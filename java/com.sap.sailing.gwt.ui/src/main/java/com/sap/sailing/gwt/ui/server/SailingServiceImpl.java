@@ -2410,23 +2410,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
-        List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
-        if (regatta != null && regatta.races != null) {
-            for (RaceDTO race : regatta.races) {
-                List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRaceAndRegatta(race.getName(), regatta.getRegattaIdentifier());
-                if (leaderboard != null && !leaderboard.isEmpty()) {
-                    results.addAll(leaderboard);
-                }
-            }
-        }
-        // Removing duplicates
-        HashSet<StrippedLeaderboardDTO> set = new HashSet<StrippedLeaderboardDTO>(results);
-        results.clear();
-        results.addAll(set);
-        return results;
-    }
-
     @Override
     public List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
