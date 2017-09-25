@@ -56,6 +56,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     private final List<HandlerRegistration> registrations = new ArrayList<>();
     private final Element contentToSyncWith;
     private final boolean hasMutationObservationCapability;
+    private JavaScriptObject observer;
 
     /**
      * Create an overlay scroll panel with the corresponding widget to scroll.
@@ -109,22 +110,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
                 applyScrollpanelToOverlay();
             }
         }));
-        final JavaScriptObject observer = setupObserver(contentToSyncWith, new Command() {
-            @Override
-            public void execute() {
-                matchScrollpanelAndContentWidths();
-                updateOverlayDisplay();
-                applyScrollpanelToOverlay();
-            }
-        });
-        registrations.add(new HandlerRegistration() {
-            @Override
-            public void removeHandler() {
-                if (observer != null) {
-                    disconnectObserver(observer);
-                }
-            }
-        });
+        createObserverForCurrentChild();
         if (!DeviceDetector.isMobile()) {
             // only bind reverse scrolling through overlay scrollpanel in desktop
             DOM.sinkEvents(overlayScrollPanelUi, Event.ONSCROLL);
@@ -159,7 +145,35 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         for (HandlerRegistration handlerRegistration : registrations) {
             handlerRegistration.removeHandler();
         }
+        removeObserverFromCurrentChildWidget();
         overlayWidget.removeFromParent();
+    }
+    
+    @Override
+    public void setWidget(Widget w) {
+        if (isAttached()) {
+            removeObserverFromCurrentChildWidget();
+        }
+        super.setWidget(w);
+        if (isAttached()) {
+            createObserverForCurrentChild();
+        }
+    }
+
+    private void createObserverForCurrentChild() {
+        observer = setupObserver(contentToSyncWith, new Command() {
+            @Override
+            public void execute() {
+                matchScrollpanelAndContentWidths();
+                updateOverlayDisplay();
+                applyScrollpanelToOverlay();
+            }
+        });
+    }
+
+    private void removeObserverFromCurrentChildWidget() {
+        disconnectObserver();
+        observer = null;
     }
 
     /**
@@ -229,7 +243,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     /**
      * Disconnect the mutation observer.
      */
-    private native void disconnectObserver(final JavaScriptObject observer) /*-{
+    private native void disconnectObserver() /*-{
 	if (observer) {
 	    observer.disconnect();
 	}
