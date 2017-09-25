@@ -133,6 +133,11 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     }
 
     @Override
+    public CycleCluster<T> getCycleCluster(T node) {
+        return cycleClusters.getCluster(node);
+    }
+    
+    @Override
     public boolean areOnSameCycleCluster(T a, T b) {
         final CycleCluster<T> aCluster = cycleClusters.getCluster(a);
         final CycleCluster<T> bCluster = cycleClusters.getCluster(b);

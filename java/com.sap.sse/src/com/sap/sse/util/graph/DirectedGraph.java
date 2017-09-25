@@ -63,5 +63,7 @@ public interface DirectedGraph<T> {
      * of one or more joined cycles, values are the cycle nodes collectively represented by the key node.
      */
     Pair<DirectedGraph<T>, CycleClusters<T>> graphWithCombinedCycleNodes();
+
+    CycleCluster<T> getCycleCluster(T node);
     
 }

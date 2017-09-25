@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +62,41 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
         final Set<DirectedEdge<Competitor>> edges = constructEdges(nodesInGraph, leaderboard, timePoint, nullScoresAreBetter);
         final DirectedGraph<Competitor> graph = DirectedGraph.create(nodesInGraph, edges);
         final TopologicalComparator<Competitor> comparator = new TopologicalComparator<>(graph);
-        return comparator.compare(o1, o2);
+        final int resultBasedOnGraphSort = comparator.compare(o1, o2);
+        // if o1 and o2 competed more than once in one race with contradicting outcomes (o1 better than o2 in at
+        // least one race, and o2 better than o1 in at least one race) and are not part of a bigger cycle,
+        // decide based on direct match score, breaking tie by last direct match between them:
+        final int result;
+        if (resultBasedOnGraphSort == 0 && graph.areOnSameCycleCluster(o1, o2) && graph.getCycleCluster(o1).getClusterNodes().size() == 2) {
+            result = compareByDirectComparison(o1Scores, o1, o2Scores, o2, nullScoresAreBetter, timePoint);
+        } else {
+            result = resultBasedOnGraphSort;
+        }
+        return result;
+    }
+
+    private int compareByDirectComparison(List<Pair<RaceColumn, Double>> o1Scores, Competitor o1,
+            List<Pair<RaceColumn, Double>> o2Scores, Competitor o2, boolean nullScoresAreBetter, TimePoint timePoint) {
+        int lastDirectComparison = 0;
+        final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
+        Iterator<Pair<RaceColumn, Double>> o1Iter = o1Scores.iterator();
+        double o1DirectComparisonScore = 0.0;
+        double o2DirectComparisonScore = 0.0;
+        while (o1Iter.hasNext()) {
+            final Pair<RaceColumn, Double> o1Result = o1Iter.next();
+            Iterator<Pair<RaceColumn, Double>> o2Iter = o2Scores.iterator();
+            while (o2Iter.hasNext()) {
+                final Pair<RaceColumn, Double> o2Result = o2Iter.next();
+                if (o2Result.getA() == o1Result.getA() &&
+                        o2Result.getA().getFleetOfCompetitor(o2) == o1Result.getA().getFleetOfCompetitor(o1)) {
+                    o1DirectComparisonScore += o1Result.getB();
+                    o2DirectComparisonScore += o2Result.getB();
+                    lastDirectComparison = pureScoreComparator.compare(o1Result.getB(), o2Result.getB());
+                    break;
+                }
+            }
+        }
+        return o1DirectComparisonScore == o2DirectComparisonScore ? lastDirectComparison : pureScoreComparator.compare(o1DirectComparisonScore, o2DirectComparisonScore);
     }
 
     /**
@@ -98,6 +133,6 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
     public int compareByLastRace(List<Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,
             List<Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded, boolean nullScoresAreBetter, Competitor o1,
             Competitor o2) {
-        return 0; // TODO should this consider the graph, its cycles, and rank by last race if an only if o1/o2 are the only elements in a cycle group?
+        return 0;
     }
 }
