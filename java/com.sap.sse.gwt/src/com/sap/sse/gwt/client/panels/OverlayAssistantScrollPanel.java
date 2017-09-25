@@ -47,7 +47,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     interface MyUiBinder extends UiBinder<DivElement, OverlayAssistantScrollPanel> {
     }
 
-    private DivElement overlayWidget;
+    private final DivElement overlayWidget;
     @UiField
     protected DivElement overlayScrollPanelUi;
     @UiField
@@ -68,6 +68,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         this.getElement().getStyle().setPaddingBottom(25, Unit.PX);
         contentToSyncWith = contentToScroll.getElement();
         this.hasMutationObservationCapability = weCanObserve();
+        overlayWidget = uiBinder.createAndBindUi(this);
     }
 
     /**
@@ -75,7 +76,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
      */
     @Override
     protected void onLoad() {
-        overlayWidget = uiBinder.createAndBindUi(this);
         RootPanel.get().getElement().appendChild(overlayWidget);
         if (!hasMutationObservationCapability) {
             return;
@@ -159,9 +159,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         for (HandlerRegistration handlerRegistration : registrations) {
             handlerRegistration.removeHandler();
         }
-        if (overlayWidget != null) {
-            overlayWidget.removeFromParent();
-        }
+        overlayWidget.removeFromParent();
     }
 
     /**
