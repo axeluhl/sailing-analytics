@@ -51,6 +51,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.permission.WildcardPermission;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -3494,7 +3495,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventDTO> getEvents() throws MalformedURLException {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
-            if (SecurityUtils.getSubject().isPermitted(Event.class.getName() + ":" + "view" + ":" + event.getName())) {
+            if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(Event.class.getName() + ":" + "view" + ":" + event.getName(), true))) {
                 EventDTO eventDTO = convertToEventDTO(event, false);
                 eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
                 eventDTO.setIsOnRemoteServer(false);

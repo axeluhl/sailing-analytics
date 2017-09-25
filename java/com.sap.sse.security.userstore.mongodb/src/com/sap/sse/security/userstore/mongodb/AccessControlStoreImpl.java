@@ -150,7 +150,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public AccessControlStore setOwnership(String id, String owner, String tenantOwner) {
-        Owner ownership = ownershipList.put(id, new OwnerImpl(id, owner, tenantOwner));
+        Owner ownership = new OwnerImpl(id, owner, tenantOwner);
+        ownershipList.put(id, ownership);
         mongoObjectFactory.storeOwnership(ownership);
         return this;
     }

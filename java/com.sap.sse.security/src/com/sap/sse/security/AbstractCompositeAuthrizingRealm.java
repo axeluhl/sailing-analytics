@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.osgi.framework.BundleContext;
@@ -170,7 +171,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         }
         try {
             for (String directPermission : getUserStore().getPermissionsFromUser(user)) {
-                Permission directPerm = getPermissionResolver().resolvePermission(directPermission);
+                Permission directPerm = new WildcardPermission(directPermission, true);
                 if (directPerm.implies(perm)) {
                     return true;
                 }

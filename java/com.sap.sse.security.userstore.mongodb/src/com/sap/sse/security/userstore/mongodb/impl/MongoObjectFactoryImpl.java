@@ -202,7 +202,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeOwnership(Owner owner) {
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
-        ownershipCollection.createIndex(new BasicDBObject(FieldNames.Ownership.NAME.name(), null));
+        ownershipCollection.createIndex(new BasicDBObject(FieldNames.Ownership.NAME.name(), 1));
         DBObject dbOwnership = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Ownership.NAME.name(), owner.getName());
         dbOwnership.put(FieldNames.Ownership.NAME.name(), owner.getName());

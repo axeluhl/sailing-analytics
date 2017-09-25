@@ -37,7 +37,7 @@ public class UserDTO implements IsSerializable {
         Util.addAll(roles, this.roles);
         this.permissions = new HashSet<>();
         for (String stringPermission : stringPermissions) {
-            this.permissions.add(new WildcardPermission(stringPermission));
+            this.permissions.add(new WildcardPermission(stringPermission, true));
         }
     }
 
