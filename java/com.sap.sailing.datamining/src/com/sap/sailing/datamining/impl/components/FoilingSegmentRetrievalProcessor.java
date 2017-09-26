@@ -2,12 +2,14 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.BravoFixTrackWithContext;
 import com.sap.sailing.datamining.impl.data.FoilingSegmentWithContext;
+import com.sap.sailing.datamining.shared.FoilingSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -18,14 +20,17 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
 public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasFoilingSegmentContext> {
+    private final FoilingSegmentsDataMiningSettings settings;
 
-    public FoilingSegmentRetrievalProcessor(ExecutorService executor, Collection<Processor<HasFoilingSegmentContext, ?>> resultReceivers, int retrievalLevel) {
+    public FoilingSegmentRetrievalProcessor(ExecutorService executor, Collection<Processor<HasFoilingSegmentContext, ?>> resultReceivers,
+            FoilingSegmentsDataMiningSettings settings, int retrievalLevel) {
         super(HasRaceOfCompetitorContext.class, HasFoilingSegmentContext.class, executor, resultReceivers, retrievalLevel);
+        this.settings = settings;
     }
 
     @Override
     protected Iterable<HasFoilingSegmentContext> retrieveData(HasRaceOfCompetitorContext element) {
-        Collection<HasFoilingSegmentContext> foilingSegments = new ArrayList<>();
+        List<HasFoilingSegmentContext> foilingSegments = new ArrayList<>();
         final TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         final TimePoint startOfRace = element.getTrackedRaceContext().getTrackedRace().getStartOfRace();
         if (startOfRace != null) {
@@ -45,19 +50,17 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                 bravoFixTrack.lockForRead();
                 try {
                     for (final BravoFix bravoFix : bravoFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) {
-                        if (isFoiling) {
-                            if (!bravoFix.isFoiling()) {
-                                isFoiling = false;
+                        final boolean currentFixIsFoiling = bravoFix.isFoiling(settings.getMinimumRideHeight());
+                        if (currentFixIsFoiling != isFoiling) {
+                            if (currentFixIsFoiling) {
+                                startOfSegment = bravoFix.getTimePoint();
+                            } else {
                                 foilingSegments.add(createFoilingSegment(startOfSegment,
                                         last /* don't include the last interval ending at the non-foiling fix */,
                                         element, bravoFixTrack));
                                 startOfSegment = null;
                             }
-                        } else {
-                            if (bravoFix.isFoiling()) {
-                                isFoiling = true;
-                                startOfSegment = bravoFix.getTimePoint();
-                            }
+                            isFoiling = currentFixIsFoiling;
                         }
                         last = bravoFix.getTimePoint();
                     }
