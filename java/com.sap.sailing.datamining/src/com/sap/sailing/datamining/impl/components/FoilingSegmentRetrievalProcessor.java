@@ -50,14 +50,21 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                 bravoFixTrack.lockForRead();
                 try {
                     for (final BravoFix bravoFix : bravoFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) {
-                        final boolean currentFixIsFoiling = bravoFix.isFoiling(settings.getMinimumRideHeight());
+                        final boolean currentFixIsFoiling = 
+                                (bravoFix.isFoiling(settings.getMinimumRideHeight()) &&
+                                        (settings.getMinimumSpeedForFoiling() == null || settings.getMinimumSpeedForFoiling().compareTo(
+                                                element.getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor()).getEstimatedSpeed(bravoFix.getTimePoint())) <= 0)) ||
+                                (settings.getMaximumSpeedNotFoiling() != null && settings.getMaximumSpeedNotFoiling().compareTo(
+                                        element.getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor()).getEstimatedSpeed(bravoFix.getTimePoint())) <= 0);
                         if (currentFixIsFoiling != isFoiling) {
                             if (currentFixIsFoiling) {
                                 startOfSegment = bravoFix.getTimePoint();
                             } else {
-                                foilingSegments.add(createFoilingSegment(startOfSegment,
-                                        last /* don't include the last interval ending at the non-foiling fix */,
-                                        element, bravoFixTrack));
+                                if (settings.getMinimumFoilingSegmentDuration() == null ||
+                                        startOfSegment.until(last).compareTo(settings.getMinimumFoilingSegmentDuration()) >= 0) {
+                                    addOrMergeFoilingSegment(element, foilingSegments, bravoFixTrack, startOfSegment,
+                                            last /* don't include the last interval ending at the non-foiling fix */);
+                                }
                                 startOfSegment = null;
                             }
                             isFoiling = currentFixIsFoiling;
@@ -68,11 +75,29 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                     bravoFixTrack.unlockAfterRead();
                 }
                 if (isFoiling) {
-                    foilingSegments.add(createFoilingSegment(startOfSegment, end, element, bravoFixTrack));
+                    addOrMergeFoilingSegment(element, foilingSegments, bravoFixTrack, startOfSegment, end);
                 }
             }
         }
         return foilingSegments;
+    }
+
+    private void addOrMergeFoilingSegment(HasRaceOfCompetitorContext element,
+            List<HasFoilingSegmentContext> foilingSegments, final BravoFixTrack<Competitor> bravoFixTrack,
+            TimePoint startOfSegment, TimePoint endOfSegment) {
+        if (foilingSegments.isEmpty() || settings.getMinimumDurationBetweenAdjacentFoilingSegments() == null) {
+            foilingSegments.add(createFoilingSegment(startOfSegment, endOfSegment, element, bravoFixTrack));
+        } else {
+            final HasFoilingSegmentContext previousSegment = foilingSegments.get(foilingSegments.size()-1);
+            final TimePoint previousEnd = previousSegment.getEndOfFoilingSegment();
+            if (previousEnd.until(startOfSegment).compareTo(settings.getMinimumDurationBetweenAdjacentFoilingSegments()) < 0) {
+                // merge:
+                foilingSegments.set(foilingSegments.size()-1, createFoilingSegment(previousSegment.getStartOfFoilingSegment(), endOfSegment, element, bravoFixTrack));
+            } else {
+                // add; duration between the segments is large enough
+                foilingSegments.add(createFoilingSegment(startOfSegment, endOfSegment, element, bravoFixTrack));
+            }
+        }
     }
 
     private HasFoilingSegmentContext createFoilingSegment(TimePoint startOfSegment, TimePoint endOfSegment,

@@ -1911,5 +1911,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String minimumSpeedForFoilingInKnotsTooltip();
     String minimumRideHeightInMeters();
     String minimumRideHeightInMetersTooltip();
+    String minimumDurationBetweenAdjacentFoilingSegmentsInSeconds();
+    String minimumDurationBetweenAdjacentFoilingSegmentsInSecondsTooltip();
     String needToProvideValidMinimumRideHeight();
 }

@@ -27,6 +27,7 @@ public class FoilingSegmentsDataMiningSettingsDialogComponent implements Setting
     private FoilingSegmentsDataMiningSettings settings;
     private StringMessages stringMessages;
     private DoubleBox minimumFoilingSegmentsDurationInSecondsBox;
+    private DoubleBox minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBox;
     private DoubleBox minimumSpeedForFoilingInKnotsBox;
     private DoubleBox maximumSpeedNotFoilingInKnotsBox;
     private DoubleBox minimumRideHeightInMetersBox;
@@ -39,7 +40,7 @@ public class FoilingSegmentsDataMiningSettingsDialogComponent implements Setting
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(10, 2);
+        Grid grid = new Grid(5, 2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -50,23 +51,48 @@ public class FoilingSegmentsDataMiningSettingsDialogComponent implements Setting
         Label minimumFoilingSegmentsDurationInSecondsLabel = new Label(stringMessages.minimumFoilingSegmentsDurationInSeconds() + ":");
         minimumFoilingSegmentsDurationInSecondsLabel.setTitle(stringMessages.minimumFoilingSegmentsDurationInSecondsTooltip());
         grid.setWidget(0, 0, minimumFoilingSegmentsDurationInSecondsLabel);
-        minimumFoilingSegmentsDurationInSecondsBox = dialog.createDoubleBox(settings.getMinimumFoilingSegmentDuration().asSeconds(), 6);
+        if (settings.getMinimumFoilingSegmentDuration() == null) {
+            minimumFoilingSegmentsDurationInSecondsBox = dialog.createDoubleBox(6);
+        } else {
+            minimumFoilingSegmentsDurationInSecondsBox = dialog.createDoubleBox(settings.getMinimumFoilingSegmentDuration().asSeconds(), 6);
+        }
         grid.setWidget(0, 1, minimumFoilingSegmentsDurationInSecondsBox);
+        Label minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBoxLabel = new Label(stringMessages.minimumDurationBetweenAdjacentFoilingSegmentsInSeconds() + ":");
+        minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBoxLabel.setTitle(stringMessages.minimumDurationBetweenAdjacentFoilingSegmentsInSecondsTooltip());
+        grid.setWidget(1, 0, minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBoxLabel);
+        if (settings.getMinimumDurationBetweenAdjacentFoilingSegments() == null) {
+            minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBox = dialog.createDoubleBox(6);
+        } else {
+            minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBox = dialog.createDoubleBox(settings.getMinimumFoilingSegmentDuration().asSeconds(), 6);
+        }
+        grid.setWidget(1, 1, minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBox);
         Label maximumSpeedNotFoilingInKnotsLabel = new Label(stringMessages.maximumSpeedNotFoilingInKnots() + ":");
         maximumSpeedNotFoilingInKnotsLabel.setTitle(stringMessages.maximumSpeedNotFoilingInKnotsTooltip());
-        grid.setWidget(1, 0, maximumSpeedNotFoilingInKnotsLabel);
-        maximumSpeedNotFoilingInKnotsBox = dialog.createDoubleBox(settings.getMaximumSpeedNotFoiling().getKnots(), 6);
-        grid.setWidget(1, 1, maximumSpeedNotFoilingInKnotsBox);
+        grid.setWidget(2, 0, maximumSpeedNotFoilingInKnotsLabel);
+        if (settings.getMaximumSpeedNotFoiling() == null) {
+            maximumSpeedNotFoilingInKnotsBox = dialog.createDoubleBox(6);
+        } else {
+            maximumSpeedNotFoilingInKnotsBox = dialog.createDoubleBox(settings.getMaximumSpeedNotFoiling().getKnots(), 6);
+        }
+        grid.setWidget(2, 1, maximumSpeedNotFoilingInKnotsBox);
         Label minimumSpeedForFoilingInKnotsLabel = new Label(stringMessages.minimumSpeedForFoilingInKnots() + ":");
         minimumSpeedForFoilingInKnotsLabel.setTitle(stringMessages.minimumSpeedForFoilingInKnotsTooltip());
-        grid.setWidget(2, 0, minimumSpeedForFoilingInKnotsLabel);
-        minimumSpeedForFoilingInKnotsBox = dialog.createDoubleBox(settings.getMinimumSpeedForFoiling().getKnots(), 6);
-        grid.setWidget(2, 1, minimumSpeedForFoilingInKnotsBox);
+        grid.setWidget(3, 0, minimumSpeedForFoilingInKnotsLabel);
+        if (settings.getMinimumSpeedForFoiling() == null) {
+            minimumSpeedForFoilingInKnotsBox = dialog.createDoubleBox(6);
+        } else {
+            minimumSpeedForFoilingInKnotsBox = dialog.createDoubleBox(settings.getMinimumSpeedForFoiling().getKnots(), 6);
+        }
+        grid.setWidget(3, 1, minimumSpeedForFoilingInKnotsBox);
         Label minimumRideHeightInMetersLabel = new Label(stringMessages.minimumRideHeightInMeters() + ":");
         minimumRideHeightInMetersLabel.setTitle(stringMessages.minimumRideHeightInMetersTooltip());
-        grid.setWidget(6, 0, minimumRideHeightInMetersLabel);
-        minimumRideHeightInMetersBox = dialog.createDoubleBox(settings.getMinimumRideHeight().getMeters(), 6);
-        grid.setWidget(6, 1, minimumRideHeightInMetersBox);
+        grid.setWidget(4, 0, minimumRideHeightInMetersLabel);
+        if (settings.getMinimumRideHeight() == null) {
+            minimumRideHeightInMetersBox = dialog.createDoubleBox(6);
+        } else {
+            minimumRideHeightInMetersBox = dialog.createDoubleBox(settings.getMinimumRideHeight().getMeters(), 6);
+        }
+        grid.setWidget(4, 1, minimumRideHeightInMetersBox);
     }
 
     @Override
@@ -74,11 +100,12 @@ public class FoilingSegmentsDataMiningSettingsDialogComponent implements Setting
         return new FoilingSegmentsDataMiningSettings(
                 minimumFoilingSegmentsDurationInSecondsBox.getValue() == null ? null
                         : new MillisecondsDurationImpl((long) (minimumFoilingSegmentsDurationInSecondsBox.getValue() * 1000.)),
+                minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBox.getValue() == null ? null
+                        : new MillisecondsDurationImpl((long) (minimumDurationBetweenAdjacentFoilingSegmentsInSecondsBox.getValue() * 1000.)),
                 minimumSpeedForFoilingInKnotsBox.getValue() == null ? null
                         : new KnotSpeedImpl(minimumSpeedForFoilingInKnotsBox.getValue()),
                 maximumSpeedNotFoilingInKnotsBox.getValue() == null ? null
-                        : new KnotSpeedImpl(maximumSpeedNotFoilingInKnotsBox.getValue()),
-                minimumRideHeightInMetersBox.getValue() == null ? null
+                        : new KnotSpeedImpl(maximumSpeedNotFoilingInKnotsBox.getValue()), minimumRideHeightInMetersBox.getValue() == null ? null
                         : new MeterDistance(minimumRideHeightInMetersBox.getValue()));
     }
 

@@ -22,11 +22,12 @@ public final class FoilingSegmentsDataMiningSettings_CustomFieldSerializer exten
 
     public static FoilingSegmentsDataMiningSettings instantiate(SerializationStreamReader streamReader) throws SerializationException {
         final Duration minimumFoilingSegmentDuration = (Duration) streamReader.readObject();
+        final Duration minimumDurationBetweenAdjacentFoilingSegments = (Duration) streamReader.readObject();
         final Speed minimumSpeedForFoiling = (Speed) streamReader.readObject();
         final Speed maximumSpeedNotFoiling = (Speed) streamReader.readObject();
         final Distance minimumRideHeight = (Distance) streamReader.readObject();
-        return new FoilingSegmentsDataMiningSettings(minimumFoilingSegmentDuration, minimumSpeedForFoiling,
-                maximumSpeedNotFoiling, minimumRideHeight);
+        return new FoilingSegmentsDataMiningSettings(minimumFoilingSegmentDuration, minimumDurationBetweenAdjacentFoilingSegments,
+                minimumSpeedForFoiling, maximumSpeedNotFoiling, minimumRideHeight);
     }
 
     @Override
@@ -48,6 +49,7 @@ public final class FoilingSegmentsDataMiningSettings_CustomFieldSerializer exten
     public static void serialize(SerializationStreamWriter streamWriter, FoilingSegmentsDataMiningSettings instance)
             throws SerializationException {
         streamWriter.writeObject(instance.getMinimumFoilingSegmentDuration());
+        streamWriter.writeObject(instance.getMinimumDurationBetweenAdjacentFoilingSegments());
         streamWriter.writeObject(instance.getMinimumSpeedForFoiling());
         streamWriter.writeObject(instance.getMaximumSpeedNotFoiling());
         streamWriter.writeObject(instance.getMinimumRideHeight());

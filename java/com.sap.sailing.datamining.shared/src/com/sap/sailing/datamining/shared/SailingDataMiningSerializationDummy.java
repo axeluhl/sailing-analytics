@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sse.common.Duration;
