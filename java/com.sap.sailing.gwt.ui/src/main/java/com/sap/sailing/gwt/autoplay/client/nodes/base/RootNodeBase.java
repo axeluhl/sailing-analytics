@@ -66,7 +66,9 @@ public abstract class RootNodeBase extends BaseCompositeNode {
             public void onSuccess(final EventDTO event) {
                 if (firstTimeEventLoaded) {
                     AutoPlayHeaderEvent hE = new AutoPlayHeaderEvent(event.getName(), "");
-                    hE.setHeaderLogoUrl(event.getLogoImage().getSourceRef());
+                    if(event.getLogoImage()!=null){
+                        hE.setHeaderLogoUrl(event.getLogoImage().getSourceRef());
+                    }
                     cf.getEventBus().fireEvent(hE);
                     firstTimeEventLoaded = false;
                 }
