@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
@@ -75,25 +74,9 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
         panel.setWidget(this);
         rawRaceMap = raceMap;
         racemap.add(raceMap);
-        resizeMapOnceInitially(raceMap);
-
         leaderBoardHolder.add(leaderboardPanel);
     }
 
-
-    private void resizeMapOnceInitially(RaceMap raceMap2) {
-        new Timer() {
-            @Override
-            public void run() {
-                raceMap2.redraw();
-                racemap.onResize();
-                if(racemap.isAttached()){
-                    this.schedule(50);
-                }
-            }
-        }.schedule(50);
-    }
-    
     @Override
     public void setStatistic(String windinfo, Distance distance, long duration) {
         statisticProperty1.setText(StringMessages.INSTANCE.windSpeed());

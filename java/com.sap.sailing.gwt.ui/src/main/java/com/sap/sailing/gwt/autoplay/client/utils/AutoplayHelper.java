@@ -179,7 +179,7 @@ public class AutoplayHelper {
         Timer creationTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
 
         creationTimer.setLivePlayDelayInMillis(1000);
-        creationTimer.setRefreshInterval(250);
+        creationTimer.setRefreshInterval(1000);
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(event, leaderBoardName);
 
