@@ -56,7 +56,6 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
         Set<HasGPSFixPolarContext> result = new HashSet<>();
         if (startTime != null && finishTime != null) {
             track.lockForRead();
-
             try {
                 Iterable<GPSFixMoving> fixes = track.getFixes(startTime, true, finishTime, false);
 
@@ -83,5 +82,4 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
     private ClusterGroup<Speed> toClusterGroup(WindSpeedSteppingWithMaxDistance windSpeedStepping) {
         return SpeedClusterGroup.createSpeedClusterGroupFrom(windSpeedStepping);
     }
-
 }
