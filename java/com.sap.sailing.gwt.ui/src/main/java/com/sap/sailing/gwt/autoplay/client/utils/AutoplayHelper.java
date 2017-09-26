@@ -154,7 +154,7 @@ public class AutoplayHelper {
     }
 
     /**
-     * Struct like Reternvalue class for a racemap. <b> The user is required to pause the timer and terminate the
+     * Struct like Returnvalue class for a racemap. <b> The user is required to pause the timer and terminate the
      * RaceTimeProvider after use! </b>
      */
     public static class RVWrapper {
@@ -179,7 +179,7 @@ public class AutoplayHelper {
         Timer creationTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
 
         creationTimer.setLivePlayDelayInMillis(1000);
-        creationTimer.setRefreshInterval(1000);
+        creationTimer.setRefreshInterval(250);
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(event, leaderBoardName);
 
