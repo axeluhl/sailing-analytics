@@ -10,6 +10,12 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * A control panel for maneuver speed details charts.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsChartConfigurationPanel extends HorizontalPanel {
 
     private IntegerBox minCountDataIntegerBox = new IntegerBox();

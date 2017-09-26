@@ -15,6 +15,11 @@ import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefiniti
 import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsStatisticAvgAggregationProcessor extends
         AbstractParallelGroupedDataAggregationProcessor<ManeuverSpeedDetailsStatistic, ManeuverSpeedDetailsAggregation> {
 

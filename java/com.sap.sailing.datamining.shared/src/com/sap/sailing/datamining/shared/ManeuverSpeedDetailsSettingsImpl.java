@@ -2,6 +2,11 @@ package com.sap.sailing.datamining.shared;
 
 import com.sap.sailing.domain.common.NauticalSide;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsSettingsImpl extends ManeuverSpeedDetailsSettings {
 
     private static final long serialVersionUID = 61329258712144L;

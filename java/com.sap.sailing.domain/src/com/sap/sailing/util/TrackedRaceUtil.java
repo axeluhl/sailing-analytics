@@ -11,16 +11,26 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Util class which is used for bearing calculation for positions within a GPS track of a competitor.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class TrackedRaceUtil {
     /**
      * Gets a list of bearings between the provided time range (inclusive the boundaries). The bearings are retrieved by
-     * means of track.getEstimatedSpeed(timePoint) with the provided frequency between each bearing step.
+     * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)} with the provided frequency between each bearing step.
      * 
      * @param track
+     *            The GPS track of competitor to use for bearings calculation
      * @param fromTimePoint
+     *            The from time point (inclusive) for resulting bearing steps
      * @param tillTimePoint
+     *            The till time point (inclusive) for resulting bearing steps
      * @param frequency
-     * @return
+     *            Time distance between bearing time point
+     * @return The list of bearings between the provided time range
      */
     public static List<BearingStep> getBearingSteps(GPSFixTrack<Competitor, GPSFixMoving> track,
             TimePoint fromTimePoint, TimePoint tillTimePoint, Duration frequency) {
@@ -59,6 +69,13 @@ public class TrackedRaceUtil {
         return relevantBearings;
     }
 
+    /**
+     * Represents a bearing step within a certain part of a GPS track. It consists of time point, speed with bearing,
+     * and course change in degrees.
+     * 
+     * @author Vladislav Chumak (D069712)
+     *
+     */
     public static class BearingStep {
         private final TimePoint timePoint;
         private final SpeedWithBearing speedWithBearing;

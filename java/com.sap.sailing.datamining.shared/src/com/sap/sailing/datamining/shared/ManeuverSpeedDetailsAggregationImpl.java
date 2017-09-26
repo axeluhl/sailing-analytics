@@ -1,5 +1,10 @@
 package com.sap.sailing.datamining.shared;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsAggregationImpl implements ManeuverSpeedDetailsAggregation {
     private static final long serialVersionUID = 9177124509619315750L;
     private double[] valuePerTWA;

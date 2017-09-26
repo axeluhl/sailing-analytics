@@ -8,20 +8,33 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * Provides a service for export of chart data into CSV format.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ChartToCsvExporter {
-    
+
     private final StringMessages stringMessages;
 
     public ChartToCsvExporter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
-    
+
+    /**
+     * Converts the data of the chart into CSV format and copies that into clipboard. Finally, window alert gets shown
+     * to the user with information that the CSV has been put into clipboard.
+     * 
+     * @param chartToExport
+     *            Chart with data to export
+     */
     public void exportChartAsCsvToClipboard(Chart chartToExport) {
         String csvContentExport = createCsvExportContentForStatisticsCurve(chartToExport);
         copyTextToClipboard(csvContentExport);
         Window.alert(stringMessages.csvCopiedToClipboard());
     }
-    
+
     private static String createCsvExportContentForStatisticsCurve(Chart chartToExport) {
         if (chartToExport != null && chartToExport.getSeries().length > 0) {
             StringBuilder csvStr = new StringBuilder("Series name");
@@ -81,9 +94,9 @@ public class ChartToCsvExporter {
         document.body.appendChild(textArea);
         textArea.select();
         try {
-                var successful = document.execCommand('copy');
+        	var successful = document.execCommand('copy');
         } catch (err) {
-                console.log('Unable to copy');
+        	console.log('Unable to copy');
         }
         document.body.removeChild(textArea);
     }-*/;

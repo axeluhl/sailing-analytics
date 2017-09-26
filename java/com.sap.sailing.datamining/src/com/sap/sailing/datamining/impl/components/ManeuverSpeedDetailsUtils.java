@@ -4,6 +4,11 @@ import java.util.function.Function;
 
 import com.sap.sailing.domain.common.NauticalSide;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsUtils {
 
     public static NauticalSide determineNauticalSideByClosestAngleDistance(double firstBearingAngle,

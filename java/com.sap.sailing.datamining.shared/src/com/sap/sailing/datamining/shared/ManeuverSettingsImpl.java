@@ -1,5 +1,10 @@
 package com.sap.sailing.datamining.shared;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSettingsImpl extends ManeuverSettings {
 
     private static final long serialVersionUID = 69258712144L;

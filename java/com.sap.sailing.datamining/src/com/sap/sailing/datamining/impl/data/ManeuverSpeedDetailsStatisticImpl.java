@@ -4,6 +4,11 @@ import com.sap.sailing.datamining.data.ManeuverSpeedDetailsStatistic;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.domain.common.NauticalSide;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsStatisticImpl implements ManeuverSpeedDetailsStatistic {
     
     private double[] maneuverValuePerTWA;

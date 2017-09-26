@@ -23,6 +23,11 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsRetrievalProcessor
         extends AbstractRetrievalProcessor<HasManeuverContext, HasManeuverSpeedDetailsContext> {
 

@@ -13,6 +13,11 @@ import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
 
     private final Map<GroupKey, ManeuverSpeedDetailsAggregationCreatorHelper> resultMap = new HashMap<>();

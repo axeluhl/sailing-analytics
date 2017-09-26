@@ -14,6 +14,12 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * Contains factory methods for various data mining charts.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ChartFactory extends Chart {
 
     public static Chart createPolarChart() {

@@ -9,6 +9,11 @@ import com.sap.sailing.datamining.impl.components.ManeuverSpeedDetailsUtils;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.domain.common.NauticalSide;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsContext {
 
     private final HasManeuverContext maneuverContext;

@@ -5,6 +5,12 @@ import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
+/**
+ * Contains statistics for speed trend analysis within maneuvers.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public interface HasManeuverSpeedDetailsContext {
 
     // FIXME due to UI bug there is at least one dimension per fact required
