@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import com.sap.sailing.datamining.Activator;
@@ -25,9 +26,11 @@ import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class FoilingSegmentWithContext implements HasFoilingSegmentContext {
+    private static final long serialVersionUID = 8177509900564308483L;
     private final HasBravoFixTrackContext bravoFixTrackContext;
     private final TimePoint startOfFoilingSegment;
     private final TimePoint endOfFoilingSegment;
+    private static final SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     public FoilingSegmentWithContext(HasBravoFixTrackContext bravoFixTrackContext, TimePoint startOfFoilingSegment,
             TimePoint endOfFoilingSegment) {
@@ -35,6 +38,12 @@ public class FoilingSegmentWithContext implements HasFoilingSegmentContext {
         this.bravoFixTrackContext = bravoFixTrackContext;
         this.startOfFoilingSegment = startOfFoilingSegment;
         this.endOfFoilingSegment = endOfFoilingSegment;
+    }
+
+    @Override
+    public String getName() {
+        return bravoFixTrackContext.getRaceOfCompetitorContext().getCompetitor().getName() + "@"
+                + TIMEPOINT_FORMATTER.format(startOfFoilingSegment.asDate());
     }
 
     @Override

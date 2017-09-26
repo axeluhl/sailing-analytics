@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -15,7 +16,7 @@ import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public interface HasFoilingSegmentContext {
+public interface HasFoilingSegmentContext extends Named {
     @Connector(scanForStatistics=false)
     HasBravoFixTrackContext getBravoFixTrackContext();
     
