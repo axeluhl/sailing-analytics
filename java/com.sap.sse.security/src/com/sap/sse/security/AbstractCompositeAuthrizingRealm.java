@@ -155,19 +155,21 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     @Override
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
         String[] parts = perm.toString().replaceAll("\\[|\\]", "").split(":");
-        if (parts.length < 3) {
-            throw new WrongPermissionFormatException(perm);
-        }
         String user = (String) principals.getPrimaryPrincipal();
-        Owner ownership = getAccessControlListStore().getOwnership(parts[2]);
-        if (user.equals(ownership.getOwner())) { // TODO check for tenant ownership
-            return true;
-        }
-        AccessControlList acl = getAccessControlListStore().getAccessControlListByName(parts[2]);
-        if (acl.hasPermission(user, "!" + parts[1])) {
-            return false;
-        } else if (acl.hasPermission(user, parts[1])) {
-            return true;
+        
+        if (parts.length < 2) {
+            throw new WrongPermissionFormatException(perm);
+        } else if (parts.length > 2) {
+            Owner ownership = getAccessControlListStore().getOwnership(parts[2]);
+            if (user.equals(ownership.getOwner())) { // TODO check for tenant ownership
+                return true;
+            }
+            AccessControlList acl = getAccessControlListStore().getAccessControlListByName(parts[2]);
+            if (acl.hasPermission(user, "!" + parts[1])) {
+                return false;
+            } else if (acl.hasPermission(user, parts[1])) {
+                return true;
+            }
         }
         try {
             for (String directPermission : getUserStore().getPermissionsFromUser(user)) {

@@ -51,6 +51,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.authz.permission.WildcardPermission;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -3495,7 +3496,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventDTO> getEvents() throws MalformedURLException {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
-            if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(Event.class.getName() + ":" + "view" + ":" + event.getName(), true))) {
+            if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(Event.class.getName() + ":" + "view" + ":" + event.getId(), true))) {
                 EventDTO eventDTO = convertToEventDTO(event, false);
                 eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
                 eventDTO.setIsOnRemoteServer(false);
@@ -3578,42 +3579,48 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString, String baseURLAsString,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
-        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
-        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
-        URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-        Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
-        List<ImageDescriptor> eventImages = convertToImages(images);
-        List<VideoDescriptor> eventVideos = convertToVideos(videos);
-        getService().apply(
-                new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
-                        isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos));
-        return getEventById(eventId, false);
+            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException, UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(Event.class.getName() + ":" + "edit" + ":" + eventId, true))) {
+            TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+            TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+            URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
+            URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+            Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
+            List<ImageDescriptor> eventImages = convertToImages(images);
+            List<VideoDescriptor> eventVideos = convertToVideos(videos);
+            getService().apply(
+                    new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
+                            isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos));
+            return getEventById(eventId, false);
+        }
+        throw new UnauthorizedException("You are not permitted to edit event " + eventId);
     }
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds)
-            throws MalformedURLException {
-        UUID eventUuid = UUID.randomUUID();
-        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
-        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
-        URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-        Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
-        
-        List<ImageDescriptor> eventImages = convertToImages(images);
-        List<VideoDescriptor> eventVideos = convertToVideos(videos);
-        getService().apply(
-                new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
-        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-        EventDTO result = getEventById(eventUuid, false);
-        getSecurityService().createAccessControlList(result.getName());
-        getSecurityService().createOwnership(result.getName(), (String) SecurityUtils.getSubject().getPrincipal(), "tenant"); // TODO: remove dummy tenant
-        return result;
+            throws MalformedURLException, UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted(Event.class.getName() + ":create")) {
+            UUID eventUuid = UUID.randomUUID();
+            TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+            TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+            URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
+            URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+            Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
+            
+            List<ImageDescriptor> eventImages = convertToImages(images);
+            List<VideoDescriptor> eventVideos = convertToVideos(videos);
+            getService().apply(
+                    new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
+                            officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
+            createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
+            getSecurityService().createAccessControlList(eventUuid.toString());
+            getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(), "tenant"); // TODO: remove dummy tenant
+            EventDTO result = getEventById(eventUuid, false);
+            return result;
+        }
+        throw new UnauthorizedException("You are not permitted to create events");
     }
 
     @Override
@@ -3643,32 +3650,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeEvents(Collection<UUID> eventIds) {
+    public void removeEvents(Collection<UUID> eventIds) throws UnauthorizedException {
         for (UUID eventId : eventIds) {
             removeEvent(eventId);
         }
     }
 
     @Override
-    public void removeEvent(UUID eventId) {
-        getService().apply(new RemoveEvent(eventId));
-    }
-
-    @Override
-    public void renameEvent(UUID eventId, String newName) {
-        getService().apply(new RenameEvent(eventId, newName));
-    }
-
-    @Override
-    public EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException {
-        EventDTO result = null;
-        Event event = getService().getEvent(id);
-        if (event != null) {
-            result = convertToEventDTO(event, withStatisticalData);
-            result.setBaseURL(getEventBaseURLFromEventOrRequest(event));
-            result.setIsOnRemoteServer(false);
+    public void removeEvent(UUID eventId) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(Event.class.getName() + ":" + "remove" + ":" + eventId, true))) {
+            getService().apply(new RemoveEvent(eventId));
+        } else {
+            throw new UnauthorizedException("You are not permitted to remove event " + eventId);
         }
-        return result;
+    }
+
+    @Override
+    public void renameEvent(UUID eventId, String newName) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(Event.class.getName() + ":" + "edit" + ":" + eventId, true))) {
+            getService().apply(new RenameEvent(eventId, newName));
+        } else {
+            throw new UnauthorizedException("You are not permitted to edit event " + eventId);
+        }
+    }
+
+    @Override
+    public EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException, UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(Event.class.getName() + ":" + "view" + ":" + id, true))) {
+            EventDTO result = null;
+            Event event = getService().getEvent(id);
+            if (event != null) {
+                result = convertToEventDTO(event, withStatisticalData);
+                result.setBaseURL(getEventBaseURLFromEventOrRequest(event));
+                result.setIsOnRemoteServer(false);
+            }
+            return result;
+        }
+        throw new UnauthorizedException("You are not permitted to view event " + id);
     }
 
     private String getEventBaseURLFromEventOrRequest(Event event) throws MalformedURLException {
