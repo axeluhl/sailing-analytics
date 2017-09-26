@@ -22,6 +22,19 @@ import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.DirectedGraph;
 import com.sap.sse.util.topologicalordering.TopologicalComparator;
 
+/**
+ * The special thing about this scoring scheme is its tie-breaking rule. If two competitors have equal score,
+ * instead of doing what sometimes is referred to as a "count-back" (sorting races from best to worst score,
+ * then comparing to same sort order of other competitor and looking for first difference) this scheme
+ * uses a graph whose edges consist of the "won over in same race" relation where competitors matched
+ * directly. A topological order will be tried to compute, but cycles may exist (A wins against B, B wins against
+ * C, C wins against A). In this case, competitors on "strongly-connected components" (node sets in the graph
+ * in which each node is reachable from each other node in that set) will be ordered by their maximum distance
+ * from a root node.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedScore {
     private static final long serialVersionUID = 1L;
 

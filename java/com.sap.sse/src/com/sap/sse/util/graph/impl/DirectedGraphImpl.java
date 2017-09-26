@@ -194,7 +194,10 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     /**
      * A strongly connected component is a set of nodes such that all nodes in the set can be reached from any other
      * node in the set by traversing existing graph edges, and where no other node exists outside that set that, when
-     * added, would still make a strongly connected component.
+     * added, would still make a strongly connected component.<p>
+     * 
+     * See also http://algo2.iti.kit.edu/documents/AlgorithmenII_WS11/folien.pdf (pages 119 and following) for a
+     * description of the algorithm implemented here.
      * 
      * @return cycle clusters; each {@link CycleCluster} is one strongly-connected component
      */

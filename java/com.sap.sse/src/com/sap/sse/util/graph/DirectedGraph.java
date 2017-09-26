@@ -19,7 +19,8 @@ public interface DirectedGraph<T> {
      * When cycles overlap, they are combined into {@link CycleCluster}s, each being
      * {@link CycleCluster#getRepresentative() represented} by a dedicated node from that cluster.
      * The cycle analysis on this graph can tell the individual {@link #getCycles() cycles}, whereas
-     * this method tells the combination of cycles into clusters based on their overlap.
+     * this method tells the combination of cycles into clusters based on their overlap. The result
+     * is also called "strongly-connected components."
      */
     CycleClusters<T> getCycleClusters();
 
