@@ -26,7 +26,6 @@ import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class FoilingSegmentWithContext implements HasFoilingSegmentContext {
-    private static final long serialVersionUID = 8177509900564308483L;
     private final HasBravoFixTrackContext bravoFixTrackContext;
     private final TimePoint startOfFoilingSegment;
     private final TimePoint endOfFoilingSegment;
