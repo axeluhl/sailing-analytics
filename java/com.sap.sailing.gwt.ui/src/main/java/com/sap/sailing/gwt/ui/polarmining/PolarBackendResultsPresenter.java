@@ -12,14 +12,17 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Series;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
-import com.sap.sailing.gwt.ui.datamining.presentation.ExportChartAsCsvToClipboardButton;
 import com.sap.sailing.polars.datamining.shared.PolarBackendData;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
@@ -85,9 +88,17 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(speedAndAngleChart, 60);
 
-        ExportChartAsCsvToClipboardButton exportButton = new ExportChartAsCsvToClipboardButton(stringMessages);
-        exportButton.setChartToExport(polarChart);
-        addControl(exportButton);
+        ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages);
+
+        Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
+                new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        chartToCsvExporter.exportChartAsCsvToClipboard(polarChart);
+                    }
+                });
+        addControl(exportStatisticsCurveToCsvButton);
     }
 
     @Override

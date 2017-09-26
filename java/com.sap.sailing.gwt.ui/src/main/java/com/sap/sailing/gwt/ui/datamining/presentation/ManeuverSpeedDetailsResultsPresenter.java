@@ -13,11 +13,13 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -57,8 +59,6 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     private QueryResultDTO<?> result;
 
-    private ExportChartAsCsvToClipboardButton exportStatisticsCurveToCsvButton;
-
     public ManeuverSpeedDetailsResultsPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
@@ -80,7 +80,16 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
         addControl(chartConfigPanel);
 
-        exportStatisticsCurveToCsvButton = new ExportChartAsCsvToClipboardButton(stringMessages);
+        ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages);
+
+        Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
+                new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        chartToCsvExporter.exportChartAsCsvToClipboard(lineChart);
+                    }
+                });
         addControl(exportStatisticsCurveToCsvButton);
 
         polarChartWrapperPanel = new SimpleLayoutPanel() {
@@ -138,7 +147,6 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         rightSideChartsWrapperPanel.addNorth(lineChart, 50);
         rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
 
-        exportStatisticsCurveToCsvButton.setChartToExport(lineChart);
         if (result != null) {
             internalShowResults(result);
         }

@@ -22,14 +22,17 @@ import org.moxieapps.gwt.highcharts.client.events.SeriesShowEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
-import com.sap.sailing.gwt.ui.datamining.presentation.ExportChartAsCsvToClipboardButton;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.common.settings.Settings;
@@ -106,9 +109,17 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(histogramChartsWrapperPanel, 60);
 
-        ExportChartAsCsvToClipboardButton exportButton = new ExportChartAsCsvToClipboardButton(stringMessages);
-        exportButton.setChartToExport(polarChart);
-        addControl(exportButton);
+        ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages);
+
+        Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
+                new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        chartToCsvExporter.exportChartAsCsvToClipboard(polarChart);
+                    }
+                });
+        addControl(exportStatisticsCurveToCsvButton);
 
         setSeriesShowAndHideHandler();
     }
