@@ -47,8 +47,8 @@ public class AutoplayHelper {
     private static final long WAIT_TIME_AFTER_END_OF_RACE_MIILIS = 60 * 1000; // 1 min
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
-    private static RaceTimesInfoProvider raceTimesInfoProvider;
-    private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
+    private static Timer fastCurrentTimeProvider = new Timer(PlayModes.Live,
+            /* delayBetweenAutoAdvancesInMilliseconds */1000l);
     private static Date startOfLifeRace;
     public static final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     /**
@@ -58,7 +58,7 @@ public class AutoplayHelper {
 
     public static long durationOfCurrentLiveRaceRunning() {
         if (startOfLifeRace != null) {
-            return raceboardTimer.getLiveTimePointInMillis() - startOfLifeRace.getTime();
+            return fastCurrentTimeProvider.getLiveTimePointInMillis() - startOfLifeRace.getTime();
         } else {
             return 0;
         }
@@ -67,14 +67,13 @@ public class AutoplayHelper {
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
             String leaderBoardName, SailingDispatchSystem dispatch,
             AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
-        raceboardTimer.setLivePlayDelayInMillis(1000);
-        raceboardTimer.setRefreshInterval(1000);
-
-        if (raceTimesInfoProvider == null) {
-            raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, errorReporter,
-                    new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
+        if (fastCurrentTimeProvider.getRefreshInterval() != 1000) {
+            fastCurrentTimeProvider.setRefreshInterval(1000);
         }
-        raceTimesInfoProvider.reset();
+
+        // only update once (very high timer to retry, meanwhile the forceUpdate will terminate the provider)
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor,
+                errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 10000);
 
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(event, leaderBoardName);
         for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
@@ -89,27 +88,22 @@ public class AutoplayHelper {
             throw new IllegalStateException(
                     "No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
         }
-        raceTimesInfoProvider.forceTimesInfosUpdate();
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
-            private boolean alreadyfired;
-
             @Override
             public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
                     long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
                     long clientTimeWhenResponseWasReceived) {
-                if (alreadyfired) {
-                    return;
-                }
-                alreadyfired = true;
                 raceTimesInfoProvider.removeRaceTimesInfoProviderListener(this);
-                raceboardTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
+                fastCurrentTimeProvider.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                         clientTimeWhenResponseWasReceived);
                 Pair<Long, RegattaAndRaceIdentifier> timeToStartAndRaceIdentifier = checkForLiveRace(
                         selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider);
                 callback.onSuccess(timeToStartAndRaceIdentifier);
+                // kill old provider!
+                raceTimesInfoProvider.terminate();
             }
         });
-
+        raceTimesInfoProvider.forceTimesInfosUpdate();
     }
 
     /**
@@ -137,12 +131,16 @@ public class AutoplayHelper {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
                 if (raceIdentifier != null) {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
-                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.getStartOfRace() != null
-                            && (raceTimes.endOfRace == null || serverTimeDuringRequest
-                                    .getTime() < raceTimes.endOfRace.getTime() + WAIT_TIME_AFTER_END_OF_RACE_MIILIS)) {
+                    boolean notNullInRequiredValues = raceTimes != null && raceTimes.startOfTracking != null
+                            && raceTimes.getStartOfRace() != null;
+                    boolean raceHasNotEndedOrOnlyRecentlyEnded = raceTimes.endOfRace == null
+                            || serverTimeDuringRequest.getTime()
+                                    - raceTimes.delayToLiveInMs < raceTimes.endOfRace.getTime()
+                                            + WAIT_TIME_AFTER_END_OF_RACE_MIILIS;
+
+                    if (notNullInRequiredValues && raceHasNotEndedOrOnlyRecentlyEnded) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
-                        long delayToLiveInMs = raceTimes.delayToLiveInMs;
-                        long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs;
+                        long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - raceTimes.delayToLiveInMs;
                         if (startIn <= PRE_RACE_DELAY && startIn > NEGATIVE_SANITY_CHECK) {
                             startOfLifeRace = raceTimes.getStartOfRace();
                             return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
@@ -155,29 +153,33 @@ public class AutoplayHelper {
         return null;
     }
 
+    /**
+     * Struct like Returnvalue class for a racemap. <b> The user is required to pause the timer and terminate the
+     * RaceTimeProvider after use! </b>
+     */
     public static class RVWrapper {
+        public final RaceTimesInfoProvider creationTimeProvider;
+        public final Timer raceboardTimer;
+        public final RaceMap raceboardPerspective;
+        public final CompetitorSelectionModel csel;
 
-        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider) {
-            this.raceboardPerspective = raceboardPerspective2;
+        public RVWrapper(RaceMap raceboardPerspective, CompetitorSelectionModel competitorSelectionProvider,
+                Timer raceboardTimer, RaceTimesInfoProvider creationTimeProvider) {
+            this.raceboardPerspective = raceboardPerspective;
             this.csel = competitorSelectionProvider;
+            this.raceboardTimer = raceboardTimer;
+            this.creationTimeProvider = creationTimeProvider;
         }
-
-        public RaceMap raceboardPerspective;
-        public CompetitorSelectionModel csel;
     }
 
     public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
         GWT.log("Creating map for " + regattaAndRaceIdentifier);
-        raceboardTimer.setLivePlayDelayInMillis(1000);
-        raceboardTimer.setRefreshInterval(1000);
+        Timer creationTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
 
-        if (raceTimesInfoProvider == null) {
-            raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, AutoplayHelper.asyncActionsExecutor,
-                    errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
-        }
-        raceTimesInfoProvider.reset();
+        creationTimer.setLivePlayDelayInMillis(1000);
+        creationTimer.setRefreshInterval(1000);
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(event, leaderBoardName);
 
@@ -185,42 +187,56 @@ public class AutoplayHelper {
 
             @Override
             public void onSuccess(Iterable<CompetitorDTO> competitors) {
-                loadRaceTimes(selectedLeaderboard, new RaceTimesInfoProviderListener() {
-                   boolean alreadyFired;
+                RaceTimesInfoProvider creationTimeProvider = new RaceTimesInfoProvider(sailingService,
+                        asyncActionsExecutor, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 1000l);
+
+                continouslyLoadRaceTimeData(selectedLeaderboard, new RaceTimesInfoProviderListener() {
+                    boolean mapAlreadyCreated;
+
                     @Override
                     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
                             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
                             long clientTimeWhenResponseWasReceived) {
 
-                        raceboardTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
+                        // keep the creationTime updated upon liveChanges!
+                        creationTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                                 clientTimeWhenResponseWasReceived);
-                        raceboardTimer.play();
+                        creationTimer
+                                .setLivePlayDelayInMillis(raceTimesInfo.get(regattaAndRaceIdentifier).delayToLiveInMs);
+                        creationTimer.play();
 
-                        if (regattaAndRaceIdentifier != null && !alreadyFired) {
-                            alreadyFired = true;
-                            sailingService.getCompetitorBoats(regattaAndRaceIdentifier,
-                                    new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
-                                        @Override
-                                        public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
-                                            createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
-                                                    result, competitors, sailingService,
-                                                    AutoplayHelper.asyncActionsExecutor, errorReporter, raceboardTimer,
-                                                    callback, clientTimeWhenResponseWasReceived,
-                                                    serverTimeDuringRequest, clientTimeWhenRequestWasSent,
-                                                    raceTimesInfo, new DefaultQuickRanksDTOProvider());
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            callback.onFailure(
-                                                    new IllegalStateException("Error getting Competitor Boats"));
-                                        }
-                                    });
+                        if (regattaAndRaceIdentifier != null) {
+                            if(!mapAlreadyCreated){
+                                mapAlreadyCreated = true;
+                                sailingService.getCompetitorBoats(regattaAndRaceIdentifier,
+                                        new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
+                                    @Override
+                                    public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
+                                        createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
+                                                result, competitors, sailingService,
+                                                AutoplayHelper.asyncActionsExecutor, errorReporter, creationTimer,
+                                                callback, clientTimeWhenResponseWasReceived,
+                                                serverTimeDuringRequest, clientTimeWhenRequestWasSent,
+                                                raceTimesInfo, creationTimeProvider,
+                                                new DefaultQuickRanksDTOProvider());
+                                    }
+                                    
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        creationTimeProvider.terminate();
+                                        creationTimer.pause();
+                                        callback.onFailure(
+                                                new IllegalStateException("Error getting Competitor Boats"));
+                                    }
+                                });
+                            }
                         } else {
+                            creationTimeProvider.terminate();
+                            creationTimer.pause();
                             callback.onFailure(new IllegalStateException("No Live Race Found"));
                         }
                     }
-                }, raceTimesInfoProvider);
+                }, creationTimeProvider);
             }
 
             @Override
@@ -230,7 +246,7 @@ public class AutoplayHelper {
         });
     }
 
-    protected static void loadRaceTimes(AbstractLeaderboardDTO selectedLeaderboard,
+    protected static void continouslyLoadRaceTimeData(AbstractLeaderboardDTO selectedLeaderboard,
             RaceTimesInfoProviderListener callback, RaceTimesInfoProvider raceTimesInfoProvider) {
         for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
@@ -240,24 +256,15 @@ public class AutoplayHelper {
                 }
             }
         }
-        raceTimesInfoProvider.forceTimesInfosUpdate();
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
-            private boolean alreadyfired;
-
             @Override
             public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
                     long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
                     long clientTimeWhenResponseWasReceived) {
-                if (alreadyfired) {
-                    return;
-                }
-                alreadyfired = true;
                 callback.raceTimesInfosReceived(raceTimesInfo, clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                         clientTimeWhenResponseWasReceived);
-                raceTimesInfoProvider.removeRaceTimesInfoProviderListener(this);
             }
         });
-
     }
 
     private static void createRaceMapIfNotExist(RegattaAndRaceIdentifier currentLiveRace,
@@ -266,7 +273,7 @@ public class AutoplayHelper {
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
             AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
             long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,
-            AbstractQuickRanksDTOProvider provider) {
+            RaceTimesInfoProvider creationTimeProvider, AbstractQuickRanksDTOProvider provider) {
 
         ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
@@ -293,7 +300,8 @@ public class AutoplayHelper {
         raceboardTimer.setPlayMode(PlayModes.Live);
         // wait for one update
         raceboardPerspective.onResize();
-        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider));
+        callback.onSuccess(
+                new RVWrapper(raceboardPerspective, competitorSelectionProvider, raceboardTimer, creationTimeProvider));
     }
 
 }

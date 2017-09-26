@@ -17,8 +17,6 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.Id
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
@@ -26,9 +24,7 @@ import com.sap.sse.common.Util.Pair;
 public class IdleUpNextNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
     private IdleUpNextPlace place;
-    private static RaceTimesInfoProvider raceTimesInfoProvider;
-    // private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds
-    // */1000l);
+    private RaceTimesInfoProvider raceTimesInfoProvider;
 
     public IdleUpNextNode(AutoPlayClientFactory cf) {
         super(IdleUpNextNode.class.getName());
@@ -42,17 +38,18 @@ public class IdleUpNextNode extends FiresPlaceNode {
         getBus().fireEvent(new AutoPlayHeaderEvent(eventName, ""));
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
+        createRaceTimeInfoProvider();
+    }
 
-        if (raceTimesInfoProvider == null) {
-            createRaceTimeInfoProvider();
-        }
-
+    @Override
+    public void onStop() {
+        raceTimesInfoProvider.terminate();
+        super.onStop();
     }
 
     private void createRaceTimeInfoProvider() {
         raceTimesInfoProvider = new RaceTimesInfoProvider(cf.getSailingService(), AutoplayHelper.asyncActionsExecutor,
                 cf.getErrorReporter(), new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
-        raceTimesInfoProvider.reset();
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(
                 cf.getAutoPlayCtx().getEvent(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
@@ -88,20 +85,6 @@ public class IdleUpNextNode extends FiresPlaceNode {
             }
         });
     };
-
-    /**
-     * functional sideeffect free method for getting a leaderboard from an event based on the name
-     */
-    public static StrippedLeaderboardDTO getSelectedLeaderboard(EventDTO event, String leaderBoardName) {
-        for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
-            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard.name.equals(leaderBoardName)) {
-                    return leaderboard;
-                }
-            }
-        }
-        return null;
-    }
 
     public static void checkForRaceStarts(AbstractLeaderboardDTO currentLeaderboard, Date serverTimeDuringRequest,
             RaceTimesInfoProvider raceTimesInfoProvider,
