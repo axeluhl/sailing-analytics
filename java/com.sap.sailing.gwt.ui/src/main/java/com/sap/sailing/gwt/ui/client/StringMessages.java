@@ -541,6 +541,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaIsLive(String regattaName);
     String regattasAreLive(String regattaNames);
     String scoringSchemeHighPointFirstGetsOne();
+    String scoringSchemeHighPointFirstGetsOneDescription();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String knotsValue(double value);
