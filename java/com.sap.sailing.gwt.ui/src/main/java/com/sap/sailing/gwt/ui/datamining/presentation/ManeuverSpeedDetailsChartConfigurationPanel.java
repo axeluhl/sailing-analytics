@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -23,6 +24,8 @@ public class ManeuverSpeedDetailsChartConfigurationPanel extends HorizontalPanel
         setHorizontalAlignment(ALIGN_LEFT);
         setVerticalAlignment(ALIGN_MIDDLE);
         setSpacing(10);
+        getElement().getStyle().setMarginTop(-10, Unit.PX);
+        getElement().getStyle().setMarginBottom(-10, Unit.PX);
 
         add(new Label(stringMessages.minDataCount() + ":"));
         minCountDataIntegerBox.setWidth(NUMBER_BOX_WIDTH);
