@@ -58,6 +58,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
         case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT_2017:
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight2017Description();
+        case HIGH_POINT_FIRST_GETS_ONE:
+            return stringMessages.scoringSchemeHighPointFirstGetsOneDescription();
         case HIGH_POINT_ESS_OVERALL:
             return stringMessages.scoringSchemeHighPointEssOverallDescription();
         case HIGH_POINT_ESS_OVERALL_12:

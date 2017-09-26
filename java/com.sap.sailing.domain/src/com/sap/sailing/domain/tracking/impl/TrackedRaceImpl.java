@@ -1738,20 +1738,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
-
-    @Override
-    public boolean hasGPSData() {
-        boolean result = false;
-        if (!tracks.values().isEmpty()) {
-            for (GPSFixTrack<Competitor, GPSFixMoving> gpsTrack : tracks.values()) {
-                if (!gpsTrack.isEmpty()) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
     
     /**
      * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time
@@ -3373,7 +3359,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING && oldStatus != TrackedRaceStatusEnum.LOADING) {
             suspendAllCachesNotUpdatingWhileLoading();
-        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
     }

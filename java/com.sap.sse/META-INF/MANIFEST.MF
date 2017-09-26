@@ -12,8 +12,10 @@ Export-Package: com.sap.sse,
  com.sap.sse.osgi,
  com.sap.sse.qrcode,
  com.sap.sse.util,
+ com.sap.sse.util.graph,
  com.sap.sse.util.impl,
- com.sap.sse.util.kmeans
+ com.sap.sse.util.kmeans,
+ com.sap.sse.util.topologicalordering
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.shared.android,

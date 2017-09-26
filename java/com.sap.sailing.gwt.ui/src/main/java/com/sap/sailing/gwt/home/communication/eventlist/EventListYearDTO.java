@@ -48,12 +48,25 @@ public class EventListYearDTO implements IsSerializable {
     protected void addEvent(EventListEventDTO event) {
         eventCount += event.getEventSeries() == null ? 1 : event.getEventSeries().getEventsCount();
         for (int i = 0; i < events.size(); i++) {
-            if (events.get(i).getStartDate().compareTo(event.getStartDate()) < 0) {
+            if (isEventBeforeOtherInList(event, events.get(i))) {
                 events.add(i, event);
                 return;
             }
         }
         events.add(event);
+    }
+    
+    private boolean isEventBeforeOtherInList(EventListEventDTO eventTocheck, EventListEventDTO referenceEvent) {
+        // Currently running events should always be the first in the list
+        // Big events (e.g. Kieler Woche) can start before smaller events but end after them.
+        // After the smaller event ended, the big event should stay at the beginning of the list.
+        if (eventTocheck.isRunning() && !referenceEvent.isRunning()) {
+            return true;
+        }
+        if (!eventTocheck.isRunning() && referenceEvent.isRunning()) {
+            return false;
+        }
+        return referenceEvent.getStartDate().before(eventTocheck.getStartDate());
     }
 
     @GwtIncompatible

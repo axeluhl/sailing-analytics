@@ -80,9 +80,10 @@ public interface ScoringScheme extends Serializable {
     /**
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
      * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
+     * @param leaderboard TODO
      */
     int compareByBetterScore(Competitor o1,
-            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint);
+            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -95,8 +96,10 @@ public interface ScoringScheme extends Serializable {
 
     /**
      * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide.
+     * @param o1 TODO
+     * @param o2 TODO
      */
-    int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter);
+    int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2);
 
     /**
      * Under certain circumstances, a scoring scheme may decide that the scores of a column are not (yet) to be used
@@ -115,5 +118,5 @@ public interface ScoringScheme extends Serializable {
      * ordering of the list containing the total points matches the order in the group.
      * @throws NoWindException 
      */
-    int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException;
+    int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
 }

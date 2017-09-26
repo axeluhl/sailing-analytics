@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
@@ -12,11 +13,6 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
-
-    public enum EventType {
-        SINGLE_REGATTA, MULTI_REGATTA, SERIES_EVENT
-    }
-
     private TreeSet<RegattaMetadataDTO> regattas = new TreeSet<>();
     private ArrayList<EventReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
     

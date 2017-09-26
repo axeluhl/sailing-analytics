@@ -120,7 +120,6 @@ public class Activator implements BundleActivator {
                 trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
 
-
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
@@ -196,7 +195,7 @@ public class Activator implements BundleActivator {
             racingEventService.stopTrackingWind(windTracker.getA(), windTracker.getB());
         }
         for (Regatta regatta : racingEventService.getAllRegattas()) {
-            racingEventService.stopTracking(regatta);
+            racingEventService.stopTracking(regatta, /* willBeRemoved */ true);
         }
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();

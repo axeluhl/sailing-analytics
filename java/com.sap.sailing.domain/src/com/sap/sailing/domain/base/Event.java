@@ -13,11 +13,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
  * 
  */
 public interface Event extends EventBase {
-    Iterable<Regatta> getRegattas();
-    
-    void addRegatta(Regatta regatta);
-    
-    void removeRegatta(Regatta regatta);
     
     /**
      * For events, the ID is always a UUID.
