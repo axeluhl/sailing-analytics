@@ -13,13 +13,13 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
@@ -77,7 +77,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected abstract EventViewBase initView();
     
     protected final void initSeriesNavigation(EventViewBase view) {
-        if (eventDTO.getType() == EventType.SERIES_EVENT) {
+        if (eventDTO.getType() == EventType.SERIES) {
             String seriesIdAsString = eventDTO.getSeriesIdAsString();
             PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(seriesIdAsString, null, false);
             view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);
@@ -95,7 +95,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         EventViewDTO event = eventDTO;
         if(showQuickfinder && event.getType() == EventType.MULTI_REGATTA) {
             view.setQuickFinderValues(getRegattasByLeaderboardGroupName());
-        } else if(showQuickfinder && event.getType() == EventType.SERIES_EVENT) {
+        } else if(showQuickfinder && event.getType() == EventType.SERIES) {
             List<EventReferenceWithStateDTO> eventsOfSeriesSorted = event.getEventsOfSeriesSorted();
             List<EventReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(eventsOfSeriesSorted.size());
             for (EventReferenceWithStateDTO seriesEvent : eventsOfSeriesSorted) {
@@ -276,7 +276,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if(regattaId  != null) {
             return regattaId;
         }
-        if(!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+        if(!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES)) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;
@@ -312,7 +312,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     protected List<NavigationItem> getNavigationPathToEventLevel() {
         List<NavigationItem> navigationItems = new ArrayList<>();
-        if(getEventDTO().getType() == EventType.SERIES_EVENT) {
+        if(getEventDTO().getType() == EventType.SERIES) {
             navigationItems.add(new NavigationItem(getEventDTO().getSeriesName(), getSeriesNavigationForCurrentEvent()));
         }
         navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getEventNavigation()));

@@ -3,8 +3,10 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -321,9 +323,17 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort) {
+    public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPortAsString) throws MalformedURLException, UnsupportedEncodingException {
+        final URL redirectTarget;
+        int redirectPort;
+        if (redirectPortAsString == null || redirectPortAsString.trim().isEmpty() || (redirectPort=Integer.valueOf(redirectPortAsString)) == 0) {
+            redirectTarget = new URL(redirectProtocol, redirectHost, /* file */ "");
+        } else {
+            redirectTarget = new URL(redirectProtocol, redirectHost, redirectPort, /* file */ "");
+        }
         return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+
-                "&redirect_uri="+client.getRedirectUri(redirectProtocol, redirectHost, redirectPort);
+                "&redirect_uri="+URLEncoder.encode(client.getDefaultRedirectUri(), "UTF-8")
+                + "&state="+URLEncoder.encode(redirectTarget.toString(), "UTF-8");
     }
 
     private Client getClient() {

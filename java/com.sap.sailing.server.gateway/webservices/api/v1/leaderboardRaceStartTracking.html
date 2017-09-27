@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/leaderboards/{name}/starttracking?race_column={name}&amp;fleet={name}</h2>
+
+<b>Description:</b>
+<p>Starts tracking the race identified by the race_column and fleet parameters.
+If no smartphone tracking denotation exists yet for that race, one is added.
+Wind tracking can be configured using optional request parameters.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>race_column, fleet</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+			<div>trackWind a boolean value, defaulting to true; tells whether to start receiving live wind data for the tracked race</div>
+			<div>correctWindDirectionByMagneticDeclination a boolean value, defaulting to true; if trackWind is true,
+			     this parameter controls whether the wind directions received are to be corrected by the magnetic
+			     declination</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>http://127.0.0.1:8888/sailingserver/api/v1/leaderboards/TracTrac%20Virtual%20Course%20Marks%20Test/settrackingtimes?race_column=R1&fleet=Default&startoftracking=2007-01-03T13:05:00Z<br>
+		delivers <pre>
+		{"addeddenotation":false, "regatta":"TracTrac Virtual Course Marks Test"}
+		</pre>
+		where the addeddenotation field tells whether an annotation for smartphone tracking had to be added
+		in order to be able to track the race.</td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

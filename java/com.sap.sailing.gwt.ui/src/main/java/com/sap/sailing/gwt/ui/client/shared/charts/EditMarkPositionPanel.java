@@ -899,14 +899,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
     
     public void showAllCourseMarkOverlays() {
-        for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
-            overlay.getValue().setVisible(true);
+        for (final CourseMarkOverlay overlay : raceMap.getCourseMarkOverlays().values()) {
+            overlay.setVisible(true);
         }
     }
     
     public void hideAllCourseMarkOverlaysExceptSelected() { 
         for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
-            overlay.getValue().setVisible(overlay.getKey().equals(selectedMark.getName()));
+            overlay.getValue().setVisible(overlay.getKey().equals(selectedMark.getIdAsString()));
         }
     }
     

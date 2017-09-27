@@ -190,7 +190,7 @@ public class SensorFixStoreAndLoadTest {
 
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -209,7 +209,7 @@ public class SensorFixStoreAndLoadTest {
 
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -228,7 +228,7 @@ public class SensorFixStoreAndLoadTest {
 
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class SensorFixStoreAndLoadTest {
 
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -266,7 +266,7 @@ public class SensorFixStoreAndLoadTest {
 
         assertNull(trackedRace.getSensorTrack(comp2, BravoFixTrack.TRACK_NAME));
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -288,7 +288,7 @@ public class SensorFixStoreAndLoadTest {
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp2, BravoFixTrack.TRACK_NAME), 1);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -309,7 +309,7 @@ public class SensorFixStoreAndLoadTest {
 
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -331,7 +331,7 @@ public class SensorFixStoreAndLoadTest {
 
         assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -359,7 +359,7 @@ public class SensorFixStoreAndLoadTest {
         // Only Fixes from 100 to 200 may be included
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
         
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -390,7 +390,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(bravoFixTrack, 3);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -405,7 +405,7 @@ public class SensorFixStoreAndLoadTest {
         BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
         assertEquals(FIX_RIDE_HEIGHT,
                 bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getRideHeight());
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -428,7 +428,7 @@ public class SensorFixStoreAndLoadTest {
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME), 1);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -452,7 +452,7 @@ public class SensorFixStoreAndLoadTest {
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME), 1);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -485,7 +485,7 @@ public class SensorFixStoreAndLoadTest {
         assertEquals(FIX_TEST_VALUE,
                 testFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getTestValue());
 
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     private void addBravoFixes() {
@@ -679,7 +679,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         assertNotNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
         assertNotNull(trackedRace.getSensorTrack(comp2, BravoFixTrack.TRACK_NAME));
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     /** Regression test for bug 4052 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4052 */
@@ -693,7 +693,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
         assertNull(trackedRace.getSensorTrack(compNotPartOfRace, BravoFixTrack.TRACK_NAME));
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -712,7 +712,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -725,7 +725,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         addBravoFixes();
         assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
     @Test
@@ -746,7 +746,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         // only the initial 3 fixes are available
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -771,7 +771,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         // only the initial 3 fixes are available
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test(timeout=10_000)
@@ -809,7 +809,7 @@ public class SensorFixStoreAndLoadTest {
             };
         }.start();
         // When the bug is triggered, this call would hang until the test timeout is reached
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
     @Test
@@ -824,7 +824,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
@@ -840,7 +840,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         trackedRace.waitForLoadingToFinish();
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
@@ -857,7 +857,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
@@ -876,7 +876,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
-        fixLoaderAndTracker.stop(true);
+        fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 

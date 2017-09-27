@@ -60,7 +60,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.datamining,
  com.sap.sailing.server,
  com.sap.sailing.grib,
- com.sap.sailing.nmeaconnector
+ com.sap.sailing.nmeaconnector,
+ com.sap.sailing.geocoding
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

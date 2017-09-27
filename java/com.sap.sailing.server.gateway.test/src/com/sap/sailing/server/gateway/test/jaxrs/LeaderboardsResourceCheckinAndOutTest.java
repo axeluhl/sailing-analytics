@@ -45,7 +45,7 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
     private RegattaLeaderboard leaderboard;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
         Competitor c = createCompetitors(1).get(0);
         competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(),

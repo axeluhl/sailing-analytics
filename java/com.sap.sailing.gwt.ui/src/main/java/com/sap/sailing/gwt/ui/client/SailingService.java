@@ -193,8 +193,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
-    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
-    
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 
     StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, UUID courseAreaId);
@@ -457,7 +455,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
-    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort);
+    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws Exception;
 
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 

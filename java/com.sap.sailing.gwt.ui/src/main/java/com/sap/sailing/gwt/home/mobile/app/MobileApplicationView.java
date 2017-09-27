@@ -7,6 +7,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
@@ -39,6 +40,9 @@ public class MobileApplicationView extends Composite implements ApplicationTopLe
 
     @UiField
     SimplePanel mainContentPanel;
+    
+    @UiField
+    SimplePanel subHeaderPanel;
 
     public MobileApplicationView(MobilePlacesNavigator placeNavigator, EventBus eventBus) {
         headerPanel = new Header(placeNavigator, eventBus);
@@ -73,5 +77,9 @@ public class MobileApplicationView extends Composite implements ApplicationTopLe
     @Override
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
         return headerPanel.getNavigationPathDisplay();
+    }
+    
+    public void setSubHeaderContent(IsWidget content) {
+        subHeaderPanel.setWidget(content);
     }
 }

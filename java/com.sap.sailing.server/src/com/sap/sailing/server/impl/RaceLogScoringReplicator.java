@@ -158,7 +158,7 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
      * If a non-{@code null} {@code optionalExplicitScore} is provided, it it returned. Otherwise, if a valid
      * {@link MaxPointsReason} is provided, {@code null} is returned as the explicit score because the scoring scheme
      * shall be used dynamically to determine the penalty score (see
-     * {@link ScoringScheme#getPenaltyScore(RaceColumn, Competitor, MaxPointsReason, Integer, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint)}).
+     * {@link ScoringScheme#getPenaltyScore(RaceColumn, Competitor, MaxPointsReason, Integer, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint, Leaderboard)}).
      * If no explicit score is provided and no {@link MaxPointsReason} is specified, a score is determined from the
      * {@code oneBasedRankByRaceCommittee} using the leaderboard scoring scheme's
      * {@link ScoringScheme#getScoreForRank(Leaderboard, RaceColumn, Competitor, int, java.util.concurrent.Callable, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint)
