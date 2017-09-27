@@ -2,7 +2,6 @@ package com.sap.sse.security.ui.settings;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
@@ -135,7 +134,6 @@ public class ComponentContextWithSettingsStorageAndAdditionalSettingsLayers<S ex
 
             @Override
             public void onSuccess(CS settings) {
-                SettingsDefaultValuesUtils.keepDefaults(component.getSettings(), settings);
                 reloadedCallback.onSettingsReloaded(settings);
             }
         });
