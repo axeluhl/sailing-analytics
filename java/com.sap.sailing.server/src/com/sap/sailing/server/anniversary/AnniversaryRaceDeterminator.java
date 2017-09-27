@@ -46,7 +46,7 @@ public class AnniversaryRaceDeterminator {
     private volatile int currentRaceCount;
 
     /**
-     * Interface for checker classes which are past to the {@link AnniversaryRaceDeterminator}'s constructor in order to
+     * Interface for checker classes which are passed to the {@link AnniversaryRaceDeterminator}'s constructor in order to
      * determine anniversary numbers based on the {@link AnniversaryChecker#update(int) provided race count}.
      */
     public interface AnniversaryChecker {
