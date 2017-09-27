@@ -2169,14 +2169,13 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="272"/>
                                 <subviews>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NN8-QQ-TQB">
-                                        <rect key="frame" x="334" y="231" width="33" height="33"/>
+                                        <rect key="frame" x="314.5" y="223.5" width="40.5" height="40.5"/>
+                                        <color key="backgroundColor" red="0.95294117647058818" green="0.95294117647058818" blue="0.95294117647058818" alpha="1" colorSpace="calibratedRGB"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="33" id="9j5-Jx-rb6"/>
-                                            <constraint firstAttribute="width" constant="33" id="h8u-PR-H5K"/>
+                                            <constraint firstAttribute="height" constant="40" id="9j5-Jx-rb6"/>
+                                            <constraint firstAttribute="width" constant="40" id="h8u-PR-H5K"/>
                                         </constraints>
-                                        <state key="normal" image="edit">
-                                            <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        </state>
+                                        <state key="normal" image="edit"/>
                                         <connections>
                                             <action selector="teamImageEditButtonTapped:" destination="b2Z-q5-zaZ" eventType="touchUpInside" id="oXP-LX-4Da"/>
                                         </connections>
@@ -2201,7 +2200,7 @@
                                     </button>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="NN8-QQ-TQB" secondAttribute="trailing" constant="8" id="2sh-sE-6uK"/>
+                                    <constraint firstAttribute="trailing" secondItem="NN8-QQ-TQB" secondAttribute="trailing" constant="20" id="2sh-sE-6uK"/>
                                     <constraint firstItem="LGR-3t-JL4" firstAttribute="centerX" secondItem="iwM-mY-oZT" secondAttribute="centerX" id="CXp-qA-Ajf"/>
                                     <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="bhL-2M-5XL" secondAttribute="trailing" constant="20" id="K21-QC-T7D"/>
                                     <constraint firstAttribute="bottom" secondItem="NN8-QQ-TQB" secondAttribute="bottom" constant="8" id="MLS-BW-Q1Y"/>
@@ -2281,12 +2280,12 @@
     <resources>
         <image name="DE.png" width="64" height="64"/>
         <image name="camera" width="24" height="24"/>
-        <image name="edit" width="33" height="33"/>
+        <image name="edit" width="24" height="24"/>
         <image name="home_bg" width="980" height="653"/>
         <image name="profile_placeholder" width="360" height="256"/>
         <image name="retry" width="24" height="24"/>
         <image name="scan_white" width="214" height="214"/>
-        <image name="settings" width="22" height="22"/>
+        <image name="settings" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="fgS-yf-c3u"/>
@@ -2294,5 +2293,4 @@
         <segue reference="Bsw-eS-BQx"/>
         <segue reference="ipS-aD-UN6"/>
     </inferredMetricsTieBreakers>
-    <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
 </document>
