@@ -111,12 +111,12 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
             self?.presentSettingsViewController()
         }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
+        let infoAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
             self?.presentAboutViewController()
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)
-        alertController.addAction(aboutAction)
+        alertController.addAction(infoAction)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
     }

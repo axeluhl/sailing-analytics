@@ -23,9 +23,9 @@ class MarkSessionViewController: SessionViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = self.optionButton
         }
-        alertController.addAction(self.makeActionSettings())
         alertController.addAction(self.makeActionCheckOut())
-        alertController.addAction(self.makeActionUpdate())
+        //alertController.addAction(self.makeActionUpdate())
+        alertController.addAction(self.makeActionSettings())
         alertController.addAction(self.makeActionInfo())
         alertController.addAction(self.makeActionCancel())
         return alertController

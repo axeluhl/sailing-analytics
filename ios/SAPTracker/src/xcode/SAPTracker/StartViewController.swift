@@ -17,7 +17,9 @@ class StartViewController: UIViewController {
     
     var userName: String?
     
+    @IBOutlet weak var regattaButtonView: UIView!
     @IBOutlet weak var regattaButton: UIButton!
+    @IBOutlet weak var trainingButtonView: UIView!
     @IBOutlet weak var trainingButton: UIButton!
     
     override func viewDidLoad() {
@@ -38,8 +40,14 @@ class StartViewController: UIViewController {
     }
     
     fileprivate func setupButtons() {
-        makeBlue(button: regattaButton)
-        makeBlue(button: trainingButton)
+        makeRound(view: regattaButtonView, cornerRadius: 4)
+        regattaButton.setTitleColor(Colors.BlueButtonTitleColor, for: .normal)
+        regattaButton.setBackgroundImage(Images.BlueButton, for: .normal)
+        regattaButton.setBackgroundImage(Images.BlueButtonHighlighted, for: .highlighted)
+        makeRound(view: trainingButtonView, cornerRadius: 4)
+        trainingButton.setTitleColor(Colors.BlueButtonTitleColor, for: .normal)
+        trainingButton.setBackgroundImage(Images.BlueButton, for: .normal)
+        trainingButton.setBackgroundImage(Images.BlueButtonHighlighted, for: .highlighted)
     }
     
     fileprivate func setupNavigationBar() {

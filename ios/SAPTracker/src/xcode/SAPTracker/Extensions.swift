@@ -104,7 +104,12 @@ extension UIViewController {
         view.layer.shadowOpacity = 0.5
         view.layer.shadowRadius = 4.0
     }
-    
+
+    func makeRound(view: UIView, cornerRadius: CGFloat) {
+        view.layer.cornerRadius = cornerRadius
+        view.layer.masksToBounds = true
+    }
+
     func makeBlue(button: UIButton) {
         button.setTitleColor(Colors.BlueButtonTitleColor, for: .normal)
         button.setBackgroundImage(Images.BlueButton, for: .normal)
