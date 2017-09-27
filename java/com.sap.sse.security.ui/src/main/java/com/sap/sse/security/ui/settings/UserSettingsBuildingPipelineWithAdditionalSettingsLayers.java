@@ -138,10 +138,7 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
             CS newInstance, Iterable<String> path) {
-        CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
-        pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set to
-                                                                                 // default values
-        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.SYSTEM_DEFAULTS, path,
+        CS pipelinedSettings = applyPatchesForPipelineLevel(newInstance, PipelineLevel.SYSTEM_DEFAULTS, path,
                 layersSettingsPatches);
         pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
 
@@ -175,10 +172,7 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(
             CS newSettings, CS newInstance,
             StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, Iterable<String> path) {
-        CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
-        pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set to
-                                                                                 // default values
-        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.SYSTEM_DEFAULTS, path,
+        CS pipelinedSettings = applyPatchesForPipelineLevel(newInstance, PipelineLevel.SYSTEM_DEFAULTS, path,
                 layersSettingsPatches);
         pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
 
