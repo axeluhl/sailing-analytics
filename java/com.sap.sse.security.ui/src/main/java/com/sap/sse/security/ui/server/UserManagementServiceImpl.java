@@ -32,19 +32,19 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Credential;
-import com.sap.sse.security.Owner;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -58,6 +58,7 @@ import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.OwnerDTO;
+import com.sap.sse.security.ui.shared.RolePermissionModelDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -144,6 +145,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             acls.add(aclDTO);
         }
         return acls;
+    }
+    
+    @Override
+    public AccessControlListDTO getAccessControlList(String id) {
+        return createAclDTOFromAcl(getSecurityService().getAccessControlListByName(id));
     }
     
     @Override
@@ -461,7 +467,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), user.getPermissions());
+                accountDTOs, user.getRoles(), new RolePermissionModelDTO(new HashSet<>()), user.getPermissions());
         return userDTO;
     }
 

@@ -13,6 +13,7 @@ import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.security.ui.shared.AccessControlListDTO;
 
 public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
@@ -29,6 +30,8 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private Map<String, String> sailorsInfoWebsiteURLs;
     private List<ImageDTO> images = new ArrayList<>();
     private List<VideoDTO> videos = new ArrayList<>();
+    
+    private AccessControlListDTO aclDTO;
 
     /**
      * For the image URL keys holds the sizes of these images if known. An image size is "known" by this object if it
@@ -180,5 +183,13 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      */
     public ImageSize getImageSize(String imageURL) {
         return imageSizes.get(imageURL);
+    }
+    
+    public void setAclDTO(AccessControlListDTO aclDTO) {
+        this.aclDTO = aclDTO;
+    }
+    
+    public AccessControlListDTO getAclDTO() {
+        return this.aclDTO;
     }
 }

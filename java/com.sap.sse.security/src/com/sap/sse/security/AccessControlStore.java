@@ -3,6 +3,8 @@ package com.sap.sse.security;
 import java.util.Set;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Owner;
 
 public interface AccessControlStore extends Named {
     Iterable<AccessControlList> getAccessControlLists();

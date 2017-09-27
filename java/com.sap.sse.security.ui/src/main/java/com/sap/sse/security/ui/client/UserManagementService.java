@@ -20,6 +20,8 @@ import com.sap.sse.security.ui.shared.UserGroupDTO;
 public interface UserManagementService extends RemoteService {
     Collection<AccessControlListDTO> getAccessControlListList();
     
+    AccessControlListDTO getAccessControlList(String id);
+    
     AccessControlListDTO updateACL(String id, Map<String, Set<String>> permissionStrings);
     
     AccessControlListDTO addToACL(String acl, String permission, String name);

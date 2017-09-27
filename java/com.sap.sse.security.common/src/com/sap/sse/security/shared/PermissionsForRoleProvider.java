@@ -9,5 +9,5 @@ package com.sap.sse.security.shared;
  *
  */
 public interface PermissionsForRoleProvider {
-    Iterable<String> getPermissions(String role);
+    Iterable<String> getPermissions(String role, RolePermissionModel rolePermissionModel);
 }

@@ -12,17 +12,19 @@ import java.util.logging.Logger;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
-import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 
-public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm {
+public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm implements RolePermissionModel {
     private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
     private final Future<UserStore> userStore;
     private final Future<AccessControlStore> aclStore;
@@ -157,7 +159,18 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         String[] parts = perm.toString().replaceAll("\\[|\\]", "").split(":");
         String user = (String) principals.getPrimaryPrincipal();
         
-        if (parts.length < 2) {
+        try {
+            return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
+                    user, getUserStore().getPermissionsFromUser(user), 
+                    getUserStore().getRolesFromUser(user), this, 
+                    getAccessControlListStore().getOwnership(parts[2]), 
+                    getAccessControlListStore().getAccessControlListByName(parts[2]));
+        } catch (UserManagementException e) {
+            logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
+            return false;
+        }
+        
+        /*if (parts.length < 2) {
             throw new WrongPermissionFormatException(perm);
         } else if (parts.length > 2) {
             Owner ownership = getAccessControlListStore().getOwnership(parts[2]);
@@ -195,7 +208,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
             return false;
         }
-        return false;
+        return false;*/
     }
 
     @Override
@@ -284,5 +297,10 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         return null; // As all the public methods of AuthorizingRealm are overridden to not use this, this should never be called.
+    }
+    
+    @Override
+    public Iterable<String> getPermissions(String role) {
+        return permissionsForRoleProvider.getPermissions(role, null);
     }
 }

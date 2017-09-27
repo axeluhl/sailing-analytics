@@ -26,7 +26,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.Status;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -490,8 +489,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         final VideoSynchPlayer videoPlayer;
         final UserDTO currentUser = userService.getCurrentUser();
         boolean showSynchControls = currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
-                        SailingPermissionsForRoleProvider.INSTANCE);
+                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission());
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
@@ -675,8 +673,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public boolean allowsEditing() {
         UserDTO currentUser = userService.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
-                        SailingPermissionsForRoleProvider.INSTANCE);
+                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission());
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.sap.sse.security.ui.client.component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -126,10 +128,10 @@ public class UserManagementPanel extends DockPanel {
                 sb.appendHtmlConstant("<td>");
                 sb.appendEscaped(value.getId());
                 sb.appendHtmlConstant("</td>");
-                for (UserGroupDTO group : value.getPermissionMap().keySet()) {
+                for (Map.Entry<UserGroupDTO, Set<String>> entry : value.getUserGroupPermissionMap().entrySet()) {
                     sb.appendHtmlConstant("<td>");
-                    String concated = group.getName() + ": ";
-                    concated += String.join(", ", value.getPermissionMap().get(group));
+                    String concated = entry.getKey().getName() + ": ";
+                    concated += String.join(", ", entry.getValue());
                     sb.appendEscaped(concated);
                     sb.appendHtmlConstant("</td>");
                 }

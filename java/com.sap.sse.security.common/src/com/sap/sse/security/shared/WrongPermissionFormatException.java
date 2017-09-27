@@ -1,8 +1,6 @@
-package com.sap.sse.security;
+package com.sap.sse.security.shared;
 
 import java.io.Serializable;
-
-import org.apache.shiro.authz.Permission;
 
 public class WrongPermissionFormatException extends RuntimeException implements Serializable {
     private static final long serialVersionUID = -1971342390698915927L;
@@ -18,7 +16,7 @@ public class WrongPermissionFormatException extends RuntimeException implements 
         this.permission = permission;
     }
     
-    public WrongPermissionFormatException(Permission permission) {
+    public WrongPermissionFormatException(WildcardPermission permission) {
         this(permission.toString());
     }
 }

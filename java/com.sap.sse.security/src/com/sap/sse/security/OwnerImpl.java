@@ -1,5 +1,7 @@
 package com.sap.sse.security;
 
+import com.sap.sse.security.shared.Owner;
+
 public class OwnerImpl implements Owner {
     private static final long serialVersionUID = -3997304159898514597L;
     

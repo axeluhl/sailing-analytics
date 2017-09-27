@@ -64,6 +64,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
 /**
@@ -108,7 +109,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final HandleTabSelectable handleTabSelectable;
     
     @SuppressWarnings("unchecked")
-    public EventListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public EventListComposite(final SailingServiceAsync sailingService, final UserDTO user, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final HandleTabSelectable handleTabSelectable, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -146,6 +147,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
+        if (!user.hasPermission("com.sap.sailing.domain.base.Event:create")) {
+            createEventBtn.setVisible(false);
+        }
 
         removeEventsButton = new Button(stringMessages.remove());
         removeEventsButton.ensureDebugId("RemoveEventsButton");

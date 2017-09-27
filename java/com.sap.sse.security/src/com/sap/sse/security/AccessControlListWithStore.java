@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sse.security.shared.AccessControlList;
+
 public class AccessControlListWithStore implements AccessControlList {
     private static final long serialVersionUID = -5709064967680495227L;
     

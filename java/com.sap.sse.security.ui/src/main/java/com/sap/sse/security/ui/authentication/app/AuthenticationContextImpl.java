@@ -1,8 +1,10 @@
 package com.sap.sse.security.ui.authentication.app;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.sap.sse.security.ui.shared.AccountDTO;
+import com.sap.sse.security.ui.shared.RolePermissionModelDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -12,7 +14,7 @@ public class AuthenticationContextImpl implements AuthenticationContext {
 
     private final UserDTO currentUser;
     private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", null, false, new ArrayList<AccountDTO>(),
-            new ArrayList<String>(), new ArrayList<String>());
+            new ArrayList<String>(), new RolePermissionModelDTO(new HashSet<>()), new ArrayList<String>());
 
     /**
      * Creating an {@link AuthenticationContextImpl} containing an anonymous {@link UserDTO} object.

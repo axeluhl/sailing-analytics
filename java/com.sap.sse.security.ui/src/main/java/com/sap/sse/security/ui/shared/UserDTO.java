@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -19,13 +20,15 @@ public class UserDTO implements IsSerializable {
     private String locale;
     private List<AccountDTO> accounts;
     private Set<String> roles;
-    private Set<WildcardPermission> permissions;
+    private RolePermissionModelDTO rolePermissionModelDTO;
+    private Set<String> permissions;
     private boolean emailValidated;
 
     UserDTO() {} // for serialization only
 
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<String> roles, Iterable<String> stringPermissions) {
+            List<AccountDTO> accounts, Iterable<String> roles, RolePermissionModelDTO rolePermissionModelDTO,
+            Iterable<String> stringPermissions) {
         this.name = name;
         this.email = email;
         this.fullName = fullName;
@@ -35,10 +38,9 @@ public class UserDTO implements IsSerializable {
         this.accounts = accounts;
         this.roles = new HashSet<>();
         Util.addAll(roles, this.roles);
+        this.rolePermissionModelDTO = rolePermissionModelDTO;
         this.permissions = new HashSet<>();
-        for (String stringPermission : stringPermissions) {
-            this.permissions.add(new WildcardPermission(stringPermission, true));
-        }
+        Util.addAll(stringPermissions, this.permissions);
     }
 
     public String getName() {
@@ -71,7 +73,11 @@ public class UserDTO implements IsSerializable {
      * user has. Use {@link #getAllPermissions(PermissionsForRoleProvider)} for that.
      */
     public Iterable<WildcardPermission> getPermissions() {
-        return permissions;
+        Set<WildcardPermission> wildcardPermissions = new HashSet<>();
+        for (String permission : this.permissions) {
+            wildcardPermissions.add(new WildcardPermission(permission));
+        }
+        return wildcardPermissions;
     }
     
     /**
@@ -102,23 +108,34 @@ public class UserDTO implements IsSerializable {
         Util.addAll(getStringPermissions(), result);
         if (permissionsForRoleProvider != null) {
             for (String role : getRoles()) {
-                Util.addAll(permissionsForRoleProvider.getPermissions(role), result);
+                Util.addAll(permissionsForRoleProvider.getPermissions(role, null), result);
             }
         }
         return result;
     }
     
-    public boolean hasPermission(String permission, PermissionsForRoleProvider permissionsForRoleProvider) {
-        return hasPermission(new WildcardPermission(permission), permissionsForRoleProvider);
+    public boolean hasPermission(String permission) {
+        return hasPermission(new WildcardPermission(permission));
     }
     
-    public boolean hasPermission(WildcardPermission permission, PermissionsForRoleProvider permissionsForRoleProvider) {
-        for (String stringPermission : getAllPermissions(permissionsForRoleProvider)) {
+    public boolean hasPermission(WildcardPermission permission) {
+        return hasPermission(permission, null, null);
+    }
+    
+    public boolean hasPermission(String permission, AccessControlListDTO acl, OwnerDTO owner) {
+        return hasPermission(new WildcardPermission(permission), acl, owner);
+    }
+    
+    public boolean hasPermission(WildcardPermission permission, AccessControlListDTO acl, OwnerDTO owner) {
+        return PermissionChecker.isPermitted(permission, name, permissions, roles, rolePermissionModelDTO, 
+                owner, acl);
+        
+        /*for (String stringPermission : getAllPermissions(SailingPermissionsForRoleProvider.INSTANCE)) {
             if (new WildcardPermission(stringPermission).implies(permission)) {
                 return true;
             }
         }
-        return false;
+        return false;*/
     }
 
     public List<AccountDTO> getAccounts() {

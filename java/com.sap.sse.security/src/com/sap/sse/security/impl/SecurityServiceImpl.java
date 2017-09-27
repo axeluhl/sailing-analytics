@@ -72,7 +72,6 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
-import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
@@ -91,7 +90,9 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -272,6 +273,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public CachingSecurityManager getSecurityManager() {
         return this.securityManager;
+    }
+    
+    @Override
+    public Owner getOwnership(String id) {
+        return aclStore.getOwnership(id);
     }
 
     @Override

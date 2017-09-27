@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
@@ -309,8 +308,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
         boolean forceLayout = false;
-        if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission(),
-                SailingPermissionsForRoleProvider.INSTANCE)) {
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission())) {
             if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPassingsSplitter.getToggleButton().setVisible(true);
             }
@@ -321,8 +319,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 markPassingsSplitter.getToggleButton().setVisible(false);
             }
         }
-        if (user != null && user.hasPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(),
-                SailingPermissionsForRoleProvider.INSTANCE)) {
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission())) {
             if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPositionSplitter.getToggleButton().setVisible(true);
             }

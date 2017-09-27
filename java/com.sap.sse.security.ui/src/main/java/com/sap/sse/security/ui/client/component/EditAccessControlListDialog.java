@@ -99,11 +99,11 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
             }
         });
         id = acl.getId();
-        for (UserGroupDTO group : acl.getPermissionMap().keySet()) {
-            Label label = new Label(group.getName());
+        for (Map.Entry<UserGroupDTO, Set<String>> entry : acl.getUserGroupPermissionMap().entrySet()) {
+            Label label = new Label(entry.getKey().getName());
             labels.add(label);
             String concatenated = "";
-            for (String permission : acl.getPermissionMap().get(group)) {
+            for (String permission : entry.getValue()) {
                 concatenated += permission + ", ";                
             }
             TextBox textBox = createTextBox(concatenated, 200);

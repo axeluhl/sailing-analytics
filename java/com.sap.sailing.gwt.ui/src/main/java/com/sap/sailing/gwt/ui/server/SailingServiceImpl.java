@@ -496,6 +496,12 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.UserGroup;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.ui.shared.AccessControlListDTO;
+import com.sap.sse.security.ui.shared.OwnerDTO;
+import com.sap.sse.security.ui.shared.UserGroupDTO;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -3875,7 +3881,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, withStatisticalData));
         }
+        eventDTO.setAclDTO(createAclDTOFromAcl(getSecurityService().getAccessControlListByName(event.getId().toString())));
         return eventDTO;
+    }
+    
+    private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
+        Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
+        for (Map.Entry<String, Set<String>> entry : acl.getPermissionMap().entrySet()) {
+            UserGroup group = getSecurityService().getUserGroupByName(entry.getKey());
+            permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
+                    entry.getValue());
+        }
+        return new AccessControlListDTO(acl.getName(), permissionMapDTO);
+    }
+    
+    private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
+        AccessControlList acl = getSecurityService().getAccessControlListByName(userGroup.getName());
+        Owner ownership = getSecurityService().getOwnership(userGroup.getName());
+        return new UserGroupDTO(userGroup.getName(), 
+                createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
+    }
+    
+    private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
+        return new OwnerDTO(ownership.getName(), ownership.getOwner(), ownership.getTenantOwner());
     }
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {

@@ -17,6 +17,8 @@ import com.sap.sse.security.ui.shared.UserGroupDTO;
 public interface UserManagementServiceAsync {
     void getAccessControlListList(AsyncCallback<Collection<AccessControlListDTO>> callback);
     
+    void getAccessControlList(String id, AsyncCallback<AccessControlListDTO> callback);
+    
     void updateACL(String id, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlListDTO> callback);
     
     void addToACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);

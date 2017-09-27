@@ -3,12 +3,12 @@ package com.sap.sse.security.userstore.mongodb;
 import java.util.Collection;
 import java.util.Map;
 
-import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.Owner;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Owner;
 
 public interface DomainObjectFactory {
     Iterable<Owner> loadAllOwnerships();
