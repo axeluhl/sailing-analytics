@@ -34,7 +34,7 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     }
     
     fileprivate func setupAddButton() {
-        makeViewRoundWithShadow(addButton)
+        makeRoundWithShadow(view: addButton)
     }
     
     fileprivate func setupLocalization() {

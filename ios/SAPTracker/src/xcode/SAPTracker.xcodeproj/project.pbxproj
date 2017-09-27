@@ -283,10 +283,6 @@
 		7F83F15819F154F000C53328 /* RegattaCheckInTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* RegattaCheckInTableViewController.swift */; };
 		7F83F16C19F154F000C53328 /* SAPTrackerAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
-		7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */; };
-		7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */; };
-		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
-		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
 		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
 		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
 		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
@@ -700,10 +696,6 @@
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPTrackerAPITests.swift; sourceTree = "<group>"; };
 		7F83F17519F1574700C53328 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Bold.ttf"; sourceTree = "<group>"; };
-		7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Light.ttf"; sourceTree = "<group>"; };
-		7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Regular.ttf"; sourceTree = "<group>"; };
-		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
 		7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingPageViewController.swift; sourceTree = "<group>"; };
 		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
 		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
@@ -1460,20 +1452,8 @@
 			isa = PBXGroup;
 			children = (
 				7F14A0031A13B9A6001C1ECB /* Flags */,
-				C89C60141D0FF63C002AAAD2 /* Fonts */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
-		};
-		C89C60141D0FF63C002AAAD2 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
-				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
-				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
-				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
-			);
-			name = Fonts;
 			sourceTree = "<group>";
 		};
 		C8BFCC1B1D50F17800FC1A27 /* SMTWiFiStatus */ = {
@@ -1911,7 +1891,6 @@
 				7F14A1C71A13B9A6001C1ECB /* OM.png in Resources */,
 				7F14A1F21A13B9A6001C1ECB /* TJ.png in Resources */,
 				7F14A12C1A13B9A6001C1ECB /* AX.png in Resources */,
-				7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */,
 				7F14A1951A13B9A6001C1ECB /* KW.png in Resources */,
 				7F14A1C21A13B9A6001C1ECB /* NO.png in Resources */,
 				7F14A16E1A13B9A6001C1ECB /* GI.png in Resources */,
@@ -1976,13 +1955,10 @@
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
 				7F14A1171A13B9A6001C1ECB /* _scotland.png in Resources */,
 				7F14A1FB1A13B9A6001C1ECB /* TW.png in Resources */,
-				7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */,
 				7F14A1451A13B9A6001C1ECB /* CG.png in Resources */,
 				7F14A1F11A13B9A6001C1ECB /* TH.png in Resources */,
 				7F14A1AC1A13B9A6001C1ECB /* ML.png in Resources */,
-				7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */,
 				7F14A1AE1A13B9A6001C1ECB /* MN.png in Resources */,
-				7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */,
 				7F14A1D41A13B9A6001C1ECB /* PY.png in Resources */,
 				7F14A1E11A13B9A6001C1ECB /* SI.png in Resources */,
 				7F14A1921A13B9A6001C1ECB /* KN.png in Resources */,

@@ -39,17 +39,6 @@ struct Colors {
     static let NavigationBarTintColor = UIColor(hex: 0x009de0)
 }
 
-struct FontNames {
-    static let OpenSans = "OpenSans"
-    static let OpenSansBold = "OpenSans-Bold"
-}
-
-struct Fonts {
-    static let OpenSansBold17 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(17.0)) ?? UIFont.systemFont(ofSize: 17.0)
-    static let OpenSansBold13 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(13.0)) ?? UIFont.systemFont(ofSize: 13.0)
-    static let OpenSans10 = UIFont(name: FontNames.OpenSans, size: CGFloat(10.0)) ?? UIFont.systemFont(ofSize: 10.0)
-}
-
 struct Images {
     static let BlueButton = UIImage(color: Colors.BlueButton)
     static let BlueButtonHighlighted = UIImage(color: Colors.BlueButtonHighlighted)

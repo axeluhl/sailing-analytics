@@ -96,7 +96,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     fileprivate func setupNavigationBarApperance() {
         UINavigationBar.appearance().tintColor = Colors.NavigationBarTintColor
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: Colors.NavigationBarTitleColor, NSFontAttributeName: Fonts.OpenSansBold17]
     }
     
     fileprivate func setupPageControlApperance() {

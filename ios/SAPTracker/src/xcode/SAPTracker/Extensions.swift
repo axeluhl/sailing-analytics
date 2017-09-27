@@ -93,19 +93,15 @@ extension UITableViewCell {
 
 extension UIViewController {
     
-    func makeViewRoundWithShadow(_ view: UIView) {
-        
+    func makeRoundWithShadow(view: UIView) {
+
         // Corner radius
         view.layer.cornerRadius = view.frame.height / 2
-        
-        // Border
-        view.layer.borderWidth = 1.0
-        view.layer.borderColor = UIColor.black.cgColor
-        
+
         // Shadow
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOffset = CGSize(width: 3, height: 3)
-        view.layer.shadowOpacity = 0.2
+        view.layer.shadowOpacity = 0.5
         view.layer.shadowRadius = 4.0
     }
     
@@ -113,35 +109,35 @@ extension UIViewController {
         button.setTitleColor(Colors.BlueButtonTitleColor, for: .normal)
         button.setBackgroundImage(Images.BlueButton, for: .normal)
         button.setBackgroundImage(Images.BlueButtonHighlighted, for: .highlighted)
-        button.updateLayer(cornerRadius: 1)
+        button.updateLayer(cornerRadius: 4)
     }
     
     func makeGray(button: UIButton) {
         button.setTitleColor(Colors.GrayButtonTitleColor, for: .normal)
         button.setBackgroundImage(Images.GrayButton, for: .normal)
         button.setBackgroundImage(Images.GrayButtonHighlighted, for: .highlighted)
-        button.updateLayer(cornerRadius: 1, borderColor: Colors.GrayButtonBorder)
+        button.updateLayer(cornerRadius: 4, borderColor: Colors.GrayButtonBorder)
     }
     
     func makeGreen(button: UIButton) {
         button.setTitleColor(Colors.GreenButtonTitleColor, for: .normal)
         button.setBackgroundImage(Images.GreenButton, for: .normal)
         button.setBackgroundImage(Images.GreenButtonHighlighted, for: .highlighted)
-        button.updateLayer(cornerRadius: 1)
+        button.updateLayer(cornerRadius: 4)
     }
     
     func makeRed(button: UIButton) {
         button.setTitleColor(Colors.RedButtonTitleColor, for: .normal)
         button.setBackgroundImage(Images.RedButton, for: .normal)
         button.setBackgroundImage(Images.RedButtonHighlighted, for: .highlighted)
-        button.updateLayer(cornerRadius: 1)
+        button.updateLayer(cornerRadius: 4)
     }
     
     func makeTranslucent(button: UIButton) {
         button.setTitleColor(Colors.TranslucentButtonTitleColor, for: .normal)
         button.setBackgroundImage(Images.TranslucentButton, for: .normal)
         button.setBackgroundImage(Images.TranslucentButtonHighlighted, for: .highlighted)
-        button.updateLayer(cornerRadius: 1, borderColor: Colors.TranslucentButtonBorder)
+        button.updateLayer(cornerRadius: 4, borderColor: Colors.TranslucentButtonBorder)
     }
     
     func presentAboutViewController() {
