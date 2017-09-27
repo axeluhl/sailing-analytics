@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.tracking.AbstractTrackedRegattaAndRaceObserver;
@@ -17,18 +16,19 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 
 /**
- * {@link AbstractTrackedRegattaAndRaceObserver} that observes {@link TrackedRace TrackedRaces} to determine when the
- * prerequisites for anniversary race candidates are fulfilled. When a race gets in that state, an update for the given
- * AnniversaryRaceDeterminator is triggered. Races that are either is a state that mets the prerequisites for
+ * {@link AbstractTrackedRegattaAndRaceObserver} that observes {@link TrackedRace}s to determine when the prerequisites
+ * for anniversary race candidates are fulfilled. When a race gets in that state, an update for the given
+ * AnniversaryRaceDeterminator is triggered. Races that are either in a state that mets the prerequisites for
  * anniversary races or races that are finished are not observed anymore.
  */
 public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRegattaAndRaceObserver {
 
     /**
-     * Listeners added a {@link TrackedRaces} that need to be cleaned when {@link TrackedRace}s are removed.
+     * Listeners added for {@link TrackedRace}s that need to be cleaned when {@link TrackedRace}s are removed.
      */
     private final Map<TrackedRace, Listener> listeners;
     private final AnniversaryRaceDeterminator anniversaryRaceDeterminator;
+
     /**
      * Flag that indicates that the {@link RaceChangeObserverForAnniversaryDetection} is stopped which means that no
      * further updates should be triggered. This is e.g. the case when a server is converted to a replica.
@@ -37,8 +37,8 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
 
     public RaceChangeObserverForAnniversaryDetection(AnniversaryRaceDeterminator anniversaryRaceDeterminator) {
         this.anniversaryRaceDeterminator = anniversaryRaceDeterminator;
-        listeners = new ConcurrentHashMap<>();
-        stopped = new AtomicBoolean(false);
+        this.listeners = new ConcurrentHashMap<>();
+        this.stopped = new AtomicBoolean(false);
     }
 
     @Override
@@ -60,6 +60,12 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
         fireUpdateIfNotStopped();
     }
 
+    /**
+     * Removes {@link Listener} from given {@link TrackedRace}, if any.
+     * 
+     * @param trackedRace
+     *            {@link TrackedRace} to remove {@link Listener} from
+     */
     private void removeListener(TrackedRace trackedRace) {
         final Listener listener = listeners.remove(trackedRace);
         if (listener != null) {
@@ -68,7 +74,8 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
     }
 
     /**
-     * {@link #fireUpdateIfNotStopped() Fires an update} if the race fulfills the criteria for being counted for anniversary races.
+     * {@link #fireUpdateIfNotStopped() Fires an update} if the race fulfills the criteria for being counted for
+     * anniversary races.
      * 
      * @return {@code true} if the tracked race fulfills the criteria for being counted for anniversary races;
      *         {@code false} otherwise
@@ -89,6 +96,9 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
         }
     }
 
+    /**
+     * Updates {@link AnniversaryRaceDeterminator} if not {@link #stopped stopped}.
+     */
     private void fireUpdateIfNotStopped() {
         if (!stopped.get()) {
             anniversaryRaceDeterminator.update();
@@ -105,8 +115,8 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
     }
     
     /**
-     * Clears all known {@link TrackedRegatta} and {@link TrackedRace} instances. Any new race is found and will trigger
-     * further updates.
+     * Clears all known {@link TrackedRegatta} and {@link TrackedRace} instances. Any new race will still be found and
+     * thus trigger further updates.
      */
     public void clear() {
         removeAll();

@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,20 +75,20 @@ public class RemoteSailingServerSet {
     private final StatisticsJsonDeserializer statisticsJsonDeserializer;
     
     /**
-     * Tracked races content is not replicated, because only the archive/master is allowed to determine Anniversaries,
-     * to ensure that there is only one truth. The results of this determination are replicated. In a replica,
-     * {@link #cachedTrackedRacesForRemoteSailingServers} remains empty, as no remote servers are queried for the race
-     * lists.
+     * Tracked races content is not replicated, because only the master (e.g. archive) determines anniversaries. The
+     * results of this determination are replicated. In a replica, {@link #cachedTrackedRacesForRemoteSailingServers}
+     * remains empty, as no remote servers are queried for their tracked races lists.
      */
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
     
     /**
-     * A Set of races, that are called each time a remote server returns a racelist
+     * {@link Set} of {@link Runnable callback}s, which are called when retrieving tracked races from a remote server
      */
     private final Set<Runnable> remoteRaceResultReceivedCallbacks = ConcurrentHashMap.newKeySet();
     
     /**
-     * Is set to false if no further remoterace lists should be loaded, this is usually the case for replicas
+     * {@link AtomicBoolean Flag} to enable or disable retrieval of tracked races from remote servers. Usually
+     * <code>false</code>/disable for replicas in order to save bandwidth and CPU.
      */
     private final AtomicBoolean retrieveRemoteRaceResult = new AtomicBoolean(true);
 
@@ -152,8 +153,13 @@ public class RemoteSailingServerSet {
     }
 
     /**
-     * If set to false, this instance will no longer attempt to load trackedRace lists from remote servers. This is
-     * expected to be set to false for replicas, as only the master/archive is allowed to determine Anniversaries
+     * Sets the {@link #retrieveRemoteRaceResult flag} to control whether or not this {@link RemoteSailingServerSet}
+     * instance attempts to load tracked races lists from remote servers. It is expected to be set to <code>false</code>
+     * for replicas, what will also clear the {@link #cachedTrackedRacesForRemoteSailingServers tracked races cache} of
+     * this instance.
+     * 
+     * @param retrieveRemoteRaceResult
+     *            <code>true</code> to enable tracked races retrieval from remote servers, <code>false</code> to disable
      */
     public void setRetrieveRemoteRaceResult(boolean retrieveRemoteRaceResult) {
         this.retrieveRemoteRaceResult.set(retrieveRemoteRaceResult);
@@ -165,8 +171,12 @@ public class RemoteSailingServerSet {
     }
 
     /**
-     * This method will load a transitive list of all tracked races, based on the
-     * {@link com.sap.sailing.server.gateway.jaxrs.api.TrackedRaceListResource.raceList} result
+     * This method will load the list of all tracked races from the provided {@link RemoteSailingServerReference remote
+     * server} instance (transitively), by calling REST API's <code>TrackedRaceListResource</code>
+     * ("/v1/trackedRaces/getRaces").
+     * 
+     * @param ref
+     *            the {@link RemoteSailingServerReference} to load tracked races from
      */
     private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
         Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
@@ -210,8 +220,8 @@ public class RemoteSailingServerSet {
     }
 
     /**
-     * Notifies all registered remoteRaceResultRecieved Callbacks, that newer but not necessarly different results are
-     * available
+     * Calls all {@link #addRemoteRaceResultReceivedCallback(Runnable) registered} callbacks, to notify them about the
+     * availability of newer, but not necessarily different tracked races results.
      */
     private void notifyRemoteRaceResultReceivedCallbacks() {
         new HashSet<>(remoteRaceResultReceivedCallbacks).forEach(Runnable::run);
@@ -293,17 +303,6 @@ public class RemoteSailingServerSet {
         updateCache(ref, result, cachedStatisticsByYearForRemoteSailingServers::put);
     }
 
-    /**
-     * Allows an easy abstraction, to query a {@link RemoteSailingServerReference} for a response in a blocking way
-     * 
-     * @param ref
-     *            the {@link RemoteSailingServerReference} to query
-     * @param url
-     *            the URL to query
-     * @return a JsonArray containing the data delivered by the {@link RemoteSailingServerReference}
-     * @throws IOException
-     * @throws ParseException
-     */
     private JSONArray getJsonFromRemoteServerSynchronously(RemoteSailingServerReference ref,
             final URL url) throws IOException, ParseException {
         logger.fine("Updating data for remote server " + ref + " from URL " + url);
@@ -331,22 +330,6 @@ public class RemoteSailingServerSet {
         return getEndpointUrl(remoteServerBaseURL, "/events");
     }
     
-    /**
-     * Retrieves a DetailedRaceInfo for a given SimpleRaceInfo from a corresponding RemoteServer, blocking
-     * 
-     * @param matching
-     *            the SimpleRaceInfo to get the DetailedRaceInfo for
-     * @return
-     * @throws MalformedURLException
-     * @throws UnsupportedEncodingException
-     */
-    private URL getDetailRaceInfoURL(URL remoteServerBaseURL, SimpleRaceInfo matching) throws MalformedURLException, UnsupportedEncodingException {
-        String encodedRaceName = java.net.URLEncoder.encode(matching.getIdentifier().getRaceName(), "UTF-8").replace("+", "%20");
-        String encodedRegattaName = java.net.URLEncoder.encode(matching.getIdentifier().getRegattaName(), "UTF-8").replace("+", "%20");
-        String params = "raceName="+encodedRaceName+"&regattaName="+encodedRegattaName;
-        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/raceDetails?"+params);
-    }
-
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {
         return getEndpointUrl(remoteServerBaseURL, "/statistics/years");
     }
@@ -427,8 +410,8 @@ public class RemoteSailingServerSet {
     }
 
     /**
-     * Returns the currently known tracked races with at least one gps fix and a set start time. This list is determined
-     * by periodically asking the {@link RemoteSailingServerReference} set, and collected transitivly
+     * Provided the currently cached tracked races lists group by the {@link RemoteSailingServerReference remote server}
+     * instances where they were originally retrieved from. This cache is determined by periodical updates.
      */
     public Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> getCachedRaceList() {
         LockUtil.lockForRead(lock);
@@ -440,16 +423,16 @@ public class RemoteSailingServerSet {
     }
 
     /**
-     * Retrieves the DetailedRaceInfo for a given SimleRaceInfo from a corresponding
-     * {@link RemoteSailingServerReference}, blocking
+     * Retrieves {@link DetailedRaceInfo detailed information} for the provided {@link SimpleRaceInfo race} from the
+     * {@link SimpleRaceInfo#getRemoteUrl() corresponding remote server URL} (blocking operation).
      * 
      * @param matching
-     *            the SimpleRaceInfo more details are being requested for
-     * @return
+     *            the {@link SimpleRaceInfo} to get the detailed information for
+     * @return the retrieved {@link DetailedRaceInfo detailed information}
      */
     public DetailedRaceInfo getDetailedInfoBlocking(SimpleRaceInfo matching) {
         try {
-            URL remoteRequestUrl = getDetailRaceInfoURL(matching.getRemoteUrl(),matching);
+            URL remoteRequestUrl = getDetailRaceInfoURL(matching.getRemoteUrl(), matching);
             logger.fine("Loading DetailedRace data for remote server from URL " + remoteRequestUrl);
             URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(remoteRequestUrl);
             try (BufferedReader bufferedReader = new BufferedReader(
@@ -469,13 +452,32 @@ public class RemoteSailingServerSet {
         }
     }
 
+    private URL getDetailRaceInfoURL(URL remoteServerBaseURL, SimpleRaceInfo matching)
+            throws MalformedURLException, UnsupportedEncodingException {
+        String raceName = URLEncoder.encode(matching.getIdentifier().getRaceName(), "UTF-8").replace("+", "%20");
+        String regattaName = URLEncoder.encode(matching.getIdentifier().getRegattaName(), "UTF-8").replace("+", "%20");
+        String params = "raceName=" + raceName + "&regattaName=" + regattaName;
+        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/raceDetails?" + params);
+    }
+
     /**
-     * Registers a listener to be run, after a {@link RemoteSailingServerReference} returned the list of races
+     * Registers a {@link Runnable callback} which is {@link Runnable#run() called}, after a retrieval of tracked races
+     * from a {@link RemoteSailingServerReference remote server} instance.
+     * 
+     * @param callback
+     *            {@link Runnable} to register
      */
     public void addRemoteRaceResultReceivedCallback(Runnable callback) {
         this.remoteRaceResultReceivedCallbacks.add(callback);
     }
     
+    /**
+     * Unregisters the given {@link Runnable callback} if it was {@link #add(RemoteSailingServerReference) registered}
+     * before, otherwise this is operation has no effect.
+     * 
+     * @param callback
+     *            {@link Runnable} to unregister
+     */
     public void removeRemoteRaceResultReceivedCallback(Runnable callback){
         this.remoteRaceResultReceivedCallbacks.remove(callback);
     }
