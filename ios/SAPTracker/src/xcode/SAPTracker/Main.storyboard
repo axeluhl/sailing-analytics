@@ -33,7 +33,7 @@
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="lc2-1P-oDt" userLabel="Header Title Label">
-                                            <rect key="frame" x="20" y="0.0" width="313.5" height="52"/>
+                                            <rect key="frame" x="20" y="0.0" width="355" height="52"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -53,7 +53,7 @@
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <subviews>
                                         <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="Footer Text View" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="FXc-cY-lmX">
-                                            <rect key="frame" x="0.0" y="0.0" width="333.5" height="52"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="52"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                             <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                             <dataDetectorType key="dataDetectorTypes" link="YES"/>
@@ -85,7 +85,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Competitor Label" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sNr-Dr-sM5">
-                                                    <rect key="frame" x="156.5" y="8" width="157" height="64"/>
+                                                    <rect key="frame" x="156.5" y="8" width="198.5" height="64"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="tpS-bc-kNc"/>
                                                     </constraints>
@@ -357,6 +357,7 @@
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="82" id="Ph2-Ov-Qwu"/>
                                                 </constraints>
+                                                <fontDescription key="fontDescription" type="system" pointSize="21"/>
                                                 <state key="normal" title="Regatta Button">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
@@ -450,19 +451,19 @@
                         </userDefinedRuntimeAttributes>
                         <variation key="default">
                             <mask key="constraints">
-                                <exclude reference="TBL-6l-s4d"/>
                                 <exclude reference="KNs-Wy-CEl"/>
                                 <exclude reference="V7f-9F-hbr"/>
+                                <exclude reference="TBL-6l-s4d"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=compact">
                             <mask key="constraints">
                                 <exclude reference="bpe-u0-i0P"/>
-                                <include reference="TBL-6l-s4d"/>
                                 <exclude reference="6Me-PE-Eyn"/>
                                 <include reference="KNs-Wy-CEl"/>
                                 <include reference="V7f-9F-hbr"/>
                                 <exclude reference="a6k-rn-thK"/>
+                                <include reference="TBL-6l-s4d"/>
                             </mask>
                         </variation>
                     </view>
@@ -678,7 +679,7 @@
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="bx9-EY-ljk" userLabel="Header Title Label">
-                                            <rect key="frame" x="20" y="0.0" width="647" height="52"/>
+                                            <rect key="frame" x="20" y="0.0" width="355" height="52"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -698,7 +699,7 @@
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <subviews>
                                         <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="Footer Text View" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="AW1-r0-JWj">
-                                            <rect key="frame" x="0.0" y="0.0" width="667" height="52"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="52"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                             <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                             <dataDetectorType key="dataDetectorTypes" link="YES"/>
@@ -1285,7 +1286,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="5Xu-6g-tqP">
-                                                    <rect key="frame" x="218.5" y="16.5" width="95" height="20"/>
+                                                    <rect key="frame" x="260" y="16.5" width="95" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1317,7 +1318,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="tJY-RR-vpe">
-                                                    <rect key="frame" x="224" y="16.5" width="89.5" height="20"/>
+                                                    <rect key="frame" x="265.5" y="16.5" width="89.5" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1349,7 +1350,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Fixes Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="dz3-w7-CCh">
-                                                    <rect key="frame" x="190.5" y="16.5" width="123" height="20"/>
+                                                    <rect key="frame" x="232" y="16.5" width="123" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1381,13 +1382,13 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Accuracy Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DiM-MR-SGV">
-                                                    <rect key="frame" x="138.5" y="16.5" width="155" height="20"/>
+                                                    <rect key="frame" x="180" y="16.5" width="155" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BFc-m8-XKV" customClass="GPSAccuracyView" customModule="SAPTracker" customModuleProvider="target">
-                                                    <rect key="frame" x="301.5" y="18" width="12" height="16"/>
+                                                    <rect key="frame" x="343" y="18" width="12" height="16"/>
                                                     <color key="backgroundColor" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="16" id="RdX-dK-JOY"/>
@@ -1493,15 +1494,17 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="48" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="mUm-EE-6Is" userLabel="Time Label">
-                                <rect key="frame" x="8" y="249.5" width="359" height="86"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="72"/>
+                                <rect key="frame" x="0.0" y="249.5" width="375" height="86"/>
+                                <fontDescription key="fontDescription" type="system" weight="thin" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <constraints>
+                            <constraint firstAttribute="trailing" secondItem="mUm-EE-6Is" secondAttribute="trailing" id="3fg-wr-qEL"/>
                             <constraint firstAttribute="centerX" secondItem="mUm-EE-6Is" secondAttribute="centerX" id="8mv-fJ-KnI"/>
                             <constraint firstItem="IeZ-JM-OWw" firstAttribute="top" secondItem="mP6-V4-QPK" secondAttribute="top" constant="8" id="IZk-R3-x2F"/>
+                            <constraint firstItem="mUm-EE-6Is" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leading" id="YTb-dU-0On"/>
                             <constraint firstItem="mUm-EE-6Is" firstAttribute="centerY" secondItem="mP6-V4-QPK" secondAttribute="centerY" constant="-41" id="buG-GE-x2S"/>
                             <constraint firstItem="IeZ-JM-OWw" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leading" constant="20" id="eYA-zH-AXy"/>
                         </constraints>
@@ -1535,8 +1538,8 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l5u-i3-029">
-                                <rect key="frame" x="8" y="249.5" width="359" height="86"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="72"/>
+                                <rect key="frame" x="0.0" y="249.5" width="375" height="86"/>
+                                <fontDescription key="fontDescription" type="system" weight="thin" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -1546,6 +1549,8 @@
                             <constraint firstItem="l5u-i3-029" firstAttribute="centerY" secondItem="FlK-rh-D6W" secondAttribute="centerY" constant="-41" id="9wt-sd-dm1"/>
                             <constraint firstAttribute="centerX" secondItem="l5u-i3-029" secondAttribute="centerX" id="dQu-qX-qAM"/>
                             <constraint firstItem="V9h-qX-rao" firstAttribute="top" secondItem="FlK-rh-D6W" secondAttribute="top" constant="8" id="de7-YX-L8e"/>
+                            <constraint firstAttribute="trailing" secondItem="l5u-i3-029" secondAttribute="trailing" id="oDV-9i-jAI"/>
+                            <constraint firstItem="l5u-i3-029" firstAttribute="leading" secondItem="FlK-rh-D6W" secondAttribute="leading" id="vT9-a0-1Om"/>
                         </constraints>
                     </view>
                     <connections>
@@ -1576,13 +1581,15 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sGK-xV-9a0">
-                                <rect key="frame" x="8" y="249.5" width="359" height="86"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="72"/>
+                                <rect key="frame" x="0.0" y="249.5" width="375" height="86"/>
+                                <fontDescription key="fontDescription" type="system" weight="thin" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <constraints>
+                            <constraint firstAttribute="trailing" secondItem="sGK-xV-9a0" secondAttribute="trailing" id="0TP-IC-PQc"/>
+                            <constraint firstItem="sGK-xV-9a0" firstAttribute="leading" secondItem="Q83-hZ-kkt" secondAttribute="leading" id="6rK-mS-bAj"/>
                             <constraint firstAttribute="centerX" secondItem="sGK-xV-9a0" secondAttribute="centerX" id="NRR-Iw-Qr5"/>
                             <constraint firstItem="1Tn-6d-NlO" firstAttribute="top" secondItem="Q83-hZ-kkt" secondAttribute="top" constant="8" id="ZXm-Ic-9ZW"/>
                             <constraint firstItem="1Tn-6d-NlO" firstAttribute="leading" secondItem="Q83-hZ-kkt" secondAttribute="leading" constant="20" id="eb5-Ud-PAy"/>
