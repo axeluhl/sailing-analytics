@@ -11,7 +11,5 @@ import UIKit
 class TrainingCheckInTableViewCell: UITableViewCell {
     
     @IBOutlet weak var eventLabel: UILabel!
-    @IBOutlet weak var competitorLabel: UILabel!
-    @IBOutlet weak var leaderboardLabel: UILabel!
     
 }

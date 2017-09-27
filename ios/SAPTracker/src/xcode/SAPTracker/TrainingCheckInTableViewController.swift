@@ -119,8 +119,6 @@ extension TrainingCheckInTableViewController: CheckInTableViewControllerDelegate
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
         guard let trainingCheckInTableViewCell = cell as? TrainingCheckInTableViewCell else { return }
         trainingCheckInTableViewCell.eventLabel.text = checkIn.event.name
-        trainingCheckInTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
-        trainingCheckInTableViewCell.competitorLabel.text = checkIn.name
     }
     
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andCompetitorCheckIn competitorCheckIn: CompetitorCheckIn) {

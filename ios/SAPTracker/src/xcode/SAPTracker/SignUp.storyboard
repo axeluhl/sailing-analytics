@@ -25,7 +25,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BJy-Aq-u8Y" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="250"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="262"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="User Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rwV-FV-peQ">
                                                 <rect key="frame" x="16" y="8" width="343" height="20.5"/>
@@ -33,11 +33,11 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="8Yr-4B-QNb">
+                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="8Yr-4B-QNb">
                                                 <rect key="frame" x="16" y="36.5" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="qY9-7D-Xs4" id="A2D-0m-ZdZ"/>
                                                 </connections>
@@ -48,7 +48,7 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="2EU-Pr-nmo">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="2EU-Pr-nmo">
                                                 <rect key="frame" x="16" y="103" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
@@ -112,7 +112,7 @@
                                             <constraint firstItem="cAM-A4-6wu" firstAttribute="top" secondItem="8Yr-4B-QNb" secondAttribute="bottom" constant="8" id="mfR-ag-GVS"/>
                                             <constraint firstItem="2EU-Pr-nmo" firstAttribute="top" secondItem="cAM-A4-6wu" secondAttribute="bottom" constant="8" id="nsb-I0-TFZ"/>
                                             <constraint firstItem="2EU-Pr-nmo" firstAttribute="leading" secondItem="rwV-FV-peQ" secondAttribute="leading" id="p0I-M4-vrO"/>
-                                            <constraint firstAttribute="bottom" secondItem="IMI-8y-Fpj" secondAttribute="bottom" constant="8" id="uNh-Kc-FGn"/>
+                                            <constraint firstAttribute="bottom" secondItem="IMI-8y-Fpj" secondAttribute="bottom" constant="20" id="uNh-Kc-FGn"/>
                                             <constraint firstItem="cAM-A4-6wu" firstAttribute="trailing" secondItem="rwV-FV-peQ" secondAttribute="trailing" id="uhS-2c-e3E"/>
                                         </constraints>
                                     </view>
@@ -188,13 +188,13 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lOZ-p2-hq2" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="532"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="544"/>
                                         <subviews>
-                                            <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="uyU-Dr-ejn">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="uyU-Dr-ejn">
                                                 <rect key="frame" x="16" y="160" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="4nf-v9-ceh"/>
                                                 </connections>
@@ -218,11 +218,11 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="kfC-jn-pil">
+                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="kfC-jn-pil">
                                                 <rect key="frame" x="16" y="93.5" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="next"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="GsQ-rL-e2I"/>
                                                 </connections>
@@ -233,11 +233,11 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="OSH-Yp-4lI">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="OSH-Yp-4lI">
                                                 <rect key="frame" x="16" y="226.5" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="0Np-hm-IiX"/>
                                                 </connections>
@@ -248,11 +248,11 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ApJ-P7-ynQ">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="ApJ-P7-ynQ">
                                                 <rect key="frame" x="16" y="293" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="Vn3-PT-tWR"/>
                                                 </connections>
@@ -263,11 +263,11 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Jar-TR-EzN">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="Jar-TR-EzN">
                                                 <rect key="frame" x="16" y="359.5" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue" secureTextEntry="YES"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next" secureTextEntry="YES"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="YME-gJ-Cea"/>
                                                 </connections>
@@ -278,7 +278,7 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="6jE-ca-Bkw">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="6jE-ca-Bkw">
                                                 <rect key="frame" x="16" y="426" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
@@ -350,7 +350,7 @@
                                             <constraint firstItem="e0x-oF-wfr" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="te4-rV-PhN"/>
                                             <constraint firstItem="uyU-Dr-ejn" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="tu6-I8-2YC"/>
                                             <constraint firstItem="OSH-Yp-4lI" firstAttribute="top" secondItem="gwJ-Rz-JWp" secondAttribute="bottom" constant="8" id="uCC-zW-Lf6"/>
-                                            <constraint firstAttribute="bottom" secondItem="54k-5G-O5L" secondAttribute="bottom" constant="8" id="xWw-ze-8yP"/>
+                                            <constraint firstAttribute="bottom" secondItem="54k-5G-O5L" secondAttribute="bottom" constant="20" id="xWw-ze-8yP"/>
                                             <constraint firstItem="6jE-ca-Bkw" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="xmY-w2-3Gv"/>
                                             <constraint firstItem="igz-ad-G8g" firstAttribute="top" secondItem="Jar-TR-EzN" secondAttribute="bottom" constant="8" id="zD2-bj-F3e"/>
                                         </constraints>
@@ -428,9 +428,9 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hFw-4k-tbQ" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="237.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="249.5"/>
                                         <subviews>
-                                            <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="dkV-73-nyH">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="dkV-73-nyH">
                                                 <rect key="frame" x="16" y="131.5" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
@@ -451,7 +451,7 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="VAJ-jX-LB3">
+                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="VAJ-jX-LB3">
                                                 <rect key="frame" x="16" y="65" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
@@ -494,7 +494,7 @@
                                             <constraint firstItem="dkV-73-nyH" firstAttribute="leading" secondItem="i3t-ER-sOF" secondAttribute="leading" id="VhD-y7-sfj"/>
                                             <constraint firstItem="gaB-EC-uXP" firstAttribute="top" secondItem="VAJ-jX-LB3" secondAttribute="bottom" constant="8" id="a3s-f4-19u"/>
                                             <constraint firstItem="jT0-5l-zqu" firstAttribute="top" secondItem="i3t-ER-sOF" secondAttribute="bottom" constant="8" id="dfc-UZ-Iqb"/>
-                                            <constraint firstAttribute="bottom" secondItem="cy3-me-Gce" secondAttribute="bottom" constant="8" id="edu-5K-JFa"/>
+                                            <constraint firstAttribute="bottom" secondItem="cy3-me-Gce" secondAttribute="bottom" constant="20" id="edu-5K-JFa"/>
                                             <constraint firstItem="VAJ-jX-LB3" firstAttribute="top" secondItem="jT0-5l-zqu" secondAttribute="bottom" constant="8" id="hT1-yE-hPW"/>
                                             <constraint firstItem="VAJ-jX-LB3" firstAttribute="leading" secondItem="i3t-ER-sOF" secondAttribute="leading" id="k0u-TJ-AbG"/>
                                             <constraint firstItem="gaB-EC-uXP" firstAttribute="leading" secondItem="i3t-ER-sOF" secondAttribute="leading" id="olR-HF-5px"/>
@@ -549,7 +549,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="40.799999999999997" y="-884.70764617691157"/>
+            <point key="canvasLocation" x="41" y="-925"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="lbf-Ic-ArT">
