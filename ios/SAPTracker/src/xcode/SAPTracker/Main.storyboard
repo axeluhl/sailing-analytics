@@ -747,10 +747,10 @@
                                 </connections>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Pwd-JR-SVL">
-                                <rect key="frame" x="291" y="519" width="64" height="64"/>
+                                <rect key="frame" x="299" y="527" width="56" height="56"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="64" id="4dV-pi-Iv0"/>
-                                    <constraint firstAttribute="height" constant="64" id="ldj-zc-a5M"/>
+                                    <constraint firstAttribute="width" constant="56" id="4dV-pi-Iv0"/>
+                                    <constraint firstAttribute="height" constant="56" id="ldj-zc-a5M"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="21"/>
                                 <state key="normal" image="fab">
