@@ -75,13 +75,13 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
     }
     
     fileprivate func setupLocalization() {
-        announcementLabel.text = Translation.CompetitorView.AnnouncementLabel.Text.String
-        countdownDaysTitleLabel.text = Translation.CompetitorView.CountdownDaysTitleLabel.Text.String
-        countdownHoursTitleLabel.text = Translation.CompetitorView.CountdownHoursTitleLabel.Text.String
-        countdownMinutesTitleLabel.text = Translation.CompetitorView.CountdownMinutesTitleLabel.Text.String
-        eventButton.setTitle(Translation.CompetitorView.EventButton.Title.String, for: .normal)
+        announcementLabel.text = Translation.RegattaView.AnnouncementLabel.Text.String
+        countdownDaysTitleLabel.text = Translation.RegattaView.CountdownDaysTitleLabel.Text.String
+        countdownHoursTitleLabel.text = Translation.RegattaView.CountdownHoursTitleLabel.Text.String
+        countdownMinutesTitleLabel.text = Translation.RegattaView.CountdownMinutesTitleLabel.Text.String
+        eventButton.setTitle(Translation.RegattaView.EventButton.Title.String, for: .normal)
         leaderboardButton.setTitle(Translation.LeaderboardView.Title.String, for: .normal)
-        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
+        startTrackingButton.setTitle(Translation.RegattaView.StartTrackingButton.Title.String, for: .normal)
     }
     
     fileprivate func setupNavigationBar() {
@@ -94,7 +94,7 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
     @objc fileprivate func tickTimer() {
         guard competitorCheckIn != nil else { return }
         if competitorCheckIn.event.startDate - Date().timeIntervalSince1970 > 0 {
-            regattaStartLabel.text = Translation.CompetitorView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
+            regattaStartLabel.text = Translation.RegattaView.StartLabel.Text.BeforeRegattaDidStart.String
             let duration = competitorCheckIn.event.startDate - Date().timeIntervalSince1970
             let days = Int(duration / (60 * 60 * 24))
             let hours = Int(duration / (60 * 60)) - (days * 24)
@@ -105,7 +105,7 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
             countdownView.isHidden = false
             countdownViewHeight.constant = 60
         } else {
-            regattaStartLabel.text = Translation.CompetitorView.RegattaStartLabel.Text.AfterRegattaDidStart.String
+            regattaStartLabel.text = Translation.RegattaView.StartLabel.Text.AfterRegattaDidStart.String
             countdownView.isHidden = true
             countdownViewHeight.constant = 0
         }
@@ -119,9 +119,9 @@ extension RegattaCompetitorViewController: SessionViewControllerDelegate {
 
     var checkIn: CheckIn { get { return competitorCheckIn } }
 
-    var checkOutActionTitle: String { get { return Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String } }
+    var checkOutActionTitle: String { get { return Translation.RegattaView.OptionSheet.CheckOutAction.Title.String } }
 
-    var checkOutAlertMessage: String { get { return Translation.CompetitorView.CheckOutAlert.Message.String } }
+    var checkOutAlertMessage: String { get { return Translation.RegattaView.CheckOutAlert.Message.String } }
 
     var coreDataManager: CoreDataManager { get { return competitorCoreDataManager } }
     

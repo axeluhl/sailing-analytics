@@ -17,15 +17,7 @@ class CompetitorSessionViewController: SessionViewController {
     weak var competitorCheckIn: CompetitorCheckIn!
     weak var competitorCoreDataManager: CoreDataManager!
     weak var competitorViewController: CompetitorViewController?
-    
-    // MARK: - OptionSheet
 
-    fileprivate func makeActionReplaceImage() -> UIAlertAction {
-        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
-            self?.competitorViewController?.showSelectImageAlert()
-        }
-    }
-    
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

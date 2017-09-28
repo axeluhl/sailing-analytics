@@ -301,26 +301,26 @@ class Translation: NSObject {
         }
     }
     
-    // MARK: - CompetitorView
+    // MARK: - RegattaView
     
-    struct CompetitorView { private static let Key = "\(CompetitorView.self)"
-        struct CountdownDaysTitleLabel { private static let Key = "\(CompetitorView.Key).\(CountdownDaysTitleLabel.self)"
+    struct RegattaView { private static let Key = "\(RegattaView.self)"
+        struct CountdownDaysTitleLabel { private static let Key = "\(RegattaView.Key).\(CountdownDaysTitleLabel.self)"
             struct Text { private static let Key = "\(CountdownDaysTitleLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct CountdownHoursTitleLabel { private static let Key = "\(CompetitorView.Key).\(CountdownHoursTitleLabel.self)"
+        struct CountdownHoursTitleLabel { private static let Key = "\(RegattaView.Key).\(CountdownHoursTitleLabel.self)"
             struct Text { private static let Key = "\(CountdownHoursTitleLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct CountdownMinutesTitleLabel { private static let Key = "\(CompetitorView.Key).\(CountdownMinutesTitleLabel.self)"
+        struct CountdownMinutesTitleLabel { private static let Key = "\(RegattaView.Key).\(CountdownMinutesTitleLabel.self)"
             struct Text { private static let Key = "\(CountdownMinutesTitleLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct RegattaStartLabel { private static let Key = "\(CompetitorView.Key).\(RegattaStartLabel.self)"
-            struct Text { private static let Key = "\(RegattaStartLabel.Key).\(Text.self)"
+        struct StartLabel { private static let Key = "\(RegattaView.Key).\(StartLabel.self)"
+            struct Text { private static let Key = "\(StartLabel.Key).\(Text.self)"
                 struct BeforeRegattaDidStart { private static let Key = "\(Text.Key).\(BeforeRegattaDidStart.self)"
                     static let String = NSLocalizedString(Key, comment: "")
                 }
@@ -329,16 +329,38 @@ class Translation: NSObject {
                 }
             }
         }
-        struct AnnouncementLabel { private static let Key = "\(CompetitorView.Key).\(AnnouncementLabel.self)"
+        struct AnnouncementLabel { private static let Key = "\(RegattaView.Key).\(AnnouncementLabel.self)"
             struct Text { private static let Key = "\(AnnouncementLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct EventButton { private static let Key = "\(CompetitorView.Key).\(EventButton.self)"
+        struct EventButton { private static let Key = "\(RegattaView.Key).\(EventButton.self)"
             struct Title { private static let Key = "\(EventButton.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
+        struct StartTrackingButton { private static let Key = "\(RegattaView.Key).\(StartTrackingButton.self)"
+            struct Title { private static let Key = "\(StartTrackingButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct OptionSheet { private static let Key = "\(RegattaView.Key).\(OptionSheet.self)"
+            struct CheckOutAction { private static let Key = "\(OptionSheet.Key).\(CheckOutAction.self)"
+                struct Title { private static let Key = "\(CheckOutAction.Key).\(Title.self)"
+                    static let String = NSLocalizedString(Key, comment: "")
+                }
+            }
+        }
+        struct CheckOutAlert { private static let Key = "\(RegattaView.Key).\(CheckOutAlert.self)"
+            struct Message { private static let Key = "\(CheckOutAlert.Key).\(Message.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+    }
+
+    // CompetitorView
+
+    struct CompetitorView { private static let Key = "\(CompetitorView.self)"
         struct TeamImageAddButton { private static let Key = "\(CompetitorView.Key).\(TeamImageAddButton.self)"
             struct Title { private static let Key = "\(TeamImageAddButton.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
@@ -346,33 +368,6 @@ class Translation: NSObject {
         }
         struct TeamImageUploadRetryButton { private static let Key = "\(CompetitorView.Key).\(TeamImageUploadRetryButton.self)"
             struct Title { private static let Key = "\(TeamImageUploadRetryButton.Key).\(Title.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
-        }
-        struct StartTrackingButton { private static let Key = "\(CompetitorView.Key).\(StartTrackingButton.self)"
-            struct Title { private static let Key = "\(StartTrackingButton.Key).\(Title.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
-        }
-        struct OptionSheet { private static let Key = "\(CompetitorView.Key).\(OptionSheet.self)"
-            struct CheckOutAction { private static let Key = "\(OptionSheet.Key).\(CheckOutAction.self)"
-                struct Title { private static let Key = "\(CheckOutAction.Key).\(Title.self)"
-                    static let String = NSLocalizedString(Key, comment: "")
-                }
-            }
-            struct ReplaceImageAction { private static let Key = "\(OptionSheet.Key).\(ReplaceImageAction.self)"
-                struct Title { private static let Key = "\(ReplaceImageAction.Key).\(Title.self)"
-                    static let String = NSLocalizedString(Key, comment: "")
-                }
-            }
-            struct UpdateAction { private static let Key = "\(OptionSheet.Key).\(UpdateAction.self)"
-                struct Title { private static let Key = "\(UpdateAction.Key).\(Title.self)"
-                    static let String = NSLocalizedString(Key, comment: "")
-                }
-            }
-        }
-        struct CheckOutAlert { private static let Key = "\(CompetitorView.Key).\(CheckOutAlert.self)"
-            struct Message { private static let Key = "\(CheckOutAlert.Key).\(Message.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
@@ -546,7 +541,7 @@ class Translation: NSObject {
         }
         struct StartTrackingButton { private static let Key = "\(TrainingView.Key).\(StartTrackingButton.self)"
             struct Title { private static let Key = "\(StartTrackingButton.Key).\(Title.self)"
-                static let String = CompetitorView.StartTrackingButton.Title.String
+                static let String = RegattaView.StartTrackingButton.Title.String
             }
         }
         struct FinishTrainingButton { private static let Key = "\(TrainingView.Key).\(FinishTrainingButton.self)"

@@ -119,13 +119,7 @@ class SessionViewController: UIViewController {
             self?.presentSettingsViewController()
         }
     }
-    
-    func makeActionUpdate() -> UIAlertAction {
-        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
-            self?.updatePessimistic()
-        }
-    }
-    
+
     @IBAction func startTrackingButtonTapped(_ sender: Any) {
         // TODO: Add or add not WiFi Alert?
         //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {

@@ -35,7 +35,7 @@ class RegattaMarkViewController: MarkSessionViewController {
     }
     
     fileprivate func setupLocalization() {
-        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
+        startTrackingButton.setTitle(Translation.RegattaView.StartTrackingButton.Title.String, for: .normal)
     }
     
     fileprivate func setupNavigationBar() {
@@ -51,9 +51,9 @@ extension RegattaMarkViewController: SessionViewControllerDelegate {
     
     var checkIn: CheckIn { get { return markCheckIn } }
 
-    var checkOutActionTitle: String { get { return Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String } }
+    var checkOutActionTitle: String { get { return Translation.RegattaView.OptionSheet.CheckOutAction.Title.String } }
 
-    var checkOutAlertMessage: String { get { return Translation.CompetitorView.CheckOutAlert.Message.String } }
+    var checkOutAlertMessage: String { get { return Translation.RegattaView.CheckOutAlert.Message.String } }
 
     var coreDataManager: CoreDataManager { get { return markCoreDataManager } }
     
