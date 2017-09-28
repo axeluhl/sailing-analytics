@@ -13,10 +13,10 @@ public class AppConstants {
     public final static String FLAG_KEY = PACKAGE_NAME + ".raceFlag";
     public final static String EXTRA_FORCE_REFRESH = PACKAGE_NAME + ".forceRefresh";
 
-    public final static String AUTHOR_TYPE_OFFICER_START = "Race Officer on Start Vessel";
-    public final static String AUTHOR_TYPE_OFFICER_FINISH = "Race Officer on Finish Vessel";
+    public final static String AUTHOR_TYPE_OFFICER_VESSEL = "Race Officer on Vessel";
     public final static String AUTHOR_TYPE_SHORE_CONTROL = "Shore Control";
     public final static String AUTHOR_TYPE_VIEWER = "Viewer";
+    public final static String AUTHOR_TYPE_SUPERUSER = "Super User";
 
     public final static String DARK_THEME = "dark";
     public final static String LIGHT_THEME = "light";
