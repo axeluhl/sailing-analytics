@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -18,6 +19,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.RolePermissionModel;
@@ -160,8 +162,13 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         String user = (String) principals.getPrimaryPrincipal();
         
         try {
+            ArrayList<WildcardPermission> directPermissions = new ArrayList<>();
+            for (String directPermission : getUserStore().getPermissionsFromUser(user)) {
+                directPermissions.add(new WildcardPermission(directPermission));
+            }
+            
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
-                    user, getUserStore().getPermissionsFromUser(user), 
+                    user, directPermissions, 
                     getUserStore().getRolesFromUser(user), this, 
                     getAccessControlListStore().getOwnership(parts[2]), 
                     getAccessControlListStore().getAccessControlListByName(parts[2]));
@@ -169,46 +176,6 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
             return false;
         }
-        
-        /*if (parts.length < 2) {
-            throw new WrongPermissionFormatException(perm);
-        } else if (parts.length > 2) {
-            Owner ownership = getAccessControlListStore().getOwnership(parts[2]);
-            if (user.equals(ownership.getOwner())) { // TODO check for tenant ownership
-                return true;
-            }
-            AccessControlList acl = getAccessControlListStore().getAccessControlListByName(parts[2]);
-            if (acl.hasPermission(user, "!" + parts[1])) {
-                return false;
-            } else if (acl.hasPermission(user, parts[1])) {
-                return true;
-            }
-        }
-        try {
-            for (String directPermission : getUserStore().getPermissionsFromUser(user)) {
-                Permission directPerm = new WildcardPermission(directPermission, true);
-                if (directPerm.implies(perm)) {
-                    return true;
-                }
-            }
-        } catch (UserManagementException e) {
-            logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
-            return false;
-        }
-        try {
-            for (String role : getUserStore().getRolesFromUser(user)) {
-                for (String rolePermission : permissionsForRoleProvider.getPermissions(role)) {
-                    Permission rolePerm = getPermissionResolver().resolvePermission(rolePermission);
-                    if (rolePerm.implies(perm)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (UserManagementException e) {
-            logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
-            return false;
-        }
-        return false;*/
     }
 
     @Override
@@ -302,5 +269,25 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     @Override
     public Iterable<String> getPermissions(String role) {
         return permissionsForRoleProvider.getPermissions(role, null);
+    }
+    
+    @Override
+    public boolean implies(String role, WildcardPermission permission) { // TODO as default implementation in interface
+        return implies(role, permission, null);
+    }
+    
+    @Override
+    public boolean implies(String role, WildcardPermission permission, Owner ownership) { // TODO as default implementation in interface
+        String[] parts = role.split(":");
+        // if there is no parameter or the first parameter (tenant) equals the tenant owner
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
+            for (String rolePermissionString : getPermissions(role)) {
+                WildcardPermission rolePermission = new WildcardPermission(rolePermissionString, true);
+                if (rolePermission.implies(permission)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

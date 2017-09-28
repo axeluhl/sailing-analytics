@@ -21,7 +21,7 @@ public class UserDTO implements IsSerializable {
     private List<AccountDTO> accounts;
     private Set<String> roles;
     private RolePermissionModelDTO rolePermissionModelDTO;
-    private Set<String> permissions;
+    private Set<WildcardPermission> permissions;
     private boolean emailValidated;
 
     UserDTO() {} // for serialization only
@@ -40,7 +40,9 @@ public class UserDTO implements IsSerializable {
         Util.addAll(roles, this.roles);
         this.rolePermissionModelDTO = rolePermissionModelDTO;
         this.permissions = new HashSet<>();
-        Util.addAll(stringPermissions, this.permissions);
+        for (String permission : stringPermissions) {
+            this.permissions.add(new WildcardPermission(permission, true));
+        }
     }
 
     public String getName() {
@@ -73,11 +75,7 @@ public class UserDTO implements IsSerializable {
      * user has. Use {@link #getAllPermissions(PermissionsForRoleProvider)} for that.
      */
     public Iterable<WildcardPermission> getPermissions() {
-        Set<WildcardPermission> wildcardPermissions = new HashSet<>();
-        for (String permission : this.permissions) {
-            wildcardPermissions.add(new WildcardPermission(permission));
-        }
-        return wildcardPermissions;
+        return this.permissions;
     }
     
     /**

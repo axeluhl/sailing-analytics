@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -239,9 +240,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public UserGroupDTO removeUserFromUserGroup(String user, String userGroup) {
-        String currUser = (String) SecurityUtils.getSubject().getPrincipal();
-        UserGroup group = getSecurityService().getUserGroupByName(userGroup);
-        if (getSecurityService().getAccessControlListByName(group.getName()).hasPermission(currUser, "removeUser")) {
+        if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(UserGroup.class.getName() + ":remove-user:" + user, true))) {
             return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup(user, userGroup));
         } else {
             return null; // TODO: implement this with exception

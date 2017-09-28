@@ -6,6 +6,8 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
 public class AccessControlListDTO implements AccessControlList, IsSerializable {
     private static final long serialVersionUID = -6425803762946910564L;
@@ -32,13 +34,17 @@ public class AccessControlListDTO implements AccessControlList, IsSerializable {
     }
     
     @Override
-    public boolean hasPermission(String user, String permission) {
+    public PermissionChecker.PermissionState hasPermission(String user, String action) {
         for (Map.Entry<UserGroupDTO, Set<String>> entry : permissionMap.entrySet()) {
-            if (entry.getKey().contains(user) && entry.getValue().contains(permission)) {
-                return true;
+            if (entry.getKey().contains(user)) {
+                if (entry.getValue().contains("!" + action)) {
+                    return PermissionState.REVOKED;
+                } else if (entry.getValue().contains(action)) {
+                    return PermissionState.GRANTED;
+                }
             }
         }
-        return false;
+        return PermissionState.NONE;
     }
     
     @Override

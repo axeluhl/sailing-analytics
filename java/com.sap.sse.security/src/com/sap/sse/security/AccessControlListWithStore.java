@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
 public class AccessControlListWithStore implements AccessControlList {
     private static final long serialVersionUID = -5709064967680495227L;
@@ -30,14 +32,18 @@ public class AccessControlListWithStore implements AccessControlList {
     }
     
     @Override
-    public boolean hasPermission(String username, String permission) {
+    public PermissionChecker.PermissionState hasPermission(String username, String action) {
         for (Map.Entry<String, Set<String>> entry : permissionMap.entrySet()) {
             UserGroup group = userStore.getUserGroupByName(entry.getKey());
-            if (group.contains(username) && entry.getValue().contains(permission)) {
-                return true;
+            if (group.contains(username)) {
+                if (entry.getValue().contains("!" + action)) {
+                    return PermissionState.REVOKED;
+                } else if (entry.getValue().contains(action)) {
+                    return PermissionState.GRANTED;
+                }
             }
         }
-        return false;
+        return PermissionState.NONE;
     }
 
     @Override

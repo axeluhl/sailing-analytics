@@ -6,7 +6,7 @@ import java.util.Set;
 import com.sap.sse.common.NamedWithID;
 
 public interface AccessControlList extends NamedWithID {    
-    boolean hasPermission(String user, String permission);
+    PermissionChecker.PermissionState hasPermission(String user, String action);
     
     Map<String, Set<String>> getPermissionMap();
 }
