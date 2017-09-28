@@ -17,8 +17,10 @@ class StartViewController: UIViewController {
     
     var userName: String?
     
+    @IBOutlet weak var regattaImageView: UIImageView!
     @IBOutlet weak var regattaButtonView: UIView!
     @IBOutlet weak var regattaButton: UIButton!
+    @IBOutlet weak var trainingImageView: UIImageView!
     @IBOutlet weak var trainingButtonView: UIView!
     @IBOutlet weak var trainingButton: UIButton!
     
@@ -45,10 +47,14 @@ class StartViewController: UIViewController {
         regattaButton.setTitleColor(Colors.BlueButtonTitleColor, for: .normal)
         regattaButton.setBackgroundImage(Images.BlueButton, for: .normal)
         regattaButton.setBackgroundImage(Images.BlueButtonHighlighted, for: .highlighted)
+        regattaImageView.addGestureRecognizer(UITapGestureRecognizer.init(target: self, action: #selector(regattaButtonTapped(_:))))
+        regattaImageView.isUserInteractionEnabled = true
         makeRound(view: trainingButtonView, cornerRadius: 4)
         trainingButton.setTitleColor(Colors.BlueButtonTitleColor, for: .normal)
         trainingButton.setBackgroundImage(Images.BlueButton, for: .normal)
         trainingButton.setBackgroundImage(Images.BlueButtonHighlighted, for: .highlighted)
+        trainingImageView.addGestureRecognizer(UITapGestureRecognizer.init(target: self, action: #selector(trainingButtonTapped(_:))))
+        trainingImageView.isUserInteractionEnabled = true
     }
 
     fileprivate func setupLocalization() {
@@ -150,7 +156,11 @@ class StartViewController: UIViewController {
     }
     
     // MARK: - Actions
-    
+
+    @IBAction func regattaButtonTapped(_ sender: Any) {
+        performSegue(withIdentifier: Segue.Regatta, sender: self)
+    }
+
     @IBAction func trainingButtonTapped(_ sender: Any) {
         if (userName == nil) {
             signUpController.loginWithViewController(self)

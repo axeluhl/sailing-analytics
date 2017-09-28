@@ -471,8 +471,10 @@
                     <connections>
                         <outlet property="regattaButton" destination="Pmf-c9-OVe" id="pqg-ry-OPE"/>
                         <outlet property="regattaButtonView" destination="gFW-ZI-Qgx" id="bCw-j5-YF4"/>
+                        <outlet property="regattaImageView" destination="f7b-Fy-qoU" id="Djo-XM-Dk7"/>
                         <outlet property="trainingButton" destination="TBi-yV-KGH" id="dUU-B8-sSj"/>
                         <outlet property="trainingButtonView" destination="Ift-x8-TYe" id="fng-Dg-vXq"/>
+                        <outlet property="trainingImageView" destination="QQn-nO-8d9" id="ToN-eh-bGD"/>
                         <segue destination="1ba-kX-Lnq" kind="show" identifier="Training" id="eP3-jF-cGa"/>
                     </connections>
                 </viewController>
