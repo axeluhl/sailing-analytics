@@ -59,8 +59,14 @@ public class DateUtil {
     }
     
     public static int daysFromNow(Date date) {
-        long day = date.getTime() / DAY_IN_MILLIS;
-        long today= new Date().getTime() / DAY_IN_MILLIS;
-        return (int) (day - today);
+        return (int) (getDayCount(date) - getDayCount(new Date()));
+    }
+
+    public static int daysUntilNow(Date date) {
+        return (int) (getDayCount(new Date()) - getDayCount(date));
+    }
+
+    private static long getDayCount(Date date) {
+        return date.getTime() / DAY_IN_MILLIS;
     }
 }

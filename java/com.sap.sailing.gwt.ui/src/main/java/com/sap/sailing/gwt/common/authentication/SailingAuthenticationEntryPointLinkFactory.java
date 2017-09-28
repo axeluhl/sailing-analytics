@@ -29,6 +29,11 @@ public final class SailingAuthenticationEntryPointLinkFactory extends AbstractEn
         return createFullQualifiedLink("/gwt/Home.html", "/user/passwordreset/:");
     }
     
+    @Override
+    public String createMoreInfoAboutLoginLink() {
+        return createFullQualifiedLink("/gwt/Home.html", "/about/account/:");
+    }
+    
     private String createFullQualifiedLink(String path, String hash) {
         return UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParametersAndPathAndHash(path, hash).buildString();
     }

@@ -37,7 +37,8 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
                     @Override
                     public void onSuccess(RVWrapper result) {
                         PreRaceRacemapPlace place = new PreRaceRacemapPlace();
-                        place.setRaceMap(result.raceboardPerspective, result.csel);
+                        place.setRaceMap(result.raceboardPerspective, result.csel, result.raceboardTimer,
+                                result.creationTimeProvider);
                         // add later with settings here
                         place.setURL(cf.getAutoPlayCtx().getEvent().getOfficialWebsiteURL());
                         setPlaceToGo(place);
@@ -45,7 +46,6 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
                                 new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getPreLiveRace().getRegattaName(),
                                         cf.getAutoPlayCtx().getPreLiveRace().getRaceName()));
                         firePlaceChangeAndStartTimer();
-
                     }
                 });
     }

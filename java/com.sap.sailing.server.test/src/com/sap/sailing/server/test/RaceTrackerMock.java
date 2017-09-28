@@ -45,7 +45,7 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    protected void onStop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
+    protected void onStop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         isTracking = false;
     }
 

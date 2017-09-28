@@ -385,7 +385,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     public Double getTotalPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) {
         return getScoreCorrection().getCorrectedScore(
                 ()->getTrackedRank(competitor, raceColumn, timePoint), competitor,
-                raceColumn, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme()).getCorrectedScore();
+                raceColumn, this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme()).getCorrectedScore();
     }
 
     @Override
@@ -627,7 +627,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             Set<RaceColumn> discardedRaceColumns) throws NoWindException {
         Callable<Integer> trackedRankProvider = ()->getTrackedRank(competitor, race, timePoint);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
-                timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
+                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
         return new EntryImpl(trackedRankProvider, correctedScore, ()->correctedResults.getUncorrectedScore(),
@@ -691,7 +691,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             for (final Competitor competitor : getCompetitors()) {
                 Callable<Integer> trackedRankProvider = ()->getTrackedRank(competitor, raceColumn, timePoint);
                 final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, raceColumn,
-                        timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
+                        this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);

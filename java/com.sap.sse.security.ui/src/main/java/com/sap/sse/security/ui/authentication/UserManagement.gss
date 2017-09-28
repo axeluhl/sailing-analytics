@@ -1,12 +1,30 @@
 .flyover {
     font-size: 1rem;
 }
+
+.flyover_position_grid {
+    visibility: visible;
+    right: 0.25em;
+    top: 55px;
+}
+
+@media ( max-width: 40em) {
+    .flyover_small_hidden {
+        visibility: hidden;
+    }
+}
+
+@media ( min-width: 76em) {
+    .flyover_position_grid {
+        visibility: visible;
+        right: calc(( 100vw - 80.5rem)/2);
+    }
+}
 .flyover_content_wrapper {
     padding: 0 1rem;
 }
 .flyover_content {
     width: 24.8em;
-    float: right;
     padding: 1.333333333333333em;
     background-color: #fff;
     border-radius: .2em;

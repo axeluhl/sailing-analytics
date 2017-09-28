@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,7 +73,14 @@ public class RemoteSailingServerSet {
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> cachedStatisticsByYearForRemoteSailingServers;
     private final StatisticsJsonDeserializer statisticsJsonDeserializer;
     
+    /**
+     * Tracked races content is not replicated. In a replica, {@link #cachedTrackedRacesForRemoteSailingServers} remains empty.
+     */
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
+    
+    private final Set<Runnable> remoteRaceResultReceivedCallbacks = ConcurrentHashMap.newKeySet();
+    
+    private final AtomicBoolean retrieveRemoteRaceResult = new AtomicBoolean(true);
 
     /**
      * @param scheduler
@@ -128,61 +136,66 @@ public class RemoteSailingServerSet {
         new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
         new Thread(() -> updateRemoteServerStatisticsCacheSynchronously(ref),
                 "Statistics by year Cache Updater for remote server " + ref).start();
-        new Thread(() -> updateRemoteServerTrackedRacesCacheSynchronously(ref), "Anniversary Cache Updater for remote server " + ref).start();
+        if (retrieveRemoteRaceResult.get()) {
+            new Thread(() -> updateRemoteServerTrackedRacesCacheSynchronously(ref),
+                    "Anniversary Cache Updater for remote server " + ref).start();
+        }
+    }
+
+    public void setRetrieveRemoteRaceResult(boolean retrieveRemoteRaceResult) {
+        this.retrieveRemoteRaceResult.set(retrieveRemoteRaceResult);
+        synchronized (cachedEventsForRemoteSailingServers) {
+            if (!this.retrieveRemoteRaceResult.get()) {
+                cachedTrackedRacesForRemoteSailingServers.clear();
+            }
+        }
     }
 
     private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
-        BufferedReader bufferedReader = null;
         Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
         try {
-            try {
-                final URL raceListURL = getRaceListURL(ref.getURL());
-                logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
-                URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(raceListURL);
-                bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
-                SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
-                final Set<SimpleRaceInfo> races = new HashSet<>();
-                JSONParser parser = new JSONParser();
-                JSONArray racesGroupedByRemoteAsObject = (JSONArray) parser.parse(bufferedReader);
-                for (Object remoteWithRaces : racesGroupedByRemoteAsObject) {
-                    JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
-                    String remoteUrlAsString = (String) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL);
-                    URL remoteUrl;
-                    if (remoteUrlAsString != null && !remoteUrlAsString.isEmpty()) {
-                        remoteUrl = new URL(remoteUrlAsString);
-                    } else {
-                        // the race was local to the remote server, indicated by a null URL; use the remote reference's URL for those
-                        remoteUrl = ref.getURL();
-                    }
-                    JSONArray raceListForOneRemote = (JSONArray) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_RACES);
-                    for (Object remoteRace : raceListForOneRemote) {
-                        JSONObject remoteRaceAsJson = (JSONObject) remoteRace;
-                        SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson, remoteUrl);
-                        races.add(event);
-                    }
+            final URL raceListURL = getRaceListURL(ref.getURL());
+            logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
+            final SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
+            final Set<SimpleRaceInfo> races = new HashSet<>();
+            for (Object remoteWithRaces : getJsonFromRemoteServerSynchronously(ref, raceListURL)) {
+                JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
+                String remoteUrlAsString = (String) remoteWithRacesAsJson
+                        .get(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL);
+                URL remoteUrl;
+                if (remoteUrlAsString != null && !remoteUrlAsString.isEmpty()) {
+                    remoteUrl = new URL(remoteUrlAsString);
+                } else {
+                    // if the race was local to the remote server, indicated by a null URL; use the remote server's URL
+                    remoteUrl = ref.getURL();
                 }
-                result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
-            } finally {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
+                JSONArray raceListForOneRemote = (JSONArray) remoteWithRacesAsJson
+                        .get(DetailedRaceInfoJsonSerializer.FIELD_RACES);
+                for (Object remoteRace : raceListForOneRemote) {
+                    JSONObject remoteRaceAsJson = (JSONObject) remoteRace;
+                    SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson, remoteUrl);
+                    races.add(event);
                 }
             }
-        } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch AnniversaryRaceData from remote server " + ref + ": " + e.getMessage(),
+            result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
+        } catch (Exception e) {
+            logger.log(Level.INFO,
+                    "Exception trying to fetch AnniversaryRaceData from remote server " + ref + ": " + e.getMessage(),
                     e);
             result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(/* events */ null, e);
         }
-        final Pair<Iterable<SimpleRaceInfo>, Exception> finalResult = result;
-        LockUtil.executeWithWriteLock(lock, () -> {
-            // check that the server was not removed while no lock was held
-            if (remoteSailingServers.containsValue(ref)) {
-                cachedTrackedRacesForRemoteSailingServers.put(ref, finalResult);
-            } else {
-                logger.fine("Omitted update for " + ref + " as it was removed");
+        synchronized (cachedTrackedRacesForRemoteSailingServers) {
+            if (retrieveRemoteRaceResult.get()) {
+                updateCache(ref, result, cachedTrackedRacesForRemoteSailingServers::put);
             }
-        });
+        }
+        notifyRemoteRaceResultReceivedCallbacks();
     }
-    
+
+    private void notifyRemoteRaceResultReceivedCallbacks() {
+        new HashSet<>(remoteRaceResultReceivedCallbacks).forEach(Runnable::run);
+    }
+
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
         return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/getRaces?transitive=true");
     }
@@ -315,17 +328,20 @@ public class RemoteSailingServerSet {
     }
 
     public RemoteSailingServerReference remove(String name) {
+        RemoteSailingServerReference ref = null;
         LockUtil.lockForWrite(lock);
         try{
-            RemoteSailingServerReference ref = remoteSailingServers.remove(name);
+            ref = remoteSailingServers.remove(name);
             if (ref != null) {
                 cachedEventsForRemoteSailingServers.remove(ref);
                 cachedStatisticsByYearForRemoteSailingServers.remove(ref);
+                cachedTrackedRacesForRemoteSailingServers.remove(ref);
             }
-            return ref;
-        }finally{
+        } finally {
             LockUtil.unlockAfterWrite(lock);
         }
+        notifyRemoteRaceResultReceivedCallbacks();
+        return ref;
     }
 
     /**
@@ -398,5 +414,13 @@ public class RemoteSailingServerSet {
         } catch (ParseException | IOException e) {
             throw new IllegalStateException("RemoteUrl could not be called ", e);
         }
+    }
+
+    public void addRemoteRaceResultReceivedCallback(Runnable callback) {
+        this.remoteRaceResultReceivedCallbacks.add(callback);
+    }
+    
+    public void removeRemoteRaceResultReceivedCallback(Runnable callback){
+        this.remoteRaceResultReceivedCallbacks.remove(callback);
     }
 }

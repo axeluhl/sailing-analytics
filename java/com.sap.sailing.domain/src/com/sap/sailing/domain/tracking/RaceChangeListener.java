@@ -25,6 +25,8 @@ public interface RaceChangeListener extends CourseListener {
     
     void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack);
     
+    void firstGPSFixReceived();
+    
     /**
      * Invoked after the mark passings have been updated in the {@link TrackedRace}.
      * 

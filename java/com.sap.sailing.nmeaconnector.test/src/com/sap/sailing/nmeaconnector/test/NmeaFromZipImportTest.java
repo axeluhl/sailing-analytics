@@ -1,5 +1,6 @@
 package com.sap.sailing.nmeaconnector.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileInputStream;
@@ -45,6 +46,30 @@ public class NmeaFromZipImportTest {
             if (entry.getName().toLowerCase().endsWith(".txt")) {
                 Iterable<Wind> windFixes = NmeaFactory.INSTANCE.readWind(zipInputStream);
                 assertTrue(!Util.isEmpty(windFixes));
+            }
+        }
+    }
+
+    @Test
+    public void testYetAnotherZipFile() throws IOException, InterruptedException {
+        zipInputStream = new ZipInputStream(new FileInputStream("resources/NMEA.zip"));
+        ZipEntry entry;
+        while ((entry=zipInputStream.getNextEntry()) != null) {
+            if (entry.getName().toLowerCase().endsWith(".txt")) {
+                Iterable<Wind> windFixes = NmeaFactory.INSTANCE.readWind(zipInputStream);
+                assertEquals(740, Util.size(windFixes));
+            }
+        }
+    }
+
+    @Test
+    public void testZipFileExcerptWithOnlyEmptyWindRecords() throws IOException, InterruptedException {
+        zipInputStream = new ZipInputStream(new FileInputStream("resources/NMEA_Snippet.zip"));
+        ZipEntry entry;
+        while ((entry=zipInputStream.getNextEntry()) != null) {
+            if (entry.getName().toLowerCase().endsWith(".txt")) {
+                Iterable<Wind> windFixes = NmeaFactory.INSTANCE.readWind(zipInputStream);
+                assertTrue(Util.isEmpty(windFixes));
             }
         }
     }

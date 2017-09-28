@@ -17,11 +17,13 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
@@ -247,6 +249,16 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 callback.loadingQueueDone(this);
             } else {
                 Util.addToValueSet(loadingQueueDoneCallBacks, lastInQueue, callback);
+            }
+        }
+    }
+    
+    protected void ensureAllSingleMarksOfCourseAreaAreCreated(final IRace tractracRace) {
+        for (final IControl tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
+                tractracRace.getCourseArea())) {
+            if (!tractracControlPoint.isMultiple()) {
+                final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);
+                getDomainFactory().getOrCreateControlPoint(ttcp);
             }
         }
     }
