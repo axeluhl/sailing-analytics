@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistik;
+package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistic;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.UListElement;
