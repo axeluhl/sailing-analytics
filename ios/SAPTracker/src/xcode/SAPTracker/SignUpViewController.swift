@@ -116,11 +116,11 @@ class SignUpViewController: FormularViewController {
         } catch {
             errorLabel.text = error.localizedDescription
             let alertController = UIAlertController.init(title: errorLabel.text, message: nil, preferredStyle: .alert)
-            let okAction = UIAlertAction.init(title: Translation.Common.OK.String, style: .cancel, handler: nil)
+            let okAction = UIAlertAction.init(title: Translation.Common.OK.String, style: .cancel)
             alertController.addAction(okAction)
             self.present(alertController, animated: true)
         }
-        UIView.animate(withDuration: 0.5) { 
+        UIView.animate(withDuration: 0.5) {
             self.view.layoutIfNeeded()
         }
     }
@@ -162,6 +162,7 @@ class SignUpViewController: FormularViewController {
         } catch {
             errorLabel.text = error.localizedDescription
         }
+        textField.layoutIfNeeded()
         UIView.animate(withDuration: 0.5) {
             self.view.layoutIfNeeded()
         }
