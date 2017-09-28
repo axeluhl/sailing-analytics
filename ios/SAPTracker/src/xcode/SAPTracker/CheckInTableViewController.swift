@@ -14,7 +14,9 @@ protocol CheckInTableViewControllerDelegate: class {
     var coreDataManager: CoreDataManager { get }
     
     var checkInController: CheckInController { get }
-    
+
+    var isFooterViewHidden: Bool { get }
+
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn)
     
     func checkInTableViewController(
@@ -39,14 +41,15 @@ class CheckInTableViewController: UIViewController {
     weak var delegate: CheckInTableViewControllerDelegate?
     
     var segueCheckIn: CheckIn?
-    
-    @IBOutlet var headerView: UIView! // Strong reference needed to avoid deallocation when not attached to table view
-    
+
+    // Strong reference needed to avoid deallocation when not attached to table view
+    @IBOutlet var headerView: UIView!
+    @IBOutlet var footerTextView: UITextView!
+
     @IBOutlet weak var headerTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var footerView: UIView!
-    @IBOutlet weak var footerTextView: UITextView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -68,6 +71,7 @@ class CheckInTableViewController: UIViewController {
         setupTableView()
         setupTableViewDataSource()
         setupTableViewHeader()
+        setupTableViewFooter()
     }
     
     fileprivate func setupTableView() {
@@ -90,7 +94,11 @@ class CheckInTableViewController: UIViewController {
             tableView.tableHeaderView = headerView
         }
     }
-    
+
+    fileprivate func setupTableViewFooter() {
+        tableView.tableFooterView?.isHidden = delegate?.isFooterViewHidden ?? false
+    }
+
     // MARK: - Layout
     
     fileprivate func layout() {
@@ -234,6 +242,7 @@ extension CheckInTableViewController: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
         setupTableViewHeader()
+        setupTableViewFooter()
     }
     
 }

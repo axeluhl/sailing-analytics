@@ -184,18 +184,12 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
 
 extension RegattaCheckInTableViewController: CheckInTableViewControllerDelegate {
     
-    var checkInController: CheckInController {
-        get {
-            return regattaCheckInController
-        }
-    }
+    var checkInController: CheckInController { get { return regattaCheckInController } }
     
-    var coreDataManager: CoreDataManager {
-        get {
-            return regattaCoreDataManager
-        }
-    }
-    
+    var coreDataManager: CoreDataManager { get { return regattaCoreDataManager } }
+
+    var isFooterViewHidden: Bool { get { return false } }
+
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
         guard let regattaCheckInTableViewCell = cell as? RegattaCheckInTableViewCell else { return }
         regattaCheckInTableViewCell.eventLabel.text = checkIn.event.name

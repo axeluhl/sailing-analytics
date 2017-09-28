@@ -104,18 +104,12 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
 
 extension TrainingCheckInTableViewController: CheckInTableViewControllerDelegate {
     
-    var checkInController: CheckInController {
-        get {
-            return trainingCheckInController
-        }
-    }
+    var checkInController: CheckInController { get { return trainingCheckInController } }
     
-    var coreDataManager: CoreDataManager {
-        get {
-            return trainingCoreDataManager
-        }
-    }
-    
+    var coreDataManager: CoreDataManager { get { return trainingCoreDataManager } }
+
+    var isFooterViewHidden: Bool { get { return fetchedResultsController?.sections?[0].numberOfObjects ?? 0 > 0 } }
+
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
         guard let trainingCheckInTableViewCell = cell as? TrainingCheckInTableViewCell else { return }
         trainingCheckInTableViewCell.eventLabel.text = checkIn.event.name
