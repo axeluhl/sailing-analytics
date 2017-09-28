@@ -9,7 +9,9 @@
 import UIKit
 
 protocol TrainingViewControllerDelegate: class {
-    
+
+    func trainingViewController(_ controller: TrainingViewController, refreshButtonTapped sender: Any)
+
     func trainingViewController(_ controller: TrainingViewController, startTrackingButtonTapped sender: Any)
     
     func trainingViewController(_ controller: TrainingViewController, leaderboardButtonTapped sender: Any)
@@ -209,7 +211,11 @@ class TrainingViewController: UIViewController {
     }
 
     // MARK: - Actions
-    
+
+    @IBAction func refreshButtonTapped(_ sender: Any) {
+        delegate?.trainingViewController(self, refreshButtonTapped: sender)
+    }
+
     @IBAction func finishTrainingButtonTapped(_ sender: Any) {
         showFinishAlert()
     }

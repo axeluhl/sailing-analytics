@@ -120,6 +120,10 @@ class SessionViewController: UIViewController {
         }
     }
 
+    @IBAction func refreshButtonTapped(_ sender: Any) {
+        updatePessimistic()
+    }
+
     @IBAction func startTrackingButtonTapped(_ sender: Any) {
         // TODO: Add or add not WiFi Alert?
         //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {

@@ -89,7 +89,11 @@ extension TrainingMarkViewController: SessionViewControllerDelegate {
 // MARK: - TrainingViewControllerDelegate
 
 extension TrainingMarkViewController: TrainingViewControllerDelegate {
-    
+
+    func trainingViewController(_ controller: TrainingViewController, refreshButtonTapped sender: Any) {
+        super.refreshButtonTapped(sender)
+    }
+
     func trainingViewController(_ controller: TrainingViewController, startTrackingButtonTapped sender: Any) {
         super.startTrackingButtonTapped(sender)
     }
