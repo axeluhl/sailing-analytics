@@ -20,7 +20,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class GetAnniversariesAction implements SailingAction<ResultWithTTL<AnniversariesDTO>> {
 
-    private static final int SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY = 500;
+    private static final int SHOW_IF_FEWER_RACES_TILL_NEXT_ANNIVERSARY = 500;
     private static final int DAYS_TO_SHOW_PAST_ANNIVERSARY = 14;
 
     @Override
@@ -33,7 +33,7 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
 
         final Pair<Integer, AnniversaryType> next = service.getNextAnniversary();
         
-        if (next != null && (next.getA() - currentRaceCount) < SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY) {
+        if (next != null && (next.getA() - currentRaceCount) < SHOW_IF_FEWER_RACES_TILL_NEXT_ANNIVERSARY) {
             if (!knownAnnivs.containsKey(next.getA())) {
                 anniversaries.addValue(new AnniversaryDTO(next.getA(), currentRaceCount, next.getB()));
             }
