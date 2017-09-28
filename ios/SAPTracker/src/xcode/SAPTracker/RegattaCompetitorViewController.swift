@@ -116,15 +116,27 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
 // MARK: SessionViewControllerDelegate
 
 extension RegattaCompetitorViewController: SessionViewControllerDelegate {
-    
+
     var checkIn: CheckIn { get { return competitorCheckIn } }
-    
+
+    var checkOutActionTitle: String { get { return Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String } }
+
+    var checkOutAlertMessage: String { get { return Translation.CompetitorView.CheckOutAlert.Message.String } }
+
     var coreDataManager: CoreDataManager { get { return competitorCoreDataManager } }
     
     var sessionController: SessionController { get { return competitorSessionController } }
     
     func makeOptionSheet() -> UIAlertController {
-        return makeCompetitorOptionSheet()
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = self.optionButton
+        }
+        alertController.addAction(self.makeActionCheckOut())
+        alertController.addAction(self.makeActionSettings())
+        alertController.addAction(self.makeActionInfo())
+        alertController.addAction(self.makeActionCancel())
+        return alertController
     }
     
     func refresh(_ animated: Bool) {

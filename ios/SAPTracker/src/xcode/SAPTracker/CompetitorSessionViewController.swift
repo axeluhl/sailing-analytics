@@ -19,21 +19,7 @@ class CompetitorSessionViewController: SessionViewController {
     weak var competitorViewController: CompetitorViewController?
     
     // MARK: - OptionSheet
-    
-    func makeCompetitorOptionSheet() -> UIAlertController {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if let popoverController = alertController.popoverPresentationController {
-            popoverController.barButtonItem = self.optionButton
-        }
-        alertController.addAction(self.makeActionCheckOut())
-        //alertController.addAction(self.makeActionReplaceImage())
-        //alertController.addAction(self.makeActionUpdate())
-        alertController.addAction(self.makeActionSettings())
-        alertController.addAction(self.makeActionInfo())
-        alertController.addAction(self.makeActionCancel())
-        return alertController
-    }
-    
+
     fileprivate func makeActionReplaceImage() -> UIAlertAction {
         return UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
             self?.competitorViewController?.showSelectImageAlert()

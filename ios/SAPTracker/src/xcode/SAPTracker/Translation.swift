@@ -503,6 +503,18 @@ class Translation: NSObject {
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
+        struct CheckOutAlert { private static let Key = "\(TrainingView.Key).\(CheckOutAlert.self)"
+            struct Message { private static let Key = "\(CheckOutAlert.Key).\(Message.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct OptionSheet { private static let Key = "\(TrainingView.Key).\(OptionSheet.self)"
+            struct CheckOutAction { private static let Key = "\(OptionSheet.Key).\(CheckOutAction.self)"
+                struct Title { private static let Key = "\(CheckOutAction.Key).\(Title.self)"
+                    static let String = NSLocalizedString(Key, comment: "")
+                }
+            }
+        }
         struct ReactivateAlert { private static let Key = "\(TrainingView.Key).\(ReactivateAlert.self)"
             struct Title { private static let Key = "\(ReactivateAlert.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
@@ -511,18 +523,33 @@ class Translation: NSObject {
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
+        struct ReactivatedAlert {
+            static let Key = "\(TrainingView.Key).\(ReactivatedAlert.self)"
+            struct Title { private static let Key = "\(ReactivatedAlert.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
         struct StartTrackingButton { private static let Key = "\(TrainingView.Key).\(StartTrackingButton.self)"
             struct Title { private static let Key = "\(StartTrackingButton.Key).\(Title.self)"
                 static let String = CompetitorView.StartTrackingButton.Title.String
             }
         }
-        struct StopTrainingAlert { private static let Key = "\(TrainingView.Key).\(StopTrainingAlert.self)"
-            struct Message { private static let Key = "\(StopTrainingAlert.Key).\(Message.self)"
+        struct FinishTrainingButton { private static let Key = "\(TrainingView.Key).\(FinishTrainingButton.self)"
+            struct Title { private static let Key = "\(FinishTrainingButton.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct FinishTrainingButton { private static let Key = "\(TrainingView.Key).\(FinishTrainingButton.self)"
-            struct Title { private static let Key = "\(FinishTrainingButton.Key).\(Title.self)"
+        struct FinishAlert {
+            static let Key = "\(TrainingView.Key).\(FinishAlert.self)"
+            struct Title { private static let Key = "\(FinishAlert.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+            struct Message { private static let Key = "\(FinishAlert.Key).\(Message.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct FinishedAlert { private static let Key = "\(TrainingView.Key).\(FinishedAlert.self)"
+            struct Title { private static let Key = "\(FinishedAlert.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }

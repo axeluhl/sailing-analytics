@@ -11,7 +11,11 @@ import UIKit
 protocol SessionViewControllerDelegate: class {
     
     var checkIn: CheckIn { get }
-    
+
+    var checkOutActionTitle: String { get }
+
+    var checkOutAlertMessage: String { get }
+
     var coreDataManager: CoreDataManager { get }
     
     var sessionController: SessionController { get }
@@ -99,7 +103,7 @@ class SessionViewController: UIViewController {
     }
     
     func makeActionCheckOut() -> UIAlertAction {
-        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { [weak self] action in
+        return UIAlertAction(title: delegate?.checkOutActionTitle, style: .default) { [weak self] action in
             self?.checkOut()
         }
     }
@@ -162,11 +166,11 @@ class SessionViewController: UIViewController {
     }
     
     // MARK: - Alerts
-    
+
     fileprivate func showCheckOutAlert() {
         let alertController = UIAlertController(
             title: Translation.Common.Warning.String,
-            message: Translation.CompetitorView.CheckOutAlert.Message.String,
+            message: delegate?.checkOutAlertMessage,
             preferredStyle: .alert
         )
         let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { [weak self] action in

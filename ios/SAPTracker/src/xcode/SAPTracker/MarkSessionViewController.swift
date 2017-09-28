@@ -17,20 +17,7 @@ class MarkSessionViewController: SessionViewController {
     weak var markCheckIn: MarkCheckIn!
     weak var markCoreDataManager: CoreDataManager!
     weak var markViewController: MarkViewController?
-    
-    func makeMarkOptionSheet() -> UIAlertController {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if let popoverController = alertController.popoverPresentationController {
-            popoverController.barButtonItem = self.optionButton
-        }
-        alertController.addAction(self.makeActionCheckOut())
-        //alertController.addAction(self.makeActionUpdate())
-        alertController.addAction(self.makeActionSettings())
-        alertController.addAction(self.makeActionInfo())
-        alertController.addAction(self.makeActionCancel())
-        return alertController
-    }
-    
+
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

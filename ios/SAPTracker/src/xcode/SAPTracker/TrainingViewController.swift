@@ -165,38 +165,56 @@ class TrainingViewController: UIViewController {
         SVProgressHUD.show()
         trainingController.finishTraining(forCheckIn: trainingCheckIn, success: { [weak self] in
             SVProgressHUD.dismiss()
-            if let strongSelf = self {
-                strongSelf.delegate?.trainingViewControllerDidFinishTraining(strongSelf)
-            }
+            self?.finishTrainingSuccess()
         }) { [weak self] (error) in
             SVProgressHUD.dismiss()
             self?.showAlert(forError: error)
         }
     }
-    
+
+    fileprivate func finishTrainingSuccess() {
+        let alertController = UIAlertController.init(title: Translation.TrainingView.FinishedAlert.Title.String, message: nil, preferredStyle: .alert)
+        let okAction = UIAlertAction.init(title: Translation.Common.OK.String, style: .default) { [weak self] (action) in
+            if let strongSelf = self {
+                strongSelf.delegate?.trainingViewControllerDidFinishTraining(strongSelf)
+            }
+        }
+        alertController.addAction(okAction)
+        present(alertController, animated: true)
+    }
+
     fileprivate func reactivateTraining() {
         SVProgressHUD.show()
         trainingController.reactivateTraining(forCheckIn: trainingCheckIn, success: { [weak self] in
             SVProgressHUD.dismiss()
-            if let strongSelf = self {
-                strongSelf.delegate?.trainingViewControllerDidReactivateTraining(strongSelf)
-            }
+            self?.reactivateTrainingSuccess()
         }) { [weak self] (error) in
             SVProgressHUD.dismiss()
             self?.showAlert(forError: error)
         }
     }
-    
+
+    fileprivate func reactivateTrainingSuccess() {
+        let alertController = UIAlertController.init(title: Translation.TrainingView.ReactivatedAlert.Title.String, message: nil, preferredStyle: .alert)
+        let okAction = UIAlertAction.init(title: Translation.Common.OK.String, style: .default) { [weak self] (action) in
+            if let strongSelf = self {
+                strongSelf.delegate?.trainingViewControllerDidReactivateTraining(strongSelf)
+            }
+        }
+        alertController.addAction(okAction)
+        present(alertController, animated: true)
+    }
+
     // MARK: - Actions
     
     @IBAction func finishTrainingButtonTapped(_ sender: Any) {
-        finishTraining()
+        showFinishAlert()
     }
     
     @IBAction func leaderboardButtonTapped(_ sender: Any) {
         delegate?.trainingViewController(self, leaderboardButtonTapped: sender)
     }
-    
+
     @IBAction func startTrackingButtonTapped(_ sender: Any) {
         if isTrainingActive {
             startTracking(success: {
@@ -210,7 +228,22 @@ class TrainingViewController: UIViewController {
     }
     
     // MARK: - Alerts
-    
+
+    fileprivate func showFinishAlert() {
+        let alertController = UIAlertController(
+            title: Translation.TrainingView.FinishAlert.Title.String,
+            message: Translation.TrainingView.FinishAlert.Message.String,
+            preferredStyle: .alert
+        )
+        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { [weak self] action in
+            self?.finishTraining()
+        }
+        let noAction = UIAlertAction(title: Translation.Common.No.String, style: .cancel, handler: nil)
+        alertController.addAction(yesAction)
+        alertController.addAction(noAction)
+        present(alertController, animated: true, completion: nil)
+    }
+
     fileprivate func showReactivateAlert() {
         let alertController = UIAlertController(
             title: Translation.TrainingView.ReactivateAlert.Title.String,
