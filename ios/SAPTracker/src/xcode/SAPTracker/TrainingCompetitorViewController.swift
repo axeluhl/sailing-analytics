@@ -19,6 +19,7 @@ class TrainingCompetitorViewController: CompetitorSessionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         delegate = self
+        setup()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -29,17 +30,11 @@ class TrainingCompetitorViewController: CompetitorSessionViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
-        setupLocalization()
         setupNavigationBar()
     }
-    
-    fileprivate func setupLocalization() {
-        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
-    }
-    
+
     fileprivate func setupNavigationBar() {
-        navigationItem.titleView = TitleView(title: competitorCheckIn.event.name, subtitle: competitorCheckIn.leaderboard.name)
-        navigationController?.navigationBar.setNeedsLayout()
+        navigationItem.title = competitorCheckIn.event.name
     }
     
     // MARK: - Segues

@@ -19,13 +19,24 @@ class TrainingMarkViewController: MarkSessionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         delegate = self
+        setup()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refresh(false)
     }
-    
+
+    // MARK: - Setup
+
+    fileprivate func setup() {
+        setupNavigationBar()
+    }
+
+    fileprivate func setupNavigationBar() {
+        navigationItem.title = markCheckIn.event.name
+    }
+
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
