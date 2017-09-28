@@ -26,12 +26,13 @@ class TrainingViewController: UIViewController {
     
     weak var trainingCheckIn: CheckIn!
     weak var trainingCoreDataManager: CoreDataManager!
-    
-    @IBOutlet var finishTrainingButtonZeroHeight: NSLayoutConstraint! // Strong reference needed to avoid deallocation when constraint is not active
-    
-    @IBOutlet weak var finishTrainingButton: UIButton!
+
+    @IBOutlet var finishButtonZeroWidth: NSLayoutConstraint! // Strong reference needed to avoid deallocation when constraint is not active
+
+    @IBOutlet weak var finishButton: UIButton!
     @IBOutlet weak var trainingNameLabel: UILabel!
     @IBOutlet weak var leaderboardButton: UIButton!
+    @IBOutlet weak var spaceBetweenLeaderboardButtonAndFinishButton: NSLayoutConstraint!
     @IBOutlet weak var startTrackingButton: UIButton!
     
     override func viewDidLoad() {
@@ -52,15 +53,15 @@ class TrainingViewController: UIViewController {
     }
     
     fileprivate func setupButtons() {
-        makeRed(button: finishTrainingButton)
-        makeBlue(button: leaderboardButton)
+        makeGray(button: finishButton)
+        makeGray(button: leaderboardButton)
         makeGreen(button: startTrackingButton)
     }
     
     fileprivate func setupLocalization() {
         leaderboardButton.setTitle(Translation.TrainingView.LeaderboardButton.Title.String, for: .normal)
         startTrackingButton.setTitle(Translation.TrainingView.StartTrackingButton.Title.String, for: .normal)
-        finishTrainingButton.setTitle(Translation.TrainingView.FinishTrainingButton.Title.String, for: .normal)
+        finishButton.setTitle(Translation.TrainingView.FinishButton.Title.String, for: .normal)
     }
     
     // MARK: - Refresh
@@ -81,11 +82,13 @@ class TrainingViewController: UIViewController {
     
     fileprivate func refreshFinishTrainingButton() {
         if (isTrainingActive) {
-            finishTrainingButtonZeroHeight.isActive = false
-            finishTrainingButton.alpha = 1
+            spaceBetweenLeaderboardButtonAndFinishButton.constant = 8
+            finishButtonZeroWidth.isActive = false
+            finishButton.alpha = 1
         } else {
-            finishTrainingButtonZeroHeight.isActive = true
-            finishTrainingButton.alpha = 0
+            spaceBetweenLeaderboardButtonAndFinishButton.constant = 0
+            finishButtonZeroWidth.isActive = true
+            finishButton.alpha = 0
         }
         view.layoutIfNeeded()
     }

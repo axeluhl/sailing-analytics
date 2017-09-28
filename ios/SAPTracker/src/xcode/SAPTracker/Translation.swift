@@ -544,8 +544,8 @@ class Translation: NSObject {
                 static let String = RegattaView.StartTrackingButton.Title.String
             }
         }
-        struct FinishTrainingButton { private static let Key = "\(TrainingView.Key).\(FinishTrainingButton.self)"
-            struct Title { private static let Key = "\(FinishTrainingButton.Key).\(Title.self)"
+        struct FinishButton { private static let Key = "\(TrainingView.Key).\(FinishButton.self)"
+            struct Title { private static let Key = "\(FinishButton.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }

@@ -2156,42 +2156,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P6q-rE-56e">
-                                <rect key="frame" x="20" y="19.5" width="335" height="0.0"/>
-                                <color key="backgroundColor" red="0.80392156859999997" green="0.12549019610000001" blue="0.1058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" priority="500" constant="82" id="TU5-5a-0bK">
-                                        <variation key="heightClass=compact" constant="62"/>
-                                    </constraint>
-                                    <constraint firstAttribute="height" id="t45-Q0-buj"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                <state key="normal" title="Stop Training Button">
-                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="finishTrainingButtonTapped:" destination="E6A-nT-WFd" eventType="touchUpInside" id="4Uo-gh-aJp"/>
-                                </connections>
-                            </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalCompressionResistancePriority="500" verticalCompressionResistancePriority="500" text="Training Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="t1K-Ke-2cf">
-                                <rect key="frame" x="20" y="28" width="335" height="107.5"/>
+                                <rect key="frame" x="20" y="8" width="335" height="20.5"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PmF-sS-oJZ">
-                                <rect key="frame" x="20" y="143.5" width="335" height="48"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="48" id="e3G-d4-ATR"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                <state key="normal" title="Leaderboard Button">
-                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="leaderboardButtonTapped:" destination="E6A-nT-WFd" eventType="touchUpInside" id="BJl-GR-5VS"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4bn-iH-vPt">
                                 <rect key="frame" x="20" y="199.5" width="335" height="82"/>
                                 <constraints>
@@ -2210,35 +2180,63 @@
                                     <action selector="startTrackingButtonTapped:" destination="smT-3p-ZYf" eventType="touchUpInside" id="rwg-ct-Ktm"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PmF-sS-oJZ">
+                                <rect key="frame" x="20" y="143" width="335" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="1Yt-VP-3JU"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                <state key="normal" title="Leaderboard Button">
+                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="leaderboardButtonTapped:" destination="E6A-nT-WFd" eventType="touchUpInside" id="BJl-GR-5VS"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P6q-rE-56e">
+                                <rect key="frame" x="355" y="143" width="0.0" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" id="Tri-Ee-84K"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                <state key="normal" title="Finish Training Button">
+                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="finishTrainingButtonTapped:" destination="E6A-nT-WFd" eventType="touchUpInside" id="4Uo-gh-aJp"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="PmF-sS-oJZ" firstAttribute="top" relation="greaterThanOrEqual" secondItem="t1K-Ke-2cf" secondAttribute="bottom" constant="8" id="27q-Y8-zPX"/>
+                            <constraint firstItem="t1K-Ke-2cf" firstAttribute="top" secondItem="XQO-xa-ead" secondAttribute="bottom" constant="8" id="2x2-NH-RWk"/>
+                            <constraint firstItem="4bn-iH-vPt" firstAttribute="top" secondItem="PmF-sS-oJZ" secondAttribute="bottom" constant="8" id="3p2-Yw-Seh"/>
+                            <constraint firstAttribute="trailing" secondItem="P6q-rE-56e" secondAttribute="trailing" constant="20" id="8Pp-ob-m2d"/>
                             <constraint firstAttribute="trailing" secondItem="t1K-Ke-2cf" secondAttribute="trailing" constant="20" id="K0e-1e-2be"/>
-                            <constraint firstItem="P6q-rE-56e" firstAttribute="leading" secondItem="3Bj-AU-gns" secondAttribute="leading" constant="20" id="QY4-P2-LYO"/>
                             <constraint firstItem="t1K-Ke-2cf" firstAttribute="leading" secondItem="3Bj-AU-gns" secondAttribute="leading" constant="20" id="RTP-Ia-1QF"/>
-                            <constraint firstItem="4bn-iH-vPt" firstAttribute="top" secondItem="PmF-sS-oJZ" secondAttribute="bottom" constant="8" id="XW8-Eb-Yf4"/>
-                            <constraint firstItem="PmF-sS-oJZ" firstAttribute="leading" secondItem="3Bj-AU-gns" secondAttribute="leading" constant="20" id="Ya7-VT-IVh"/>
+                            <constraint firstItem="PmF-sS-oJZ" firstAttribute="leading" secondItem="3Bj-AU-gns" secondAttribute="leading" constant="20" id="U6T-Mw-7Ig"/>
+                            <constraint firstItem="P6q-rE-56e" firstAttribute="leading" secondItem="PmF-sS-oJZ" secondAttribute="trailing" id="Z8i-Ej-hGh"/>
                             <constraint firstItem="4bn-iH-vPt" firstAttribute="leading" secondItem="3Bj-AU-gns" secondAttribute="leading" constant="20" id="coL-4k-Wn7"/>
-                            <constraint firstItem="P6q-rE-56e" firstAttribute="top" secondItem="XQO-xa-ead" secondAttribute="bottom" constant="20" id="hO3-Qu-Sda"/>
+                            <constraint firstItem="P6q-rE-56e" firstAttribute="height" secondItem="PmF-sS-oJZ" secondAttribute="height" id="eOu-Gr-Ejh"/>
                             <constraint firstItem="x9D-DE-IEL" firstAttribute="top" secondItem="4bn-iH-vPt" secondAttribute="bottom" constant="20" id="jFb-as-wZf"/>
-                            <constraint firstAttribute="trailing" secondItem="P6q-rE-56e" secondAttribute="trailing" constant="20" id="nRA-0d-X5O"/>
-                            <constraint firstItem="t1K-Ke-2cf" firstAttribute="top" secondItem="P6q-rE-56e" secondAttribute="bottom" constant="8" id="o7q-yn-1EL"/>
-                            <constraint firstAttribute="trailing" secondItem="PmF-sS-oJZ" secondAttribute="trailing" constant="20" id="uVD-hm-9ia"/>
-                            <constraint firstItem="PmF-sS-oJZ" firstAttribute="top" secondItem="t1K-Ke-2cf" secondAttribute="bottom" constant="8" id="xiz-vg-CnP"/>
+                            <constraint firstItem="P6q-rE-56e" firstAttribute="centerY" secondItem="PmF-sS-oJZ" secondAttribute="centerY" id="phm-Ne-dxy"/>
+                            <constraint firstItem="P6q-rE-56e" firstAttribute="width" secondItem="PmF-sS-oJZ" secondAttribute="width" priority="750" id="yz5-u4-sSq"/>
                             <constraint firstAttribute="trailing" secondItem="4bn-iH-vPt" secondAttribute="trailing" constant="20" id="zs9-rc-8ao"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="finishTrainingButton" destination="P6q-rE-56e" id="tMb-Ok-rIh"/>
-                        <outlet property="finishTrainingButtonZeroHeight" destination="t45-Q0-buj" id="zE2-aS-7Ur"/>
+                        <outlet property="finishButton" destination="P6q-rE-56e" id="4pu-7L-0jT"/>
+                        <outlet property="finishButtonZeroWidth" destination="Tri-Ee-84K" id="IXe-n8-jh3"/>
                         <outlet property="leaderboardButton" destination="PmF-sS-oJZ" id="sxk-I4-ODg"/>
+                        <outlet property="spaceBetweenLeaderboardButtonAndFinishButton" destination="Z8i-Ej-hGh" id="sxf-qc-XrO"/>
                         <outlet property="startTrackingButton" destination="4bn-iH-vPt" id="dRN-g2-hxh"/>
                         <outlet property="trainingNameLabel" destination="t1K-Ke-2cf" id="AEF-S9-W7E"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JKG-e5-dm0" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4060" y="-2526"/>
+            <point key="canvasLocation" x="4060" y="-2526.8365817091458"/>
         </scene>
         <!--Competitor View Controller-->
         <scene sceneID="T01-po-oc2">
