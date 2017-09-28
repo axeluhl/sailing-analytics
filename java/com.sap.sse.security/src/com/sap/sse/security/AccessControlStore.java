@@ -21,7 +21,12 @@ public interface AccessControlStore extends Named {
     AccessControlStore removePermission(String id, String group, String permission);
     AccessControlStore removeAccessControlList(String id);
     
+    Iterable<Owner> getOwnerships();
     Owner createOwnership(String id, String owner, String tenantOwner);
     AccessControlStore setOwnership(String id, String owner, String tenantOwner);
     AccessControlStore removeOwnership(String id);
+    
+    void clear();
+    void replaceContentsFrom(AccessControlStore newAclStore);
+   
 }

@@ -1,7 +1,13 @@
 package com.sap.sse.security.impl;
 
+import java.util.Set;
+
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
+import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 /**
@@ -14,6 +20,22 @@ import com.sap.sse.security.shared.UserManagementException;
  *
  */
 public interface ReplicableSecurityService extends SecurityService {
+    Void internalCreateAcl(String id);
+    
+    Void internalAclPutPermissions(String id, String group, Set<String> permissions);
+    
+    Void internalAclAddPermission(String id, String group, String permission);
+    
+    Void internalAclRemovePermission(String id, String group, String permission);
+    
+    Void internalCreateOwnership(String id, String owner, String tenantOwner);
+    
+    Void internalCreateUserGroup(String name, String owner, AccessControlStore aclStore) throws UserGroupManagementException;
+    
+    Void internalCreateTenant(String name, String owner, AccessControlStore aclStore) throws TenantManagementException, UserGroupManagementException;
+    
+    Void internalUpdateUserGroup(UserGroup group);
+    
     Void internalStoreUser(User user);
 
     Void internalSetPreference(String username, String key, String value);

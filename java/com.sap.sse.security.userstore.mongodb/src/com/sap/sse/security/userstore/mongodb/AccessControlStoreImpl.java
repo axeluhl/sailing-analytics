@@ -167,4 +167,26 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public Owner getOwnership(String id) {
         return ownershipList.get(id);
     }
+    
+    @Override 
+    public Iterable<Owner> getOwnerships() {
+        return new ArrayList<>(ownershipList.values());
+    }
+
+    @Override
+    public void clear() {
+        accessControlLists.clear();
+        ownershipList.clear();        
+    }
+
+    @Override
+    public void replaceContentsFrom(AccessControlStore newAclStore) {
+        clear();
+        for (AccessControlList acl : newAclStore.getAccessControlLists()) {
+            accessControlLists.put(acl.getName(), acl);
+        }
+        for (Owner ownership : newAclStore.getOwnerships()) {
+            ownershipList.put(ownership.getName(), ownership);
+        }
+    }
 }

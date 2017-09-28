@@ -171,6 +171,9 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void clear() {
+        tenants.clear();
+        userGroups.clear();
+        
         clearAllPreferenceObjects();
         emailForUsername.clear();
         settings.clear();
@@ -195,6 +198,12 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void replaceContentsFrom(UserStore newUserStore) {
         clear();
+        for (Tenant tenant : newUserStore.getTenants()) {
+            tenants.add(tenant.getName());
+        }
+        for (UserGroup group : newUserStore.getUserGroups()) {
+            userGroups.put(group.getName(), group);
+        }
         for (User user : newUserStore.getUsers()) {
             users.put(user.getName(), user);
             addToUsersByEmail(user);

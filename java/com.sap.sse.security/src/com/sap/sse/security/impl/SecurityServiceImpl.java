@@ -292,16 +292,28 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public SecurityService createAccessControlList(String id) {
-        aclStore.createAccessControlList(id);
+        apply(s->s.internalCreateAcl(id));
         return this;
+    }
+    
+    @Override
+    public Void internalCreateAcl(String id) {
+        aclStore.createAccessControlList(id);
+        return null;
     }
 
     @Override
     public AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap) {
-        for (UserGroup group : permissionMap.keySet()) {
-            aclStore.putPermissions(id, group.getName(), permissionMap.get(group));
+        for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
+            apply(s->s.internalAclPutPermissions(id, entry.getKey().getName(), entry.getValue()));
         }
         return aclStore.getAccessControlListByName(id);
+    }
+    
+    @Override
+    public Void internalAclPutPermissions(String id, String group, Set<String> permissions) {
+        aclStore.putPermissions(id, group, permissions);
+        return null;
     }
 
     /*
@@ -309,8 +321,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     @Override
     public AccessControlList addToACL(String acl, String permission, String name) {
-        aclStore.addPermission(acl, name, permission);
+        apply(s->s.internalAclAddPermission(acl, name, permission));
         return aclStore.getAccessControlListByName(acl);
+    }
+    
+    @Override
+    public Void internalAclAddPermission(String id, String group, String permission) {
+        aclStore.addPermission(id, group, permission);
+        return null;
     }
 
     /*
@@ -318,14 +336,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     @Override
     public AccessControlList removeFromACL(String acl, String permission, String name) {
-        aclStore.removePermission(acl, name, permission);
+        apply(s->s.internalAclRemovePermission(acl, name, permission));
         return aclStore.getAccessControlListByName(acl);
+    }
+    
+    @Override 
+    public Void internalAclRemovePermission(String id, String group, String permission) {
+        aclStore.removePermission(id, group, permission);
+        return null;
     }
     
     @Override
     public SecurityService createOwnership(String id, String owner, String tenant) {
-        aclStore.createOwnership(id, owner, tenant);
+        apply(s->s.internalCreateOwnership(id, owner, tenant));
         return this;
+    }
+    
+    @Override
+    public Void internalCreateOwnership(String id, String owner, String tenantOwner) {
+        aclStore.createOwnership(id, owner, tenantOwner);
+        return null;
     }
 
     @Override
@@ -345,27 +375,47 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException {
-        return userStore.createUserGroup(name, owner, aclStore);
+        apply(s->s.internalCreateUserGroup(name, owner, aclStore));
+        return userStore.getUserGroupByName(name);
     }
-
+    
+    @Override
+    public Void internalCreateUserGroup(String name, String owner, AccessControlStore aclStore) throws UserGroupManagementException {
+        userStore.createUserGroup(name, owner, aclStore);
+        return null;
+    }
+    
     @Override
     public Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException {
-        return userStore.createTenant(name, owner, aclStore);
+        apply(s->s.internalCreateTenant(name, owner, aclStore));
+        return userStore.getTenantByName(name);
+    }
+    
+    @Override
+    public Void internalCreateTenant(String name, String owner, AccessControlStore aclStore) throws TenantManagementException, UserGroupManagementException {
+        userStore.createTenant(name, owner, aclStore);
+        return null;
     }
 
     @Override
     public UserGroup addUserToUserGroup(String user, String name) {
         UserGroup userGroup = userStore.getUserGroupByName(name);
         userGroup.add(user);
-        userStore.updateUserGroup(userGroup);
+        apply(s->s.internalUpdateUserGroup(userGroup));
         return userGroup;
+    }
+    
+    @Override
+    public Void internalUpdateUserGroup(UserGroup group) {
+        userStore.updateUserGroup(group);
+        return null;
     }
 
     @Override
     public UserGroup removeUserFromUserGroup(String user, String name) {
         UserGroup userGroup = userStore.getUserGroupByName(name);
         userGroup.remove(user);
-        userStore.updateUserGroup(userGroup);
+        apply(s->s.internalUpdateUserGroup(userGroup));
         return userGroup;
     }
 
@@ -1106,6 +1156,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         userStore.clear();
+        aclStore.clear();
     }
 
     @Override
@@ -1135,12 +1186,22 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
+        if (aclStore != null) {
+            Thread.currentThread().setContextClassLoader(aclStore.getClass().getClassLoader());
+        }
+        try {
+            AccessControlStore newAclStore = (AccessControlStore) is.readObject();
+            aclStore.replaceContentsFrom(newAclStore);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldCCL);
+        }
     }
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(cacheManager);
         objectOutputStream.writeObject(userStore);
+        objectOutputStream.writeObject(aclStore);
     }
 
     @Override
