@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -105,10 +106,11 @@ public class TimePanelFragment extends BasePanelFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (preferences.getRacingProcedureIsResultEntryEnabled(getRace().getState().getRacingProcedure().getType())) {
+        if (preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
             mClickListener = new CompetitorPanelClick();
             mCompetitorList.setListener(mClickListener);
             mCompetitorList.setVisibility(View.VISIBLE);
+            checkWarnings(getRaceState());
         }
     }
 
@@ -249,6 +251,15 @@ public class TimePanelFragment extends BasePanelFragment {
         }
     }
 
+    private void checkWarnings(ReadonlyRaceState state) {
+        CompetitorResults results = state.getConfirmedFinishPositioningList();
+        if (results != null) {
+            mCompetitorList.showWarningSign(results.hasConflicts());
+        } else {
+            mCompetitorList.showWarningSign(false);
+        }
+    }
+
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
 
         @Override
@@ -266,6 +277,20 @@ public class TimePanelFragment extends BasePanelFragment {
             super.onStartTimeChanged(state);
 
             mLinkedRace = null;
+        }
+
+        @Override
+        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositioningsChanged(state);
+
+            checkWarnings(state);
+        }
+
+        @Override
+        public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
+            super.onFinishingPositionsConfirmed(state);
+
+            checkWarnings(state);
         }
     }
 

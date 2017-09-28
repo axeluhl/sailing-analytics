@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
@@ -16,10 +20,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class PanelButton extends FrameLayout implements DialogInterface.OnClickListener {
 
@@ -85,6 +85,7 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
     private ImageView mMarker;
     private View mLine;
+    private ImageView mWarningSign;
 
     private PanelType mType;
     private CaptionPosition mCaptionPosition;
@@ -166,6 +167,9 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         mMarker = (ImageView) findViewById(R.id.marker_bottom);
 
         setLinePosition(a.getInt(R.styleable.PanelButton_linePosition, -1));
+
+        mWarningSign = (ImageView) findViewById(R.id.warning_sign);
+        setWarningSignPosition(a.getInt(R.styleable.PanelButton_warningSignPosition, -1));
 
         a.recycle();
 
@@ -304,6 +308,39 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         if (mLine != null) {
             mLine.setVisibility(VISIBLE);
         }
+    }
+
+    private void setWarningSignPosition(int position) {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mWarningSign.getLayoutParams());
+        switch (position) {
+            case 0: // top left
+                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                break;
+
+            case 1: // top right
+                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                break;
+
+            case 2: // bottom right
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                break;
+
+            case 3: // bottom left
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                break;
+
+            default:
+                break;
+        }
+        mWarningSign.setLayoutParams(params);
+    }
+
+    public void showWarningSign(boolean show) {
+        mWarningSign.setVisibility(show ? VISIBLE : GONE);
     }
 
     private void hideValues() {

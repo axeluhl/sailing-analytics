@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="@string/finished_tracking"
             android:textAppearance="?attr/textPanelHeader"
-            android:textSize="@dimen/textSize_18"/>
+            android:textSize="@dimen/textSize_18" />
 
         <ImageView
             android:id="@+id/list_lock"
@@ -48,4 +48,14 @@
             android:text="@string/finished_edit"
             android:textAppearance="?attr/textPanelCaption" />
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/warning_sign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="4dp"
+        android:src="@drawable/ic_warning_yellow"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </merge>

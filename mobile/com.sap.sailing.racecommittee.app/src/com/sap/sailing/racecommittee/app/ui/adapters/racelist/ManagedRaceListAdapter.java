@@ -14,6 +14,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -193,6 +194,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             holder.race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
             RaceState state = race.getRace().getState();
             if (state != null) {
+                CompetitorResults results = state.getConfirmedFinishPositioningList();
+                if (results != null) {
+                    holder.warning_sign.setVisibility(results.hasConflicts() ? View.VISIBLE : View.GONE);
+                }
                 if (state.getStartTime() != null) {
                     int startRes = R.string.race_started;
                     if (state.getFinishedTime() == null) {
@@ -390,6 +395,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (holder.explicit_factor != null) {
             holder.explicit_factor.setVisibility(View.GONE);
         }
+        if (holder.warning_sign != null) {
+            holder.warning_sign.setVisibility(View.GONE);
+        }
         holder.setMarker(0);
     }
 
@@ -513,6 +521,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         /* package */ ImageView has_dependent_races;
         /* package */ TextView depends_on;
         /* package */ TextView explicit_factor;
+        /* package */ ImageView warning_sign;
 
         /* package */ void findViews(View layout) {
             panel_left = ViewHelper.get(layout, R.id.panel_left);
@@ -534,6 +543,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
             depends_on = ViewHelper.get(layout, R.id.depends_on);
             explicit_factor = ViewHelper.get(layout, R.id.explicit_factor);
+            warning_sign = ViewHelper.get(layout, R.id.warning_sign);
         }
 
         /* package */ void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
