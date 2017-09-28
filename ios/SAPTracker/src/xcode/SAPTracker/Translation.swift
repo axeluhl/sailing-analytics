@@ -39,7 +39,22 @@ class Translation: NSObject {
             static let String = NSLocalizedString(Key, comment: "")
         }
     }
-    
+
+    // MARK: - StartView
+
+    struct StartView { private static let Key = "\(StartView.self)"
+        struct RegattaButton { private static let Key = "\(StartView.Key).\(RegattaButton.self)"
+            struct Title { private static let Key = "\(RegattaButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct TrainingButton { private static let Key = "\(StartView.Key).\(TrainingButton.self)"
+            struct Title { private static let Key = "\(TrainingButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+    }
+
     // MARK: - RegattaCheckInController
     
     struct RegattaCheckInController { private static let Key = "\(RegattaCheckInController.self)"

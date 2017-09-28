@@ -36,6 +36,7 @@ class StartViewController: UIViewController {
 
     fileprivate func setup() {
         setupButtons()
+        setupLocalization()
         setupNavigationBar()
     }
     
@@ -49,7 +50,12 @@ class StartViewController: UIViewController {
         trainingButton.setBackgroundImage(Images.BlueButton, for: .normal)
         trainingButton.setBackgroundImage(Images.BlueButtonHighlighted, for: .highlighted)
     }
-    
+
+    fileprivate func setupLocalization() {
+        regattaButton.setTitle(Translation.StartView.RegattaButton.Title.String, for: .normal)
+        trainingButton.setTitle(Translation.StartView.TrainingButton.Title.String, for: .normal)
+    }
+
     fileprivate func setupNavigationBar() {
         navigationItem.title = Application.Title
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
