@@ -39,7 +39,7 @@ class CreateTrainingViewController: UIViewController {
     }
     
     fileprivate func setupButtons() {
-        makeGreen(button: createTrainingButton)
+        makeBlue(button: createTrainingButton)
     }
     
     fileprivate func setupLocalization() {
