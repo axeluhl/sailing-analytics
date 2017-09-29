@@ -81,8 +81,8 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
                     // latitude / longitude are represented in funny NMEA-like way; the value divided by 100 as
                     // a floored integer represents the full degrees; the value modulo 100 represents the decimal
                     // minutes. Example: the pair (4124.645890, 213.738670) stands for N41°24.645890 E002°13.738670
-                    final Wind wind = new WindImpl(new DegreePosition(funnyLatLng(fix.get(Fields.Lat.ordinal())),
-                            funnyLatLng(fix.get(Fields.Lon.ordinal()))),
+                    final Wind wind = new WindImpl(new DegreePosition(FunnyDegreeConverter.funnyLatLng(fix.get(Fields.Lat.ordinal())),
+                            FunnyDegreeConverter.funnyLatLng(fix.get(Fields.Lon.ordinal()))),
                             fix.getTimePoint(), new KnotSpeedWithBearingImpl(fix.get(Fields.TWS.ordinal()),
                                     new DegreeBearingImpl(fix.get(Fields.TWD.ordinal())).reverse()));
                     result.add(wind);
@@ -103,19 +103,5 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
             importer.importFixes(inputStream, callback, filename, filename, /* downsample */ false);
         }
         return result;
-    }
-    
-    /**
-     * latitude / longitude are represented in funny NMEA-like way; the value divided by 100 as a floored integer
-     * represents the full degrees; the value modulo 100 represents the decimal minutes. Example: the pair (4124.645890,
-     * 213.738670) stands for N41°24.645890 E002°13.738670, or as decimal degrees (41.410765, 2.228978)
-     * 
-     * @param d double value in "funny" format
-     * @return double value as decimal degrees
-     */
-    private double funnyLatLng(double d) {
-        final int intDeg = (int) (d / 100.);
-        final double minutes = d - intDeg;
-        return ((double) intDeg) + minutes/60.;
     }
 }
