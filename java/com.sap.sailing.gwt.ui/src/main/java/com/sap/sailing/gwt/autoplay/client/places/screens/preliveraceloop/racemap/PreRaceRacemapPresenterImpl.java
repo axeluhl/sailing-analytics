@@ -76,9 +76,13 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                         default:
                         }
                     }
-                    String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(), null,
-                            getSlideCtx().getPreLiveRace());
-                    view.updateStatistic(lastStatisticResult, url, windSpeed, windDegree);
+                    //in rare circumstances it can occure, that while the liverace changes, the url could be updated due to timing overlaps
+                    RegattaAndRaceIdentifier preRace = getSlideCtx().getPreLiveRace();
+                    if(preRace != null){
+                        String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(), null,
+                                preRace);
+                        view.updateStatistic(lastStatisticResult, url, windSpeed, windDegree);
+                    }
                 }
             }
         };
