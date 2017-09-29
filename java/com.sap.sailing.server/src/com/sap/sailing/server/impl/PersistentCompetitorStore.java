@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
@@ -13,12 +16,15 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -51,21 +57,48 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this, raceLogResolver);
         this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, serviceFinderFactory);
         this.storeTo = storeTo;
+        migrateCompetitorsIfRequired();
         if (clearCompetitorsAndBaots) {
-            storeTo.removeAllCompetitors();
             storeTo.removeAllBoats();
+            storeTo.removeAllCompetitors();
         } else {
-            Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
-            for (Competitor competitor : allCompetitors) {
-                addCompetitorToTransientStore(competitor.getId(), competitor);
-            }
             Collection<Boat> allBoats = loadFrom.loadAllBoats();
             for (Boat boat: allBoats) {
                 addBoatToTransientStore(boat.getId(), boat);
             }
+            Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
+            for (Competitor competitor : allCompetitors) {
+                addCompetitorToTransientStore(competitor.getId(), competitor);
+            }
         }
     }
     
+    /**
+     * Migrate competitors with contained boats (before bug2822) to competitors with separate boats if required
+     */
+    private void migrateCompetitorsIfRequired() {
+        boolean migrationRequired = !storeTo.getDatabase().collectionExists(CollectionNames.BOATS.name());
+        if (migrationRequired) {
+            Collection<CompetitorWithBoat> allLegacyCompetitorsWithBoat = loadFrom.loadAllLegacyCompetitorsWithBoat();
+            List<Competitor> newCompetitors = new ArrayList<>();
+            List<Boat> newBoats = new ArrayList<>();
+            
+            for (CompetitorWithBoat competitorWithBoat: allLegacyCompetitorsWithBoat) {
+                Boat containedBoat = competitorWithBoat.getBoat();
+                // Create a new random uuid for the boats to make sure the competitor uuid is not used  
+                UUID boatUUID = UUID.randomUUID();
+                DynamicBoat newBoat = new BoatImpl(boatUUID, containedBoat.getName(), containedBoat.getBoatClass(), containedBoat.getSailID());
+                newBoats.add(newBoat);
+                
+                CompetitorWithBoat newCompetitorWithBoat = new CompetitorWithBoatImpl((Competitor) competitorWithBoat, newBoat);
+                newCompetitors.add(newCompetitorWithBoat);
+            }
+            storeTo.storeCompetitors(newCompetitors);
+            storeTo.storeBoats(newBoats);
+        }
+    }
+
+
     DomainObjectFactory getDomainObjectFactory() {
         return loadFrom;
     }

@@ -180,6 +180,11 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
                 return leaderboardGroupID.equals(lg1.getId()) ? lg1 : leaderboardGroupID.equals(lg2.getId()) ? lg2 : null;
             }
+
+            @Override
+            public LeaderboardGroup resolveLeaderboardGroupByRegattaName(String regattaName) {
+                return null;
+            }
         });
         assertNotNull(loadedEvent);
         assertEquals(eventName, loadedEvent.getName());

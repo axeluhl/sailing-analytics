@@ -224,10 +224,10 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorWithBoatJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorWithBoatRefJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.deserialization.impl.LegacyCompetitorWithContainedBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -253,8 +253,8 @@ import com.sap.sse.util.ThreadPoolUtil;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
-    private final CompetitorWithBoatJsonDeserializer competitorWithBoatDeserializer;
-    private final CompetitorJsonDeserializer competitorDeserializer;
+    private final LegacyCompetitorWithContainedBoatJsonDeserializer legacyCompetitorWithBoatDeserializer;
+    private final CompetitorWithBoatRefJsonDeserializer competitorWithBoatRefDeserializer;
     private final BoatJsonDeserializer boatDeserializer;
 
     private final DB database;
@@ -287,8 +287,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             this.raceTrackingConnectivityParamsServiceFinder = null;
         }
         this.baseDomainFactory = baseDomainFactory;
-        this.competitorWithBoatDeserializer = CompetitorWithBoatJsonDeserializer.create(baseDomainFactory);
-        this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
+        this.legacyCompetitorWithBoatDeserializer = LegacyCompetitorWithContainedBoatJsonDeserializer.create(baseDomainFactory);
+        this.competitorWithBoatRefDeserializer = CompetitorWithBoatRefJsonDeserializer.create(baseDomainFactory);
+//        this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
         this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory);
         this.database = db;
     }
@@ -2326,19 +2327,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Collection<Competitor> loadAllCompetitors() {
-        Collection<Competitor> competitors = loadAllCompetitorsWithoutBoat();
-        Collection<CompetitorWithBoat> competitorsWithBoat = loadAllCompetitorsWithBoat();
-        competitors.addAll(competitorsWithBoat);
-        return competitors; 
-    }
-    
-    private Collection<Competitor> loadAllCompetitorsWithoutBoat() {
         ArrayList<Competitor> result = new ArrayList<>();
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITH_BOAT_REFERENCES.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                Competitor c = competitorDeserializer.deserialize(json);
+                Competitor c = competitorWithBoatRefDeserializer.deserialize(json);
                 result.add(c);
             }
         } catch (Exception e) {
@@ -2348,18 +2342,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Collection<CompetitorWithBoat> loadAllCompetitorsWithBoat() {
+    @Override
+    public Collection<CompetitorWithBoat> loadAllLegacyCompetitorsWithBoat() {
         ArrayList<CompetitorWithBoat> result = new ArrayList<>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                CompetitorWithBoat c = competitorWithBoatDeserializer.deserialize(json);
+                CompetitorWithBoat c = legacyCompetitorWithBoatDeserializer.deserialize(json);
                 result.add(c);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-            logger.log(Level.SEVERE, "loadCompetitors", e);
+            logger.log(Level.SEVERE, "loadLegacyCompetitors", e);
         }
         return result;
     }

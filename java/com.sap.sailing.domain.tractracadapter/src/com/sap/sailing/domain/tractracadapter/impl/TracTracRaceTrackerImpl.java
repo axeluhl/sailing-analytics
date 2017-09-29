@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
@@ -261,10 +262,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      */
     TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
-                raceLogResolver, connectivityParams, timeoutInMilliseconds);
+                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
     }
     
     /**
@@ -283,7 +284,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      */
     TracTracRaceTrackerImpl(final Regatta regatta, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
@@ -394,7 +395,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
-                simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, tractracRace,
+                simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, tractracRace,
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
                 useInternalMarkPassingAlgorithm, timeoutInMilliseconds)) {
             receivers.add(receiver);

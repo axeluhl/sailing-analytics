@@ -1482,10 +1482,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
                 if (regatta == null) {
                     // create tracker and use an existing or create a default regatta
-                    tracker = params.createRaceTracker(this, windStore, /* raceLogResolver */ this, timeoutInMilliseconds);
+                    tracker = params.createRaceTracker(this, windStore, /* raceLogResolver */ this, /* leaderboardGroupResolver */ this, timeoutInMilliseconds);
                 } else {
                     // use the regatta selected by the RaceIdentifier regattaToAddTo
-                    tracker = params.createRaceTracker(regatta, this, windStore, /* raceLogResolver */ this, timeoutInMilliseconds);
+                    tracker = params.createRaceTracker(regatta, this, windStore, /* raceLogResolver */ this, /* leaderboardGroupResolver */ this, timeoutInMilliseconds);
                     assert tracker.getRegatta() == regatta;
                 }
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
@@ -2570,6 +2570,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return leaderboardGroupsByID.get(leaderboardGroupID);
     }
 
+    @Override
+    public LeaderboardGroup resolveLeaderboardGroupByRegattaName(String regattaName) {
+        for (LeaderboardGroup leaderboardGroup: getLeaderboardGroups().values()) {
+            for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                if (leaderboard.getName().equals(regattaName)) {
+                    return leaderboardGroup;
+                }
+            }
+        }
+        return null;
+    }
+    
     @Override
     public LeaderboardGroup addLeaderboardGroup(UUID leaderboardGroupId, String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, List<String> leaderboardNames,

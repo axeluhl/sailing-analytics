@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -37,6 +38,7 @@ public interface MetadataParser {
     public interface BoatMetaData extends Named {
         String getId();
         String getColor();
+        UUID getUuid();
     }
 
     Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);

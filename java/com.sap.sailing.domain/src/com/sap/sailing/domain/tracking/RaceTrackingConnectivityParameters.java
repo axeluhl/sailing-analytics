@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 
 /**
  * Different tracking providers require different sets of arguments to start tracking a race.
@@ -34,7 +35,7 @@ public interface RaceTrackingConnectivityParameters {
      *            tracker.
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception;
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception;
     
     /**
      * Starts a {@link RaceTracker}, associating the resulting races with the {@link Regatta} passed as argument
@@ -44,7 +45,7 @@ public interface RaceTrackingConnectivityParameters {
      * @param timeoutInMilliseconds TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception;
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception;
     
     /**
      * Deliver an ID object equal to that of the {@link RaceTracker#getID()} delivered by the {@link RaceTracker}

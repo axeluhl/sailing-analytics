@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -116,17 +117,17 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             CreateModelException, SubscriberInitializationException {
-        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
+        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, this, timeoutInMilliseconds);
         return tracker;
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception {
+            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, raceLogStore, regattaLogStore, windStore,
-                trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
+                trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, this, timeoutInMilliseconds);
         return tracker;
     }
 

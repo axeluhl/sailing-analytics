@@ -84,15 +84,31 @@ public class MetadataParserImpl implements MetadataParser {
 
     public class BoatMetaDataImpl extends NamedImpl implements BoatMetaData  {
         private static final long serialVersionUID = 1L;
-        private final String id; 
+        private String id; 
+        private UUID uuid; 
         private final String color; 
 
-        public BoatMetaDataImpl(String boatName, String boatId, String boatColor) {
+        public BoatMetaDataImpl(String boatUuid, String boatId, String boatName, String boatColor) {
             super(boatName);
             this.id = boatId;
+            this.uuid = null;
             this.color = boatColor;
+            if (boatUuid != null) {
+                try {
+                    this.uuid = UUID.fromString(boatUuid);
+                } catch (IllegalArgumentException e) {
+                    // fallback, at least id is set to the provided string 
+                    if (id == null) {
+                        id = boatUuid;
+                    }
+                }    
+            }
         }
-        
+
+        public UUID getUuid() {
+            return uuid;
+        }
+
         public String getId() {
             return id;
         }
@@ -236,6 +252,7 @@ public class MetadataParserImpl implements MetadataParser {
         BoatMetaData result = null;
         String parsedBoatName = null;
         String parsedBoatId = null;
+        String parsedBoatUuid = null;
         String parsedColor = null;
         String raceCompetitorMetadataString = competitor.getMetadata() != null ? competitor.getMetadata().getText() : null;
         if (raceCompetitorMetadataString != null) {
@@ -245,12 +262,14 @@ public class MetadataParserImpl implements MetadataParser {
                     parsedBoatName = entry.getValue();
                 } else if (entry.getKey().equals("boatId")) {
                     parsedBoatId = entry.getValue();
+                } else if (entry.getKey().equals("boatUuid")) {
+                    parsedBoatUuid = entry.getValue();
                 } else if (entry.getKey().equals("boatColor")) {
                     parsedColor = entry.getValue();
                 }
             }
-            if (parsedBoatName != null && parsedBoatId != null && parsedColor != null) {
-                result = new BoatMetaDataImpl(parsedBoatName, parsedBoatId, parsedColor);
+            if (parsedBoatName != null && (parsedBoatId != null || parsedBoatUuid != null)  && parsedColor != null) {
+                result = new BoatMetaDataImpl(parsedBoatUuid, parsedBoatId, parsedBoatName, parsedColor);
             }
         }
         return result;

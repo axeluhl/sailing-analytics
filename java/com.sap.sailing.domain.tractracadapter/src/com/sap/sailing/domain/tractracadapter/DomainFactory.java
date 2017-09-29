@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -139,7 +140,7 @@ public interface DomainFactory {
      * @param timeoutInMilliseconds TODO
      */
     TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     /**
@@ -148,7 +149,7 @@ public interface DomainFactory {
      * @param timeoutInMilliseconds TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException;
 
@@ -172,7 +173,7 @@ public interface DomainFactory {
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, long delayToLiveInMillis,
             Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, IRace tractracRace,
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds);
 
@@ -232,7 +233,7 @@ public interface DomainFactory {
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
             long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            RaceLogResolver raceLogResolver, URI courseDesignUpdateURI, 
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, URI courseDesignUpdateURI, 
             String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean ignoreTracTracMarkPassings, long timeoutInMilliseconds, ReceiverType... types);
 
     JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
@@ -265,7 +266,8 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, IRace race, BoatClass defaultBoatClass);
+    Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, LeaderboardGroupResolver LeaderboardGroupResolver,
+            IRace race, BoatClass defaultBoatClass);
 
     BoatClass resolveDominantBoatClassOfRace(IRace race);
     

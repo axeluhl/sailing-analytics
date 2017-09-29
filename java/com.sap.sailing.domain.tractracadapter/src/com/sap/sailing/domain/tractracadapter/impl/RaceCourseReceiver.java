@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -66,16 +67,18 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     private final IControlRouteChangeListener listener;
     private final boolean useInternalMarkPassingAlgorithm;
     private final RaceLogResolver raceLogResolver;
+    private final LeaderboardGroupResolver leaderboardGroupResolver;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             IRace tractracRace, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, Simulator simulator,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
-            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) {
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         this.tractracRace = tractracRace;
         this.raceLogResolver = raceLogResolver;
+        this.leaderboardGroupResolver = leaderboardGroupResolver;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
         if (simulator == null) {
@@ -159,7 +162,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
             BoatClass dominantBoatClass = getDomainFactory().resolveDominantBoatClassOfRace(tractracRace);
-            Map<Competitor, Boat> competitorAndBoats = getDomainFactory().getOrCreateCompetitorsAndTheirBoats(getTrackedRegatta(), tractracRace, dominantBoatClass);
+            Map<Competitor, Boat> competitorAndBoats = getDomainFactory().getOrCreateCompetitorsAndTheirBoats(getTrackedRegatta(), leaderboardGroupResolver, tractracRace, dominantBoatClass);
             trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(),
                     dominantBoatClass, competitorAndBoats, course, sidelines, windStore, delayToLiveInMillis,
