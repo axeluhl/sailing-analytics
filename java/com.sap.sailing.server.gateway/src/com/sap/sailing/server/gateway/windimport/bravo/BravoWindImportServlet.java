@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,11 +39,11 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         final String sourceName;
         logger.info("Importing Bravo wind data from "+uploadRequest.files);
         if (uploadRequest.files != null && !uploadRequest.files.isEmpty()) {
-            sourceName = uploadRequest.files.toString();
+            sourceName = uploadRequest.files.stream().map(f->f.getName()).collect(Collectors.joining(", "));
         } else {
             sourceName = "Bravo Wind Import";
         }
-        windSource = new WindSourceWithAdditionalID(WindSourceType.WEB, sourceName + "@" + MillisecondsTimePoint.now());
+        windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, sourceName + "@" + MillisecondsTimePoint.now());
         return windSource;
     }
 
