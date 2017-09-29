@@ -2284,13 +2284,9 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="264"/>
                                 <subviews>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NN8-QQ-TQB">
-                                        <rect key="frame" x="314.5" y="215.5" width="40.5" height="40.5"/>
-                                        <color key="backgroundColor" red="0.95294117647058818" green="0.95294117647058818" blue="0.95294117647058818" alpha="1" colorSpace="calibratedRGB"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="40" id="9j5-Jx-rb6"/>
-                                            <constraint firstAttribute="width" constant="40" id="h8u-PR-H5K"/>
-                                        </constraints>
+                                        <rect key="frame" x="307" y="206" width="56" height="56"/>
                                         <state key="normal" image="edit"/>
+                                        <state key="highlighted" image="edit_pressed"/>
                                         <connections>
                                             <action selector="teamImageEditButtonTapped:" destination="b2Z-q5-zaZ" eventType="touchUpInside" id="oXP-LX-4Da"/>
                                         </connections>
@@ -2315,10 +2311,10 @@
                                     </button>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="NN8-QQ-TQB" secondAttribute="trailing" constant="20" id="2sh-sE-6uK"/>
+                                    <constraint firstAttribute="trailing" secondItem="NN8-QQ-TQB" secondAttribute="trailing" constant="12" id="2sh-sE-6uK"/>
                                     <constraint firstItem="LGR-3t-JL4" firstAttribute="centerX" secondItem="iwM-mY-oZT" secondAttribute="centerX" id="CXp-qA-Ajf"/>
                                     <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="bhL-2M-5XL" secondAttribute="trailing" constant="20" id="K21-QC-T7D"/>
-                                    <constraint firstAttribute="bottom" secondItem="NN8-QQ-TQB" secondAttribute="bottom" constant="8" id="MLS-BW-Q1Y"/>
+                                    <constraint firstAttribute="bottom" secondItem="NN8-QQ-TQB" secondAttribute="bottom" constant="2" id="MLS-BW-Q1Y"/>
                                     <constraint firstItem="LGR-3t-JL4" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="iwM-mY-oZT" secondAttribute="leading" constant="20" id="O61-Gf-BKa"/>
                                     <constraint firstItem="bhL-2M-5XL" firstAttribute="centerX" secondItem="iwM-mY-oZT" secondAttribute="centerX" id="Q3G-HZ-ioT"/>
                                     <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="LGR-3t-JL4" secondAttribute="trailing" constant="20" id="UKL-Q2-04G"/>
@@ -2395,7 +2391,8 @@
     <resources>
         <image name="DE.png" width="64" height="64"/>
         <image name="camera" width="24" height="24"/>
-        <image name="edit" width="24" height="24"/>
+        <image name="edit" width="56" height="56"/>
+        <image name="edit_pressed" width="56" height="56"/>
         <image name="fab" width="56" height="56"/>
         <image name="fab_pressed" width="56" height="56"/>
         <image name="profile_placeholder" width="360" height="256"/>
