@@ -10,6 +10,7 @@ import Foundation
 
 struct Application {
     static let Title = "SAP Sail InSight"
+    static let RequestTimeout: TimeInterval = 7
 }
 
 struct URLs {

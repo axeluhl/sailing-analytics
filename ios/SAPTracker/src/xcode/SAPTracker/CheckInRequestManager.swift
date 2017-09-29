@@ -88,6 +88,7 @@ class CheckInRequestManager: NSObject {
         self.baseURLString = baseURLString
         manager = AFHTTPRequestOperationManager(baseURL: URL(string: baseURLString))
         manager.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
+        manager.requestSerializer.timeoutInterval = Application.RequestTimeout
         manager.responseSerializer = AFJSONResponseSerializer() as AFHTTPResponseSerializer
         sessionManager = AFURLSessionManager(sessionConfiguration: URLSessionConfiguration.default)
         sessionManager.responseSerializer = AFJSONResponseSerializer() as AFHTTPResponseSerializer
