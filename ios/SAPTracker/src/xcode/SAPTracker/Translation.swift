@@ -541,7 +541,8 @@ class Translation: NSObject {
         }
         struct StartTrackingButton { private static let Key = "\(TrainingView.Key).\(StartTrackingButton.self)"
             struct Title { private static let Key = "\(StartTrackingButton.Key).\(Title.self)"
-                static let String = RegattaView.StartTrackingButton.Title.String
+                static let StringWhenTrainingIsActive = RegattaView.StartTrackingButton.Title.String
+                static let StringWhenTrainingIsInActive = TrainingView.ReactivateAlert.Title.String
             }
         }
         struct FinishButton { private static let Key = "\(TrainingView.Key).\(FinishButton.self)"

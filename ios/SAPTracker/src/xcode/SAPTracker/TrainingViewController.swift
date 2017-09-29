@@ -62,7 +62,7 @@ class TrainingViewController: UIViewController {
     
     fileprivate func setupLocalization() {
         leaderboardButton.setTitle(Translation.TrainingView.LeaderboardButton.Title.String, for: .normal)
-        startTrackingButton.setTitle(Translation.TrainingView.StartTrackingButton.Title.String, for: .normal)
+        startTrackingButton.setTitle(isTrainingActive ? Translation.TrainingView.StartTrackingButton.Title.StringWhenTrainingIsActive : Translation.TrainingView.StartTrackingButton.Title.StringWhenTrainingIsInActive, for: .normal)
         finishButton.setTitle(Translation.TrainingView.FinishButton.Title.String, for: .normal)
     }
     
@@ -117,8 +117,10 @@ class TrainingViewController: UIViewController {
     
     fileprivate func refreshStartTrainingButton() {
         if (isTrainingActive) {
+            startTrackingButton.setTitle(Translation.TrainingView.StartTrackingButton.Title.StringWhenTrainingIsActive, for: .normal)
             makeGreen(button: startTrackingButton)
         } else {
+            startTrackingButton.setTitle(Translation.TrainingView.StartTrackingButton.Title.StringWhenTrainingIsInActive, for: .normal)
             makeGray(button: startTrackingButton)
         }
     }
