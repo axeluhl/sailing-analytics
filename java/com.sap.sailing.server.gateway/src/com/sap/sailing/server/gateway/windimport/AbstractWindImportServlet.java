@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImportServlet.WindImportResult.RaceEntry;
@@ -201,7 +202,8 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
         response.getWriter().append(windImportResult.json().toJSONString());
     }
 
-    protected abstract Iterable<Wind> importWind(Map<InputStream, String> streamsWithFilenames) throws IOException, InterruptedException;
+    protected abstract Iterable<Wind> importWind(Map<InputStream, String> streamsWithFilenames)
+            throws IOException, InterruptedException, FormatNotSupportedException;
 
     protected abstract WindSource getWindSource(UploadRequest uploadRequest);
 

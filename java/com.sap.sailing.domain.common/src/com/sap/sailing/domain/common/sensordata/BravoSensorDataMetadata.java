@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.common.sensordata;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -51,8 +53,16 @@ public enum BravoSensorDataMetadata {
     public static List<String> getTrackColumnNames() {
         ArrayList<String> colNames = new ArrayList<>(getTrackColumnCount());
         for (BravoSensorDataMetadata item : BravoSensorDataMetadata.values()) {
-            colNames.add(item.columnName);
+            colNames.add(item.getColumnName());
         }
         return colNames;
+    }
+
+    public static Map<String, Integer> getColumnNamesToIndexInDoubleFix() {
+        final Map<String, Integer> columnNamesToIndexInDoubleFix = new HashMap<>();
+        for (final BravoSensorDataMetadata column : BravoSensorDataMetadata.values()) {
+            columnNamesToIndexInDoubleFix.put(column.getColumnName(), column.getColumnIndex());
+        }
+        return columnNamesToIndexInDoubleFix;
     }
 }
