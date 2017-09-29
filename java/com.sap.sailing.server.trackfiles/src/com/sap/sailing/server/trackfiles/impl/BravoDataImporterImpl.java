@@ -74,9 +74,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 }
                 LOG.fine("Validate and parse header columns");
                 final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
-
                 DoubleFixProcessor downsampler = createProcessor(callback, trackIdentifier);
-
                 buffer.lines().forEach(line -> {
                     lineNr.incrementAndGet();
                     downsampler.accept(parseLine(lineNr.get(), filename, line, colIndices));
