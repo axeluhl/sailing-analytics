@@ -24,16 +24,16 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
     Distance getManeuverLoss();
 
     @Statistic(messageKey = "ManeuverEnteringAbsTWA", ordinal = 5)
-    Double getEnteringBeatAngle();
+    Double getEnteringAbsTWA();
 
     @Statistic(messageKey = "ManeuverExitingAbsTWA", ordinal = 6)
-    Double getExitingBeatAngle();
+    Double getExitingAbsTWA();
 
     @Statistic(messageKey = "ManeuverDurationInSeconds", ordinal = 8, resultDecimals = 2)
     Double getManeuverDuration();
 
     @Statistic(messageKey = "AbsTWAAtManeuverClimax", ordinal = 7)
-    Double getBeatAngleAtManeuverClimax();
+    Double getAbsTWAAtManeuverClimax();
 
     @Statistic(messageKey = "EnteringManeuverSpeedMinusExitingSpeed", ordinal = 19, resultDecimals = 4)
     Double getEnteringManeuverSpeedMinusExitingSpeed();

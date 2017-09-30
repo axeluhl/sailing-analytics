@@ -45,7 +45,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     @Override
-    public Double getBeatAngleAtManeuverClimax() {
+    public Double getAbsTWAAtManeuverClimax() {
         Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
         TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
                 .getTrackedRace();
@@ -95,12 +95,12 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     @Override
-    public Double getEnteringBeatAngle() {
+    public Double getEnteringAbsTWA() {
         return getBeatAngleAtTimepoint(maneuver.getTimePointBefore());
     }
 
     @Override
-    public Double getExitingBeatAngle() {
+    public Double getExitingAbsTWA() {
         return getBeatAngleAtTimepoint(maneuver.getTimePointAfter());
     }
 
