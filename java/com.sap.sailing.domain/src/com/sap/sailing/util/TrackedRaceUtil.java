@@ -12,7 +12,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Util class which is used for bearing calculation for positions within a GPS track of a competitor.
+ * Util class which is used for bearing calculation considering positions within a GPS track of a competitor.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -71,7 +71,8 @@ public class TrackedRaceUtil {
 
     /**
      * Represents a bearing step within a certain part of a GPS track. It consists of time point, speed with bearing,
-     * and course change in degrees.
+     * and course change in degrees. The latter is calculated as course change between the bearing of the previous step
+     * and this step. If there is no previous step, then the course change in degrees value is zero.
      * 
      * @author Vladislav Chumak (D069712)
      *
@@ -81,6 +82,16 @@ public class TrackedRaceUtil {
         private final SpeedWithBearing speedWithBearing;
         private final double courseChangeInDegrees;
 
+        /**
+         * Constructs a bearing step with details about speed, bearing and course change related to the previous step.
+         * 
+         * @param timePoint
+         *            The time point when the step details have been recorded
+         * @param speedWithBearing
+         *            Speed with bearing at the provided time point
+         * @param courseChangeInDegrees
+         *            Course change in degrees compared to the previous step. Zero, if this is a first step.
+         */
         public BearingStep(TimePoint timePoint, SpeedWithBearing speedWithBearing, double courseChangeInDegrees) {
             this.timePoint = timePoint;
             this.speedWithBearing = speedWithBearing;

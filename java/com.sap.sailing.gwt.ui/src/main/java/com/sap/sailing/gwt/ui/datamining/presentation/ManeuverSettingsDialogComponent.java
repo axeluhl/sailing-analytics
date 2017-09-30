@@ -14,6 +14,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
+ * Settings dialog for maneuver settings.
  * 
  * @author Vladislav Chumak (D069712)
  *

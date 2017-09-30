@@ -22,6 +22,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  */
 public class ChartFactory extends Chart {
 
+    /**
+     * Creates a circular chart for polar data rendering for TWA range [-179°; 180°].
+     * 
+     * @return The chart for polars
+     */
     public static Chart createPolarChart() {
         LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1)
                 .setMarker(new Marker().setEnabled(false));
@@ -34,6 +39,15 @@ public class ChartFactory extends Chart {
         return polarSheetChart;
     }
 
+    /**
+     * Creates a line diagram for data count per TWA value.
+     * 
+     * @param xAxisLabel
+     *            The label of the X-axis
+     * @param stringMessages
+     *            The i18n messages
+     * @return A line diagram
+     */
     public static Chart createDataCountHistogramChart(String xAxisLabel, StringMessages stringMessages) {
         Chart histogramChart = new Chart().setType(Type.COLUMN).setHeight100().setWidth100();
         histogramChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
@@ -45,6 +59,13 @@ public class ChartFactory extends Chart {
         return histogramChart;
     }
 
+    /**
+     * Creates a line diagram for the development of boat speed considering the wind speed.
+     * 
+     * @param stringMessages
+     *            The i18n messages
+     * @return A line diagram
+     */
     public static Chart createSpeedChart(StringMessages stringMessages) {
         Chart speedChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
         speedChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
@@ -55,6 +76,13 @@ public class ChartFactory extends Chart {
         return speedChart;
     }
 
+    /**
+     * Creates a line diagram for the development of beat angle considering the wind speed.
+     * 
+     * @param stringMessages
+     *            The i18n messages
+     * @return A line diagram
+     */
     public static Chart createAngleChart(StringMessages stringMessages) {
         Chart angleChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
         angleChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
@@ -64,6 +92,13 @@ public class ChartFactory extends Chart {
         return angleChart;
     }
 
+    /**
+     * Creates a line diagram for displaying the polars.
+     * 
+     * @param stringMessages
+     *            The i18n messages
+     * @return A line diagram
+     */
     public static Chart createLineChartForPolarData(StringMessages stringMessages) {
         LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1)
                 .setMarker(new Marker().setEnabled(false));

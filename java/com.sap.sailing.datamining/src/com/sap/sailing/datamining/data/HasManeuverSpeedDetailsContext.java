@@ -26,8 +26,8 @@ public interface HasManeuverSpeedDetailsContext {
     @Statistic(messageKey = "RatioToEnteringSpeed", ordinal = 1, resultDecimals = 4)
     ManeuverSpeedDetailsStatistic getRatioToEnteringSpeedStatistic();
 
-    @Statistic(messageKey = "RatioToPreviousTWA", ordinal = 5, resultDecimals = 4)
-    ManeuverSpeedDetailsStatistic getRatioToPreviousTWAStatistic();
+    @Statistic(messageKey = "RatioToPreviousTWASpeed", ordinal = 5, resultDecimals = 4)
+    ManeuverSpeedDetailsStatistic getRatioToPreviousTWASpeedStatistic();
 
     @Statistic(messageKey = "LowestRatioToEnteringSpeed", ordinal = 2, resultDecimals = 4)
     Double getLowestRatioToEnteringSpeedStatistic();

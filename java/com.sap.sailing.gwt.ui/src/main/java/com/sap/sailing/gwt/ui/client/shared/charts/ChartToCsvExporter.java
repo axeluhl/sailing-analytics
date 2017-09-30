@@ -23,8 +23,8 @@ public class ChartToCsvExporter {
     }
 
     /**
-     * Converts the data of the chart into CSV format and copies that into clipboard. Finally, window alert gets shown
-     * to the user with information that the CSV has been put into clipboard.
+     * Converts the data of the chart into CSV format and stores it in clipboard. Finally, window alert gets shown
+     * to the user with information that there is CSV content in his clipboard.
      * 
      * @param chartToExport
      *            Chart with data to export

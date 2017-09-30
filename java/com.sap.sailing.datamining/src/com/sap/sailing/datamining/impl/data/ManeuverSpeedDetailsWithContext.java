@@ -80,7 +80,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     }
 
     @Override
-    public ManeuverSpeedDetailsStatistic getRatioToPreviousTWAStatistic() {
+    public ManeuverSpeedDetailsStatistic getRatioToPreviousTWASpeedStatistic() {
         double[] speedRatioToPreviousSpeedPerTWA = new double[360];
         double lastSpeedValue = 0;
 
