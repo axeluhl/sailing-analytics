@@ -21,7 +21,7 @@ public class DomainFactoryImplTest {
     
     @Test
     public void testGetDominantBoatClass_TestNullCollection() {
-        Assert.assertEquals(null, domainFactory.resolveDominantBoatClassOfRace(null));
+        Assert.assertEquals(null, domainFactory.getDominantBoatClass(null));
     }
     
     @Test
