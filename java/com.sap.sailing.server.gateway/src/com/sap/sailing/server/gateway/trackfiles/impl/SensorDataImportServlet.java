@@ -96,7 +96,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                                 }
                             }
                         }
-                    }, fi.getName(), requestedImporterName);
+                    }, fi.getName(), requestedImporterName, /* downsample */ true);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
                 } catch (FormatNotSupportedException e) {
                     logger.log(Level.INFO, "Failed to import file " + requestedImporterName);

@@ -541,6 +541,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaIsLive(String regattaName);
     String regattasAreLive(String regattaNames);
     String scoringSchemeHighPointFirstGetsOne();
+    String scoringSchemeHighPointFirstGetsOneDescription();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String knotsValue(double value);
@@ -879,6 +880,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String seriesLeaderboard();
     String regattaLeaderboards();
     String polars();
+    String foilingSegments();
     String sailID();
     String clearSelection();
     String running();
@@ -1803,6 +1805,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String set();
     String gribWindImport_Title();
     String nmeaWindImport_Title();
+    String bravoWindImport_Title();
     String angleInDegree();
     String angleInRadian();
     String centralAngleInRadian();
@@ -1918,4 +1921,15 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String anniversaryAnnouncementTeaser(int anniversary);
     String anniversaryAnnouncementDescription(String raceDisplayName);
     String anniversaryRaceLinkText();
+    String minimumFoilingSegmentsDurationInSeconds();
+    String minimumFoilingSegmentsDurationInSecondsTooltip();
+    String maximumSpeedNotFoilingInKnots();
+    String maximumSpeedNotFoilingInKnotsTooltip();
+    String minimumSpeedForFoilingInKnots();
+    String minimumSpeedForFoilingInKnotsTooltip();
+    String minimumRideHeightInMeters();
+    String minimumRideHeightInMetersTooltip();
+    String minimumDurationBetweenAdjacentFoilingSegmentsInSeconds();
+    String minimumDurationBetweenAdjacentFoilingSegmentsInSecondsTooltip();
+    String needToProvideValidMinimumRideHeight();
 }

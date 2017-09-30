@@ -23,6 +23,9 @@ public interface HasFoilingSegmentContext {
     
     TimePoint getEndOfFoilingSegment();
     
+    @Dimension(messageKey="FoilingSegmentName")
+    String getName();
+    
     @Statistic(messageKey="FoilingDuration")
     Duration getDuration();
     

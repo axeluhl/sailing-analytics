@@ -33,7 +33,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
@@ -53,6 +52,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
@@ -383,7 +383,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         DefaultHttpClient client = new SystemDefaultHttpClient();
         CookieStore cookieStore = new BasicCookieStore();
         client.setCookieStore(cookieStore);
-        client.setRedirectStrategy(new LaxRedirectStrategy());
+        client.setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes());
         HttpGet get = new HttpGet(getOauthAuthorizeUrl());
         HttpResponse responseForAuthorize = client.execute(get);
         return signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);

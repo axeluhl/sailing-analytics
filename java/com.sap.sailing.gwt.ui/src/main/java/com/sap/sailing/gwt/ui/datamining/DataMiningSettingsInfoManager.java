@@ -7,9 +7,11 @@ import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.datamining.shared.ManeuverSettingsImpl;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettingsImpl;
+import com.sap.sailing.datamining.shared.FoilingSegmentsDataMiningSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.ManeuverSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.presentation.ManeuverSpeedDetailsSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.polarmining.FoilingSegmentsDataMiningSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
@@ -36,6 +38,9 @@ public class DataMiningSettingsInfoManager {
         ManeuverSettingsInfo maneuverSettingsInfo = new ManeuverSettingsInfo();
         infosMappedBySettingsType.put(ManeuverSettings.class, maneuverSettingsInfo);
         infosMappedBySettingsType.put(ManeuverSettingsImpl.class, maneuverSettingsInfo);
+
+        FoilingSegmentsDataMiningSettingsInfo foilingDataMiningSettingsInfo = new FoilingSegmentsDataMiningSettingsInfo();
+        infosMappedBySettingsType.put(FoilingSegmentsDataMiningSettings.class, foilingDataMiningSettingsInfo);
     }
 
     public DataMiningSettingsInfo getSettingsInfo(Class<?> settingsType) {
@@ -43,7 +48,6 @@ public class DataMiningSettingsInfoManager {
     }
 
     private class PolarDataMiningSettingsInfo implements DataMiningSettingsInfo {
-
         @SuppressWarnings("unchecked")
         @Override
         public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
@@ -108,4 +112,23 @@ public class DataMiningSettingsInfoManager {
 
     }
 
+    private class FoilingSegmentsDataMiningSettingsInfo implements DataMiningSettingsInfo {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
+                SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new FoilingSegmentsDataMiningSettingsDialogComponent(
+                    (FoilingSegmentsDataMiningSettings) settings);
+        }
+
+        @Override
+        public String getLocalizedName(StringMessages stringMessages) {
+            return stringMessages.foilingSegments();
+        }
+
+        @Override
+        public String getId() {
+            return "FoilingSegmentsDataMiningSettingsInfo";
+        }
+    }
 }
