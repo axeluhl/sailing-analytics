@@ -1,0 +1,94 @@
+{
+  "Instances": [
+    {
+      "Monitoring": {
+        "State": "disabled"
+      },
+      "PublicDnsName": "",
+      "StateReason": {
+        "Message": "pending",
+        "Code": "pending"
+      },
+      "State": {
+        "Code": 0,
+        "Name": "pending"
+      },
+      "EbsOptimized": false,
+      "LaunchTime": "2017-09-30T21:25:42.000Z",
+      "PrivateIpAddress": "172.31.11.219",
+      "ProductCodes": [],
+      "VpcId": "vpc-e5ba568c",
+      "StateTransitionReason": "",
+      "InstanceId": "i-0bffd2ccda265d766",
+      "ImageId": "ami-39f3e25d",
+      "PrivateDnsName": "ip-172-31-11-219.eu-west-2.compute.internal",
+      "KeyName": "leonradeck-keypair",
+      "SecurityGroups": [
+        {
+          "GroupName": "Sailing Analytics App",
+          "GroupId": "sg-871732ee"
+        }
+      ],
+      "ClientToken": "",
+      "SubnetId": "subnet-cf1119b7",
+      "InstanceType": "t2.medium",
+      "NetworkInterfaces": [
+        {
+          "Status": "in-use",
+          "MacAddress": "06:3e:b3:b7:f0:6c",
+          "SourceDestCheck": true,
+          "VpcId": "vpc-e5ba568c",
+          "Description": "",
+          "NetworkInterfaceId": "eni-7bc4ee29",
+          "PrivateIpAddresses": [
+            {
+              "PrivateDnsName": "ip-172-31-11-219.eu-west-2.compute.internal",
+              "Primary": true,
+              "PrivateIpAddress": "172.31.11.219"
+            }
+          ],
+          "PrivateDnsName": "ip-172-31-11-219.eu-west-2.compute.internal",
+          "Attachment": {
+            "Status": "attaching",
+            "DeviceIndex": 0,
+            "DeleteOnTermination": true,
+            "AttachmentId": "eni-attach-7685b216",
+            "AttachTime": "2017-09-30T21:25:42.000Z"
+          },
+          "Groups": [
+            {
+              "GroupName": "Sailing Analytics App",
+              "GroupId": "sg-871732ee"
+            }
+          ],
+          "Ipv6Addresses": [],
+          "OwnerId": "017363970217",
+          "SubnetId": "subnet-cf1119b7",
+          "PrivateIpAddress": "172.31.11.219"
+        }
+      ],
+      "SourceDestCheck": true,
+      "Placement": {
+        "Tenancy": "default",
+        "GroupName": "",
+        "AvailabilityZone": "eu-west-2a"
+      },
+      "Hypervisor": "xen",
+      "BlockDeviceMappings": [],
+      "Architecture": "x86_64",
+      "RootDeviceType": "ebs",
+      "RootDeviceName": "/dev/xvda",
+      "VirtualizationType": "hvm",
+      "Tags": [
+        {
+          "Value": "test",
+          "Key": "Name"
+        }
+      ],
+      "AmiLaunchIndex": 0
+    }
+  ],
+  "ReservationId": "r-05476b18f9f0eb85b",
+  "Groups": [],
+  "OwnerId": "017363970217"
+}
