@@ -342,6 +342,11 @@ upper() {
   tr '[:lower:]' '[:upper:]'
 }
 
+# Removes all whitespaces
+trim() {
+	tr -d '[:space:]'
+}
+
 ltrim() {
   # Removes all leading whitespace (from the left).
   local char=${1:-[:space:]}
@@ -354,7 +359,7 @@ rtrim() {
   sed "s%[${char//%/\\%}]*$%%"
 }
 
-trim() {
+lttrim() {
   # Removes all leading/trailing whitespace
   # Usage examples:
   #     echo "  foo  bar baz " | trim  #==> "foo  bar baz"
@@ -381,6 +386,10 @@ squeeze_lines() {
     # </doc:squeeze_lines> }}}
 
     sed '/^[[:space:]]\+$/s/.*//g' | cat -s | trim_lines
+}
+
+sanitize(){
+	tr -d '\r'
 }
 
 progressBar() {

@@ -45,11 +45,10 @@ use_tmux=false
 args=()
 
 # Create temp directory with three random numbers and the process ID
-tmpDir=$(mktemp ./${scriptName}.XXXXXX)
-sleep 100
-#(umask 077 && mktemp "${tmpDir}") || {
-#  die "Could not create temporary directory! Exiting."
-#}
+tmpDir="/tmp/${scriptName}.$RANDOM.$RANDOM.$RANDOM.$$"
+(umask 077 && mkdir "${tmpDir}") || {
+  die "Could not create temporary directory! Exiting."
+}
 
 # Logging
 # Log is only used when the '-l' flag is set.
@@ -86,7 +85,8 @@ This is an AWS automation bash script for deploying SAP Sailing Analytics instan
   -k, --key-name             IAM keypair name 
   -f, --key-file             Path to keypair file
   -s, --security-group-ids   Security group ids of instance to create 
-  -u, --user-data            Path to userdata file
+  -u, --user-username        Username of user to create
+  -q, --user-password        Password of user to create
   -n, --instance-name        Name for instance (only letters and numbers)
   -l, --instance-short-name  Short name for instance
   -h, --hosted-zone-id	     Hosted zone id 
@@ -153,21 +153,37 @@ while [[ $1 = -?* ]]; do
 	-k|--key-name) shift; key_name_param=${1} ;;
 	-f|--key-file) shift; key_file_param=${1} ;;
 	-s|--security-group-ids) shift; security_group_ids_param=${1} ;;
-	-u|--user-data) shift; user_data_param=${1} ;;
+	-u|--user-username) shift; user_username_param=${1} ;;
+	-q|--user-password) shift; user_password_param=${1} ;;
 	-n|--name) shift; instance_name_param=${1} ;;
 	-l|--short-name) shift; instance_short_name_param=${1} ;;
 	-h|--hosted-zone-id) shift; hosted_zone_id_param=${1} ;;
 	-a|--admin-password) shift; new_admin_password_param=${1} ;;
 	-m|--mongo-db-host) shift; mongo_db_host_param=${1} ;;
 	-p|--mongo-db-port) shift; mongo_db_port_param=${1} ;;
-	--create-elb-standalone-instance) shift; create_elb_standalone_instance_param=true ;;
-	--use-tmux) shift; use_tmux=true ;;
+	--create-elb-standalone-instance) shift; create_elb_standalone_instance_param=${1} ;;
+	--use-tmux) shift; use_tmux=${1}	 ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac
   shift
 done
 
+# Override default variables with parameter values 
+region=${region_param:-$default_region}
+instance_type=${instance_type_param:-$default_instance_type}
+key_name=${key_name_param:-$default_key_name}
+key_file=${key_file_param:-$default_key_file}
+security_group_ids=${security_group_ids_param:-$default_security_group_ids}
+user_data=${user_data_param:-$default_user_data}
+instance_name=${instance_name_param:-$default_instance_name_param}
+instance_short_name=${instance_short_name_param:-$default_instance_short_name}
+hosted_zone_id=${hosted_zone_id_param:-$default_hosted_zone_id}
+new_admin_password=${new_admin_password_param:-$default_new_admin_password}
+user_username=${user_username_param:-$default_user_username}
+user_password=${user_password_param:-$default_user_password}
+MONGODB_HOST=${mongo_db_host_param:-$DEFAULT_MONGODB_HOST}
+MONGODB_PORT=${mongo_db_port_param:-$DEFAULT_MONGODB_PORT}
 
 # Store the remaining part as arguments.
 args+=("$@")
