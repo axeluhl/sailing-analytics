@@ -18,9 +18,6 @@ function user_input(){
 }
 
 function execute() {
-	prepare_user_data_variables "$USE_ENVIRONMENT_VALUE"
-	create_user_data_file
-	
 	echo "Creating instance..."
 	json_instance=$(run_instance)
 	instance_id=$(get_instance_id "$json_instance")
@@ -70,11 +67,17 @@ function execute() {
 	# ignore new user for the moment because updating its priviliges via rest is not yet implemented
 	
 	echo "Creating elastic load balancer..."
-	json_elb=$(create_http_elb "$instance_name")
-  # json_elb=$(create_https_elb "$instance_name" "$certificate_arn")
-	elb_dns_name=$(get_elb_dns_name "$json_elb")
-	echo "Created elastic load balancer: $elb_dns_name."
-
+	load_balancer_name=$($instance_name | trim)
+	json_load_balancer=$(create_http_elb "$load_balancer_name")
+  # json_load_balancer=$(create_https_elb "$load_balancer_name" "$certificate_arn")
+	load_balancer_dns_name=$(get_elb_dns_name "$json_load_balancer")
+	echo "Created elastic load balancer: $load_balancer_dns_name."
+	
+	echo "Configuring load balancer health check..."
+	configure_health_check_http "$load_balancer_name"
+  # configure_health_check_https "$load_balancer_name"	
+	echo "Configured load balancer health check..."
+	
 	echo "Adding instance to elb..."
 	json_added_instance_response=$(add_instance_to_elb "$instance_name" "$instance_id")
 	added_instance_id=$(get_added_instance_from_elb "$json_added_instance_response" )
@@ -84,15 +87,19 @@ function execute() {
 }
 
 function run_instance(){
+	prepare_user_data_variables
+	create_user_data_file
+	
 	local command="aws --region $region ec2 run-instances"
 	command+=$(add_param "region" $region)
 	command+=$(add_param "image-id" $image_id)
 	command+=$(add_param "count" $instance_count)
 	command+=$(add_param "instance-type" $instance_type)
 	command+=$(add_param "key-name" $key_name)
-	command+=$(add_param "security-group-ids" $security_group_ids)
+	command+=$(add_param "security-group-ids" $instance_security_group_ids)
 	command+=$(add_param "user-data" 'file://${tmpDir}/$user_data_file')
 	command+=$(add_param "tag-specifications" $(printf $tag_specifications $instance_name))
+	
 	eval "$command"
 }
 
@@ -102,30 +109,14 @@ function create_user_data_file(){
 }
 
 function prepare_user_data_variables() {
-	if [ -z "$MONGODB_HOST" ]; then
-		MONGODB_HOST="$DEFAULT_MONGODB_HOST"
-	fi
-	if [ -z "$MONGODB_PORT" ]; then
-		MONGODB_PORT="$DEFAULT_MONGODB_PORT"
-	fi
-	if [ -z "$MONGODB_NAME" ]; then
-		MONGODB_NAME="$(lower_trim $instance_name)"
-	fi
-	if [ -z "$REPLICATION_CHANNEL" ]; then
-		REPLICATION_CHANNEL="$MONGODB_NAME"
-	fi
-	if [ -z "$SERVER_NAME" ]; then
-		SERVER_NAME="$MONGODB_NAME"
-	fi
-	if [ -z "$USE_ENVIRONMENT" ]; then
-		USE_ENVIRONMENT="live-server"
-	fi
-	if [ -z "$INSTALL_FROM_RELEASE" ]; then
-		INSTALL_FROM_RELEASE="$(get_latest_release)"
-	fi	
-	if [ -z "$SERVER_STARTUP_NOTIFY" ]; then
-		SERVER_STARTUP_NOTIFY="$DEFAULT_SERVER_STARTUP_NOTIFY"
-	fi
+	MONGODB_HOST="$mongodb_host"
+	MONGODB_PORT="$mongodb_port"
+	MONGODB_NAME="$(lower_trim $instance_name)"
+	REPLICATION_CHANNEL="$MONGODB_NAME"
+	SERVER_NAME="$MONGODB_NAME"
+	USE_ENVIRONMENT="live-server"
+	INSTALL_FROM_RELEASE="$(get_latest_release)"
+	SERVER_STARTUP_NOTIFY="$default_server_startup_notify"
 }
 
 function write_user_data_to_file(){

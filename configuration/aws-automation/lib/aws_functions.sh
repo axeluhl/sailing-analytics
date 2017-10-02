@@ -37,12 +37,12 @@ function create_event(){
 
 # $1: access_token $2: public_dns_name $3: admin_username 4: admin_new_password
 function change_admin_password(){
-	curl -X POST -H "Authorization: Bearer $access_token" "http://$public_dns_name:8888/security/api/restsecurity/change_password" --data "username=$admin_username" --data "password=$new_admin_password"
+	curl -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
 }
 
 # $1: access_token $2: public_dns_name 3: user_username 4: user_password
 function create_new_user(){
-	curl -X POST -H "Authorization: Bearer $access_token" "http://$public_dns_name:8888/security/api/restsecurity/create_user" --data "username=$user_username" --data "password=$user_password"
+	curl -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
 }
 
 # $1: json_instance
@@ -62,7 +62,7 @@ function query_public_dns_name(){
 
 # $1: key_file $2: ssh_user $3: public_dns_name
 function wait_for_ssh_connection(){
-	status=""
+	local status=""
 	while [[ $status != ok ]]
 	do
 		echo -n "."
@@ -96,13 +96,23 @@ function wait_for_create_event_resource(){
 }
 
 # $1: load_balancer_name $2: subnet_ids
-function create_http_elb(){
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --availability-zones $(get_availability_zones)
+function create_load_balancer_http(){
+	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --availability-zones $(get_availability_zones) --security-groups "$elb_security_group_ids"
 }
 
 # $1: load_balancer_name $2: certificate_arn
-function create_https_elb(){
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones $(get_availability_zones)
+function create_load_balancer_https(){
+	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones $(get_availability_zones) --security-groups "$elb_security_group_ids"
+}
+
+# $1: load_balancer_name
+function configure_health_check_http(){
+	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTP:80/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
+}
+
+# $1: load_balancer_name
+function configure_health_check_https(){
+	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTPS:443/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
 }
 
 function get_availability_zones(){
@@ -130,16 +140,17 @@ function input_region(){
 		echo $region
 	fi
 }
+
 function input_instance_type(){
 	if [ -z "$instance_type_param" ]; then
-		ask $(instance_type_ask_message) instance_type
+		ask $(instance_type_ask_message) default_instance_type instance_type 
 		echo $instance_type
 	fi
 }
 
 function input_instance_name(){
 	if [ -z "$instance_name_param" ]; then
-		ask_required $(instance_name_ask_message) instance_name 
+		ask_required $(instance_name_ask_message) default_instance_name instance_name 
 		echo $instance_name
 	fi
 }
@@ -174,14 +185,14 @@ function input_new_admin_password(){
 
 function input_mongo_db_host(){
 	if [ -z "$mongo_db_host_param" ]; then
-		ask $(mongo_db_host_ask_message) MONGODB_HOST
+		ask $(mongo_db_host_ask_message) mongodb_host
 		echo $MONGODB_HOST
 	fi
 }
 
 function input_mongo_db_port(){
 	if [ -z "$mongo_db_port_param" ]; then
-		ask $(mongo_db_port_ask_message) MONGODB_PORT
+		ask $(mongo_db_port_ask_message) mongodb_port
 		echo $MONGODB_PORT
 	fi
 }

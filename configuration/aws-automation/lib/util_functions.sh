@@ -254,14 +254,14 @@ function is_not_confirmed() {
 # ------------------------------------------------------
 
 function ask(){
-	 read -e -p "$1" -i "${!2}" $2
+	 read -e -p "$1" -i "${!2}" $3
 }
 
 function ask_required(){
-    read -e -p "$1" -i "${!2}" $2
+    read -e -p "$1" -i "${!2}" $3
 	while [[ -z "${!2}" ]]
 	do
-	  read -e -p "$1" -i "${!2}" $2
+	  read -e -p "$1" -i "${!2}" $3
 	done
 }
 
