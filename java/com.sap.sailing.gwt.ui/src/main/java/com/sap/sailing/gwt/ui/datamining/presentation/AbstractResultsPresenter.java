@@ -90,10 +90,8 @@ implements ResultsPresenterWithControls<SettingsType> {
                 presentationPanel.setWidget(getPresentationWidget());
                 state = ResultsPresenterState.RESULT;
             }
-            
             this.currentResult = result;
             updateCurrentResultInfo();
-            
             internalShowResults(getCurrentResult());
         } else {
             this.currentResult = null;

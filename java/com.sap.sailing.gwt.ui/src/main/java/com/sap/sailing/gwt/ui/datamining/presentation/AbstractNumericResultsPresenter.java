@@ -36,7 +36,6 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
     public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
-        
         numberDataProvider = new NumberDataProvider();
         dataProviders = new HashMap<>();
         AbstractNumericDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
@@ -45,7 +44,6 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         dataProviders.put(durationDataProvider.getResultType().getName(), durationDataProvider);
         AbstractNumericDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
         dataProviders.put(bearingDataProvider.getResultType().getName(), bearingDataProvider);
-        
         dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
             @Override
             protected String convertObjectToString(String dataKey) {
