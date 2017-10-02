@@ -9,6 +9,7 @@ scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 utilsLocation="${scriptPath}/lib/utils.sh"
 
+# source utils.sh
 if [ -f "${utilsLocation}" ]; then
   source "${utilsLocation}"
 else
@@ -16,6 +17,7 @@ else
   exit 1
 fi
 
+# delete temp files when trapped
 function trapCleanup() {
   echo ""
   deleteTemp
@@ -29,9 +31,9 @@ function safeExit() {
 }
 
 function deleteTemp () {
-  if is_dir "${tmpDir}"; then
-    rm -r "${tmpDir}"
-  fi
+   if is_dir "${tmpDir}"; then
+     rm -r "${tmpDir}"
+   fi
 }
 
 quiet=false
@@ -40,12 +42,12 @@ verbose=true
 force=false
 strict=false
 debug=true
-use_tmux=false
+use_tmux=true
 args=()
 
 # Create temp directory with three random numbers and the process ID
-tmpDir="/tmp/${scriptName}.$RANDOM.$RANDOM.$RANDOM.$$"
-(umask 077 && mkdir "${tmpDir}") || {
+tmpDir="./tmp/"
+(umask 000 && mkdir "${tmpDir}") || {
   die "Could not create temporary directory! Exiting."
 }
 
@@ -56,12 +58,8 @@ tmpDir="/tmp/${scriptName}.$RANDOM.$RANDOM.$RANDOM.$$"
 # -----------------------------------
 logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
-# checkDependencies
-# checkEnvironment
 
 function mainScript() {
-# configureUI
-
 
 echo -n
 if [ "$create_elb_standalone_instance_param" == "true" ]; then

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Set default values here. 
-# Overwrite Hierarchy: 1. parameter values 2. console input values 3. default values
+# Cave: default values get overwritten by passing parameters to the script
 default_region=eu-west-2
 default_count=1
 default_instance_type=t2.medium
@@ -18,18 +18,12 @@ default_user_username=testuser
 default_user_password=password
 DEFAULT_MONGODB_HOST=35.176.4.35
 DEFAULT_MONGODB_PORT=27017
-
-# These variables are set automatically
-MONGODB_NAME=
-USE_ENVIRONMENT=
-REPLICATION_CHANNEL=
-SERVER_NAME=
+DEFAULT_SERVER_STARTUP_NOTIFY=leon.radeck@sap.com
 
 # Constants
 ssh_retry_interval=2
 ssh_user=root
 http_retry_interval=5
-SERVER_STARTUP_NOTIFY=leon.radeck@sap.com
 user_data_file=".userdata.txt"
 admin_username=admin
 admin_password=admin
