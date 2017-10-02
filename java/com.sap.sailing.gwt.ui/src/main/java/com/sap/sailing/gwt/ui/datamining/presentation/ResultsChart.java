@@ -244,25 +244,21 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private void showResultData() {
         buildMainKeyMapAndSetXAxisCategories();
         createAndAddSeriesToChart();
-        
         Map<GroupKey, List<Number>> valuesPerMainKey = new HashMap<>();
         for (Entry<GroupKey, ? extends Number> resultEntry : currentResultValues.entrySet()) {
             GroupKey mainKey = GroupKey.Util.getMainKey(resultEntry.getKey());
             Number value = resultEntry.getValue();
-            
             if (!isCurrentResultSimple()) {
                 if (!valuesPerMainKey.containsKey(mainKey)) {
                     valuesPerMainKey.put(mainKey, new ArrayList<Number>());
                 }
                 valuesPerMainKey.get(mainKey).add(value);
             }
-            
             Point point = new Point(mainKeyToXValueMap.get(mainKey), value);
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
         }
-        
         averagePerMainKey.clear();
         medianPerMainKey.clear();
         if (!isCurrentResultSimple()) {
@@ -272,7 +268,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 medianPerMainKey.put(mainKey, getMedianFromValues(values));
             }
         }
-        
         chart.redraw();
     }
 
@@ -361,11 +356,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(getStringMessages().dataMiningResult()));
-        
         chart.setExporting(new Exporting().setEnabled(false));
-
         chart.getXAxis().setAllowDecimals(false);
-
         chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
@@ -376,7 +368,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 }
             }
         }));
-        
         return chart;
     }
 
