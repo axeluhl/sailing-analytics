@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceData
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DurationDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.NumberDataProvider;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -54,7 +55,8 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-                internalShowNumericResult(resultValues);
+                Map<GroupKey, Pair<Number, Number>> errorMargins = currentDataProvider.getErrorData(getCurrentResult(), dataSelectionListBox.getValue());
+                internalShowNumericResult(resultValues, errorMargins);
             }
         });
         addControl(dataSelectionListBox);
@@ -63,7 +65,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
     /**
      * Adjusts, if necessary, the {@link #currentDataProvider} to the type of result, then requests from the
      * {@link #currentDataProvider} the mapping of the {@code result} to {@link Number}s for each group key.
-     * The {@link Number}s returned by the provider will then be passed to {@link #internalShowNumericResult(Map)}
+     * The {@link Number}s returned by the provider will then be passed to {@link #internalShowNumericResult(Map, Map)}
      * for display.
      */
     protected void internalShowResults(QueryResultDTO<?> result) {
@@ -71,7 +73,8 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         updateDataSelectionListBox();
         if (currentDataProvider != null) {
             Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-            internalShowNumericResult(resultValues);
+            Map<GroupKey, Pair<Number, Number>> errorMargins = currentDataProvider.getErrorData(getCurrentResult(), dataSelectionListBox.getValue());
+            internalShowNumericResult(resultValues, errorMargins);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
@@ -101,7 +104,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         }
     }
 
-    protected abstract void internalShowNumericResult(Map<GroupKey, Number> resultValues);
+    protected abstract void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Pair<Number, Number>> errorMargins);
 
     String getSelectedDataKey() {
         return dataSelectionListBox.getValue();

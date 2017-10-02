@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
@@ -123,10 +124,22 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
+    
+    /**
+     * The series showing the numerical results
+     */
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
+    
+    /**
+     * The optional series visualizing error bars, if available based on the data type;
+     * see 
+     */
+    private final Map<GroupKey, Series> errorSeriesMappedByGroupKey;
+    
     private final GroupKey simpleResultSeriesKey;
     private final Map<GroupKey, Integer> mainKeyToXValueMap;
     private Map<GroupKey, Number> currentResultValues;
+    private Map<GroupKey, Pair<Number, Number>> currentResultErrorMargins;
 
     private final Map<GroupKey, Double> averagePerMainKey;
     private final Map<GroupKey, Double> medianPerMainKey;
@@ -181,8 +194,9 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         chart = createChart();
         chartPanel.setWidget(chart);
         
-        seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
-        simpleResultSeriesKey = new GenericGroupKey<String>(stringMessages.results());
+        seriesMappedByGroupKey = new HashMap<>();
+        errorSeriesMappedByGroupKey = new HashMap<>();
+        simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
         mainKeyToXValueMap = new HashMap<>();
         averagePerMainKey = new HashMap<>();
         medianPerMainKey = new HashMap<>();
@@ -194,8 +208,9 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     }
 
     @Override
-    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Pair<Number, Number>> errorMargins) {
         this.currentResultValues = resultValues;
+        this.currentResultErrorMargins = errorMargins;
         decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);
         updateKeyComparatorListBox();
         resetChartSeries();
@@ -229,6 +244,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private void resetChartSeries() {
         chart.removeAllSeries(false);
         seriesMappedByGroupKey.clear();
+        errorSeriesMappedByGroupKey.clear();
     }
 
     private void updateChartLabels() {
@@ -258,6 +274,13 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
+            final Pair<Number, Number> errorMargins = currentResultErrorMargins.get(mainKey);
+            if (errorMargins != null) {
+                Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(), errorMargins.getB());
+                point.setName(mainKey.asString());
+                errorSeriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
+                    .addPoint(errorMarginsPoint, false, false, false);
+            }
         }
         averagePerMainKey.clear();
         medianPerMainKey.clear();
@@ -327,12 +350,15 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
                 seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
+                errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()+
+                        " "+getStringMessages().dataMiningErrorMargins()));
             }
         }
         List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
         Collections.sort(sortedSeriesKeys);
         for (GroupKey seriesKey : sortedSeriesKeys) {
             chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
+            chart.addSeries(errorSeriesMappedByGroupKey.get(seriesKey), false, false);
         }
     }
     

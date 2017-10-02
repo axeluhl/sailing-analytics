@@ -1915,4 +1915,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String minimumDurationBetweenAdjacentFoilingSegmentsInSeconds();
     String minimumDurationBetweenAdjacentFoilingSegmentsInSecondsTooltip();
     String needToProvideValidMinimumRideHeight();
+    String dataMiningErrorMargins();
 }
