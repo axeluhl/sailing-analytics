@@ -95,9 +95,18 @@ function wait_for_create_event_resource(){
 	done
 }
 
-# $1: load_balancer_name $2: subnet_id
-function create_elb(){
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --subnets $2
+# $1: load_balancer_name $2: subnet_ids
+function create_http_elb(){
+	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --availability-zones $(get_availability_zones)
+}
+
+# $1: load_balancer_name $2: certificate_arn
+function create_https_elb(){
+	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones $(get_availability_zones)
+}
+
+function get_availability_zones(){
+	aws ec2 --region $region describe-availability-zones | jq -r '.AvailabilityZones[].ZoneName' | tr -s '\r\n' ' '
 }
 
 # $1: json_elb

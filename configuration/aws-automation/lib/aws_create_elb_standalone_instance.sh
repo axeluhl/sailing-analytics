@@ -23,7 +23,6 @@ function execute() {
 	
 	echo "Creating instance..."
 	json_instance=$(run_instance)
-	subnet_id=$(get_subnet_id "$json_instance")
 	instance_id=$(get_instance_id "$json_instance")
 	
 	echo "Wait until instance is recognized by AWS..." 
@@ -71,7 +70,8 @@ function execute() {
 	# ignore new user for the moment because updating its priviliges via rest is not yet implemented
 	
 	echo "Creating elastic load balancer..."
-	json_elb=$(create_elb "$instance_name" "$subnet_id")
+	json_elb=$(create_http_elb "$instance_name")
+  # json_elb=$(create_https_elb "$instance_name" "$certificate_arn")
 	elb_dns_name=$(get_elb_dns_name "$json_elb")
 	echo "Created elastic load balancer: $elb_dns_name."
 
@@ -87,7 +87,7 @@ function run_instance(){
 	local command="aws --region $region ec2 run-instances"
 	command+=$(add_param "region" $region)
 	command+=$(add_param "image-id" $image_id)
-	command+=$(add_param "count" $count)
+	command+=$(add_param "count" $instance_count)
 	command+=$(add_param "instance-type" $instance_type)
 	command+=$(add_param "key-name" $key_name)
 	command+=$(add_param "security-group-ids" $security_group_ids)
