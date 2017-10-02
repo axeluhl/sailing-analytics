@@ -39,7 +39,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
         SafeHtmlBuilder resultsBuilder = new SafeHtmlBuilder();
         resultsBuilder.appendHtmlConstant("<b>").appendEscaped(result.getResultSignifier()).appendHtmlConstant("</b>");
         resultsBuilder.appendHtmlConstant("<br />");
-        
         resultsBuilder.appendHtmlConstant("<table>");
         if (isCurrentResultTwoDimensional()) {
             buildTable(resultValues, resultsBuilder);
@@ -47,7 +46,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
             buildList(resultValues, resultsBuilder);
         }
         resultsBuilder.appendHtmlConstant("</table>");
-        
         resultsLabel.setHTML(resultsBuilder.toSafeHtml().asString());
     }
 
@@ -75,7 +73,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
                     unfoldedResultValues.get(mainKey).containsKey(subKey)) {
                     value = unfoldedResultValues.get(mainKey).get(subKey);
                 }
-                
                 resultsBuilder.appendHtmlConstant("<td>");
                 if (value != null) {
                     resultsBuilder.append(value.doubleValue());
