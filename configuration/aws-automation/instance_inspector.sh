@@ -1,23 +1,37 @@
 #!/usr/bin/env bash
 
+ssh_user=root
+public_dns_name=$1
+key_file='/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem'
+
+while getopts i: option
+do
+ case "${option}"
+ in
+ i) public_dns_name=${OPTARG};;
+ esac
+done
+
+main() {
+	checkDependencies
+	checkEnvironment
+	configureUI
+	tmux_open_connections
+	tmux_tail_logfiles
+}
+
 function checkDependencies() {
 if ! type tmux >/dev/null 2>/dev/null; then
   echo "The package \"tmux\" is required to run this script"
-  safeExit
+  exit
 fi
 }
 
 function checkEnvironment() {
 if ! { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
   echo "Please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
-  safeExit
+  exit
 fi 
-}
-
-function tail_instance(){
-	configureUI
-	tmux_open_connections
-	tmux_tail_logfiles
 }
 
 function configureUI() {
@@ -44,7 +58,9 @@ function tmux_open_connections() {
 }
 
 function tmux_tail_logfiles(){
-	tmux send-keys -t 1 "clear;echo \"Waiting for file /home/sailing/servers/server/logs/sailing0.log.0 to appear...\";tail -F -v /home/sailing/servers/server/logs/sailing0.log.0" C-m
-	tmux send-keys -t 2 "clear;tail -f -v /var/log/sailing.out" C-m
-	tmux send-keys -t 3 "clear;tail -f -v /var/log/sailing.err" C-m
+	tmux send-keys -t 1 "clear;echo \"Waiting for file /home/sailing/servers/server/logs/sailing0.log.0 to appear...\";less +F /home/sailing/servers/server/logs/sailing0.log.0" C-m
+	tmux send-keys -t 2 "clear;less +F /var/log/sailing.out" C-m
+	tmux send-keys -t 3 "clear;less +F /var/log/sailing.err" C-m
 }
+
+main

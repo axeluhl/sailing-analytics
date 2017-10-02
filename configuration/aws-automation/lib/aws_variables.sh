@@ -30,7 +30,7 @@ image_id=ami-39f3e25d
 hosted_zone_id=Z1R8UBAEXAMPLE
 certificate_arn='arn:aws:iam::123456789012:server-certificate/my-server-cert'
 elb_security_group_ids=sg-871732ee
-mongodb_host=35.176.4.35 
+mongodb_host=35.176.42.142
 mongodb_port=27017
 
 # Other Variables
@@ -39,6 +39,7 @@ ssh_retry_interval=2
 ssh_user=root
 http_retry_interval=5
 user_data_file=".userdata.txt"
+change_resource_record_set_file=".change-resource-record-set.json"
 tag_specifications="\'ResourceType=instance,Tags=[{Key=Name,Value=%s}]\'"
 admin_username=admin
 admin_password=admin

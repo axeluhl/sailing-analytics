@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function create_elb_standalone_instance(){
+function create_instance_with_elb(){
 	user_input
 	execute
 }
@@ -13,13 +13,12 @@ function user_input(){
 	input_key_name
 	input_key_file
 	input_new_admin_password
-	input_mongo_db_host
-	input_mongo_db_port
 }
 
 function execute() {
 	echo "Creating instance..."
 	json_instance=$(run_instance)
+
 	instance_id=$(get_instance_id "$json_instance")
 	
 	echo "Wait until instance is recognized by AWS..." 
@@ -28,6 +27,7 @@ function execute() {
 	
 	echo "Querying for the instance public dns name..." 
 	public_dns_name=$(query_public_dns_name $instance_id)
+
 	echo "The public dns name is: $public_dns_name"
 	
 	echo -n "Wait until ssh connection is established.." 
@@ -36,8 +36,7 @@ function execute() {
 	
 	if [ "$use_tmux" == "true" ]; then
 		echo "Started tailing logfiles on panes 1,2,3."
-		tmux_open_connections
-		tmux_tail_logfiles
+		tail_instance
 	fi
 	
 	echo -n "Wait until resource \"/security/api/restsecurity/access_token\" is available..."
@@ -57,19 +56,17 @@ function execute() {
 	echo "Created event with id: $event_id."
 	
 	echo "Changing admin password from $admin_password to $new_admin_password..."
-	change_admin_password "$access_token" "$public_dns_name" "$admin_username" "$admin_new_password"
-	echo "Changed admin password."
+	change_admin_password "$access_token" "$public_dns_name" "$admin_username" "$new_admin_password"
 
 	echo "Creating new user \"$user_username\" with password \"$user_password\"..."
 	create_new_user "$access_token" "$public_dns_name" "$user_username" "$user_password"
-	echo "Created user."
 	
 	# ignore new user for the moment because updating its priviliges via rest is not yet implemented
 	
 	echo "Creating elastic load balancer..."
-	load_balancer_name=$($instance_name | trim)
-	json_load_balancer=$(create_http_elb "$load_balancer_name")
-  # json_load_balancer=$(create_https_elb "$load_balancer_name" "$certificate_arn")
+	load_balancer_name=$(echo "$instance_name" | trim)
+	json_load_balancer=$(create_load_balancer_http "$load_balancer_name")
+  # json_load_balancer=$(create_load_balancer_https "$load_balancer_name" "$certificate_arn")
 	load_balancer_dns_name=$(get_elb_dns_name "$json_load_balancer")
 	echo "Created elastic load balancer: $load_balancer_dns_name."
 	
@@ -82,6 +79,10 @@ function execute() {
 	json_added_instance_response=$(add_instance_to_elb "$instance_name" "$instance_id")
 	added_instance_id=$(get_added_instance_from_elb "$json_added_instance_response" )
 	echo "Added instance \"$added_instance_id\" to elb \"$elb_dns_name\"."
+	
+	echo "Creating route53 record set (Name: $load_balancer_name.sapsailing.com Value: $load_balancer_dns_name Type: CNAME)"
+	create_change_resource_record_set_file "asd" 60 "ddd"
+	#change_resource_record_sets
 	
 	echo "Finished."
 }
@@ -120,8 +121,6 @@ function prepare_user_data_variables() {
 }
 
 function write_user_data_to_file(){
-	create_empty_user_data_file
-	
 	local CR_LF=$'\r'$'\n'
 
 	content+="MONGODB_HOST=$MONGODB_HOST"

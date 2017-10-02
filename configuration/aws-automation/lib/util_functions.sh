@@ -259,7 +259,7 @@ function ask(){
 
 function ask_required(){
     read -e -p "$1" -i "${!2}" $3
-	while [[ -z "${!2}" ]]
+	while [[ -z "${!3}" ]]
 	do
 	  read -e -p "$1" -i "${!2}" $3
 	done

@@ -24,12 +24,6 @@ function get_latest_release(){
 	echo "$result" | head -1
 }
 
-function create_empty_user_data_file(){
-	if [ ! $(is_exists "${tmpDir}/$user_data_file") ]; then
-		touch $user_data_file
-	fi
-}
-
 # $1: access_token $:2 public_dns_name 
 function create_event(){
 	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" | jq -r '.eventid' | tr -d '\r'
@@ -97,12 +91,12 @@ function wait_for_create_event_resource(){
 
 # $1: load_balancer_name $2: subnet_ids
 function create_load_balancer_http(){
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --availability-zones $(get_availability_zones) --security-groups "$elb_security_group_ids"
+	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids"
 }
 
 # $1: load_balancer_name $2: certificate_arn
 function create_load_balancer_https(){
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones $(get_availability_zones) --security-groups "$elb_security_group_ids"
+	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids"
 }
 
 # $1: load_balancer_name
@@ -116,12 +110,12 @@ function configure_health_check_https(){
 }
 
 function get_availability_zones(){
-	aws ec2 --region $region describe-availability-zones | jq -r '.AvailabilityZones[].ZoneName' | tr -s '\r\n' ' '
+	aws ec2 --region $region describe-availability-zones --query "AvailabilityZones[].ZoneName"
 }
 
 # $1: json_elb
 function get_elb_dns_name(){
-	echo $1 | jq -r '.DNSName'
+	echo $1 | jq -n -r '.DNSName'
 }
 
 # $1: load_balancer_name 2: instance_id 
@@ -132,6 +126,19 @@ function add_instance_to_elb(){
 # $1: json_response
 function get_added_instance_from_elb(){
 	echo "$json_response" | jq -r '.Instances[0].InstanceId'
+}
+
+
+# $1: subdomain_name $2: TTL $3: load_balancer_dns 
+function create_change_resource_record_set_file(){
+	json=$(printf '{"Changes":[{"Action":"CREATE","ResourceRecordSet": {"Name": "%s","Type": "CNAME","TTL": %s,"ResourceRecords":[{"Value": "%s"}]}}]}' $1 $2 $3)
+	echo "$json" > "${tmpDir}/$change_resource_record_set_file"
+	#cat "${tmpDir}/$change_resource_record_set_file" | jq .
+}
+
+# NOT TESTED
+function change_resource_record_sets(){
+	aws route53 change-resource-record-sets --hosted-zone-id $hosted_zone_id --change-batch "file://${tmpDir}/$change_resource_record_set_file"
 }
 
 function input_region(){
@@ -157,43 +164,29 @@ function input_instance_name(){
 
 function input_instance_short_name(){
 	if [ -z "$instance_short_name_param" ]; then
-		ask_required $(instance_short_name_ask_message) instance_short_name
+		ask_required $(instance_short_name_ask_message) default_instance_short_name instance_short_name
 		echo $instance_short_name
 	fi
 }
 
 function input_key_name(){
 	if [ -z "$key_name_param" ]; then
-		ask $(key_name_ask_message) key_name
+		ask $(key_name_ask_message) default_key_name key_name
 		echo $key_name
 	fi
 }
 
 function input_key_file(){
 	if [ -z "$key_file_param" ]; then
-		ask $(key_file_ask_message) key_file
+		ask $(key_file_ask_message) default_key_file key_file
 		echo $key_file
 	fi
 }
 
 function input_new_admin_password(){
 	if [ -z "$new_admin_password_param" ]; then
-		ask $(new_admin_password_ask_message) new_admin_password
+		ask $(new_admin_password_ask_message) default_new_admin_password new_admin_password
 		echo $new_admin_password
-	fi
-}
-
-function input_mongo_db_host(){
-	if [ -z "$mongo_db_host_param" ]; then
-		ask $(mongo_db_host_ask_message) mongodb_host
-		echo $MONGODB_HOST
-	fi
-}
-
-function input_mongo_db_port(){
-	if [ -z "$mongo_db_port_param" ]; then
-		ask $(mongo_db_port_ask_message) mongodb_port
-		echo $MONGODB_PORT
 	fi
 }
 

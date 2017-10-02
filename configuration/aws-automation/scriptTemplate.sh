@@ -60,11 +60,13 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
 
 function mainScript() {
-
 echo -n
-if [ "$create_elb_standalone_instance_param" == "true" ]; then
-	
-	create_elb_standalone_instance
+if [ "$use_tmux_param" == "true" ]; then
+	checkDependencies
+	checkEnvironment
+fi
+if [ "$create_instance_with_elb_param" == "true" ]; then
+	create_instance_with_elb
 fi
 }
 
@@ -147,8 +149,8 @@ while [[ $1 = -?* ]]; do
 	-n|--instance-name) shift; instance_name_param=${1} ;;
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
-	--create-elb-standalone-instance) shift; create_elb_standalone_instance_param=${1} ;;
-	--use-tmux) shift; use_tmux=${1}	 ;;
+	--create-instance-with-elb) shift; create_instance_with_elb_param=${1} ;;
+	--use-tmux) shift; use_tmux_param=${1} ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac
