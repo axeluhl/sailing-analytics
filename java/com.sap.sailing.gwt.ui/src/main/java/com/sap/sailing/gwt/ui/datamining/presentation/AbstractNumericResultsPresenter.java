@@ -60,6 +60,12 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         addControl(dataSelectionListBox);
     }
     
+    /**
+     * Adjusts, if necessary, the {@link #currentDataProvider} to the type of result, then requests from the
+     * {@link #currentDataProvider} the mapping of the {@code result} to {@link Number}s for each group key.
+     * The {@link Number}s returned by the provider will then be passed to {@link #internalShowNumericResult(Map)}
+     * for display.
+     */
     protected void internalShowResults(QueryResultDTO<?> result) {
         currentDataProvider = selectCurrentDataProvider();
         updateDataSelectionListBox();
