@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining.presentation.dataproviders;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -24,27 +24,27 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
  *
  * @param <T>
  */
-public abstract class AbstractNumericDataProvider<T> {
+public abstract class AbstractNumericDataProvider<T extends Serializable> {
 
     private final Class<T> resultType;
-    private final LinkedHashMap<String, Function<T, Number>> mappings;
 
-    protected AbstractNumericDataProvider(Class<T> resultType, LinkedHashMap<String, Function<T, Number>> mappings) {
+    protected AbstractNumericDataProvider(Class<T> resultType) {
         this.resultType = resultType;
-        this.mappings = mappings;
     }
 
     public Class<T> getResultType() {
         return resultType;
     }
 
-    public Collection<String> getDataKeys() {
-        return mappings.keySet();
-    }
+    public abstract Collection<String> getDataKeys(QueryResultDTO<?> result);
 
-    public boolean isValidDataKey(String dataKey) {
-        return mappings.containsKey(dataKey);
-    }
+    public abstract boolean isValidDataKey(QueryResultDTO<?> result, String dataKey);
+    
+    public abstract String getDefaultDataKeyFor(QueryResultDTO<?> result);
+    
+    public abstract String getLocalizedNameForDataKey(QueryResultDTO<?> result, StringMessages stringMessages, String dataKey);
+    
+    protected abstract Function<T, Number> getMapping(QueryResultDTO<?> result, String dataKey);
     
     /**
      * Provides the actual result data to be visualized primarily. The {@code result} entries are mapped to
@@ -55,7 +55,7 @@ public abstract class AbstractNumericDataProvider<T> {
         if (!acceptsResultsOfType(result.getResultType())) {
             throw new IllegalArgumentException("This data provider doesn't work for results of the type '" + result.getResultType() + "'");
         }
-        Function<T, Number> mapping = mappings.get(dataKey);
+        Function<T, Number> mapping = getMapping(result, dataKey);
         if (mapping == null) {
             throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
         }
@@ -72,7 +72,8 @@ public abstract class AbstractNumericDataProvider<T> {
     /**
      * Optionally, a {@link QueryResultDTO query result} may provide {@link QueryResultDTO#getErrorMargins() error
      * margin data} which can, if available, be visualized, e.g., by error bars. This method collects this error
-     * margin data and maps it through the {@link #mappings mapping} selected by the {@code dataKey}.
+     * margin data and maps it through the {@link #mappings mapping} selected by the {@code dataKey}. The
+     * implementation in this class returns {@code null}.
      * 
      * @param result
      *            the result from which to extract error margins
@@ -84,36 +85,11 @@ public abstract class AbstractNumericDataProvider<T> {
      *         equal key.
      */
     public Map<GroupKey, Pair<Number, Number>> getErrorData(QueryResultDTO<?> result, String dataKey) {
-        if (!acceptsResultsOfType(result.getResultType())) {
-            throw new IllegalArgumentException("This data provider doesn't work for results of the type '" + result.getResultType() + "'");
-        }
-        Function<T, Number> mapping = mappings.get(dataKey);
-        if (mapping == null) {
-            throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
-        }
-        final Map<GroupKey, Pair<Number, Number>> data = new HashMap<>();
-        final Map<GroupKey, ?> errorMargins = result.getErrorMargins();
-        for (GroupKey groupKey : errorMargins.keySet()) {
-            if (errorMargins != null) {
-                @SuppressWarnings("unchecked")
-                Pair<T, T> errorMarginsForGroupKey = (Pair<T, T>) errorMargins.get(groupKey);
-                if (errorMarginsForGroupKey != null) {
-                    data.put(groupKey, new Pair<>(mapping.apply(errorMarginsForGroupKey.getA()),
-                                                  mapping.apply(errorMarginsForGroupKey.getB())));
-                }
-            }
-        }
-        return data.isEmpty() ? null : data;
+        return null;
     }
 
     public boolean acceptsResultsOfType(String type) {
         return getResultType().getName().equals(type);
     }
 
-    public String getDefaultDataKeyFor(QueryResultDTO<?> result) {
-        return mappings.keySet().iterator().next();
-    }
-    
-    public abstract String getLocalizedNameForDataKey(StringMessages stringMessages, String dataKey);
-    
 }

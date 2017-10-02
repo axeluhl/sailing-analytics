@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
@@ -10,16 +13,15 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.ValueListBox;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractNumericDataProvider;
+import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AverageWithStatsDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.BearingDataProvider;
+import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DataProvidersPrecedenceList;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DurationDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.NumberDataProvider;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -29,26 +31,25 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public abstract class AbstractNumericResultsPresenter<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
     
-    private final NumberDataProvider numberDataProvider;
-    private final Map<String, AbstractNumericDataProvider<? extends Object>> dataProviders;
+    private final DataProvidersPrecedenceList dataProviders;
     private final ValueListBox<String> dataSelectionListBox;
     private AbstractNumericDataProvider<? extends Object> currentDataProvider;
 
     public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
-        numberDataProvider = new NumberDataProvider();
-        dataProviders = new HashMap<>();
-        AbstractNumericDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
-        dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
-        AbstractNumericDataProvider<Duration> durationDataProvider = new DurationDataProvider();
-        dataProviders.put(durationDataProvider.getResultType().getName(), durationDataProvider);
-        AbstractNumericDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
-        dataProviders.put(bearingDataProvider.getResultType().getName(), bearingDataProvider);
+        final List<AbstractNumericDataProvider<? extends Serializable>> basicProviders = Arrays.asList(
+                new NumberDataProvider(),
+                new DistanceDataProvider(),
+                new DurationDataProvider(),
+                new BearingDataProvider());
+        final List<AbstractNumericDataProvider<? extends Serializable>> allProviders = new ArrayList<>(basicProviders);
+        allProviders.add(new AverageWithStatsDataProvider(new DataProvidersPrecedenceList(basicProviders)));
+        dataProviders = new DataProvidersPrecedenceList(allProviders);
         dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
             @Override
             protected String convertObjectToString(String dataKey) {
-                return currentDataProvider.getLocalizedNameForDataKey(stringMessages, dataKey);
+                return currentDataProvider.getLocalizedNameForDataKey(getCurrentResult(), stringMessages, dataKey);
             }
         });
         dataSelectionListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -69,7 +70,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
      * for display.
      */
     protected void internalShowResults(QueryResultDTO<?> result) {
-        currentDataProvider = selectCurrentDataProvider();
+        currentDataProvider = dataProviders.selectCurrentDataProvider(result.getResultType());
         updateDataSelectionListBox();
         if (currentDataProvider != null) {
             Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
@@ -86,18 +87,11 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         }
     }
     
-    private AbstractNumericDataProvider<? extends Object> selectCurrentDataProvider() {
-        if (numberDataProvider.acceptsResultsOfType(getCurrentResult().getResultType())) {
-            return numberDataProvider;
-        }
-        return dataProviders.get(getCurrentResult().getResultType());
-    }
-    
     private void updateDataSelectionListBox() {
         if (currentDataProvider == null) {
             dataSelectionListBox.setAcceptableValues(Collections.<String>emptyList());
         } else {
-            Collection<String> dataKeys = currentDataProvider.getDataKeys();
+            Collection<String> dataKeys = currentDataProvider.getDataKeys(getCurrentResult());
             String keyToSelect = currentDataProvider.getDefaultDataKeyFor(getCurrentResult());
             dataSelectionListBox.setValue(keyToSelect, false);
             dataSelectionListBox.setAcceptableValues(dataKeys);
@@ -111,7 +105,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
     }
     
     void setSelectedDataKey(String dataKey) {
-        if (!currentDataProvider.isValidDataKey(dataKey)) {
+        if (!currentDataProvider.isValidDataKey(getCurrentResult(), dataKey)) {
             throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
         }
         dataSelectionListBox.setValue(dataKey, true);

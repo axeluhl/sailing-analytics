@@ -12,13 +12,14 @@ import org.junit.Test;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.data.AverageWithStats;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestParallelAggregationProcessors {
     
-    private Collection<Processor<Map<GroupKey, Number>, ?>> receivers;
+    private Collection<Processor<Map<GroupKey, AverageWithStats<?>>, ?>> receivers;
     private Map<GroupKey, Number> receivedAggregations;
 
     @Test
@@ -47,7 +48,8 @@ public class TestParallelAggregationProcessors {
 
     @Test
     public void testAverageAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> averageAggregationProcessor = ParallelGroupedNumberDataAverageAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> averageAggregationProcessor = ParallelGroupedNumberDataAverageAggregationProcessor
+                .getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         ConcurrencyTestsUtil.processElements(averageAggregationProcessor, elements);
         

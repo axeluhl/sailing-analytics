@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class BearingDataProvider extends AbstractNumericDataProvider<Bearing> {
+public class BearingDataProvider extends AbstractNumericDataProviderWithStaticMappings<Bearing> {
     
     private static final String DEGREES = "Degrees";
     private static final String RADIANS = "Radians";
@@ -29,7 +29,7 @@ public class BearingDataProvider extends AbstractNumericDataProvider<Bearing> {
     }
 
     @Override
-    public String getLocalizedNameForDataKey(StringMessages stringMessages, String dataKey) {
+    public String getLocalizedNameForDataKey(QueryResultDTO<?> result, StringMessages stringMessages, String dataKey) {
         switch (dataKey) {
         case DEGREES:
             return stringMessages.angleInDegree();

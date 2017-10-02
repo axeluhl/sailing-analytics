@@ -5,30 +5,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.omg.CORBA.DoubleHolder;
-import org.omg.CORBA.IntHolder;
 
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.data.AverageWithStats;
+import com.sap.sse.datamining.shared.impl.AverageWithStatsImpl;
 
 public class ParallelGroupedNumberDataAverageAggregationProcessor
-            extends AbstractParallelGroupedDataStoringAggregationProcessor<Number, Number> {
-    private static final AggregationProcessorDefinition<Number, Number> DEFINITION =
-            new SimpleAggregationProcessorDefinition<>(Number.class, Number.class, "Average", ParallelGroupedNumberDataAverageAggregationProcessor.class);
+            extends AbstractParallelGroupedDataStoringAggregationProcessor<Number, AverageWithStats<Number>> {
+    private static final Class<?> _c = AverageWithStats.class;
+    @SuppressWarnings("unchecked")
+    private static final Class<AverageWithStats<Number>> _cc = (Class<AverageWithStats<Number>>) _c;
     
-    public static AggregationProcessorDefinition<Number, Number> getDefinition() {
+    private static final AggregationProcessorDefinition<Number, AverageWithStats<Number>> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(Number.class,
+                    _cc, "Average", ParallelGroupedNumberDataAverageAggregationProcessor.class);
+    
+    public static AggregationProcessorDefinition<Number, AverageWithStats<Number>> getDefinition() {
         return DEFINITION;
     }
 
     private final Map<GroupKey, DoubleHolder> sumPerKey;
-    private final Map<GroupKey, IntHolder> elementAmountPerKey;
+    private final Map<GroupKey, AtomicLong> elementAmountPerKey;
 
     public ParallelGroupedNumberDataAverageAggregationProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, Number>, ?>> resultReceivers) {
+            Collection<Processor<Map<GroupKey, AverageWithStats<Number>>, ?>> resultReceivers) {
         super(executor, resultReceivers, "Average");
         elementAmountPerKey = new HashMap<>();
         sumPerKey = new HashMap<>();
@@ -38,6 +45,7 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
     protected void storeElement(GroupedDataEntry<Number> element) {
         if (element.getDataEntry() != null) {
             incrementElementAmount(element);
+            // concurrency is not an issue here; needsSynchronization() returns true
             DoubleHolder aggregate = sumPerKey.get(element.getKey());
             if (aggregate == null) {
                 aggregate = new DoubleHolder(element.getDataEntry().doubleValue());
@@ -50,20 +58,27 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
 
     private void incrementElementAmount(GroupedDataEntry<Number> element) {
         GroupKey key = element.getKey();
-        IntHolder currentAmount = elementAmountPerKey.get(key);
+        // concurrency is not an issue here; needsSynchronization() returns true
+        AtomicLong currentAmount = elementAmountPerKey.get(key);
         if (currentAmount == null) {
-            elementAmountPerKey.put(key, new IntHolder(1));
+            elementAmountPerKey.put(key, new AtomicLong(1));
         } else {
-            currentAmount.value++;
+            currentAmount.incrementAndGet();
         }
     }
 
     @Override
-    protected Map<GroupKey, Number> aggregateResult() {
-        Map<GroupKey, Number> result = new HashMap<>();
+    protected Map<GroupKey, AverageWithStats<Number>> aggregateResult() {
+        Map<GroupKey, AverageWithStats<Number>> result = new HashMap<>();
         for (Entry<GroupKey, DoubleHolder> sumAggregationEntry : sumPerKey.entrySet()) {
             GroupKey key = sumAggregationEntry.getKey();
-            result.put(key, sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).value);
+            result.put(key, new AverageWithStatsImpl<Number>(sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get(),
+                    /* TODO min */ sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get() / 2,
+                    /* TODO max */ 2*sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get(),
+                    /* median */ null,
+                    /* standardDeviation */ null,
+                    /* count */ elementAmountPerKey.get(key).get(),
+                    Number.class));
         }
         return result;
     }

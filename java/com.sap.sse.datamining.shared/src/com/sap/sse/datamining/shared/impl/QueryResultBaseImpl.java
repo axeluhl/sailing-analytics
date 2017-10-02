@@ -3,7 +3,6 @@ package com.sap.sse.datamining.shared.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResultBase;
@@ -14,7 +13,6 @@ public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase
 
     private QueryResultState state;
     private Map<GroupKey, ResultType> results;
-    private Map<GroupKey, Pair<ResultType, ResultType>> errorMargins;
     private AdditionalResultData additionalData;
 
     /**
@@ -70,17 +68,7 @@ public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase
         return results;
     }
 
-    @Override
-    public Map<GroupKey, Pair<ResultType, ResultType>> getErrorMargins() {
-        return errorMargins;
-    }
-
     public void addResult(GroupKey key, ResultType value) {
         results.put(key, value);
     }
-
-    public void addErrorMargin(GroupKey key, Pair<ResultType, ResultType> value) {
-        errorMargins.put(key, value);
-    }
-
 }
