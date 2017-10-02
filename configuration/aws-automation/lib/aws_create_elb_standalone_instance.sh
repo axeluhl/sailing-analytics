@@ -3,11 +3,11 @@
 USE_ENVIRONMENT_VALUE="live-server"
 
 function create_elb_standalone_instance(){
-	prepare_user_data_variables $USE_ENVIRONMENT_VALUE
-	user_input
-	execute
+	echo ${tmpDir}
+	create_user_data_file
+	#user_input
+	#execute
 }
-
 
 function user_input(){
 	input_region
@@ -50,18 +50,6 @@ function wait_for_ssh_connection(){
 	echo ""
 }
 
-function tmux_open_connections() {
-	tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $key_file $ssh_user@$public_dns_name" C-m
-	tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $key_file $ssh_user@$public_dns_name" C-m
-	tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $key_file $ssh_user@$public_dns_name" C-m
-}
-
-function tmux_tail_logfiles(){
-	tmux send-keys -t 1 "clear;echo \"Waiting for file /home/sailing/servers/server/logs/sailing0.log.0 to appear...\";tail -F -v /home/sailing/servers/server/logs/sailing0.log.0" C-m
-	tmux send-keys -t 2 "clear;tail -f -v /var/log/sailing.out" C-m
-	tmux send-keys -t 3 "clear;tail -f -v /var/log/sailing.err" C-m
-}
-
 # $1: admin_username $2: admin_password $: public_dns_name
 function wait_for_access_token_resource(){
 	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' http://$1:$2@$3:8888/security/api/restsecurity/access_token) != "200" ]]; 
@@ -90,7 +78,19 @@ function create_event(){
 	echo $(curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" | jq -r '.eventid' | tr -d '\r')
 }
 
+# $1: access_token $2: public_dns_name $3: admin_username 4: admin_new_password
+function change_admin_password(){
+	curl -X POST -H "Authorization: Bearer $access_token" "http://$public_dns_name:8888/security/api/restsecurity/change_password" --data "username=$admin_username" --data "password=$new_admin_password"
+}
+
+# $1: access_token $2: public_dns_name 3: user_username 4: user_password
+function create_new_user(){
+	curl -X POST -H "Authorization: Bearer $access_token" "http://$public_dns_name:8888/security/api/restsecurity/create_user" --data "username=$user_username" --data "password=$user_password"
+}
+
+
 function execute() {
+	prepare_user_data_variables $USE_ENVIRONMENT_VALUE
 	create_user_data_file
 	
 	echo "Creating instance..."
@@ -134,26 +134,44 @@ function execute() {
 	echo "Created event with id: $event_id."
 	
 	echo "Changing admin password from $admin_password to $new_admin_password..."
-	curl -X POST -H "Authorization: Bearer $access_token" "http://$public_dns_name:8888/security/api/restsecurity/change_password" --data "username=$admin_username" --data "password=$new_admin_password"
+	change_admin_password "$access_token" "$public_dns_name" "$admin_username" "$admin_new_password"
 	echo "Changed admin password."
 
 	echo "Creating new user \"$user_username\" with password \"$user_password\"..."
-	curl -X POST -H "Authorization: Bearer $access_token" "http://$public_dns_name:8888/security/api/restsecurity/create_user" --data "username=$user_username" --data "password=$user_password"
+	create_new_user "$access_token" "$public_dns_name" "$user_username" "$user_password"
 	echo "Created user."
 	
 	# ignore new user for the moment because updating its priviliges via rest is not yet implemented
 	
 	echo "Creating elastic load balancer..."
-	json_elb=$(aws elb create-load-balancer --load-balancer-name $instance_name --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --subnets $subnet_id)
-	elb_dns_name=$(echo $json_elb | jq -r '.DNSName')
+	json_elb=$(create_elb "$instance_name" "$subnet_id")
+	elb_dns_name=$(get_elb_dns_name "$json_elb")
 	echo "Created elastic load balancer: $elb_dns_name."
 
 	echo "Adding instance to elb..."
-	json_response=$(aws elb register-instances-with-load-balancer --load-balancer-name $instance_name --instances $instance_id)
-	added_instance_id=$(echo $json_response | jq -r '.Instances[0].InstanceId')
+	json_added_instance_response=$(add_instance_to_elb "$instance_name" "$instance_id")
+	added_instance_id=$(get_added_instance_from_elb "$json_added_instance_response" )
 	echo "Added instance \"$added_instance_id\" to elb \"$elb_dns_name\"."
-	
-	finalize
+}
+
+# $1: load_balancer_name $2: subnet_id
+function create_elb(){
+	echo $(aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --subnets $2)
+}
+
+# $1: json_elb
+function get_elb_dns_name(){
+	echo $(echo $1 | jq -r '.DNSName')
+}
+
+# $1: load_balancer_name 2: instance_id 
+function add_instance_to_elb(){
+	echo $(aws elb register-instances-with-load-balancer --load-balancer-name $1 --instances $2)
+}
+
+# $1: json_response
+function get_added_instance_from_elb(){
+	echo $(echo $json_response | jq -r '.Instances[0].InstanceId')
 }
 
 function run_instance(){
@@ -164,7 +182,7 @@ function run_instance(){
 	command+=$(add_param "instance-type" $instance_type)
 	command+=$(add_param "key-name" $key_name)
 	command+=$(add_param "security-group-ids" $security_group_ids)
-	command+=$(add_param "user-data" $user_data)
+	command+=$(add_param "user-data" "file://$user_data_file")
 	command+=$(add_param "tag-specifications" $(printf $tag_specifications $instance_name))
 	echo $command
 }
@@ -175,14 +193,13 @@ function create_user_data_file(){
 }
 
 function create_empty_user_data_file(){
-	
-	if [ ! $(is_exists $USER_DATA_FILE) ]; then
-		touch $USER_DATA_FILE
+	if [ ! $(is_exists "${tmpDir}/$user_data_file") ]; then
+		touch $user_data_file
 	fi
 }
 
 function delete_user_data_file(){
-	rm $USER_DATA_FILE
+	rm $user_data_file
 }
 
 function write_user_data_to_file(){
@@ -206,12 +223,9 @@ function write_user_data_to_file(){
 	content+=$CR_LF
 	content+="SERVER_STARTUP_NOTIFY=$SERVER_STARTUP_NOTIFY"
 	
-	echo "$content" > "$USER_DATA_FILE"
+	echo "$content" > "${tmpDir}/$user_data_file"
 }
 
-function finalize(){
-	delete_user_data_file
-}
 
 
 

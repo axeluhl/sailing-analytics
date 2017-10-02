@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 # ##################################################
-# AWS automation script for deploying SAP Sailing Analytics instances 
-# and their depending infrastructure
+# AWS automation script for setting up SAP Sailing Analytics instance infrasctructure
 #
 version="1.0.0"               # Sets version variable
 
