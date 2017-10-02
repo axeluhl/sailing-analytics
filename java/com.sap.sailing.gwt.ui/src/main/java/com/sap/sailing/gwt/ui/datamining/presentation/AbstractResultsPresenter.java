@@ -113,7 +113,6 @@ implements ResultsPresenterWithControls<SettingsType> {
             errorLabel.setHTML(SafeHtmlUtils.fromString(error).asString());
             state = ResultsPresenterState.ERROR;
         }
-        
         currentResult = null;
         updateCurrentResultInfo();
         presentationPanel.setWidget(errorLabel);
@@ -135,7 +134,6 @@ implements ResultsPresenterWithControls<SettingsType> {
             presentationPanel.setWidget(labeledBusyIndicator);
             state = ResultsPresenterState.BUSY;
         }
-        
         currentResult = null;
         updateCurrentResultInfo();
     }
