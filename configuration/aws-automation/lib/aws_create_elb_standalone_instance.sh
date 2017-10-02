@@ -18,7 +18,6 @@ function user_input(){
 function execute() {
 	echo "Creating instance..."
 	json_instance=$(run_instance)
-
 	instance_id=$(get_instance_id "$json_instance")
 	
 	echo "Wait until instance is recognized by AWS..." 
@@ -65,8 +64,10 @@ function execute() {
 	
 	echo "Creating elastic load balancer..."
 	load_balancer_name=$(echo "$instance_name" | trim)
+	
 	json_load_balancer=$(create_load_balancer_http "$load_balancer_name")
   # json_load_balancer=$(create_load_balancer_https "$load_balancer_name" "$certificate_arn")
+  
 	load_balancer_dns_name=$(get_elb_dns_name "$json_load_balancer")
 	echo "Created elastic load balancer: $load_balancer_dns_name."
 	

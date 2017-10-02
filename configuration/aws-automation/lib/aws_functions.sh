@@ -31,12 +31,12 @@ function create_event(){
 
 # $1: access_token $2: public_dns_name $3: admin_username 4: admin_new_password
 function change_admin_password(){
-	curl -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
+	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
 }
 
 # $1: access_token $2: public_dns_name 3: user_username 4: user_password
 function create_new_user(){
-	curl -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
+	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
 }
 
 # $1: json_instance
@@ -104,6 +104,7 @@ function configure_health_check_http(){
 	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTP:80/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
 }
 
+# NOT TESTED
 # $1: load_balancer_name
 function configure_health_check_https(){
 	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTPS:443/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
