@@ -56,7 +56,7 @@ user_password=${user_password_param:-$default_user_password}
 instance_name=${instance_name_param:-$default_instance_name_param}
 instance_short_name=${instance_short_name_param:-$default_instance_short_name}
 new_admin_password=${new_admin_password_param:-$default_new_admin_password}
-tail_instance=tail_instance_param
+tail_instance="$tail_instance_param"
 ssh_user=${ssh_user_param:-$default_ssh_user}
 
 function region_ask_message() {

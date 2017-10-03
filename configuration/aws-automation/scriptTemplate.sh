@@ -41,7 +41,7 @@ printLog=false
 verbose=true
 force=false
 strict=false
-debug=false
+debug=true
 args=()
 
 # Create temp directory with three random numbers and the process ID
@@ -60,12 +60,14 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
 function mainScript() {
 echo -n
+
 if [ "$create_instance_with_elb_param" == "true" ]; then
 	if [ ! -z "$tail_instance_param" ]; then
 		check_if_tmux_is_used
 	fi
 	create_instance_with_elb
 fi
+
 if [ ! -z "$tail_instance_param" ]; then
 	check_if_tmux_is_used
 	tail_instance_logfiles "$tail_instance_param" "$ssh_user_param"

@@ -16,80 +16,57 @@ function user_input(){
 }
 
 function execute() {
-	echo "Creating instance..."
+	header "Instance Initialization"
+	
 	json_instance=$(run_instance)
 	instance_id=$(get_instance_id "$json_instance")
 	
-	echo "Wait until instance is recognized by AWS..." 
-	aws ec2 wait instance-exists --instance-ids $instance_id
-	echo "The instance is now recognized."
+	wait_instance_exists "$instance_id"
+	public_dns_name=$(query_public_dns_name "$instance_id")
 	
-	echo "Querying for the instance public dns name..." 
-	public_dns_name=$(query_public_dns_name $instance_id)
-
-	echo "The public dns name is: $public_dns_name"
-	
+	header "SSH Connection"
 	
 	wait_for_ssh_connection "$key_file" "$ssh_user" "$public_dns_name"
 	
-	
 	if [ ! -z "$tail_instance" ]; then
-		echo "Started tailing logfiles on panes 1,2,3."
-		tail_instance_logfiles "$public_dns_name" "$ssh_user"
+		tail_instance_logfiles "$ssh_user" "$public_dns_name"
 	fi
 	
-	echo -n "Wait until resource \"/security/api/restsecurity/access_token\" is available..."
+	header "Event and user creation"
+	
 	wait_for_access_token_resource "$admin_username" "$admin_password" "$public_dns_name"
-	echo "Resource \"/security/api/restsecurity/access_token\" is available."
-	
-	echo "Getting access token..."
 	access_token=$(get_access_token "$admin_username" "$admin_password" "$public_dns_name")
-	echo "Got access token: $access_token"
 	
-	echo "Wait until resource \"/sailingserver/api/v1/events/createEvent\" is available..."
 	wait_for_create_event_resource "$public_dns_name"
-	echo "Resource \"/sailingserver/api/v1/events/createEvent\" is available."
-	
-	echo "Creating event..."
 	event_id=$(create_event "$access_token" "$public_dns_name")
-	echo "Created event with id: $event_id."
 	
-	echo "Changing admin password from $admin_password to $new_admin_password..."
 	change_admin_password "$access_token" "$public_dns_name" "$admin_username" "$new_admin_password"
-
-	echo "Creating new user \"$user_username\" with password \"$user_password\"..."
 	create_new_user "$access_token" "$public_dns_name" "$user_username" "$user_password"
 	
-	# ignore new user for the moment because updating its priviliges via rest is not yet implemented
+    # ignore new user for the moment because updating its priviliges via rest is not yet implemented
 	
-	echo "Creating elastic load balancer..."
+	header "Load balancer creation"
+	
 	load_balancer_name=$(echo "$instance_name" | trim)
-	
 	json_load_balancer=$(create_load_balancer_http "$load_balancer_name")
-  # json_load_balancer=$(create_load_balancer_https "$load_balancer_name" "$certificate_arn")
-  
-	load_balancer_dns_name=$(get_elb_dns_name "$json_load_balancer")
-	echo "Created elastic load balancer: $load_balancer_dns_name."
+    # json_load_balancer=$(create_load_balancer_https "$load_balancer_name" "$certificate_arn")
+    load_balancer_dns_name=$(get_elb_dns_name "$json_load_balancer")
+
+	json_health_check=$(configure_health_check_http "$load_balancer_name")
+    # configure_health_check_https "$load_balancer_name"	
 	
-	echo "Configuring load balancer health check..."
-	configure_health_check_http "$load_balancer_name"
-  # configure_health_check_https "$load_balancer_name"	
-	echo "Configured load balancer health check..."
-	
-	echo "Adding instance to elb..."
 	json_added_instance_response=$(add_instance_to_elb "$instance_name" "$instance_id")
 	added_instance_id=$(get_added_instance_from_elb "$json_added_instance_response" )
-	echo "Added instance \"$added_instance_id\" to elb \"$elb_dns_name\"."
 	
-	echo "Creating route53 record set (Name: $load_balancer_name.sapsailing.com Value: $load_balancer_dns_name Type: CNAME)"
-	create_change_resource_record_set_file "asd" 60 "ddd"
-  # change_resource_record_sets
+	header "Route53 record creation"
+	
+	route53_change_resource_record "$load_balancer_name" 60 "$load_balancer_dns_name"
 	
 	echo "Finished."
 }
 
 function run_instance(){
-	prepare_user_data_variables
+	local_echo "Creating instance..."
 	create_user_data_file
 	
 	local command="aws --region $region ec2 run-instances"
@@ -102,7 +79,11 @@ function run_instance(){
 	command+=$(add_param "user-data" 'file://${tmpDir}/$user_data_file')
 	command+=$(add_param "tag-specifications" $(printf $tag_specifications $instance_name))
 	
-	eval "$command"
+	json_instance=$(eval "$command") || true
+	
+	instance_id=$(get_instance_id "$json_instance")
+	
+	echo "$json_instance"
 }
 
 function create_user_data_file(){

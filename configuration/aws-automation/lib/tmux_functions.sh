@@ -23,15 +23,14 @@ if ! { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
 fi 
 }
 
-# $1: public_dns_name $2: ssh_user 
+# $1: ssh_user $2: public_dns_name 
 function tail_instance_logfiles(){
-	configureUI
-	if [ ! -z "$2" ]; then
+	if [ ! -z "$tail_instance" ]; then
+		echo "Open tmux panes and start tailing log files..."
+		configureUI
 		open_connections "$1" "$2"
-	else
-		open_connections "$1" "$ssh_user"
+		tail_logfiles
 	fi
-	tail_logfiles
 }
 
 function configureUI() {
@@ -55,11 +54,15 @@ tmux select-pane -t 0
 
 }
 
+# $1: ssh_user $2: public_dns_name
 function open_connections() {
-	wait_for_ssh_connection "$key_file" "$2" "$1"
-	tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $key_file $2@$1" C-m
-	tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $key_file $2@$1" C-m
-	tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $key_file $2@$1" C-m
+	if [ ! -z "$1" ]; then
+		$ssh_user=$1
+	fi
+	wait_for_ssh_connection "$key_file" "$ssh_user" "$2"
+	tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
+	tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
+	tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
 }
 
 function tail_logfiles(){
@@ -76,4 +79,13 @@ function close_all_panes(){
 
 function get_number_of_panes(){
 	tmux display-message -p '#{window_panes}' 
+}
+
+function more_panes_are_open(){
+	if { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
+		if [ "$(get_number_of_panes)" -gt 1 ]; then
+			return 0;
+		fi
+	fi
+	return 1;
 }

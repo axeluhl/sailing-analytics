@@ -40,7 +40,7 @@ function _alert() {
   if [[ "${quiet}" = "true" ]] || [ "${quiet}" == "1" ]; then
    return
   else
-   echo -e "${color}$(printf "" "${1}") ${_message}${reset}";
+   echo -e "${color}$(printf "" "${1}") ${_message}${reset}" >&2;
   fi
 
 }
@@ -53,7 +53,7 @@ function info ()      { local _message="${*}"; echo "$(_alert info)"; }
 function debug ()     { local _message="${*}"; echo "$(_alert debug)"; }
 function success ()   { local _message="${*}"; echo "$(_alert success)"; }
 function input()      { local _message="${*}"; echo -n "$(_alert input)"; }
-function header()     { local _message="========== ${*} ==========  "; echo "$(_alert header)"; }
+function header()     { local _message="\n========== ${*} ==========\n  "; echo "$(_alert header)"; }
 
 # Log messages when verbose is set to "true"
 verbose() {

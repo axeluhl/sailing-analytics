@@ -6,7 +6,7 @@
 # ------------------------------------------------------
 
 function confirm_close_panes(){ 
-  if [ ! -z "$tail_instance" ]; then
+  if more_panes_are_open; then
 	seek_confirmation "Do you want to close all open panes?"
 	if is_confirmed; then
 		close_all_panes
@@ -688,4 +688,9 @@ function json2yaml() {
 function yaml2json() {
   # convert yaml files to json using python and PyYAML
   python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < "$1"
+}
+
+# $1: text
+function local_echo(){
+	echo "$1" >&2
 }
