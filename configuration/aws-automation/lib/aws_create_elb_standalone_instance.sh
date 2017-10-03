@@ -29,13 +29,13 @@ function execute() {
 
 	echo "The public dns name is: $public_dns_name"
 	
-	echo -n "Wait until ssh connection is established.." 
-	wait_for_ssh_connection "$key_file" "$ssh_user" "$public_dns_name"
-	echo "SSH Connection is established."
 	
-	if [ "$use_tmux" == "true" ]; then
+	wait_for_ssh_connection "$key_file" "$ssh_user" "$public_dns_name"
+	
+	
+	if [ ! -z "$tail_instance" ]; then
 		echo "Started tailing logfiles on panes 1,2,3."
-		tail_instance
+		tail_instance_logfiles "$public_dns_name" "$ssh_user"
 	fi
 	
 	echo -n "Wait until resource \"/security/api/restsecurity/access_token\" is available..."
@@ -83,7 +83,7 @@ function execute() {
 	
 	echo "Creating route53 record set (Name: $load_balancer_name.sapsailing.com Value: $load_balancer_dns_name Type: CNAME)"
 	create_change_resource_record_set_file "asd" 60 "ddd"
-	#change_resource_record_sets
+  # change_resource_record_sets
 	
 	echo "Finished."
 }

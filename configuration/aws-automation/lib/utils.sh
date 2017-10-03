@@ -10,11 +10,11 @@
 bold=$(tput bold)
 underline=$(tput sgr 0 1)
 reset=$(tput sgr0)
-purple=$(tput setaf 171)
-red=$(tput setaf 1)
-green=$(tput setaf 76)
+purple='\033[0;35m'
+red='\033[0;31m'
+green='\033[0;32m'
 tan=$(tput setaf 3)
-blue=$(tput setaf 38)
+blue='\033[0;36m'
 
 function _alert() {
   if [ "${1}" = "emergency" ]; then
@@ -27,8 +27,9 @@ function _alert() {
   if [ "${1}" = "header" ]; then local color="${bold}""${tan}"; fi
   if [ "${1}" = "input" ]; then local color="${bold}"; printLog="false"; fi
   if [ "${1}" = "info" ] || [ "${1}" = "notice" ]; then local color=""; fi
+  
   # Don't use colors on pipes or non-recognized terminals
-  if [[ "${TERM}" != "xterm"* ]] || [ -t 1 ]; then color=""; reset=""; fi
+  #if [[ "${TERM}" != "xterm"* ]] || [ -t 1 ]; then color=""; reset=""; fi
 
   # Print to $logFile
   if [[ ${printLog} = "true" ]] || [ "${printLog}" == "1" ]; then
@@ -39,7 +40,7 @@ function _alert() {
   if [[ "${quiet}" = "true" ]] || [ "${quiet}" == "1" ]; then
    return
   else
-   echo -e "$(date +"%r") ${color}$(printf "[%9s]" "${1}") ${_message}${reset}";
+   echo -e "${color}$(printf "" "${1}") ${_message}${reset}";
   fi
 
 }

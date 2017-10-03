@@ -12,6 +12,7 @@ default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
 default_user_username=testuser
 default_user_password=test
+default_ssh_user=root
 
 # Variables for region "eu-west-1" (Ireland)
 
@@ -36,7 +37,6 @@ mongodb_port=27017
 # Other Variables
 
 ssh_retry_interval=2
-ssh_user=root
 http_retry_interval=5
 user_data_file=".userdata.txt"
 change_resource_record_set_file=".change-resource-record-set.json"
@@ -56,6 +56,8 @@ user_password=${user_password_param:-$default_user_password}
 instance_name=${instance_name_param:-$default_instance_name_param}
 instance_short_name=${instance_short_name_param:-$default_instance_short_name}
 new_admin_password=${new_admin_password_param:-$default_new_admin_password}
+tail_instance=tail_instance_param
+ssh_user=${ssh_user_param:-$default_ssh_user}
 
 function region_ask_message() {
 	printf "Please enter the region for the instance (default: \"%s\"): " $region

@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-function add_param() {
-	if [ ! -z "$2" ]; then
-		result=" --$1 $2"
-	fi
-	echo "$result"
-}
-
 function get_latest_release(){
 	# get html from releases.sapsailing.com
 	html=$(wget releases.sapsailing.com -q -O -)
@@ -56,6 +49,7 @@ function query_public_dns_name(){
 
 # $1: key_file $2: ssh_user $3: public_dns_name
 function wait_for_ssh_connection(){
+	echo -n "Connecting to $2@$3 with keypair $1..." 
 	local status=""
 	while [[ $status != ok ]]
 	do
@@ -64,6 +58,7 @@ function wait_for_ssh_connection(){
 		sleep $ssh_retry_interval
 	done
 	echo ""
+	echo "SSH Connection is established."
 }
 
 # $1: admin_username $2: admin_password $: public_dns_name
@@ -140,6 +135,13 @@ function create_change_resource_record_set_file(){
 # NOT TESTED
 function change_resource_record_sets(){
 	aws route53 change-resource-record-sets --hosted-zone-id $hosted_zone_id --change-batch "file://${tmpDir}/$change_resource_record_set_file"
+}
+
+function add_param() {
+	if [ ! -z "$2" ]; then
+		result=" --$1 $2"
+	fi
+	echo "$result"
 }
 
 function input_region(){

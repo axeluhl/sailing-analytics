@@ -5,13 +5,24 @@
 # These functions are for use with different trap scenarios
 # ------------------------------------------------------
 
+function confirm_close_panes(){ 
+  if [ ! -z "$tail_instance" ]; then
+	seek_confirmation "Do you want to close all open panes?"
+	if is_confirmed; then
+		close_all_panes
+	else
+		safeExit
+	fi
+  fi
+}
+
 # Non destructive exit for when script exits naturally.
 # Usage: Add this function at the end of every script
 function safeExit() {
   # Delete temp files, if any
-  # if is_dir "${tmpDir}"; then
-    # rm -r "${tmpDir}"
-  # fi
+  if is_dir "${tmpDir}"; then
+    rm -r "${tmpDir}"
+  fi
   trap - INT TERM EXIT
   exit
 }

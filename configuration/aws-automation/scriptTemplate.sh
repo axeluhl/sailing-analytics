@@ -41,8 +41,7 @@ printLog=false
 verbose=true
 force=false
 strict=false
-debug=true
-use_tmux=true
+debug=false
 args=()
 
 # Create temp directory with three random numbers and the process ID
@@ -61,12 +60,15 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
 function mainScript() {
 echo -n
-if [ "$use_tmux_param" == "true" ]; then
-	checkDependencies
-	checkEnvironment
-fi
 if [ "$create_instance_with_elb_param" == "true" ]; then
+	if [ ! -z "$tail_instance_param" ]; then
+		check_if_tmux_is_used
+	fi
 	create_instance_with_elb
+fi
+if [ ! -z "$tail_instance_param" ]; then
+	check_if_tmux_is_used
+	tail_instance_logfiles "$tail_instance_param" "$ssh_user_param"
 fi
 }
 
@@ -76,19 +78,20 @@ usage() {
 This is an AWS automation bash script for deploying SAP Sailing Analytics instances and their depending infrastructure
 
  ${bold}Options:${reset}
-  -r, --region               AWS region (default: \"eu-west-2\" for London)
-  -t, --instance-type        Instance type (default: \"t2.medium\")
+  -r, --region               AWS region (e.g. \"eu-west-2\" for London)
+  -t, --instance-type        Instance type (e.g. \"t2.medium\")
   -k, --key-name             IAM keypair name 
   -f, --key-file             Path to keypair file
+  -s, --ssh-user             SSH user to connect to instance
   -u, --user-username        Username of user to create
   -q, --user-password        Password of user to create
-  -n, --instance-name        Name for instance (only letters and numbers)
+  -n, --instance-name        Name for instance 
   -l, --instance-short-name  Short name for instance
   -a, --admin-password	     New password for the admin user
   
       --create-elb-standalone-instance	 Create instance with elastic load balancer (default: \"false\")
       
-	  --use-tmux             Use tmux for automatic log tailing of instance
+	  --tail-instance        Tail logs from instance using tmux
 	  --version              Output version information and exit
 	  
 	  
@@ -144,13 +147,14 @@ while [[ $1 = -?* ]]; do
 	-t|--instance-type) shift; instance_type_param=${1} ;;
 	-k|--key-name) shift; key_name_param=${1} ;;
 	-f|--key-file) shift; key_file_param=${1} ;;
+	-s|--ssh-user) shift; ssh_user_param=${1} ;;
 	-u|--user-username) shift; user_username_param=${1} ;;
 	-q|--user-password) shift; user_password_param=${1} ;;
 	-n|--instance-name) shift; instance_name_param=${1} ;;
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
-	--create-instance-with-elb) shift; create_instance_with_elb_param=${1} ;;
-	--use-tmux) shift; use_tmux_param=${1} ;;
+	--create-instance-with-elb) shift; create_instance_with_elb_param="true" ;;
+	--tail-instance) shift; tail_instance_param=${1} ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac
@@ -188,4 +192,5 @@ set -o pipefail
 mainScript
 
 # Exit cleanlyd
+confirm_close_panes
 safeExit
