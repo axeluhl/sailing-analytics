@@ -6578,13 +6578,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<DetailType> determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
-        final boolean hasOverallLeaderboard;
-        if (leaderboardGroupName != null) {
-            LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
-            hasOverallLeaderboard = group != null ? group.hasOverallLeaderboard() : false;
-        } else {
-            hasOverallLeaderboard = false;
-        }
         ArrayList<DetailType> availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
@@ -6599,10 +6592,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
         availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
         availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
-        if (hasOverallLeaderboard) {
-            availableDetailsTypes.add(DetailType.OVERALL_RANK);
+        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);        if (leaderboardGroupName != null) {
+            LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
+            if (group != null ? group.hasOverallLeaderboard() : false) {
+                availableDetailsTypes.add(DetailType.OVERALL_RANK);
+            }
         }
-        return null;
+        return availableDetailsTypes;
     }
 }
