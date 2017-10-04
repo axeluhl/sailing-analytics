@@ -24,8 +24,8 @@ public class BravoDataImportTest {
     private LearningBatchProcessor batchProcessor;
     private DownsamplerTo1HzProcessor downsampler;
 
-    private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl() {
-        protected com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor createProcessor(
+    private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl(BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix()) {
+        protected com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor createDownsamplingProcessor(
                 DoubleVectorFixImporter.Callback callback,
                 TrackFileImportDeviceIdentifier trackIdentifier) {
             batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
@@ -73,7 +73,7 @@ public class BravoDataImportTest {
                 callbackCallCount++;
                 sumRideHeightInMeters += new BravoFixImpl(fix).getRideHeight().getMeters();
             }
-        }, "filename", "source");
+        }, "filename", "source", /* downsample */ true);
         Assert.assertEquals(importData.expectedFixesCount, downsampler.getCountSourceTtl());
         Assert.assertEquals(importData.expectedFixesConsolidated, downsampler.getCountImportedTtl());
         Assert.assertEquals(importData.expectedFixesConsolidated, callbackCallCount);

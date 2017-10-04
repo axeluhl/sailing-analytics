@@ -1,5 +1,8 @@
 package com.sap.sailing.server.trackfiles.impl.doublefix;
 
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 public final class DoubleVectorFixData {
     private long timepointInMs;
     private double[] fix;
@@ -24,5 +27,9 @@ public final class DoubleVectorFixData {
 
     public double[] getFix() {
         return fix;
+    }
+
+    public TimePoint getTimepoint() {
+        return new MillisecondsTimePoint(timepointInMs);
     }
 }

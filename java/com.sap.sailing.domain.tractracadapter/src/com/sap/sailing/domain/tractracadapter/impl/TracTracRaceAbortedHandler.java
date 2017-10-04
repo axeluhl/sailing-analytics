@@ -43,7 +43,7 @@ public class TracTracRaceAbortedHandler extends UpdateHandler implements RaceAbo
         logger.info("Using " + raceAbortedURL.toString() + " for the race aborted notification!");
         HttpURLConnection connection = (HttpURLConnection) raceAbortedURL.openConnection();
         try {
-            setConnectionProperties(connection);
+            connection = setConnectionProperties(connection);
             try {
                 checkAndLogUpdateResponse(connection);
             } catch (ParseException e) {
