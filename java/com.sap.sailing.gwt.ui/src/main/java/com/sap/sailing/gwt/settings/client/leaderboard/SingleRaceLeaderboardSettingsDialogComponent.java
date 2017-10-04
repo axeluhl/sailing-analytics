@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
@@ -30,7 +29,7 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes);
                 
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
-        SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,
+        final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
@@ -38,7 +37,6 @@ public class SingleRaceLeaderboardSettingsDialogComponent
                         .getValue().booleanValue(),
                 showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
                 isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
-        SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }
     

@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
@@ -56,7 +55,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N
                 ? numberOfLastRacesToShowBox.getValue() : null;
-        MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(maneuverDetailsToShow,
+        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow, namesOfRaceColumnsToShow,
                 lastNRacesToShowValue,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
@@ -66,7 +65,6 @@ public class MultiRaceLeaderboardSettingsDialogComponent
                         .getValue().booleanValue(),
                 showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
                 isCompetitorNationalityColumnVisible.getValue());
-        SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }
 
