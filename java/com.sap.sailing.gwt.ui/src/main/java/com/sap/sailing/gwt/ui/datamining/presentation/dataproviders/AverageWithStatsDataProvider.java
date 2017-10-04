@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.AverageWithStats;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -54,26 +54,26 @@ public class AverageWithStatsDataProvider extends AbstractNumericDataProvider<Av
      *         the {@link #getData(QueryResultDTO, String)} result the map returned by this method needs to have an
      *         equal key.
      */
-    public Map<GroupKey, Pair<Number, Number>> getErrorData(QueryResultDTO<?> result, String dataKey) {
+    public Map<GroupKey, Triple<Number, Number, Long>> getErrorData(QueryResultDTO<?> result, String dataKey) {
         if (!acceptsResultsOfType(result.getResultType())) {
             throw new IllegalArgumentException("This data provider doesn't work for results of the type '" + result.getResultType() + "'");
         }
         return getErrorDataInternal(result, dataKey);
     }
 
-    private <T> Map<GroupKey, Pair<Number, Number>> getErrorDataInternal(QueryResultDTO<?> result, String dataKey) {
+    private <T> Map<GroupKey, Triple<Number, Number, Long>> getErrorDataInternal(QueryResultDTO<?> result, String dataKey) {
         @SuppressWarnings("unchecked")
         Function<T, Number> mapping = (Function<T, Number>) getInnerMapping(result, dataKey);
         if (mapping == null) {
             throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
         }
-        final Map<GroupKey, Pair<Number, Number>> data = new HashMap<>();
+        final Map<GroupKey, Triple<Number, Number, Long>> data = new HashMap<>();
         for (Entry<GroupKey, ?> e : result.getResults().entrySet()) {
             @SuppressWarnings("unchecked")
             AverageWithStats<T> aws = (AverageWithStats<T>) e.getValue();
             if (aws.getMin() != null && aws.getMax() != null) {
-                data.put(e.getKey(), new Pair<>(mapping.apply(aws.getMin()),
-                                                mapping.apply(aws.getMax())));
+                data.put(e.getKey(), new Triple<>(mapping.apply(aws.getMin()),
+                                                  mapping.apply(aws.getMax()), aws.getCount()));
             }
         }
         return data.isEmpty() ? null : data;

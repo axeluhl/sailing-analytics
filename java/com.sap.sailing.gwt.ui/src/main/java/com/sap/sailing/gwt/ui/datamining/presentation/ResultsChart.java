@@ -19,6 +19,7 @@ import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
@@ -34,7 +35,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
@@ -139,7 +140,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private final GroupKey simpleResultSeriesKey;
     private final Map<GroupKey, Integer> mainKeyToXValueMap;
     private Map<GroupKey, Number> currentResultValues;
-    private Map<GroupKey, Pair<Number, Number>> currentResultErrorMargins;
+    private Map<GroupKey, Triple<Number, Number, Long>> currentResultErrorMargins;
 
     private final Map<GroupKey, Double> averagePerMainKey;
     private final Map<GroupKey, Double> medianPerMainKey;
@@ -208,7 +209,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     }
 
     @Override
-    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Pair<Number, Number>> errorMargins) {
+    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
         this.currentResultValues = resultValues;
         this.currentResultErrorMargins = errorMargins;
         decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);
@@ -274,10 +275,10 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
-            final Pair<Number, Number> errorMargins = currentResultErrorMargins.get(mainKey);
+            final Triple<Number, Number, Long> errorMargins = currentResultErrorMargins.get(mainKey);
             if (errorMargins != null) {
                 Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(), errorMargins.getB());
-                point.setName(mainKey.asString());
+                errorMarginsPoint.setName(mainKey.asString()+", "+stringMessages.elements(errorMargins.getC()));
                 errorSeriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                     .addPoint(errorMarginsPoint, false, false, false);
             }
@@ -350,7 +351,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
                 seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
-                errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()+
+                errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setType(Type.ERRORBAR).setName(seriesKey.asString()+
                         " "+getStringMessages().dataMiningErrorMargins()));
             }
         }

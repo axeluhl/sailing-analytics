@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
@@ -71,20 +71,20 @@ public abstract class AbstractNumericDataProvider<T extends Serializable> {
 
     /**
      * Optionally, a {@link QueryResultDTO query result} may provide {@link QueryResultDTO#getErrorMargins() error
-     * margin data} which can, if available, be visualized, e.g., by error bars. This method collects this error
-     * margin data and maps it through the {@link #mappings mapping} selected by the {@code dataKey}. The
-     * implementation in this class returns {@code null}.
+     * margin data} which can, if available, be visualized, e.g., by error bars. This method collects this error margin
+     * data and maps it through the {@link #mappings mapping} selected by the {@code dataKey}. The implementation in
+     * this class returns {@code null}.
      * 
      * @param result
      *            the result from which to extract error margins
      * @param dataKey
      *            selects one of the mappings provided to this object's constructor
-     * @return {@code null} if no error margin information is available, or pairs of lower and upper error margin
-     *         bounds, keyed by the group key. The map may not be "complete," meaning that not for all keys returned in
-     *         the {@link #getData(QueryResultDTO, String)} result the map returned by this method needs to have an
-     *         equal key.
+     * @return {@code null} if no error margin information is available, or triples of lower and upper error margin
+     *         bounds and the element count, keyed by the group key. The map may not be "complete," meaning that not for
+     *         all keys returned in the {@link #getData(QueryResultDTO, String)} result the map returned by this method
+     *         needs to have an equal key.
      */
-    public Map<GroupKey, Pair<Number, Number>> getErrorData(QueryResultDTO<?> result, String dataKey) {
+    public Map<GroupKey, Triple<Number, Number, Long>> getErrorData(QueryResultDTO<?> result, String dataKey) {
         return null;
     }
 
