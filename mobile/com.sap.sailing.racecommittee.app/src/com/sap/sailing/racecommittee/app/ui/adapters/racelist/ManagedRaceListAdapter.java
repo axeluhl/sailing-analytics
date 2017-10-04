@@ -93,8 +93,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         for (final ManagedRace race : mAllRaces) {
             viewItemsRaces.put(race, new RaceListDataTypeRace(race, mInflater));
             final SeriesBase series = race.getSeries();
+            boolean hasConflict = race.getState().getConfirmedFinishPositioningList() != null && race.getState().getConfirmedFinishPositioningList().hasConflicts();
             if (!viewItemsSeriesHeaders.containsKey(series)) {
-                viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater));
+                viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater, hasConflict));
+            } else {
+                if (hasConflict) {
+                    viewItemsSeriesHeaders.get(series).setHasConflict(true);
+                }
             }
         }
     }
@@ -175,6 +180,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         BroadcastManager.getInstance(getContext()).addIntent(intent);
                     }
                 });
+                holder.protest_warning_image.setVisibility(header.hasConflict() ? View.VISIBLE : View.GONE);
                 convertView.setTag(R.id.race_list_header, raceListElement);
             }
         } else if (type == ViewType.RACE.index) {
@@ -516,6 +522,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         /* package */ TextView race_unscheduled;
         /* package */ TextView flag_timer;
         /* package */ ImageView protest_image;
+        /* package */ ImageView protest_warning_image;
         /* package */ TextView boat_class;
         /* package */ TextView fleet_series;
         /* package */ ImageView has_dependent_races;
@@ -538,6 +545,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);
             flag_timer = ViewHelper.get(layout, R.id.flag_timer);
             protest_image = ViewHelper.get(layout, R.id.protest_image);
+            protest_warning_image = ViewHelper.get(layout, R.id.protest_warning_image);
             boat_class = ViewHelper.get(layout, R.id.boat_class);
             fleet_series = ViewHelper.get(layout, R.id.fleet_series);
             has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
