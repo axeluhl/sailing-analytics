@@ -25,12 +25,10 @@ fi
 
 # $1: ssh_user $2: public_dns_name 
 function tail_instance_logfiles(){
-	if [ ! -z "$tail_instance" ]; then
 		echo "Open tmux panes and start tailing log files..."
 		configureUI
 		open_connections "$1" "$2"
 		tail_logfiles
-	fi
 }
 
 function configureUI() {
@@ -56,9 +54,6 @@ tmux select-pane -t 0
 
 # $1: ssh_user $2: public_dns_name
 function open_connections() {
-	if [ ! -z "$1" ]; then
-		$ssh_user=$1
-	fi
 	wait_for_ssh_connection "$key_file" "$ssh_user" "$2"
 	tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
 	tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m

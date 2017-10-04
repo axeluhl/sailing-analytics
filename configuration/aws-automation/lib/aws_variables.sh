@@ -45,8 +45,7 @@ admin_username=admin
 admin_password=admin
 instance_count=1
 
-
-tail_instance="$tail_instance_param"
+# Internal variable
 ssh_user=${ssh_user_param:-$default_ssh_user}
 
 function region_ask_message() {

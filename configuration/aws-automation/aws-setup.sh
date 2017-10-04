@@ -61,17 +61,21 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 function mainScript() {
 echo -n
 
-if [ "$instance_with_elb_param" == "true" ]; then
-	if [ ! -z "$tail_instance_param" ]; then
+if $instance_with_elb; then
+	if $tail_instance; then
 		check_if_tmux_is_used
 	fi
 	create_instance_with_elb
 fi
 
-if [ ! -z "$tail_instance_param" ]; then
+safeExit
+
+if $tail_instance; then
 	check_if_tmux_is_used
 	tail_instance_logfiles "$tail_instance_param" "$ssh_user_param"
 fi
+
+safeExit
 }
 
 usage() {
@@ -155,8 +159,10 @@ while [[ $1 = -?* ]]; do
 	-n|--instance-name) shift; instance_name_param=${1} ;;
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
-	--instance-with-elb) shift; instance_with_elb_param="true" ;;
-	--tail) shift; tail_instance_param=${1} ;;
+	-v|--verbose) shift; verbose=true ;;
+	-d|--debug) shift; debug=true ;;
+	--instance-with-elb) shift; instance_with_elb=true ;;
+	--tail) shift; tail_instance=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac

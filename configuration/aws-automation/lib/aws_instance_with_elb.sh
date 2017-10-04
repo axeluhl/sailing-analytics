@@ -30,9 +30,11 @@ function execute() {
 	
 	wait_for_ssh_connection "$key_file" "$ssh_user" "$public_dns_name"
 	
-	if [ ! -z "$tail_instance" ]; then
+	if $tail_instance; then
 		tail_instance_logfiles "$ssh_user" "$public_dns_name"
 	fi
+	
+	input_user_password
 	
 	header "Event and user creation"
 	

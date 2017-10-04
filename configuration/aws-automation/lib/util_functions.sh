@@ -694,3 +694,17 @@ function yaml2json() {
 function local_echo(){
 	echo "$1" >&2
 }
+
+function is_error(){
+	[ $1 -ne 0 ]
+}
+
+# $1: value
+function is_number(){
+	[[ $1 =~ ^-?[0-9]+$ ]]
+}
+
+# $1: value 
+function is_http_ok(){
+	is_number $1 && [ $1 == 200 ]
+}
