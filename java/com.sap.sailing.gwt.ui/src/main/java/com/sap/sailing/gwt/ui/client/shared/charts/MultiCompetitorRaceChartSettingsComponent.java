@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -24,28 +23,11 @@ public class MultiCompetitorRaceChartSettingsComponent extends
     private final List<DetailType> availableDetailsTypes;
 
     public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings,
-            StringMessages stringMessages, boolean hasOverallLeaderboard) {
+            StringMessages stringMessages, List<DetailType> availableDetailTypes) {
         super(settings, stringMessages);
         this.initialFirstDetailType = settings.getFirstDetailType();
         this.initialSecondDetailType = settings.getSecondDetailType();
-        availableDetailsTypes = new ArrayList<DetailType>();
-        availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
-        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
-        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START);
-        availableDetailsTypes.add(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS);
-        availableDetailsTypes.add(DetailType.GAP_TO_LEADER_IN_SECONDS);
-        availableDetailsTypes.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
-        availableDetailsTypes.add(DetailType.RACE_RANK);
-        availableDetailsTypes.add(DetailType.REGATTA_RANK);
-        availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
-        availableDetailsTypes.add(DetailType.BEAT_ANGLE);
-        availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
-        availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
-        if (hasOverallLeaderboard) {
-            availableDetailsTypes.add(DetailType.OVERALL_RANK);
-        }
+        this.availableDetailsTypes = availableDetailTypes;
     }
 
     @Override

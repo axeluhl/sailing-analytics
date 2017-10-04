@@ -5,6 +5,8 @@ import static com.sap.sailing.domain.common.SortingOrder.DESCENDING;
 import static com.sap.sailing.domain.common.SortingOrder.NONE;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Identifies details that can be requested from the racing service. Optionally, the details can specify a precision
@@ -68,5 +70,36 @@ public enum DetailType implements Serializable {
 
     public SortingOrder getDefaultSortingOrder() {
         return defaultSortingOrder;
+    }
+    
+    /**
+     * Default set of DetailTypes for charts, this list contains all commonly available data, without the use of extra
+     * sensors.
+     */
+    public static List<DetailType> getDefaultDetailTypesForChart() {
+        List<DetailType> availableDetailsTypes = new ArrayList<>();
+        availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
+        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
+        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START);
+        availableDetailsTypes.add(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS);
+        availableDetailsTypes.add(DetailType.GAP_TO_LEADER_IN_SECONDS);
+        availableDetailsTypes.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+        availableDetailsTypes.add(DetailType.RACE_RANK);
+        availableDetailsTypes.add(DetailType.REGATTA_RANK);
+        availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
+        availableDetailsTypes.add(DetailType.BEAT_ANGLE);
+        availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
+        availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
+        availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
+        return availableDetailsTypes;
+    }
+
+    /**
+     * Special List of DetailTypes, that allows operators to select for example the RideHeight, that is usually only selectable, if it already has data.
+     */
+    public static List<DetailType> getAutoplayDetailTypesForChart() {
+        List<DetailType> availableDetailsTypes = getDefaultDetailTypesForChart();
+        availableDetailsTypes.add(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS);
+        return availableDetailsTypes;
     }
 }

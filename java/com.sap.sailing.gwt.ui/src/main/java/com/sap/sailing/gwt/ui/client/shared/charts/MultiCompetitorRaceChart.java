@@ -1,13 +1,11 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -31,8 +29,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  */
 public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
-    private boolean hasOverallLeaderboard;
-    
     private final MultiCompetitorRaceChartLifecycle lifecycle;
     
     public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
@@ -48,22 +44,6 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
         this.lifecycle = lifecycle;
-        if (leaderboardGroupName != null) {
-            sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
-                    new AsyncCallback<LeaderboardGroupDTO>() {
-                        @Override
-                        public void onSuccess(LeaderboardGroupDTO group) {
-                            hasOverallLeaderboard = group != null ? group.hasOverallLeaderboard() : false;
-                        }
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error fetching the leaderboard group '" + leaderboardGroupName
-                                    + "': " + caught.getMessage());
-                        }
-                    });
-        } else {
-            hasOverallLeaderboard = false;
-        }
     }
     
     @Override
@@ -78,9 +58,10 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
     
     @Override
-    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettingsComponent(settings,
-                getStringMessages(), hasOverallLeaderboard);
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent(
+            MultiCompetitorRaceChartSettings settings) {
+        return new MultiCompetitorRaceChartSettingsComponent(settings, getStringMessages(),
+                lifecycle.getAllowedDetailTypes());
     }
 
     @Override

@@ -1,22 +1,25 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.List;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChartSettings> {
     private final StringMessages stringMessages;
-    private final boolean hasOverallLeaderboard;
+    private List<DetailType> allowedDetailTypes;
     
     public static final String ID = "cc";
     
-    public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, boolean hasOverallLeaderboard) {
+    public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, List<DetailType> allowedDetailTypes) {
         this.stringMessages = stringMessages;
-        this.hasOverallLeaderboard = hasOverallLeaderboard;
+        this.allowedDetailTypes = allowedDetailTypes;
     }
 
     @Override
     public MultiCompetitorRaceChartSettingsComponent getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, hasOverallLeaderboard);
+        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, allowedDetailTypes);
     }
 
     @Override
@@ -47,5 +50,9 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     @Override
     public MultiCompetitorRaceChartSettings extractDocumentSettings(MultiCompetitorRaceChartSettings settings) {
         return settings;
+    }
+
+    public List<DetailType> getAllowedDetailTypes() {
+        return allowedDetailTypes;
     }
 }
