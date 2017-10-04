@@ -6592,7 +6592,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
         availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
         availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
+        if (trackedRace != null) {
+            boolean hasBravoTrack = true;
+            for (BravoFixTrack<Competitor> track : trackedRace.<BravoFix, BravoFixTrack<Competitor>>getSensorTracks(BravoFixTrack.TRACK_NAME)) {
+                hasBravoTrack = true;
+                // TODO check for extended
+            }
+            if (hasBravoTrack) {
+                availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+            }
+        }
         if (leaderboardGroupName != null) {
             LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
             if (group != null ? group.hasOverallLeaderboard() : false) {
