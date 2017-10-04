@@ -275,7 +275,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
-            final Triple<Number, Number, Long> errorMargins = currentResultErrorMargins.get(mainKey);
+            final Triple<Number, Number, Long> errorMargins = currentResultErrorMargins==null?null:currentResultErrorMargins.get(mainKey);
             if (errorMargins != null) {
                 Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(), errorMargins.getB());
                 errorMarginsPoint.setName(mainKey.asString()+", "+stringMessages.elements(errorMargins.getC()));
