@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Base application theme -->
-    <style name="AppTheme.Light" parent="AppTheme.Light.Base"/>
+    <style name="AppTheme.Light" parent="AppTheme.Light.Base" />
 
     <style name="AppTheme.Light.Base" parent="AppTheme.Light.Custom">
         <item name="windowActionModeOverlay">true</item>

@@ -543,7 +543,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
             depends_on = ViewHelper.get(layout, R.id.depends_on);
             explicit_factor = ViewHelper.get(layout, R.id.explicit_factor);
-            warning_sign = ViewHelper.get(layout, R.id.warning_sign);
+            warning_sign = ViewHelper.get(layout, R.id.panel_additional_image);
         }
 
         /* package */ void showFlag(LayerDrawable flag, Drawable arrow, String timer) {

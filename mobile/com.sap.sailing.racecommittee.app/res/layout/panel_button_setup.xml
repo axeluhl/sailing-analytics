@@ -44,15 +44,29 @@
             android:layout_above="@id/panel_button_footer"
             android:layout_below="@id/panel_button_header">
 
-            <ImageView
-                android:id="@+id/panel_image"
-                android:layout_width="@dimen/side_button_imageSize"
-                android:layout_height="@dimen/side_button_imageSize"
+            <RelativeLayout
+                android:id="@+id/panel_image_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_centerInParent="true"
-                android:visibility="gone"
-                tools:src="@drawable/flag_papa_64dp"
-                tools:visibility="gone" />
+                android:layout_centerInParent="true">
+
+                <ImageView
+                    android:id="@+id/panel_image"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    tools:src="@drawable/flag_papa_64dp" />
+
+                <ImageView
+                    android:id="@+id/panel_additional_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/panel_image"
+                    android:layout_alignRight="@id/panel_image"
+                    android:visibility="gone"
+                    tools:src="@drawable/ic_warning_yellow"
+                    tools:visibility="gone" />
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/panel_value"
@@ -81,7 +95,7 @@
                 android:track="@drawable/switch_track"
                 android:visibility="gone"
                 tools:targetApi="LOLLIPOP"
-                tools:visibility="visible" />
+                tools:visibility="gone" />
         </RelativeLayout>
 
         <FrameLayout
@@ -124,14 +138,6 @@
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:background="?attr/black"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/warning_sign"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:src="@drawable/ic_warning_yellow"
             android:visibility="gone" />
     </RelativeLayout>
 </merge>

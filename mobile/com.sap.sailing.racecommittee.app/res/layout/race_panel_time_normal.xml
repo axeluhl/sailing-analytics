@@ -126,13 +126,13 @@
                 android:layout_height="match_parent"
                 android:layout_weight="10"
                 android:visibility="gone"
+                app:buttonAdditionalImage="@drawable/ic_warning_yellow_24dp"
                 app:buttonCaption="@string/competitor_list"
                 app:buttonImage="?attr/competitor_list"
                 app:buttonType="typeImage"
                 app:captionPosition="bottom"
                 app:imageSize="48dp"
                 app:linePosition="left"
-                app:warningSignPosition="topRight"
                 tools:visibility="visible" />
         </LinearLayout>
     </com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout>

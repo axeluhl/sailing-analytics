@@ -81,7 +81,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
         }
         mListLock = ViewHelper.get(layout, R.id.list_lock);
 
-        mWarning = ViewHelper.get(layout, R.id.warning_sign);
+        mWarning = ViewHelper.get(layout, R.id.panel_additional_image);
 
         return layout;
     }

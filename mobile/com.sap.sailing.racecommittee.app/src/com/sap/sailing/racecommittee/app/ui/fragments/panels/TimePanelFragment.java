@@ -234,7 +234,6 @@ public class TimePanelFragment extends BasePanelFragment {
                 changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
 
-
             case FINISHED:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
@@ -253,11 +252,7 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private void checkWarnings(ReadonlyRaceState state) {
         CompetitorResults results = state.getConfirmedFinishPositioningList();
-        if (results != null) {
-            mCompetitorList.showWarningSign(results.hasConflicts());
-        } else {
-            mCompetitorList.showWarningSign(false);
-        }
+        mCompetitorList.showAdditionalImage(results.hasConflicts());
     }
 
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {

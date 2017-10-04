@@ -26,70 +26,21 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
     public final static int LEVEL_UNKNOWN = -1;
     public final static int LEVEL_NORMAL = 0;
     public final static int LEVEL_TOGGLED = 1;
-
-    public enum PanelType {
-        Value(0),
-        Image(1),
-        Switch(2),
-        Flag(3);
-
-        private int value;
-
-        PanelType(int type) {
-            value = type;
-        }
-
-        @Nullable
-        public static PanelType fromId(int id) {
-            for (PanelType type : PanelType.values()) {
-                if (type.value == id) {
-                    return type;
-                }
-            }
-            return null;
-        }
-    }
-
-    public enum CaptionPosition {
-        top(0),
-        bottom(1);
-
-        private int value;
-
-        CaptionPosition(int position) {
-            value = position;
-        }
-
-        @Nullable
-        public static CaptionPosition fromId(int id) {
-            for (CaptionPosition position : CaptionPosition.values()) {
-                if (position.value == id) {
-                    return position;
-                }
-            }
-            return null;
-        }
-    }
-
     private View mLayer;
     private View mLock;
-
     private String mCaption;
     private TextView mHeader;
     private TextView mFooter;
-
     private View mContent;
     private TextView mValue;
+    private View mImageLayout;
     private ImageView mImage;
+    private ImageView mAdditionalImage;
     private Switch mSwitch;
-
     private ImageView mMarker;
     private View mLine;
-    private ImageView mWarningSign;
-
     private PanelType mType;
     private CaptionPosition mCaptionPosition;
-
     private PanelButtonClick mListener;
     private TouchEventListener mTouchEventListener;
 
@@ -149,6 +100,7 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         mValue = (TextView) findViewById(R.id.panel_value);
         setPanelText(a.getString(R.styleable.PanelButton_buttonValue));
 
+        mImageLayout = findViewById(R.id.panel_image_layout);
         mImage = (ImageView) findViewById(R.id.panel_image);
         int size = a.getDimensionPixelSize(R.styleable.PanelButton_imageSize, 0);
         if (size > 0) {
@@ -168,8 +120,9 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
         setLinePosition(a.getInt(R.styleable.PanelButton_linePosition, -1));
 
-        mWarningSign = (ImageView) findViewById(R.id.warning_sign);
-        setWarningSignPosition(a.getInt(R.styleable.PanelButton_warningSignPosition, -1));
+        mAdditionalImage = (ImageView) findViewById(R.id.panel_additional_image);
+        mAdditionalImage.setVisibility(GONE);
+        setButtonAdditionalImage(a.getDrawable(R.styleable.PanelButton_buttonAdditionalImage));
 
         a.recycle();
 
@@ -270,6 +223,18 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         }
     }
 
+    public void setButtonAdditionalImage(Drawable drawable) {
+        if (mAdditionalImage != null) {
+            mAdditionalImage.setImageDrawable(drawable);
+        }
+    }
+
+    public void showAdditionalImage(boolean show) {
+        if (mAdditionalImage != null) {
+            mAdditionalImage.setVisibility(show ? VISIBLE : GONE);
+        }
+    }
+
     public void setPanelSwitch(@StringRes int id) {
         setPanelSwitch(getResources().getString(id));
     }
@@ -310,46 +275,13 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         }
     }
 
-    private void setWarningSignPosition(int position) {
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mWarningSign.getLayoutParams());
-        switch (position) {
-            case 0: // top left
-                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                break;
-
-            case 1: // top right
-                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                break;
-
-            case 2: // bottom right
-                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                break;
-
-            case 3: // bottom left
-                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                break;
-
-            default:
-                break;
-        }
-        mWarningSign.setLayoutParams(params);
-    }
-
-    public void showWarningSign(boolean show) {
-        mWarningSign.setVisibility(show ? VISIBLE : GONE);
-    }
-
     private void hideValues() {
         if (mValue != null) {
             mValue.setVisibility(GONE);
         }
 
-        if (mImage != null) {
-            mImage.setVisibility(GONE);
+        if (mImageLayout != null) {
+            mImageLayout.setVisibility(GONE);
         }
 
         if (mSwitch != null) {
@@ -364,8 +296,8 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
                 break;
 
             case Image:
-                if (mImage != null) {
-                    mImage.setVisibility(VISIBLE);
+                if (mImageLayout != null) {
+                    mImageLayout.setVisibility(VISIBLE);
                 }
                 break;
 
@@ -479,9 +411,51 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         return mTouchEventListener.onTouchEvent(event);
     }
 
+    public enum PanelType {
+        Value(0), Image(1), Switch(2), Flag(3);
+
+        private int value;
+
+        PanelType(int type) {
+            value = type;
+        }
+
+        @Nullable
+        public static PanelType fromId(int id) {
+            for (PanelType type : PanelType.values()) {
+                if (type.value == id) {
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum CaptionPosition {
+        top(0), bottom(1);
+
+        private int value;
+
+        CaptionPosition(int position) {
+            value = position;
+        }
+
+        @Nullable
+        public static CaptionPosition fromId(int id) {
+            for (CaptionPosition position : CaptionPosition.values()) {
+                if (position.value == id) {
+                    return position;
+                }
+            }
+            return null;
+        }
+    }
+
     public interface PanelButtonClick {
+
         void onClick(PanelButton view);
 
         void onChangedSwitch(PanelButton view, boolean isChecked);
+
     }
 }
