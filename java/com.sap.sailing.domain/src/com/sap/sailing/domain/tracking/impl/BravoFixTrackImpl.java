@@ -22,7 +22,9 @@ import com.sap.sse.common.WithID;
  */
 public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends SensorFixTrackImpl<ItemType, BravoFix>
         implements DynamicBravoFixTrack<ItemType> {
-    private static final long serialVersionUID = 5517848726456424386L;
+    private static final long serialVersionUID = 460944392510182976L;
+    
+    private final boolean hasExtendedFixes;
 
     /**
      * @param trackedItem
@@ -30,8 +32,9 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * @param trackName
      *            the name of the track by which it can be obtained from the {@link TrackedRace}.
      */
-    public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
+    public BravoFixTrackImpl(ItemType trackedItem, String trackName, boolean hasExtendedFixes) {
         super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
+        this.hasExtendedFixes = hasExtendedFixes;
     }
 
     @Override
@@ -166,5 +169,10 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
             unlockAfterRead();
         }
         return result;
+    }
+
+    @Override
+    public boolean hasExtendedFixes() {
+        return hasExtendedFixes;
     }
 }
