@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,6 +66,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.PermissionBuilderImpl;
+import com.sap.sse.security.shared.PermissionBuilder.Action;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -192,7 +194,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
-        eventTable = createEventTable();
+        eventTable = createEventTable(user);
         eventTable.ensureDebugId("EventsCellTable");
         filterTextbox.setTable(eventTable);
         refreshableEventSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
@@ -221,7 +223,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         initWidget(mainPanel);
     }
 
-    private CellTable<EventDTO> createEventTable() {
+    private CellTable<EventDTO> createEventTable(UserDTO user) {
         FlushableCellTable<EventDTO> table = new FlushableCellTable<EventDTO>(/* pageSize */10000, tableRes);
         eventListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -360,16 +362,29 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         };
         
-        ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(
-                new EventConfigImagesBarCell(stringMessages));
+        ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = 
+                new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(new EventConfigImagesBarCell(stringMessages)) {
+            @Override
+            public String getValue(EventDTO event) {
+                ArrayList<String> allowedActions = new ArrayList<>();
+                for (Action action : Arrays.asList(DefaultActions.EDIT, DefaultActions.REMOVE)) {
+                    if (user.hasPermission(
+                            PermissionBuilderImpl.getInstance().getPermission("com.sap.sailing.domain.base.Event", action, event.id.toString()),
+                            event.getAclDTO(), null)) {
+                        allowedActions.add(action.name());
+                    }
+                }
+                return String.join(",", allowedActions);
+            }
+        };
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
             @Override
             public void update(int index, EventDTO event, String value) {
-                if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                if (DefaultActions.REMOVE.equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                         removeEvent(event);
                     }
-                } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                } else if (DefaultActions.EDIT.equals(value)) {
                     openEditEventDialog(event);
                 }
             }
