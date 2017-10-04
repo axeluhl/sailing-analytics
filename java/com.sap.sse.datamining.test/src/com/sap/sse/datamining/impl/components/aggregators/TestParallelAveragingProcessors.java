@@ -32,7 +32,8 @@ public class TestParallelAveragingProcessors extends AbstractTestParallelAveragi
         Map<GroupKey, Number> sumAggregations = computeExpectedSumAggregations(elements);
         Map<GroupKey, Number> minAggregations = computeExpectedMinAggregations();
         Map<GroupKey, Number> maxAggregations = computeExpectedMaxAggregations();
-        Map<GroupKey, Number> medianAggregations = computeExpectedMedianAggregations();
+        // TODO need to decide whether we want to pay the memory overhead for median determination for each average calculation
+//        Map<GroupKey, Number> medianAggregations = computeExpectedMedianAggregations();
         Map<GroupKey, Double> elementAmountPerKey = countElementAmountPerKey(elements);
         for (Entry<GroupKey, Number> sumAggregationEntry : sumAggregations.entrySet()) {
             GroupKey key = sumAggregationEntry.getKey();
@@ -40,7 +41,7 @@ public class TestParallelAveragingProcessors extends AbstractTestParallelAveragi
                     /* average */ sumAggregationEntry.getValue().doubleValue() / elementAmountPerKey.get(key),
                     /* min */ minAggregations.get(key),
                     /* max */ maxAggregations.get(key),
-                    /* median */ medianAggregations.get(key),
+                    /* median */ /* medianAggregations.get(key) */ null,
                     /* standardDeviation */ null,
                     /* count */ elementAmountPerKey.get(key).longValue(),
                     /* resultType */ Number.class));

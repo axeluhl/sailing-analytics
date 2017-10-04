@@ -32,6 +32,8 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
     }
 
     private final Map<GroupKey, DoubleHolder> sumPerKey;
+    private final Map<GroupKey, Double> minPerKey;
+    private final Map<GroupKey, Double> maxPerKey;
     private final Map<GroupKey, AtomicLong> elementAmountPerKey;
 
     public ParallelGroupedNumberDataAverageAggregationProcessor(ExecutorService executor,
@@ -39,6 +41,8 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
         super(executor, resultReceivers, "Average");
         elementAmountPerKey = new HashMap<>();
         sumPerKey = new HashMap<>();
+        minPerKey = new HashMap<>();
+        maxPerKey = new HashMap<>();
     }
 
     @Override
@@ -47,11 +51,18 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
             incrementElementAmount(element);
             // concurrency is not an issue here; needsSynchronization() returns true
             DoubleHolder aggregate = sumPerKey.get(element.getKey());
+            final double doubleValue = element.getDataEntry().doubleValue();
             if (aggregate == null) {
-                aggregate = new DoubleHolder(element.getDataEntry().doubleValue());
+                aggregate = new DoubleHolder(doubleValue);
                 sumPerKey.put(element.getKey(), aggregate);
             } else {
-                aggregate.value += element.getDataEntry().doubleValue();
+                aggregate.value += doubleValue;
+            }
+            if (!minPerKey.containsKey(element.getKey()) || doubleValue < minPerKey.get(element.getKey())) {
+                minPerKey.put(element.getKey(), doubleValue);
+            }
+            if (!maxPerKey.containsKey(element.getKey()) || doubleValue > maxPerKey.get(element.getKey())) {
+                maxPerKey.put(element.getKey(), doubleValue);
             }
         }
     }
@@ -73,8 +84,7 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
         for (Entry<GroupKey, DoubleHolder> sumAggregationEntry : sumPerKey.entrySet()) {
             GroupKey key = sumAggregationEntry.getKey();
             result.put(key, new AverageWithStatsImpl<Number>(sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get(),
-                    /* TODO min */ sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get() / 2,
-                    /* TODO max */ 2*sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get(),
+                    minPerKey.get(key), maxPerKey.get(key),
                     /* median */ null,
                     /* standardDeviation */ null,
                     /* count */ elementAmountPerKey.get(key).get(),
