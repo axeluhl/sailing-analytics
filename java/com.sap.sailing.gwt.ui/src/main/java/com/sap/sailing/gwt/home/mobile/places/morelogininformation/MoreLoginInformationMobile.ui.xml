@@ -47,13 +47,11 @@
                 image="{local_res.notifications}"
                 content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
         </a:item>
-        <!-- 
         <a:footer>
             <g:HTMLPanel addStyleNames="{style.buttonContainer}">
-                <a
+                <a ui:field="register"
                     class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}">TODO: register</a>
             </g:HTMLPanel>
         </a:footer>
-         -->
     </a:Accordion>
 </ui:UiBinder>

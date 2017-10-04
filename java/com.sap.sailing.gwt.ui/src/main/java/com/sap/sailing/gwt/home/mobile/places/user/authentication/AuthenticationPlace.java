@@ -9,6 +9,11 @@ import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class AuthenticationPlace extends Place implements HasMobileVersion, HasLocationTitle {
+    private boolean register;
+
+    public AuthenticationPlace(boolean register) {
+        this.register = register;
+    }
     
     @Override
     public String getLocationTitle() {
@@ -24,7 +29,7 @@ public class AuthenticationPlace extends Place implements HasMobileVersion, HasL
 
         @Override
         public AuthenticationPlace getPlace(String token) {
-            return new AuthenticationPlace();
+            return new AuthenticationPlace(false);
         }
     }
     

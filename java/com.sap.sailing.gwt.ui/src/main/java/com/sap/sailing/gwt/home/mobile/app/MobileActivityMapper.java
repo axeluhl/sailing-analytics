@@ -87,7 +87,7 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof ImprintPlace) {
             return new ImprintActivityProxy((ImprintPlace) place);
         } else if (place instanceof MoreLoginInformationPlace) {
-            return new MoreLoginInformationActivity(place);
+            return new MoreLoginInformationActivity(place, clientFactory);
         } else {
             return null;
         }

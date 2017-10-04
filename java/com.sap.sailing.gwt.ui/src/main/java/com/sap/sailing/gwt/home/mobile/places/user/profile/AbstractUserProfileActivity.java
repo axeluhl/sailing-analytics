@@ -15,7 +15,7 @@ public abstract class AbstractUserProfileActivity extends AbstractActivity imple
     
     @Override
     public void doTriggerLoginForm() {
-        clientFactory.getNavigator().getSignInNavigation().goToPlace();
+        clientFactory.getNavigator().getSignInNavigation(false).goToPlace();
     }
     
     @Override
