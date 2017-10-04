@@ -40,7 +40,7 @@ function _alert() {
   if [[ "${quiet}" = "true" ]] || [ "${quiet}" == "1" ]; then
    return
   else
-   echo -e "${color}$(printf "" "${1}") ${_message}${reset}" >&2;
+   echo -e "${color}$(printf ">" "${1}") ${_message}${reset}" >&2;
   fi
 
 }
