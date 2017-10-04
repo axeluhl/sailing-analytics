@@ -197,7 +197,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
 
         public AbstractColumnChartDescriptor(String name, boolean showErrorBars) {
             this.name = name;
-            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), stringMessages, showErrorBars);
+            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), stringMessages, showErrorBars, /* drillDownCallback */ null);
         }
 
         @Override
