@@ -34,11 +34,13 @@ import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.WithControls;
 import com.sap.sailing.gwt.ui.datamining.developer.PredefinedQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionViewer;
+import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart.DrillDownCallback;
 import com.sap.sailing.gwt.ui.datamining.selection.filter.ListRetrieverChainFilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettingsDialogComponent;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -50,7 +52,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
+public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls, DrillDownCallback {
 
     private static final double headerPanelHeight = 45;
     private static final double footerPanelHeight = 50;
@@ -167,6 +169,32 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         providers.forEach(provider -> provider.awaitReloadComponents());
     }
     
+    /**
+     * The first {@link FunctionDTO dimension} of which the {@code groupKey} is assumed to be an instance will be
+     * removed from the {@link #groupingProvider}. A filter criterion for that dimension will be added to the
+     * {@link #filterSelectionProvider}, filtering such that only {@code groupKey} will be accepted as value. For this
+     * purpose, the retriever levels are scanned from top to bottom to find the topmost occurrence of that dimension.<p>
+     * 
+     * If the {@link #groupingProvider} had only one grouping level, a popup menu is displayed where the user must select
+     * another dimension to group by, before the query can be run again. Otherwise, the query is executed again after
+     * the first grouping level has been removed and the filter has been set.
+     * 
+     * @return {@code true} if it seems the drill-down has worked
+     */
+    @Override
+    public boolean drillDown(GroupKey groupKey) {
+        final boolean result;
+        final Collection<FunctionDTO> dimensionsToGroupBy = groupingProvider.getDimensionsToGroupBy();
+        if (!dimensionsToGroupBy.isEmpty()) {
+            final FunctionDTO firstDimension = dimensionsToGroupBy.iterator().next();
+            groupingProvider.removeDimensionToGroupBy(firstDimension);
+            result = true;
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
     @Override
     public void awaitReloadComponents() {
         // Nothing to do here

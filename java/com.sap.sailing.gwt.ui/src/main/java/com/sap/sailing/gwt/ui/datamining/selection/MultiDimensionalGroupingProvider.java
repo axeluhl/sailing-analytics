@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -194,13 +196,26 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
 
     @Override
     public Collection<FunctionDTO> getDimensionsToGroupBy() {
-        Collection<FunctionDTO> dimensionsToGroupBy = new ArrayList<FunctionDTO>();
+        Collection<FunctionDTO> dimensionsToGroupBy = new ArrayList<>();
         for (ValueListBox<FunctionDTO> dimensionListBox : dimensionToGroupByBoxes) {
             if (dimensionListBox.getValue() != null) {
                 dimensionsToGroupBy.add(dimensionListBox.getValue());
             }
         }
         return dimensionsToGroupBy;
+    }
+    
+    @Override
+    public void removeDimensionToGroupBy(FunctionDTO dimension) {
+        for (final Iterator<ValueListBox<FunctionDTO>> i=dimensionToGroupByBoxes.iterator(); i.hasNext(); ) {
+            final ValueListBox<FunctionDTO> dimensionListBox = i.next();
+            if (Util.equalsWithNull(dimension, dimensionListBox.getValue())) {
+                i.remove();
+                mainPanel.remove(dimensionListBox);
+                updateAcceptableValues();
+                notifyListeners();
+            }
+        }
     }
 
     @Override

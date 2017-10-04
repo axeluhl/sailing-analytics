@@ -36,6 +36,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     
     private DataMiningSession session;
 
+    private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
+    
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
@@ -55,15 +57,15 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
                         getStringMessages());
-                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(null, null, getStringMessages());
-                
+                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(/* parent */ null, /* context */ null,
+                        /* delegate drillDownCallback */ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey),
+                        getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-                QueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
+                queryDefinitionProviderWithControls =
                         new QueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
                                 dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
-                
                 QueryRunner queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
                         dataMiningService,
                         DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);

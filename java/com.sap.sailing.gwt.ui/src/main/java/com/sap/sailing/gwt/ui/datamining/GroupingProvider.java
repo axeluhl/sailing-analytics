@@ -6,13 +6,16 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public interface GroupingProvider extends DataMiningComponentProvider<SerializableSettings>, DataRetrieverChainDefinitionChangedListener {
-    
-    public Collection<FunctionDTO> getDimensionsToGroupBy();
-    public String getCustomGrouperScriptText();
-    
-    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
-    
-    public void addGroupingChangedListener(GroupingChangedListener listener);
+public interface GroupingProvider
+        extends DataMiningComponentProvider<SerializableSettings>, DataRetrieverChainDefinitionChangedListener {
+    Collection<FunctionDTO> getDimensionsToGroupBy();
+
+    String getCustomGrouperScriptText();
+
+    void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
+
+    void addGroupingChangedListener(GroupingChangedListener listener);
+
+    void removeDimensionToGroupBy(FunctionDTO dimension);
 
 }
