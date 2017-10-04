@@ -119,7 +119,7 @@ public class RaceLogFixTrackerManagerTest {
                         throw new IllegalArgumentException("Unknown event type");
                     }
                 });
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }
 
     /**
@@ -140,6 +140,6 @@ public class RaceLogFixTrackerManagerTest {
                     }
                 });
         trackedRace.attachRaceLog(raceLog2);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }
 }

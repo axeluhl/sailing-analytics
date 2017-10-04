@@ -319,6 +319,15 @@ public class Util {
         }
         return set;
     }
+    
+    public static interface Mapper<S, T> { T map(S s); }
+    public static <S, T> Iterable<T> map(Iterable<S> iterable, Mapper<S, T> mapper) {
+        List<T> result = new ArrayList<>();
+        for (final S s : iterable) {
+            result.add(mapper.map(s));
+        }
+        return result;
+    }
 
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method

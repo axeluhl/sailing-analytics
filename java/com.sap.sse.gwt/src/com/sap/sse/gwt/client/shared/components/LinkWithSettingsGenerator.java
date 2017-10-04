@@ -23,7 +23,7 @@ public class LinkWithSettingsGenerator<S extends Settings> {
 
     private final SettingsToUrlSerializer settingsToUrlSerializer = new SettingsToUrlSerializer();
 
-    private final String path;
+    private final String baseUrl, path;
     private final GenericSerializableSettings[] contextDefinition;
     
     /**
@@ -47,6 +47,22 @@ public class LinkWithSettingsGenerator<S extends Settings> {
      *            {@link EntryPoint} the link is created for.
      */
     public LinkWithSettingsGenerator(String path, GenericSerializableSettings... contextDefinition) {
+        this(null, path, contextDefinition);
+    }
+
+    /**
+     * Constructs a link based on the given base URL and path arguments.
+     * 
+     * @param baseUrl
+     *            the base URL to use for the generated link
+     * @param path
+     *            the path to use for the generated link
+     * @param contextDefinition
+     *            {@link GenericSerializableSettings} instances that in sum define the context parameters of the
+     *            {@link EntryPoint} the link is created for.
+     */
+    public LinkWithSettingsGenerator(String baseUrl, String path, GenericSerializableSettings... contextDefinition) {
+        this.baseUrl = baseUrl;
         this.path = path;
         this.contextDefinition = contextDefinition;
     }
@@ -60,14 +76,15 @@ public class LinkWithSettingsGenerator<S extends Settings> {
     
     /**
      * Creates a link using the contextDefinition (see constructors) and the given {@link Settings} instance.
-     * 
      */
     public String createUrl(S settings) {
         final UrlBuilder urlBuilder;
-        if (path == null) {
-            urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
-        } else {
+        if (baseUrl != null && path != null) {
+            urlBuilder = UrlBuilderUtil.createUrlBuilderFromBaseURLAndPathWithCleanParameters(baseUrl, path);
+        } else if (path != null) {
             urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(path);
+        } else {
+            urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         }
         serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinition);
         return urlBuilder.buildString();

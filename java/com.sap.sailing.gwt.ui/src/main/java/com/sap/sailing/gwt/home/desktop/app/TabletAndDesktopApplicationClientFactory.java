@@ -78,6 +78,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
+
+        new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }
     
     @Override

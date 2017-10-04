@@ -54,6 +54,8 @@ public interface ThreadPoolUtil {
      */
     ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(String name);
     
+    ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name);
+
     /**
      * In case an application module really requires its own thread pool instead of
      * using {@link #getBackgroundTaskThreadPool}, it should size the thread pool

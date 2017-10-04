@@ -13,6 +13,7 @@ import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchAct
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -47,6 +48,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
@@ -277,7 +279,18 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public void onPause() {
         mDragDropManager.cancelDrag();
+
         super.onPause();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
+        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
+        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override
@@ -285,6 +298,11 @@ public class TrackingListFragment extends BaseFragment
         super.onStop();
 
         sendUnconfirmed();
+
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
+        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_STOP);
+        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override

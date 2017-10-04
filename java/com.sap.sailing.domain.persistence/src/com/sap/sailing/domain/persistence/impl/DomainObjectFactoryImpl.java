@@ -116,6 +116,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEv
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnTimeFactorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -163,6 +164,8 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.EventType;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -2365,5 +2368,58 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         };
+    }
+    
+    @Override
+    public Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException {
+        HashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> fromDb = new HashMap<>();
+        DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
+        DBCursor cursor = anniversarysStored.find();
+        while (cursor.hasNext()) {
+            DBObject toLoad = cursor.next();
+            String leaderboardName = toLoad.get(FieldNames.LEADERBOARD_NAME.name()).toString();
+            String eventID = toLoad.get(FieldNames.EVENT_ID.name()).toString();
+
+            final Object mongoDisplayName = toLoad.get(FieldNames.LEADERBOARD_DISPLAY_NAME.name());
+            final String leaderboardDisplayName;
+            if (mongoDisplayName == null) {
+                leaderboardDisplayName = null;
+            } else {
+                leaderboardDisplayName = mongoDisplayName.toString();
+            }
+            final Object mongoEventName = toLoad.get(FieldNames.EVENT_NAME.name());
+            final String eventName;
+            if (mongoEventName == null) {
+                eventName = null;
+            } else {
+                eventName = mongoEventName.toString();
+            }
+
+            TimePoint startOfRace = new MillisecondsTimePoint(
+                    ((Number) toLoad.get(FieldNames.START_OF_RACE.name())).longValue());
+            String race = toLoad.get(FieldNames.RACE_NAME.name()).toString();
+            String regatta = toLoad.get(FieldNames.REGATTA_NAME.name()).toString();
+            Object rurl = toLoad.get(FieldNames.REMOTE_URL.name());
+            final URL remoteUrlOrNull;
+            if (rurl != null) {
+                remoteUrlOrNull = new URL(rurl.toString());
+            } else {
+                remoteUrlOrNull = null;
+            }
+            final Object typeJson = toLoad.get(FieldNames.EVENT_TYPE.name());
+            final EventType eventType;
+            if (typeJson == null) {
+                eventType = null;
+            } else {
+                eventType = EventType.valueOf(typeJson.toString());
+            }
+            DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race),
+                    leaderboardName, leaderboardDisplayName, startOfRace, UUID.fromString(eventID), eventName, eventType,
+                    remoteUrlOrNull);
+            int anniversary = ((Number) toLoad.get(FieldNames.ANNIVERSARY_NUMBER.name())).intValue();
+            String type = toLoad.get(FieldNames.ANNIVERSARY_TYPE.name()).toString();
+            fromDb.put(anniversary, new Pair<>(loadedAnniversary, AnniversaryType.valueOf(type)));
+        }
+        return fromDb;
     }
 }

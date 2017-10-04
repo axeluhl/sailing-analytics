@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -198,11 +199,15 @@ public interface DynamicTrackedRace extends TrackedRace {
      * Updates the status of one {@link TrackingDataLoader}. This influences the overall status of the TrackedRace with the following rules:
      * <ul>
      * <li>The {@link TrackedRace} is initially in the state PREPARED</li>
+     * <li>If the {@code status} of the {@code source} loader is set to {@link TrackedRaceStatusEnum#REMOVED}, the {@link TrackedRace}
+     * will to to status {@link TrackedRaceStatusEnum#REMOVED}.</li>
+     * <li>Otherwise, if there are no loaders left, the {@link TrackedRace}'s status goes to {@link TrackedRaceStatusEnum#FINISHED}.</li>
      * <li>If any loader's state is ERROR, this will also be the case for the {@link TrackedRace}</li>
      * <li>Otherwise: If any loader's state is LOADING, the {@link TrackedRace} will also be in loading state with the progress being the average progress of all loaders (including those not being in loading state)</li>
-     * <li>Otherwise: If all laoders are in PREPARED state, this will also be the case for the {@link TrackedRace}</li>
+     * <li>Otherwise: If all loaders are in PREPARED state, this will also be the case for the {@link TrackedRace}</li>
      * <li>Otherwise: The {@link TrackedRace} is in TRACKING state</li>
      * </ul>
+     * Loaders in status {@link TrackedRaceStatusEnum#FINISHED} or {@link TrackedRaceStatusEnum#REMOVED} will be removed.
      * 
      * @see TrackedRace#getStatus()
      */

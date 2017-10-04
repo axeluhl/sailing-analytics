@@ -209,7 +209,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(false);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
     }
     
@@ -289,7 +289,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
     }
 }

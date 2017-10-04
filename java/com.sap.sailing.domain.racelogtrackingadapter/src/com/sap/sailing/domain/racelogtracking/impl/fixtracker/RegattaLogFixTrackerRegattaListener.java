@@ -74,9 +74,9 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
             if (raceTracker != null) {
                 boolean added = raceTracker.add(new RaceTracker.Listener() {
                     @Override
-                    public void onTrackerWillStop(boolean preemptive) {
+                    public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
                         raceTracker.remove(this);
-                        removeRaceLogSensorDataTracker(raceIdentifier, preemptive);
+                        removeRaceLogSensorDataTracker(raceIdentifier, preemptive, willBeRemoved);
                     }
                 });
                 // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
@@ -89,7 +89,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
                         oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
                     }
                     if (oldInstance != null) {
-                        oldInstance.stop(true);
+                        oldInstance.stop(/* preemptive */ true, /* willBeRemoved */ false);
                     }
                 }
             }
@@ -102,13 +102,13 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     }
     
     private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier) {
-        removeRaceLogSensorDataTracker(raceIdentifier, false);
+        removeRaceLogSensorDataTracker(raceIdentifier, /* preemptive */ false, /* willBeRemoved */ false);
     }
 
-    private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier, boolean preemptive) {
+    private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier, boolean preemptive, boolean willBeRemoved) {
         RaceLogFixTrackerManager currentActiveDataTracker = dataTrackers.get(raceIdentifier);
         if (currentActiveDataTracker != null) {
-            currentActiveDataTracker.stop(preemptive);
+            currentActiveDataTracker.stop(preemptive, willBeRemoved);
             trackerStopped(raceIdentifier, currentActiveDataTracker);
         }
     }

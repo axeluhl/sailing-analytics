@@ -67,6 +67,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
             TimePoint timePoint = MillisecondsTimePoint.now();
             JSONObject jsonLeaderboardGroup = new JSONObject();
             jsonLeaderboardGroup.put("name", leaderboardGroup.getName());
+            jsonLeaderboardGroup.put("id", leaderboardGroup.getId().toString());
             jsonLeaderboardGroup.put("description", leaderboardGroup.getDescription());
             jsonLeaderboardGroup.put("timepoint", timePoint.toString());
             JSONArray jsonLeaderboardEntries = new JSONArray();
