@@ -13,6 +13,8 @@ function user_input(){
 	input_key_name
 	input_key_file
 	input_new_admin_password
+	input_user_username
+	input_user_password
 }
 
 function execute() {

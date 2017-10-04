@@ -45,30 +45,20 @@ admin_username=admin
 admin_password=admin
 instance_count=1
 
-# Setting variables
 
-region=${region_param:-$default_region}
-instance_type=${instance_type_param:-$default_instance_type}
-key_name=${key_name_param:-$default_key_name}
-key_file=${key_file_param:-$default_key_file}
-user_username=${user_username_param:-$default_user_username}
-user_password=${user_password_param:-$default_user_password}
-instance_name=${instance_name_param:-$default_instance_name_param}
-instance_short_name=${instance_short_name_param:-$default_instance_short_name}
-new_admin_password=${new_admin_password_param:-$default_new_admin_password}
 tail_instance="$tail_instance_param"
 ssh_user=${ssh_user_param:-$default_ssh_user}
 
 function region_ask_message() {
-	printf "Please enter the region for the instance (default: \"%s\"): " $region
+	printf "Please enter the region for the instance (default: \"%s\"): " $default_region
 }
 
 function instance_type_ask_message() {
-	printf "Please enter the instance type (default: \"%s\"): " $instance_type
+	printf "Please enter the instance type (default: \"%s\"): " $default_instance_type
 }
 
 function key_name_ask_message() {
-	printf "Please enter the key name of the keypair you want to use to connect to the instance (e.g. \"%s\"): " $key_name
+	printf "Please enter the key name of the keypair you want to use to connect to the instance (e.g. \"%s\"): " $default_key_name
 }
 
 function instance_name_ask_message() {
@@ -80,19 +70,26 @@ function instance_short_name_ask_message() {
 }
 
 function key_file_ask_message() {
-	printf "Please enter the file path of the keypair you want to use to connect to the instance (e.g. \"%s\"): " $key_file
+	printf "Please enter the file path of the keypair you want to use to connect to the instance (e.g. \"%s\"): " $default_key_file
 }
 
 function new_admin_password_ask_message() {
-	printf "Please enter a new password for the admin user (default: \"%s\"): " $new_admin_password
+	printf "Please enter a new password for the admin user (default: \"%s\"): " $default_new_admin_password
 }
 
 function mongo_db_host_ask_message() {
-	printf "Please enter the ip adress of the mongo db server: (default: \"%s\"): " $mongodb_host
+	printf "Please enter the ip adress of the mongo db server: (default: \"%s\"): " $default_mongodb_host
 }
 
 function mongo_db_port_ask_message() {
-	printf "Please enter the port of the mongo db server: (default: \"%s\"): " $mongodb_port
+	printf "Please enter the port of the mongo db server: (default: \"%s\"): " $default_mongodb_port
 }
 
+function user_username_ask_message() {
+	printf "Please enter the username of your new user: (default: \"%s\"): " $default_user_username
+}
+
+function user_password_ask_message() {
+	printf "Please enter the password of your new user: (default: \"%s\"): " $default_user_password
+}
 

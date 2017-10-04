@@ -89,7 +89,7 @@ This is an AWS automation bash script for deploying SAP Sailing Analytics instan
   -q, --user-password        Password of user to create
   -n, --instance-name        Name for instance 
   -l, --instance-short-name  Short name for instance
-  -a, --admin-password	     New password for the admin user
+  -a, --new-admin-password	 New password for the admin user
   
       --instance-with-elb	 Create instance with elastic load balancer (default: \"false\")
       
