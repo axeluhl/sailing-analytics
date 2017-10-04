@@ -58,20 +58,6 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.isShowCompetitorNationality());
     }
     
-    public SingleRaceLeaderboardSettings createSettingsWithCustomExpandPreselectedRaceState(SingleRaceLeaderboardSettings settings) {
-        return new SingleRaceLeaderboardSettings(
-                settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(),
-                settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
-                settings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                settings.isShowAddedScores(),
-                settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                settings.isShowCompetitorSailIdColumn(),
-                settings.isShowCompetitorFullNameColumn(),
-                settings.isShowRaceRankColumn(),
-                settings.isShowCompetitorNationality());
-    }
-    
     public MultiRaceLeaderboardSettings mergeLeaderboardSettings(MultiRaceLeaderboardSettings settingsWithRaceSelection, MultiRaceLeaderboardSettings settingsWithDetails) {
         final MultiRaceLeaderboardSettings newSettings = mergeLeaderboardSettingsHelper(settingsWithRaceSelection, settingsWithDetails);
         return newSettings;
