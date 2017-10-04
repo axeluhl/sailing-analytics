@@ -252,7 +252,9 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private void checkWarnings(ReadonlyRaceState state) {
         CompetitorResults results = state.getConfirmedFinishPositioningList();
-        mCompetitorList.showAdditionalImage(results.hasConflicts());
+        if (results != null) {
+            mCompetitorList.showAdditionalImage(results.hasConflicts());
+        }
     }
 
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
