@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -34,12 +35,11 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     }
 
     @Override
-    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
         QueryResultDTO<?> result = getCurrentResult();
         SafeHtmlBuilder resultsBuilder = new SafeHtmlBuilder();
         resultsBuilder.appendHtmlConstant("<b>").appendEscaped(result.getResultSignifier()).appendHtmlConstant("</b>");
         resultsBuilder.appendHtmlConstant("<br />");
-        
         resultsBuilder.appendHtmlConstant("<table>");
         if (isCurrentResultTwoDimensional()) {
             buildTable(resultValues, resultsBuilder);
@@ -47,7 +47,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
             buildList(resultValues, resultsBuilder);
         }
         resultsBuilder.appendHtmlConstant("</table>");
-        
         resultsLabel.setHTML(resultsBuilder.toSafeHtml().asString());
     }
 
@@ -75,7 +74,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
                     unfoldedResultValues.get(mainKey).containsKey(subKey)) {
                     value = unfoldedResultValues.get(mainKey).get(subKey);
                 }
-                
                 resultsBuilder.appendHtmlConstant("<td>");
                 if (value != null) {
                     resultsBuilder.append(value.doubleValue());

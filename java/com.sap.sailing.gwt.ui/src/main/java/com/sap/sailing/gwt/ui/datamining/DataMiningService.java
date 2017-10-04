@@ -49,5 +49,4 @@ public interface DataMiningService extends RemoteService {
             PredefinedQueryIdentifier identifier, String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
-
 }

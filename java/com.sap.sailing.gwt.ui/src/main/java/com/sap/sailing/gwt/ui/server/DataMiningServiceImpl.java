@@ -331,5 +331,4 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
     }
-
 }
