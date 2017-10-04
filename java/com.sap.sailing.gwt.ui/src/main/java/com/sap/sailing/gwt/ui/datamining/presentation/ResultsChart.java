@@ -144,10 +144,11 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
     private final Map<GroupKey, Double> averagePerMainKey;
     private final Map<GroupKey, Double> medianPerMainKey;
+    private final boolean showErrorBars;
 
-    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages, boolean showErrorBars) {
         super(parent, context, stringMessages);
-        
+        this.showErrorBars = showErrorBars;
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
         sortByPanel.add(new Label(stringMessages.sortBy() + ":"));
@@ -275,12 +276,14 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
-            final Triple<Number, Number, Long> errorMargins = currentResultErrorMargins==null?null:currentResultErrorMargins.get(mainKey);
-            if (errorMargins != null) {
-                Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(), errorMargins.getB());
-                errorMarginsPoint.setName(mainKey.asString()+", "+stringMessages.elements(errorMargins.getC()));
-                errorSeriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
-                    .addPoint(errorMarginsPoint, false, false, false);
+            if (showErrorBars) {
+                final Triple<Number, Number, Long> errorMargins = currentResultErrorMargins==null?null:currentResultErrorMargins.get(mainKey);
+                if (errorMargins != null) {
+                    Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(), errorMargins.getB());
+                    errorMarginsPoint.setName(mainKey.asString()+", "+stringMessages.elements(errorMargins.getC()));
+                    errorSeriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
+                        .addPoint(errorMarginsPoint, false, false, false);
+                }
             }
         }
         averagePerMainKey.clear();
@@ -351,15 +354,19 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
                 seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
-                errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setType(Type.ERRORBAR).setName(seriesKey.asString()+
-                        " "+getStringMessages().dataMiningErrorMargins()));
+                if (showErrorBars) {
+                    errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setType(Type.ERRORBAR).setName(seriesKey.asString()+
+                            " "+getStringMessages().dataMiningErrorMargins()));
+                }
             }
         }
         List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
         Collections.sort(sortedSeriesKeys);
         for (GroupKey seriesKey : sortedSeriesKeys) {
             chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
-            chart.addSeries(errorSeriesMappedByGroupKey.get(seriesKey), false, false);
+            if (showErrorBars) {
+                chart.addSeries(errorSeriesMappedByGroupKey.get(seriesKey), false, false);
+            }
         }
     }
     
