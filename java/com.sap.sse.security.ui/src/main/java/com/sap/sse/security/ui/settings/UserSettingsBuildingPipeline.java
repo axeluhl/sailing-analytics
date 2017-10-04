@@ -110,21 +110,18 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(
             CS newSettings, CS newInstance,
-            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, Iterable<String> path) {
-        CS documentSettingsWithUserSettingsDiff;
+            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, Iterable<String> path){
+        CS pipelinedSettings = newInstance;
+
         if (previousSettingsRepresentation.hasStoredUserSettings()) {
-            CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
-            pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set
-                                                                                     // to default values
-            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
-                    newInstance,
+            pipelinedSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+                    pipelinedSettings,
                     previousSettingsRepresentation.getUserSettingsRepresentation().getSubSettingsRepresentation(path));
-            pipelinedSettings = SettingsUtil.copyDefaultsFromValues(previousUserSettings, pipelinedSettings);
-            documentSettingsWithUserSettingsDiff = SettingsUtil.copyValues(newSettings, pipelinedSettings);
-        } else {
-            documentSettingsWithUserSettingsDiff = newSettings;
+
+            pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
         }
-        return settingsRepresentationTransformer.convertToSettingsRepresentation(documentSettingsWithUserSettingsDiff);
+        pipelinedSettings = SettingsUtil.copyValues(newSettings, pipelinedSettings);
+        return settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
     }
 
 }
