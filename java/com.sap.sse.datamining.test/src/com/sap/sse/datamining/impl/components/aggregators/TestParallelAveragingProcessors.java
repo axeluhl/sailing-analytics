@@ -44,7 +44,7 @@ public class TestParallelAveragingProcessors extends AbstractTestParallelAveragi
                     /* median */ /* medianAggregations.get(key) */ null,
                     /* standardDeviation */ null,
                     /* count */ elementAmountPerKey.get(key).longValue(),
-                    /* resultType */ Number.class));
+                    /* resultType */ Number.class.getName()));
         }
         return result;
     }

@@ -12,7 +12,7 @@ public class AverageWithStatsImpl<T> implements AverageWithStats<T> {
     private final long count;
     private final String resultType;
 
-    public AverageWithStatsImpl(T average, T min, T max, T median, T standardDeviation, long count, Class<T> resultType) {
+    public AverageWithStatsImpl(T average, T min, T max, T median, T standardDeviation, long count, String resultType) {
         super();
         this.average = average;
         this.min = min;
@@ -20,7 +20,7 @@ public class AverageWithStatsImpl<T> implements AverageWithStats<T> {
         this.median = median;
         this.standardDeviation = standardDeviation;
         this.count = count;
-        this.resultType = resultType.getName();
+        this.resultType = resultType;
     }
 
     @Override

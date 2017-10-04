@@ -88,7 +88,7 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
                     /* median */ null,
                     /* standardDeviation */ null,
                     /* count */ elementAmountPerKey.get(key).get(),
-                    Number.class));
+                    Number.class.getName()));
         }
         return result;
     }
