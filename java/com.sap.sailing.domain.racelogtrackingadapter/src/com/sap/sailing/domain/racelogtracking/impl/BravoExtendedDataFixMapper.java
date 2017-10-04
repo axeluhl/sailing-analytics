@@ -1,11 +1,12 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.BravoExtendedFixImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
@@ -13,23 +14,23 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.BravoFixTrackImpl;
 
 /**
- * {@link SensorFixMapper} implementation to handle {@link BravoFix}es.
+ * {@link SensorFixMapper} implementation to handle {@link BravoExtendedFix}es.
  */
-public class BravoDataFixMapper implements SensorFixMapper<BravoFix, DynamicSensorFixTrack<Competitor, BravoFix>, Competitor> {
+public class BravoExtendedDataFixMapper implements SensorFixMapper<BravoFix, DynamicSensorFixTrack<Competitor, BravoFix>, Competitor> {
 
     @Override
     public DynamicSensorFixTrack<Competitor, BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
         return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, 
-                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, false));
+                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, true));
     }
     
     @Override
-    public BravoFix map(DoubleVectorFix fix) {
-        return new BravoFixImpl(fix);
+    public BravoExtendedFix map(DoubleVectorFix fix) {
+        return new BravoExtendedFixImpl(fix);
     }
     
     @Override
     public boolean isResponsibleFor(Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
-        return RegattaLogDeviceCompetitorBravoMappingEventImpl.class.isAssignableFrom(eventType);
+        return RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl.class.isAssignableFrom(eventType);
     }
 }
