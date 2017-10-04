@@ -64,6 +64,8 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.PermissionBuilderImpl;
+import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -147,7 +149,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
-        if (!user.hasPermission("com.sap.sailing.domain.base.Event:create")) {
+        if (!user.hasPermission(
+                PermissionBuilderImpl.getInstance().getPermission("com.sap.sailing.domain.base.Event", DefaultActions.CREATE))) {
             createEventBtn.setVisible(false);
         }
 
