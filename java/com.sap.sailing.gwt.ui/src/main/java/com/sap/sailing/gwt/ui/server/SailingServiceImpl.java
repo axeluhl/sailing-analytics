@@ -6592,7 +6592,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
         availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
         availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);        if (leaderboardGroupName != null) {
+        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        if (leaderboardGroupName != null) {
             LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
             if (group != null ? group.hasOverallLeaderboard() : false) {
                 availableDetailsTypes.add(DetailType.OVERALL_RANK);
