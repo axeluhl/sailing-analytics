@@ -20,10 +20,9 @@ function get_latest_release(){
 # $1: access_token $:2 public_dns_name 
 function create_event(){
 	local_echo "Creating event..."
-	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" | jq -r '.eventid' | tr -d '\r'
+	result_code=$(curl -w ''%{http_code}'' -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" | jq -r '.eventid' | tr -d '\r')
 	
-	event_id=$?
-	if [ $event_id -ne 0 ]; then
+	if [ $result_code -ne 200 ]; then
 		error "Failed creating event."
 	else
 		success "Created event with id: \"$event_id\"."
@@ -34,56 +33,46 @@ function create_event(){
 # $1: access_token $2: public_dns_name $3: admin_username 4: admin_new_password
 function change_admin_password(){
 	local_echo "Changing admin password from \"$3\" to \"$4\"..."
-	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
+	result_code=$(curl -w ''%{http_code}'' -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4")
 	
-	result=$?
-	if [ $result -ne 0 ]; then
+	if [ $result_code -ne 200 ]; then
 		error "Failed changing password."
 	else
 		success "Changed admin password from \"$3\" to \"$4\"."
-		return $result
+		echo $result
 	fi
 }
 
 # $1: access_token $2: public_dns_name 3: user_username 4: user_password
 function create_new_user(){
-	local_echo 'Creating new user \"$4\" with password \"$4\"...'
-	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
+	local_echo "Creating new user \"$3\" with password \"$4\"..."
+	result_code=$(curl -w ''%{http_code}'' -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4")
 	
-	result=$?
-	if [ $result -ne 0 ]; then
+	if [ $result_code -ne 200 ]; then
 		error "Failed creating user."
 	else
 		success "Successfully created user \"$3\"."
-		return $result
+		echo $result
 	fi
 }
-
 
 # $1: instance_id
 function query_public_dns_name(){
 	local_echo "Querying for the instance public dns name..." 
-	aws --region $region ec2 describe-instances --instance-ids $1 --output text --query 'Reservations[*].Instances[*].PublicDnsName' | tr -d '\r'
+	public_dns_name=$(aws --region $region ec2 describe-instances --instance-ids $1 --output text --query 'Reservations[*].Instances[*].PublicDnsName' | tr -d '\r')
 	
-	public_dns_name=$?
-	if [ $public_dns_name -ne 0 ]; then
+	result_code=$?
+	if [ $result_code -ne 0 ]; then
 		error "Querying for instance public dns name failed."
 	else
-		success "Public dns name of instance \"$instance_id\" is \"$public_dns_name\""
-		return $public_dns_name
+		success "Public dns name of instance \"$instance_id\" is \"$public_dns_name\"."
+		echo $public_dns_name
 	fi
-}
-
-# $1: instance_id
-function wait_instance_exists(){
-	local_echo "Wait until instance $1 is recognized by AWS..." 
-	aws ec2 wait instance-exists --instance-ids $1
-	success "The instance \"$1\" is now recognized by AWS."
 }
 
 # $1: key_file $2: ssh_user $3: public_dns_name
 function wait_for_ssh_connection(){
-	echo -n "Connecting to $2@$3 with keypair $1..." 
+	echo -n "Connecting to $2@$3..." 
 	local status=""
 	while [[ $status != ok ]]
 	do
@@ -104,44 +93,45 @@ function wait_for_access_token_resource(){
 		sleep $http_retry_interval; 
 	done
 	echo ""
-	success 'Resource "/security/api/restsecurity/access_token" is now available.'
-}
-
-# $1: admin_username $2: admin_password 3: public_dns_name
-function get_access_token(){
-	local_echo "Getting access token..."
-	curl -s -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" | jq -r '.access_token' | tr -d '\r'
-	
-	access_token=$?
-	if [ $access_token -ne 0 ]; then
-		error "Failed getting access token."
-	else
-		success "Access token is: \"$access_token\""
-		return $access_token
-	fi
+	success "Resource \"/security/api/restsecurity/access_token\" is now available."
 }
 
 # $1: public_dns_name
 function wait_for_create_event_resource(){
 	echo 'Wait until resource "/sailingserver/api/v1/events/createEvent" is available...'
-	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' http://$1:8888/sailingserver/api/v1/events/createEvent) == "404" ]]; 
+	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' http://$1:8888/sailingserver/api/v1/events/createEvent) != "401" ]]; 
 	do 
 		sleep $http_retry_interval; 
 	done
-	success 'Resource "/sailingserver/api/v1/events/createEvent" is now available.'
+	echo ""
+	success "Resource \"/sailingserver/api/v1/events/createEvent\" is now available."
+}
+
+# $1: admin_username $2: admin_password 3: public_dns_name
+function get_access_token(){
+	local_echo "Getting access token..."
+	access_token=$(curl -s -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" | jq -r '.access_token' | tr -d '\r')
+	
+	return_code=$?
+	if [ $return_code -ne 0 ]; then
+		error "Failed getting access token."
+	else
+		success "Access token is: \"$access_token\""
+		echo $access_token
+	fi
 }
 
 # $1: load_balancer_name
 function create_load_balancer_http(){
 	local_echo "Creating load balancer \"$load_balancer_name\"..."
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids"
+	json_result=$(aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids")
 	
-	json_load_balancer=$?
-	if [ $json_load_balancer -ne 0 ]; then
+	result_code=$?
+	if [ $result_code -ne 0 ]; then
 		error "Failed creating load balancer."
 	else
 		success "Created load balancer \"$load_balancer_name\"."
-		return $json_load_balancer
+		echo $json_result
 	fi
 }
 
@@ -149,28 +139,28 @@ function create_load_balancer_http(){
 # $1: load_balancer_name $2: certificate_arn
 function create_load_balancer_https(){
 	local_echo 'Creating load balancer "$load_balancer_name"...'
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids" | tr -d '\r'
+	json_result=$(aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids" | tr -d '\r')
 	
-	json_load_balancer=$?
-	if [ $json_load_balancer -ne 0 ]; then
+	result_code=$?
+	if [ $result_code -ne 0 ]; then
 		error "Failed creating load balancer."
 	else
 		success "Created load balancer \"$load_balancer_name\"."
-		return $json_load_balancer
+		echo $json_result
 	fi
 }
 
 # $1: load_balancer_name
 function configure_health_check_http(){
 	local_echo "Configuring load balancer health check..."	
-	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTP:80/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5 
+	json_result=$(aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTP:80/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5)
 	
-	json_health_check=$?
-	if [ $json_health_check -ne 0 ]; then
+	result_code=$?
+	if [ $result_code -ne 0 ]; then
 		error "Failed configuring health check."
 	else
 		success "Successfully configured healthcheck for load balancer \"$load_balancer_name\"."
-		return $json_health_check
+		echo $json_result
 	fi
 }
 
@@ -178,47 +168,59 @@ function configure_health_check_http(){
 # $1: load_balancer_name
 function configure_health_check_https(){
 	local_echo "Configuring load balancer health check..."	
-	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTPS:443/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5 
+	json_result=$(aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTPS:443/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5)
 	
-	json_health_check=$?
-	if [ $json_health_check -ne 0 ]; then
+	result_code=$?
+	if [ $result_code -ne 0 ]; then
 		error "Failed configuring health check."
 	else
 		success "Successfully configured healthcheck for load balancer \"$load_balancer_name\"."
-		return $json_health_check
+		echo $json_result
 	fi
 }
 
 # $1: load_balancer_name 2: instance_id 
 function add_instance_to_elb(){
 	local_echo "Adding instance to elb..."
-	aws elb register-instances-with-load-balancer --load-balancer-name $1 --instances $2 | tr -d '\r'
+	json_result=$(aws elb register-instances-with-load-balancer --load-balancer-name $1 --instances $2 | tr -d '\r')
 	
-	result=$?
-	if [ $result -ne 0 ]; then
+	result_code=$?
+	if [ $result_code -ne 0 ]; then
 		error "Failed adding instance to load balancer."
 	else
 		success "Successfully added instance \"$instance_id\" to load balancer \"$1\"."
-		return $result
+		echo $json_result
 	fi
 }
 
 # NOT TESTED
 # $1: subdomain_name $2: TTL $3: load_balancer_dns_name 
 function route53_change_resource_record(){
-	local json=$(printf '{"Changes":[{"Action":"CREATE","ResourceRecordSet": {"Name": "%s.sapsailing.com","Type": "CNAME","TTL": %s,"ResourceRecords":[{"Value": "%s"}]}}]}' $1 $2 $3)
-	echo "$json" > "${tmpDir}/$change_resource_record_set_file"
+	create_route53_record_file "$1" "$2" "$3"
 	
-	local_echo "Creating Route53 record set (Name: $1.sapsailing.com Value: $3 Type: CNAME)"
-	aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "file://${tmpDir}/$change_resource_record_set_file"
+	local_echo "Creating Route53 record set (Name: $1.sapsailing.com Value: $3 Type: CNAME)..."
+	json_result=$(aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "file://${tmpDir}/$change_resource_record_set_file")
 	
-	result=$?
-	if [ $result -ne 0 ]; then
+	result_code=$?
+	if [ $result_code -ne 0 ]; then
 		error "Failed creating Route53 record."
 	else
 		success "Successfully created Route53 record."
-		return $result
+		echo $json_result
 	fi
+}
+
+# $1: sub_domain $2: TTL $: load_balancer_dns_name
+function create_route53_record_file(){
+	local json=$(printf '{"Changes":[{"Action":"CREATE","ResourceRecordSet": {"Name": "%s.sapsailing.com","Type": "CNAME","TTL": %s,"ResourceRecords":[{"Value": "%s"}]}}]}' $1 $2 $3)
+	echo "$json" > "${tmpDir}/$change_resource_record_set_file"
+}
+
+# $1: instance_id
+function wait_instance_exists(){
+	local_echo "Wait until instance \"$1\" is recognized by AWS..." 
+	result=$(aws ec2 wait instance-exists --instance-ids $1)
+	success "The instance \"$1\" is now recognized by AWS."
 }
 
 function add_param() {

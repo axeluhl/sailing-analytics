@@ -1,160 +1,198 @@
 #!/usr/bin/env bash
 
-# TODO: Parameter input by user
-# 
+# ##################################################
+# AWS automation script for setting up SAP Sailing Analytics instance infrasctructure
+#
+version="1.0.0"               # Sets version variable
 
-# check if tmux package is installed
-if ! type tmux >/dev/null 2>/dev/null; then
-  echo "The package \"tmux\" is required to run this script"
+scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+utilsLocation="${scriptPath}/lib/utils.sh"
+
+# source utils.sh
+if [ -f "${utilsLocation}" ]; then
+  source "${utilsLocation}"
+else
+  echo "Please find the file util.sh and add a reference to it in this script. Exiting."
+  exit 1
 fi
 
-# check if the script is executed in a tmux environment
-if ! { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
-  echo "Please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
+# delete temp files when trapped
+function trapCleanup() {
+  echo ""
+  deleteTemp
+  die "Exit trapped. In function: '${FUNCNAME[*]}'"
+}
+
+function safeExit() {
+  deleteTemp
+  trap - INT TERM EXIT
   exit
-fi 
+}
 
-export AWS_REGION=eu-west-2
-export IMAGE_ID=ami-39f3e25d
-export COUNT=1
-export INSTANCE_TYPE=t2.medium
-export KEY_NAME=leonradeck-keypair
-export KEY_FILE=/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem
-export SECURITY_GROUP_IDS=sg-871732ee
-export USER_DATA=file://./userdata.txt
-export SERVER_NAME_LONG=WCSantander2017
-export SERVER_NAME_SHORT=wcs17
-export TAG_SPECIFICATIONS='ResourceType=instance,Tags=[{Key=Name,Value=$SERVER_NAME}]'
+function deleteTemp () {
+   if is_dir "${tmpDir}"; then
+     rm -r "${tmpDir}"
+   fi
+}
 
-export SSH_RETRY_INTERVAL_IN_SECONDS=2
-export SSH_USER=root
-export SSH_OK=ok
+quiet=false
+printLog=false
+verbose=true
+force=false
+strict=false
+debug=true
+args=()
 
-export HTTP_RETRY_INTERVAL_IN_SECONDS=5
+# Create temp directory with three random numbers and the process ID
+tmpDir="./tmp/"
+(umask 000 && mkdir "${tmpDir}") || {
+  die "Could not create temporary directory! Exiting."
+}
 
-export USERNAME=admin
-export PASSWORD=admin
-export CHANGED_PASSWORD=admin
+# Logging
+# Log is only used when the '-l' flag is set.
+# To never save a logfile change variable to '/dev/null'
+# Save to standard user log location use: $HOME/Library/Logs/${scriptBasename}.log
+# -----------------------------------
+logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
-export NEW_USERNAME=testuser
-export NEW_PASSWORD=password
 
-export HOST_ZONE_ID=Z1R8UBAEXAMPLE
-export RECORD_FILE=file://C:\awscli\route53\change-resource-record-sets.json
+function mainScript() {
+echo -n
 
-# enable scrolling, clicking on panes etc.
-tmux set -g mouse on
+if [ "$instance_with_elb_param" == "true" ]; then
+	if [ ! -z "$tail_instance_param" ]; then
+		check_if_tmux_is_used
+	fi
+	create_instance_with_elb
+fi
 
-# enable named border at the top of panes
-tmux set -g pane-border-status top
-tmux set -g pane-border-format " [#{pane_index}] - #T "  
+if [ ! -z "$tail_instance_param" ]; then
+	check_if_tmux_is_used
+	tail_instance_logfiles "$tail_instance_param" "$ssh_user_param"
+fi
+}
 
-# construct pane layout
-tmux split-window -h -p 50 
-tmux select-pane -t 0
-tmux split-window -v -p 50 
-tmux select-pane -t 2 
-tmux split-window -v -p 50 
-tmux select-pane -t 0
+usage() {
+  echo -n "${scriptName} [OPTION]... [FILE]...
 
-# create parameterized instance and get instance id
-echo "Creating instance..."
-INSTANCE=`aws --region $AWS_REGION  ec2 run-instances \
---region $AWS_REGION \
---image-id $IMAGE_ID \
---count $COUNT \
---instance-type $INSTANCE_TYPE \
---key-name $KEY_NAME \
---security-group-ids $SECURITY_GROUP_IDS \
---user-data $USER_DATA \
---tag-specifications $TAG_SPECIFICATIONS`
+This is an AWS automation bash script for deploying SAP Sailing Analytics instances and their depending infrastructure
 
-echo "$INSTANCE"
-SUBNET_ID=$(echo $INSTANCE | jq -r '.Instances[0].SubnetId' | tr -d '\r')
-INSTANCE_ID=$(echo $INSTANCE | jq -r '.Instances[0].InstanceId' | tr -d '\r')
-echo "Subnet: $SUBNET_ID" 
+ ${bold}Options:${reset}
+  -r, --region               AWS region (e.g. \"eu-west-2\" for London)
+  -t, --instance-type        Instance type (e.g. \"t2.medium\")
+  -k, --key-name             IAM keypair name 
+  -f, --key-file             Path to keypair file
+  -s, --ssh-user             SSH user to connect to instance
+  -u, --user-username        Username of user to create
+  -q, --user-password        Password of user to create
+  -n, --instance-name        Name for instance 
+  -l, --instance-short-name  Short name for instance
+  -a, --admin-password	     New password for the admin user
+  
+      --instance-with-elb	 Create instance with elastic load balancer (default: \"false\")
+      
+	  --tail                 Tail logs from instance using tmux
+	  --version              Output version information and exit
+	  
+	  
+"
+}
 
-echo "Wait until instance is recognized by AWS..." 
-aws ec2 wait instance-exists --instance-ids $INSTANCE_ID
-echo "The instance is now recognized."
+# Iterate over options breaking -ab into -a -b when needed and --foo=bar into
+# --foo bar
+optstring=h
+unset options
+while (($#)); do
+  case $1 in
+    # If option is of type -ab
+    -[!-]?*)
+      # Loop over each character starting with the second
+      for ((i=1; i < ${#1}; i++)); do
+        c=${1:i:1}
 
-echo "Querying for the instance public dns name..." 
-PUBLIC_DNS_NAME=`aws --region $AWS_REGION ec2 describe-instances --instance-ids $INSTANCE_ID --output text --query 'Reservations[*].Instances[*].PublicDnsName' | tr -d '\r'`
-echo "The public dns name is: $PUBLIC_DNS_NAME"
+        # Add current char to options
+        options+=("-$c")
 
-echo "Wait until ssh connection is established..." 
-status=not_ok
-while [[ $status != ok ]]
-do
-  echo -n "."
-  status=`ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@$PUBLIC_DNS_NAME echo $SSH_OK 2>&1`
-  sleep $SSH_RETRY_INTERVAL_IN_SECONDS
+        # If option takes a required argument, and it's not the last char make
+        # the rest of the string its argument
+        if [[ $optstring = *"$c:"* && ${1:i+1} ]]; then
+          options+=("${1:i+1}")
+          break
+        fi
+      done
+      ;;
+
+    # If option is of type --foo=bar
+    --?*=*) options+=("${1%%=*}" "${1#*=}") ;;
+    # add --endopts for --
+    --) options+=(--endopts) ;;
+    # Otherwise, nothing special
+    *) options+=("$1") ;;
+  esac
+  shift
 done
-echo "SSH Connection is established."
+set -- "${options[@]}"
+unset options
 
-echo "Started tailing logfiles on panes 1,2,3."
+# Print help if no arguments were passed.
+# Uncomment to force arguments when invoking the script
+[[ $# -eq 0 ]] && set -- "--help"
 
-# open ssh connection on panes 1,2,3
-tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@$PUBLIC_DNS_NAME" C-m
-tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@$PUBLIC_DNS_NAME" C-m
-tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@$PUBLIC_DNS_NAME" C-m
-
-# tail some important files
-tmux send-keys -t 1 "clear;echo \"Waiting for file /home/sailing/servers/server/logs/sailing0.log.0 to appear...\";tail -F -v /home/sailing/servers/server/logs/sailing0.log.0" C-m
-tmux send-keys -t 2 "clear;tail -f -v /var/log/sailing.out" C-m
-tmux send-keys -t 3 "clear;tail -f -v /var/log/sailing.err" C-m
-
-echo "Wait until resource \"/security/api/restsecurity/access_token\" is available..."
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$USERNAME:$PASSWORD@$PUBLIC_DNS_NAME:8888/security/api/restsecurity/access_token)" != "200" ]]; 
-do sleep $HTTP_RETRY_INTERVAL_IN_SECONDS; 
+# Read the options and set variables
+while [[ $1 = -?* ]]; do
+  case $1 in
+    -h|--help) usage >&2; safeExit ;;
+    --version) echo "$(basename $0) ${version}"; safeExit ;;
+    -r|--region) shift; region_param=${1} ;;
+	-t|--instance-type) shift; instance_type_param=${1} ;;
+	-k|--key-name) shift; key_name_param=${1} ;;
+	-f|--key-file) shift; key_file_param=${1} ;;
+	-s|--ssh-user) shift; ssh_user_param=${1} ;;
+	-u|--user-username) shift; user_username_param=${1} ;;
+	-q|--user-password) shift; user_password_param=${1} ;;
+	-n|--instance-name) shift; instance_name_param=${1} ;;
+	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
+	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
+	--instance-with-elb) shift; instance_with_elb_param="true" ;;
+	--tail) shift; tail_instance_param=${1} ;;
+    --endopts) shift; break ;;
+    *) die "invalid option: '$1'." ;;
+  esac
+  shift
 done
-echo "Resource \"/security/api/restsecurity/access_token\" is available."
 
-echo "Getting access token..."
-ACCESS_TOKEN=$(curl -X GET "http://$USERNAME:$PASSWORD@$PUBLIC_DNS_NAME:8888/security/api/restsecurity/access_token" | jq -r '.access_token' | tr -d '\r')
-echo "Access token is: $ACCESS_TOKEN"
+# Store the remaining part as arguments.
+args+=("$@")
 
-echo "Wait until resource \"/sailingserver/api/v1/events/createEvent\" is available..."
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$PUBLIC_DNS_NAME:8888/sailingserver/api/v1/events/createEvent)" == "404" ]]; 
-do sleep $HTTP_RETRY_INTERVAL_IN_SECONDS; 
-done
-echo "Resource \"/sailingserver/api/v1/events/createEvent\" is available."
+############# RUN SCRIPT #############
 
-echo "Creating event..."
-EVENT_ID=$(curl -X POST -H "Authorization: Bearer $ACCESS_TOKEN" "http://$PUBLIC_DNS_NAME:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" | jq -r '.eventid' | tr -d '\r')
-echo "Created event wit id: $EVENT_ID"
+# Trap bad exits with your cleanup function
+trap trapCleanup EXIT INT TERM
 
-echo "Changing admin password from $PASSWORD to $CHANGED_PASSWORD..."
-curl -X POST -H "Authorization: Bearer $ACCESS_TOKEN" "http://$PUBLIC_DNS_NAME:8888/security/api/restsecurity/change_password" --data "username=$USERNAME" --data "password=$CHANGED_PASSWORD"
-echo "Changed admin password."
+# Set IFS to preferred implementation
+IFS=$'\n\t'
 
-echo "Creating new user \"$NEW_USERNAME\" with password \"$NEW_PASSWORD\"..."
-curl -X POST -H "Authorization: Bearer $ACCESS_TOKEN" "http://$PUBLIC_DNS_NAME:8888/security/api/restsecurity/create_user" --data "username=$NEW_USERNAME" --data "password=$NEW_PASSWORD"
-echo "Created user."
-# ignore new user for the moment because updating its priviliges via rest is not yet implemented
+# Exit on error. Append '||true' when you run the script if you expect an error.
+set -o errexit
 
-# EVENT_SSL_LINE="Event-SSL $PUBLIC_DNS_NAME \"$EVENT_ID\" 127.0.0.1 8888"
-# EVENTS_FILE="/etc/httpd/conf.d/001-events.conf"
-# echo "Appending: $EVENT_SSL_LINE to file $EVENTS_FILE."
-# ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@$PUBLIC_DNS_NAME
+# Run in debug mode, if set
+if ${debug}; then set -x ; fi
 
-# allocate elastic ip
-# ELASTIC_IP=$(aws ec2 allocate-address | jq -r '.PublicIp' | tr -d '\r')
+# Exit on empty variable
+if ${strict}; then set -o nounset ; fi
 
-# associate elastic ip with instance 
-# aws ec2 associate-address --instance-id $INSTANCE_ID --public-ip $ELASTIC_IP
+# Bash will remember & return the highest exitcode in a chain of pipes.
+# This way you can catch the error in case mysqldump fails in `mysqldump |gzip`, for example.
+set -o pipefail
 
-# create elb
-echo "Creating elastic load balancer..."
-aws elb create-load-balancer --load-balancer-name $SERVER_NAME_LONG --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --subnets $SUBNET_ID
-echo "Created elastic load balancer."
+# Invoke the checkDependenices function to test for Bash packages.  Uncomment if needed.
+# checkDependencies
 
-# add instances to elb
-echo "Adding instance to elb..."
-aws elb register-instances-with-load-balancer --load-balancer-name $SERVER_NAME_LONG --instances $INSTANCE_ID
-echo "Added instance."
+# Run your script
+mainScript
 
-# create change-resource-record-set file
- 
-# create Route53 entry for elb
-# aws route53 change-resource-record-sets --hosted-zone-id $HOST_ZONE_ID --change-batch $RECORD_FILE
+# Exit cleanlyd
+confirm_close_panes
+safeExit

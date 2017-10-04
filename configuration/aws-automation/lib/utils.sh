@@ -29,7 +29,7 @@ function _alert() {
   if [ "${1}" = "info" ] || [ "${1}" = "notice" ]; then local color=""; fi
   
   # Don't use colors on pipes or non-recognized terminals
-  #if [[ "${TERM}" != "xterm"* ]] || [ -t 1 ]; then color=""; reset=""; fi
+  # if [[ "${TERM}" != "xterm"* ]] || [ -t 1 ]; then color=""; reset=""; fi
 
   # Print to $logFile
   if [[ ${printLog} = "true" ]] || [ "${printLog}" == "1" ]; then
@@ -46,13 +46,13 @@ function _alert() {
 }
 
 function die ()       { local _message="${*} Exiting."; echo "$(_alert emergency)"; safeExit;}
-function error ()     { local _message="${*}"; echo "$(_alert error)"; }
-function warning ()   { local _message="${*}"; echo "$(_alert warning)"; }
-function notice ()    { local _message="${*}"; echo "$(_alert notice)"; }
-function info ()      { local _message="${*}"; echo "$(_alert info)"; }
-function debug ()     { local _message="${*}"; echo "$(_alert debug)"; }
-function success ()   { local _message="${*}"; echo "$(_alert success)"; }
-function input()      { local _message="${*}"; echo -n "$(_alert input)"; }
+function error ()     { local _message="${*}"; echo "$(_alert error)" >&2; }
+function warning ()   { local _message="${*}"; echo "$(_alert warning)" >&2; }
+function notice ()    { local _message="${*}"; echo "$(_alert notice)" >&2; }
+function info ()      { local _message="${*}"; echo "$(_alert info)" >&2; }
+function debug ()     { local _message="${*}"; echo "$(_alert debug)" >&2; }
+function success ()   { local _message="${*}"; echo "$(_alert success)" >&2; }
+function input()      { local _message="${*}"; echo "$(_alert input)" >&2; }
 function header()     { local _message="\n========== ${*} ==========\n  "; echo "$(_alert header)"; }
 
 # Log messages when verbose is set to "true"

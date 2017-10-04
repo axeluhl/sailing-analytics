@@ -48,14 +48,16 @@ function execute() {
 	header "Load balancer creation"
 	
 	load_balancer_name=$(echo "$instance_name" | trim)
+	
 	json_load_balancer=$(create_load_balancer_http "$load_balancer_name")
     # json_load_balancer=$(create_load_balancer_https "$load_balancer_name" "$certificate_arn")
+	
     load_balancer_dns_name=$(get_elb_dns_name "$json_load_balancer")
 
 	json_health_check=$(configure_health_check_http "$load_balancer_name")
     # configure_health_check_https "$load_balancer_name"	
 	
-	json_added_instance_response=$(add_instance_to_elb "$instance_name" "$instance_id")
+	json_added_instance_response=$(add_instance_to_elb "$load_balancer_name" "$instance_id")
 	added_instance_id=$(get_added_instance_from_elb "$json_added_instance_response" )
 	
 	header "Route53 record creation"
