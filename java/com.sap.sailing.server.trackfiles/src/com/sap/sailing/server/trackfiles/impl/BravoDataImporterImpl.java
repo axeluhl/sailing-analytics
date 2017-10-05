@@ -41,11 +41,16 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * different col definitions.
  */
 public class BravoDataImporterImpl implements DoubleVectorFixImporter {
+    public static final String BRAVO_TYPE = "BRAVO";
+    public static final String BRAVO_EXTENDED_TYPE = "BRAVO_EXTENDED";
+    
     private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
+    private final String type;
 
-    public BravoDataImporterImpl(Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix) {
+    public BravoDataImporterImpl(String type, Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix) {
+        this.type = type;
         this.columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     }
     
@@ -168,7 +173,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
 
     @Override
     public String getType() {
-        return "BRAVO";
+        return type;
     }
 
     @Override
