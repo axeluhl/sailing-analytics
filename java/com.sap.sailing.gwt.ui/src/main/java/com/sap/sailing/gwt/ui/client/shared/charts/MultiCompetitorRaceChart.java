@@ -31,6 +31,10 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private final MultiCompetitorRaceChartLifecycle lifecycle;
     
+    /**
+     * Creates a Chart used for example in the Raceboard to display various additional data.
+     * Cannot be used without a lifecycle, as the allowedDetailTypes are determined via the lifecycle
+     */
     public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
             MultiCompetitorRaceChartLifecycle lifecycle,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -65,6 +69,12 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
 
     @Override
+    /**
+     * {@see com.sap.sse.gwt.client.shared.components.Component} filters the first and second detailtype using the
+     * lifecycles allowedTypes. If non allowed types are found, then they are replaced by either
+     * WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD or none for the first and second type. What types are allowed is
+     * determined by the environment, for example if additional foiling sensor data is imported
+     */
     public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
         DetailType firstType = newSettings.getFirstDetailType();

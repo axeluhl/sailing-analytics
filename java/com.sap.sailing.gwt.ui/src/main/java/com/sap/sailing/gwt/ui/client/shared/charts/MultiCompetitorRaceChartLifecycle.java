@@ -12,6 +12,14 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     
     public static final String ID = "cc";
     
+    /**
+     * Lifecycle for the Chart currently used in the Raceboard to display additional data.
+     * 
+     * @param allowedDetailTypes
+     *            Is a List of all valid DetailTypes for this chart. These are dependant on the environment, for example
+     *            foiling races with Brave-Devices can show additional DetailTypes. The order of the List determines the
+     *            order of the options in the related settingsdialog
+     */
     public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, List<DetailType> allowedDetailTypes) {
         this.stringMessages = stringMessages;
         this.allowedDetailTypes = allowedDetailTypes;

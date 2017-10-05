@@ -13,6 +13,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * This class is responsible for showing the settings dialog for the comptitorchart that is used for example in the
+ * RaceBoard. It will depending on availableDetailTypes offer different options to select for the first and for the
+ * second type. The availableDetailTypes are determined based on the environment of the corresponding race, for example
+ * if additional foiling sensor data is imported. If non availableDetailTypes are selected for the first/second, instead
+ * the dialog will show the first valid/none selected. Upon making to default the prior invalid values are overwritten,
+ * they are kept otherwise.
+ */
 public class MultiCompetitorRaceChartSettingsComponent extends
         AbstractChartSettingsComponent<MultiCompetitorRaceChartSettings> implements
         SettingsDialogComponent<MultiCompetitorRaceChartSettings> {
@@ -22,6 +30,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends
     private final DetailType initialSecondDetailType;
     private final List<DetailType> availableDetailsTypes;
 
+    
     public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings,
             StringMessages stringMessages, List<DetailType> availableDetailTypes) {
         super(settings, stringMessages);
@@ -71,6 +80,9 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         return new MultiCompetitorRaceChartSettings(getAbstractResult(), newFirstDetailType, newSecondDetailType);
     }
 
+    /**
+     * Determines a selected DetailType of a Checkbox, returns null if not available 
+     */
     private DetailType findSelectedTypeFor(ListBox typeSelectionListBox) {
         int itemIndex = typeSelectionListBox.getSelectedIndex();
         String selectedDetailType = typeSelectionListBox.getValue(itemIndex);
