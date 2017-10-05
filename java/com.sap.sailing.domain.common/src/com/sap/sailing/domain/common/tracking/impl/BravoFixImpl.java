@@ -15,7 +15,7 @@ import com.sap.sse.common.TimePoint;
  */
 public class BravoFixImpl implements BravoFix {
     private static final long serialVersionUID = 2033254212013221160L;
-    private final DoubleVectorFix fix;
+    protected final DoubleVectorFix fix;
 
     public BravoFixImpl(DoubleVectorFix fix) {
         this.fix = fix;

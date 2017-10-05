@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.sensordata.BravoExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 
@@ -8,6 +11,31 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
 
     public BravoExtendedFixImpl(DoubleVectorFix fix) {
         super(fix);
+    }
+
+    @Override
+    public Bearing getDaggerBoardRakeAnglePort() {
+        return new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.DB_RAKE_PORT.getColumnIndex()));
+    }
+
+    @Override
+    public Bearing getDaggerBoardRakeAngleStbd() {
+        return new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.DB_RAKE_STBD.getColumnIndex()));
+    }
+
+    @Override
+    public Bearing getRudderRakeAnglePort() {
+        return new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.RUDDER_RAKE_PORT.getColumnIndex()));
+    }
+
+    @Override
+    public Bearing getRudderRakeAngleStbd() {
+        return new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.RUDDER_RAKE_STBD.getColumnIndex()));
+    }
+
+    @Override
+    public Bearing getMastRotation() {
+        return new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.MAST_ROTATION.getColumnIndex()));
     }
 
 }
