@@ -6581,8 +6581,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<DetailType> availableDetailsTypes = DetailType.getDefaultDetailTypesForChart();
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
         if (trackedRace != null) {
-            boolean hasBravoTrack = true;
-            boolean hasExtendedBravoFixes = true;
+            boolean hasBravoTrack = false;
+            boolean hasExtendedBravoFixes = false;
             for (BravoFixTrack<Competitor> track : trackedRace.<BravoFix, BravoFixTrack<Competitor>>getSensorTracks(BravoFixTrack.TRACK_NAME)) {
                 hasBravoTrack = true;
                 if (track.hasExtendedFixes()) {
