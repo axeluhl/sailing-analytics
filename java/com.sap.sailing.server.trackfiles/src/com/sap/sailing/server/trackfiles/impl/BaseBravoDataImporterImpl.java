@@ -31,6 +31,16 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
+ * Base class that processes CSV files containing data from Bravo units. Those files have the following specifics:
+ * <ul>
+ *   <li>There are several comment lines at the beginning starting with {@code #}</li>
+ *   <li>Date and headlines are separated by tabs</li>
+ *   <li>The first relevant line contains headlines. The first three values are jjlDATE, jjlTIME and Epoch. The order of all other columns may vary.</li>
+ *   <li>All values are double values.</li>
+ * </ul>
+ * 
+ * Due to the data being raw data, this importer supports downsampling to improve data quality and reduce the amount of data being stored in the DB.
+ * 
  * TODO: access to columns enum actually by public static enum. Col definition should belong to instance, so we can have
  * different col definitions.
  */

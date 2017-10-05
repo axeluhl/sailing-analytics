@@ -4,6 +4,12 @@ import java.util.Map;
 
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 
+/**
+ * Abstract implementation of DoubleVectorFixImporter to import CSV data files from Bravo units.
+ * 
+ * @see BaseBravoDataImporterImpl
+ *
+ */
 public abstract class AbstractBravoDataImporterImpl extends BaseBravoDataImporterImpl implements DoubleVectorFixImporter {
     private final String type;
 
