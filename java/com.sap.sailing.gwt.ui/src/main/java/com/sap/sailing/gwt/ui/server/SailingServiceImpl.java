@@ -3672,6 +3672,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (SecurityUtils.getSubject().isPermitted(
                 ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.REMOVE, eventId.toString()))) {
             getService().apply(new RemoveEvent(eventId));
+            getSecurityService().deleteACL(eventId.toString());
+            getSecurityService().deleteOwnership(eventId.toString());
         } else {
             throw new UnauthorizedException("You are not permitted to remove event " + eventId);
         }

@@ -27,7 +27,11 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalAclRemovePermission(String id, String group, String permission);
     
+    Void internalDeleteAcl(String id);
+    
     Void internalCreateOwnership(String id, String owner, String tenantOwner);
+    
+    Void internalDeleteOwnership(String id);
     
     Void internalCreateUserGroup(String name) throws UserGroupManagementException;
     

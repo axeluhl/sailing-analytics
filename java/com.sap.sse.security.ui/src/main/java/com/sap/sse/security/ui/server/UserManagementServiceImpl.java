@@ -256,6 +256,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo deleteTenant(String name) {
         try {
             getSecurityService().deleteTenant(name);
+            getSecurityService().deleteACL(name);
+            getSecurityService().deleteOwnership(name);
             return new SuccessInfo(true, "Deleted tenant: " + name + ".", /* redirectURL */ null, null);
         } catch (TenantManagementException | UserGroupManagementException e) {
             return new SuccessInfo(false, "Could not delete tenant.", /* redirectURL */ null, null);
@@ -459,6 +461,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo deleteUser(String username) {
         try {
             getSecurityService().deleteUser(username);
+            getSecurityService().deleteACL(username);
+            getSecurityService().deleteOwnership(username);
             return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
         } catch (UserManagementException e) {
             return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);

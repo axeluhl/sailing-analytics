@@ -55,7 +55,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     AccessControlList removeFromACL(String acl, String permission, String name);
     
+    void deleteACL(String id);
+    
     SecurityService createOwnership(String id, String owner, String tenant);
+    
+    void deleteOwnership(String id);
     
     Iterable<UserGroup> getUserGroupList();
     

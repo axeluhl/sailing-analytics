@@ -346,6 +346,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return null;
     }
     
+    @Override 
+    public void deleteACL(String id) {
+        apply(s->s.internalDeleteAcl(id));
+    }
+    
+    @Override
+    public Void internalDeleteAcl(String id) {
+        aclStore.removeAccessControlList(id);
+        return null;
+    }
+    
     @Override
     public SecurityService createOwnership(String id, String owner, String tenant) {
         apply(s->s.internalCreateOwnership(id, owner, tenant));
@@ -355,6 +366,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalCreateOwnership(String id, String owner, String tenantOwner) {
         aclStore.createOwnership(id, owner, tenantOwner);
+        return null;
+    }
+    
+    @Override
+    public void deleteOwnership(String id) {
+        apply(s->s.internalDeleteOwnership(id));
+    }
+    
+    @Override
+    public Void internalDeleteOwnership(String id) {
+        aclStore.removeOwnership(id);
         return null;
     }
 
