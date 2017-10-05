@@ -70,6 +70,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup addUserToUserGroup(String user, String userGroup);
 
     UserGroup removeUserFromUserGroup(String user, String userGroup);
+    
+    void deleteUserGroup(String name) throws UserGroupManagementException;
+    
+    void deleteTenant(String name) throws TenantManagementException, UserGroupManagementException;
 
     Iterable<User> getUserList();
 

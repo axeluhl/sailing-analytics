@@ -42,6 +42,8 @@ public interface UserManagementService extends RemoteService {
     
     UserGroupDTO removeUserFromUserGroup(String user, String userGroup);
     
+    SuccessInfo deleteTenant(String name);
+    
     Collection<UserDTO> getUserList();
 
     Collection<UserDTO> getFilteredSortedUserList(String filter);

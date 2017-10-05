@@ -418,6 +418,34 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         apply(s->s.internalUpdateUserGroup(userGroup));
         return userGroup;
     }
+    
+    @Override
+    public void deleteUserGroup(String name) throws UserGroupManagementException {
+        apply(s->s.internalDeleteUserGroup(name));
+    }
+    
+    @Override
+    public Void internalDeleteUserGroup(String name) throws UserGroupManagementException {
+        userStore.deleteUserGroup(name);
+        return null;
+    }
+    
+    @Override
+    public void deleteTenant(String name) throws TenantManagementException, UserGroupManagementException {
+        for (Owner ownership : aclStore.getOwnerships()) {
+            if (ownership.getTenantOwner().equals(name)) {
+                throw new TenantManagementException("The tenant still is tenant owner");
+            }
+        }
+        apply(s->s.internalDeleteTenant(name));
+        deleteUserGroup(name);
+    }
+    
+    @Override
+    public Void internalDeleteTenant(String name) throws TenantManagementException {
+        userStore.deleteTenant(name);
+        return null;
+    }
 
     @Override
     public Iterable<User> getUserList() {

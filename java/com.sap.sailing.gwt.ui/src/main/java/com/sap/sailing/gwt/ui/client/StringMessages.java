@@ -1236,6 +1236,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     @Override
     String errorCommunicatingWithServer();
     String userManagement();
+    String tenantManagement();
     String regattaStructureImport();
     String filteredBy();
     String filterBy();

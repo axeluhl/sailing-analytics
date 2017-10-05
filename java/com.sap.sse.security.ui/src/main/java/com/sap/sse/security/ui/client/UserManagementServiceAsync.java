@@ -39,6 +39,8 @@ public interface UserManagementServiceAsync {
     
     void removeUserFromUserGroup(String user, String userGroup, AsyncCallback<UserGroupDTO> asyncCallback);
     
+    void deleteTenant(String name, AsyncCallback<SuccessInfo> callback);
+
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
 
     void getCurrentUser(AsyncCallback<UserDTO> callback);

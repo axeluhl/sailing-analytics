@@ -47,6 +47,7 @@ import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorat
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
+import com.sap.sse.security.ui.client.component.TenantManagementPanel;
 import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -278,6 +279,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 SailingPermissionsForRoleProvider.INSTANCE, Arrays.<AbstractRole>asList(AbstractRoles.values()), Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()));
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel),
                 getStringMessages().userManagement(), Permission.MANAGE_USERS);
+        
+        final TenantManagementPanel tenantManagementPanel = new TenantManagementPanel(getUserService(), StringMessages.INSTANCE);
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<TenantManagementPanel>(tenantManagementPanel),
+                getStringMessages().tenantManagement(), Permission.MANAGE_USERS);
         
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(sailingService, this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),

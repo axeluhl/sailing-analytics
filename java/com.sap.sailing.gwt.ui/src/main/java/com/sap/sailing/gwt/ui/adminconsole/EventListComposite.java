@@ -380,11 +380,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
             @Override
             public void update(int index, EventDTO event, String value) {
-                if (DefaultActions.REMOVE.equals(value)) {
+                if (DefaultActions.REMOVE.name().equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                         removeEvent(event);
                     }
-                } else if (DefaultActions.EDIT.equals(value)) {
+                } else if (DefaultActions.EDIT.name().equals(value)) {
                     openEditEventDialog(event);
                 }
             }

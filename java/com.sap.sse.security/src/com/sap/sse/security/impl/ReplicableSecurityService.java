@@ -36,6 +36,10 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalUpdateUserGroup(UserGroup group);
     
+    Void internalDeleteUserGroup(String name) throws UserGroupManagementException;
+    
+    Void internalDeleteTenant(String name) throws TenantManagementException;
+    
     Void internalStoreUser(User user);
 
     Void internalSetPreference(String username, String key, String value);

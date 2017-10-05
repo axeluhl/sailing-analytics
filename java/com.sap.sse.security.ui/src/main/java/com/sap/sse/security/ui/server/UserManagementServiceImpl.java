@@ -212,7 +212,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserGroupDTO createUserGroup(String name, String owner) {
         // TODO: create UserGroupManagementException_CustomSeri.....?
         try {
-            return createUserGroupDTOFromUserGroup(getSecurityService().createUserGroup(name, owner));
+            UserGroup userGroup = getSecurityService().createUserGroup(name, owner);
+            getSecurityService().createAccessControlList(name);
+            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), "tenant");
+            return createUserGroupDTOFromUserGroup(userGroup);
         } catch (UserGroupManagementException e) {
             return null;
         }
@@ -244,6 +247,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup(user, userGroup));
         } else {
             return null; // TODO: implement this with exception
+        }
+    }
+    
+    @Override
+    public SuccessInfo deleteTenant(String name) {
+        try {
+            getSecurityService().deleteTenant(name);
+            return new SuccessInfo(true, "Deleted tenant: " + name + ".", /* redirectURL */ null, null);
+        } catch (TenantManagementException | UserGroupManagementException e) {
+            return new SuccessInfo(false, "Could not delete tenant.", /* redirectURL */ null, null);
         }
     }
 
@@ -292,6 +305,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         User u = null;
         try {
             u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
+            getSecurityService().createAccessControlList(name);
+            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), "tenant");
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());

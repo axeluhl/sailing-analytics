@@ -329,7 +329,6 @@ public class UserStoreImpl implements UserStore {
         }
         logger.info("Creating user group: " + name + " with owner " + owner);
         UserGroup group = new UserGroupImpl(name);
-        aclStore.createAccessControlList(name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
