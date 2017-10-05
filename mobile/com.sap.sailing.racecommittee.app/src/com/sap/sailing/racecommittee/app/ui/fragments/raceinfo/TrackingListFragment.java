@@ -505,7 +505,7 @@ public class TrackingListFragment extends BaseFragment
         mFinishedData.add(pos, new CompetitorResultWithIdImpl(mId, competitor.getId(), name, greatestOneBasedRankSoFar + 1, MaxPointsReason.NONE,
                     /* score */ null, /* finishingTime */ null, /* comment */ null));
         mId++;
-        mFinishedAdapter.notifyDataSetChanged();
+        mFinishedAdapter.notifyItemInserted(pos);
         if (mDots.size() > 0) {
             Toast.makeText(getActivity(), getString(R.string.added_to_result_list, name, pos + 1), Toast.LENGTH_SHORT).show();
         }
@@ -513,9 +513,10 @@ public class TrackingListFragment extends BaseFragment
 
     private void removeCompetitorFromList(Competitor competitor) {
         mCompetitorData.remove(competitor);
+        int pos = mFilteredCompetitorData.indexOf(competitor);
         mFilteredCompetitorData.remove(competitor);
         sortCompetitors();
-        mCompetitorAdapter.notifyDataSetChanged();
+        mCompetitorAdapter.notifyItemRemoved(pos);
     }
 
     /**
@@ -597,7 +598,7 @@ public class TrackingListFragment extends BaseFragment
         mCompetitorData.add(competitor);
         mFilteredCompetitorData.add(competitor);
         sortCompetitors();
-        mCompetitorAdapter.notifyDataSetChanged();
+        mCompetitorAdapter.notifyItemInserted(mFilteredCompetitorData.indexOf(competitor));
     }
 
     @Override
