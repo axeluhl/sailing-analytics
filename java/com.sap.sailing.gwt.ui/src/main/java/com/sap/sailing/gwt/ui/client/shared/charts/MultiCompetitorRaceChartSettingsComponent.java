@@ -37,28 +37,23 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         Label chartSelectionLabel = new Label(stringMessages.chooseChart());
         mainPanel.add(chartSelectionLabel);
         chartFirstTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        chartSecondTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        //add empty values, required, if a non available value is saved as default in the settings. Eg. rideheight, which is only valid for foiling races
+        chartSecondTypeSelectionListBox.addItem("--", "--");
         int i = 0;
         for (DetailType detailType : availableDetailsTypes) {
             chartFirstTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
+            chartSecondTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
             if (detailType == initialFirstDetailType) {
                 chartFirstTypeSelectionListBox.setSelectedIndex(i);
+            }
+            if (detailType == initialSecondDetailType) {
+                //add offset for empty item
+                chartSecondTypeSelectionListBox.setSelectedIndex(i+1);
             }
             i++;
         }
         mainPanel.add(chartFirstTypeSelectionListBox);
-        chartSecondTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
-        i = 0;
-        for (DetailType detailType : availableDetailsTypes) {
-            chartSecondTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
-            if (detailType == initialSecondDetailType) {
-                chartSecondTypeSelectionListBox.setSelectedIndex(i);
-            }
-            i++;
-        }
-        chartSecondTypeSelectionListBox.addItem("--", "--");
-        if (initialSecondDetailType == null) {
-            chartSecondTypeSelectionListBox.setSelectedIndex(chartSecondTypeSelectionListBox.getItemCount() - 1);
-        }
         mainPanel.add(chartSecondTypeSelectionListBox);
         mainPanel.add(new Label(stringMessages.stepSizeInSeconds()));
         stepSizeBox = dialog.createDoubleBox(((double) getSettings().getStepSizeInMillis()) / 1000, 5);
