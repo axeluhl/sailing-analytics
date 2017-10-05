@@ -10,6 +10,6 @@ public class ImagesBarColumn<T, S extends ImagesBarCell> extends Column<T, Strin
 
     @Override
     public String getValue(T object) {
-        return "";
+        return "*";
     }
 }

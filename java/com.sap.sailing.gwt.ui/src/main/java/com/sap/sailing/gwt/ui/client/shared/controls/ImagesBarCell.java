@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.controls;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
@@ -152,6 +152,13 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
         return context;
     }
 
+    
+    /**
+     * @param data Has to contain a list of allowed actions or '*' if everything is permitted. The list has to be 
+     * comma separated. All commas in the allowed actions have to be escaped with a \\ as well as every \\. 
+     * The allowed actions are compared to the action name of the {@link ImageSpec} and only those where the 
+     * action name corresponds to one allowed action from the list will be displayed.
+     */
     @Override
     protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
         this.context = context;
@@ -162,10 +169,37 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
          * out of order.
          */
         if (data != null) {
-            List<String> allowedActions = Arrays.asList((data.asString().split(",")));
+            List<String> allowedActions = new ArrayList<>();
+            String currentAction = "";
+            String dataAsString = data.asString();
+            boolean escaped = false;
+            for (int i = 0; i < dataAsString.length(); i++) {
+                char character = dataAsString.charAt(i);
+                if (escaped) {
+                    if (character == ',' || character == '\\') {
+                        currentAction += character;
+                        escaped = false;
+                    } else {
+                        throw new IllegalArgumentException("A character other than ',' or '\\' was illegaly escaped.");
+                    }
+                } else {
+                    if (character == '\\') {
+                        escaped = true;
+                    } else if (character == ',') {
+                        allowedActions.add(currentAction);
+                        currentAction = "";
+                    } else {
+                        currentAction += character;
+                    }
+                }
+            }
+            if (escaped) {
+                throw new IllegalArgumentException("A '\\' was illegaly found at the end of the data string.");
+            }
+            allowedActions.add(currentAction);
             SafeStyles imgStyle = getImageStyle();
             for (ImageSpec imageSpec : getImageSpecs()) {
-                if (allowedActions.contains(imageSpec.getActionName())) {
+                if (dataAsString.equals("*") || allowedActions.contains(imageSpec.getActionName())) {
                     SafeHtml rendered;
                     rendered = getImageTemplate().cell(imageSpec.getActionName(), imgStyle, imageSpec.getTooltip(),
                             imageSpec.getImagePrototype().getSafeHtml());

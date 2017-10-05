@@ -3889,6 +3889,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, withStatisticalData));
         }
         eventDTO.setAclDTO(createAclDTOFromAcl(getSecurityService().getAccessControlListByName(event.getId().toString())));
+        eventDTO.setOwnershipDTO(createOwnershipDTOFromOwnership(getSecurityService().getOwnership(event.getId().toString())));
         return eventDTO;
     }
     

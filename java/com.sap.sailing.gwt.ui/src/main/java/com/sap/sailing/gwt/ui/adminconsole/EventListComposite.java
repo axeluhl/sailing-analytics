@@ -362,19 +362,19 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         };
         
-        ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = 
-                new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(new EventConfigImagesBarCell(stringMessages)) {
+        AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = 
+                new AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell>(new EventConfigImagesBarCell(stringMessages)) {
             @Override
-            public String getValue(EventDTO event) {
-                ArrayList<String> allowedActions = new ArrayList<>();
+            public Iterable<Action> getAllowedActions(EventDTO event) {
+                ArrayList<Action> allowedActions = new ArrayList<>();
                 for (Action action : Arrays.asList(DefaultActions.EDIT, DefaultActions.REMOVE)) {
                     if (user.hasPermission(
                             PermissionBuilderImpl.getInstance().getPermission("com.sap.sailing.domain.base.Event", action, event.id.toString()),
-                            event.getAclDTO(), null)) {
-                        allowedActions.add(action.name());
+                            event.getAclDTO(), event.getOwnershipDTO())) {
+                        allowedActions.add(action);
                     }
                 }
-                return String.join(",", allowedActions);
+                return allowedActions;
             }
         };
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
