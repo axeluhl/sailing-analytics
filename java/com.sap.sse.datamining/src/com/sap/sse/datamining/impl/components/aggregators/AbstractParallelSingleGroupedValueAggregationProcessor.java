@@ -27,7 +27,7 @@ public abstract class AbstractParallelSingleGroupedValueAggregationProcessor<Val
     }
 
     @Override
-    protected void handleElement(GroupedDataEntry<ValueType> element) {
+    public void handleElement(GroupedDataEntry<ValueType> element) {
         GroupKey key = element.getKey();
         ValueType value = element.getDataEntry();
         if (value != null) {
@@ -47,7 +47,7 @@ public abstract class AbstractParallelSingleGroupedValueAggregationProcessor<Val
     protected abstract ValueType compareValuesAndReturnNewResult(ValueType currentResult, ValueType newValue);
 
     @Override
-    protected Map<GroupKey, ValueType> getResult() {
+    public Map<GroupKey, ValueType> getResult() {
         return valueMap;
     }
 

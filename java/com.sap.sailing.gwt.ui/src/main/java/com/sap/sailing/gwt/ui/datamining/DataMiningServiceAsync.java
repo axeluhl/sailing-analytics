@@ -61,5 +61,4 @@ public interface DataMiningServiceAsync {
      * look at bug 1503.<br />
      */
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
-
 }
