@@ -126,8 +126,8 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
      * @param newSettings
      *            The settings to convert to storable representation
      * @param newInstance
-     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues and
-     *            values of the instance are completely ignored)
+     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues are
+     *            required, if used for layer patching, values are completely ignored)
      * @param previousSettingsRepresentation
      *            The representation of settings which have been already stored (the whole settings tree)
      * @param path
@@ -159,8 +159,8 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
      * @param newSettings
      *            The settings to convert to storable representation
      * @param newInstance
-     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues and
-     *            values of the instance are completely ignored)
+     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues are
+     *            required, if used for layer patching, values are completely ignored)
      * @param previousSettingsRepresentation
      *            The representation of settings which have been already stored (the whole settings tree)
      * @param path
