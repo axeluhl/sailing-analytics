@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.Duration;
@@ -74,6 +75,12 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
      */
     Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint from, TimePoint to);
     
+    /**
+     * Returns {@code true}, if the track contains {@link BravoExtendedFix} instances instead of simple {@link BravoFix BravoFixes}.
+     * It is not guaranteed that the track exclusively contains {@link BravoExtendedFix BravoExtendedFixes} if this is {@code true}.
+     * It is up to the operator to ensure, that either normal Bravo data or the extended data is imported, but it isn't enforced.
+     * If both types of fixes are contained, data may seem to have "gaps" because single fixes returned do not provide the extended data.
+     */
     boolean hasExtendedFixes();
     
     Bearing getDbRakePortIfAvailable(TimePoint timePoint);

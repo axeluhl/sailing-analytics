@@ -178,6 +178,14 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         return hasExtendedFixes;
     }
     
+    /**
+     * Generic implementation to get values from extended fixes. The implementation ensured that in case of simple
+     * {@link BravoFix} instances, just {@code null} is returned. If valid {@link BravoExtendedFix BravoExtendedFixes}
+     * are found, the provided getter is used to extract the value from the identified fix.
+     * 
+     * In case of a mix of {@link BravoFix} and {@link BravoExtendedFix} instances, this method may return null values
+     * for specific {@link TimePoint TimePoints}.
+     */
     private Bearing getBearingValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, Bearing> getter) {
         if (!hasExtendedFixes) {
             return null;

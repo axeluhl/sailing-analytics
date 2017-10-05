@@ -234,6 +234,9 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
     
+    /**
+     * Returns all contained {@link SensorFixTrack SensorFixTracks} for the given trackName and associated to any competitor.
+     */
     <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(String trackName);
 
     /**
