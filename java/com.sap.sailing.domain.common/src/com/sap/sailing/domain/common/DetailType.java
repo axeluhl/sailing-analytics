@@ -89,8 +89,6 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.BEAT_ANGLE);
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
-        availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
         return availableDetailsTypes;
     }
 
