@@ -1918,4 +1918,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String needToProvideValidMinimumRideHeight();
     String dataMiningErrorMargins();
     String elements(long count);
+    String currentDbRakePortInDegree();
+    String currentDbRakePortInDegreeTooltip();
+    String currentDbRakeStbdInDegree();
+    String currentDbRakeStbdInDegreeTooltip();
+    String currentRudderRakePortInDegree();
+    String currentRudderRakePortInDegreeTooltip();
+    String currentRudderRakeStbdInDegree();
+    String currentRudderRakeStbdInDegreeTooltip();
+    String currentMastRotationInDegree();
+    String currentMastRotationInDegreeTooltip();
 }

@@ -46,6 +46,16 @@ public class DetailTypeFormatter {
             return stringMessages.currentPitchInDegree();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMeters();
+        case CURRENT_DB_RAKE_PORT_IN_DEGREES:
+            return stringMessages.currentDbRakePortInDegree();
+        case CURRENT_DB_RAKE_STBD_IN_DEGREES:
+            return stringMessages.currentDbRakeStbdInDegree();
+        case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES:
+            return stringMessages.currentRudderRakePortInDegree();
+        case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES:
+            return stringMessages.currentRudderRakeStbdInDegree();
+        case CURRENT_MAST_ROTATION_IN_DEGREES:
+            return stringMessages.currentMastRotationInDegree();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
             return stringMessages.estimatedTimeToNextWaypointInSeconds();
         case VELOCITY_MADE_GOOD_IN_KNOTS:
@@ -204,6 +214,11 @@ public class DetailTypeFormatter {
         case COURSE_OVER_GROUND_TRUE_DEGREES:
         case CURRENT_HEEL_IN_DEGREES:
         case CURRENT_PITCH_IN_DEGREES:
+        case CURRENT_DB_RAKE_PORT_IN_DEGREES:
+        case CURRENT_DB_RAKE_STBD_IN_DEGREES:
+        case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES:
+        case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES:
+        case CURRENT_MAST_ROTATION_IN_DEGREES:
             return stringMessages.degreesShort();
 
         case GAP_TO_LEADER_IN_SECONDS:
@@ -320,6 +335,16 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageRideHeightInMetersTooltip();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMetersTooltip();
+        case CURRENT_DB_RAKE_PORT_IN_DEGREES:
+            return stringMessages.currentDbRakePortInDegreeTooltip();
+        case CURRENT_DB_RAKE_STBD_IN_DEGREES:
+            return stringMessages.currentDbRakeStbdInDegreeTooltip();
+        case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES:
+            return stringMessages.currentRudderRakePortInDegreeTooltip();
+        case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES:
+            return stringMessages.currentRudderRakeStbdInDegreeTooltip();
+        case CURRENT_MAST_ROTATION_IN_DEGREES:
+            return stringMessages.currentMastRotationInDegreeTooltip();
         case CURRENT_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegreeTooltip();
         case CURRENT_PITCH_IN_DEGREES:
