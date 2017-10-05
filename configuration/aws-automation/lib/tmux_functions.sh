@@ -8,6 +8,7 @@ function construct_ui() {
 	tmux set -g pane-border-status top
 	tmux set -g pane-border-format " [#{pane_index}] - #T "  
 
+	# close all panes except one
 	reset_panes
 	sleep 1
 	
@@ -20,14 +21,17 @@ function construct_ui() {
 	tmux select-pane -t 0
 }
 
-# $1: ssh_user $2: public_dns_name
+# -----------------------------------------------------------
+# Opens ssh connections on all four panes
+# @param $1  key file
+# @param $2  ssh user
+# @param $3  dns name of instance
+# -----------------------------------------------------------
 function open_connections() {
-	wait_for_ssh_connection "$key_file" "$ssh_user" "$2"
-	tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
-	tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
-	tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
+	tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $1 $2@$3" C-m
+	tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $1 $2@$3" C-m
+	tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $1 $2@$3" C-m
 }
-
 
 function reset_panes(){
 	if more_panes_are_open; then
@@ -75,6 +79,9 @@ function inside_tmux_session(){
 	[ "$TERM" = "screen" ] && [ -n "$TMUX" ]
 }
 
+# -----------------------------------------------------------
+# Prompts user if open panes should be closed 
+# -----------------------------------------------------------
 function confirm_reset_panes(){ 
   if more_panes_are_open; then
 	seek_confirmation "Do you want to close all open panes?"

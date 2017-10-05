@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-# ##################################################
-# AWS automation script for setting up SAP Sailing Analytics instance infrasctructure
-#
+# AWS automation script for setting up SAP Sailing Analytics instance infrasctructure 
+# ------------------------------------------------------
+
 version="1.0.0" # Sets version variable
 
 scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 utilsLocation="${scriptPath}/lib/utils.sh"
 
-# source utils.sh
+# source utils.sh which itself sources all other .sh files in the /lib directory
 if [ -f "${utilsLocation}" ]; then
   source "${utilsLocation}"
 else
@@ -51,8 +51,7 @@ tmpDir="./tmp/"
   die "Could not create temporary directory! Exiting."
 }
 
-# Logging
-# Log is only used when the '-l' flag is set.
+# Logging (not used)
 # To never save a logfile change variable to '/dev/null'
 # Save to standard user log location use: $HOME/Library/Logs/${scriptBasename}.log
 # -----------------------------------
@@ -76,7 +75,6 @@ if $tail_instance ; then
 	safeExit
 fi
 
-safeExit
 }
 
 usage() {
@@ -225,5 +223,5 @@ set -o pipefail
 mainScript
 
 # Exit cleanlyd
-confirm_close_panes
+confirm_reset_panes
 safeExit

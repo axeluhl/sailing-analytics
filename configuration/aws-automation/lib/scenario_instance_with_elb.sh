@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 
+# Scenario for creating a route53 entry that is pointing 
+# to a load balancer which includes an instance
+# ------------------------------------------------------
+
 function instance_with_elb_start(){
 	instance_with_elb_require
 	instance_with_elb_execute
 }
 
+# -----------------------------------------------------------
+# All these variables are needed for this scenario
+# If one variable is not assigned or passed by parameter
+# the user will be prompted to enter a value
+# -----------------------------------------------------------
 function instance_with_elb_require(){
 	require_region
 	require_instance_type

@@ -10,6 +10,11 @@ function tail_precondition(){
 	check_if_tmux_is_used
 }
 
+# -----------------------------------------------------------
+# All these variables are needed for this scenario
+# If one variable is not assigned or passed by parameter
+# the user will be prompted to enter a value
+# -----------------------------------------------------------
 function tail_user_input(){
 	require_key_file
 	require_ssh_user
