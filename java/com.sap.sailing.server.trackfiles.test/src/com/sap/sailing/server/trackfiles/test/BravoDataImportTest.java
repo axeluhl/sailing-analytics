@@ -24,7 +24,7 @@ public class BravoDataImportTest {
     private LearningBatchProcessor batchProcessor;
     private DownsamplerTo1HzProcessor downsampler;
 
-    private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl(BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix()) {
+    private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl(BravoDataImporterImpl.BRAVO_TYPE, BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix()) {
         protected com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor createDownsamplingProcessor(
                 DoubleVectorFixImporter.Callback callback,
                 TrackFileImportDeviceIdentifier trackIdentifier) {
