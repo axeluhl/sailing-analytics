@@ -4,24 +4,24 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
+import com.sap.sailing.domain.common.sensordata.BravoExtendedSensorDataMetadata;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
-public class BravoDataImporterImpl extends AbstractBravoDataImporterImpl {
-    public static final String BRAVO_TYPE = "BRAVO";
+public class BravoExtendedDataImporterImpl extends AbstractBravoDataImporterImpl {
+    public static final String BRAVO_EXTENDED_TYPE = "BRAVO_EXTENDED";
 
-    public BravoDataImporterImpl() {
-        super(BRAVO_TYPE, BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix());
+    public BravoExtendedDataImporterImpl() {
+        super(BRAVO_EXTENDED_TYPE, BravoExtendedSensorDataMetadata.getColumnNamesToIndexInDoubleFix());
     }
 
     @Override
     public RegattaLogDeviceCompetitorSensorDataMappingEvent createEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable id, Competitor mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
-        return new RegattaLogDeviceCompetitorBravoMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo,
+        return new RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo,
                 device, from, to);
     }
 }

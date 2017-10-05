@@ -7,8 +7,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.sap.sailing.domain.common.sensordata.BravoExtendedSensorDataMetadata;
-import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.server.trackfiles.common.GPSFixImporterRegistration;
 import com.sap.sailing.server.trackfiles.common.SensorDataImporterRegistration;
 
@@ -19,10 +17,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         registrations.addAll(GPSFixImporterRegistration.register(new RouteConverterGPSFixImporterImpl(), context));
         registrations.addAll(SensorDataImporterRegistration.register(
-                new BravoDataImporterImpl(BravoDataImporterImpl.BRAVO_TYPE, BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix()), context));
+                new BravoDataImporterImpl(), context));
         registrations.addAll(SensorDataImporterRegistration
-                .register(new BravoDataImporterImpl(BravoDataImporterImpl.BRAVO_EXTENDED_TYPE,
-                        BravoExtendedSensorDataMetadata.getColumnNamesToIndexInDoubleFix()), context));
+                .register(new BravoExtendedDataImporterImpl(), context));
     }
 
     @Override
