@@ -3,9 +3,9 @@ package com.sap.sailing.domain.common.tracking;
 import com.sap.sailing.domain.common.Bearing;
 
 public interface BravoExtendedFix extends BravoFix {
-    Bearing getDaggerBoardRakeAnglePort();
-    Bearing getDaggerBoardRakeAngleStbd();
-    Bearing getRudderRakeAnglePort();
-    Bearing getRudderRakeAngleStbd();
+    Bearing getDbRakePort();
+    Bearing getDbRakeStbd();
+    Bearing getRudderRakePort();
+    Bearing getRudderRakeStbd();
     Bearing getMastRotation();
 }
