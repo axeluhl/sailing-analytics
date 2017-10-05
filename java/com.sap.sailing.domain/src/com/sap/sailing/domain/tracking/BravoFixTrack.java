@@ -75,4 +75,10 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint from, TimePoint to);
     
     boolean hasExtendedFixes();
+    
+    Bearing getDbRakePortIfAvailable(TimePoint timePoint);
+    Bearing getDbRakeStbdIfAvailable(TimePoint timePoint);
+    Bearing getRudderRakePortIfAvailable(TimePoint timePoint);
+    Bearing getRudderRakeStbdIfAvailable(TimePoint timePoint);
+    Bearing getMastRotationIfAvailable(TimePoint timePoint);
 }

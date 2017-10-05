@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.io.Serializable;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -174,5 +176,62 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     @Override
     public boolean hasExtendedFixes() {
         return hasExtendedFixes;
+    }
+    
+    private Bearing getBearingValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, Bearing> getter) {
+        if (!hasExtendedFixes) {
+            return null;
+        }
+        final BravoExtendedFix fixAfter = getFirstFixAtOrAfterIfExtended(timePoint);
+        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return getter.apply(fixAfter);
+        }
+        final BravoExtendedFix fixBefore = getLastFixAtOrBeforeIfExtended(timePoint);
+        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return getter.apply(fixBefore);
+        }
+        if (fixAfter == null || fixBefore == null) {
+            // the fix is out of the TimeRange where we have fixes
+            return null;
+        }
+        // TODO interpolate if necessary
+        return getter.apply(fixBefore);
+    }
+    
+    public BravoExtendedFix getFirstFixAtOrAfterIfExtended(TimePoint timePoint) {
+        BravoFix fix = getFirstFixAtOrAfter(timePoint);
+        return fix instanceof BravoExtendedFix ? (BravoExtendedFix) fix : null;
+    }
+    
+    public BravoExtendedFix getLastFixAtOrBeforeIfExtended(TimePoint timePoint) {
+        BravoFix fix = getLastFixAtOrBefore(timePoint);
+        return fix instanceof BravoExtendedFix ? (BravoExtendedFix) fix : null;
+    }
+
+    @Override
+    public Bearing getDbRakePortIfAvailable(TimePoint timePoint) {
+        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakePort);
+    }
+
+    @Override
+    public Bearing getDbRakeStbdIfAvailable(TimePoint timePoint) {
+        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakeStbd);
+    }
+
+    @Override
+    public Bearing getRudderRakePortIfAvailable(TimePoint timePoint) {
+        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakePort);
+    }
+
+    @Override
+    public Bearing getRudderRakeStbdIfAvailable(TimePoint timePoint) {
+        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakeStbd);
+    }
+
+    @Override
+    public Bearing getMastRotationIfAvailable(TimePoint timePoint) {
+        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getMastRotation);
     }
 }

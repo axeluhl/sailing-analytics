@@ -2981,6 +2981,46 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = rideHeight == null ? null : rideHeight.getMeters();
                 }
             }
+            case CURRENT_DB_RAKE_PORT_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getDbRakePortIfAvailable(timePoint);
+                    result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
+            case CURRENT_DB_RAKE_STBD_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getDbRakeStbdIfAvailable(timePoint);
+                    result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
+            case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getRudderRakePortIfAvailable(timePoint);
+                    result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
+            case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getRudderRakeStbdIfAvailable(timePoint);
+                            result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
+            case CURRENT_MAST_ROTATION_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getMastRotationIfAvailable(timePoint);
+                    result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
                 break;
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
