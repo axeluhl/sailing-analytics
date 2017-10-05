@@ -7,21 +7,26 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Metadata that defines the column structure of Bravo fixes when imported as {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * Metadata that defines the column structure of BravoExtended fixes when imported as {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
  * 
  * The current implementation only stores a subset of the information available during the import.
+ * 
+ * The first columns need to be consistent with {@link BravoSensorDataMetadata}.
  */
-public enum BravoSensorDataMetadata {
-
-    RIDE_HEIGHT_PORT_HULL("RideHeightPortHull"), //
-    RIDE_HEIGHT_STBD_HULL("RideHeightStbdHull"), //
+public enum BravoExtendedSensorDataMetadata {
+    RIDE_HEIGHT_PORT_HULL("RideHeightPort"), //
+    RIDE_HEIGHT_STBD_HULL("RideHeightStbd"), //
     HEEL("Heel"), //
-    PITCH("ImuSensor_Pitch");
-
+    PITCH("PitchRate"),
+    DB_RAKE_PORT("DaggerBoardRakeAnglePort"), //
+    DB_RAKE_STBD("DaggerBoardRakeAngleStbd"), //
+    RUDDER_RAKE_PORT("RudderRakeAnglePort"), //
+    RUDDER_RAKE_STBD("RudderRakeAngleStbd"), //
+    MAST_ROTATION("MastRotation");
 
     private String columnName;
     
-    private BravoSensorDataMetadata(String columnName) {
+    private BravoExtendedSensorDataMetadata(String columnName) {
         this.columnName = columnName;
     }
     
@@ -35,9 +40,9 @@ public enum BravoSensorDataMetadata {
 
     public static final int HEADER_COLUMN_OFFSET = 3;
 
-    public static BravoSensorDataMetadata byColumnName(String valueName) {
-        BravoSensorDataMetadata[] values = BravoSensorDataMetadata.values();
-        for (BravoSensorDataMetadata item : values) {
+    public static BravoExtendedSensorDataMetadata byColumnName(String valueName) {
+        BravoExtendedSensorDataMetadata[] values = BravoExtendedSensorDataMetadata.values();
+        for (BravoExtendedSensorDataMetadata item : values) {
             if (Objects.equals(item.getColumnName(), valueName)) {
                 return item;
             }
@@ -46,12 +51,12 @@ public enum BravoSensorDataMetadata {
     }
 
     public static int getTrackColumnCount() {
-        return BravoSensorDataMetadata.values().length;
+        return BravoExtendedSensorDataMetadata.values().length;
     }
 
     public static List<String> getTrackColumnNames() {
         ArrayList<String> colNames = new ArrayList<>(getTrackColumnCount());
-        for (BravoSensorDataMetadata item : BravoSensorDataMetadata.values()) {
+        for (BravoExtendedSensorDataMetadata item : BravoExtendedSensorDataMetadata.values()) {
             colNames.add(item.getColumnName());
         }
         return colNames;
@@ -59,7 +64,7 @@ public enum BravoSensorDataMetadata {
 
     public static Map<String, Integer> getColumnNamesToIndexInDoubleFix() {
         final Map<String, Integer> columnNamesToIndexInDoubleFix = new HashMap<>();
-        for (final BravoSensorDataMetadata column : BravoSensorDataMetadata.values()) {
+        for (final BravoExtendedSensorDataMetadata column : BravoExtendedSensorDataMetadata.values()) {
             columnNamesToIndexInDoubleFix.put(column.getColumnName(), column.getColumnIndex());
         }
         return columnNamesToIndexInDoubleFix;
