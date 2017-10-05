@@ -329,74 +329,54 @@ function get_added_instance_from_elb(){
 	echo "$json_response" | jq -r '.Instances[0].InstanceId'
 }
 
+
 function input_region(){
-	if [ -z "$region_param" ]; then
-		ask $(region_ask_message) default_region region
-	else
-		region="$region_param"
-	fi
+	input_variable "$region_param" region "$default_region" "$region_ask_message"
 }
 
 function input_instance_type(){
-	if [ -z "$instance_type_param" ]; then
-		ask $(instance_type_ask_message) default_instance_type instance_type 
-	else
-		instance_type="$instance_type_param"
-	fi
-}
+	input_variable "$instance_type_param" instance_type "$default_instance_type" "$instance_type_ask_message"
 
+}
 function input_instance_name(){
-	if [ -z "$instance_name_param" ]; then
-		ask_required $(instance_name_ask_message) default_instance_name instance_name 
-	else
-		instance_name="$instance_name_param"
-	fi
+	input_variable "$instance_name_param" instance_name "$default_instance_name" "$instance_name_ask_message"
 }
 
 function input_instance_short_name(){
-	if [ -z "$instance_short_name_param" ]; then
-		ask_required $(instance_short_name_ask_message) default_instance_short_name instance_short_name
-	else
-		instance_short_name="$instance_short_name_param"
-	fi
+	input_variable "$instance_short_name_param" instance_short_name "$default_instance_short_name" "$instance_short_name_ask_message"
 }
 
 function input_key_name(){
-	if [ -z "$key_name_param" ]; then
-		ask $(key_name_ask_message) default_key_name key_name
-	else
-		key_name="$key_name_param"
-	fi
+	input_variable "$key_name_param" key_name "$default_key_name" "$key_name_ask_message"
 }
 
 function input_key_file(){
-	if [ -z "$key_file_param" ]; then
-		ask $(key_file_ask_message) default_key_file key_file
-	else
-		key_file="$key_file_param"
-	fi
+	input_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message"
 }
 
 function input_new_admin_password(){
-	if [ -z "$new_admin_password_param" ]; then
-		ask $(new_admin_password_ask_message) default_new_admin_password new_admin_password
-	else
-		new_admin_password="$new_admin_password_param"
-	fi
+	input_variable "$new_admin_password_param" new_admin_password "$default_new_admin_password" "$new_admin_password_ask_message"
 }
 
 function input_user_username(){
-	if [ -z "$user_username_param" ]; then
-		ask $(user_username_ask_message) default_user_username user_username
-	else
-		user_username="$new_admin_password_param"
-	fi
+	input_variable "$user_username_param" user_password "$default_user_username" "$user_username_ask_message"
 }
 
 function input_user_password(){
-	if [ -z "$user_password_param" ]; then
-		ask $(new_admin_password_ask_message) default_user_password user_password
+	input_variable "$user_password_param" user_password "$default_user_password" "$user_password_ask_message"
+}
+
+function input_public_dns_name(){
+	input_variable "$public_dns_name_param" public_dns_name "" "$public_dns_name_ask_message"
+}
+
+# $1: param_variable $2: variable $3: default_variable $4: message
+function input_variable(){
+	if [ -z "$1" ]; then
+		if [ -z "${!2}" ]; then
+			ask "$4" "$3" $2
+		fi
 	else
-		user_password="$new_admin_password_param"
+		$2="$1"
 	fi
 }

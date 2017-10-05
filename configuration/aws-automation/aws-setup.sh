@@ -38,13 +38,14 @@ function deleteTemp () {
 
 quiet=false
 printLog=false
-verbose=true
+verbose=false
 force=false
 strict=false
-debug=true
+debug=false 
 args=()
 
 # Create temp directory with three random numbers and the process ID
+# in the name.  This directory is removed automatically at exit.
 tmpDir="./tmp/"
 (umask 000 && mkdir "${tmpDir}") || {
   die "Could not create temporary directory! Exiting."
@@ -62,45 +63,64 @@ function mainScript() {
 echo -n
 
 if $instance_with_elb; then
-	if $tail_instance; then
+	if $tail; then
 		check_if_tmux_is_used
 	fi
-	create_instance_with_elb
+	instance_with_elb_start
+	safeExit
 fi
 
-safeExit
-
-if $tail_instance; then
+if $tail_instance ; then
 	check_if_tmux_is_used
-	tail_instance_logfiles "$tail_instance_param" "$ssh_user_param"
+	tail_start "$tail_instance_param" "$ssh_user_param"
+	safeExit
 fi
 
 safeExit
 }
 
 usage() {
-  echo -n "${scriptName} [OPTION]... [FILE]...
+  echo -n "${scriptName} [OPTION]... 
 
-This is an AWS automation bash script for deploying SAP Sailing Analytics instances and their depending infrastructure
+ This is an AWS automation bash script for deploying SAP Sailing Analytics 
+ instances and their depending infrastructure
 
- ${bold}Options:${reset}
+ ${bold}Parameter:${reset}
   -r, --region               AWS region (e.g. \"eu-west-2\" for London)
   -t, --instance-type        Instance type (e.g. \"t2.medium\")
-  -k, --key-name             IAM keypair name 
+  -k, --key-name             IAM keypair name (e.g. \"leonradeck-keypair\")
   -f, --key-file             Path to keypair file
-  -s, --ssh-user             SSH user to connect to instance
+  -s, --ssh-user             SSH user to connect to instance (e.g. \"root\")
   -u, --user-username        Username of user to create
   -q, --user-password        Password of user to create
-  -n, --instance-name        Name for instance 
-  -l, --instance-short-name  Short name for instance
-  -a, --new-admin-password	 New password for the admin user
+  -n, --instance-name        Name for instance (e.g. \"WC Santander 2017\")
+  -l, --instance-short-name  Short name for instance (e.g. subdomain \"wcs17\")
+  -a, --new-admin-password   New password for the admin user 
+  -p, --public-dns-name      Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
+  -v, --verbose true	     Verbose mode
+  -d, --debug true           Debug mode
   
-      --instance-with-elb	 Create instance with elastic load balancer (default: \"false\")
-      
-	  --tail                 Tail logs from instance using tmux
-	  --version              Output version information and exit
-	  
-	  
+  ${bold}Scenarios:${reset}
+  --instance-with-elb        Create instance with elastic load balancer 
+                             and route53 entry
+  --tail                     Tail logs from instance using tmux
+  
+  
+  ${bold}Other:${reset}
+  --version                  Output version information and exit
+  
+
+  ${bold}Examples:${reset}
+  Create standalone instance with load balancer and route53 entry:
+  > aws-setup --instance-with-elb
+ 
+  Create standalone instance with load balancer and route53 entry 
+  while automatically tailing important log files (tmux required):
+  > aws-setup --instance-with-elb --tail
+ 
+  Tail logfiles of running instance with dns name:
+  > aws-setup --tail --public-dns-name ec2-x.compute.amazonaws.com 
+  
 "
 }
 
@@ -144,6 +164,10 @@ unset options
 # Uncomment to force arguments when invoking the script
 [[ $# -eq 0 ]] && set -- "--help"
 
+# Set default value of variable without parameter value to false 
+instance_with_elb=false
+tail_instance=false
+
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
   case $1 in
@@ -159,10 +183,11 @@ while [[ $1 = -?* ]]; do
 	-n|--instance-name) shift; instance_name_param=${1} ;;
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
-	-v|--verbose) shift; verbose=true ;;
-	-d|--debug) shift; debug=true ;;
-	--instance-with-elb) shift; instance_with_elb=true ;;
-	--tail) shift; tail_instance=true ;;
+	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
+	-v|--verbose) verbose=true ;;
+	-d|--debug) debug=true ;;
+	--instance-with-elb) instance_with_elb=true ;;
+	--tail) tail=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac

@@ -12,7 +12,6 @@ default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
 default_user_username=testuser
 default_user_password=test
-default_ssh_user=root
 
 # Variables for region "eu-west-1" (Ireland)
 
@@ -44,51 +43,19 @@ tag_specifications="\'ResourceType=instance,Tags=[{Key=Name,Value=%s}]\'"
 admin_username=admin
 admin_password=admin
 instance_count=1
+ssh_user=root
 
-# Internal variable
-ssh_user=${ssh_user_param:-$default_ssh_user}
+region_ask_message="Please enter the region for the instance: " 
+instance_type_ask_message="Please enter the instance type: " 
+key_name_ask_message="Please enter the name of your keypair to connect to the instance: " 
+instance_name_ask_message="Please enter a name for the instance: (e.g \"WC Santander 2017\"): "
+instance_short_name_ask_message="Please enter a short name for the instance (e.g. \"wcs17\"): " 
+key_file_ask_message="Please enter the file path of the keypair: "
+new_admin_password_ask_message="Please enter a new password for the admin user: " 
+mongo_db_host_ask_message="Please enter the ip adress of the mongo db server: " 
+mongo_db_port_ask_message="Please enter the port of the mongo db server: " 
+user_username_ask_message="Please enter the username of your new user: " 
+user_password_ask_message="Please enter the password of your new user: " 
+public_dns_name_ask_message="Please enter the public dns name: "
 
-function region_ask_message() {
-	printf "Please enter the region for the instance (default: \"%s\"): " $default_region
-}
-
-function instance_type_ask_message() {
-	printf "Please enter the instance type (default: \"%s\"): " $default_instance_type
-}
-
-function key_name_ask_message() {
-	printf "Please enter the key name of the keypair you want to use to connect to the instance (e.g. \"%s\"): " $default_key_name
-}
-
-function instance_name_ask_message() {
-	printf "Please enter a name for the instance: (e.g \"WC Santander 2017\"): "
-}
-
-function instance_short_name_ask_message() {
-	printf "Please enter a short name for the instance (e.g. \"wcs17\" for use as a subdomain): " 
-}
-
-function key_file_ask_message() {
-	printf "Please enter the file path of the keypair you want to use to connect to the instance (e.g. \"%s\"): " $default_key_file
-}
-
-function new_admin_password_ask_message() {
-	printf "Please enter a new password for the admin user (default: \"%s\"): " $default_new_admin_password
-}
-
-function mongo_db_host_ask_message() {
-	printf "Please enter the ip adress of the mongo db server: (default: \"%s\"): " $default_mongodb_host
-}
-
-function mongo_db_port_ask_message() {
-	printf "Please enter the port of the mongo db server: (default: \"%s\"): " $default_mongodb_port
-}
-
-function user_username_ask_message() {
-	printf "Please enter the username of your new user: (default: \"%s\"): " $default_user_username
-}
-
-function user_password_ask_message() {
-	printf "Please enter the password of your new user: (default: \"%s\"): " $default_user_password
-}
 

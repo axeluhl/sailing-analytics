@@ -40,18 +40,18 @@ function _alert() {
   if [[ "${quiet}" = "true" ]] || [ "${quiet}" == "1" ]; then
    return
   else
-   echo -e "${color}$(printf ">" "${1}") ${_message}${reset}" >&2;
+   echo -e "${color}$(printf "" "${1}") ${_message}${reset}" >&2;
   fi
 
 }
 
 function die ()       { local _message="${*} Exiting."; echo "$(_alert emergency)"; safeExit;}
-function error ()     { local _message="${*}"; echo "$(_alert error)" >&2; }
+function error ()     { local _message="> ${*}"; echo "$(_alert error)" >&2; }
 function warning ()   { local _message="${*}"; echo "$(_alert warning)" >&2; }
 function notice ()    { local _message="${*}"; echo "$(_alert notice)" >&2; }
 function info ()      { local _message="${*}"; echo "$(_alert info)" >&2; }
 function debug ()     { local _message="${*}"; echo "$(_alert debug)" >&2; }
-function success ()   { local _message="${*}"; echo "$(_alert success)" >&2; }
+function success ()   { local _message="> ${*}"; echo "$(_alert success)" >&2; }
 function input()      { local _message="${*}"; echo "$(_alert input)" >&2; }
 function header()     { local _message="\n========== ${*} ==========\n  "; echo "$(_alert header)"; }
 

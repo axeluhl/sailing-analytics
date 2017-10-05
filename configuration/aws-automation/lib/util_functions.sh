@@ -5,17 +5,6 @@
 # These functions are for use with different trap scenarios
 # ------------------------------------------------------
 
-function confirm_close_panes(){ 
-  if more_panes_are_open; then
-	seek_confirmation "Do you want to close all open panes?"
-	if is_confirmed; then
-		close_all_panes
-	else
-		safeExit
-	fi
-  fi
-}
-
 # Non destructive exit for when script exits naturally.
 # Usage: Add this function at the end of every script
 function safeExit() {
@@ -78,7 +67,16 @@ function convertsecs() {
   printf "%02d:%02d:%02d\n" $h $m $s
 }
 
-
+function confirm_close_panes(){ 
+  if more_panes_are_open; then
+	seek_confirmation "Do you want to close all open panes?"
+	if is_confirmed; then
+		close_all_panes
+	else
+		safeExit
+	fi
+  fi
+}
 
 # Join
 # ----------------------------------------------
@@ -265,7 +263,7 @@ function is_not_confirmed() {
 # ------------------------------------------------------
 
 function ask(){
-	 read -e -p "$1" -i "${!2}" $3
+	 read -e -p "$1" -i "$2" $3
 }
 
 function ask_required(){

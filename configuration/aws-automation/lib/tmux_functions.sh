@@ -4,52 +4,48 @@ sailing_0='/home/sailing/servers/server/logs/sailing0.log.0'
 sailing_err='/var/log/sailing.err'
 sailing_out='/var/log/sailing.out'
 
-function check_if_tmux_is_used(){
-	check_dependencies
-	check_environment
+function tail_precondition(){
+	check_if_tmux_is_used
 }
 
-function check_dependencies() {
-if ! type tmux >/dev/null 2>/dev/null; then
-  echo "The package \"tmux\" is required to run the script with this option"
-  safeExit
-fi
+function tail_instance_start(){
+	tail_precondition
+	tail_instance_user_input
+	tail_instance_execute
 }
 
-function check_environment() {
-if ! { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
-  echo "To tail instance log files, please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
-  safeExit
-fi 
+function tail_instance_user_input(){
+	input_key_file
+	input_public_dns_name
+	input_public_dns_name
 }
 
-# $1: ssh_user $2: public_dns_name 
-function tail_instance_logfiles(){
-		echo "Open tmux panes and start tailing log files..."
-		configureUI
-		open_connections "$1" "$2"
-		tail_logfiles
+# $1: ssh_user $2: public_dns_name
+function tail_instance_execute() {
+	echo "Open tmux panes and start tailing log files..."
+	configureUI
+	open_connections "$1" "$2"
+	tail_logfiles
 }
 
 function configureUI() {
-# enable scrolling, clicking on panes etc.
-tmux set -g mouse on
+	# enable scrolling, clicking on panes etc.
+	tmux set -g mouse on
 
-# enable named border at the top of panes
-tmux set -g pane-border-status top
-tmux set -g pane-border-format " [#{pane_index}] - #T "  
+	# enable named border at the top of panes
+	tmux set -g pane-border-status top
+	tmux set -g pane-border-format " [#{pane_index}] - #T "  
 
-# construct pane layout
+	# construct pane layout
 
-close_all_panes
-sleep 1
-tmux split-window -h -p 50 
-tmux select-pane -t 0
-tmux split-window -v -p 50 
-tmux select-pane -t 2 
-tmux split-window -v -p 50 
-tmux select-pane -t 0
-
+	close_all_panes
+	sleep 1
+	tmux split-window -h -p 50 
+	tmux select-pane -t 0
+	tmux split-window -v -p 50 
+	tmux select-pane -t 2 
+	tmux split-window -v -p 50 
+	tmux select-pane -t 0
 }
 
 # $1: ssh_user $2: public_dns_name
@@ -83,4 +79,23 @@ function more_panes_are_open(){
 		fi
 	fi
 	return 1;
+}
+
+function check_if_tmux_is_used(){
+	check_dependencies
+	check_environment
+}
+
+function check_dependencies() {
+	if ! type tmux >/dev/null 2>/dev/null; then
+		echo "The package \"tmux\" is required to run the script with this option"
+		safeExit
+	fi
+}
+
+function check_environment() {
+	if ! { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
+		echo "To tail instance log files, please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
+		safeExit
+	fi 
 }
