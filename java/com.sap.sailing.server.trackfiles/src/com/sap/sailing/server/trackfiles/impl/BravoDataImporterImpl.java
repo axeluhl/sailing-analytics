@@ -10,6 +10,9 @@ import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Importer for CSV data files from Bravo units used at the ESS.
+ */
 public class BravoDataImporterImpl extends AbstractBravoDataImporterImpl {
     public static final String BRAVO_TYPE = "BRAVO";
 

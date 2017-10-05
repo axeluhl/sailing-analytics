@@ -6636,7 +6636,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
             }
             if (hasExtendedBravoFixes) {
-                // TODO add more DetailTypes later
+                availableDetailsTypes.add(DetailType.CURRENT_DB_RAKE_PORT_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_DB_RAKE_STBD_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_RUDDER_RAKE_PORT_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_RUDDER_RAKE_STBD_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_MAST_ROTATION_IN_DEGREES);
             }
         }
         if (leaderboardGroupName != null) {
