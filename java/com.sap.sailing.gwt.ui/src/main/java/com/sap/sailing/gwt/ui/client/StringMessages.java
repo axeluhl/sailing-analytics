@@ -1463,6 +1463,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String latestRegattaStandings();
     String plainText();
     String columnChart();
+    String columnChartWithErrorBars();
     String choosePresentation();
     String cantDisplayDataOfType(String resultType);
     String shownDecimals();
@@ -1915,4 +1916,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String minimumDurationBetweenAdjacentFoilingSegmentsInSeconds();
     String minimumDurationBetweenAdjacentFoilingSegmentsInSecondsTooltip();
     String needToProvideValidMinimumRideHeight();
+    String dataMiningErrorMargins();
+    String elements(long count);
 }

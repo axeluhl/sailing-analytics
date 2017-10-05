@@ -38,6 +38,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         this.stringMessages = stringMessages;
         availablePresenters = new ArrayList<>();
         availablePresenters.add(new ColumnChartDescriptor());
+        availablePresenters.add(new ColumnChartDescriptorWithErrorBars());
         availablePresenters.add(new PlainDescriptor());
 
         presenterPanel = new DeckLayoutPanel();
@@ -190,24 +191,36 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         
     }
     
-    private class ColumnChartDescriptor implements PresenterDescriptor<Object> {
-        
+    private abstract class AbstractColumnChartDescriptor implements PresenterDescriptor<Object> {
         private final ResultsChart presenter;
+        private final String name;
 
-        public ColumnChartDescriptor() {
-            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), stringMessages);
+        public AbstractColumnChartDescriptor(String name, boolean showErrorBars) {
+            this.name = name;
+            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), stringMessages, showErrorBars);
         }
 
         @Override
         public String getName() {
-            return stringMessages.columnChart();
+            return name;
         }
 
         @Override
         public AbstractResultsPresenter<?> getPresenter() {
             return presenter;
         }
-        
+    }
+    
+    private class ColumnChartDescriptor extends AbstractColumnChartDescriptor {
+        public ColumnChartDescriptor() {
+            super(stringMessages.columnChart(), /* showErrorBars */ false);
+        }
+    }
+
+    private class ColumnChartDescriptorWithErrorBars extends AbstractColumnChartDescriptor {
+        public ColumnChartDescriptorWithErrorBars() {
+            super(stringMessages.columnChartWithErrorBars(), /* showErrorBars */ true);
+        }
     }
 
     @Override

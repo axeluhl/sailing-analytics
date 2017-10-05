@@ -43,11 +43,9 @@ implements ResultsPresenterWithControls<SettingsType> {
         super(parent, context);
         this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
-        
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
         mainPanel.addNorth(controlsPanel, 40);
-        
         Button exportButton = new Button("Export");
         exportButton.setEnabled(false);
         exportButton.addClickHandler(new ClickHandler() {
@@ -59,16 +57,12 @@ implements ResultsPresenterWithControls<SettingsType> {
             }
         });
 //        addControl(exportButton);
-
         presentationPanel = new DeckLayoutPanel();
         mainPanel.add(presentationPanel);
-        
         errorLabel = new HTML();
         errorLabel.setStyleName("chart-importantMessage");
-        
         labeledBusyIndicator = new HTML(stringMessages.runningQuery());
         labeledBusyIndicator.setStyleName("chart-busyMessage");
-
         showError(getStringMessages().runAQuery());
     }
     
@@ -90,10 +84,8 @@ implements ResultsPresenterWithControls<SettingsType> {
                 presentationPanel.setWidget(getPresentationWidget());
                 state = ResultsPresenterState.RESULT;
             }
-            
             this.currentResult = result;
             updateCurrentResultInfo();
-            
             internalShowResults(getCurrentResult());
         } else {
             this.currentResult = null;
@@ -113,7 +105,6 @@ implements ResultsPresenterWithControls<SettingsType> {
             errorLabel.setHTML(SafeHtmlUtils.fromString(error).asString());
             state = ResultsPresenterState.ERROR;
         }
-        
         currentResult = null;
         updateCurrentResultInfo();
         presentationPanel.setWidget(errorLabel);
@@ -135,7 +126,6 @@ implements ResultsPresenterWithControls<SettingsType> {
             presentationPanel.setWidget(labeledBusyIndicator);
             state = ResultsPresenterState.BUSY;
         }
-        
         currentResult = null;
         updateCurrentResultInfo();
     }
