@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
 function instance_with_elb_start(){
-	instance_with_elb_user_input
+	instance_with_elb_require
 	instance_with_elb_execute
 }
 
-function instance_with_elb_user_input(){
-	input_region
-	input_instance_type
-	input_instance_name
-	input_instance_short_name
-	input_key_name
-	input_key_file
-	input_new_admin_password
-	input_user_username
-	input_user_password
+function instance_with_elb_require(){
+	require_region
+	require_instance_type
+	require_instance_name
+	require_instance_short_name
+	require_key_name
+	require_key_file
+	require_new_admin_password
+	require_user_username
+	require_user_password
 }
 
 function instance_with_elb_execute() {
@@ -31,8 +31,8 @@ function instance_with_elb_execute() {
 	
 	wait_for_ssh_connection "$key_file" "$ssh_user" "$public_dns_name"
 	
-	if $tail_instance; then
-		tail_instance_logfiles "$ssh_user" "$public_dns_name"
+	if $tail; then
+		tail_start
 	fi
 	
 	header "Event and user creation"
@@ -84,7 +84,7 @@ function run_instance(){
 	command+=$(add_param "user-data" 'file://${tmpDir}/$user_data_file')
 	command+=$(add_param "tag-specifications" $(printf $tag_specifications $instance_name))
 	
-	local json_instance=$(eval "$command") # || true
+	local json_instance=$(eval "$command") 
 	local instance_id=$(get_instance_id "$json_instance")
 	
 	echo "$json_instance"

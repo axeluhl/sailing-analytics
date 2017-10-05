@@ -3,7 +3,7 @@
 # ##################################################
 # AWS automation script for setting up SAP Sailing Analytics instance infrasctructure
 #
-version="1.0.0"               # Sets version variable
+version="1.0.0" # Sets version variable
 
 scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

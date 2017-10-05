@@ -1,34 +1,6 @@
 #!/usr/bin/env bash
 
-sailing_0='/home/sailing/servers/server/logs/sailing0.log.0'
-sailing_err='/var/log/sailing.err'
-sailing_out='/var/log/sailing.out'
-
-function tail_precondition(){
-	check_if_tmux_is_used
-}
-
-function tail_instance_start(){
-	tail_precondition
-	tail_instance_user_input
-	tail_instance_execute
-}
-
-function tail_instance_user_input(){
-	input_key_file
-	input_public_dns_name
-	input_public_dns_name
-}
-
-# $1: ssh_user $2: public_dns_name
-function tail_instance_execute() {
-	echo "Open tmux panes and start tailing log files..."
-	configureUI
-	open_connections "$1" "$2"
-	tail_logfiles
-}
-
-function configureUI() {
+function construct_ui() {
 	# enable scrolling, clicking on panes etc.
 	tmux set -g mouse on
 
@@ -36,10 +8,10 @@ function configureUI() {
 	tmux set -g pane-border-status top
 	tmux set -g pane-border-format " [#{pane_index}] - #T "  
 
-	# construct pane layout
-
-	close_all_panes
+	reset_panes
 	sleep 1
+	
+	# construct pane layout
 	tmux split-window -h -p 50 
 	tmux select-pane -t 0
 	tmux split-window -v -p 50 
@@ -56,14 +28,9 @@ function open_connections() {
 	tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $key_file $1@$2" C-m
 }
 
-function tail_logfiles(){
-	tmux send-keys -t 1 "clear;echo \"Waiting for file $sailing_0 to appear...\";touch $sailing_0;cat $sailing_0;tail -F -v $sailing_0" C-m
-	tmux send-keys -t 2 "clear;cat $sailing_out;tail -F -v $sailing_out" C-m
-	tmux send-keys -t 3 "clear;cat $sailing_err;tail -F -v $sailing_err" C-m
-}
 
-function close_all_panes(){
-	if [ "$(get_number_of_panes)" -gt 1 ]; then
+function reset_panes(){
+	if more_panes_are_open; then
 		tmux kill-pane -a -t 0
 	fi
 }
@@ -73,7 +40,7 @@ function get_number_of_panes(){
 }
 
 function more_panes_are_open(){
-	if { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
+	if inside_tmux_session; then
 		if [ "$(get_number_of_panes)" -gt 1 ]; then
 			return 0;
 		fi
@@ -87,15 +54,34 @@ function check_if_tmux_is_used(){
 }
 
 function check_dependencies() {
-	if ! type tmux >/dev/null 2>/dev/null; then
+	if ! is_tmux_available; then
 		echo "The package \"tmux\" is required to run the script with this option"
 		safeExit
 	fi
 }
 
 function check_environment() {
-	if ! { [ "$TERM" = "screen" ] && [ -n "$TMUX" ]; } then
+	if ! inside_tmux_session; then
 		echo "To tail instance log files, please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
 		safeExit
 	fi 
+}
+
+function is_tmux_available(){
+	type tmux >/dev/null 2>/dev/null
+}
+
+function inside_tmux_session(){
+	[ "$TERM" = "screen" ] && [ -n "$TMUX" ]
+}
+
+function confirm_reset_panes(){ 
+  if more_panes_are_open; then
+	seek_confirmation "Do you want to close all open panes?"
+	if is_confirmed; then
+		reset_panes
+	else
+		safeExit
+	fi
+  fi
 }

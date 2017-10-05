@@ -42,7 +42,6 @@ function _alert() {
   else
    echo -e "${color}$(printf "" "${1}") ${_message}${reset}" >&2;
   fi
-
 }
 
 function die ()       { local _message="${*} Exiting."; echo "$(_alert emergency)"; safeExit;}

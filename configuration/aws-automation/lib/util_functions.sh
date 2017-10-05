@@ -67,17 +67,6 @@ function convertsecs() {
   printf "%02d:%02d:%02d\n" $h $m $s
 }
 
-function confirm_close_panes(){ 
-  if more_panes_are_open; then
-	seek_confirmation "Do you want to close all open panes?"
-	if is_confirmed; then
-		close_all_panes
-	else
-		safeExit
-	fi
-  fi
-}
-
 # Join
 # ----------------------------------------------
 # This function joins items together with a user specified separator

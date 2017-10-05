@@ -57,5 +57,4 @@ mongo_db_port_ask_message="Please enter the port of the mongo db server: "
 user_username_ask_message="Please enter the username of your new user: " 
 user_password_ask_message="Please enter the password of your new user: " 
 public_dns_name_ask_message="Please enter the public dns name: "
-
-
+ssh_user_ask_message="Please enter the ssh user: "

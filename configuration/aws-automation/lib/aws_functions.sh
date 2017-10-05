@@ -331,47 +331,51 @@ function get_added_instance_from_elb(){
 
 
 function input_region(){
-	input_variable "$region_param" region "$default_region" "$region_ask_message"
+	require_variable "$region_param" region "$default_region" "$region_ask_message"
 }
 
 function input_instance_type(){
-	input_variable "$instance_type_param" instance_type "$default_instance_type" "$instance_type_ask_message"
+	require_variable "$instance_type_param" instance_type "$default_instance_type" "$instance_type_ask_message"
 
 }
 function input_instance_name(){
-	input_variable "$instance_name_param" instance_name "$default_instance_name" "$instance_name_ask_message"
+	require_variable "$instance_name_param" instance_name "$default_instance_name" "$instance_name_ask_message"
 }
 
 function input_instance_short_name(){
-	input_variable "$instance_short_name_param" instance_short_name "$default_instance_short_name" "$instance_short_name_ask_message"
+	require_variable "$instance_short_name_param" instance_short_name "$default_instance_short_name" "$instance_short_name_ask_message"
 }
 
 function input_key_name(){
-	input_variable "$key_name_param" key_name "$default_key_name" "$key_name_ask_message"
+	require_variable "$key_name_param" key_name "$default_key_name" "$key_name_ask_message"
 }
 
 function input_key_file(){
-	input_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message"
+	require_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message"
 }
 
 function input_new_admin_password(){
-	input_variable "$new_admin_password_param" new_admin_password "$default_new_admin_password" "$new_admin_password_ask_message"
+	require_variable "$new_admin_password_param" new_admin_password "$default_new_admin_password" "$new_admin_password_ask_message"
 }
 
 function input_user_username(){
-	input_variable "$user_username_param" user_password "$default_user_username" "$user_username_ask_message"
+	require_variable "$user_username_param" user_password "$default_user_username" "$user_username_ask_message"
 }
 
 function input_user_password(){
-	input_variable "$user_password_param" user_password "$default_user_password" "$user_password_ask_message"
+	require_variable "$user_password_param" user_password "$default_user_password" "$user_password_ask_message"
 }
 
 function input_public_dns_name(){
-	input_variable "$public_dns_name_param" public_dns_name "" "$public_dns_name_ask_message"
+	require_variable "$public_dns_name_param" public_dns_name "" "$public_dns_name_ask_message"
+}
+
+function input_ssh_user(){
+	require_variable "$ssh_user_param" ssh_user "" "$ssh_user_ask_message"
 }
 
 # $1: param_variable $2: variable $3: default_variable $4: message
-function input_variable(){
+function require_variable(){
 	if [ -z "$1" ]; then
 		if [ -z "${!2}" ]; then
 			ask "$4" "$3" $2
