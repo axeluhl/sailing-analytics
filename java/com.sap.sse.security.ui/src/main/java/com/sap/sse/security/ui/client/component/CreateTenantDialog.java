@@ -16,23 +16,17 @@ import com.sap.sse.security.ui.shared.TenantDTO;
 public class CreateTenantDialog extends DataEntryDialog<TenantData> {
     private final StringMessages stringMessages;
     private final TextBox nameBox;
-    private final TextBox ownerBox;
     private final UserManagementServiceAsync userManagementService;
     
     public static class TenantData {
         private final String name;
-        private final String owner;
         
-        protected TenantData(String name, String owner) {
+        protected TenantData(String name) {
             super();
             this.name = name;
-            this.owner = owner;
         }
         public String getName() {
             return name;
-        }
-        public String getOwner() {
-            return owner;
         }
     }
     
@@ -41,7 +35,7 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
         this(stringMessages, "Create a tenant", "Enter tenant name and owner", userManagementService, null, new DialogCallback<TenantData>() {
             @Override
             public void ok(TenantData tenantData) {
-                userManagementService.createTenant(tenantData.name, tenantData.owner, new AsyncCallback<TenantDTO>() {
+                userManagementService.createTenant(tenantData.name, "tenant", new AsyncCallback<TenantDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert("Error creating tenant.");
@@ -70,11 +64,8 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
                 }, callback);
         nameBox = createTextBox("", 30);
         nameBox.setName("name");
-        ownerBox = createTextBox("", 30);
-        ownerBox.setName("owner");
         if (tenant != null) {
             nameBox.setText(tenant.getName());
-            ownerBox.setText(tenant.getOwner() == null ? "" : tenant.getOwner().getOwner() + " | " + tenant.getOwner().getTenantOwner());
         }
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
@@ -95,23 +86,17 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
     protected TextBox getNameBox() {
         return nameBox;
     }
-
-    protected TextBox getOwnerBox() {
-        return ownerBox;
-    }
     
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(2, 2);
+        Grid result = new Grid(1, 2);
         result.setWidget(0, 0, new Label("Name"));
         result.setWidget(0, 1, getNameBox());
-        result.setWidget(1, 0, new Label("Owner"));
-        result.setWidget(1, 1, getOwnerBox());
         return result;
     }
 
     @Override
     protected TenantData getResult() {
-        return new TenantData(nameBox.getText(), ownerBox.getText());
+        return new TenantData(nameBox.getText());
     }
 }

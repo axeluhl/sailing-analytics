@@ -27,7 +27,7 @@ public class CreateUserDialog extends AbstractUserDialog {
                                 .createSimpleUser(usernameEmailPassword.getUsername(),
                                         usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
                                         /* fullName */ null, /* company */ null,
-                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), new AsyncCallback<UserDTO>() {
+                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), "tenant", new AsyncCallback<UserDTO>() {
                                             @Override
                                             public void onSuccess(UserDTO result) {
                                                 for (UserCreatedEventHandler handler : handlers) {

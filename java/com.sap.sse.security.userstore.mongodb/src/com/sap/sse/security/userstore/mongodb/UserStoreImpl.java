@@ -323,11 +323,11 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserGroup createUserGroup(String name, String owner, AccessControlStore aclStore) throws UserGroupManagementException {
+    public UserGroup createUserGroup(String name) throws UserGroupManagementException {
         if (userGroups.contains(name)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
-        logger.info("Creating user group: " + name + " with owner " + owner);
+        logger.info("Creating user group: " + name);
         UserGroup group = new UserGroupImpl(name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
@@ -375,12 +375,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Tenant createTenant(String name, String owner, AccessControlStore aclStore) throws TenantManagementException, UserGroupManagementException {
+    public Tenant createTenant(String name) throws TenantManagementException, UserGroupManagementException {
         if (tenants.contains(name)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
-        UserGroup group = createUserGroup(name, owner, aclStore);
-        logger.info("Creating tenant: " + name + " with owner " + owner);
+        UserGroup group = createUserGroup(name);
+        logger.info("Creating tenant: " + name);
         Tenant tenant = new Tenant(group);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeTenant(name);

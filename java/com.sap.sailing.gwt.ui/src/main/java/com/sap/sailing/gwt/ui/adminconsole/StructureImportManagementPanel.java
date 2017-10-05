@@ -268,7 +268,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
                 newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
                 newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(),
-                newEvent.getVideos(), newEvent.getLeaderboardGroupIds(), new AsyncCallback<EventDTO>() {
+                newEvent.getVideos(), newEvent.getLeaderboardGroupIds(), "tenant", new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(stringMessages.errorTryingToCreateNewEvent(newEvent.getName(), t.getMessage()));

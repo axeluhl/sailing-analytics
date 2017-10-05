@@ -15,7 +15,7 @@ public interface UserStore extends Named {
     
     UserGroup getUserGroupByName(String name);
     
-    UserGroup createUserGroup(String name, String owner, AccessControlStore aclStore) throws UserGroupManagementException;
+    UserGroup createUserGroup(String name) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup tenant);
     
@@ -28,7 +28,7 @@ public interface UserStore extends Named {
      */
     Tenant getTenantByName(String name);
     
-    Tenant createTenant(String name, String owner, AccessControlStore aclStore) throws TenantManagementException, UserGroupManagementException;
+    Tenant createTenant(String name) throws TenantManagementException, UserGroupManagementException;
     
     void updateTenant(Tenant tenant);
     

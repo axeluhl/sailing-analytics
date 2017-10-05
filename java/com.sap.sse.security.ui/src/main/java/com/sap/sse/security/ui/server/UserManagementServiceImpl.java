@@ -209,12 +209,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public UserGroupDTO createUserGroup(String name, String owner) {
+    public UserGroupDTO createUserGroup(String name, String tenantOwner) {
         // TODO: create UserGroupManagementException_CustomSeri.....?
         try {
-            UserGroup userGroup = getSecurityService().createUserGroup(name, owner);
+            UserGroup userGroup = getSecurityService().createUserGroup(name);
             getSecurityService().createAccessControlList(name);
-            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), "tenant");
+            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
             return createUserGroupDTOFromUserGroup(userGroup);
         } catch (UserGroupManagementException e) {
             return null;
@@ -222,11 +222,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public TenantDTO createTenant(String name, String owner) {
+    public TenantDTO createTenant(String name, String tenantOwner) {
         // TODO: create TenantManagementException_CustomSeri.....?
-        //String subject = (String) SecurityUtils.getSubject().getPrincipal(); // TODO: use this as owner
         try {
-            return createTenantDTOFromTenant(getSecurityService().createTenant(name, owner));
+            Tenant tenant = getSecurityService().createTenant(name);
+            getSecurityService().createAccessControlList(name);
+            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
+            return createTenantDTOFromTenant(tenant);
         } catch (TenantManagementException | UserGroupManagementException e) {
             return null;
         }
@@ -301,12 +303,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException {
         User u = null;
         try {
             u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
             getSecurityService().createAccessControlList(name);
-            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), "tenant");
+            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());

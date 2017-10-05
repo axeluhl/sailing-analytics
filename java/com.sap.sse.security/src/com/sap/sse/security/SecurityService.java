@@ -63,9 +63,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     Iterable<Tenant> getTenantList();
     
-    UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException;
+    UserGroup createUserGroup(String name) throws UserGroupManagementException;
     
-    Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException;
+    Tenant createTenant(String name) throws TenantManagementException, UserGroupManagementException;
     
     UserGroup addUserToUserGroup(String user, String userGroup);
 

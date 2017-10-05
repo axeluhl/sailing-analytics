@@ -417,7 +417,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String baseURL,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
-            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs, AsyncCallback<EventDTO> callback);
+            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs, String tenantOwner, AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,

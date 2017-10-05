@@ -374,26 +374,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException {
-        apply(s->s.internalCreateUserGroup(name, owner, aclStore));
+    public UserGroup createUserGroup(String name) throws UserGroupManagementException {
+        apply(s->s.internalCreateUserGroup(name));
         return userStore.getUserGroupByName(name);
     }
     
     @Override
-    public Void internalCreateUserGroup(String name, String owner, AccessControlStore aclStore) throws UserGroupManagementException {
-        userStore.createUserGroup(name, owner, aclStore);
+    public Void internalCreateUserGroup(String name) throws UserGroupManagementException {
+        userStore.createUserGroup(name);
         return null;
     }
     
     @Override
-    public Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException {
-        apply(s->s.internalCreateTenant(name, owner, aclStore));
+    public Tenant createTenant(String name) throws TenantManagementException, UserGroupManagementException {
+        apply(s->s.internalCreateTenant(name));
         return userStore.getTenantByName(name);
     }
     
     @Override
-    public Void internalCreateTenant(String name, String owner, AccessControlStore aclStore) throws TenantManagementException, UserGroupManagementException {
-        userStore.createTenant(name, owner, aclStore);
+    public Void internalCreateTenant(String name) throws TenantManagementException, UserGroupManagementException {
+        userStore.createTenant(name);
         return null;
     }
 

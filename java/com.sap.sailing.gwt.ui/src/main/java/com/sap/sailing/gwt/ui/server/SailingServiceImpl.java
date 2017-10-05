@@ -3608,7 +3608,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds)
+            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
+            Iterable<UUID> leaderboardGroupIds, String tenantOwner)
             throws MalformedURLException, UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted(
                 ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.CREATE))) {
@@ -3626,7 +3627,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
             createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
             getSecurityService().createAccessControlList(eventUuid.toString());
-            getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(), "tenant"); // TODO: remove dummy tenant
+            getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
             EventDTO result = getEventById(eventUuid, false);
             return result;
         }

@@ -34,9 +34,9 @@ public interface UserManagementService extends RemoteService {
     
     Collection<TenantDTO> getTenantList();
     
-    UserGroupDTO createUserGroup(String name, String owner);
+    UserGroupDTO createUserGroup(String name, String tenantOwner);
     
-    TenantDTO createTenant(String name, String owner);
+    TenantDTO createTenant(String name, String tenantOwner);
     
     UserGroupDTO addUserToUserGroup(String user, String userGroup);
     
@@ -52,7 +52,7 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo login(String username, String password);
 
-    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
+    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException;
     
     /**
      * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have
