@@ -3,10 +3,7 @@ package com.sap.sse.security.ui.client.component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,9 +11,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,7 +36,6 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public class UserManagementPanel extends DockPanel {
     
@@ -113,36 +109,28 @@ public class UserManagementPanel extends DockPanel {
         });
         buttonPanel.add(editACLButton);
         aclSingleSelectionModel = new SingleSelectionModel<>();
-        final CellList<AccessControlListDTO> aclList = new CellList<AccessControlListDTO>(new AbstractCell<AccessControlListDTO>() {
+        final CellTable<AccessControlListDTO> aclTable = new CellTable<AccessControlListDTO>();
+        TextColumn<AccessControlListDTO> idColumn = new TextColumn<AccessControlListDTO>() {
             @Override
-            public void render(Context context, AccessControlListDTO value, SafeHtmlBuilder sb) {
-                if (value == null) {
-                    return;
-                }
-                sb.appendHtmlConstant("<table>");
-                sb.appendHtmlConstant("<tr>");
-                sb.appendHtmlConstant("<td>");
-                sb.appendEscaped(value.getId());
-                sb.appendHtmlConstant("</td>");
-                for (Map.Entry<UserGroupDTO, Set<String>> entry : value.getUserGroupPermissionMap().entrySet()) {
-                    sb.appendHtmlConstant("<td>");
-                    String concated = entry.getKey().getName() + ": ";
-                    concated += String.join(", ", entry.getValue());
-                    sb.appendEscaped(concated);
-                    sb.appendHtmlConstant("</td>");
-                }
-                sb.appendHtmlConstant("</tr>");
-                sb.appendHtmlConstant("</table>");
+            public String getValue(AccessControlListDTO acl) {
+                return acl.getId();
             }
-            
-        });
-        aclList.setSelectionModel(aclSingleSelectionModel);
+        };
+        TextColumn<AccessControlListDTO> displayNameColumn = new TextColumn<AccessControlListDTO>() {
+            @Override
+            public String getValue(AccessControlListDTO acl) {
+                return acl.getDisplayName();
+            }
+        };
+        aclTable.addColumn(idColumn, "ID");
+        aclTable.addColumn(displayNameColumn, "Display Name");
+        aclTable.setSelectionModel(aclSingleSelectionModel);
         aclListDataProvider = new AccessControlListListDataProvider(userManagementService);
-        aclList.setPageSize(20);
-        aclListDataProvider.addDataDisplay(aclList);
+        aclTable.setPageSize(20);
+        aclListDataProvider.addDataDisplay(aclTable);
         SimplePager aclPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
-        aclPager.setDisplay(aclList);
-        ScrollPanel aclPanel = new ScrollPanel(aclList);
+        aclPager.setDisplay(aclTable);
+        ScrollPanel aclPanel = new ScrollPanel(aclTable);
         west.add(aclPager);
         west.add(aclPanel);
         

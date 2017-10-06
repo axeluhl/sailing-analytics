@@ -20,6 +20,7 @@ public class AccessControlListDTO implements AccessControlList, IsSerializable {
     
     public AccessControlListDTO(String idAsString, String displayName, Map<UserGroupDTO, Set<String>> permissionMap) {
         this.idAsString = idAsString;
+        this.displayName = displayName;
         this.permissionMap = permissionMap;
     }
     
