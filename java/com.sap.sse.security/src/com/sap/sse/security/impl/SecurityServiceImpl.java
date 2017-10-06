@@ -66,6 +66,7 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
@@ -286,18 +287,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public AccessControlList getAccessControlListByName(String id) {
+    public AccessControlList getAccessControlList(String id) {
         return aclStore.getAccessControlList(id);
     }
     
     @Override
-    public SecurityService createAccessControlList(String id) {
-        return createAccessControlList(id, id);
+    public SecurityService createAccessControlList(WithID id) {
+        return createAccessControlList(id, id.getId().toString());
     }
     
     @Override
-    public SecurityService createAccessControlList(String id, String displayName) {
-        apply(s->s.internalCreateAcl(id, displayName));
+    public SecurityService createAccessControlList(WithID id, String displayName) {
+        apply(s->s.internalCreateAcl(id.getId().toString(), displayName));
         return this;
     }
     
@@ -363,13 +364,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public SecurityService createOwnership(String id, String owner, String tenant) {
-        return createOwnership(id, owner, tenant, id);
+    public SecurityService createOwnership(WithID id, String owner, String tenant) {
+        return createOwnership(id, owner, tenant, id.getId().toString());
     }
     
     @Override
-    public SecurityService createOwnership(String id, String owner, String tenant, String displayName) {
-        apply(s->s.internalCreateOwnership(id, owner, tenant, displayName));
+    public SecurityService createOwnership(WithID id, String owner, String tenant, String displayName) {
+        apply(s->s.internalCreateOwnership(id.getId().toString(), owner, tenant, displayName));
         return this;
     }
     

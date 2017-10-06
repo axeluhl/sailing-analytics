@@ -11,6 +11,7 @@ import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
@@ -39,11 +40,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     Iterable<AccessControlList> getAccessControlListList();
     
-    AccessControlList getAccessControlListByName(String id);
+    AccessControlList getAccessControlList(String id);
     
-    SecurityService createAccessControlList(String id);
+    /**
+     * @param id Has to be globally unique, will be stored as string
+     */
+    SecurityService createAccessControlList(WithID id);
     
-    SecurityService createAccessControlList(String id, String displayName);
+    /**
+     * @param id Has to be globally unique, will be stored as string
+     */
+    SecurityService createAccessControlList(WithID id, String displayName);
     
     AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap);
     
@@ -59,9 +66,15 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void deleteACL(String id);
     
-    SecurityService createOwnership(String id, String owner, String tenant);
+    /**
+     * @param id Has to be globally unique, will be stored as string
+     */
+    SecurityService createOwnership(WithID id, String owner, String tenant);
     
-    SecurityService createOwnership(String id, String owner, String tenant, String displayName);
+    /**
+     * @param id Has to be globally unique, will be stored as string
+     */
+    SecurityService createOwnership(WithID id, String owner, String tenant, String displayName);
     
     void deleteOwnership(String id);
     

@@ -3626,8 +3626,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                             officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
             createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-            getSecurityService().createAccessControlList(eventUuid.toString());
-            getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
+            Event event = getService().getEvent(eventUuid);
+            getSecurityService().createAccessControlList(event);
+            getSecurityService().createOwnership(event, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
             EventDTO result = getEventById(eventUuid, false);
             return result;
         }
@@ -3891,7 +3892,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, withStatisticalData));
         }
-        eventDTO.setAclDTO(createAclDTOFromAcl(getSecurityService().getAccessControlListByName(event.getId().toString())));
+        eventDTO.setAclDTO(createAclDTOFromAcl(getSecurityService().getAccessControlList(event.getId().toString())));
         eventDTO.setOwnershipDTO(createOwnershipDTOFromOwnership(getSecurityService().getOwnership(event.getId().toString())));
         return eventDTO;
     }
@@ -3907,7 +3908,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
-        AccessControlList acl = getSecurityService().getAccessControlListByName(userGroup.getName());
+        AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
         Owner ownership = getSecurityService().getOwnership(userGroup.getName());
         return new UserGroupDTO(userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
