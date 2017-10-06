@@ -188,6 +188,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         if (!dimensionsToGroupBy.isEmpty()) {
             final FunctionDTO firstDimension = dimensionsToGroupBy.iterator().next();
             groupingProvider.removeDimensionToGroupBy(firstDimension);
+            filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension, groupKey);
             result = true;
         } else {
             result = false;

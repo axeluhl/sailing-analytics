@@ -9,11 +9,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -116,7 +118,11 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
             dimensionFilter.setAvailableDimensions(remainingDimensions);
         }
     }
-
+    
+    public boolean hasDimension(FunctionDTO dimension) {
+        return availableDimensions.contains(dimension);
+    }
+    
     private Collection<FunctionDTO> getSelectedDimensions() {
         Collection<FunctionDTO> selectedDimensions = new ArrayList<>();
         for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
@@ -174,13 +180,35 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         return filterSelection;
     }
 
+    /**
+     * If there is already a filter set for {@code dimension}, replace its value selection by the {@code values}
+     * provided. Otherwise, add a {@link DimensionFilterSelectionProvider} for {@code dimension} and set its
+     * filter values to {@code values}.<p>
+     * 
+     * <em>Precondition:</em> {@link #hasDimension(FunctionDTO) hasDimension(dimension)}{@code == true}
+     */
+    public void addFilter(FunctionDTO dimension, Set<? extends Serializable> values) {
+        DimensionFilterSelectionProvider dimensionFilter = null;
+        for (final DimensionFilterSelectionProvider dimensionSelectionProvider : dimensionSelectionProviders) {
+            if (Util.equalsWithNull(dimensionSelectionProvider.getSelectedDimension(), dimension)) {
+                dimensionFilter = dimensionSelectionProvider;
+                break;
+            }
+        }
+        if (dimensionFilter == null) {
+            // add dimension filter and set value selection:
+            dimensionFilter = createDimensionSelectionProvider();
+            addDimensionSelectionProvider(dimensionFilter);
+            updateAvailableDimensions();
+        }
+        dimensionFilter.setSelectedDimensionAndValues(dimension, values);
+    }
+
     public void applySelection(HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection) {
         dimensionSelectionProviders.clear();
         mainPanel.clear();
-        
         List<FunctionDTO> sortedDimensions = new ArrayList<>(filterSelection.keySet());
         Collections.sort(sortedDimensions);
-        
         for (FunctionDTO functionDTO : sortedDimensions) {
             DimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
             addDimensionSelectionProvider(dimensionFilter);
