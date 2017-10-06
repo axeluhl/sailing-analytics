@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -131,6 +134,7 @@ public class BaseBravoDataImporterImpl {
             if (epochColValue != null && epochColValue.length() > 0) {
                 epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
                 epoch = Long.parseLong(epochColValue);
+                epoch = epoch - 1500635950955l + LocalDateTime.of(2016, Month.JUNE, 23, 13, 00).toEpochSecond(ZoneOffset.UTC) * 1000;
                 double[] trackFixData = new double[getTrackColumnCount()];
                 for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
                     Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
