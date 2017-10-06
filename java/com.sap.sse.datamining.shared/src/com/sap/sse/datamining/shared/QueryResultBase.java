@@ -7,19 +7,19 @@ import com.sap.sse.datamining.shared.data.QueryResultState;
 
 public interface QueryResultBase<ResultType> extends Serializable {
     
-    public QueryResultState getState();
+    QueryResultState getState();
     
-    public int getRetrievedDataAmount();
-    public double getCalculationTimeInSeconds();
+    int getRetrievedDataAmount();
+    double getCalculationTimeInSeconds();
 
     /**
      * @return a description what kind of results are contained.
      */
-    public String getResultSignifier();
+    String getResultSignifier();
     
-    public int getValueDecimals();
+    int getValueDecimals();
 
-    public boolean isEmpty();
-    public Map<GroupKey, ResultType> getResults();
-    
+    boolean isEmpty();
+    Map<GroupKey, ResultType> getResults();
+
 }
