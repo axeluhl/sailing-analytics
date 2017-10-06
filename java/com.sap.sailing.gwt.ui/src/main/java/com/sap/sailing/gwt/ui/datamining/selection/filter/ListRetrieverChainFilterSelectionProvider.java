@@ -33,7 +33,6 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -66,6 +65,14 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     private final ScrollPanel selectionPanel;
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
+    
+    /**
+     * When the {@link #retrieverLevelList retriever levels} have been received, this field is initialized
+     * with the mapping of dimension functions to the reduced set shown in the per-level filters. This way,
+     * an original dimension can be {@link ReducedDimensionsDTO#getReducedDimension(FunctionDTO) mapped} to
+     * its corresponding dimension from the reduced set of dimensions that are shown in the per-level filters.
+     */
+    private ReducedDimensionsDTO reducedDimensions;
 
     public ListRetrieverChainFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, StringMessages stringMessages,
@@ -109,11 +116,12 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     }
     
     @Override
-    public void setHighestRetrieverLevelWithFilterDimension(FunctionDTO dimension, GroupKey groupKey) {
+    public void setHighestRetrieverLevelWithFilterDimension(FunctionDTO dimension, Serializable groupKey) {
+        FunctionDTO dimensionMappedToReducedDimensions = reducedDimensions == null ? dimension : reducedDimensions.getReducedDimension(dimension);
         for (final DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
             final RetrieverLevelFilterSelectionProvider selectionProvider = selectionProvidersMappedByRetrievedDataType.get(retrieverLevel);
-            if (selectionProvider.hasDimension(dimension)) {
-                selectionProvider.addFilter(dimension, Collections.singleton(groupKey));
+            if (selectionProvider.hasDimension(dimensionMappedToReducedDimensions)) {
+                selectionProvider.addFilter(dimensionMappedToReducedDimensions, Collections.singleton(groupKey));
                 break;
             }
         }
@@ -152,7 +160,6 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         clearContent();
         retrieverLevelDataProvider.getList().addAll(retrieverChain.getRetrieverLevels());
         retrieverLevelList.setPageSize(retrieverLevelDataProvider.getList().size());
-        
         dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(),
                 new AsyncCallback<ReducedDimensionsDTO>() {
             @Override
@@ -161,6 +168,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
             }
             @Override
             public void onSuccess(ReducedDimensionsDTO dimensionsMappedByLevel) {
+                ListRetrieverChainFilterSelectionProvider.this.reducedDimensions = dimensionsMappedByLevel;
                 int firstFilterableRetrieverLevel = Integer.MAX_VALUE;
                 for (Entry<DataRetrieverLevelDTO, HashSet<FunctionDTO>> dimensionsEntry : dimensionsMappedByLevel.getReducedDimensions().entrySet()) {
                     if (!dimensionsEntry.getValue().isEmpty()) {

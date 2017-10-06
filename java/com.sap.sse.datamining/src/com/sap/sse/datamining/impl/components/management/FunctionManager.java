@@ -339,11 +339,18 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
                                                                             : functionFactory.createCompoundFunction(subList);
                         if (Util.contains(previousDimensions, subFunction)) {
                             isAllowed = false; // TODO record the reduction process, mapping original dimension to equal element from previousDimensions
+                            for (final Function<?> previousDimension : previousDimensions) {
+                                if (previousDimension.equals(subFunction)) {
+                                    fromOriginalToReducedDimensions.put(dimension, previousDimension);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
                 if (isAllowed) {
                     modifiableReducedDimensions.add(dimension);
+                    fromOriginalToReducedDimensions.put(dimension, dimension);
                 }
             }
         }

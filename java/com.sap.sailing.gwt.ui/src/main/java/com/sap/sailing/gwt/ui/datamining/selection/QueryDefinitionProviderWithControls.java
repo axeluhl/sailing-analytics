@@ -42,6 +42,7 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -183,12 +184,14 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
      */
     @Override
     public boolean drillDown(GroupKey groupKey) {
+        assert groupKey instanceof GenericGroupKey<?>;
         final boolean result;
+        final GenericGroupKey<?> groupKeyForSingleDimension = (GenericGroupKey<?>) groupKey;
         final Collection<FunctionDTO> dimensionsToGroupBy = groupingProvider.getDimensionsToGroupBy();
         if (!dimensionsToGroupBy.isEmpty()) {
             final FunctionDTO firstDimension = dimensionsToGroupBy.iterator().next();
             groupingProvider.removeDimensionToGroupBy(firstDimension);
-            filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension, groupKey);
+            filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension, (Serializable) groupKeyForSingleDimension.getValue());
             result = true;
         } else {
             result = false;
