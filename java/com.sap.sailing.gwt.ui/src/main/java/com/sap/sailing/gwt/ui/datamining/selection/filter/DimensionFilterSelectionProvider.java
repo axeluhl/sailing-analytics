@@ -254,7 +254,6 @@ class DimensionFilterSelectionProvider {
         dimensionChangedHandler.firstChange = false;
         dimensionListBox.setValue(functionDTO, true);
         selectionToBeApplied = selection;
-        updateSelectionTable(/* notifyListenersWhenSelectionChanged */ true);
     }
     
     public Widget getEntryWidget() {
