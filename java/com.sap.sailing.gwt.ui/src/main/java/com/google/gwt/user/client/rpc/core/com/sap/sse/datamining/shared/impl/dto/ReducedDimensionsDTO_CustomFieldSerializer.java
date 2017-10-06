@@ -49,8 +49,8 @@ public class ReducedDimensionsDTO_CustomFieldSerializer extends CustomFieldSeria
     @SuppressWarnings("unchecked") // the cast to List<String> is the problem here
     public static ReducedDimensionsDTO instantiate(SerializationStreamReader streamReader)
             throws SerializationException {
-        final HashMap<FunctionDTO, FunctionDTO> fromOriginalToReducedDimension = (HashMap<FunctionDTO, FunctionDTO>) streamReader.readObject();
         final HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> reducedDimensions = (HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>) streamReader.readObject();
+        final HashMap<FunctionDTO, FunctionDTO> fromOriginalToReducedDimension = (HashMap<FunctionDTO, FunctionDTO>) streamReader.readObject();
         return new ReducedDimensionsDTO(reducedDimensions, fromOriginalToReducedDimension);
     }
 
