@@ -23,7 +23,7 @@ image_id=ami-39f3e25d
 hosted_zone_id=Z1R8UBAEXAMPLE
 certificate_arn='arn:aws:iam::123456789012:server-certificate/my-server-cert'
 elb_security_group_ids=sg-871732ee
-mongodb_host=35.176.42.142
+mongodb_host=35.176.143.232
 mongodb_port=27017
 
 # Variables for region "eu-west-1" (Ireland)

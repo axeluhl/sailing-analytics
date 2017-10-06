@@ -111,6 +111,14 @@ function is_http_ok(){
 	is_number $1 && [ $1 == 200 ]
 }
 
+function get_response(){
+	echo "$1" | head -n-1
+}
+
+function get_status_code(){
+	echo "$1" | tail -n1
+}
+
 # ------------------------------------------------------
 # The following functions were part of a bash template 
 # and could be useful in the future
@@ -667,11 +675,27 @@ httpStatus() {
                   --no-keepalive ${curlops} --output /dev/null  ${url})`
 
   #      __________ get the STATUS (from code) which is human interpretable:
-  case $code in
-       000) status="Not responding within ${timeout} seconds" ;;
+  
+  status=$(get_http_code_message $code)
+
+  # _______________ MAIN
+  case ${flag} in
+       --status) echo "${code} ${status}" ;;
+       -s)       echo "${code} ${status}" ;;
+       --code)   echo "${code}"         ;;
+       -c)       echo "${code}"         ;;
+       *)        echo " !!  httpstatus: bad flag" && safeExit;;
+  esac
+
+  IFS="${saveIFS}"
+}
+
+function get_http_code_message(){
+	case $1 in
+       000) status="Not responding within timeout" ;;
        100) status="Informational: Continue" ;;
        101) status="Informational: Switching Protocols" ;;
-       200) status="Successful: OK within ${timeout} seconds" ;;
+       200) status="Successful: OK within timeout" ;;
        201) status="Successful: Created" ;;
        202) status="Successful: Accepted" ;;
        203) status="Successful: Non-Authoritative Information" ;;
@@ -694,7 +718,7 @@ httpStatus() {
        405) status="Client Error: Method Not Allowed" ;;
        406) status="Client Error: Not Acceptable" ;;
        407) status="Client Error: Proxy Authentication Required" ;;
-       408) status="Client Error: Request Timeout within ${timeout} seconds" ;;
+       408) status="Client Error: Request Timeout within timeout" ;;
        409) status="Client Error: Conflict" ;;
        410) status="Client Error: Gone" ;;
        411) status="Client Error: Length Required" ;;
@@ -708,23 +732,13 @@ httpStatus() {
        501) status="Server Error: Not Implemented" ;;
        502) status="Server Error: Bad Gateway" ;;
        503) status="Server Error: Service Unavailable" ;;
-       504) status="Server Error: Gateway Timeout within ${timeout} seconds" ;;
+       504) status="Server Error: Gateway Timeout within timeout" ;;
        505) status="Server Error: HTTP Version Not Supported" ;;
-       *)   echo " !!  httpstatus: status not defined." && safeExit ;;
+       *)   status="status not defined." ;;
   esac
-
-
-  # _______________ MAIN
-  case ${flag} in
-       --status) echo "${code} ${status}" ;;
-       -s)       echo "${code} ${status}" ;;
-       --code)   echo "${code}"         ;;
-       -c)       echo "${code}"         ;;
-       *)        echo " !!  httpstatus: bad flag" && safeExit;;
-  esac
-
-  IFS="${saveIFS}"
+  echo "$status"
 }
+
 
 function makeCSV() {
   # Creates a new CSV file if one does not already exist.

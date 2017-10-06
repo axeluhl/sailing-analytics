@@ -229,7 +229,8 @@ set -o pipefail
 # Invoke the checkDependenices function to test for Bash packages.  Uncomment if needed.
 # checkDependencies
 
-# Run your script
+# Run your scrip
+confirm_reset_panes
 mainScript
 
 # Exit cleanlyd

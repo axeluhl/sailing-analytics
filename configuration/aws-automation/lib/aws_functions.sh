@@ -26,6 +26,33 @@ function get_latest_release(){
 }
 
 # -----------------------------------------------------------
+# Get access token 
+# @param $1  admin username
+# @param $2  admin password
+# @param $3  dns name of instance
+# @return    access token
+# -----------------------------------------------------------
+function get_access_token(){
+	local_echo "Getting access token..."
+	local out=$(get_access_token_command $1 $2 $3)
+	local status_code=$(get_status_code "$out")
+	local response=$(get_response "$out")
+	local message=$(get_http_code_message $status_code)
+	
+	if is_http_ok $status_code; then
+		local access_token=$(echo "$response" | jq -r '.access_token' | tr -d '\r')
+		success "Access token is: \"$access_token\""
+		echo "$access_token"
+	else
+		error "Failed getting access token. Error [$status_code] $message"
+	fi
+}
+
+function get_access_token_command(){
+	curl -qSfsw '\n%{http_code}' -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" 
+}
+
+# -----------------------------------------------------------
 # Creates a new event with no regatta and venuename="Default"
 # @param $1  access token of privileged user 
 # @param $2  dns name of instance
@@ -33,18 +60,21 @@ function get_latest_release(){
 # -----------------------------------------------------------
 function create_event(){
 	local_echo "Creating event..."
-	event_id=$(create_event_command $1 $2)
+	local out=$(create_event_command $1 $2)
+	local status_code=$(get_status_code "$out")
+	local response=$(get_response "$out")
+	local message=$(get_http_code_message $status_code)
 
-	if is_valid_event_id $event_id; then
+	if is_http_ok $status_code; then
+		local event_id=$(echo $response | jq -r '.eventid' | tr -d '\r')
 		success "Created event with id: \"$event_id\"."
 	else
-		error "Failed creating event."
-		echo $event_id | jq -r '.eventid' | tr -d '\r'
+		error "Failed creating event. [$status_code] $message"
 	fi
 }
 
 function create_event_command(){
-	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" 
+	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" 2>/dev/null
 }
 
 # -----------------------------------------------------------
@@ -57,18 +87,20 @@ function create_event_command(){
 # -----------------------------------------------------------
 function change_admin_password(){
 	local_echo "Changing password of user \"$3\" to \"$4\"..."
-	local result=$(change_admin_password_command $1 $2 $3 $4)
+	local out=$(change_admin_password_command $1 $2 $3 $4)
+	local status_code=$(get_status_code "$out")
+	local response=$(get_response "$out")
+	local message=$(get_http_code_message $status_code)
 	
-	if is_http_ok $result; then
+	if is_http_ok $status_code; then
 		success "Changed password to \"$4\"."
-		echo $result
 	else
-		error "Failed changing password. Error: $result"
+		error "Failed changing password. [$status_code] $message"
 	fi
 }
 
 function change_admin_password_command(){
-	curl -w ''%{http_code}'' -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
+	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
 }
 
 # -----------------------------------------------------------
@@ -81,19 +113,21 @@ function change_admin_password_command(){
 # -----------------------------------------------------------
 function create_new_user(){
 	local_echo "Creating new user \"$3\" with password \"$4\"..."
-	local result=$(create_new_user_command $1 $2 $3 $4)
+	local out=$(create_new_user_command $1 $2 $3 $4)
+	local status_code=$(get_status_code "$out")
+	local response=$(get_response "$out")
+	local message=$(get_http_code_message $status_code)
 	
 	if is_http_ok $result; then
 		success "Successfully created user \"$3\"."
-		echo $result
 	else
-		error "Failed creating user. Error: $result"
+		error "Failed creating user. [$status_code] $message"
 	fi
 }
 
 # $1: access_token $2: public_dns_name $3: user_username $4: user_password
 function create_new_user_command(){
-	curl -w ''%{http_code}'' -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
+	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
 }
 
 # -----------------------------------------------------------
@@ -103,7 +137,7 @@ function create_new_user_command(){
 # -----------------------------------------------------------
 function query_public_dns_name(){
 	local_echo "Querying for the instance public dns name..." 
-	public_dns_name=$(query_public_dns_name_command $1)
+	local public_dns_name=$(query_public_dns_name_command $1)
 	
 	if is_error $?; then
 		error "Querying for instance public dns name failed."
@@ -186,29 +220,6 @@ function wait_for_create_event_resource_command(){
 function wait_instance_exists(){
 	local_echo "Wait until instance \"$1\" is recognized by AWS..." 
 	local result=$(aws ec2 wait instance-exists --instance-ids $1)
-}
-
-# -----------------------------------------------------------
-# Get access token 
-# @param $1  admin username
-# @param $2  admin password
-# @param $3  dns name of instance
-# @return    access token
-# -----------------------------------------------------------
-function get_access_token(){
-	local_echo "Getting access token..."
-	local access_token=$(get_access_token_command $1 $2 $3)
-	
-	if is_error $?; then
-		error "Failed getting access token."
-	else
-		success "Access token is: \"$access_token\""
-		echo $access_token | jq -r '.access_token' | tr -d '\r'
-	fi
-}
-
-function get_access_token_command(){
-	curl -w ''%{http_code}'' -s -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" 
 }
 
 # -----------------------------------------------------------

@@ -98,11 +98,11 @@ function run_instance(){
 	local json_instance=$(eval "$command") 
 	local instance_id=$(get_instance_id "$json_instance")
 	
-	if ! is_valid_instance_id "$instance_id"; then
-		error "Failed creating instance."
-	else
+	if is_valid_instance_id "$instance_id"; then
 		success "Created instance \"$instance_id\""
 		echo $json_instance
+	else
+		error "Failed creating instance."
 	fi
 }
 
