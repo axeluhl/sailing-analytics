@@ -20,13 +20,13 @@ import com.sap.sse.security.ui.shared.UserGroupDTO;
 public interface UserManagementService extends RemoteService {
     Collection<AccessControlListDTO> getAccessControlListList();
     
-    AccessControlListDTO getAccessControlList(String id);
+    AccessControlListDTO getAccessControlList(String idAsString);
     
-    AccessControlListDTO updateACL(String id, Map<String, Set<String>> permissionStrings);
+    AccessControlListDTO updateACL(String idAsString, Map<String, Set<String>> permissionStrings);
     
-    AccessControlListDTO addToACL(String acl, String permission, String name);
+    AccessControlListDTO addToACL(String idAsString, String group, String permission);
     
-    AccessControlListDTO removeFromACL(String acl, String permission, String name);
+    AccessControlListDTO removeFromACL(String idAsString, String group, String permission);
     
     Collection<UserGroupDTO> getUserGroupList(boolean withTenants);
     
@@ -38,11 +38,11 @@ public interface UserManagementService extends RemoteService {
     
     TenantDTO createTenant(String name, String tenantOwner);
     
-    UserGroupDTO addUserToUserGroup(String user, String userGroup);
+    UserGroupDTO addUserToUserGroup(String idAsString, String user);
     
-    UserGroupDTO removeUserFromUserGroup(String user, String userGroup);
+    UserGroupDTO removeUserFromUserGroup(String idAsString, String user);
     
-    SuccessInfo deleteTenant(String name);
+    SuccessInfo deleteTenant(String idAsString);
     
     Collection<UserDTO> getUserList();
 

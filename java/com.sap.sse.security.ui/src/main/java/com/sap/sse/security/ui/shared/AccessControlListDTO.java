@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.shared;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.AccessControlList;
@@ -10,21 +11,21 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
 public class AccessControlListDTO implements AccessControlList, IsSerializable {
-    private String id;
+    private String idAsString;
     private String displayName;
     
     private Map<UserGroupDTO, Set<String>> permissionMap;
     
     AccessControlListDTO() {} // for serialization only
     
-    public AccessControlListDTO(String id, String displayName, Map<UserGroupDTO, Set<String>> permissionMap) {
-        this.id = id;
+    public AccessControlListDTO(String idAsString, String displayName, Map<UserGroupDTO, Set<String>> permissionMap) {
+        this.idAsString = idAsString;
         this.permissionMap = permissionMap;
     }
     
     @Override
     public String getId() {
-        return id;
+        return idAsString;
     }
     
     @Override
@@ -47,10 +48,10 @@ public class AccessControlListDTO implements AccessControlList, IsSerializable {
     }
     
     @Override
-    public Map<String, Set<String>> getPermissionMap() {
-        Map<String, Set<String>> permissionMap = new HashMap<>();
+    public Map<UUID, Set<String>> getPermissionMap() {
+        Map<UUID, Set<String>> permissionMap = new HashMap<>();
         for (Map.Entry<UserGroupDTO, Set<String>> entry : this.permissionMap.entrySet()) {
-            permissionMap.put(entry.getKey().getName(), entry.getValue());
+            permissionMap.put(entry.getKey().getId(), entry.getValue());
         }
         return permissionMap;
     }

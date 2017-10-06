@@ -36,11 +36,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     SecurityManager getSecurityManager();
     
-    Owner getOwnership(String id);
+    Owner getOwnership(String idAsString);
     
     Iterable<AccessControlList> getAccessControlListList();
     
-    AccessControlList getAccessControlList(String id);
+    AccessControlList getAccessControlList(String idAsString);
     
     /**
      * @param id Has to be globally unique, will be stored as string
@@ -52,49 +52,53 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     SecurityService createAccessControlList(WithID id, String displayName);
     
-    AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap);
+    AccessControlList updateACL(String idAsString, Map<UserGroup, Set<String>> permissionMap);
     
     /*
-     * @param name The name of the user or user group to add
+     * @param name The name of the user group to add
      */
-    AccessControlList addToACL(String acl, String permission, String name);
+    AccessControlList addToACL(String idAsString, UUID group, String permission);
     
     /*
-     * @param name The name of the user or user group to remove
+     * @param name The name of the user group to remove
      */
-    AccessControlList removeFromACL(String acl, String permission, String name);
+    AccessControlList removeFromACL(String idAsString, UUID group, String permission);
     
-    void deleteACL(String id);
+    void deleteACL(String idAsString);
     
     /**
-     * @param id Has to be globally unique, will be stored as string
+     * @param idAsString Has to be globally unique, will be stored as string
      */
-    SecurityService createOwnership(WithID id, String owner, String tenant);
+    SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner);
     
     /**
-     * @param id Has to be globally unique, will be stored as string
+     * @param idAsString Has to be globally unique, will be stored as string
      */
-    SecurityService createOwnership(WithID id, String owner, String tenant, String displayName);
+    SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner, String displayName);
     
-    void deleteOwnership(String id);
+    void deleteOwnership(String idAsString);
     
     Iterable<UserGroup> getUserGroupList();
+    
+    UserGroup getUserGroup(UUID id);
     
     UserGroup getUserGroupByName(String name);
     
     Iterable<Tenant> getTenantList();
     
-    UserGroup createUserGroup(String id, String name) throws UserGroupManagementException;
+    Tenant getTenantByName(String name);
     
-    Tenant createTenant(String id, String name) throws TenantManagementException, UserGroupManagementException;
+    UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
     
-    UserGroup addUserToUserGroup(String user, String userGroup);
+    Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
+    
+    UserGroup addUserToUserGroup(UUID group, String user);
 
-    UserGroup removeUserFromUserGroup(String user, String userGroup);
+    UserGroup removeUserFromUserGroup(UUID group, String user);
     
-    void deleteUserGroup(String id) throws UserGroupManagementException;
+    void deleteUserGroup(UUID id) throws UserGroupManagementException;
     
-    void deleteTenant(String id) throws TenantManagementException, UserGroupManagementException;
+    void deleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException;
 
     Iterable<User> getUserList();
 

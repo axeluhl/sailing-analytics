@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
@@ -52,8 +53,9 @@ public class UserStoreImpl implements UserStore {
 
     private String name = "MongoDB user store";
     
-    private final ConcurrentSkipListSet<String> tenants;
-    private final ConcurrentHashMap<String, UserGroup> userGroups;
+    private final ConcurrentSkipListSet<UUID> tenants;
+    private final ConcurrentHashMap<UUID, UserGroup> userGroups;
+    private final ConcurrentHashMap<String, UUID> userGroupsByName;
     
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
@@ -102,6 +104,7 @@ public class UserStoreImpl implements UserStore {
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         tenants = new ConcurrentSkipListSet<>();
         userGroups = new ConcurrentHashMap<>();
+        userGroupsByName = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
@@ -133,7 +136,7 @@ public class UserStoreImpl implements UserStore {
             }
             tenants.addAll(domainObjectFactory.loadAllTenantIds());
             for (UserGroup group : domainObjectFactory.loadAllUserGroups()) {
-                userGroups.put(group.getId().toString(), group);
+                userGroups.put((UUID) group.getId(), group);
             }
             for (User u : domainObjectFactory.loadAllUsers()) {
                 users.put(u.getName(), u);
@@ -198,10 +201,10 @@ public class UserStoreImpl implements UserStore {
     public void replaceContentsFrom(UserStore newUserStore) {
         clear();
         for (Tenant tenant : newUserStore.getTenants()) {
-            tenants.add(tenant.getName());
+            tenants.add((UUID) tenant.getId());
         }
         for (UserGroup group : newUserStore.getUserGroups()) {
-            userGroups.put(group.getName(), group);
+            userGroups.put((UUID) group.getId(), group);
         }
         for (User user : newUserStore.getUsers()) {
             users.put(user.getName(), user);
@@ -315,14 +318,23 @@ public class UserStoreImpl implements UserStore {
     public Iterable<UserGroup> getUserGroups() {
         return new ArrayList<>(userGroups.values());
     }
+    
+    @Override
+    public UserGroup getUserGroupByName(String name) {
+        UUID id = userGroupsByName.get(name);
+        if (id != null) {
+            return getUserGroup(id);
+        }
+        return null;
+    }
 
     @Override
-    public UserGroup getUserGroup(String id) {
+    public UserGroup getUserGroup(UUID id) {
         return userGroups.get(id);
     }
     
     @Override
-    public UserGroup createUserGroup(String id, String name) throws UserGroupManagementException {
+    public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
         if (userGroups.contains(id)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
@@ -338,14 +350,14 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void updateUserGroup(UserGroup group) {
         logger.info("Updating user group " + group.getName() + " in DB");
-        userGroups.put(group.getId().toString(), group);
+        userGroups.put((UUID) group.getId(), group);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
     }
 
     @Override
-    public void deleteUserGroup(String id) throws UserGroupManagementException {
+    public void deleteUserGroup(UUID id) throws UserGroupManagementException {
         if (!userGroups.contains(id)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
         }
@@ -359,14 +371,23 @@ public class UserStoreImpl implements UserStore {
     @Override
     public Iterable<Tenant> getTenants() {
         Set<Tenant> result = new HashSet<>();
-        for (String id : tenants) {
+        for (UUID id : tenants) {
             result.add(getTenant(id));
         }
         return result;
     }
 
     @Override
-    public Tenant getTenant(String id) {
+    public Tenant getTenantByName(String name) {
+        UserGroup group = getUserGroupByName(name);
+        if (tenants.contains((UUID) group.getId())) {
+            return new Tenant(group);
+        }
+        return null;
+    }
+
+    @Override
+    public Tenant getTenant(UUID id) {
         if (tenants.contains(id)) {
             return new Tenant(userGroups.get(id));
         }
@@ -374,7 +395,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Tenant createTenant(String id, String name) throws TenantManagementException, UserGroupManagementException {
+    public Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException {
         if (tenants.contains(id)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
@@ -395,7 +416,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void deleteTenant(String id) throws TenantManagementException {
+    public void deleteTenant(UUID id) throws TenantManagementException {
         if (!tenants.contains(id)) {
             throw new TenantManagementException(TenantManagementException.TENANT_DOES_NOT_EXIST);
         }
@@ -407,7 +428,7 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public void deleteTenantWithUserGroup(String id) throws TenantManagementException, UserGroupManagementException {
+    public void deleteTenantWithUserGroup(UUID id) throws TenantManagementException, UserGroupManagementException {
         deleteTenant(id);
         deleteUserGroup(id);
     }

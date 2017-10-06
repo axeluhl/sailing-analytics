@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.security.AccessControlStore;
@@ -61,65 +62,65 @@ public class AccessControlStoreImpl implements AccessControlStore {
      * Gets the ACL by name and if it is not present loads it. However there should only be the need to load them when the user store is initialized
      */
     @Override
-    public AccessControlList getAccessControlList(String id) {
-        AccessControlList acl = accessControlLists.get(id);
+    public AccessControlList getAccessControlList(String idAsString) {
+        AccessControlList acl = accessControlLists.get(idAsString);
         if (acl != null) {
             return acl;
         }
-        acl = domainObjectFactory.loadAccessControlList(id, userStore, this);
+        acl = domainObjectFactory.loadAccessControlList(idAsString, userStore, this);
         accessControlLists.put(acl.getId().toString(), acl);
         return acl;
     }
 
     @Override
-    public AccessControlList createAccessControlList(String id, String displayName) {
-        AccessControlList acl = new AccessControlListWithStore(id, displayName, userStore);
-        accessControlLists.put(id, acl);
+    public AccessControlList createAccessControlList(String idAsString, String displayName) {
+        AccessControlList acl = new AccessControlListWithStore(idAsString, displayName, userStore);
+        accessControlLists.put(idAsString, acl);
         mongoObjectFactory.storeAccessControlList(acl);
         return acl;
     }
 
     @Override
-    public AccessControlStore putPermissions(String id, String group, Set<String> permissions) {
-        AccessControlList acl = accessControlLists.get(id);
-        Map<String, Set<String>> permissionMap = acl.getPermissionMap();
+    public AccessControlStore putPermissions(String idAsString, UUID group, Set<String> permissions) {
+        AccessControlList acl = accessControlLists.get(idAsString);
+        Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         permissionMap.put(group, permissions);
-        acl = new AccessControlListWithStore(id, acl.getDisplayName(), permissionMap, userStore);
+        acl = new AccessControlListWithStore(idAsString, acl.getDisplayName(), permissionMap, userStore);
         mongoObjectFactory.storeAccessControlList(acl);
         return this;
     }
 
     @Override
-    public AccessControlStore addPermission(String id, String group, String permission) {
-        AccessControlList acl = accessControlLists.get(id);
-        Map<String, Set<String>> permissionMap = acl.getPermissionMap();
+    public AccessControlStore addPermission(String idAsString, UUID group, String permission) {
+        AccessControlList acl = accessControlLists.get(idAsString);
+        Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         Set<String> permissionsGroup = permissionMap.get(group);
         if (permissionsGroup == null) {
             permissionsGroup = new HashSet<>();
             permissionMap.put(group, permissionsGroup);
         }
         permissionsGroup.add(permission);
-        acl = new AccessControlListWithStore(id, acl.getDisplayName(), permissionMap, userStore);
+        acl = new AccessControlListWithStore(idAsString, acl.getDisplayName(), permissionMap, userStore);
         mongoObjectFactory.storeAccessControlList(acl);
         return this;
     }
 
     @Override
-    public AccessControlStore removePermission(String id, String group, String permission) {
-        AccessControlList acl = accessControlLists.get(id);
-        Map<String, Set<String>> permissionMap = acl.getPermissionMap();
+    public AccessControlStore removePermission(String idAsString, UUID group, String permission) {
+        AccessControlList acl = accessControlLists.get(idAsString);
+        Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         Set<String> permissionsGroup = permissionMap.get(group);
         if (permissionsGroup != null) {
             permissionsGroup.remove(permission);
-            acl = new AccessControlListWithStore(id, acl.getDisplayName(), permissionMap, userStore);
+            acl = new AccessControlListWithStore(idAsString, acl.getDisplayName(), permissionMap, userStore);
             mongoObjectFactory.storeAccessControlList(acl);
         }
         return this;
     }
 
     @Override
-    public AccessControlStore removeAccessControlList(String id) {
-        AccessControlList acl = accessControlLists.remove(id);
+    public AccessControlStore removeAccessControlList(String idAsString) {
+        AccessControlList acl = accessControlLists.remove(idAsString);
         mongoObjectFactory.deleteAccessControlList(acl);
         return this;
     }
@@ -143,29 +144,29 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     @Override
-    public Owner createOwnership(String id, String owner, String tenantOwner, String displayName) {
-        setOwnership(id, owner, tenantOwner, displayName);
-        return ownershipList.get(id);
+    public Owner createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
+        setOwnership(idAsString, owner, tenantOwner, displayName);
+        return ownershipList.get(idAsString);
     }
 
     @Override
-    public AccessControlStore setOwnership(String id, String owner, String tenantOwner, String displayName) {
-        Owner ownership = new OwnerImpl(id, owner, tenantOwner, displayName);
-        ownershipList.put(id, ownership);
+    public AccessControlStore setOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
+        Owner ownership = new OwnerImpl(idAsString, owner, tenantOwner, displayName);
+        ownershipList.put(idAsString, ownership);
         mongoObjectFactory.storeOwnership(ownership);
         return this;
     }
 
     @Override
-    public AccessControlStore removeOwnership(String id) {
-        Owner ownership = ownershipList.remove(id);
+    public AccessControlStore removeOwnership(String idAsString) {
+        Owner ownership = ownershipList.remove(idAsString);
         mongoObjectFactory.deleteOwnership(ownership);
         return this;
     }
 
     @Override
-    public Owner getOwnership(String id) {
-        return ownershipList.get(id);
+    public Owner getOwnership(String idAsString) {
+        return ownershipList.get(idAsString);
     }
     
     @Override 

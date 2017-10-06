@@ -1,6 +1,7 @@
 package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Map;
+import java.util.UUID;
 
 import com.mongodb.DB;
 import com.sap.sse.security.User;
@@ -17,13 +18,13 @@ public interface MongoObjectFactory {
     
     public void deleteOwnership(Owner owner);
     
-    public void storeTenant(String id);
+    public void storeTenant(UUID id);
     
-    public void deleteTenant(String id);
+    public void deleteTenant(UUID id);
     
     public void storeUserGroup(UserGroup group);
     
-    public void deleteUserGroup(String id);
+    public void deleteUserGroup(UUID id);
 
     public void storeUser(User user);
     

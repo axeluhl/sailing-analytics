@@ -3609,7 +3609,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
-            Iterable<UUID> leaderboardGroupIds, String tenantOwner)
+            Iterable<UUID> leaderboardGroupIds, String tenantOwnerName)
             throws MalformedURLException, UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted(
                 ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.CREATE))) {
@@ -3628,7 +3628,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
             Event event = getService().getEvent(eventUuid);
             getSecurityService().createAccessControlList(event);
-            getSecurityService().createOwnership(event, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
+            getSecurityService().createOwnership(event, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwnerName).getId());
             EventDTO result = getEventById(eventUuid, false);
             return result;
         }
@@ -3899,8 +3899,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
         Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
-        for (Map.Entry<String, Set<String>> entry : acl.getPermissionMap().entrySet()) {
-            UserGroup group = getSecurityService().getUserGroupByName(entry.getKey());
+        for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
+            UserGroup group = getSecurityService().getUserGroup(entry.getKey());
             permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
                     entry.getValue());
         }
@@ -3910,12 +3910,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
         AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
         Owner ownership = getSecurityService().getOwnership(userGroup.getName());
-        return new UserGroupDTO(userGroup.getName(), 
+        return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
     
     private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
-        return new OwnerDTO(ownership.getId().toString(), ownership.getDisplayName(), ownership.getOwner(), ownership.getTenantOwner());
+        return new OwnerDTO(ownership.getId().toString(), ownership.getOwner(), ownership.getTenantOwner(), ownership.getDisplayName());
     }
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {

@@ -1,6 +1,7 @@
 package com.sap.sse.security.impl;
 
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
@@ -21,27 +22,27 @@ import com.sap.sse.security.shared.UserManagementException;
 public interface ReplicableSecurityService extends SecurityService {
     Void internalCreateAcl(String id, String displayName);
     
-    Void internalAclPutPermissions(String id, String group, Set<String> permissions);
+    Void internalAclPutPermissions(String id, UUID group, Set<String> permissions);
     
-    Void internalAclAddPermission(String id, String group, String permission);
+    Void internalAclAddPermission(String id, UUID group, String permission);
     
-    Void internalAclRemovePermission(String id, String group, String permission);
+    Void internalAclRemovePermission(String id, UUID group, String permission);
     
     Void internalDeleteAcl(String id);
     
-    Void internalCreateOwnership(String id, String owner, String tenantOwner, String displayName);
+    Void internalCreateOwnership(String id, String owner, UUID tenantOwner, String displayName);
     
     Void internalDeleteOwnership(String id);
     
-    Void internalCreateUserGroup(String id, String name) throws UserGroupManagementException;
+    Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException;
     
-    Void internalCreateTenant(String id, String name) throws TenantManagementException, UserGroupManagementException;
+    Void internalCreateTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
     
     Void internalUpdateUserGroup(UserGroup group);
     
-    Void internalDeleteUserGroup(String id) throws UserGroupManagementException;
+    Void internalDeleteUserGroup(UUID id) throws UserGroupManagementException;
     
-    Void internalDeleteTenant(String id) throws TenantManagementException, UserGroupManagementException;
+    Void internalDeleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException;
     
     Void internalStoreUser(User user);
 

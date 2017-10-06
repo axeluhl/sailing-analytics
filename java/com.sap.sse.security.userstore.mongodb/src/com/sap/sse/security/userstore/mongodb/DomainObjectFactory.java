@@ -2,6 +2,7 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.User;
@@ -17,7 +18,7 @@ public interface DomainObjectFactory {
     
     AccessControlList loadAccessControlList(String id, UserStore userStore, AccessControlStore aclStore);
 
-    Collection<String> loadAllTenantIds();
+    Collection<UUID> loadAllTenantIds();
     
     Iterable<UserGroup> loadAllUserGroups();
     

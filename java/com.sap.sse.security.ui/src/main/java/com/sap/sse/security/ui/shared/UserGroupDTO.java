@@ -1,10 +1,12 @@
 package com.sap.sse.security.ui.shared;
 
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class UserGroupDTO implements IsSerializable {
+    private UUID id;
     private String name;
     private AccessControlListDTO acl;
     private OwnerDTO owner;
@@ -12,11 +14,16 @@ public class UserGroupDTO implements IsSerializable {
     
     UserGroupDTO() {} // just for serialization
     
-    public UserGroupDTO(String name, AccessControlListDTO acl, OwnerDTO owner, Set<String> usernames) {
+    public UserGroupDTO(UUID id, String name, AccessControlListDTO acl, OwnerDTO owner, Set<String> usernames) {
+        this.id = id;
         this.name = name;
         this.acl = acl;
         this.owner = owner;
         this.usernames = usernames;
+    }
+    
+    public UUID getId() {
+        return id;
     }
     
     public String getName() {

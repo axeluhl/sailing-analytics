@@ -277,8 +277,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Owner getOwnership(String id) {
-        return aclStore.getOwnership(id);
+    public Owner getOwnership(String idAsString) {
+        return aclStore.getOwnership(idAsString);
     }
 
     @Override
@@ -287,8 +287,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public AccessControlList getAccessControlList(String id) {
-        return aclStore.getAccessControlList(id);
+    public AccessControlList getAccessControlList(String idAsString) {
+        return aclStore.getAccessControlList(idAsString);
     }
     
     @Override
@@ -309,52 +309,52 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap) {
+    public AccessControlList updateACL(String idAsString, Map<UserGroup, Set<String>> permissionMap) {
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
-            apply(s->s.internalAclPutPermissions(id, entry.getKey().getName(), entry.getValue()));
+            apply(s->s.internalAclPutPermissions(idAsString, (UUID) entry.getKey().getId(), entry.getValue()));
         }
-        return aclStore.getAccessControlList(id);
+        return aclStore.getAccessControlList(idAsString);
     }
     
     @Override
-    public Void internalAclPutPermissions(String id, String group, Set<String> permissions) {
+    public Void internalAclPutPermissions(String id, UUID group, Set<String> permissions) {
         aclStore.putPermissions(id, group, permissions);
         return null;
     }
 
     /*
-     * @param name The name of the user or user group to add
+     * @param name The name of the user group to add
      */
     @Override
-    public AccessControlList addToACL(String aclId, String permission, String name) {
-        apply(s->s.internalAclAddPermission(aclId, name, permission));
+    public AccessControlList addToACL(String aclId, UUID group, String permission) {
+        apply(s->s.internalAclAddPermission(aclId, group, permission));
         return aclStore.getAccessControlList(aclId);
     }
     
     @Override
-    public Void internalAclAddPermission(String id, String group, String permission) {
+    public Void internalAclAddPermission(String id, UUID group, String permission) {
         aclStore.addPermission(id, group, permission);
         return null;
     }
 
     /*
-     * @param name The name of the user or user group to remove
+     * @param name The name of the user group to remove
      */
     @Override
-    public AccessControlList removeFromACL(String aclId, String permission, String name) {
-        apply(s->s.internalAclRemovePermission(aclId, name, permission));
+    public AccessControlList removeFromACL(String aclId, UUID group, String permission) {
+        apply(s->s.internalAclRemovePermission(aclId, group, permission));
         return aclStore.getAccessControlList(aclId);
     }
     
     @Override 
-    public Void internalAclRemovePermission(String id, String group, String permission) {
+    public Void internalAclRemovePermission(String id, UUID group, String permission) {
         aclStore.removePermission(id, group, permission);
         return null;
     }
     
     @Override 
-    public void deleteACL(String id) {
-        apply(s->s.internalDeleteAcl(id));
+    public void deleteACL(String idAsString) {
+        apply(s->s.internalDeleteAcl(idAsString));
     }
     
     @Override
@@ -364,25 +364,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public SecurityService createOwnership(WithID id, String owner, String tenant) {
-        return createOwnership(id, owner, tenant, id.getId().toString());
+    public SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner) {
+        return createOwnership(idAsString, owner, tenantOwner, idAsString.getId().toString());
     }
     
     @Override
-    public SecurityService createOwnership(WithID id, String owner, String tenant, String displayName) {
-        apply(s->s.internalCreateOwnership(id.getId().toString(), owner, tenant, displayName));
+    public SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner, String displayName) {
+        apply(s->s.internalCreateOwnership(idAsString.getId().toString(), owner, tenantOwner, displayName));
         return this;
     }
     
     @Override
-    public Void internalCreateOwnership(String id, String owner, String tenantOwner, String displayName) {
+    public Void internalCreateOwnership(String id, String owner, UUID tenantOwner, String displayName) {
         aclStore.createOwnership(id, owner, tenantOwner, displayName);
         return null;
     }
     
     @Override
-    public void deleteOwnership(String id) {
-        apply(s->s.internalDeleteOwnership(id));
+    public void deleteOwnership(String idAsString) {
+        apply(s->s.internalDeleteOwnership(idAsString));
     }
     
     @Override
@@ -395,43 +395,53 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Iterable<UserGroup> getUserGroupList() {
         return userStore.getUserGroups();
     }
+    
+    @Override
+    public UserGroup getUserGroup(UUID id) {
+        return userStore.getUserGroup(id);
+    }
 
     @Override
     public UserGroup getUserGroupByName(String name) {
-        return userStore.getUserGroup(name);
+        return userStore.getUserGroupByName(name);
     }
 
     @Override
     public Iterable<Tenant> getTenantList() {
         return userStore.getTenants();
     }
+    
+    @Override
+    public Tenant getTenantByName(String name) {
+        return userStore.getTenantByName(name);
+    }
 
     @Override
-    public UserGroup createUserGroup(String id, String name) throws UserGroupManagementException {
+    public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
         apply(s->s.internalCreateUserGroup(id, name));
         return userStore.getUserGroup(id);
     }
     
     @Override
-    public Void internalCreateUserGroup(String id, String name) throws UserGroupManagementException {
+    public Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException {
         userStore.createUserGroup(id, name);
         return null;
     }
     
     @Override
-    public Tenant createTenant(String id, String name) throws TenantManagementException, UserGroupManagementException {
+    public Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException {
         apply(s->s.internalCreateTenant(id, name));
         return userStore.getTenant(id);
     }
     
     @Override
-    public Void internalCreateTenant(String id, String name) throws TenantManagementException, UserGroupManagementException {
+    public Void internalCreateTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException {
         userStore.createTenant(id, name);
         return null;
     }
 
     @Override
-    public UserGroup addUserToUserGroup(String user, String id) {
+    public UserGroup addUserToUserGroup(UUID id, String user) {
         UserGroup userGroup = userStore.getUserGroup(id);
         userGroup.add(user);
         apply(s->s.internalUpdateUserGroup(userGroup));
@@ -445,7 +455,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserGroup removeUserFromUserGroup(String user, String id) {
+    public UserGroup removeUserFromUserGroup(UUID id, String user) {
         UserGroup userGroup = userStore.getUserGroup(id);
         userGroup.remove(user);
         apply(s->s.internalUpdateUserGroup(userGroup));
@@ -453,18 +463,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void deleteUserGroup(String id) throws UserGroupManagementException {
+    public void deleteUserGroup(UUID id) throws UserGroupManagementException {
         apply(s->s.internalDeleteUserGroup(id));
     }
     
     @Override
-    public Void internalDeleteUserGroup(String id) throws UserGroupManagementException {
+    public Void internalDeleteUserGroup(UUID id) throws UserGroupManagementException {
         userStore.deleteUserGroup(id);
         return null;
     }
     
     @Override
-    public void deleteTenant(String id) throws TenantManagementException, UserGroupManagementException {
+    public void deleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException {
         for (Owner ownership : aclStore.getOwnerships()) {
             if (ownership.getTenantOwner().equals(id)) {
                 throw new TenantManagementException("The tenant still is tenant owner");
@@ -475,7 +485,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Void internalDeleteTenant(String id) throws TenantManagementException, UserGroupManagementException {
+    public Void internalDeleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException {
         userStore.deleteTenantWithUserGroup(id);
         return null;
     }

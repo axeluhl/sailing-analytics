@@ -3,38 +3,34 @@ package com.sap.sse.security;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.sap.sse.common.WithID;
+import java.util.UUID;
 
 public class UserGroupImpl implements UserGroup {
     private static final long serialVersionUID = -6387489363559803841L;
 
-    /**
-     * The ID for this tenant; Implements the {@link WithID} key
-     */
+    private final UUID id;
     private final String name;
-    private final String id;
     
     private Set<String> usernames;
         
-    public UserGroupImpl(String id, String name) {
+    public UserGroupImpl(UUID id, String name) {
         this(id, name, new HashSet<>());
     }
     
-    public UserGroupImpl(String id, String name, Set<String> usernames) {
+    public UserGroupImpl(UUID id, String name, Set<String> usernames) {
         this.id = id;
         this.name = name;
         this.usernames = usernames;
     }
     
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
     public Serializable getId() {
         return id;
+    }
+    
+    @Override
+    public String getName() {
+        return name;
     }
     
     @Override

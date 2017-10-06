@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.AccessControlList;
@@ -8,23 +9,23 @@ import com.sap.sse.security.shared.Owner;
 
 public interface AccessControlStore extends Named {
     Iterable<AccessControlList> getAccessControlLists();
-    AccessControlList getAccessControlList(String id);
+    AccessControlList getAccessControlList(String idAsString);
     
     /**
-     * @param id ID of the object the ACL is attached to
+     * @param idAsString ID of the object the ACL is attached to
      * @param owner Owner of the object the ACL is attached to
      */
-    AccessControlList createAccessControlList(String id, String displayName);
-    AccessControlStore putPermissions(String id, String group, Set<String> permissions);
-    AccessControlStore addPermission(String id, String group, String permission);
-    AccessControlStore removePermission(String id, String group, String permission);
-    AccessControlStore removeAccessControlList(String id);
+    AccessControlList createAccessControlList(String idAsString, String displayName);
+    AccessControlStore putPermissions(String idAsString, UUID group, Set<String> permissions);
+    AccessControlStore addPermission(String idAsString, UUID group, String permission);
+    AccessControlStore removePermission(String idAsString, UUID group, String permission);
+    AccessControlStore removeAccessControlList(String idAsString);
     
     Iterable<Owner> getOwnerships();
-    Owner getOwnership(String id);
-    Owner createOwnership(String id, String owner, String tenantOwner, String displayName);
-    AccessControlStore setOwnership(String id, String owner, String tenantOwner, String displayName);
-    AccessControlStore removeOwnership(String id);
+    Owner getOwnership(String idAsString);
+    Owner createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
+    AccessControlStore setOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
+    AccessControlStore removeOwnership(String idAsString);
     
     void clear();
     void replaceContentsFrom(AccessControlStore newAclStore);

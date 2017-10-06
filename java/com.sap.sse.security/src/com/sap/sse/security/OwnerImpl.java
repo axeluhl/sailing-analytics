@@ -1,15 +1,17 @@
 package com.sap.sse.security;
 
+import java.util.UUID;
+
 import com.sap.sse.security.shared.Owner;
 
 public class OwnerImpl implements Owner {    
-    private final String id;
+    private final String idAsString;
     private final String owner;
-    private final String tenantOwner;
+    private final UUID tenantOwner;
     private final String displayName;
     
-    public OwnerImpl(String id, String owner, String tenantOwner, String displayName) {
-        this.id = id;
+    public OwnerImpl(String idAsString, String owner, UUID tenantOwner, String displayName) {
+        this.idAsString = idAsString;
         this.owner = owner;
         this.tenantOwner = tenantOwner;
         this.displayName = displayName;
@@ -17,7 +19,7 @@ public class OwnerImpl implements Owner {
     
     @Override
     public String getId() {
-        return id;
+        return idAsString;
     }
 
     @Override
@@ -26,7 +28,7 @@ public class OwnerImpl implements Owner {
     }
 
     @Override
-    public String getTenantOwner() {
+    public UUID getTenantOwner() {
         return tenantOwner;
     }
     

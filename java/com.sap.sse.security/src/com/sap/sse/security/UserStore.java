@@ -13,28 +13,29 @@ import com.sap.sse.security.shared.UserManagementException;
 public interface UserStore extends Named {
     Iterable<UserGroup> getUserGroups();
     
-    UserGroup getUserGroup(String id);
+    UserGroup getUserGroup(UUID id);
     
-    UserGroup createUserGroup(String id, String name) throws UserGroupManagementException;
+    UserGroup getUserGroupByName(String name);
+    
+    UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup tenant);
     
-    void deleteUserGroup(String id) throws UserGroupManagementException;
+    void deleteUserGroup(UUID id) throws UserGroupManagementException;
     
     Iterable<Tenant> getTenants();
     
-    /**
-     * The tenant with that {@link User#getName() name} or {@code null} if no such tenant exists
-     */
-    Tenant getTenant(String id);
+    Tenant getTenant(UUID id);
     
-    Tenant createTenant(String id, String name) throws TenantManagementException, UserGroupManagementException;
+    Tenant getTenantByName(String name);
+    
+    Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
     
     void updateTenant(Tenant tenant);
     
-    void deleteTenant(String id) throws TenantManagementException;
+    void deleteTenant(UUID id) throws TenantManagementException;
     
-    void deleteTenantWithUserGroup(String id) throws TenantManagementException, UserGroupManagementException;
+    void deleteTenantWithUserGroup(UUID id) throws TenantManagementException, UserGroupManagementException;
     
     Iterable<User> getUsers();
 

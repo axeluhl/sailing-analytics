@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,9 +75,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String id = (String) aclDBObject.get(FieldNames.AccessControlList.ID.name());
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.DISPLAY_NAME.name());
         Map<?, ?> permissionMapAsBSON = ((BSONObject) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name())).toMap();
-        Map<String, Set<String>> permissionMap = new HashMap<>();
+        Map<UUID, Set<String>> permissionMap = new HashMap<>();
         for (Map.Entry<?, ?> entry : permissionMapAsBSON.entrySet()) {
-            String key = entry.getKey().toString();
+            UUID key = UUID.fromString(entry.getKey().toString());
             Set<String> value = new HashSet<>();
             for (Object o : (BasicDBList) entry.getValue()) {
                 value.add(o.toString());
@@ -88,11 +89,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Collection<String> loadAllTenantIds() {
-        Set<String> result = new HashSet<>();
+    public Collection<UUID> loadAllTenantIds() {
+        Set<UUID> result = new HashSet<>();
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         for (DBObject o : tenantCollection.find()) {
-            result.add((String) o.get(FieldNames.Tenant.ID.name()));
+            result.add(UUID.fromString((String) o.get(FieldNames.Tenant.ID.name())));
         }
         return result;
     }
@@ -113,7 +114,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private UserGroup loadUserGroup(DBObject groupDBObject) {
-        final String id = (String) groupDBObject.get(FieldNames.UserGroup.ID.name());
+        final UUID id = UUID.fromString((String) groupDBObject.get(FieldNames.UserGroup.ID.name()));
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<String> users = new HashSet<String>();
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERS.name());
@@ -344,7 +345,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String id = (String) ownershipDBObject.get(FieldNames.Ownership.ID.name());
         final String displayName = (String) ownershipDBObject.get(FieldNames.Ownership.DISPLAY_NAME.name());
         final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER.name());
-        final String tenantOwner = (String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER.name());
+        final UUID tenantOwner = UUID.fromString((String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER.name()));
         return new OwnerImpl(id, owner, tenantOwner, displayName);
     }
 }

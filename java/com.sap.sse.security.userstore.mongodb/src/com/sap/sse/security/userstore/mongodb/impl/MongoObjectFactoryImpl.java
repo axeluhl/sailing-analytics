@@ -2,6 +2,7 @@ package com.sap.sse.security.userstore.mongodb.impl;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -54,20 +55,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void storeTenant(String id) {
+    public void storeTenant(UUID id) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.ID.name(), 1));
         DBObject dbTenant = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Tenant.ID.name(), id);
-        dbTenant.put(FieldNames.Tenant.ID.name(), id);
+        DBObject query = new BasicDBObject(FieldNames.Tenant.ID.name(), id.toString());
+        dbTenant.put(FieldNames.Tenant.ID.name(), id.toString());
         tenantCollection.update(query, dbTenant, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 
     @Override
-    public void deleteTenant(String id) {
+    public void deleteTenant(UUID id) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         DBObject dbTenant = new BasicDBObject();
-        dbTenant.put(FieldNames.Tenant.ID.name(), id);
+        dbTenant.put(FieldNames.Tenant.ID.name(), id.toString());
         tenantCollection.remove(dbTenant);
     }
     
@@ -84,10 +85,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void deleteUserGroup(String id) {
+    public void deleteUserGroup(UUID id) {
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         DBObject dbUserGroup = new BasicDBObject();
-        dbUserGroup.put(FieldNames.UserGroup.ID.name(), id);
+        dbUserGroup.put(FieldNames.UserGroup.ID.name(), id.toString());
         userGroupCollection.remove(dbUserGroup);
     }
 

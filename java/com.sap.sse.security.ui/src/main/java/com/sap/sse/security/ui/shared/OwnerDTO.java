@@ -1,18 +1,20 @@
 package com.sap.sse.security.ui.shared;
 
+import java.util.UUID;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.Owner;
 
 public class OwnerDTO implements Owner, IsSerializable {    
-    private String id;
+    private String idAsString;
     private String owner;
-    private String tenantOwner;
+    private UUID tenantOwner;
     private String displayName;
     
     OwnerDTO() {} // for serialization only
     
-    public OwnerDTO(String id, String owner, String tenantOwner, String displayName) {
-        this.id = id;
+    public OwnerDTO(String idAsString, String owner, UUID tenantOwner, String displayName) {
+        this.idAsString = idAsString;
         this.owner = owner;
         this.tenantOwner = tenantOwner;
         this.displayName = displayName;
@@ -20,7 +22,7 @@ public class OwnerDTO implements Owner, IsSerializable {
     
     @Override
     public String getId() {
-        return id;
+        return idAsString;
     }
     
     @Override
@@ -29,7 +31,7 @@ public class OwnerDTO implements Owner, IsSerializable {
     }
     
     @Override
-    public String getTenantOwner() {
+    public UUID getTenantOwner() {
         return tenantOwner;
     }
 
