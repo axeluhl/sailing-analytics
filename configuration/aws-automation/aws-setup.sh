@@ -110,14 +110,24 @@ usage() {
 
   ${bold}Examples:${reset}
   Create standalone instance with load balancer and route53 entry:
-  > aws-setup --instance-with-elb
+  > ./aws-setup.sh --instance-with-elb
  
   Create standalone instance with load balancer and route53 entry 
   while automatically tailing important log files (tmux required):
-  > aws-setup --instance-with-elb --tail
+  > ./aws-setup.sh --instance-with-elb --tail
  
   Tail logfiles of running instance with dns name:
-  > aws-setup --tail --public-dns-name ec2-x.compute.amazonaws.com 
+  > ./aws-setup.sh --tail --public-dns-name ec2-x.compute.amazonaws.com
+
+  Create standalone instance with load balancer and route 53 entry by
+  passing all relevant parameters to script avoiding user input. 
+  Also use debug mode.
+  > ./aws-setup.sh --region eu-west-2 --instance-type t2.medium 
+  --key-name leonradeck-keypair --key-file /cygdrive/c/Users/d069485/
+  .ssh/leonradeck-keypair.pem --user-username test --user-password test 
+  --instance-name \"WC Santander 2017\" --instance-short-name test 
+  --new-admin-password admin -d --instance-with-elb
+ 	
   
 "
 }
@@ -164,7 +174,7 @@ unset options
 
 # Set default value of variable without parameter value to false 
 instance_with_elb=false
-tail_instance=false
+tail=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -223,5 +233,4 @@ set -o pipefail
 mainScript
 
 # Exit cleanlyd
-confirm_reset_panes
 safeExit

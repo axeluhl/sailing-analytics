@@ -39,12 +39,12 @@ function create_event(){
 		success "Created event with id: \"$event_id\"."
 	else
 		error "Failed creating event."
-		echo $event_id
+		echo $event_id | jq -r '.eventid' | tr -d '\r'
 	fi
 }
 
 function create_event_command(){
-	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" | jq -r '.eventid' | tr -d '\r'
+	curl -s -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" 
 }
 
 # -----------------------------------------------------------
@@ -81,7 +81,7 @@ function change_admin_password_command(){
 # -----------------------------------------------------------
 function create_new_user(){
 	local_echo "Creating new user \"$3\" with password \"$4\"..."
-	result=$(create_new_user_command $1 $2 $3 $4)
+	local result=$(create_new_user_command $1 $2 $3 $4)
 	
 	if is_http_ok $result; then
 		success "Successfully created user \"$3\"."
@@ -103,18 +103,18 @@ function create_new_user_command(){
 # -----------------------------------------------------------
 function query_public_dns_name(){
 	local_echo "Querying for the instance public dns name..." 
-	local public_dns_name=$(query_public_dns_name_command $1)
-
+	public_dns_name=$(query_public_dns_name_command $1)
+	
 	if is_error $?; then
 		error "Querying for instance public dns name failed."
 	else
 		success "Public dns name of instance \"$instance_id\" is \"$public_dns_name\"."
-		echo $public_dns_name
+		echo $public_dns_name | tr -d '\r'
 	fi
 }
 
 function query_public_dns_name_command(){
-	aws --region "$region" ec2 describe-instances --instance-ids "$1" --output text --query 'Reservations[*].Instances[*].PublicDnsName' | tr -d '\r'
+	aws --region "$region" ec2 describe-instances --instance-ids "$1" --output text --query 'Reservations[*].Instances[*].PublicDnsName'
 }
 
 # -----------------------------------------------------------
@@ -186,13 +186,6 @@ function wait_for_create_event_resource_command(){
 function wait_instance_exists(){
 	local_echo "Wait until instance \"$1\" is recognized by AWS..." 
 	local result=$(aws ec2 wait instance-exists --instance-ids $1)
-	
-	if is_error $?; then
-		error "Instance was not recognized by AWS."
-	else
-		success "The instance \"$1\" is now recognized by AWS."
-		echo ""
-	fi
 }
 
 # -----------------------------------------------------------
@@ -210,12 +203,12 @@ function get_access_token(){
 		error "Failed getting access token."
 	else
 		success "Access token is: \"$access_token\""
-		echo $access_token
+		echo $access_token | jq -r '.access_token' | tr -d '\r'
 	fi
 }
 
 function get_access_token_command(){
-	curl -s -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" | jq -r '.access_token' | tr -d '\r'
+	curl -s -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" 
 }
 
 # -----------------------------------------------------------
@@ -253,12 +246,12 @@ function create_load_balancer_https(){
 		error "Failed creating load balancer."
 	else
 		success "Created load balancer \"$load_balancer_name\"."
-		echo $json_result
+		echo $json_result | tr -d '\r'
 	fi
 }
 
 function create_load_balancer_https_command(){
-	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids" | tr -d '\r'
+	aws elb create-load-balancer --load-balancer-name $1 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" "Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=80,SSLCertificateId=$2" --availability-zones "$(get_availability_zones)" --security-groups "$elb_security_group_ids" 
 }
 
 # -----------------------------------------------------------
@@ -319,12 +312,12 @@ function add_instance_to_elb(){
 		error "Failed adding instance to load balancer."
 	else
 		success "Successfully added instance \"$instance_id\" to load balancer \"$1\"."
-		echo $json_result
+		echo $json_result | tr -d '\r'
 	fi
 }
 
 function add_instance_to_elb_command(){
-	aws elb register-instances-with-load-balancer --load-balancer-name $1 --instances $2 | tr -d '\r'
+	aws elb register-instances-with-load-balancer --load-balancer-name $1 --instances $2 
 }
 
 # NOT TESTED
@@ -439,7 +432,7 @@ function require_new_admin_password(){
 }
 
 function require_user_username(){
-	require_variable "$user_username_param" user_password "$default_user_username" "$user_username_ask_message"
+	require_variable "$user_username_param" user_username "$default_user_username" "$user_username_ask_message"
 }
 
 function require_user_password(){

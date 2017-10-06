@@ -77,6 +77,8 @@ function instance_with_elb_execute() {
 	route53_change_resource_record "$load_balancer_name" 60 "$load_balancer_dns_name"
 	
 	echo "Finished."
+	
+	confirm_reset_panes
 }
 
 function run_instance(){
@@ -96,7 +98,12 @@ function run_instance(){
 	local json_instance=$(eval "$command") 
 	local instance_id=$(get_instance_id "$json_instance")
 	
-	echo "$json_instance"
+	if ! is_valid_instance_id "$instance_id"; then
+		error "Failed creating instance."
+	else
+		success "Created instance \"$instance_id\""
+		echo $json_instance
+	fi
 }
 
 function write_user_data_to_file(){

@@ -42,9 +42,10 @@ function require_variable(){
 			ask "$4" "$3" $2
 		fi
 	else
-		$2="$1"
+		read -r "$2" <<< "$1"
 	fi
 }
+
 
 # -----------------------------------------------------------
 # Creates a parameter from a key and value
@@ -66,6 +67,10 @@ function add_param() {
 # -----------------------------------------------------------
 function is_valid_event_id(){
 	[[ $1 =~ .{8}-.{4}-.{4}-.{4}-.{12} ]]
+}
+
+function is_valid_instance_id(){
+	[[ $1 =~ i-.{17}} ]]
 }
 
 # Other
