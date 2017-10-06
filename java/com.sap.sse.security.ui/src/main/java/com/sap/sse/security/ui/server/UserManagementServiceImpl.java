@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -107,7 +108,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
-        AccessControlList acl = aclStore.getAccessControlListByName(userGroup.getName());
+        AccessControlList acl = aclStore.getAccessControlList(userGroup.getId().toString());
         Owner ownership = aclStore.getOwnership(userGroup.getName());
         return new UserGroupDTO(userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
@@ -117,8 +118,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (tenant == null) {
             return null;
         } else {
-            AccessControlList acl = aclStore.getAccessControlListByName(tenant.getName());
-            Owner ownership = aclStore.getOwnership(tenant.getName());
+            AccessControlList acl = aclStore.getAccessControlList(tenant.getId().toString());
+            Owner ownership = aclStore.getOwnership(tenant.getId().toString());
             return new TenantDTO(tenant.getName(),
                     createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), tenant.getUsernames());
         }
@@ -127,15 +128,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
         Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
         for (Map.Entry<String, Set<String>> entry : acl.getPermissionMap().entrySet()) {
-            UserGroup group = userStore.getUserGroupByName(entry.getKey());
+            UserGroup group = userStore.getUserGroup(entry.getKey());
             permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
                     entry.getValue());
         }
-        return new AccessControlListDTO(acl.getName(), permissionMapDTO);
+        return new AccessControlListDTO(acl.getId().toString(), acl.getDisplayName(), permissionMapDTO);
     }
     
     private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
-        return new OwnerDTO(ownership.getName(), ownership.getOwner(), ownership.getTenantOwner());
+        return new OwnerDTO(ownership.getId().toString(), ownership.getOwner(), ownership.getTenantOwner(), ownership.getDisplayName());
     }
     
     @Override
@@ -211,10 +212,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserGroupDTO createUserGroup(String name, String tenantOwner) {
         // TODO: create UserGroupManagementException_CustomSeri.....?
+        String id = UUID.randomUUID().toString();
         try {
-            UserGroup userGroup = getSecurityService().createUserGroup(name);
-            getSecurityService().createAccessControlList(name);
-            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
+            UserGroup userGroup = getSecurityService().createUserGroup(id, name);
+            getSecurityService().createAccessControlList(id, name)
+            .createOwnership(id, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner, name);
             return createUserGroupDTOFromUserGroup(userGroup);
         } catch (UserGroupManagementException e) {
             return null;
@@ -224,10 +226,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public TenantDTO createTenant(String name, String tenantOwner) {
         // TODO: create TenantManagementException_CustomSeri.....?
+        String id = UUID.randomUUID().toString();
         try {
-            Tenant tenant = getSecurityService().createTenant(name);
-            getSecurityService().createAccessControlList(name);
-            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner);
+            Tenant tenant = getSecurityService().createTenant(id, name);
+            getSecurityService().createAccessControlList(id, name);
+            getSecurityService().createOwnership(id, (String) SecurityUtils.getSubject().getPrincipal(), tenantOwner, name);
             return createTenantDTOFromTenant(tenant);
         } catch (TenantManagementException | UserGroupManagementException e) {
             return null;

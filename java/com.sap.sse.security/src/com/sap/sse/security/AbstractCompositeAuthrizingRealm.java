@@ -171,7 +171,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
                     user, directPermissions, 
                     getUserStore().getRolesFromUser(user), this, 
                     getAccessControlListStore().getOwnership(parts[2]), 
-                    getAccessControlListStore().getAccessControlListByName(parts[2]));
+                    getAccessControlListStore().getAccessControlList(parts[2]));
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
             return false;

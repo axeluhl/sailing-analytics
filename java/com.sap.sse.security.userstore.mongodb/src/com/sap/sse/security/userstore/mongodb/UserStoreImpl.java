@@ -20,7 +20,6 @@ import org.apache.shiro.SecurityUtils;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
@@ -132,9 +131,9 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storeSettingTypes(settingTypes);
                 mongoObjectFactory.storeSettings(settings);
             }
-            tenants.addAll(domainObjectFactory.loadAllTenantnames());
+            tenants.addAll(domainObjectFactory.loadAllTenantIds());
             for (UserGroup group : domainObjectFactory.loadAllUserGroups()) {
-                userGroups.put(group.getName(), group);
+                userGroups.put(group.getId().toString(), group);
             }
             for (User u : domainObjectFactory.loadAllUsers()) {
                 users.put(u.getName(), u);
@@ -318,108 +317,107 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public UserGroup getUserGroupByName(String name) {
-        return userGroups.get(name);
+    public UserGroup getUserGroup(String id) {
+        return userGroups.get(id);
     }
     
     @Override
-    public UserGroup createUserGroup(String name) throws UserGroupManagementException {
-        if (userGroups.contains(name)) {
+    public UserGroup createUserGroup(String id, String name) throws UserGroupManagementException {
+        if (userGroups.contains(id)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
-        logger.info("Creating user group: " + name);
-        UserGroup group = new UserGroupImpl(name);
+        logger.info("Creating user group: " + id);
+        UserGroup group = new UserGroupImpl(id, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
-        userGroups.put(name, group);
+        userGroups.put(id, group);
         return group;
     }
 
     @Override
     public void updateUserGroup(UserGroup group) {
         logger.info("Updating user group " + group.getName() + " in DB");
-        userGroups.put(group.getName(), group);
+        userGroups.put(group.getId().toString(), group);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
     }
 
     @Override
-    public void deleteUserGroup(String name) throws UserGroupManagementException {
-        if (!userGroups.contains(name)) {
+    public void deleteUserGroup(String id) throws UserGroupManagementException {
+        if (!userGroups.contains(id)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
         }
-        logger.info("Deleting user group: " + name);
-        userGroups.remove(name);
+        logger.info("Deleting user group: " + id);
+        userGroups.remove(id);
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteUserGroup(name);
+            mongoObjectFactory.deleteUserGroup(id);
         }
     }
     
     @Override
     public Iterable<Tenant> getTenants() {
         Set<Tenant> result = new HashSet<>();
-        for (String name : tenants) {
-            result.add(getTenantByName(name));
+        for (String id : tenants) {
+            result.add(getTenant(id));
         }
         return result;
     }
 
     @Override
-    public Tenant getTenantByName(String name) {
-        if (tenants.contains(name)) {
-            return new Tenant(userGroups.get(name));
+    public Tenant getTenant(String id) {
+        if (tenants.contains(id)) {
+            return new Tenant(userGroups.get(id));
         }
         return null;
     }
 
     @Override
-    public Tenant createTenant(String name) throws TenantManagementException, UserGroupManagementException {
-        if (tenants.contains(name)) {
+    public Tenant createTenant(String id, String name) throws TenantManagementException, UserGroupManagementException {
+        if (tenants.contains(id)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
-        UserGroup group = createUserGroup(name);
-        logger.info("Creating tenant: " + name);
+        UserGroup group = createUserGroup(id, name);
+        logger.info("Creating tenant: " + id);
         Tenant tenant = new Tenant(group);
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeTenant(name);
+            mongoObjectFactory.storeTenant(id);
         }
-        tenants.add(name);
+        tenants.add(id);
         return tenant;
     }
 
     @Override
     public void updateTenant(Tenant tenant) {
         updateUserGroup(tenant);
-        logger.info("Updating tenant " + tenant.getName() + " in DB");
+        logger.info("Updating tenant " + tenant.getId() + " in DB");
     }
 
     @Override
-    public void deleteTenant(String name) throws TenantManagementException {
-        if (!tenants.contains(name)) {
+    public void deleteTenant(String id) throws TenantManagementException {
+        if (!tenants.contains(id)) {
             throw new TenantManagementException(TenantManagementException.TENANT_DOES_NOT_EXIST);
         }
-        logger.info("Deleting tenant: " + name);
-        tenants.remove(name);
+        logger.info("Deleting tenant: " + id);
+        tenants.remove(id);
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteTenant(name);
+            mongoObjectFactory.deleteTenant(id);
         }
     }
     
     @Override
-    public void deleteTenantWithUserGroup(String name) throws TenantManagementException, UserGroupManagementException {
-        deleteTenant(name);
-        deleteUserGroup(name);
+    public void deleteTenantWithUserGroup(String id) throws TenantManagementException, UserGroupManagementException {
+        deleteTenant(id);
+        deleteUserGroup(id);
     }
 
     @Override
-    public User createUser(String name, String email, String owner, AccessControlStore aclStore, Account... accounts) throws UserManagementException {
+    public User createUser(String name, String email, String owner, Account... accounts) throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         User user = new User(name, email, accounts);
-        aclStore.createAccessControlList(name);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);

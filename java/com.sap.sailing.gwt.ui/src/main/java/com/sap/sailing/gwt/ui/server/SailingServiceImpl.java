@@ -3903,7 +3903,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
                     entry.getValue());
         }
-        return new AccessControlListDTO(acl.getName(), permissionMapDTO);
+        return new AccessControlListDTO(acl.getId().toString(), acl.getDisplayName(), permissionMapDTO);
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
@@ -3914,7 +3914,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
-        return new OwnerDTO(ownership.getName(), ownership.getOwner(), ownership.getTenantOwner());
+        return new OwnerDTO(ownership.getId().toString(), ownership.getDisplayName(), ownership.getOwner(), ownership.getTenantOwner());
     }
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {

@@ -9,10 +9,9 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
-public class AccessControlListWithStore implements AccessControlList {
-    private static final long serialVersionUID = -5709064967680495227L;
-    
+public class AccessControlListWithStore implements AccessControlList {    
     private final String id;
+    private final String displayName;
     
     private final UserStore userStore;
     
@@ -21,20 +20,21 @@ public class AccessControlListWithStore implements AccessControlList {
      */
     private final Map<String, Set<String>> permissionMap;
     
-    public AccessControlListWithStore(String id, Map<String, Set<String>> permissionMap, UserStore userStore) {
+    public AccessControlListWithStore(String id, String displayName, Map<String, Set<String>> permissionMap, UserStore userStore) {
         this.id = id;
+        this.displayName = displayName;
         this.permissionMap = permissionMap;
         this.userStore = userStore;
     }
     
-    public AccessControlListWithStore(String id, UserStore userStore) {
-        this(id, new HashMap<>(), userStore);
+    public AccessControlListWithStore(String id, String displayName, UserStore userStore) {
+        this(id, displayName, new HashMap<>(), userStore);
     }
     
     @Override
     public PermissionChecker.PermissionState hasPermission(String username, String action) {
         for (Map.Entry<String, Set<String>> entry : permissionMap.entrySet()) {
-            UserGroup group = userStore.getUserGroupByName(entry.getKey());
+            UserGroup group = userStore.getUserGroup(entry.getKey());
             if (group.contains(username)) {
                 if (entry.getValue().contains("!" + action)) {
                     return PermissionState.REVOKED;
@@ -45,15 +45,15 @@ public class AccessControlListWithStore implements AccessControlList {
         }
         return PermissionState.NONE;
     }
-
+    
     @Override
-    public String getName() {
-        return id;
+    public String getDisplayName() {
+        return displayName;
     }
 
     @Override
     public Serializable getId() {
-        return getName();
+        return id;
     }
 
     @Override

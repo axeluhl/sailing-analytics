@@ -10,27 +10,26 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
 public class AccessControlListDTO implements AccessControlList, IsSerializable {
-    private static final long serialVersionUID = -6425803762946910564L;
-
     private String id;
+    private String displayName;
     
     private Map<UserGroupDTO, Set<String>> permissionMap;
     
     AccessControlListDTO() {} // for serialization only
     
-    public AccessControlListDTO(String id, Map<UserGroupDTO, Set<String>> permissionMap) {
+    public AccessControlListDTO(String id, String displayName, Map<UserGroupDTO, Set<String>> permissionMap) {
         this.id = id;
         this.permissionMap = permissionMap;
     }
     
     @Override
-    public String getName() {
-        return getId();
+    public String getId() {
+        return id;
     }
     
     @Override
-    public String getId() {
-        return id;
+    public String getDisplayName() {
+        return displayName;
     }
     
     @Override

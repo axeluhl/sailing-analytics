@@ -3,21 +3,24 @@ package com.sap.sse.security.userstore.mongodb.impl;
 public class FieldNames {
     
     public static enum AccessControlList {
-        NAME,
+        ID,
+        DISPLAY_NAME,
         PERMISSION_MAP
     }
     
     public static enum Ownership {
-        NAME,
+        ID,
         OWNER,
+        DISPLAY_NAME,
         TENANT_OWNER
     }
     
     public static enum Tenant {
-        NAME
+        ID
     }
     
     public static enum UserGroup {
+        ID,
         NAME,
         USERS
     }

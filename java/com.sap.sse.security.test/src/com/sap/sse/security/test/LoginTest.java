@@ -68,7 +68,7 @@ public class LoginTest {
 
     @Test
     public void rolesTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com", "admin", aclStore);
+        store.createUser("me", "me@sap.com", "admin");
         store.addRoleForUser("me", "testrole");
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), "testrole"));
@@ -76,7 +76,7 @@ public class LoginTest {
 
     @Test
     public void permissionsTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com", "admin", aclStore);
+        store.createUser("me", "me@sap.com", "admin");
         store.addPermissionForUser("me", "a:b:c");
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(store2.getUserByName("me").hasPermission("a:b:c"));

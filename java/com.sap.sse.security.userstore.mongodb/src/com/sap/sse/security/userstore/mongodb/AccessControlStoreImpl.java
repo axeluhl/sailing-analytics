@@ -45,7 +45,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         
         if (domainObjectFactory != null) {
             for (Owner ownership : domainObjectFactory.loadAllOwnerships()) {
-                ownershipList.put(ownership.getName(), ownership);
+                ownershipList.put(ownership.getId().toString(), ownership);
             }
         }
         
@@ -61,37 +61,37 @@ public class AccessControlStoreImpl implements AccessControlStore {
      * Gets the ACL by name and if it is not present loads it. However there should only be the need to load them when the user store is initialized
      */
     @Override
-    public AccessControlList getAccessControlListByName(String name) {
-        AccessControlList acl = accessControlLists.get(name);
+    public AccessControlList getAccessControlList(String id) {
+        AccessControlList acl = accessControlLists.get(id);
         if (acl != null) {
             return acl;
         }
-        acl = domainObjectFactory.loadAccessControlList(name, userStore, this);
-        accessControlLists.put(acl.getName(), acl);
+        acl = domainObjectFactory.loadAccessControlList(id, userStore, this);
+        accessControlLists.put(acl.getId().toString(), acl);
         return acl;
     }
 
     @Override
-    public AccessControlList createAccessControlList(String name) {
-        AccessControlList acl = new AccessControlListWithStore(name, userStore);
-        accessControlLists.put(name, acl);
+    public AccessControlList createAccessControlList(String id, String displayName) {
+        AccessControlList acl = new AccessControlListWithStore(id, displayName, userStore);
+        accessControlLists.put(id, acl);
         mongoObjectFactory.storeAccessControlList(acl);
         return acl;
     }
 
     @Override
-    public AccessControlStore putPermissions(String name, String group, Set<String> permissions) {
-        AccessControlList acl = accessControlLists.get(name);
+    public AccessControlStore putPermissions(String id, String group, Set<String> permissions) {
+        AccessControlList acl = accessControlLists.get(id);
         Map<String, Set<String>> permissionMap = acl.getPermissionMap();
         permissionMap.put(group, permissions);
-        acl = new AccessControlListWithStore(name, permissionMap, userStore);
+        acl = new AccessControlListWithStore(id, acl.getDisplayName(), permissionMap, userStore);
         mongoObjectFactory.storeAccessControlList(acl);
         return this;
     }
 
     @Override
-    public AccessControlStore addPermission(String name, String group, String permission) {
-        AccessControlList acl = accessControlLists.get(name);
+    public AccessControlStore addPermission(String id, String group, String permission) {
+        AccessControlList acl = accessControlLists.get(id);
         Map<String, Set<String>> permissionMap = acl.getPermissionMap();
         Set<String> permissionsGroup = permissionMap.get(group);
         if (permissionsGroup == null) {
@@ -99,27 +99,27 @@ public class AccessControlStoreImpl implements AccessControlStore {
             permissionMap.put(group, permissionsGroup);
         }
         permissionsGroup.add(permission);
-        acl = new AccessControlListWithStore(name, permissionMap, userStore);
+        acl = new AccessControlListWithStore(id, acl.getDisplayName(), permissionMap, userStore);
         mongoObjectFactory.storeAccessControlList(acl);
         return this;
     }
 
     @Override
-    public AccessControlStore removePermission(String name, String group, String permission) {
-        AccessControlList acl = accessControlLists.get(name);
+    public AccessControlStore removePermission(String id, String group, String permission) {
+        AccessControlList acl = accessControlLists.get(id);
         Map<String, Set<String>> permissionMap = acl.getPermissionMap();
         Set<String> permissionsGroup = permissionMap.get(group);
         if (permissionsGroup != null) {
             permissionsGroup.remove(permission);
-            acl = new AccessControlListWithStore(name, permissionMap, userStore);
+            acl = new AccessControlListWithStore(id, acl.getDisplayName(), permissionMap, userStore);
             mongoObjectFactory.storeAccessControlList(acl);
         }
         return this;
     }
 
     @Override
-    public AccessControlStore removeAccessControlList(String name) {
-        AccessControlList acl = accessControlLists.remove(name);
+    public AccessControlStore removeAccessControlList(String id) {
+        AccessControlList acl = accessControlLists.remove(id);
         mongoObjectFactory.deleteAccessControlList(acl);
         return this;
     }
@@ -135,22 +135,22 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public void loadRemainingACLs() {
         if (domainObjectFactory != null) {
             for (AccessControlList acl : domainObjectFactory.loadAllAccessControlLists(userStore, this)) {
-                if (!accessControlLists.containsKey(acl.getName())) {
-                    accessControlLists.put(acl.getName(), acl);
+                if (!accessControlLists.containsKey(acl.getId().toString())) {
+                    accessControlLists.put(acl.getId().toString(), acl);
                 }
             }
         }
     }
     
     @Override
-    public Owner createOwnership(String id, String owner, String tenantOwner) {
-        setOwnership(id, owner, tenantOwner);
+    public Owner createOwnership(String id, String owner, String tenantOwner, String displayName) {
+        setOwnership(id, owner, tenantOwner, displayName);
         return ownershipList.get(id);
     }
 
     @Override
-    public AccessControlStore setOwnership(String id, String owner, String tenantOwner) {
-        Owner ownership = new OwnerImpl(id, owner, tenantOwner);
+    public AccessControlStore setOwnership(String id, String owner, String tenantOwner, String displayName) {
+        Owner ownership = new OwnerImpl(id, owner, tenantOwner, displayName);
         ownershipList.put(id, ownership);
         mongoObjectFactory.storeOwnership(ownership);
         return this;
@@ -183,10 +183,10 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public void replaceContentsFrom(AccessControlStore newAclStore) {
         clear();
         for (AccessControlList acl : newAclStore.getAccessControlLists()) {
-            accessControlLists.put(acl.getName(), acl);
+            accessControlLists.put(acl.getId().toString(), acl);
         }
         for (Owner ownership : newAclStore.getOwnerships()) {
-            ownershipList.put(ownership.getName(), ownership);
+            ownershipList.put(ownership.getId().toString(), ownership);
         }
     }
 }

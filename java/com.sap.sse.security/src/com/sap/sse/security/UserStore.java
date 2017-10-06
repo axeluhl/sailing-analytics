@@ -13,28 +13,28 @@ import com.sap.sse.security.shared.UserManagementException;
 public interface UserStore extends Named {
     Iterable<UserGroup> getUserGroups();
     
-    UserGroup getUserGroupByName(String name);
+    UserGroup getUserGroup(String id);
     
-    UserGroup createUserGroup(String name) throws UserGroupManagementException;
+    UserGroup createUserGroup(String id, String name) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup tenant);
     
-    void deleteUserGroup(String name) throws UserGroupManagementException;
+    void deleteUserGroup(String id) throws UserGroupManagementException;
     
     Iterable<Tenant> getTenants();
     
     /**
      * The tenant with that {@link User#getName() name} or {@code null} if no such tenant exists
      */
-    Tenant getTenantByName(String name);
+    Tenant getTenant(String id);
     
-    Tenant createTenant(String name) throws TenantManagementException, UserGroupManagementException;
+    Tenant createTenant(String id, String name) throws TenantManagementException, UserGroupManagementException;
     
     void updateTenant(Tenant tenant);
     
-    void deleteTenant(String name) throws TenantManagementException;
+    void deleteTenant(String id) throws TenantManagementException;
     
-    void deleteTenantWithUserGroup(String name) throws TenantManagementException, UserGroupManagementException;
+    void deleteTenantWithUserGroup(String id) throws TenantManagementException, UserGroupManagementException;
     
     Iterable<User> getUsers();
 
@@ -50,7 +50,7 @@ public interface UserStore extends Named {
     
     User getUserByAccessToken(String accessToken);
 
-    User createUser(String name, String email, String owner, AccessControlStore aclStore, Account... accounts) throws UserManagementException;
+    User createUser(String name, String email, String owner, Account... accounts) throws UserManagementException;
 
     void updateUser(User user);
 

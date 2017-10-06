@@ -19,7 +19,7 @@ import com.sap.sse.security.shared.UserManagementException;
  *
  */
 public interface ReplicableSecurityService extends SecurityService {
-    Void internalCreateAcl(String id);
+    Void internalCreateAcl(String id, String displayName);
     
     Void internalAclPutPermissions(String id, String group, Set<String> permissions);
     
@@ -29,19 +29,19 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalDeleteAcl(String id);
     
-    Void internalCreateOwnership(String id, String owner, String tenantOwner);
+    Void internalCreateOwnership(String id, String owner, String tenantOwner, String displayName);
     
     Void internalDeleteOwnership(String id);
     
-    Void internalCreateUserGroup(String name) throws UserGroupManagementException;
+    Void internalCreateUserGroup(String id, String name) throws UserGroupManagementException;
     
-    Void internalCreateTenant(String name) throws TenantManagementException, UserGroupManagementException;
+    Void internalCreateTenant(String id, String name) throws TenantManagementException, UserGroupManagementException;
     
     Void internalUpdateUserGroup(UserGroup group);
     
-    Void internalDeleteUserGroup(String name) throws UserGroupManagementException;
+    Void internalDeleteUserGroup(String id) throws UserGroupManagementException;
     
-    Void internalDeleteTenant(String name) throws TenantManagementException;
+    Void internalDeleteTenant(String id) throws TenantManagementException, UserGroupManagementException;
     
     Void internalStoreUser(User user);
 

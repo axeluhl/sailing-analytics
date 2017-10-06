@@ -60,9 +60,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public AccessControlList loadAccessControlList(String name, UserStore userStore, AccessControlStore aclStore) {
+    public AccessControlList loadAccessControlList(String id, UserStore userStore, AccessControlStore aclStore) {
         DBObject query = new BasicDBObject();
-        query.put(FieldNames.AccessControlList.NAME.name(), name);
+        query.put(FieldNames.AccessControlList.ID.name(), id);
         DBCursor cursor = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).find(query);
         if (cursor.hasNext()) {
             return loadAccessControlList(cursor.next(), userStore, aclStore);
@@ -71,7 +71,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     public AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore, AccessControlStore aclStore) {
-        final String name = (String) aclDBObject.get(FieldNames.AccessControlList.NAME.name());       
+        final String id = (String) aclDBObject.get(FieldNames.AccessControlList.ID.name());
+        final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.DISPLAY_NAME.name());
         Map<?, ?> permissionMapAsBSON = ((BSONObject) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name())).toMap();
         Map<String, Set<String>> permissionMap = new HashMap<>();
         for (Map.Entry<?, ?> entry : permissionMapAsBSON.entrySet()) {
@@ -82,16 +83,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             permissionMap.put(key, value);
         }
-        AccessControlList result = new AccessControlListWithStore(name, permissionMap, userStore);
+        AccessControlList result = new AccessControlListWithStore(id, displayName, permissionMap, userStore);
         return result;
     }
     
     @Override
-    public Collection<String> loadAllTenantnames() {
+    public Collection<String> loadAllTenantIds() {
         Set<String> result = new HashSet<>();
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         for (DBObject o : tenantCollection.find()) {
-            result.add((String) o.get(FieldNames.Tenant.NAME.name()));
+            result.add((String) o.get(FieldNames.Tenant.ID.name()));
         }
         return result;
     }
@@ -112,6 +113,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private UserGroup loadUserGroup(DBObject groupDBObject) {
+        final String id = (String) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<String> users = new HashSet<String>();
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERS.name());
@@ -120,7 +122,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 users.add((String) o);
             }
         }
-        UserGroup result = new UserGroupImpl(name, users);
+        UserGroup result = new UserGroupImpl(id, name, users);
         return result;
     }
 
@@ -339,9 +341,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private Owner loadOwnership(DBObject ownershipDBObject) {
-        final String name = (String) ownershipDBObject.get(FieldNames.Ownership.NAME.name());
+        final String id = (String) ownershipDBObject.get(FieldNames.Ownership.ID.name());
+        final String displayName = (String) ownershipDBObject.get(FieldNames.Ownership.DISPLAY_NAME.name());
         final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER.name());
         final String tenantOwner = (String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER.name());
-        return new OwnerImpl(name, owner, tenantOwner);
+        return new OwnerImpl(id, owner, tenantOwner, displayName);
     }
 }

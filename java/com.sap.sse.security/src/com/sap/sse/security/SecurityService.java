@@ -43,6 +43,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     SecurityService createAccessControlList(String id);
     
+    SecurityService createAccessControlList(String id, String displayName);
+    
     AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap);
     
     /*
@@ -59,6 +61,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     SecurityService createOwnership(String id, String owner, String tenant);
     
+    SecurityService createOwnership(String id, String owner, String tenant, String displayName);
+    
     void deleteOwnership(String id);
     
     Iterable<UserGroup> getUserGroupList();
@@ -67,17 +71,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     Iterable<Tenant> getTenantList();
     
-    UserGroup createUserGroup(String name) throws UserGroupManagementException;
+    UserGroup createUserGroup(String id, String name) throws UserGroupManagementException;
     
-    Tenant createTenant(String name) throws TenantManagementException, UserGroupManagementException;
+    Tenant createTenant(String id, String name) throws TenantManagementException, UserGroupManagementException;
     
     UserGroup addUserToUserGroup(String user, String userGroup);
 
     UserGroup removeUserFromUserGroup(String user, String userGroup);
     
-    void deleteUserGroup(String name) throws UserGroupManagementException;
+    void deleteUserGroup(String id) throws UserGroupManagementException;
     
-    void deleteTenant(String name) throws TenantManagementException, UserGroupManagementException;
+    void deleteTenant(String id) throws TenantManagementException, UserGroupManagementException;
 
     Iterable<User> getUserList();
 

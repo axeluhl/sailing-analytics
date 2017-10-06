@@ -17,13 +17,13 @@ public interface MongoObjectFactory {
     
     public void deleteOwnership(Owner owner);
     
-    public void storeTenant(String name);
+    public void storeTenant(String id);
     
-    public void deleteTenant(String name);
+    public void deleteTenant(String id);
     
     public void storeUserGroup(UserGroup group);
     
-    public void deleteUserGroup(String name);
+    public void deleteUserGroup(String id);
 
     public void storeUser(User user);
     

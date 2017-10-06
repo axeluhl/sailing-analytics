@@ -6,15 +6,12 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class UserStoreTest {
     private final UserStore userStore = new UserStoreImpl(null, null);
-    private final AccessControlStore aclStore = new AccessControlStoreImpl(null, null, userStore);
     private final String username = "abc";
     private final String email = "e@mail.com";
     private final String accessToken = "ak";
@@ -23,7 +20,7 @@ public class UserStoreTest {
     
     @Before
     public void setUp() throws UserManagementException {
-        userStore.createUser(username, email, "admin", aclStore);
+        userStore.createUser(username, email, "admin");
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
     }

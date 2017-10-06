@@ -13,14 +13,16 @@ public class UserGroupImpl implements UserGroup {
      * The ID for this tenant; Implements the {@link WithID} key
      */
     private final String name;
+    private final String id;
     
     private Set<String> usernames;
         
-    public UserGroupImpl(String name) {
-        this(name, new HashSet<>());
+    public UserGroupImpl(String id, String name) {
+        this(id, name, new HashSet<>());
     }
     
-    public UserGroupImpl(String name, Set<String> usernames) {
+    public UserGroupImpl(String id, String name, Set<String> usernames) {
+        this.id = id;
         this.name = name;
         this.usernames = usernames;
     }
@@ -32,7 +34,7 @@ public class UserGroupImpl implements UserGroup {
 
     @Override
     public Serializable getId() {
-        return getName();
+        return id;
     }
     
     @Override
