@@ -93,6 +93,7 @@ public class TrackingListFragment extends BaseFragment
     private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
+    private CompetitorResultsList<CompetitorResultWithIdImpl> mServerData;
     private List<Competitor> mCompetitorData;
     private List<Competitor> mFilteredCompetitorData;
     private int mId = 0;
@@ -106,6 +107,7 @@ public class TrackingListFragment extends BaseFragment
     public TrackingListFragment() {
         mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
         mFilteredCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
+        mServerData = new CompetitorResultsList<>(Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
     }
 
     public static TrackingListFragment newInstance(Bundle args, int startMode) {
@@ -271,7 +273,7 @@ public class TrackingListFragment extends BaseFragment
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
     }
-    
+
     private int getFirstRankZeroPosition() {
         return mAdapter.getFirstRankZeroPosition();
     }
@@ -360,7 +362,7 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private void sendUnconfirmed() {
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResultsDiff());
     }
 
     private void loadCompetitors() {
@@ -421,6 +423,8 @@ public class TrackingListFragment extends BaseFragment
         deleteCompetitorsFromFinishedList(data);
         deleteCompetitorsFromCompetitorList();
         mCompetitorAdapter.notifyDataSetChanged();
+        mServerData.clear();
+        mServerData.addAll(mFinishedData);
     }
 
     protected void onLoadLeaderboardSucceeded(LeaderboardResult data) {
@@ -429,7 +433,7 @@ public class TrackingListFragment extends BaseFragment
         Collections.sort(sortByRank, new Comparator<CompetitorWithRaceRankImpl>() {
             @Override
             public int compare(CompetitorWithRaceRankImpl left, CompetitorWithRaceRankImpl right) {
-                return (int)left.getRaceRank(raceName) - (int)right.getRaceRank(raceName);
+                return (int) left.getRaceRank(raceName) - (int) right.getRaceRank(raceName);
             }
         });
         List<Competitor> sortedList = new ArrayList<>();
@@ -449,13 +453,23 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private void deleteCompetitorsFromFinishedList(Collection<Competitor> validCompetitors) {
+        List<Integer> positions = new ArrayList<>();
         List<CompetitorResultWithIdImpl> toBeDeleted = new ArrayList<>();
         for (CompetitorResultWithIdImpl item : mFinishedData) {
             if (!validCompetitors.contains(getCompetitorStore().getExistingCompetitorById(item.getCompetitorId()))) {
+                positions.add(mFinishedData.indexOf(item));
+                toBeDeleted.add(item);
+                continue;
+            }
+            if (item.getOneBasedRank() == 0 && item.getMaxPointsReason() == MaxPointsReason.NONE) {
+                positions.add(mFinishedData.indexOf(item));
                 toBeDeleted.add(item);
             }
         }
         mFinishedData.removeAll(toBeDeleted);
+        for (Integer pos : positions) {
+            mFinishedAdapter.notifyItemRemoved(pos);
+        }
     }
 
     private void deleteCompetitorsFromCompetitorList() {
@@ -471,7 +485,8 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private CompetitorResultsList<CompetitorResultWithIdImpl> initializeFinishList() {
-        CompetitorResultsList<CompetitorResultWithIdImpl> positioning = new CompetitorResultsList<>(Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
+        CompetitorResultsList<CompetitorResultWithIdImpl> positioning = new CompetitorResultsList<>(Collections
+            .synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) {
             for (CompetitorResult results : getRaceState().getFinishPositioningList()) {
                 positioning.add(new CompetitorResultWithIdImpl(mId, results));
@@ -533,21 +548,19 @@ public class TrackingListFragment extends BaseFragment
      * <li>Rank changed from non-0 to other non-0 value: adjust all ranks between and including old and new list
      * position</li>
      * </ol>
-     * 
-     * @param fromPosition
-     *            the position (zero-based index) where the item currently is in {@link #mFinishedData}
-     * @param toPosition
-     *            the position (zero-based index <em>after</em> removal of the item from its {@code fromPosition}) where
-     *            to {@link List#add(int, Object)} the item again in {@link #mFinishedData}
+     *
+     * @param fromPosition the position (zero-based index) where the item currently is in {@link #mFinishedData}
+     * @param toPosition   the position (zero-based index <em>after</em> removal of the item from its {@code fromPosition}) where
+     *                     to {@link List#add(int, Object)} the item again in {@link #mFinishedData}
      */
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
         CompetitorResultWithIdImpl item = mFinishedData.remove(fromPosition);
         mFinishedData.add(toPosition, item);
         final int firstPositionChanged = Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition));
-        final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition)+1);
+        final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition) + 1);
         adjustRanks(firstPositionChanged, lastPositionChanged);
-        mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged-firstPositionChanged);
+        mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged - firstPositionChanged);
     }
 
     @Override
@@ -568,30 +581,26 @@ public class TrackingListFragment extends BaseFragment
      * In {@link #mFinishedData}, starting at index {@code fromPosition}, updates all ranks so they equal the
      * position in the list plus one; stop before reaching the entry at list index {@code toPosition} or the
      * {@link #getFirstRankZeroPosition() first penalty position}.
-     * 
+     *
      * @param fromPosition inclusive start index into {@link #mFinishedData} where to start updating the ranks
-     * @param toPosition exclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
+     * @param toPosition   exclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
      */
     private void adjustRanks(int fromPosition, int toPosition) {
         final int end = Math.min(toPosition, getFirstRankZeroPosition());
         for (int i = fromPosition; i < end; i++) {
             CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
-            final int newOneBasedRank = i+1;
+            final int newOneBasedRank = i + 1;
             mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
         }
     }
 
-    private CompetitorResultWithIdImpl cloneCompetitorResultAndAdjustRank(
-        CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition, final int newOneBasedRank) {
-        return new CompetitorResultWithIdImpl(
-            competitorToReplaceWithAdjustedPosition.getId(),
-            competitorToReplaceWithAdjustedPosition.getCompetitorId(),
-            competitorToReplaceWithAdjustedPosition.getCompetitorDisplayName(),
-            newOneBasedRank,
-            competitorToReplaceWithAdjustedPosition.getMaxPointsReason(),
-            competitorToReplaceWithAdjustedPosition.getScore(),
-            competitorToReplaceWithAdjustedPosition.getFinishingTime(),
-            competitorToReplaceWithAdjustedPosition.getComment());
+    private CompetitorResultWithIdImpl cloneCompetitorResultAndAdjustRank(CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition,
+        final int newOneBasedRank) {
+        return new CompetitorResultWithIdImpl(competitorToReplaceWithAdjustedPosition.getId(), competitorToReplaceWithAdjustedPosition
+            .getCompetitorId(), competitorToReplaceWithAdjustedPosition
+            .getCompetitorDisplayName(), newOneBasedRank, competitorToReplaceWithAdjustedPosition
+            .getMaxPointsReason(), competitorToReplaceWithAdjustedPosition.getScore(), competitorToReplaceWithAdjustedPosition
+            .getFinishingTime(), competitorToReplaceWithAdjustedPosition.getComment());
     }
 
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
@@ -603,12 +612,13 @@ public class TrackingListFragment extends BaseFragment
 
     @Override
     public void onLongClick(final CompetitorResultWithIdImpl item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
-        builder.setTitle(R.string.select_penalty_reason).setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        builder.setTitle(R.string.select_penalty_reason);
+        builder.setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
                 setMaxPointsReasonForItem(item, maxPointsReasons[position]);
-                mFinishedAdapter.notifyDataSetChanged();
+                mFinishedAdapter.notifyItemChanged(mFinishedData.indexOf(item));
             }
         });
         builder.show();
@@ -625,10 +635,10 @@ public class TrackingListFragment extends BaseFragment
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState()
-            .getFinishingTime(), item, mAdapter.getFirstRankZeroPosition()+
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState().getFinishingTime(), item,
+            mAdapter.getFirstRankZeroPosition() +
             /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
-            (item.getOneBasedRank()==0?1:0), false);
+                (item.getOneBasedRank() == 0 ? 1 : 0), false);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -650,6 +660,7 @@ public class TrackingListFragment extends BaseFragment
      * <ol>
      * <li>Rank set from non-0 to 0 and MaxPointsReason is not NONE: move item to the end of the list, into the
      * "penalized section"; decrement ranks greater than old rank</li>
+     * <li>Rank set from non-0 to 0 and MaxPointsReason is NONE: remove item from finish list</li>
      * <li>Rank set from 0 to non-0: move from penalized to ranked section; increment ranks greater than or equal to old
      * rank</li>
      * <li>Rank changed from non-0 to other non-0 value: adjust all ranks between and including old and new list
@@ -662,11 +673,14 @@ public class TrackingListFragment extends BaseFragment
         if (item.getOneBasedRank() != 0 && newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() != MaxPointsReason.NONE) {
             // move to the end of the area of "penalized" competitors; may also be an unpenalized competitor that hasn't
             // been removed yet (e.g., in order to force a score correction reset on the server)
-            onItemMove(index, mFinishedData.size()-1); // -1 because first the element is removed, so when inserting the list is one element shorter
+            onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting the list is one element shorter
         } else if (item.getOneBasedRank() != newItem.getOneBasedRank() && newItem.getOneBasedRank() != 0) {
             onItemMove(index, newItem.getOneBasedRank() - 1);
+        } else if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
+            onItemRemove(index);
+        } else {
+            mFinishedAdapter.notifyItemChanged(index);
         }
-        mFinishedAdapter.notifyDataSetChanged();
     }
 
     private CharSequence[] getAllMaxPointsReasons() {
@@ -688,10 +702,49 @@ public class TrackingListFragment extends BaseFragment
     private CompetitorResults getCompetitorResults() {
         CompetitorResults result = new CompetitorResultsImpl();
         for (CompetitorResultWithIdImpl item : mFinishedData) {
-            result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(),
-                item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item
-                .getFinishingTime(), item.getComment()));
+            result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
+                .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
         }
+        return result;
+    }
+
+    private CompetitorResults getCompetitorResultsDiff() {
+        CompetitorResults result = new CompetitorResultsImpl();
+
+        // all changed item
+        for (CompetitorResultWithIdImpl oldItem : mServerData) {
+            boolean found = false;
+            for (CompetitorResultWithIdImpl newItem : mFinishedData) {
+                if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
+                    if (!oldItem.equals(newItem)) {
+                        result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem
+                            .getOneBasedRank(), newItem.getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment()));
+                    }
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                result.add(new CompetitorResultImpl(oldItem.getCompetitorId(), oldItem.getCompetitorDisplayName(), 0, oldItem
+                    .getMaxPointsReason(), oldItem.getScore(), oldItem.getFinishingTime(), oldItem.getComment()));
+            }
+        }
+
+        // all new items
+        for (CompetitorResultWithIdImpl newItem : mFinishedData) {
+            boolean found = false;
+            for (CompetitorResultWithIdImpl oldItem : mServerData) {
+                if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem.getOneBasedRank(), newItem
+                    .getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment()));
+            }
+        }
+
         return result;
     }
 
