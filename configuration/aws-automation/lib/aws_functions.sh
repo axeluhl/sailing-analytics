@@ -208,7 +208,7 @@ function get_access_token(){
 }
 
 function get_access_token_command(){
-	curl -s -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" 
+	curl -w ''%{http_code}'' -s -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token" 
 }
 
 # -----------------------------------------------------------
@@ -334,10 +334,11 @@ function route53_change_resource_record(){
 	local_echo "Creating Route53 record set (Name: $1.sapsailing.com Value: $3 Type: CNAME)..."
 	local json_result=$(route53_change_resource_record_command $1 $2 $3)
 	
+	# condition does not work, will add a validator
 	if is_error $?; then
 		error "Failed creating Route53 record."
 	else
-		#success "Successfully created Route53 record."
+		# success "Successfully created Route53 record."
 		echo $json_result
 	fi
 }

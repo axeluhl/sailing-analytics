@@ -70,7 +70,7 @@ function is_valid_event_id(){
 }
 
 function is_valid_instance_id(){
-	[[ $1 =~ i-.{17}} ]]
+	[[ $1 =~ i-.{17} ]]
 }
 
 # Other

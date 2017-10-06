@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # Scenario for creating a route53 entry that is pointing 
-# to a load balancer which includes an instance
+# to a load balancer which contains an instance
 # ------------------------------------------------------
 
-function instance_with_elb_start(){
-	instance_with_elb_require
-	instance_with_elb_execute
+function instance_with_load_balancer_start(){
+	instance_with_load_balancer_require
+	instance_with_load_balancer_execute
 }
 
 # -----------------------------------------------------------
@@ -14,7 +14,7 @@ function instance_with_elb_start(){
 # If one variable is not assigned or passed by parameter
 # the user will be prompted to enter a value
 # -----------------------------------------------------------
-function instance_with_elb_require(){
+function instance_with_load_balancer_require(){
 	require_region
 	require_instance_type
 	require_instance_name
@@ -26,7 +26,7 @@ function instance_with_elb_require(){
 	require_user_password
 }
 
-function instance_with_elb_execute() {
+function instance_with_load_balancer_execute() {
 	header "Instance Initialization"
 	
 	local json_instance=$(run_instance)
