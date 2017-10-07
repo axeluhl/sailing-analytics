@@ -12,15 +12,12 @@ public interface AccordionResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String accordion();
-        String accordion_trigger();
-        String accordion_content();
-        String solutions();
         String accordioncollapsed();
-        String solutions_item_header_arrow();
-        String solutions_item();
-        String solutions_item_header();
-        String solutions_item_body();
-        String solutions_item_header_title();
+        String accordion_item_header_arrow();
+        String accordion_item();
+        String accordion_item_header();
+        String accordion_item_body();
+        String accordion_item_header_title();
         String withHeader();
         String withFooter();
     }
