@@ -41,7 +41,7 @@ printLog=false
 verbose=false
 force=false
 strict=false
-debug=true 
+debug=false 
 args=()
 
 # Create temp directory with three random numbers and the process ID
@@ -127,7 +127,6 @@ usage() {
   .ssh/leonradeck-keypair.pem --user-username test --user-password test 
   --instance-name \"WC Santander 2017\" --instance-short-name test 
   --new-admin-password admin -d --instance-with-load-balancer
- 	
   
 "
 }

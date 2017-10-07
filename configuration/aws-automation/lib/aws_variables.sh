@@ -13,8 +13,9 @@ default_key_file='/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem'
 default_instance_type=t2.medium
 default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
-default_user_username=testuser
-default_user_password=test
+default_user_username=newuser
+default_user_password=newpassword
+
 
 # Variables for region "eu-west-2" (London) 
 

@@ -139,6 +139,7 @@ function query_public_dns_name(){
 	local_echo "Querying for the instance public dns name..." 
 	local public_dns_name=$(query_public_dns_name_command $1)
 	
+	# not effective
 	if is_error $?; then
 		error "Querying for instance public dns name failed."
 	else
@@ -192,7 +193,7 @@ function wait_for_access_token_resource(){
 }
 
 function wait_for_access_token_resource_command(){
-	curl -s -o /dev/null -w ''%{http_code}'' http://$1:$2@$3:8888/security/api/restsecurity/access_token
+	curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval http://$1:$2@$3:8888/security/api/restsecurity/access_token
 }
 
 # -----------------------------------------------------------
@@ -210,7 +211,7 @@ function wait_for_create_event_resource(){
 }
 
 function wait_for_create_event_resource_command(){
-	curl -s -o /dev/null -w ''%{http_code}'' http://$1:8888/sailingserver/api/v1/events/createEvent
+	curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval http://$1:8888/sailingserver/api/v1/events/createEvent
 }
 
 # -----------------------------------------------------------
