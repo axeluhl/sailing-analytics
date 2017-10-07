@@ -61,9 +61,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                         getStringMessages());
                 ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(/* parent */ null, /* context */ null,
                         /* delegate drillDownCallback */ groupKey -> {
-                            final boolean result = queryDefinitionProviderWithControls.drillDown(groupKey);
-                            queryRunner.runQuery();
-                            return result;
+                            queryDefinitionProviderWithControls.drillDown(groupKey, /* onSuccessCallback */ ()->queryRunner.runQuery());
                         }, getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 queryDefinitionProviderWithControls =

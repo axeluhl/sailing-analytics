@@ -50,7 +50,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     @FunctionalInterface
     public static interface DrillDownCallback {
-        boolean drillDown(GroupKey groupKey);
+        void drillDown(GroupKey groupKey);
     }
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
@@ -398,7 +398,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         public boolean onClick(SeriesClickEvent seriesClickEvent) {
             final double xAxisValue = seriesClickEvent.getNearestXAsDouble();
             final GroupKey groupKey = xValueToMainKeyMap.get((int) Math.round(xAxisValue));
-            return drillDown(groupKey);
+            drillDown(groupKey);
+            return true;
         }
     }
 
@@ -435,14 +436,10 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
      * 
      * @return whether or not a drill-down was issued
      */
-    public boolean drillDown(GroupKey groupKey) {
-        final boolean drilledDown;
+    public void drillDown(GroupKey groupKey) {
         if (drillDownCallback != null) {
-            drilledDown = drillDownCallback.drillDown(groupKey);
-        } else {
-            drilledDown = false;
+            drillDownCallback.drillDown(groupKey);
         }
-        return drilledDown;
     }
 
     @Override

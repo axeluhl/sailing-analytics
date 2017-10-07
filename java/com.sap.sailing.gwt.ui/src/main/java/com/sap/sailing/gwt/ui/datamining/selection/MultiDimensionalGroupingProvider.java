@@ -90,7 +90,6 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         updateAvailableDimensions();
     }
     
-    
     @Override
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
         if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
@@ -140,16 +139,19 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         dimensionToGroupByBoxes.clear();
         availableDimensions.clear();
     }
+    
+    @Override
+    public Iterable<FunctionDTO> getAvailableDimensions() {
+        return Collections.unmodifiableList(availableDimensions);
+    }
+
+    @Override
+    public void setDimensionToGroupBy(int i, FunctionDTO dimensionToGroupBy) {
+        dimensionToGroupByBoxes.get(i).setValue(dimensionToGroupBy, /* fireEvents */ true);
+    }
 
     private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {
-        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
-            @Override
-            protected String convertObjectToString(FunctionDTO function) {
-                return function.getDisplayName();
-            }
-            
-        });
-        dimensionToGroupByBox.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = createDimensionToGroupByBoxWithoutEventHandler();
         dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             private boolean firstChange = true;
 
@@ -168,6 +170,19 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
                 notifyListeners();
             }
         });
+        return dimensionToGroupByBox;
+    }
+
+    @Override
+    public ValueListBox<FunctionDTO> createDimensionToGroupByBoxWithoutEventHandler() {
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
+            @Override
+            protected String convertObjectToString(FunctionDTO function) {
+                return function.getDisplayName();
+            }
+            
+        });
+        dimensionToGroupByBox.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
         return dimensionToGroupByBox;
     }
 
