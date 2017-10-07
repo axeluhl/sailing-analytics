@@ -48,6 +48,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
+    @FunctionalInterface
     public static interface DrillDownCallback {
         boolean drillDown(GroupKey groupKey);
     }

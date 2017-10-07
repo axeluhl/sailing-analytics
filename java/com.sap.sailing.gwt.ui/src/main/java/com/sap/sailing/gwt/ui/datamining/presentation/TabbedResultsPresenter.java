@@ -38,7 +38,8 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     private final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
     private final DrillDownCallback drillDownCallback;
     
-    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback, StringMessages stringMessages) {
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback,
+            StringMessages stringMessages) {
         super(parent, context);
         this.stringMessages = stringMessages;
         this.drillDownCallback = drillDownCallback;

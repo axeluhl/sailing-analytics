@@ -53,20 +53,25 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING, SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+            private SimpleQueryRunner queryRunner;
+
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
                         getStringMessages());
                 ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(/* parent */ null, /* context */ null,
-                        /* delegate drillDownCallback */ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey),
-                        getStringMessages());
+                        /* delegate drillDownCallback */ groupKey -> {
+                            final boolean result = queryDefinitionProviderWithControls.drillDown(groupKey);
+                            queryRunner.runQuery();
+                            return result;
+                        }, getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 queryDefinitionProviderWithControls =
                         new QueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
                                 dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
-                QueryRunner queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
+                queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
                         dataMiningService,
                         DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);
                 queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());

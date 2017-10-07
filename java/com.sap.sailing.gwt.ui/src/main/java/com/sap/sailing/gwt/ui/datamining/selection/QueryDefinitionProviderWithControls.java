@@ -80,7 +80,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             ResultsPresenter<?> resultsPresenter) {
         super(parent, context, stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
-        
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("definitionProviderControls");
@@ -251,7 +250,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         groupingProvider.applyQueryDefinition(queryDefinition);
         filterSelectionProvider.applySelection(queryDefinition);
         setBlockChangeNotification(false);
-        
         notifyQueryDefinitionChanged();
     }
 
