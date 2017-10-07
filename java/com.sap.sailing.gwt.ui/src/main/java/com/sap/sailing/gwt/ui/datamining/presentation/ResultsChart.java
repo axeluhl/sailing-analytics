@@ -21,9 +21,12 @@ import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -45,6 +48,10 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
+    @FunctionalInterface
+    public static interface DrillDownCallback {
+        void drillDown(GroupKey groupKey);
+    }
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -125,6 +132,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
+    private final DrillDownCallback drillDownCallback;
     
     /**
      * The series showing the numerical results
@@ -139,6 +147,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     
     private final GroupKey simpleResultSeriesKey;
     private final Map<GroupKey, Integer> mainKeyToXValueMap;
+    private final Map<Integer, GroupKey> xValueToMainKeyMap;
     private Map<GroupKey, Number> currentResultValues;
     private Map<GroupKey, Triple<Number, Number, Long>> currentResultErrorMargins;
 
@@ -146,9 +155,11 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private final Map<GroupKey, Double> medianPerMainKey;
     private final boolean showErrorBars;
 
-    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages, boolean showErrorBars) {
+    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
+            boolean showErrorBars, DrillDownCallback drillDownCallback) {
         super(parent, context, stringMessages);
         this.showErrorBars = showErrorBars;
+        this.drillDownCallback = drillDownCallback;
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
         sortByPanel.add(new Label(stringMessages.sortBy() + ":"));
@@ -200,6 +211,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         errorSeriesMappedByGroupKey = new HashMap<>();
         simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
         mainKeyToXValueMap = new HashMap<>();
+        xValueToMainKeyMap = new HashMap<>();
         averagePerMainKey = new HashMap<>();
         medianPerMainKey = new HashMap<>();
     }
@@ -327,10 +339,12 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         List<GroupKey> sortedMainKeys = getSortedMainKeys();
         String[] categories = new String[sortedMainKeys.size()];
         mainKeyToXValueMap.clear();
+        xValueToMainKeyMap.clear();
         for (int i = 0; i < sortedMainKeys.size(); i++) {
             GroupKey mainKey = sortedMainKeys.get(i);
             categories[i] = mainKey.asString();
             mainKeyToXValueMap.put(mainKey, i);
+            xValueToMainKeyMap.put(i, mainKey);
         }
         chart.getXAxis().setCategories(false, categories);
     }
@@ -378,6 +392,16 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             return simpleResultSeriesKey;
         }
     }
+    
+    private class SeriesClickHandler implements SeriesClickEventHandler {
+        @Override
+        public boolean onClick(SeriesClickEvent seriesClickEvent) {
+            final double xAxisValue = seriesClickEvent.getNearestXAsDouble();
+            final GroupKey groupKey = xValueToMainKeyMap.get((int) Math.round(xAxisValue));
+            drillDown(groupKey);
+            return true;
+        }
+    }
 
     private Chart createChart() {
         Chart chart = new Chart()
@@ -402,7 +426,20 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 }
             }
         }));
+        chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesClickEventHandler(new SeriesClickHandler()));
         return chart;
+    }
+
+    /**
+     * Attempts a drill-down for the {@code groupKey}. If a drill-down callback has been
+     * provided, it will be invoked; otherwise, this is a no-op.
+     * 
+     * @return whether or not a drill-down was issued
+     */
+    public void drillDown(GroupKey groupKey) {
+        if (drillDownCallback != null) {
+            drillDownCallback.drillDown(groupKey);
+        }
     }
 
     @Override
