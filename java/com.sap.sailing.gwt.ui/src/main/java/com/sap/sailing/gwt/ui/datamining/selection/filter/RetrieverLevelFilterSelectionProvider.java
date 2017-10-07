@@ -182,26 +182,37 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
 
     /**
      * If there is already a filter set for {@code dimension}, replace its value selection by the {@code values}
-     * provided. Otherwise, add a {@link DimensionFilterSelectionProvider} for {@code dimension} and set its
-     * filter values to {@code values}.<p>
+     * provided. Otherwise, set the last (expectedly non-selected) {@link DimensionFilterSelectionProvider} to
+     * {@code dimension} and set its filter values to {@code values}.
+     * <p>
      * 
      * <em>Precondition:</em> {@link #hasDimension(FunctionDTO) hasDimension(dimension)}{@code == true}
      */
     public void addFilter(FunctionDTO dimension, Set<? extends Serializable> values) {
         DimensionFilterSelectionProvider dimensionFilter = null;
         for (final DimensionFilterSelectionProvider dimensionSelectionProvider : dimensionSelectionProviders) {
+            dimensionFilter = dimensionSelectionProvider;
             if (Util.equalsWithNull(dimensionSelectionProvider.getSelectedDimension(), dimension)) {
-                dimensionFilter = dimensionSelectionProvider;
                 break;
             }
         }
+        // now dimensionFilter will either be the "perfect match" with the correct dimension,
+        // or it's the last DimensionFilterSelectionProvider found, expected to have an empty selection and
+        // will be used to set the dimension and filter; or it's null, meaning there was no dimension filter
+        // which is considered an error
         if (dimensionFilter == null) {
-            // add dimension filter and set value selection:
-            dimensionFilter = createDimensionSelectionProvider();
-            addDimensionSelectionProvider(dimensionFilter);
-            updateAvailableDimensions();
+            throw new IllegalStateException("Internal error: must have at least one de-selected dimension filter per retriever level");
         }
-        dimensionFilter.setSelectedDimensionAndValues(dimension, values);
+        if (dimensionFilter.getSelectedDimension() == null) {
+            // dimension not yet filtered for; use the last empty dimension filter box, set dimension and define filter values: 
+            dimensionFilter.setSelectedDimensionAndValues(dimension, values);
+            final DimensionFilterSelectionProvider newDimensionFilter = createDimensionSelectionProvider();
+            addDimensionSelectionProvider(newDimensionFilter);
+            updateAvailableDimensions();
+        } else {
+            // was filtered for that dimension already; replace filter, restricting to values requested:
+            dimensionFilter.setSelectedDimensionAndValues(dimension, values);
+        }
     }
 
     public void applySelection(HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection) {

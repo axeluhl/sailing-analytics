@@ -129,9 +129,11 @@ class DimensionFilterSelectionProvider {
                 retrieverLevelSelectionProvider.removeDimensionFilter(DimensionFilterSelectionProvider.this);
                 firstChange = false;
             } else {
+                // only one dimension remaining for selection; there is no additional dimension selection provider
+                // that would remain if we remove the current one; therefore, clear the selection on the current one
+                // and see what the user does with it...
                 selectionTable.clearSelection();
                 selectionTable.setContent(new ArrayList<>(), true);
-                
                 selectionTable.setVisible(false);
                 toggleFilterButton.setVisible(false);
                 firstChange = true;
