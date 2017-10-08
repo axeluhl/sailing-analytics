@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart.DrillDownCallback;
 import com.sap.sailing.gwt.ui.polarmining.PolarBackendResultsPresenter;
 import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.common.settings.Settings;
@@ -35,18 +36,20 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
 
     private final ScrolledTabLayoutPanel tabPanel;
     private final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
+    private final DrillDownCallback drillDownCallback;
 
-    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback,
+            StringMessages stringMessages) {
         super(parent, context);
         this.stringMessages = stringMessages;
-
+        this.drillDownCallback = drillDownCallback;
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
         tabPanel.setAnimationDuration(0);
         tabPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         presentersMappedByHeader = new HashMap<>();
 
         addNewTabTab();
-        addTabAndFocus(new MultiResultsPresenter(this, context, stringMessages));
+        addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback, stringMessages));
     }
 
     private void addNewTabTab() {
@@ -60,7 +63,7 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
                 if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                     event.cancel();
                     addTabAndFocus(new MultiResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
-                            stringMessages));
+                            drillDownCallback, stringMessages));
                 }
             }
         });
@@ -88,7 +91,7 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
             } else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();
-                    addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), stringMessages));
+                    addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback, stringMessages));
                     removeTab(oldHeader);
                 }
             }
