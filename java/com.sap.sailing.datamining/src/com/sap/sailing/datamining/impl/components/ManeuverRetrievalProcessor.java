@@ -14,16 +14,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class ManeuverRetrievalProcessor
-        extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasManeuverContext> {
+public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasManeuverContext> {
 
     private final ManeuverSettings settings;
 
-    public ManeuverRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings,
-            int retrievalLevel) {
-        super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers,
-                retrievalLevel);
+    public ManeuverRetrievalProcessor(ExecutorService executor, Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings, int retrievalLevel) {
+        super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers, retrievalLevel);
         this.settings = settings;
     }
 

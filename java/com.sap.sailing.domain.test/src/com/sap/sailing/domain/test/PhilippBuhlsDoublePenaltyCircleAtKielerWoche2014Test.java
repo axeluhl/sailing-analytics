@@ -50,14 +50,11 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
-        URI storedUri = new URI("file:///" + new File("resources/event_20140619_KieleWoche-R1_Blue_Laser.mtb")
-                .getCanonicalPath().replace('\\', '/'));
+        URI storedUri = new URI("file:///"+new File("resources/event_20140619_KieleWoche-R1_Blue_Laser.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(
-                new URL("file:///"
-                        + new File("resources/event_20140619_KieleWoche-R1_Blue_Laser.txt").getCanonicalPath()),
+                new URL("file:///" + new File("resources/event_20140619_KieleWoche-R1_Blue_Laser.txt").getCanonicalPath()),
                 /* liveUri */null, /* storedUri */storedUri, new ReceiverType[] { ReceiverType.MARKPASSINGS,
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(
@@ -65,22 +62,17 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
                         new KnotSpeedWithBearingImpl(18, new DegreeBearingImpl(296))),
                 new WindSourceImpl(WindSourceType.WEB));
     }
-
+    
     /**
-     * Asserts that Philipp Buhl is having two penalty circles detected in the time between 13:03:18+0200 and
-     * 13:03:47+0200
+     * Asserts that Philipp Buhl is having two penalty circles detected in the time between 13:03:18+0200 and 13:03:47+0200
      */
     @Test
     public void testDoublePenaltyForPhilippAndTobiasAndMaximAndDharmender() throws ParseException, NoWindException {
-        assertTwoPenalties("Philipp Buhl", "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:24",
-                "06/21/2014-13:03:37");
-        assertTwoPenalties("Dharmender SINGH", "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:51:56",
-                "06/21/2014-12:52:12");
+        assertTwoPenalties("Philipp Buhl",        "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:24", "06/21/2014-13:03:37");
+        assertTwoPenalties("Dharmender SINGH",    "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:51:56", "06/21/2014-12:52:12");
         // note the typo in Tobias's name; this is how we get it from TracTrac...
-        assertTwoPenalties("Tolbias SCHADEWALDT", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:07",
-                "06/21/2014-12:47:15");
-        assertTwoPenalties("Maxim NIKOLAEV", "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:32",
-                "06/21/2014-12:49:48");
+        assertTwoPenalties("Tolbias SCHADEWALDT", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:07", "06/21/2014-12:47:15");
+        assertTwoPenalties("Maxim NIKOLAEV",      "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:32", "06/21/2014-12:49:48");
     }
 
     private void assertTwoPenalties(String competitorName, final String from, final String to,
@@ -91,21 +83,17 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
         assertNotNull(fromDate);
         assertNotNull(toDate);
         assertNotNull(competitor);
-
         Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>();
         Util.addAll(maneuvers, maneuversInvalid);
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
-                assertTrue(Math.abs(maneuver.getDirectionChangeInDegrees()) < 700); // the second penalty has to count
-                                                                                    // for its own
+                assertTrue(Math.abs(maneuver.getDirectionChangeInDegrees()) < 700); // the second penalty has to count for its own
             }
         }
-        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
-                new MillisecondsTimePoint(dateFormat.parse(firstPenalty)), 5000);
-        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
-                new MillisecondsTimePoint(dateFormat.parse(secondPenalty)), 5000);
+        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse(firstPenalty)), 5000);
+        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse(secondPenalty)), 5000);
         assertAllManeuversOfTypesDetected(Collections.singletonList(ManeuverType.PENALTY_CIRCLE), maneuversInvalid);
     }
 }

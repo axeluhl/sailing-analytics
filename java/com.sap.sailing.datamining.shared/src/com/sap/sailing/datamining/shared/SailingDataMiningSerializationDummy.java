@@ -38,7 +38,6 @@ public final class SailingDataMiningSerializationDummy implements SerializationD
     private ManeuverSettings maneuverSettings;
     private ManeuverSettingsImpl maneuverSettingsImpl;
 
-    private SailingDataMiningSerializationDummy() {
-    }
+    private SailingDataMiningSerializationDummy() { }
 
 }

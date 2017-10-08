@@ -46,15 +46,13 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 /**
  * Allows presentation of {@link PolarAggregation} data.
  * 
- * </br>
- * </br>
+ * </br></br>
  * 
  * Contains a polar chart on the left displaying the actual polar diagram and two histograms on the right. The upper
  * histogram shows datacount over angle and the second one shows datacount over windrange upon clicking a point in the
  * polar chart.
  * 
- * </br>
- * </br>
+ * </br></br>
  * 
  * Used in conjunction with the datamining framework.
  * 

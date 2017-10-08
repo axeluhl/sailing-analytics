@@ -49,28 +49,23 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
-        URI storedUri = new URI("file:///" + new File("resources/event_20110929_Internatio-Champions_Cup_Final.mtb")
-                .getCanonicalPath().replace('\\', '/'));
-        super.setUp(
-                new URL("file:///"
-                        + new File("resources/event_20110929_Internatio-Champions_Cup_Final.txt").getCanonicalPath()),
+        URI storedUri = new URI("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().recordWind(
-                new WindImpl(/* position */null, MillisecondsTimePoint.now(),
-                        new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
-                new WindSourceImpl(WindSourceType.WEB));
+                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
     }
-
+    
     /**
-     * If a leg's type needs to be determined, some wind data is required to decide on upwind, downwind or reaching leg.
-     * Wind information is queried by {@link TrackedLegImpl} based on the marks' positions. Therefore, approximate mark
-     * positions are set here for all marks of {@link #getTrackedRace()}'s courses for the time span starting at the
-     * epoch up to now.
+     * If a leg's type needs to be determined, some wind data is required to decide on upwind,
+     * downwind or reaching leg. Wind information is queried by {@link TrackedLegImpl} based on
+     * the marks' positions. Therefore, approximate mark positions are set here for all marks
+     * of {@link #getTrackedRace()}'s courses for the time span starting at the epoch up to now.
      */
     public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace race) {
         TimePoint epoch = new MillisecondsTimePoint(0l);

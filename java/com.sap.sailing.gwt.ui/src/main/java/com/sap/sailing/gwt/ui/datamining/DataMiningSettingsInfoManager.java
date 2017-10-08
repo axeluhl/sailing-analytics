@@ -50,10 +50,8 @@ public class DataMiningSettingsInfoManager {
     private class PolarDataMiningSettingsInfo implements DataMiningSettingsInfo {
         @SuppressWarnings("unchecked")
         @Override
-        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
-                SettingsType settings) {
-            return (SettingsDialogComponent<SettingsType>) new PolarDataMiningSettingsDialogComponent(
-                    (PolarDataMiningSettings) settings);
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new PolarDataMiningSettingsDialogComponent((PolarDataMiningSettings) settings);
         }
 
         @Override
@@ -115,10 +113,8 @@ public class DataMiningSettingsInfoManager {
     private class FoilingSegmentsDataMiningSettingsInfo implements DataMiningSettingsInfo {
         @SuppressWarnings("unchecked")
         @Override
-        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
-                SettingsType settings) {
-            return (SettingsDialogComponent<SettingsType>) new FoilingSegmentsDataMiningSettingsDialogComponent(
-                    (FoilingSegmentsDataMiningSettings) settings);
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new FoilingSegmentsDataMiningSettingsDialogComponent((FoilingSegmentsDataMiningSettings) settings);
         }
 
         @Override

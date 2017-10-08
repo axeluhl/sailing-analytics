@@ -50,90 +50,73 @@ public class SailingDataRetrievalChainDefinitions {
 
     public SailingDataRetrievalChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
-
+        
         final DataRetrieverChainDefinition<RacingEventService, HasLeaderboardContext> leaderboardRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 RacingEventService.class, HasLeaderboardContext.class, "LeaderboardSailingDomainRetrieverChain");
-        leaderboardRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class,
-                LeaderboardGroupWithContext.class, "LeaderboardGroup");
-        leaderboardRetrieverChainDefinition.endWith(LeaderboardGroupRetrievalProcessor.class,
-                LeaderboardRetrievalProcessor.class, HasLeaderboardContext.class, "Leaderboard");
-
-        final DataRetrieverChainDefinition<RacingEventService, HasRaceResultOfCompetitorContext> raceResultOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                leaderboardRetrieverChainDefinition, HasRaceResultOfCompetitorContext.class,
-                "RaceResultSailingDomainRetrieverChain");
-        raceResultOfCompetitorRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class,
-                CompetitorOfRaceInLeaderboardRetrievalProcessor.class, HasRaceResultOfCompetitorContext.class,
-                "Competitor");
+        leaderboardRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroupWithContext.class, "LeaderboardGroup");
+        leaderboardRetrieverChainDefinition.endWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class,
+                HasLeaderboardContext.class, "Leaderboard");
+        
+        final DataRetrieverChainDefinition<RacingEventService, HasRaceResultOfCompetitorContext> raceResultOfCompetitorRetrieverChainDefinition =
+                new SimpleDataRetrieverChainDefinition<>(leaderboardRetrieverChainDefinition, HasRaceResultOfCompetitorContext.class, "RaceResultSailingDomainRetrieverChain");
+        raceResultOfCompetitorRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, CompetitorOfRaceInLeaderboardRetrievalProcessor.class, HasRaceResultOfCompetitorContext.class, "Competitor");
         dataRetrieverChainDefinitions.add(raceResultOfCompetitorRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedRaceContext> trackedRaceRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 leaderboardRetrieverChainDefinition, HasTrackedRaceContext.class, "RaceSailingDomainRetrieverChain");
-        trackedRaceRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class,
-                TrackedRaceRetrievalProcessor.class, HasTrackedRaceContext.class, "Race");
+        trackedRaceRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,
+                HasTrackedRaceContext.class, "Race");
         dataRetrieverChainDefinitions.add(trackedRaceRetrieverChainDefinition);
-
+        
         final DataRetrieverChainDefinition<RacingEventService, HasRaceOfCompetitorContext> raceOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                trackedRaceRetrieverChainDefinition, HasRaceOfCompetitorContext.class,
-                "RaceOfCompetitorSailingDomainRetrieverChain");
-        raceOfCompetitorRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class,
-                RaceOfCompetitorRetrievalProcessor.class, HasRaceOfCompetitorContext.class, "Competitor");
+                trackedRaceRetrieverChainDefinition, HasRaceOfCompetitorContext.class, "RaceOfCompetitorSailingDomainRetrieverChain");
+        raceOfCompetitorRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, RaceOfCompetitorRetrievalProcessor.class, HasRaceOfCompetitorContext.class, "Competitor");
         dataRetrieverChainDefinitions.add(raceOfCompetitorRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasBravoFixTrackContext> bravoFixTrackRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                raceOfCompetitorRetrieverChainDefinition, HasBravoFixTrackContext.class,
-                "BravoFixTrackSailingDomainRetrieverChain");
-        bravoFixTrackRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class,
-                BravoFixTrackRetrievalProcessor.class, HasBravoFixTrackContext.class, "BravoFixTrack");
+                raceOfCompetitorRetrieverChainDefinition, HasBravoFixTrackContext.class, "BravoFixTrackSailingDomainRetrieverChain");
+        bravoFixTrackRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, BravoFixTrackRetrievalProcessor.class,
+                HasBravoFixTrackContext.class, "BravoFixTrack");
         dataRetrieverChainDefinitions.add(bravoFixTrackRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasFoilingSegmentContext> foilingSegmentsRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                raceOfCompetitorRetrieverChainDefinition, HasFoilingSegmentContext.class,
-                "FoilingSegmentsSailingDomainRetrieverChain");
-        foilingSegmentsRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class,
-                FoilingSegmentRetrievalProcessor.class, HasFoilingSegmentContext.class,
-                FoilingSegmentsDataMiningSettings.class, FoilingSegmentsDataMiningSettings.createDefaultSettings(),
-                "FoilingSegments");
+                raceOfCompetitorRetrieverChainDefinition, HasFoilingSegmentContext.class, "FoilingSegmentsSailingDomainRetrieverChain");
+        foilingSegmentsRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, FoilingSegmentRetrievalProcessor.class,
+                HasFoilingSegmentContext.class, FoilingSegmentsDataMiningSettings.class, FoilingSegmentsDataMiningSettings.createDefaultSettings(), "FoilingSegments");
         dataRetrieverChainDefinitions.add(foilingSegmentsRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                trackedRaceRetrieverChainDefinition, HasTrackedLegOfCompetitorContext.class,
-                "LegSailingDomainRetrieverChain");
-        legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class,
-                TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
-        legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class,
-                TrackedLegOfCompetitorRetrievalProcessor.class, HasTrackedLegOfCompetitorContext.class,
-                "LegOfCompetitor");
+                trackedRaceRetrieverChainDefinition, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");
+        legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
+        legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class, TrackedLegOfCompetitorRetrievalProcessor.class,
+                HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
         dataRetrieverChainDefinitions.add(legOfCompetitorRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasGPSFixContext> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 legOfCompetitorRetrieverChainDefinition, HasGPSFixContext.class, "GPSFixSailingDomainRetrieverChain");
-        gpsFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class,
-                GPSFixRetrievalProcessor.class, HasGPSFixContext.class, "GpsFix");
+        gpsFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, GPSFixRetrievalProcessor.class,
+                HasGPSFixContext.class, "GpsFix");
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasBravoFixContext> bravoFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                legOfCompetitorRetrieverChainDefinition, HasBravoFixContext.class,
-                "BravoFixSailingDomainRetrieverChain");
-        bravoFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class,
-                BravoFixRetrievalProcessor.class, HasBravoFixContext.class, "BravoFix");
+                legOfCompetitorRetrieverChainDefinition, HasBravoFixContext.class, "BravoFixSailingDomainRetrieverChain");
+        bravoFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, BravoFixRetrievalProcessor.class,
+                HasBravoFixContext.class, "BravoFix");
         dataRetrieverChainDefinitions.add(bravoFixRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasWindFixContext> windFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasWindFixContext.class, "WindFixSailingDomainRetrieverChain");
-        windFixRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, WindTrackRetrievalProcessor.class,
-                HasWindTrackContext.class, "WindTrack");
+        windFixRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, WindTrackRetrievalProcessor.class, HasWindTrackContext.class, "WindTrack");
         windFixRetrieverChainDefinition.endWith(WindTrackRetrievalProcessor.class, WindFixRetrievalProcessor.class,
                 HasWindFixContext.class, "WindFix");
         dataRetrieverChainDefinitions.add(windFixRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasManeuverContext> maneuverRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                legOfCompetitorRetrieverChainDefinition, HasManeuverContext.class,
-                "ManeuverSailingDomainRetrieverChain");
-        maneuverRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class,
-                ManeuverRetrievalProcessor.class, HasManeuverContext.class, ManeuverSettings.class,
-                ManeuverSettingsImpl.createDefault(), "Maneuver");
+                legOfCompetitorRetrieverChainDefinition, HasManeuverContext.class, "ManeuverSailingDomainRetrieverChain");
+        maneuverRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, ManeuverRetrievalProcessor.class,
+                HasManeuverContext.class, ManeuverSettings.class, ManeuverSettingsImpl.createDefault(), "Maneuver");
         dataRetrieverChainDefinitions.add(maneuverRetrieverChainDefinition);
-
+        
         DataRetrieverChainDefinition<RacingEventService, HasManeuverSpeedDetailsContext> speedDetailsDataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 maneuverRetrieverChainDefinition, HasManeuverSpeedDetailsContext.class,
                 "ManeuverSpeedDetailsRetrieverChain");
@@ -144,10 +127,8 @@ public class SailingDataRetrievalChainDefinitions {
         dataRetrieverChainDefinitions.add(speedDetailsDataRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                legOfCompetitorRetrieverChainDefinition, HasMarkPassingContext.class,
-                "MarkPassingSailingDomainRetrieverChain");
-        markPassingRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class,
-                MarkPassingRetrievalProcessor.class, HasMarkPassingContext.class, "MarkPassing");
+                legOfCompetitorRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");
+        markPassingRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, MarkPassingRetrievalProcessor.class, HasMarkPassingContext.class, "MarkPassing");
         dataRetrieverChainDefinitions.add(markPassingRetrieverChainDefinition);
     }
 

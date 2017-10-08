@@ -33,12 +33,10 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
- * Is able to present {@link PolarBackendData}.</br>
- * Has one polar chart showing the perAngle regression data and two x-y-linecharts that show speed and angle over
- * windspeed regressions.
+ * Is able to present {@link PolarBackendData}.</br> Has one polar chart showing the perAngle regression data and two
+ * x-y-linecharts that show speed and angle over windspeed regressions.
  * 
- * </br>
- * </br>
+ * </br></br>
  * Used in conjunction with the datamining framework.
  * 
  * @author D054528 (Frederik Petersen)
