@@ -14,22 +14,22 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
-    public double getDbRakePort() {
+    public double getPortDaggerboardRake() {
         return fix.get(BravoExtendedSensorDataMetadata.DB_RAKE_PORT.getColumnIndex());
     }
 
     @Override
-    public double getDbRakeStbd() {
+    public double getStbdDaggerboardRake() {
         return fix.get(BravoExtendedSensorDataMetadata.DB_RAKE_STBD.getColumnIndex());
     }
 
     @Override
-    public double getRudderRakePort() {
+    public double getPortRudderRake() {
         return fix.get(BravoExtendedSensorDataMetadata.RUDDER_RAKE_PORT.getColumnIndex());
     }
 
     @Override
-    public double getRudderRakeStbd() {
+    public double getStbdRudderRake() {
         return fix.get(BravoExtendedSensorDataMetadata.RUDDER_RAKE_STBD.getColumnIndex());
     }
 

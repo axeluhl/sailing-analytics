@@ -219,23 +219,23 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getDbRakePortIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakePort);
+    public Double getPortDaggerboardRakeIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortDaggerboardRake);
     }
 
     @Override
-    public Double getDbRakeStbdIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakeStbd);
+    public Double getStbdDaggerboardRakeStbdIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdDaggerboardRake);
     }
 
     @Override
-    public Double getRudderRakePortIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakePort);
+    public Double getPortRudderRakeIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortRudderRake);
     }
 
     @Override
-    public Double getRudderRakeStbdIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakeStbd);
+    public Double getStbdRudderRakeIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdRudderRake);
     }
 
     @Override

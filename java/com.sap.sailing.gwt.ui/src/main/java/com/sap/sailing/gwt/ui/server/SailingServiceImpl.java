@@ -2985,28 +2985,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getDbRakePortIfAvailable(timePoint);
+                    result = bravoFixTrack.getPortDaggerboardRakeIfAvailable(timePoint);
                 }
             }
             case CURRENT_STBD_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getDbRakeStbdIfAvailable(timePoint);
+                    result = bravoFixTrack.getStbdDaggerboardRakeStbdIfAvailable(timePoint);
                 }
             }
             case CURRENT_PORT_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getRudderRakePortIfAvailable(timePoint);
+                    result = bravoFixTrack.getPortRudderRakeIfAvailable(timePoint);
                 }
             }
             case CURRENT_STBD_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getRudderRakeStbdIfAvailable(timePoint);
+                    result = bravoFixTrack.getStbdRudderRakeIfAvailable(timePoint);
                 }
             }
             case CURRENT_MAST_ROTATION_IN_DEGREES: {
