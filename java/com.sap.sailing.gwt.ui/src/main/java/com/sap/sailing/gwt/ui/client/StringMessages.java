@@ -1918,4 +1918,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String needToProvideValidMinimumRideHeight();
     String dataMiningErrorMargins();
     String elements(long count);
+    String chooseDifferentDimensionTitle();
+    String chooseDifferentDimensionMessage();
+    String pleaseSelectADimension();
 }

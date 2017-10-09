@@ -9,11 +9,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -116,7 +118,11 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
             dimensionFilter.setAvailableDimensions(remainingDimensions);
         }
     }
-
+    
+    public boolean hasDimension(FunctionDTO dimension) {
+        return availableDimensions.contains(dimension);
+    }
+    
     private Collection<FunctionDTO> getSelectedDimensions() {
         Collection<FunctionDTO> selectedDimensions = new ArrayList<>();
         for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
@@ -174,13 +180,46 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         return filterSelection;
     }
 
+    /**
+     * If there is already a filter set for {@code dimension}, replace its value selection by the {@code values}
+     * provided. Otherwise, set the last (expectedly non-selected) {@link DimensionFilterSelectionProvider} to
+     * {@code dimension} and set its filter values to {@code values}.
+     * <p>
+     * 
+     * <em>Precondition:</em> {@link #hasDimension(FunctionDTO) hasDimension(dimension)}{@code == true}
+     */
+    public void addFilter(FunctionDTO dimension, Set<? extends Serializable> values) {
+        DimensionFilterSelectionProvider dimensionFilter = null;
+        for (final DimensionFilterSelectionProvider dimensionSelectionProvider : dimensionSelectionProviders) {
+            dimensionFilter = dimensionSelectionProvider;
+            if (Util.equalsWithNull(dimensionSelectionProvider.getSelectedDimension(), dimension)) {
+                break;
+            }
+        }
+        // now dimensionFilter will either be the "perfect match" with the correct dimension,
+        // or it's the last DimensionFilterSelectionProvider found, expected to have an empty selection and
+        // will be used to set the dimension and filter; or it's null, meaning there was no dimension filter
+        // which is considered an error
+        if (dimensionFilter == null) {
+            throw new IllegalStateException("Internal error: must have at least one de-selected dimension filter per retriever level");
+        }
+        if (dimensionFilter.getSelectedDimension() == null) {
+            // dimension not yet filtered for; use the last empty dimension filter box, set dimension and define filter values: 
+            dimensionFilter.setSelectedDimensionAndValues(dimension, values);
+            final DimensionFilterSelectionProvider newDimensionFilter = createDimensionSelectionProvider();
+            addDimensionSelectionProvider(newDimensionFilter);
+            updateAvailableDimensions();
+        } else {
+            // was filtered for that dimension already; replace filter, restricting to values requested:
+            dimensionFilter.setSelectedDimensionAndValues(dimension, values);
+        }
+    }
+
     public void applySelection(HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection) {
         dimensionSelectionProviders.clear();
         mainPanel.clear();
-        
         List<FunctionDTO> sortedDimensions = new ArrayList<>(filterSelection.keySet());
         Collections.sort(sortedDimensions);
-        
         for (FunctionDTO functionDTO : sortedDimensions) {
             DimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
             addDimensionSelectionProvider(dimensionFilter);

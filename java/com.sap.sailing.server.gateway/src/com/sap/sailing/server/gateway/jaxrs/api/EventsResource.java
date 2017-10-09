@@ -97,7 +97,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
-    private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     private final boolean enforceSecurityChecks;
     
