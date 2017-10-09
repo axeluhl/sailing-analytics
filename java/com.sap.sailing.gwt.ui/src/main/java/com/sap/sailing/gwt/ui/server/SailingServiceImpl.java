@@ -2981,28 +2981,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = rideHeight == null ? null : rideHeight.getMeters();
                 }
             }
-            case CURRENT_DB_RAKE_PORT_IN_DEGREES: {
+            case CURRENT_PORT_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getDbRakePortIfAvailable(timePoint);
                 }
             }
-            case CURRENT_DB_RAKE_STBD_IN_DEGREES: {
+            case CURRENT_STBD_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getDbRakeStbdIfAvailable(timePoint);
                 }
             }
-            case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES: {
+            case CURRENT_PORT_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getRudderRakePortIfAvailable(timePoint);
                 }
             }
-            case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES: {
+            case CURRENT_STBD_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
@@ -6632,10 +6632,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
             }
             if (hasExtendedBravoFixes) {
-                availableDetailsTypes.add(DetailType.CURRENT_DB_RAKE_PORT_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_DB_RAKE_STBD_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_RUDDER_RAKE_PORT_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_RUDDER_RAKE_STBD_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_PORT_DAGGERBOARD_RAKE);
+                availableDetailsTypes.add(DetailType.CURRENT_STBD_DAGGERBOARD_RAKE);
+                availableDetailsTypes.add(DetailType.CURRENT_PORT_RUDDER_RAKE);
+                availableDetailsTypes.add(DetailType.CURRENT_STBD_RUDDER_RAKE);
                 availableDetailsTypes.add(DetailType.CURRENT_MAST_ROTATION_IN_DEGREES);
             }
         }

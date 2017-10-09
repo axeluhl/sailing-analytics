@@ -46,14 +46,14 @@ public class DetailTypeFormatter {
             return stringMessages.currentPitchInDegree();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMeters();
-        case CURRENT_DB_RAKE_PORT_IN_DEGREES:
-            return stringMessages.currentDbRakePortInDegree();
-        case CURRENT_DB_RAKE_STBD_IN_DEGREES:
-            return stringMessages.currentDbRakeStbdInDegree();
-        case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES:
-            return stringMessages.currentRudderRakePortInDegree();
-        case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES:
-            return stringMessages.currentRudderRakeStbdInDegree();
+        case CURRENT_PORT_DAGGERBOARD_RAKE:
+            return stringMessages.currentPortDaggerboardRake();
+        case CURRENT_STBD_DAGGERBOARD_RAKE:
+            return stringMessages.currentStbdDaggerboardRake();
+        case CURRENT_PORT_RUDDER_RAKE:
+            return stringMessages.currentPortRudderRake();
+        case CURRENT_STBD_RUDDER_RAKE:
+            return stringMessages.currentStbdRudderRake();
         case CURRENT_MAST_ROTATION_IN_DEGREES:
             return stringMessages.currentMastRotationInDegree();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
@@ -217,10 +217,10 @@ public class DetailTypeFormatter {
         case CURRENT_MAST_ROTATION_IN_DEGREES:
             return stringMessages.degreesShort();
         
-        case CURRENT_DB_RAKE_PORT_IN_DEGREES:
-        case CURRENT_DB_RAKE_STBD_IN_DEGREES:
-        case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES:
-        case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES:
+        case CURRENT_PORT_DAGGERBOARD_RAKE:
+        case CURRENT_STBD_DAGGERBOARD_RAKE:
+        case CURRENT_PORT_RUDDER_RAKE:
+        case CURRENT_STBD_RUDDER_RAKE:
             // We currently do not show a specific unit for these measures because these are specific "uninterpreted" values
             return "";
 
@@ -338,14 +338,14 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageRideHeightInMetersTooltip();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMetersTooltip();
-        case CURRENT_DB_RAKE_PORT_IN_DEGREES:
-            return stringMessages.currentDbRakePortInDegreeTooltip();
-        case CURRENT_DB_RAKE_STBD_IN_DEGREES:
-            return stringMessages.currentDbRakeStbdInDegreeTooltip();
-        case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES:
-            return stringMessages.currentRudderRakePortInDegreeTooltip();
-        case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES:
-            return stringMessages.currentRudderRakeStbdInDegreeTooltip();
+        case CURRENT_PORT_DAGGERBOARD_RAKE:
+            return stringMessages.currentPortDaggerboardRakeTooltip();
+        case CURRENT_STBD_DAGGERBOARD_RAKE:
+            return stringMessages.currentStbdDaggerboardRakeTooltip();
+        case CURRENT_PORT_RUDDER_RAKE:
+            return stringMessages.currentPortRudderRakeTooltip();
+        case CURRENT_STBD_RUDDER_RAKE:
+            return stringMessages.currentStbdRudderRakeTooltip();
         case CURRENT_MAST_ROTATION_IN_DEGREES:
             return stringMessages.currentMastRotationInDegreeTooltip();
         case CURRENT_HEEL_IN_DEGREES:
