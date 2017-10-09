@@ -129,9 +129,11 @@ class DimensionFilterSelectionProvider {
                 retrieverLevelSelectionProvider.removeDimensionFilter(DimensionFilterSelectionProvider.this);
                 firstChange = false;
             } else {
+                // only one dimension remaining for selection; there is no additional dimension selection provider
+                // that would remain if we remove the current one; therefore, clear the selection on the current one
+                // and see what the user does with it...
                 selectionTable.clearSelection();
                 selectionTable.setContent(new ArrayList<>(), true);
-                
                 selectionTable.setVisible(false);
                 toggleFilterButton.setVisible(false);
                 firstChange = true;
@@ -195,11 +197,7 @@ class DimensionFilterSelectionProvider {
                         } else {
                             selectionChanged = selectionTable.updateContent(content, notifyListenersWhenSelectionChanged);
                         }
-                        
-                        if (selectionToBeApplied != null) {
-                            selectionTable.setSelection(selectionToBeApplied, notifyListenersWhenSelectionChanged);
-                            selectionToBeApplied = null;
-                        }
+                        updateSelectionTable(notifyListenersWhenSelectionChanged);
                         busyIndicator.setVisible(false);
                         selectionTable.setVisible(true);
                         toggleFilterButton.setVisible(true);
@@ -222,6 +220,22 @@ class DimensionFilterSelectionProvider {
                 });
     }
     
+    /**
+     * If {@code #selectionToBeApplied} is not {@code null}, the table displaying the selection will have its selection
+     * model updated based on the contents of {@link #selectionToBeApplied}, and {@link #selectionToBeApplied} will be
+     * set to {@code null} afterwards.
+     * 
+     * @param notifyListenersWhenSelectionChanged
+     *            if {@code true}, selection listeners will be notified about any change that is caused by invoking this
+     *            method
+     */
+    private void updateSelectionTable(final boolean notifyListenersWhenSelectionChanged) {
+        if (selectionToBeApplied != null) {
+            selectionTable.setSelection(selectionToBeApplied, notifyListenersWhenSelectionChanged);
+            selectionToBeApplied = null;
+        }
+    }
+
     void setAvailableDimensions(Collection<FunctionDTO> availableDimensions) {
         dimensionListBox.setAcceptableValues(availableDimensions);
     }
@@ -240,8 +254,8 @@ class DimensionFilterSelectionProvider {
 
     void setSelectedDimensionAndValues(FunctionDTO functionDTO, Collection<?> selection) {
         dimensionChangedHandler.firstChange = false;
-        selectionToBeApplied = selection;
         dimensionListBox.setValue(functionDTO, true);
+        selectionToBeApplied = selection;
     }
     
     public Widget getEntryWidget() {
