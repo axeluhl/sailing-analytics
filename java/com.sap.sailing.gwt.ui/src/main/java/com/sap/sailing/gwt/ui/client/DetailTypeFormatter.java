@@ -214,12 +214,15 @@ public class DetailTypeFormatter {
         case COURSE_OVER_GROUND_TRUE_DEGREES:
         case CURRENT_HEEL_IN_DEGREES:
         case CURRENT_PITCH_IN_DEGREES:
+        case CURRENT_MAST_ROTATION_IN_DEGREES:
+            return stringMessages.degreesShort();
+        
         case CURRENT_DB_RAKE_PORT_IN_DEGREES:
         case CURRENT_DB_RAKE_STBD_IN_DEGREES:
         case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES:
         case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES:
-        case CURRENT_MAST_ROTATION_IN_DEGREES:
-            return stringMessages.degreesShort();
+            // We currently do not show a specific unit for these measures because these are specific "uninterpreted" values
+            return "";
 
         case GAP_TO_LEADER_IN_SECONDS:
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:

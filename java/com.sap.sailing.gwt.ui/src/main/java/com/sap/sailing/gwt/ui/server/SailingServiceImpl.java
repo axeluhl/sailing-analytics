@@ -2985,32 +2985,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    final Bearing bearing = bravoFixTrack.getDbRakePortIfAvailable(timePoint);
-                    result = bearing == null ? null : bearing.getDegrees();
+                    result = bravoFixTrack.getDbRakePortIfAvailable(timePoint);
                 }
             }
             case CURRENT_DB_RAKE_STBD_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    final Bearing bearing = bravoFixTrack.getDbRakeStbdIfAvailable(timePoint);
-                    result = bearing == null ? null : bearing.getDegrees();
+                    result = bravoFixTrack.getDbRakeStbdIfAvailable(timePoint);
                 }
             }
             case CURRENT_RUDDER_RAKE_PORT_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    final Bearing bearing = bravoFixTrack.getRudderRakePortIfAvailable(timePoint);
-                    result = bearing == null ? null : bearing.getDegrees();
+                    result = bravoFixTrack.getRudderRakePortIfAvailable(timePoint);
                 }
             }
             case CURRENT_RUDDER_RAKE_STBD_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    final Bearing bearing = bravoFixTrack.getRudderRakeStbdIfAvailable(timePoint);
-                            result = bearing == null ? null : bearing.getDegrees();
+                    result = bravoFixTrack.getRudderRakeStbdIfAvailable(timePoint);
                 }
             }
             case CURRENT_MAST_ROTATION_IN_DEGREES: {

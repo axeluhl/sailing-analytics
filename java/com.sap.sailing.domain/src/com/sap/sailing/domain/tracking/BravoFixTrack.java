@@ -83,9 +83,9 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
      */
     boolean hasExtendedFixes();
     
-    Bearing getDbRakePortIfAvailable(TimePoint timePoint);
-    Bearing getDbRakeStbdIfAvailable(TimePoint timePoint);
-    Bearing getRudderRakePortIfAvailable(TimePoint timePoint);
-    Bearing getRudderRakeStbdIfAvailable(TimePoint timePoint);
+    Double getDbRakePortIfAvailable(TimePoint timePoint);
+    Double getDbRakeStbdIfAvailable(TimePoint timePoint);
+    Double getRudderRakePortIfAvailable(TimePoint timePoint);
+    Double getRudderRakeStbdIfAvailable(TimePoint timePoint);
     Bearing getMastRotationIfAvailable(TimePoint timePoint);
 }

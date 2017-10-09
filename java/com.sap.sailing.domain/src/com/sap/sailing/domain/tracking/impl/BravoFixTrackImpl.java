@@ -186,7 +186,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * In case of a mix of {@link BravoFix} and {@link BravoExtendedFix} instances, this method may return null values
      * for specific {@link TimePoint TimePoints}.
      */
-    private Bearing getBearingValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, Bearing> getter) {
+    private <T> T getValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, T> getter) {
         if (!hasExtendedFixes) {
             return null;
         }
@@ -219,27 +219,27 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Bearing getDbRakePortIfAvailable(TimePoint timePoint) {
-        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakePort);
+    public Double getDbRakePortIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakePort);
     }
 
     @Override
-    public Bearing getDbRakeStbdIfAvailable(TimePoint timePoint) {
-        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakeStbd);
+    public Double getDbRakeStbdIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getDbRakeStbd);
     }
 
     @Override
-    public Bearing getRudderRakePortIfAvailable(TimePoint timePoint) {
-        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakePort);
+    public Double getRudderRakePortIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakePort);
     }
 
     @Override
-    public Bearing getRudderRakeStbdIfAvailable(TimePoint timePoint) {
-        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakeStbd);
+    public Double getRudderRakeStbdIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getRudderRakeStbd);
     }
 
     @Override
     public Bearing getMastRotationIfAvailable(TimePoint timePoint) {
-        return getBearingValueFromExtendedFix(timePoint, BravoExtendedFix::getMastRotation);
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getMastRotation);
     }
 }
