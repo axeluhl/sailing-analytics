@@ -79,6 +79,8 @@ public class MobileApplicationClientFactory extends
                 root.setSubHeaderContent(null);
                 dismissCallback.run();
                 navigator.goToPlace(navigator.getMoreLoginInfo());
+            },() -> {
+                navigator.goToPlace(navigator.getSignInNavigation());
             });
             root.setSubHeaderContent(content);
         });
