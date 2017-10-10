@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsEntry;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractKeywordFilter;
 import com.sap.sse.common.filter.Filter;
 
@@ -17,7 +18,7 @@ public class UserSettingsByKeyTextBoxFilter extends AbstractTextBoxFilter<UserSe
 
     @Override
     protected Filter<UserSettingsEntry> getFilter(String searchString) {
-        this.filter.setKeywords(Arrays.asList(searchString));
+        this.filter.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchString));
         return filter;
     }
 
