@@ -9,11 +9,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.CompositeAction;
-import org.openqa.selenium.interactions.HasInputDevices;
-import org.openqa.selenium.interactions.KeyDownAction;
-import org.openqa.selenium.interactions.KeyUpAction;
-import org.openqa.selenium.interactions.Keyboard;
-import org.openqa.selenium.interactions.Mouse;
 
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.AttributeHelper;
@@ -124,21 +119,18 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     protected CompositeAction getModifiedCompositeActionAction() {
-        HasInputDevices devices = (HasInputDevices) this.driver;
-        
-        final Mouse mouse = devices.getMouse();
-        final Keyboard keyboard = devices.getKeyboard();
-        
         return new CompositeAction() {
             @Override
             public void perform() {
-                Action pressControl = new KeyDownAction(keyboard, mouse, Keys.CONTROL);
-                pressControl.perform();
+                Actions actions = new Actions(driver);
+                actions.keyDown(Keys.CONTROL);
+                actions.perform();
                 
                 super.perform();
                 
-                Action releaseControl = new KeyUpAction(keyboard, mouse, Keys.CONTROL);
-                releaseControl.perform();
+                actions = new Actions(driver);
+                actions.keyUp(Keys.CONTROL);
+                actions.perform();
             }
         };
     }
