@@ -26,7 +26,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 
 /**
  * This scrollpanel overlays a second scrollbar fixed to the bottom of the viewport as soon as the original scrollbar is
@@ -57,6 +56,16 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     private final Element contentToSyncWith;
     private final boolean hasMutationObservationCapability;
     private JavaScriptObject observer;
+    /**
+     * Flag that indicated that scrolling was initiated by table, the scroll event fired by the overlay scrollbar must
+     * be ignored, solving bug 4283
+     */
+    private boolean ignoreOverlayScrollEvent = false;
+    /**
+     * Flag that indicated that scrolling was initiated by overlay scrollpanel, the scroll event fired by the table must
+     * be ignored, solving bug 4283
+     */
+    private boolean ignoreTableScrollEvent = false;
 
     /**
      * Create an overlay scroll panel with the corresponding widget to scroll.
@@ -107,22 +116,31 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         registrations.add(this.addScrollHandler(new ScrollHandler() {
             @Override
             public void onScroll(ScrollEvent event) {
-                applyScrollpanelToOverlay();
+                GWT.log("scroll initiated by table");
+                if (ignoreTableScrollEvent) {
+                    ignoreTableScrollEvent = false;
+                } else {
+                    ignoreOverlayScrollEvent = true;
+                    applyScrollpanelToOverlay();
+                }
             }
         }));
         createObserverForCurrentChild();
-        if (!DeviceDetector.isMobile()) {
-            // only bind reverse scrolling through overlay scrollpanel in desktop
-            DOM.sinkEvents(overlayScrollPanelUi, Event.ONSCROLL);
-            DOM.setEventListener(overlayScrollPanelUi, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
+        // only bind reverse scrolling through overlay scrollpanel in desktop
+        DOM.sinkEvents(overlayScrollPanelUi, Event.ONSCROLL);
+        DOM.setEventListener(overlayScrollPanelUi, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                if (ignoreOverlayScrollEvent) {
+                    ignoreOverlayScrollEvent = false;
+                } else {
                     if (event.getTypeInt() == Event.ONSCROLL) {
+                        ignoreTableScrollEvent = true;
                         applyOverlayToScrollpanel();
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     private void applyScrollpanelToOverlay() {
@@ -150,7 +168,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         }
         overlayWidget.removeFromParent();
     }
-    
+
     @Override
     public void setWidget(Widget w) {
         if (observer != null) {
