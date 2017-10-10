@@ -37,9 +37,9 @@
         <value>C:\apps\ChromeSeleniumDriver\chromedriver.exe</value>
      </system-property>
      <system-property>
-        <name>webdriver.firefox.bin</name>
+        <name>webdriver.gecko.driver</name>
         <!-- Default binary location on Windows: -->
-        <value>c:\Program Files (x86)\Mozilla Firefox 24\firefox.exe</value>
+        <value>c:\path\to\geckodriver.exe</value>
         <!--  -->
         <!-- Default binary location on Linux: -->
         <!-- <value>/usr/bin/firefox</value> --> 
