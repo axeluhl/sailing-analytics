@@ -1938,4 +1938,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chooseDifferentDimensionTitle();
     String chooseDifferentDimensionMessage();
     String pleaseSelectADimension();
+    String minManeuverEnteringAbsTWA();
+    String maxManeuverEnteringAbsTWA();
+    String minManeuverExitingAbsTWA();
+    String maxManeuverExitingAbsTWA();
 }

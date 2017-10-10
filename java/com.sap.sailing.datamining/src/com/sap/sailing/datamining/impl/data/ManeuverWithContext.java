@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -105,6 +106,14 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     private Double getAbsTWAAtTimepoint(TimePoint timepoint) {
+        Double twa = getTWAAtTimepoint(timepoint);
+        if(twa == null) {
+            return null;
+        }
+        return Math.abs(twa);
+    }
+    
+    private Double getTWAAtTimepoint(TimePoint timepoint) {
         Wind wind = trackedLegOfCompetitor.getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
                 .getWind(maneuver.getPosition(), timepoint);
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext()
@@ -114,8 +123,8 @@ public class ManeuverWithContext implements HasManeuverContext {
             competitorTrack.lockForRead();
             try {
                 SpeedWithBearing speedWithBearing = competitorTrack.getEstimatedSpeed(timepoint);
-                double absTWA = Math.abs(wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees());
-                return absTWA;
+                double twa = wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees();
+                return twa;
             } finally {
                 competitorTrack.unlockAfterRead();
             }
@@ -131,5 +140,17 @@ public class ManeuverWithContext implements HasManeuverContext {
     @Override
     public Double getRatioBetweenManeuverEnteringAndExitingSpeed() {
         return getManeuverEnteringSpeed() / getManeuverExitingSpeed();
+    }
+
+    @Override
+    public Tack getTackBeforeManeuver() {
+        Double twa = getTWAAtTimepoint(maneuver.getTimePointBefore());
+        if(twa == null) {
+            return null;
+        }
+        if(twa < 0) {
+            return Tack.PORT;
+        }
+        return Tack.STARBOARD;
     }
 }

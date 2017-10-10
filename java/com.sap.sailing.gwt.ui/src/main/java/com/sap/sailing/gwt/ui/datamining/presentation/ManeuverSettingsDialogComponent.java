@@ -29,6 +29,10 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
     private DoubleBox maxManeuverEnteringSpeedBox;
     private DoubleBox minManeuverExitingSpeedBox;
     private DoubleBox maxManeuverExitingSpeedBox;
+    private DoubleBox minManeuverEnteringAbsTWA;
+    private DoubleBox maxManeuverEnteringAbsTWA;
+    private DoubleBox minManeuverExitingAbsTWA;
+    private DoubleBox maxManeuverExitingAbsTWA;
 
     public ManeuverSettingsDialogComponent(ManeuverSettings settings) {
         this.settings = settings;
@@ -38,7 +42,7 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(6, 2);
+        Grid grid = new Grid(10, 2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -75,13 +79,33 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
         grid.setWidget(5, 0, maxManeuverExitingSpeedLabel);
         maxManeuverExitingSpeedBox = dialog.createDoubleBox(settings.getMaxManeuverExitingSpeedInKnots(), 10);
         grid.setWidget(5, 1, maxManeuverExitingSpeedBox);
+        
+        Label minManeuverEnteringAbsTWALabel = dialog.createLabel(stringMessages.minManeuverEnteringAbsTWA());
+        grid.setWidget(6, 0, minManeuverEnteringAbsTWALabel);
+        minManeuverEnteringAbsTWA = dialog.createDoubleBox(settings.getMinManeuverEnteringAbsTWA(), 10);
+        grid.setWidget(6, 1, minManeuverEnteringAbsTWA);
+
+        Label maxManeuverEnteringAbsTWALabel = dialog.createLabel(stringMessages.maxManeuverEnteringAbsTWA());
+        grid.setWidget(7, 0, maxManeuverEnteringAbsTWALabel);
+        maxManeuverEnteringAbsTWA = dialog.createDoubleBox(settings.getMaxManeuverEnteringAbsTWA(), 10);
+        grid.setWidget(7, 1, maxManeuverEnteringAbsTWA);
+        
+        Label minManeuverExitingAbsTWALabel = dialog.createLabel(stringMessages.minManeuverExitingAbsTWA());
+        grid.setWidget(8, 0, minManeuverExitingAbsTWALabel);
+        minManeuverExitingAbsTWA = dialog.createDoubleBox(settings.getMinManeuverExitingAbsTWA(), 10);
+        grid.setWidget(8, 1, minManeuverExitingAbsTWA);
+
+        Label maxManeuverExitingAbsTWALabel = dialog.createLabel(stringMessages.maxManeuverExitingAbsTWA());
+        grid.setWidget(9, 0, maxManeuverExitingAbsTWALabel);
+        maxManeuverExitingAbsTWA = dialog.createDoubleBox(settings.getMaxManeuverExitingAbsTWA(), 10);
+        grid.setWidget(9, 1, maxManeuverExitingAbsTWA);
     }
 
     @Override
     public ManeuverSettings getResult() {
         return new ManeuverSettingsImpl(minManeuverDurationBox.getValue(), maxManeuverDurationBox.getValue(),
                 minManeuverEnteringSpeedBox.getValue(), maxManeuverEnteringSpeedBox.getValue(),
-                minManeuverExitingSpeedBox.getValue(), maxManeuverExitingSpeedBox.getValue());
+                minManeuverExitingSpeedBox.getValue(), maxManeuverExitingSpeedBox.getValue(), minManeuverEnteringAbsTWA.getValue(), maxManeuverEnteringAbsTWA.getValue(), minManeuverExitingAbsTWA.getValue(), maxManeuverExitingAbsTWA.getValue());
     }
 
     @Override

@@ -23,4 +23,12 @@ public abstract class ManeuverSettings extends SerializableSettings {
 
     public abstract Double getMaxManeuverExitingSpeedInKnots();
 
+    public abstract Double getMinManeuverEnteringAbsTWA();
+
+    public abstract Double getMaxManeuverEnteringAbsTWA();
+
+    public abstract Double getMinManeuverExitingAbsTWA();
+
+    public abstract Double getMaxManeuverExitingAbsTWA();
+
 }

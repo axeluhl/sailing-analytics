@@ -14,12 +14,16 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasManeuverContext> {
+public class ManeuverRetrievalProcessor
+        extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasManeuverContext> {
 
     private final ManeuverSettings settings;
 
-    public ManeuverRetrievalProcessor(ExecutorService executor, Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings, int retrievalLevel) {
-        super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers, retrievalLevel);
+    public ManeuverRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings,
+            int retrievalLevel) {
+        super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers,
+                retrievalLevel);
         this.settings = settings;
     }
 
@@ -32,7 +36,7 @@ public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
                 Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
                     ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, maneuver);
-                    // Compute only figures which are really required for filtering
+                    // Compute only numbers which are really required for filtering
                     double maneuverDuration = settings.getMinManeuverDuration() != null
                             || settings.getMaxManeuverDuration() != null ? maneuverWithContext.getManeuverDuration()
                                     : 0;
@@ -42,6 +46,10 @@ public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
                     double maneuverExitingSpeed = settings.getMinManeuverExitingSpeedInKnots() != null
                             || settings.getMaxManeuverExitingSpeedInKnots() != null
                                     ? maneuverWithContext.getManeuverExitingSpeed() : 0;
+                    double maneuverEnteringAbsTWA = settings.getMinManeuverEnteringAbsTWA() != null
+                            ? maneuverWithContext.getEnteringAbsTWA() : 0;
+                    double maneuverExitingAbsTWA = settings.getMinManeuverExitingAbsTWA() != null
+                            ? maneuverWithContext.getExitingAbsTWA() : 0;
 
                     if (!(settings.getMinManeuverDuration() != null
                             && maneuverDuration < settings.getMinManeuverDuration()
@@ -54,7 +62,15 @@ public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
                             || settings.getMinManeuverExitingSpeedInKnots() != null
                                     && maneuverExitingSpeed < settings.getMinManeuverExitingSpeedInKnots()
                             || settings.getMaxManeuverExitingSpeedInKnots() != null
-                                    && maneuverExitingSpeed > settings.getMaxManeuverExitingSpeedInKnots())) {
+                                    && maneuverExitingSpeed > settings.getMaxManeuverExitingSpeedInKnots()
+                            || settings.getMinManeuverEnteringAbsTWA() != null
+                                    && maneuverEnteringAbsTWA < settings.getMinManeuverEnteringAbsTWA()
+                            || settings.getMaxManeuverEnteringAbsTWA() != null
+                                    && maneuverEnteringAbsTWA > settings.getMaxManeuverEnteringAbsTWA()
+                            || settings.getMinManeuverExitingAbsTWA() != null
+                                    && maneuverExitingAbsTWA < settings.getMinManeuverExitingAbsTWA()
+                            || settings.getMaxManeuverExitingAbsTWA() != null
+                                    && maneuverExitingAbsTWA > settings.getMaxManeuverExitingAbsTWA())) {
 
                         maneuversWithContext.add(maneuverWithContext);
                     }

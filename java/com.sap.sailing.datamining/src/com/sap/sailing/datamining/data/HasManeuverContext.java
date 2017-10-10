@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.data;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -16,6 +17,9 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Dimension(messageKey = "ToSide", ordinal = 16)
     NauticalSide getToSide();
+    
+    @Dimension(messageKey = "TackBeforeManeuver")
+    Tack getTackBeforeManeuver();
 
     @Statistic(messageKey = "AbsoluteDirectionChange", resultDecimals = 2, ordinal = 3)
     Double getAbsoluteDirectionChangeInDegrees();
