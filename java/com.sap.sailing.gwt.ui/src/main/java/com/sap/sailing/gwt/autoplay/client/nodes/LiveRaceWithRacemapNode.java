@@ -49,7 +49,7 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
 
                     @Override
                     public void onSuccess(RVWrapper result) {
-                        place.setRaceMap(result.raceboardPerspective, result.csel);
+                        place.setRaceMap(result.raceboardPerspective, result.csel,result.raceboardTimer,result.creationTimeProvider);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
                         getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLiveRace().getRegattaName(),

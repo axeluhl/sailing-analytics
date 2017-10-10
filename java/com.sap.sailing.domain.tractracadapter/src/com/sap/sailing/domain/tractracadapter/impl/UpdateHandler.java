@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -30,6 +29,7 @@ import com.sap.sailing.domain.tractracadapter.UpdateResponse;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sse.common.Duration;
 
 public class UpdateHandler {
     
@@ -145,27 +145,54 @@ public class UpdateHandler {
         return reader;
     }
 
-    protected void sendWithPayload(HttpURLConnection connection, String payload) throws IOException {
-        DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-        writer.writeBytes(payload);
-        writer.flush();
-        writer.close();
+    protected HttpURLConnection setConnectionProperties(HttpURLConnection connection) throws IOException {
+        return followRedirects(connection, c->{
+            c.setRequestMethod(HttpGetRequestMethod);
+            c.setDoOutput(false);
+            c.setUseCaches(false);
+        });
+    }
+    
+    protected HttpURLConnection setConnectionPropertiesAndSendWithPayload(HttpURLConnection connection, String payload) throws IOException {
+        return followRedirects(connection, c-> {
+            c.setRequestMethod(HttpPostRequestMethod);
+            c.setDoOutput(true);
+            c.setUseCaches(false);
+            c.setRequestProperty(ContentType, ContentTypeApplicationJson);
+            c.addRequestProperty(ContentLength, String.valueOf(payload.getBytes().length));
+            DataOutputStream writer = new DataOutputStream(c.getOutputStream());
+            writer.writeBytes(payload);
+            writer.flush();
+            writer.close();
+        });
+    }
+    
+    @FunctionalInterface
+    private static interface ConnectionConsumer {
+        void consume(HttpURLConnection connection) throws IOException;
+    }
+    
+    private HttpURLConnection followRedirects(HttpURLConnection connection, ConnectionConsumer connectionConsumer) throws IOException {
+        // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
+        final int HTTP_MAX_REDIRECTS = 5;
+        int redirects = 0;
+        int responseCode;
+        do {
+            connectionConsumer.consume(connection);
+            connection.setReadTimeout((int) Duration.ONE_MINUTE.times(10).asMillis());
+            responseCode = connection.getResponseCode();
+            if ((connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
+                || connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) && redirects < HTTP_MAX_REDIRECTS) {
+                String location = connection.getHeaderField("Location");
+                final URL nextUrl = new URL(location);
+                connection = (HttpURLConnection) nextUrl.openConnection();
+                redirects++;
+            }
+        } while ((responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) && redirects < HTTP_MAX_REDIRECTS);
+        return connection;
     }
 
-    protected void setConnectionProperties(HttpURLConnection connection) throws ProtocolException {
-        connection.setRequestMethod(HttpGetRequestMethod);
-        connection.setDoOutput(false);
-        connection.setUseCaches(false);
-    }
-    
-    protected void setConnectionProperties(HttpURLConnection connection, String payload) throws ProtocolException {
-        connection.setRequestMethod(HttpPostRequestMethod);
-        connection.setDoOutput(true);
-        connection.setUseCaches(false);
-        connection.setRequestProperty(ContentType, ContentTypeApplicationJson);
-        connection.addRequestProperty(ContentLength, String.valueOf(payload.getBytes().length));
-    }
-    
     protected boolean isActive() {
         return this.active;
     }

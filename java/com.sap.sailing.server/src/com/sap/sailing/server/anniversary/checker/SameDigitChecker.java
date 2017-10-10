@@ -7,7 +7,8 @@ import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
 
 /**
- * This checker adds all races that are the 10kth,25kth,50kth or 75kth or are a factor 10 of one of those.
+ * This {@link AnniversaryChecker} implementation determines all repdigit race counts starting at 11,111 as an
+ * anniversary, except those containing 9, because they are too close to {@link QuarterChecker}'s 10^n anniversaries.
  */
 public class SameDigitChecker implements AnniversaryChecker {
     private final List<Integer> pastAnniversaries;
@@ -26,7 +27,7 @@ public class SameDigitChecker implements AnniversaryChecker {
 
         int amount = 5;
         while (true) {
-            // we do not use the 9 digit, as it is too close to the 10*x from the Quarterchecker
+            // we do not use the 9 digit, as it is too close to the 10^n from the QuarterChecker
             for (int digit = 1; digit < 9; digit++) {
                 String digitAsString = String.valueOf(digit);
                 String toTest = "";

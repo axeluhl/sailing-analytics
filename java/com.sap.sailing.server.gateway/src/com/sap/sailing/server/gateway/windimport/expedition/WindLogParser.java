@@ -25,70 +25,69 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindLogParser {
+    /**
+     * Collects partial wind data until everything is there to create a Wind instance.
+     * 
+     * @author D047974
+     *
+     */
+    private static class WindBuffer {
+        /**
+         * The 1900 Date System http://support.microsoft.com/kb/180162/en-us
+         */
+        private static final Calendar EXCEL_EPOCH_START = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        static {
+            EXCEL_EPOCH_START.set(1899, Calendar.DECEMBER, 30, 0, 0, 0);
+            EXCEL_EPOCH_START.set(Calendar.MILLISECOND, 0);
+        }
+        private static final BigDecimal MILLISECONDS_PER_DAY = BigDecimal.valueOf(24 * 60 * 60 * 1000);
 
-	/**
-	 * Collects partial wind data until everything is there to create a Wind instance.
-	 * @author D047974
-	 *
-	 */
-	private static class WindBuffer {
-		/**
-		 * The 1900 Date System http://support.microsoft.com/kb/180162/en-us
-		 */
-		private static final Calendar EXCEL_EPOCH_START = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		static {
-			EXCEL_EPOCH_START.set(1899, Calendar.DECEMBER, 30, 0, 0, 0);
-			EXCEL_EPOCH_START.set(Calendar.MILLISECOND, 0);
-		}
-		private static final BigDecimal MILLISECONDS_PER_DAY = BigDecimal.valueOf(24 * 60 * 60 * 1000);
+        private TimePoint timePoint;
+        private Position position;
+        private SpeedWithBearing trueWindSpeedWithBearing;
 
-		private TimePoint timePoint;
-		private Position position;
-		private SpeedWithBearing trueWindSpeedWithBearing;
-
-		public void updateTime(String time_ExcelEpoch) {
+        public void updateTime(String time_ExcelEpoch) {
             if (!time_ExcelEpoch.trim().isEmpty()) {
                 BigDecimal timeStamp = new BigDecimal(time_ExcelEpoch);
                 long millisecondsSinceExcelEpochStart = timeStamp.multiply(MILLISECONDS_PER_DAY).longValue();
-    			this.timePoint = new MillisecondsTimePoint(EXCEL_EPOCH_START.getTimeInMillis() + millisecondsSinceExcelEpochStart);
+                this.timePoint = new MillisecondsTimePoint(
+                        EXCEL_EPOCH_START.getTimeInMillis() + millisecondsSinceExcelEpochStart);
             }
+        }
 
-		}
+        public void updateWindData(String trueWindSpeedData, String trueWindDirectionData) {
+            if (!trueWindSpeedData.trim().isEmpty() && !trueWindDirectionData.trim().isEmpty()) {
+                double trueWindSpeed = Double.parseDouble(trueWindSpeedData);
+                double trueWindDirection = Double.parseDouble(trueWindDirectionData);
+                Bearing trueWindBearing = new DegreeBearingImpl(trueWindDirection + 180);
+                this.trueWindSpeedWithBearing = new KnotSpeedWithBearingImpl(trueWindSpeed, trueWindBearing);
+            }
+        }
 
-		public void updateWindData(String trueWindSpeedData, String trueWindDirectionData) {
-			if (!trueWindSpeedData.trim().isEmpty() && !trueWindDirectionData.trim().isEmpty()) {
-				double trueWindSpeed = Double.parseDouble(trueWindSpeedData);
-				double trueWindDirection = Double.parseDouble(trueWindDirectionData);
-				Bearing trueWindBearing = new DegreeBearingImpl(trueWindDirection + 180);
-				this.trueWindSpeedWithBearing = new KnotSpeedWithBearingImpl(trueWindSpeed, trueWindBearing);
-			}
-		}
+        public void updatePosition(String latData, String lonData) {
+            if (!latData.trim().isEmpty() && !lonData.trim().isEmpty()) {
+                double lat = Double.parseDouble(latData);
+                double lon = Double.parseDouble(lonData);
+                this.position = new DegreePosition(lat, lon);
+            }
+        }
 
-		public void updatePosition(String latData, String lonData) {
-			if (!latData.trim().isEmpty() && !lonData.trim().isEmpty()) {
-				double lat = Double.parseDouble(latData);
-				double lon = Double.parseDouble(lonData);
+        public Wind createWindIfReady() {
+            if ((timePoint != null) && (position != null) && (trueWindSpeedWithBearing != null)) {
+                WindImpl result = new WindImpl(position, timePoint, trueWindSpeedWithBearing);
+                reset();
+                return result;
+            } else {
+                return null;
+            }
+        }
 
-				this.position = new DegreePosition(lat, lon);
-			}
-		}
-
-		public Wind createWindIfReady() {
-			if ((timePoint != null) && (position != null) && (trueWindSpeedWithBearing != null)) {
-				WindImpl result = new WindImpl(position, timePoint, trueWindSpeedWithBearing);
-				reset();
-				return result;
-			} else {
-				return null;
-			}
-		}
-
-		private void reset() {
-			timePoint = null;
-			position = null;
-			trueWindSpeedWithBearing = null;
-		}
-	}
+        private void reset() {
+            timePoint = null;
+            position = null;
+            trueWindSpeedWithBearing = null;
+        }
+    }
 
     private static final String COL_NAME_TIME_STAMP = "GPS Time";
     private static final String COL_NAME_TRUE_WIND_SPEED = "Tws";
