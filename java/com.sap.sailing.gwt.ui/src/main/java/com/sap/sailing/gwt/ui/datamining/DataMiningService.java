@@ -17,6 +17,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 
 public interface DataMiningService extends RemoteService {
 
@@ -28,9 +29,7 @@ public interface DataMiningService extends RemoteService {
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName);
 
     HashSet<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
-    HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
-    HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
+    ReducedDimensionsDTO getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
 
     ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeName);
@@ -49,5 +48,4 @@ public interface DataMiningService extends RemoteService {
             PredefinedQueryIdentifier identifier, String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
-
 }

@@ -34,6 +34,7 @@ import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -48,6 +49,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
@@ -133,34 +135,29 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, dataRetrieverChainDefinitionDTO.getName()));
-        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
-        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions = getDataMiningServer()
-                .getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
-        return dimensionsMappedByLevelAsDTOs(dimensions, localeInfoName);
-    }
-    
-    @Override
-    public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
+    public ReducedDimensionsDTO getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
         SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, dataRetrieverChainDefinitionDTO.getName()));
         DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
-        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = getDataMiningServer()
-                .getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
-        return dimensionsMappedByLevelAsDTOs(reducedDimensions, localeInfoName);
+        ReducedDimensions reducedDimensions = getDataMiningServer().getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+        return reducedDimensionsAsDTO(reducedDimensions, localeInfoName);
     }
 
-    private HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> dimensionsMappedByLevelAsDTOs(
-            Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions, String localeInfoName) {
+    private ReducedDimensionsDTO reducedDimensionsAsDTO(
+            ReducedDimensions dimensions, String localeInfoName) {
         HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> dimensionDTOs = new HashMap<>();
         ResourceBundleStringMessages stringMessages = getDataMiningServer().getStringMessages();
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
-        for (Entry<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsEntry : dimensions.entrySet()) {
+        for (final Entry<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsEntry : dimensions.getReducedDimensions().entrySet()) {
             dimensionDTOs.put(dtoFactory.createDataRetrieverLevelDTO(dimensionsEntry.getKey(), stringMessages, locale),
                               functionsAsDTOs(dimensionsEntry.getValue(), localeInfoName));
         }
-        return dimensionDTOs;
+        HashMap<FunctionDTO, FunctionDTO> fromOriginalToReducedDTO = new HashMap<>();
+        for (final Entry<Function<?>, Function<?>> fromOriginalToReduced : dimensions.getFromOriginalDimensionToReducedDimension().entrySet()) {
+            fromOriginalToReducedDTO.put(dtoFactory.createFunctionDTO(fromOriginalToReduced.getKey(), stringMessages, locale),
+                    dtoFactory.createFunctionDTO(fromOriginalToReduced.getValue(), stringMessages, locale));
+        }
+        return new ReducedDimensionsDTO(dimensionDTOs, fromOriginalToReducedDTO);
     }
     
     private HashSet<FunctionDTO> functionsAsDTOs(Iterable<Function<?>> functions, String localeInfoName) {
@@ -331,5 +328,4 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
     }
-
 }

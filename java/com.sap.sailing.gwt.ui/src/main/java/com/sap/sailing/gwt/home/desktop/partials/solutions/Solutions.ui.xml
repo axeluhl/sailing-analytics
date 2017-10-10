@@ -1,21 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:sb="urn:import:com.sap.sailing.gwt.home.shared.partials.storebadges">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res"
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.desktop.partials.solutions.SolutionsResources" />
-    <ui:style>
-        .storeBadgesContainer>a>img {
-            height: 60px;
-            width: auto;
-            margin-right: 10px;
-        }
-        .storeBadgesContainer {
-            margin: 20px 0px;
-        }
-    </ui:style>
 	<g:HTMLPanel>
 		<!-- Page displays all solutions -->
 		<div class="{local_res.css.solutions}">
@@ -136,15 +126,7 @@
 								<p>
 									<ui:text from='{i18n.contentSapSailingRaceManager}' />
 								</p>
-                                <div 
-                                    class="{style.storeBadgesContainer}"
-                                    >
-                                    <a  ui:field="raceManagerPlayStoreLinkUi"
-                                        target="_blank"
-                                        ><img
-                                            ui:field="raceManagerPlayStoreImgUi" 
-                                            alt="Get it on Google Play" /></a>
-                                </div>
+								<sb:PlayStoreBadge targetUrl="{i18n.playstoreRacecommitteeApp}"/>
 								<g:Anchor ui:field="raceCommitteeAppDetailsAnchor"
 									styleName="{res.mainCss.button}">
 									<ui:text from='{i18n.sapSailingRaceManagerReadMore}' />
@@ -164,22 +146,8 @@
 							<p>
 								<ui:text from='{i18n.contentSapSailInSight}' />
 							</p>
-							<div class="{style.storeBadgesContainer}">
-								<a  ui:field="inSightAppStoreLinkUi"
-									target="_blank"
-								><img
-									ui:field="inSightAppStoreImgUi"
-									alt="Get it on AppStore"
-								/></a>
-							</div>
-							<div class="{style.storeBadgesContainer}">
-								<a  ui:field="inSightPlayStoreLinkUi"
-									target="_blank"
-								><img
-									ui:field="inSightPlayStoreImgUi"
-									alt="Get it on Google Play"
-									/></a>
-							</div>
+							<sb:AppStoreBadge targetUrl="{i18n.appstoreSapSailInsight}"/>
+							<sb:PlayStoreBadge targetUrl="{i18n.playstoreInsightApp}"/>
 							<g:Anchor ui:field="inSightAppDetailsAnchor"
 								styleName="{res.mainCss.button}">
 								<ui:text from='{i18n.sapSailInSightReadMore}' />
@@ -199,16 +167,7 @@
 								<p>
 									<ui:text from='{i18n.contentSapSailingBuoyPinger}' />
 								</p>
-								<div
-									class="{style.storeBadgesContainer}"
-								>
-									<a  ui:field="buoyPingerPlayStoreLinkUi"
-										target="_blank"
-									><img
-										ui:field="buoyPingerPlayStoreImgUi"
-										alt="Get it on Google Play"
-									/></a>
-								</div>
+								<sb:PlayStoreBadge targetUrl="{i18n.playStoreBuoyPingerApp}"/>
 								<g:Anchor ui:field="buoyPingerAppDetailsAnchor"
 									styleName="{res.mainCss.button}">
 									<ui:text from='{i18n.sapSailingBuoyPingerReadMore}' />

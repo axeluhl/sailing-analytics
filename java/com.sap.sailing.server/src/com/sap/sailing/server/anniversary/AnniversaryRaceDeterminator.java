@@ -23,14 +23,14 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * This implements the calculation and management of anniversary races. The base of the anniversary calculation is a
- * list of races consisting of known remote races taken from {@link RemoteSailingServerSet} and the set of locally
- * available races taken from {@link RacingEventService}. The anniversaries to be found are defined by a set of
- * {@link AnniversaryChecker} instances given to the constructor. On every update of the remote race list in
- * {@link RemoteSailingServerSet}, a list of all known races is created ordered by the startTimePoint. With this,
- * anniversaries are defined by their startTimePoint at the moment when the list exceeds a number that matches an
- * anniversary to be found. Even if an older race is added afterwards, the initially determined nth race will stay the
- * same.
+ * This class implements the calculation and management of anniversary races. The base of the anniversary calculation is
+ * a list of {@link SimpleRaceInfo races} consisting of known remote races taken from {@link RemoteSailingServerSet} and
+ * the set of locally available races taken from {@link RacingEventService}. The anniversaries to be found are defined
+ * by a set of {@link AnniversaryChecker} instances given to the constructor. On every
+ * {@link AnniversaryRaceDeterminator#update() update} a list of all known races is created and ordered by the
+ * startTimePoint. With this, anniversaries are defined by their startTimePoint at the moment when the list exceeds a
+ * number that matches an anniversary to be found. Even if an older race is added afterwards, the initially determined
+ * nth race will stay the same.
  */
 public class AnniversaryRaceDeterminator {
     private static final Logger logger = Logger.getLogger(AnniversaryRaceDeterminator.class.getName());
@@ -45,6 +45,10 @@ public class AnniversaryRaceDeterminator {
     private volatile Pair<Integer, AnniversaryType> nextAnniversary;
     private volatile int currentRaceCount;
 
+    /**
+     * Interface for checker classes which are passed to the {@link AnniversaryRaceDeterminator}'s constructor in order to
+     * determine anniversary numbers based on the {@link AnniversaryChecker#update(int) provided race count}.
+     */
     public interface AnniversaryChecker {
 
         /**
@@ -120,8 +124,8 @@ public class AnniversaryRaceDeterminator {
     }
 
     /**
-     * Determines and stores anniversary that weren't found before. For every newly found anniversary, the details need
-     * to be retrieved from the server where the race is hosted.
+     * Determines and stores anniversary that weren't found before. For every newly found anniversary, the
+     * {@link DetailedRaceInfo detail information} need to be retrieved from the server where the race is hosted.
      */
     private void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
         if (isStarted.get()) {

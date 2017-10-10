@@ -55,7 +55,7 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
      * Implements rule 13.5 of the Extreme Sailing Series notice of race as of August 2012.
      */
     @Override
-    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint) {
+    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
         assert o1Scores.size() == o2Scores.size();
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);

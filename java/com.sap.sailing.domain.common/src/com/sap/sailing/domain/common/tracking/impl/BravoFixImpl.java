@@ -59,7 +59,12 @@ public class BravoFixImpl implements BravoFix {
 
     @Override
     public boolean isFoiling() {
-        return getRideHeight().compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
+        return isFoiling(MIN_FOILING_HEIGHT_THRESHOLD);
+    }
+    
+    @Override
+    public boolean isFoiling(Distance minimumRideHeight) {
+        return getRideHeight().compareTo(minimumRideHeight) >= 0;
     }
 
     @Override

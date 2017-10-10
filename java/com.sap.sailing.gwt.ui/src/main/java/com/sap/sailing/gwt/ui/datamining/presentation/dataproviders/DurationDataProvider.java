@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Duration;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class DurationDataProvider extends AbstractNumericDataProvider<Duration> {
+public class DurationDataProvider extends AbstractNumericDataProviderWithStaticMappings<Duration> {
     private static final String DAYS = "Days";
     private static final String HOURS = "Hours";
     private static final String MINUTES = "Minutes";
@@ -34,7 +34,7 @@ public class DurationDataProvider extends AbstractNumericDataProvider<Duration> 
     }
 
     @Override
-    public String getLocalizedNameForDataKey(StringMessages stringMessages, String dataKey) {
+    public String getLocalizedNameForDataKey(QueryResultDTO<?> result, StringMessages stringMessages, String dataKey) {
         switch (dataKey) {
         case DAYS:
             return stringMessages.days();

@@ -14,7 +14,7 @@ public class LoginHintPopup extends PopupPanel {
     protected final LoginHintContent content;
     private Runnable dismissCallback;
 
-    public LoginHintPopup(AuthenticationManager authenticationManager, Runnable moreInfoCallback) {
+    public LoginHintPopup(AuthenticationManager authenticationManager, Runnable moreInfoCallback, Runnable toLogin) {
         LOCAL_CSS.ensureInjected();
         this.setStyleName(LOCAL_CSS.flyover());
         ensureDebugId("loginHintPopup");
@@ -26,6 +26,10 @@ public class LoginHintPopup extends PopupPanel {
             hide();
             dismissCallback.run();
             moreInfoCallback.run();
+        }, () -> {
+            if(toLogin != null){
+                toLogin.run();
+            }
         });
         content.addStyleName(LOCAL_CSS.flyover_content());
 
