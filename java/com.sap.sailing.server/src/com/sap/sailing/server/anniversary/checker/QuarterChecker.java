@@ -7,7 +7,8 @@ import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
 
 /**
- * This checker adds all races that are the 10kth,25kth,50kth or 75kth or are a factor x*10 of one of those.
+ * This {@link AnniversaryChecker} implementation determines race counts of 10000, 25000, 50000 and 75000 as well as all
+ * the powers of 10 of these values as an anniversary.
  */
 public class QuarterChecker implements AnniversaryChecker {
     private final static int[] ANNIVERSARIES = new int[] { 10000, 25000, 50000, 75000 };

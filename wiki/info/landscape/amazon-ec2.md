@@ -371,7 +371,7 @@ cp -rf /home/sailing/servers/server/logs/* /var/log/old/<event-name>/<instance-p
 # <EVENT> <YEAR>
 Use Event-ARCHIVE-SSL-Redirect <EVENT><YEAR>.sapsailing.com "<EVENT-UUID>"
 ```
-- Check the Apache config is correct before reloading it via `apachtctl configtest`
+- Check the Apache config is correct before reloading it via `apachectl configtest`
 - When `SYNTAX OK` go ahead with reload `/etc/init.d/httpd reload`
 - Now let us point the public towards the Archive server with removing the Route53 DNS entry for the event
 - Make sure that you keep running ELB and Master server in it for at least 12 hours, as DNS servers around the world will cache the old entry. If you would already remove ELB and Master, this would result in people may not reaching your event anymore

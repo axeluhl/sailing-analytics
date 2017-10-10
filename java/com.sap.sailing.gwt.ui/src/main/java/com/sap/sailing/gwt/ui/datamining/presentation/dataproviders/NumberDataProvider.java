@@ -6,7 +6,7 @@ import java.util.function.Function;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class NumberDataProvider extends AbstractNumericDataProvider<Number> {
+public class NumberDataProvider extends AbstractNumericDataProviderWithStaticMappings<Number> {
     private final static String FLOAT = "Float";
     private final static String INTEGER = "Integer";
 
@@ -44,7 +44,7 @@ public class NumberDataProvider extends AbstractNumericDataProvider<Number> {
     }
 
     @Override
-    public String getLocalizedNameForDataKey(StringMessages stringMessages, String dataKey) {
+    public String getLocalizedNameForDataKey(QueryResultDTO<?> result, StringMessages stringMessages, String dataKey) {
         switch (dataKey) {
         case FLOAT:
             return stringMessages.floatNumber();

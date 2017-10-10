@@ -1,7 +1,7 @@
 package com.sap.sailing.server.trackfiles.impl.doublefix;
 
-
+@FunctionalInterface
 public interface DoubleFixProcessor {
     void accept(DoubleVectorFixData fix);
-    void finish();
+    default void finish() {}
 }

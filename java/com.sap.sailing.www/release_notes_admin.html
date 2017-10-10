@@ -44,6 +44,13 @@
                               <li><tt>igtimi.client.redirect.port</tt>: redirection port; defaults to empty, using the default port for the protocol</li>
                             </ul>
                         </li>
+                        <li>When using a TracTrac update URI, errors were possible due to the incorrect use of HTTP
+                            instead of HTTPS as the URI/URL's protocol. The TracTrac server responds to an HTTP
+                            request with a response code 302 (temporary redirect), but our TracTrac connector did
+                            not handle this due to redirects that change protocols are not followed by default in
+                            Java. This has now been changed, and although it is of course better to use the correct
+                            protocol (HTTPS) right away, redirects will now be handled correctly, too.
+                        </li>
                     </ul>
 
                     <h2 class="articleSubheadline">August 2017</h2>

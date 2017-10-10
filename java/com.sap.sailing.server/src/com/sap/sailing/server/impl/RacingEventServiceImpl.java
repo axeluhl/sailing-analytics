@@ -70,7 +70,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
@@ -172,6 +171,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
@@ -266,7 +266,7 @@ import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator, EventFetcher {
+        LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -468,6 +468,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
 
     private final AnniversaryRaceDeterminator anniversaryRaceDeterminator;
+
+    /**
+     * Observes {@link TrackedRegatta} and {@link TrackedRace} instances known to trigger an update of
+     * {@link AnniversaryRaceDeterminator} if the number of anniversary race candidates changes. To do this, the
+     * instance is registered as {@link TrackedRegattaListener} on the {@link TrackedRegattaListenerManager} know by
+     * this service.
+     */
+    private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -757,7 +765,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
         anniversaryRaceDeterminator = new AnniversaryRaceDeterminator(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
-        this.trackedRegattaListener.addListener(new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator));
+        raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
+        this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
     }
 
     private void restoreTrackedRaces() {
@@ -830,6 +839,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         getRaceLogStore().clear();
         getRegattaLogStore().clear();
         anniversaryRaceDeterminator.clear();
+        raceChangeObserverForAnniversaryDetection.clear();
     }
 
     @Override
@@ -1476,13 +1486,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (persistent) {
             updateStoredRegatta(regatta);
         }
-        for (Event event : getAllEvents()) {
-            for (CourseArea eventCourseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseAreaId != null && eventCourseArea.getId().equals(defaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
+
         return wasCreated;
     }
 
@@ -2387,7 +2391,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 regatta.addSeries(seriesObj);
             }
         }
-        regatta.adjustEventToRegattaAssociation(this);
+
         if (regatta.isPersistent()) {
             mongoObjectFactory.storeRegatta(regatta);
         }
@@ -3102,6 +3106,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         anniversaryRaceDeterminator.clearAndStop();
         this.remoteSailingServerSet.setRetrieveRemoteRaceResult(false);
+        this.trackedRegattaListener.removeListener(raceChangeObserverForAnniversaryDetection);
+        raceChangeObserverForAnniversaryDetection.stop();
     }
 
     // Used for TESTING only

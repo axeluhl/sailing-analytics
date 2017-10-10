@@ -9,7 +9,6 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 
 public class EventDTO extends EventBaseDTO {
     private static final long serialVersionUID = -7100030301376959817L;
-    public List<RegattaDTO> regattas;
 
     private Date currentServerTime;
 
@@ -33,7 +32,6 @@ public class EventDTO extends EventBaseDTO {
         super(name, leaderboardGroups);
         this.leaderboardGroups = leaderboardGroups;
         initCurrentServerTime();
-        regattas = new ArrayList<RegattaDTO>();
     }
 
     public boolean isFakeSeries() {

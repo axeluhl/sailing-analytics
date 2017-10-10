@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistik.PreRaceStatisticsBox;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistic.PreRaceStatisticsBox;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
 import com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;

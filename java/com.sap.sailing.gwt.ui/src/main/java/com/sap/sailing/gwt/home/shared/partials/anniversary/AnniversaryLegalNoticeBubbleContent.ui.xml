@@ -1,6 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversaryLegalMessages" />
     <ui:style>
         .container {
             padding: 0 1em !important;
