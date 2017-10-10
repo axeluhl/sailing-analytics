@@ -6,6 +6,8 @@ import java.util.function.Function;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -16,6 +18,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Specific {@link SensorFixTrackImpl} used for {@link BravoFix}es.
@@ -186,26 +189,14 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * In case of a mix of {@link BravoFix} and {@link BravoExtendedFix} instances, this method may return null values
      * for specific {@link TimePoint TimePoints}.
      */
-    private <T> T getValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, T> getter) {
+    private <T, I> T getValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, T> getter,
+            Function<T, ScalableValue<I, T>> converterToScalableValue) {
         if (!hasExtendedFixes) {
             return null;
         }
-        final BravoExtendedFix fixAfter = getFirstFixAtOrAfterIfExtended(timePoint);
-        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return getter.apply(fixAfter);
-        }
-        final BravoExtendedFix fixBefore = getLastFixAtOrBeforeIfExtended(timePoint);
-        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return getter.apply(fixBefore);
-        }
-        if (fixAfter == null || fixBefore == null) {
-            // the fix is out of the TimeRange where we have fixes
-            return null;
-        }
-        // TODO interpolate if necessary
-        return getter.apply(fixBefore);
+        final com.sap.sse.common.Util.Function<BravoFix, ScalableValue<I, T>> converter =
+              fix -> converterToScalableValue.apply(getter.apply((BravoExtendedFix) fix));  
+        return getInterpolatedValue(timePoint, converter);
     }
     
     public BravoExtendedFix getFirstFixAtOrAfterIfExtended(TimePoint timePoint) {
@@ -220,26 +211,63 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Double getPortDaggerboardRakeIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortDaggerboardRake);
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortDaggerboardRake,
+                ScalableDouble::new);
     }
 
     @Override
     public Double getStbdDaggerboardRakeStbdIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdDaggerboardRake);
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdDaggerboardRake,
+                ScalableDouble::new);
     }
 
     @Override
     public Double getPortRudderRakeIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortRudderRake);
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortRudderRake,
+                ScalableDouble::new);
     }
 
     @Override
     public Double getStbdRudderRakeIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdRudderRake);
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdRudderRake,
+                ScalableDouble::new);
     }
 
     @Override
     public Bearing getMastRotationIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getMastRotation);
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getMastRotation,
+                NaivelyScalableBearing::new);
+    }
+    
+    private static class NaivelyScalableBearing implements ScalableValue<Double, Bearing> {
+        private final double deg;
+        
+        public NaivelyScalableBearing(Bearing b) {
+            deg = b.getDegrees();
+        }
+        
+        private NaivelyScalableBearing(double deg) {
+            this.deg = deg;
+        }
+        
+        @Override
+        public ScalableValue<Double, Bearing> multiply(double factor) {
+            return new NaivelyScalableBearing(deg*factor);
+        }
+
+        @Override
+        public ScalableValue<Double, Bearing> add(ScalableValue<Double, Bearing> t) {
+            return new NaivelyScalableBearing(deg+t.getValue());
+        }
+
+        @Override
+        public Bearing divide(double divisor) {
+            return new DegreeBearingImpl(deg/divisor);
+        }
+
+        @Override
+        public Double getValue() {
+            return deg;
+        }
     }
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 
-import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
@@ -21,7 +20,7 @@ public abstract class AbstractBravoDataImportTest {
     
     private DownsamplerTo1HzProcessor downsampler;
 
-    private BaseBravoDataImporterImpl bravoDataImporter;
+    protected BaseBravoDataImporterImpl bravoDataImporter;
     private int callbackCallCount = 0;
     private double sumRideHeightInMeters = 0.0;
     
@@ -44,7 +43,7 @@ public abstract class AbstractBravoDataImportTest {
                     DoubleVectorFixImporter.Callback callback,
                     TrackFileImportDeviceIdentifier trackIdentifier) {
                 final LearningBatchProcessor batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
-                downsampler = new DownsamplerTo1HzProcessor(BravoSensorDataMetadata.getTrackColumnCount(), batchProcessor);
+                downsampler = new DownsamplerTo1HzProcessor(getTrackColumnCount(), batchProcessor);
                 return downsampler;
             };
         };
