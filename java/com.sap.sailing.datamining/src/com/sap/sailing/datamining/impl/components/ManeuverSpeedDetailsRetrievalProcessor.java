@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
@@ -72,7 +71,8 @@ public class ManeuverSpeedDetailsRetrievalProcessor
             stepMillis = 1;
         }
 
-        List<BearingStep> maneuverBearingSteps = trackedRace.getTrack(competitor).getBearingSteps(maneuver.getTimePointBefore(), maneuver.getTimePointAfter(), new MillisecondsDurationImpl(stepMillis));
+        final Iterable<BearingStep> maneuverBearingSteps = trackedRace.getTrack(competitor).getBearingSteps(
+                maneuver.getTimePointBefore(), maneuver.getTimePointAfter(), new MillisecondsDurationImpl(stepMillis));
 
         NauticalSide maneuverDirection = maneuver.getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT
                 : NauticalSide.STARBOARD;

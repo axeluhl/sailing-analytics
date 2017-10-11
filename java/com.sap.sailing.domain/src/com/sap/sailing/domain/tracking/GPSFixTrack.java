@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
 import java.util.Iterator;
-import java.util.List;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Distance;
@@ -181,6 +180,6 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      *            Time distance between bearing time point
      * @return The list of bearings between the provided time range
      */
-    List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint tillTimePoint, Duration frequency);
+    Iterable<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint tillTimePoint, Duration frequency);
 
 }
