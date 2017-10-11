@@ -36,9 +36,11 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
+import com.sap.sailing.domain.tracking.BearingStep;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -1116,5 +1118,95 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     
     public static Speed getDefaultMaxSpeedForSmoothing() {
         return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
+    }
+    
+    /**
+     * Gets a list of bearings between the provided time range (inclusive the boundaries). The bearings are retrieved by
+     * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)} with the provided frequency between each bearing step.
+     * 
+     * @param track
+     *            The GPS track of competitor to use for bearings calculation
+     * @param fromTimePoint
+     *            The from time point (inclusive) for resulting bearing steps
+     * @param tillTimePoint
+     *            The till time point (inclusive) for resulting bearing steps
+     * @param frequency
+     *            Time distance between bearing time point
+     * @return The list of bearings between the provided time range
+     */
+    @Override
+    public List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint tillTimePoint, Duration frequency) {
+        List<BearingStep> relevantBearings = new ArrayList<>();
+        Bearing lastBearing = null;
+        double lastCourseChangeAngleInDegrees = 0;
+        for (TimePoint timePoint = fromTimePoint; !timePoint.after(tillTimePoint); timePoint = timePoint
+                .plus(frequency)) {
+            SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
+            if (estimatedSpeed != null) {
+                Bearing bearing = estimatedSpeed.getBearing();
+                // First bearing step supposed to have 0 as course change as
+                // it does not have any previous steps with bearings to compute bearing difference.
+                // If the condition is not met, the existing code which uses ManeuverBearingStep class will break.
+                double courseChangeAngleInDegrees = lastBearing == null ? 0
+                        : lastBearing.getDifferenceTo(bearing).getDegrees();
+
+                // In extreme cases, the getDifferenceTo() might compute a bearing in a wrong maneuver direction due to
+                // fast turn and/or inaccurate GPS during penalty circles.
+                // We need to ensure that our totalCourseChange does not get reduced erroneously. It is more likely to
+                // have a course change step sequence
+                // like 20, 70, 120, 200, 90, 20 which produces 520 degrees total course change than a sequence with 20,
+                // 70, 120, -160, 90, 20 which produces 160 degrees total course change.
+                // If we fail to take care of the signum, penalty circle computation will fail due to inconsistencies
+                // with douglas peucker fixes.
+                if (Math.abs(Math.signum(courseChangeAngleInDegrees) - Math.signum(lastCourseChangeAngleInDegrees)) == 2
+                        && Math.abs(courseChangeAngleInDegrees - lastCourseChangeAngleInDegrees) >= 180) {
+                    courseChangeAngleInDegrees += courseChangeAngleInDegrees < 0 ? 360 : -360;
+                }
+                relevantBearings.add(new BearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees));
+                lastBearing = bearing;
+                lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
+            }
+
+        }
+        return relevantBearings;
+    }
+
+    public static class BearingStepImpl implements BearingStep {
+        private static final long serialVersionUID = 6541349657098710337L;
+        
+        private final TimePoint timePoint;
+        private final SpeedWithBearing speedWithBearing;
+        private final double courseChangeInDegrees;
+
+        /**
+         * Constructs a bearing step with details about speed, bearing and course change related to the previous step.
+         * 
+         * @param timePoint
+         *            The time point when the step details have been recorded
+         * @param speedWithBearing
+         *            Speed with bearing at the provided time point
+         * @param courseChangeInDegrees
+         *            Course change in degrees compared to the previous step. Zero, if this is a first step.
+         */
+        public BearingStepImpl(TimePoint timePoint, SpeedWithBearing speedWithBearing, double courseChangeInDegrees) {
+            this.timePoint = timePoint;
+            this.speedWithBearing = speedWithBearing;
+            this.courseChangeInDegrees = courseChangeInDegrees;
+        }
+
+        @Override
+        public TimePoint getTimePoint() {
+            return timePoint;
+        }
+
+        @Override
+        public SpeedWithBearing getSpeedWithBearing() {
+            return speedWithBearing;
+        }
+
+        @Override
+        public double getCourseChangeInDegrees() {
+            return courseChangeInDegrees;
+        }
     }
 }

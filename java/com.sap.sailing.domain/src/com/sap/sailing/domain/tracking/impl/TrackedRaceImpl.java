@@ -123,6 +123,7 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.BearingStep;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -149,8 +150,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.util.TrackedRaceUtil;
-import com.sap.sailing.util.TrackedRaceUtil.BearingStep;
+import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl.BearingStepImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
@@ -3127,7 +3127,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * @return
      */
     private ComputedManeuverDetails computeManeuverDetails(Competitor competitor, TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
-        List<BearingStep> bearingStepsToAnalyze = TrackedRaceUtil.getBearingSteps(getTrack(competitor), timePointBeforeManeuver,
+        List<BearingStep> bearingStepsToAnalyze = getTrack(competitor).getBearingSteps(timePointBeforeManeuver,
                 timePointAfterManeuver, Duration.ONE_SECOND);
         
         TimePoint maneuverTimePoint = computeManeuverTimePoint(bearingStepsToAnalyze,
@@ -3272,7 +3272,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     //First bearing step supposed to have 0 as course change as
                     //it does not have any previous steps with bearings to compute bearing difference.
                     //If the condition is not met, the existing code which uses ManeuverBearingStep class will break.
-                    entry = new BearingStep(entry.getTimePoint(), entry.getSpeedWithBearing(), 0.0);
+                    entry = new BearingStepImpl(entry.getTimePoint(), entry.getSpeedWithBearing(), 0.0);
                 }
                 maneuverBearingSteps.add(entry);
             }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import java.util.Iterator;
+import java.util.List;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Distance;
@@ -12,6 +13,7 @@ import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -166,5 +168,19 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      * have everything re-calculated when needed.
      */
     void resumeValidityCaching();
+    
+    /**
+     * Gets a list of bearings between the provided time range (inclusive the boundaries). The bearings are retrieved by
+     * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)} with the provided frequency between each bearing step.
+     * 
+     * @param fromTimePoint
+     *            The from time point (inclusive) for resulting bearing steps
+     * @param tillTimePoint
+     *            The till time point (inclusive) for resulting bearing steps
+     * @param frequency
+     *            Time distance between bearing time point
+     * @return The list of bearings between the provided time range
+     */
+    List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint tillTimePoint, Duration frequency);
 
 }
