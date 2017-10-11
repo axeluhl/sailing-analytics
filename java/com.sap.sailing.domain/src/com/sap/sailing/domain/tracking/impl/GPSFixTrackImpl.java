@@ -1120,22 +1120,13 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
     }
     
-    /**
-     * Gets a list of bearings between the provided time range (inclusive the boundaries). The bearings are retrieved by
-     * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)} with the provided frequency between each bearing step.
-     * 
-     * @param track
-     *            The GPS track of competitor to use for bearings calculation
-     * @param fromTimePoint
-     *            The from time point (inclusive) for resulting bearing steps
-     * @param tillTimePoint
-     *            The till time point (inclusive) for resulting bearing steps
-     * @param samplingRate
-     *            Time distance between bearing time point
-     * @return The list of bearings between the provided time range
-     */
     @Override
-    public List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint tillTimePoint, Duration samplingRate) {
+    public List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration samplingRate) {
+        
+        if(samplingRate.asMillis() == 0) {
+            throw new IllegalArgumentException("Sampling rate must not be 0");
+        }
+        
         List<BearingStep> relevantBearings = new ArrayList<>();
         Bearing lastBearing = null;
         double lastCourseChangeAngleInDegrees = 0;
@@ -1144,8 +1135,8 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         
         for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint
                 .plus(samplingRate)) {
-            if(timePoint.after(tillTimePoint)) {
-                timePoint = tillTimePoint;
+            if(timePoint.after(toTimePoint)) {
+                timePoint = toTimePoint;
             }
             SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
             if (estimatedSpeed != null) {
@@ -1172,7 +1163,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 lastBearing = bearing;
                 lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
             }
-            if(timePoint.equals(tillTimePoint)) {
+            if(timePoint.equals(toTimePoint)) {
                 break;
             }
 
