@@ -3130,21 +3130,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             Iterable<BearingStep> bearingStepsToAnalyze, NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
         
-        //Compute course changes before and after maneuver timepoint
+        // Compute course changes before and after maneuver timepoint
         double currentCourseChangeInDegreesAfterManeuverClimax = 0;
         double currentCourseChangeInDegreesBeforeManeuverClimax = 0;
         for (BearingStep entry : bearingStepsToAnalyze) {
             double courseChangeAngleInDegrees = entry.getCourseChangeInDegrees();
             TimePoint timePoint = entry.getTimePoint();
-            if(timePoint.after(maneuverTimePoint)) {
+            if (timePoint.after(maneuverTimePoint)) {
                 currentCourseChangeInDegreesAfterManeuverClimax += courseChangeAngleInDegrees;
             } else {
                 currentCourseChangeInDegreesBeforeManeuverClimax += courseChangeAngleInDegrees;
             }
         }
         
-        //Refine the timePointBeforeManeuver by checking whether the total course changed before maneuver timepoint
-        //may be increased or kept unchanged if we cut off bearing steps one by one from the left.
+        // Refine the timePointBeforeManeuver by checking whether the total course changed before maneuver timepoint
+        // may be increased or kept unchanged if we cut off bearing steps one by one from the left.
         TimePoint refinedTimePointBeforeManeuver = null;
         SpeedWithBearing refinedSpeedWithBearingBeforeManeuver = null;
         double maxCourseChangeInDegreesBeforeManeuverClimax = currentCourseChangeInDegreesBeforeManeuverClimax;
@@ -3157,16 +3157,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
                 double courseChangeAngleInDegrees = entry.getCourseChangeInDegrees();
                 currentCourseChangeInDegreesBeforeManeuverClimax -= courseChangeAngleInDegrees;
-                
-                //adjust tolerance for zero-like value in order to be able to assign maneuver timepoint
-                //as refinedTimePointBefore. It is required due to accuracy drift in additive estimated values.
+                // adjust tolerance for zero-like value in order to be able to assign maneuver timepoint
+                // as refinedTimePointBefore. It is required due to accuracy drift in additive estimated values.
                 double currentCourseChangeForSignum = currentCourseChangeInDegreesBeforeManeuverClimax;
                 if (currentCourseChangeForSignum < 0.001 && currentCourseChangeForSignum > -0.001) {
                     currentCourseChangeForSignum = 0;
                 }
-                //Only allow consideration of the new cut step when remaining course change sign corresponds to the direction of processed maneuver.
-                //As initial maximal course change may not match the signum of direction of processed maneuver,
-                //course changes after cut operation with the right signum must get priority over max course change with wrong signum.
+                // Only allow consideration of the new cut step when remaining course change sign corresponds to the
+                // direction of processed maneuver. As initial maximal course change may not match the signum of direction of processed maneuver,
+                // course changes after cut operation with the right signum must get priority over max course change with wrong signum.
                 if (Math.abs(Math.signum(currentCourseChangeForSignum) - totalCourseChangeSignum) < 2
                         && (Math.signum(maxCourseChangeInDegreesBeforeManeuverClimax) != totalCourseChangeSignum
                                 || Math.abs(maxCourseChangeInDegreesBeforeManeuverClimax) <= Math
@@ -3176,15 +3175,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
                 }
             } else  {
-                //apply the timepoint and speed with bearing of the first maneuver bearing step as default
+                // apply the timepoint and speed with bearing of the first maneuver bearing step as default
                 refinedTimePointBeforeManeuver = entry.getTimePoint();
                 refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
                 firstLoop = false;
             }
         }
-        
-        //Refine the timePointAfterManeuver by checking whether the total course changed after maneuver timepoint
-        //may be increased or kept unchanged if we cut off bearing steps one by one from the right.
+        // Refine the timePointAfterManeuver by checking whether the total course changed after maneuver timepoint
+        // may be increased or kept unchanged if we cut off bearing steps one by one from the right.
         TimePoint refinedTimePointAfterManeuver = null;
         SpeedWithBearing refinedSpeedWithBearingAfterManeuver = null;
         double maxCourseChangeInDegreesAfterManeuverClimax = currentCourseChangeInDegreesAfterManeuverClimax;
@@ -3193,8 +3191,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         Util.addAll(bearingStepsToAnalyze, bearingStepsAsList);
         for (ListIterator<BearingStep> iterator = bearingStepsAsList.listIterator(bearingStepsAsList.size()); iterator.hasPrevious();) {
             BearingStep entry = iterator.previous();
-            if(refinedTimePointAfterManeuver == null) {
-                //apply the timepoint and speed with bearing of the last maneuver bearing step as default
+            if (refinedTimePointAfterManeuver == null) {
+                // apply the timepoint and speed with bearing of the last maneuver bearing step as default
                 refinedTimePointAfterManeuver = entry.getTimePoint();
                 refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
             }
@@ -3211,16 +3209,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             double courseChangeAngleInDegrees = entry.getCourseChangeInDegrees();
             currentCourseChangeInDegreesAfterManeuverClimax -= courseChangeAngleInDegrees;
             
-            //adjust tolerance for zero-like value in order to be able to assign maneuver timepoint
-            //as refinedTimePointAfter. It is required due to accuracy drift in additive estimated values.
+            // adjust tolerance for zero-like value in order to be able to assign maneuver timepoint
+            // as refinedTimePointAfter. It is required due to accuracy drift in additive estimated values.
             double currentCourseChangeForSignum = currentCourseChangeInDegreesAfterManeuverClimax;
             if (currentCourseChangeForSignum < 0.001 && currentCourseChangeForSignum > -0.001) {
                 currentCourseChangeForSignum = 0;
             }
-            
-            //Only allow consideration of the new cut step when remaining course change sign corresponds to the direction of processed maneuver.
-            //As initial maximal course change may not match the signum of direction of processed maneuver,
-            //course changes after cut operation with the right signum must get priority over max course change with wrong signum.
+            // Only allow consideration of the new cut step when remaining course change sign corresponds to the
+            // direction of processed maneuver.
+            // As initial maximal course change may not match the signum of direction of processed maneuver,
+            // course changes after cut operation with the right signum must get priority over max course change with
+            // wrong signum.
             if (Math.abs(Math.signum(currentCourseChangeForSignum) - totalCourseChangeSignum) < 2
                     && (Math.signum(maxCourseChangeInDegreesAfterManeuverClimax) != totalCourseChangeSignum
                             || Math.abs(maxCourseChangeInDegreesAfterManeuverClimax) <= Math
