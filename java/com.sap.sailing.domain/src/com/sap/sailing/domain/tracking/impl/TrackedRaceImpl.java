@@ -3266,18 +3266,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private TimePoint computeManeuverTimePoint(Iterable<BearingStep> maneuverBearingSteps, NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
-        double maxAngleSpeedInDegreesPerSecond = 0;
+        double maxAngleSpeedInDegreesPerMillisecond = 0;
         TimePoint maneuverTimePoint = null;
         TimePoint lastTimePoint = null;
         for (BearingStep entry : maneuverBearingSteps) {
             TimePoint timePoint = entry.getTimePoint();
             if (lastTimePoint != null) {
                 double courseChangeAngleInDegrees = entry.getCourseChangeInDegrees();
-                if(Math.signum(courseChangeAngleInDegrees) == totalCourseChangeSignum) {
-                    double angleSpeedInDegreesPerSecond = Math.abs(courseChangeAngleInDegrees
+                if (Math.signum(courseChangeAngleInDegrees) == totalCourseChangeSignum) {
+                    double angleSpeedInDegreesPerMillisecond = Math.abs(courseChangeAngleInDegrees
                             / (double) (timePoint.asMillis() - lastTimePoint.asMillis()));
-                    if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
-                        maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
+                    if (angleSpeedInDegreesPerMillisecond > maxAngleSpeedInDegreesPerMillisecond) {
+                        maxAngleSpeedInDegreesPerMillisecond = angleSpeedInDegreesPerMillisecond;
                         maneuverTimePoint = lastTimePoint;
                     }
                 }
