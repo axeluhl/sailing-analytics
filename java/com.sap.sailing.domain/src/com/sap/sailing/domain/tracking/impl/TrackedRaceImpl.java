@@ -2989,26 +2989,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
             // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
             if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
-                TimePointAndTotalCourseChangeInDegrees firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(competitor, timePointBeforeManeuver, courseBeforeManeuver, refinedManeuverDetails.getManeuverBearingSteps(), wind);
-                if(firstPenaltyCircleCompletedAt == null) {
-                    //This should really not happen!
+                TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(
+                        competitor, timePointBeforeManeuver, courseBeforeManeuver,
+                        refinedManeuverDetails.getManeuverBearingSteps(), wind);
+                if (firstPenaltyCircleCompletedAt == null) {
+                    // This should really not happen!
                     logger.warning("Maneuver detection has failed to process penaulty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null");
-                    //Use already detected maneuver details as fallback data to prevent Nullpointer
-                    firstPenaltyCircleCompletedAt = new TimePointAndTotalCourseChangeInDegrees(timePointAfterManeuver, totalCourseChangeInDegrees);
+                    // Use already detected maneuver details as fallback data to prevent Nullpointer
+                    firstPenaltyCircleCompletedAt = timePointAfterManeuver;
                 }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
                 if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt.getTimePoint());
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt);
                 }
-                ComputedManeuverDetails refinedPenaultyDetails = computeManeuverDetails(competitor, timePointBeforeManeuver, firstPenaltyCircleCompletedAt.getTimePoint(), maneuverDirection);
-                Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaultyDetails.getTimepoint(), /* extrapolate */ false);
+                ComputedManeuverDetails refinedPenaltyDetails = computeManeuverDetails(competitor, timePointBeforeManeuver, firstPenaltyCircleCompletedAt, maneuverDirection);
+                Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimepoint(), /* extrapolate */ false);
                 final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
-                        refinedPenaultyDetails.getTimepoint(), refinedPenaultyDetails.getSpeedWithBearingBefore(),
-                        refinedPenaultyDetails.getSpeedWithBearingAfter(), refinedPenaultyDetails.getTotalCourseChangeInDegrees(), maneuverLoss, timePointBeforeManeuver, timePointAfterManeuver);
+                        refinedPenaltyDetails.getTimepoint(), refinedPenaltyDetails.getSpeedWithBearingBefore(),
+                        refinedPenaltyDetails.getSpeedWithBearingAfter(), refinedPenaltyDetails.getTotalCourseChangeInDegrees(),
+                        maneuverLoss, timePointBeforeManeuver, timePointAfterManeuver);
                 result.add(maneuver);
                 // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes remain
                 if (numberOfTacks>1 || numberOfJibes>1) {
-                    result.addAll(detectManeuvers(competitor, firstPenaltyCircleCompletedAt.getTimePoint(), timePointAfterManeuver, /* ignoreMarkPassings */ true));
+                    result.addAll(detectManeuvers(competitor, firstPenaltyCircleCompletedAt, timePointAfterManeuver, /* ignoreMarkPassings */ true));
                 }
             } else {
                 if (numberOfTacks > 0) {
@@ -3042,7 +3045,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         }
                     }
                 }
-                if(Math.floor(totalCourseChangeInDegrees) != 0) {
+                if (Math.floor(totalCourseChangeInDegrees) != 0) {
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
                             speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, timePointBeforeManeuver, timePointAfterManeuver);
@@ -3053,35 +3056,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
-    private static class TimePointAndTotalCourseChangeInDegrees {
-        private final TimePoint timePoint;
-        private final double totalCourseChangeInDegrees;
-        protected TimePointAndTotalCourseChangeInDegrees(TimePoint timePoint, double totalCourseChangeInDegrees) {
-            super();
-            this.timePoint = timePoint;
-            this.totalCourseChangeInDegrees = totalCourseChangeInDegrees;
-        }
-        public TimePoint getTimePoint() {
-            return timePoint;
-        }
-        @SuppressWarnings("unused")
-        public double getTotalCourseChangeInDegrees() {
-            return totalCourseChangeInDegrees;
-        }
-    }
-    
     /**
      * Starting at <code>timePointBeforeManeuver</code>, and assuming that the group of <code>approximatedFixesAndCourseChanges</code>
      * contains at least a tack and a jibe, finds the approximated fix's time point at which one tack and one jibe have been
      * completed and for which the total course change is as close as possible to 360°.
      */
-    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(
+    private TimePoint getTimePointOfCompletionOfFirstPenaltyCircle(
             Competitor competitor, TimePoint timePointBeforeManeuver, Bearing courseBeforeManeuver, Iterable<BearingStep> maneuverBearingSteps, Wind wind) {
         double totalCourseChangeInDegrees = 0;
         double bestTotalCourseChangeInDegrees = 0; // this should be as close as possible to 360� after one tack and one gybe
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         Bearing newCourse = courseBeforeManeuver;
-        TimePointAndTotalCourseChangeInDegrees result = null;
+        TimePoint result = null;
         boolean firstEntry = true;
         for (BearingStep fixAndCourseChange : maneuverBearingSteps) {
             if(firstEntry) {
@@ -3101,13 +3087,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // It could be that both numbers increased, and one was 1 before, so now we have 1 and 2. But
                         // we can't split it up finer than two fixes, so we'll use the time point between the last two fixes
                         // instead:
-                        result = new TimePointAndTotalCourseChangeInDegrees(fixAndCourseChange.getTimePoint(), totalCourseChangeInDegrees);
+                        result = fixAndCourseChange.getTimePoint();
                     }
                     break; // don't continue into a subsequent tack/gybe sailed in conjunction with the penalty or starting the next circle
                 }
                 if (Math.abs(360-Math.abs(totalCourseChangeInDegrees)) < (Math.abs(360-Math.abs(bestTotalCourseChangeInDegrees)))) {
                     bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
-                    result = new TimePointAndTotalCourseChangeInDegrees(fixAndCourseChange.getTimePoint(), bestTotalCourseChangeInDegrees);
+                    result = fixAndCourseChange.getTimePoint();
                 } else {
                     break; // not getting closer but further away from 360�
                 }
@@ -3213,13 +3199,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
             }
             TimePoint timePoint = entry.getTimePoint();
-            if(setNextEntryAsBoundary) {
+            if (setNextEntryAsBoundary) {
                 maxCourseChangeInDegreesAfterManeuverClimax = currentCourseChangeInDegreesAfterManeuverClimax;
                 refinedTimePointAfterManeuver = timePoint;
                 refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
                 setNextEntryAsBoundary = false;
             }
-            if(timePoint.equals(maneuverTimePoint)) {
+            if (timePoint.equals(maneuverTimePoint)) {
                 break;
             }
             double courseChangeAngleInDegrees = entry.getCourseChangeInDegrees();
@@ -3228,20 +3214,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             //adjust tolerance for zero-like value in order to be able to assign maneuver timepoint
             //as refinedTimePointAfter. It is required due to accuracy drift in additive estimated values.
             double currentCourseChangeForSignum = currentCourseChangeInDegreesAfterManeuverClimax;
-            if(currentCourseChangeForSignum < 0.001 && currentCourseChangeForSignum > -0.001) {
+            if (currentCourseChangeForSignum < 0.001 && currentCourseChangeForSignum > -0.001) {
                 currentCourseChangeForSignum = 0;
             }
             
             //Only allow consideration of the new cut step when remaining course change sign corresponds to the direction of processed maneuver.
             //As initial maximal course change may not match the signum of direction of processed maneuver,
             //course changes after cut operation with the right signum must get priority over max course change with wrong signum.
-            if(Math.abs(Math.signum(currentCourseChangeForSignum) - totalCourseChangeSignum) < 2 && (Math.signum(maxCourseChangeInDegreesAfterManeuverClimax) != totalCourseChangeSignum || Math.abs(maxCourseChangeInDegreesAfterManeuverClimax) <= Math.abs(currentCourseChangeInDegreesAfterManeuverClimax))) {
+            if (Math.abs(Math.signum(currentCourseChangeForSignum) - totalCourseChangeSignum) < 2
+                    && (Math.signum(maxCourseChangeInDegreesAfterManeuverClimax) != totalCourseChangeSignum
+                            || Math.abs(maxCourseChangeInDegreesAfterManeuverClimax) <= Math
+                                    .abs(currentCourseChangeInDegreesAfterManeuverClimax))) {
                 setNextEntryAsBoundary = true;
             }
         }
-        
-        double refinedTotalCourseChangeInDegrees = maxCourseChangeInDegreesAfterManeuverClimax + maxCourseChangeInDegreesBeforeManeuverClimax;
-        ComputedManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = new ComputedManeuverEnteringAndExitingDetails(refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, refinedSpeedWithBearingBeforeManeuver, refinedSpeedWithBearingAfterManeuver, refinedTotalCourseChangeInDegrees);
+        double refinedTotalCourseChangeInDegrees = maxCourseChangeInDegreesAfterManeuverClimax
+                + maxCourseChangeInDegreesBeforeManeuverClimax;
+        ComputedManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = new ComputedManeuverEnteringAndExitingDetails(
+                refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, refinedSpeedWithBearingBeforeManeuver,
+                refinedSpeedWithBearingAfterManeuver, refinedTotalCourseChangeInDegrees);
         return maneuverEnteringAndExitingDetails;
     }
 
