@@ -264,8 +264,8 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
      * Disconnect the mutation observer.
      */
     private native void disconnectObserver() /*-{
-	if (observer) {
-	    observer.disconnect();
+	if (this.@com.sap.sse.gwt.client.panels.OverlayAssistantScrollPanel::observer) {
+	    this.@com.sap.sse.gwt.client.panels.OverlayAssistantScrollPanel::observer.disconnect();
 	}
     }-*/;
 
