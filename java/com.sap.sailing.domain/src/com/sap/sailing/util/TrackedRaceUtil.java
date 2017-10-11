@@ -49,12 +49,12 @@ public class TrackedRaceUtil {
                         : lastBearing.getDifferenceTo(bearing).getDegrees();
 
                 // In extreme cases, the getDifferenceTo() might compute a bearing in a wrong maneuver direction due to
-                // fast turn and/or inaccurate GPS during penaulty circles.
+                // fast turn and/or inaccurate GPS during penalty circles.
                 // We need to ensure that our totalCourseChange does not get reduced erroneously. It is more likely to
                 // have a course change step sequence
                 // like 20, 70, 120, 200, 90, 20 which produces 520 degrees total course change than a sequence with 20,
                 // 70, 120, -160, 90, 20 which produces 160 degrees total course change.
-                // If we fail to take care of the signum, penaulty circle computation will fail due to inconsistencies
+                // If we fail to take care of the signum, penalty circle computation will fail due to inconsistencies
                 // with douglas peucker fixes.
                 if (Math.abs(Math.signum(courseChangeAngleInDegrees) - Math.signum(lastCourseChangeAngleInDegrees)) == 2
                         && Math.abs(courseChangeAngleInDegrees - lastCourseChangeAngleInDegrees) >= 180) {

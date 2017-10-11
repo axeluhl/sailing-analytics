@@ -2742,7 +2742,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // the bearings in these variables are between approximation points
             SpeedWithBearing speedWithBearingOnApproximationFromPreviousToCurrent = previous
                     .getSpeedAndBearingRequiredToReach(current);
-            SpeedWithBearing speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges = speedWithBearingOnApproximationFromPreviousToCurrent;
             SpeedWithBearing speedWithBearingOnApproximationFromCurrentToNext; // will certainly be assigned because iter's collection's size > 2
             do {
                 GPSFixMoving next = approximationPointsIter.next();
@@ -2769,11 +2768,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // course change in different direction; cluster the course changes in same direction so far, then
                     // start new list
                     List<Maneuver> maneuvers = groupChangesInSameDirectionIntoManeuvers(competitor,
-                            speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
-                            courseChangeSequenceInSameDirection, ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd);
+                            courseChangeSequenceInSameDirection,
+                            ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd);
                     result.addAll(maneuvers);
                     courseChangeSequenceInSameDirection.clear();
-                    speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges = speedWithBearingOnApproximationFromPreviousToCurrent;
                 }
                 courseChangeSequenceInSameDirection.add(courseChangeAtFix);
                 previous = current;
@@ -2782,8 +2780,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             } while (approximationPointsIter.hasNext());
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
                 result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor,
-                        speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
-                        courseChangeSequenceInSameDirection, ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd));
+                        courseChangeSequenceInSameDirection,
+                        ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd));
             }
         }
         return result;
@@ -2860,10 +2858,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
      * the average time point of the course changes that went into the maneuver construction is used.
      * <p>
-     * 
-     * @param speedWithBearingOnApproximationAtBeginning
-     *            the speed/bearing before the first approximating fix passed in
-     *            <code>courseChangeSequenceInSameDirection</code>
      * @param courseChangeSequenceInSameDirection
      *            all expected to have equal {@link CourseChange#to()} values
      * @param ignoreMarkPassings
@@ -2886,19 +2880,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * @return a non-<code>null</code> list
      */
     private List<Maneuver> groupChangesInSameDirectionIntoManeuvers(Competitor competitor,
-            SpeedWithBearing speedWithBearingOnApproximationAtBeginning,
-            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection, boolean ignoreMarkPassings,
-            TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
+            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection,
+            boolean ignoreMarkPassings, TimePoint earliestManeuverStart,
+            TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
             Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
-            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
-            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
             Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
-            SpeedWithBearing afterCurrentCourseChange = null; // sure to be set because iter's collection is not empty
-            // and the first use requires group not to be empty which can only happen after the first group.add
             do {
                 Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 if (!group.isEmpty()
@@ -2918,13 +2908,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             group, totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD, earliestManeuverStart, latestManeuverEnd), result);
                     group.clear();
                     totalCourseChangeInDegrees = 0.0;
-                    beforeGroupOnApproximation = beforeCurrentCourseChangeOnApproximation;
                 }
-                afterCurrentCourseChange = beforeCurrentCourseChangeOnApproximation
-                        .applyCourseChange(currentFixAndCourseChange.getB());
                 totalCourseChangeInDegrees += currentFixAndCourseChange.getB().getCourseChangeInDegrees();
                 group.add(currentFixAndCourseChange);
-                beforeCurrentCourseChangeOnApproximation = afterCurrentCourseChange; // speed/bearing after course
                 // change
             } while (iter.hasNext());
             if (!group.isEmpty()) {
