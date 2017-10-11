@@ -1,10 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -83,6 +86,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private PenaltyAdapter mAdapter;
     private TextView mEntryCount;
     private CompetitorResultsList<CompetitorResultEditableImpl> mCompetitorResults;
+    private CompetitorResultsList<CompetitorResultEditableImpl> mServerData;
     private View mListButtonLayout;
     private ImageView mListButton;
     private HeaderLayout mHeader;
@@ -99,6 +103,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
         mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
+        mServerData = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
         SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
         if (searchView != null) {
             searchView.setSearchTextWatcher(this);
@@ -290,13 +295,17 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     private void sendUnconfirmed() {
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
+        CompetitorResults results = getCompetitorResultsDiff();
+        if (((CompetitorResultsImpl)results).size() > 0) {
+            getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), results);
+        }
     }
 
     private void confirmData() {
         sendUnconfirmed();
         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
+        loadCompetitors();
     }
 
     private String[] getAllMaxPointsReasons() {
@@ -351,6 +360,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     private void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
         mCompetitorResults.clear();
+        mServerData.clear();
         for (Competitor item : data) { // add loaded competitors
             String name = "";
             if (item.getBoat() != null) {
@@ -360,6 +370,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             CompetitorResult result = new CompetitorResultImpl(item.getId(), name, 0, MaxPointsReason.NONE,
                     /* score */ null, /* finishingTime */ null, /* comment */ null);
             mCompetitorResults.add(new CompetitorResultEditableImpl(result));
+            mServerData.add(new CompetitorResultEditableImpl(result));
         }
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position list
             for (CompetitorResult result : getRaceState().getFinishPositioningList()) {
@@ -367,11 +378,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 for (int i = 0; i < mCompetitorResults.size(); i++) {
                     if (mCompetitorResults.get(i).getCompetitorId().equals(result.getCompetitorId())) {
                         mCompetitorResults.remove(i);
+                        mServerData.remove(i);
                         break;
                     }
                     pos++;
                 }
                 mCompetitorResults.add(pos, new CompetitorResultEditableImpl(result));
+                mServerData.add(pos, new CompetitorResultEditableImpl(result));
             }
         }
         mAdapter.setCompetitor(mCompetitorResults);
@@ -432,24 +445,38 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     private void setPublishButton() {
-        int count = 0;
+        Set<Serializable> changed = new HashSet<>();
         boolean isChecked = false;
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
             if (item.isChecked()) {
                 isChecked = true;
             }
-            if (!MaxPointsReason.NONE.equals(item.getMaxPointsReason())) {
-                count++;
+            for (CompetitorResultEditableImpl server : mServerData) {
+                if (server.getCompetitorId().equals(item.getCompetitorId())) {
+                    if (!server.getMaxPointsReason().equals(item.getMaxPointsReason())) {
+                        changed.add(item.getCompetitorId());
+                        break;
+                    }
+                }
+            }
+        }
+        for (CompetitorResultEditableImpl server : mServerData) {
+            for (CompetitorResultEditableImpl item : mCompetitorResults) {
+                if (item.getCompetitorId().equals(server.getCompetitorId())) {
+                    if (!item.getMaxPointsReason().equals(server.getMaxPointsReason())) {
+                        changed.add(server.getCompetitorId());
+                        break;
+                    }
+                }
             }
         }
         String text = getString(R.string.publish_button_empty);
-        // FIXME needs redefine later
-//        if (count != 0) {
-//            text = getString(R.string.publish_button_other, count);
-//        }
+        if (changed.size() != 0) {
+            text = getString(R.string.publish_button_other, changed.size());
+        }
         mPublishButton.setText(text);
-        mPublishButton.setEnabled(count != 0);
-        mButtonBar.setVisibility((count != 0 || isChecked) ? View.VISIBLE : View.GONE);
+        mPublishButton.setEnabled(changed.size() != 0);
+        mButtonBar.setVisibility((changed.size() != 0 || isChecked) ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -504,43 +531,33 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
     }
 
-    private CompetitorResults getCompetitorResults() {
-        CompetitorResultsImpl results = new CompetitorResultsImpl();
-        Collections.sort(mCompetitorResults, new Comparator<CompetitorResultEditableImpl>() {
-            @Override
-            public int compare(CompetitorResultEditableImpl left, CompetitorResultEditableImpl right) {
-                int result;
-                if (left.getOneBasedRank() == 0 || left.getOneBasedRank() != right.getOneBasedRank()) {
-                    result = 1;
-                } else {
-                    result = left.getOneBasedRank() - right.getOneBasedRank();
+    private CompetitorResults getCompetitorResultsDiff() {
+        CompetitorResultsImpl result = new CompetitorResultsImpl();
+
+        for (CompetitorResultEditableImpl oldItem : mServerData) {
+            for (CompetitorResultEditableImpl newItem : mCompetitorResults) {
+                if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
+                    if (!oldItem.equals(newItem)) {
+                        result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem
+                            .getOneBasedRank(), newItem.getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment()));
+                    }
+                    break;
                 }
-                return result;
-            }
-        });
-        for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            if (!MaxPointsReason.NONE.equals(item.getMaxPointsReason()) || item.getOneBasedRank() > 0) {
-                CompetitorResult result = new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item
-                    .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment());
-                results.add(result);
             }
         }
-        // sort penalty result to the end
-        Collections.sort(results, new Comparator<CompetitorResult>() {
-            @Override
-            public int compare(CompetitorResult left, CompetitorResult right) {
-                int result;
-                if (left.getOneBasedRank() > 0 && right.getOneBasedRank() > 0) {
-                    result = left.getOneBasedRank() - right.getOneBasedRank();
-                } else if (left.getOneBasedRank() == 0 && right.getOneBasedRank() == 0) {
-                    result = 0;
-                } else {
-                    result = right.getOneBasedRank() - left.getOneBasedRank();
+
+        // all new items
+        for (CompetitorResultEditableImpl newItem : mCompetitorResults) {
+            for (CompetitorResultEditableImpl oldItem : mServerData) {
+                if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
+                    result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem.getOneBasedRank(), newItem
+                        .getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment()));
+                    break;
                 }
-                return result;
             }
-        });
-        return results;
+        }
+
+        return result;
     }
 
     @Override
