@@ -3107,8 +3107,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * timepoint of maneuver climax, total course change, and relevant maneuver bearing steps.
      */
     private ComputedManeuverDetails computeManeuverDetails(Competitor competitor, TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
-        final Iterable<BearingStep> bearingStepsToAnalyze = getTrack(competitor).getBearingSteps(timePointBeforeManeuver,
-                timePointAfterManeuver, Duration.ONE_SECOND);
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        Duration gpsSampling = track.getAverageIntervalBetweenRawFixes();
+        Duration bearingSamplingRate = gpsSampling.asMillis() > 1000 ? Duration.ONE_SECOND : gpsSampling;
+        Iterable<BearingStep> bearingStepsToAnalyze = track.getBearingSteps(timePointBeforeManeuver,
+                timePointAfterManeuver, bearingSamplingRate);
         TimePoint maneuverTimePoint = computeManeuverTimePoint(bearingStepsToAnalyze, maneuverDirection);
         ComputedManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = computeManeuverEnteringAndExitingDetails(
                 maneuverTimePoint, bearingStepsToAnalyze, maneuverDirection);
