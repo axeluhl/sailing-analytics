@@ -453,7 +453,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
             for (CompetitorResultEditableImpl server : mServerData) {
                 if (server.getCompetitorId().equals(item.getCompetitorId())) {
-                    if (!server.getMaxPointsReason().equals(item.getMaxPointsReason())) {
+                    if (!server.equals(item)) {
                         changed.add(item.getCompetitorId());
                         break;
                     }
@@ -463,7 +463,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         for (CompetitorResultEditableImpl server : mServerData) {
             for (CompetitorResultEditableImpl item : mCompetitorResults) {
                 if (item.getCompetitorId().equals(server.getCompetitorId())) {
-                    if (!item.getMaxPointsReason().equals(server.getMaxPointsReason())) {
+                    if (!item.equals(server)) {
                         changed.add(server.getCompetitorId());
                         break;
                     }
