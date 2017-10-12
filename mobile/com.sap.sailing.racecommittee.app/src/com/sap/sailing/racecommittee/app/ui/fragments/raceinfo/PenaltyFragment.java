@@ -507,7 +507,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     competitor.setDirty(true);
                 }
                 if (!Util.equalsWithNull(competitor.getComment(), item.getComment())) {
-                    competitor.setComment(item.getComment());
+                    competitor.setComment(TextUtils.isEmpty(item.getComment()) ? null : item.getComment());
                     competitor.setDirty(true);
                 }
                 if (!Util.equalsWithNull(competitor.getScore(), item.getScore())) {
