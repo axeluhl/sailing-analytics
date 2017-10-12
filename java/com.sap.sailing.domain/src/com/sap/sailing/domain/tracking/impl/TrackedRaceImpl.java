@@ -2994,7 +2994,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         refinedManeuverDetails.getManeuverBearingSteps(), wind);
                 if (firstPenaltyCircleCompletedAt == null) {
                     // This should really not happen!
-                    logger.warning("Maneuver detection has failed to process penaulty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null");
+                    logger.warning("Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null");
                     // Use already detected maneuver details as fallback data to prevent Nullpointer
                     firstPenaltyCircleCompletedAt = timePointAfterManeuver;
                 }
@@ -3107,8 +3107,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * timepoint of maneuver climax, total course change, and relevant maneuver bearing steps.
      */
     private ComputedManeuverDetails computeManeuverDetails(Competitor competitor, TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
-        final Iterable<BearingStep> bearingStepsToAnalyze = getTrack(competitor).getBearingSteps(timePointBeforeManeuver,
-                timePointAfterManeuver, Duration.ONE_SECOND);
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        Duration gpsSampling = track.getAverageIntervalBetweenRawFixes();
+        Duration bearingSamplingRate = gpsSampling.asMillis() > 1000 ? Duration.ONE_SECOND : gpsSampling;
+        Iterable<BearingStep> bearingStepsToAnalyze = track.getBearingSteps(timePointBeforeManeuver,
+                timePointAfterManeuver, bearingSamplingRate);
         TimePoint maneuverTimePoint = computeManeuverTimePoint(bearingStepsToAnalyze, maneuverDirection);
         ComputedManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = computeManeuverEnteringAndExitingDetails(
                 maneuverTimePoint, bearingStepsToAnalyze, maneuverDirection);
@@ -4257,18 +4260,48 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             this.speedWithBearingAfter = speedWithBearingAfter;
             this.totalCourseChangeInDegrees = totalCourseChangeInDegrees;
         }
+
+        /**
+         * Gets the computed time point of maneuver start.
+         * 
+         * @return The time point of maneuver start
+         */
         public TimePoint getTimepointBefore() {
             return timepointBefore;
         }
+
+        /**
+         * Gets the computed time point of maneuver end.
+         * 
+         * @return The time point of maneuver end
+         */
         public TimePoint getTimepointAfter() {
             return timepointAfter;
         }
+
+        /**
+         * Gets the speed with bearing at maneuver start.
+         * 
+         * @return The speed with bearing at maneuver start
+         */
         public SpeedWithBearing getSpeedWithBearingBefore() {
             return speedWithBearingBefore;
         }
+
+        /**
+         * Gets the speed with bearing at maneuver end.
+         * 
+         * @return The speed with bearing at maneuver end
+         */
         public SpeedWithBearing getSpeedWithBearingAfter() {
             return speedWithBearingAfter;
         }
+
+        /**
+         * Gets the total course change performed within maneuver in degrees. The port side course changes are negative.
+         * 
+         * @return The total course change in degrees
+         */
         public double getTotalCourseChangeInDegrees() {
             return totalCourseChangeInDegrees;
         }
@@ -4284,9 +4317,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             this.timepoint = timepoint;
             this.maneuverBearingSteps = maneuverBearingSteps;
         }
+
+        /**
+         * Gets the computed time point of the corresponding maneuver. The time point refers to a position within
+         * maneuver, where the highest course change has been recorded.
+         * 
+         * @return The computed maneuver time point
+         */
         public TimePoint getTimepoint() {
             return timepoint;
         }
+
+        /**
+         * Gets the list of bearing steps which was used for maneuver details computation.
+         * 
+         * @return The bearing steps of maneuver
+         */
         public List<BearingStep> getManeuverBearingSteps() {
             return maneuverBearingSteps;
         }

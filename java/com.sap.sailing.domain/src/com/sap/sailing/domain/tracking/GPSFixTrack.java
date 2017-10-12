@@ -171,15 +171,16 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
     /**
      * Gets a list of bearings between the provided time range (inclusive the boundaries). The bearings are retrieved by
      * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)} with the provided frequency between each bearing step.
+     * The last bearing step will be always sampled at provided toTimePoint irrespective of the sampling rate.
      * 
      * @param fromTimePoint
      *            The from time point (inclusive) for resulting bearing steps
-     * @param tillTimePoint
-     *            The till time point (inclusive) for resulting bearing steps
-     * @param frequency
+     * @param toTimePoint
+     *            The to time point (inclusive) for resulting bearing steps
+     * @param samplingRate
      *            Time distance between bearing time point
      * @return The list of bearings between the provided time range
      */
-    Iterable<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint tillTimePoint, Duration frequency);
+    Iterable<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration samplingRate);
 
 }
