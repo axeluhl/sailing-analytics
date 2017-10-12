@@ -139,7 +139,6 @@ public class TrackingListFragment extends BaseFragment
             listButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendUnconfirmed();
                     RaceFragment fragment = PenaltyFragment.newInstance();
                     int viewId = R.id.race_content;
                     switch (getRaceState().getStatus()) {

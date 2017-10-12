@@ -116,7 +116,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             mListButtonLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendUnconfirmed();
                     RaceFragment fragment = TrackingListFragment.newInstance(new Bundle(), 1);
                     int viewId = R.id.race_content;
                     switch (getRaceState().getStatus()) {
