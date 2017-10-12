@@ -249,7 +249,7 @@ public class TrackingListFragment extends BaseFragment
             }
             mConfirm = (Button) getView().findViewById(R.id.confirm);
             if (mConfirm != null) {
-                mConfirm.setEnabled(mDots.size() == 0);
+                mConfirm.setEnabled(true);
                 mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -774,7 +774,7 @@ public class TrackingListFragment extends BaseFragment
         if (mTools != null) {
             mTools.setVisibility(mActivePage == 0 ? View.VISIBLE : View.GONE);
         }
-        mConfirm.setEnabled(mActivePage != 0 || mDots.size() == 0);
+        mConfirm.setEnabled(true);
     }
 
     private void sortCompetitors() {
