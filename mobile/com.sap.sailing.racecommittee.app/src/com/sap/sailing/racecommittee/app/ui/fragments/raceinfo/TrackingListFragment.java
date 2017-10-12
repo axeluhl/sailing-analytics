@@ -93,7 +93,7 @@ public class TrackingListFragment extends BaseFragment
     private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
-    private CompetitorResultsList<CompetitorResultWithIdImpl> mServerData;
+    private CompetitorResults mLastPublished;
     private List<Competitor> mCompetitorData;
     private List<Competitor> mFilteredCompetitorData;
     private int mId = 0;
@@ -107,7 +107,7 @@ public class TrackingListFragment extends BaseFragment
     public TrackingListFragment() {
         mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
         mFilteredCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
-        mServerData = new CompetitorResultsList<>(Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
+        mLastPublished = new CompetitorResultsImpl();
     }
 
     public static TrackingListFragment newInstance(Bundle args, int startMode) {
@@ -199,6 +199,7 @@ public class TrackingListFragment extends BaseFragment
                 }
             });
         }
+
         return layout;
     }
 
@@ -272,6 +273,13 @@ public class TrackingListFragment extends BaseFragment
         mFilteredCompetitorData.addAll(mCompetitorData);
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
+
+        if (getRaceState().getConfirmedFinishPositioningList() != null) {
+            for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
+                mLastPublished.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+            }
+        }
     }
 
     private int getFirstRankZeroPosition() {
@@ -423,8 +431,6 @@ public class TrackingListFragment extends BaseFragment
         deleteCompetitorsFromFinishedList(data);
         deleteCompetitorsFromCompetitorList();
         mCompetitorAdapter.notifyDataSetChanged();
-        mServerData.clear();
-        mServerData.addAll(mFinishedData);
     }
 
     protected void onLoadLeaderboardSucceeded(LeaderboardResult data) {
@@ -709,10 +715,9 @@ public class TrackingListFragment extends BaseFragment
     private CompetitorResults getCompetitorResultsDiff() {
         CompetitorResults result = new CompetitorResultsImpl();
 
-        // all changed item
-        for (CompetitorResultWithIdImpl oldItem : mServerData) {
+        for (CompetitorResult oldItem : mLastPublished) {
             boolean found = false;
-            for (CompetitorResultWithIdImpl newItem : mFinishedData) {
+            for (CompetitorResult newItem : mFinishedData) {
                 if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
                     if (!oldItem.equals(newItem)) {
                         result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem
@@ -725,21 +730,6 @@ public class TrackingListFragment extends BaseFragment
             if (!found) {
                 result.add(new CompetitorResultImpl(oldItem.getCompetitorId(), oldItem.getCompetitorDisplayName(), 0, oldItem
                     .getMaxPointsReason(), oldItem.getScore(), oldItem.getFinishingTime(), oldItem.getComment()));
-            }
-        }
-
-        // all new items
-        for (CompetitorResultWithIdImpl newItem : mFinishedData) {
-            boolean found = false;
-            for (CompetitorResultWithIdImpl oldItem : mServerData) {
-                if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem.getOneBasedRank(), newItem
-                    .getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment()));
             }
         }
 
