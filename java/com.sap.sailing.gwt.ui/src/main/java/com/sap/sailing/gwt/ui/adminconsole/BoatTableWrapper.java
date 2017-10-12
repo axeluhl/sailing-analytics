@@ -32,9 +32,9 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
     
-    public BoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+    public BoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
+            boolean multiSelection, boolean enablePager, int pagingSize, boolean allowActions) {
+        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
                     @Override
                     public boolean representSameEntity(BoatDTO dto1, BoatDTO dto2) {
@@ -115,7 +115,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
             }
         });
 
-        filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterCompetitors()),
+        filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
                 new ArrayList<BoatDTO>(), table, dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(BoatDTO boat) {
@@ -151,7 +151,9 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(boatColorColumn, stringMessages.color());
         table.addColumn(boatIdColumn, stringMessages.id());
-        table.addColumn(boatActionColumn, stringMessages.actions());
+        if (allowActions) {
+            table.addColumn(boatActionColumn, stringMessages.actions());
+        }
         table.ensureDebugId("BoatsTable");
     }
     
@@ -167,25 +169,46 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         getFilteredBoats(boats);
     }
     
-    public void refreshBoatList(final Callback<Iterable<BoatDTO>, Throwable> callback) {
-        sailingService.getBoats(new AsyncCallback<Iterable<BoatDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
-                if (callback != null) {
-                    callback.onFailure(caught);
+    public void refreshBoatList(boolean loadOnlyStandaloneBoats, final Callback<Iterable<BoatDTO>, Throwable> callback) {
+        if (loadOnlyStandaloneBoats) {
+            sailingService.getStandaloneBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
+                    if (callback != null) {
+                        callback.onFailure(caught);
+                    }
                 }
-            }
 
-            @Override
-            public void onSuccess(Iterable<BoatDTO> result) {
-                getFilteredBoats(result);
-                filterBoats(result);
-                if (callback != null) {
-                    callback.onSuccess(result);
+                @Override
+                public void onSuccess(Iterable<BoatDTO> result) {
+                    getFilteredBoats(result);
+                    filterBoats(result);
+                    if (callback != null) {
+                        callback.onSuccess(result);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            sailingService.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
+                    if (callback != null) {
+                        callback.onFailure(caught);
+                    }
+                }
+
+                @Override
+                public void onSuccess(Iterable<BoatDTO> result) {
+                    getFilteredBoats(result);
+                    filterBoats(result);
+                    if (callback != null) {
+                        callback.onSuccess(result);
+                    }
+                }
+            });
+        }
     }
 
     private void getFilteredBoats(Iterable<BoatDTO> result) {
@@ -204,8 +227,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
                     @Override
                     public void onSuccess(BoatDTO updatedBoat) {
-                        //only reload selected boats reloading with refreshBoatList(leaderboardName)
-                        //would not work in case the list is not based on a leaderboard e.g. AbstractBoatRegistrationDialog
                         int editedBoatIndex = getFilterField().indexOf(originalBoat);
                         getFilterField().remove(originalBoat);
                         if (editedBoatIndex >= 0){

@@ -598,7 +598,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     
     void addOrUpdateCompetitors(List<CompetitorDTO> competitors, AsyncCallback<List<CompetitorDTO>> asyncCallback);
 
-    void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
+    void addOrUpdateCompetitorWithBoat(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
     void addOrUpdateCompetitorWithoutBoat(CompetitorWithoutBoatDTO competitor, AsyncCallback<CompetitorWithoutBoatDTO> asyncCallback);
     
@@ -607,7 +607,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 
-    void getBoats(AsyncCallback<Iterable<BoatDTO>> asyncCallback);
+    void getAllBoats(AsyncCallback<Iterable<BoatDTO>> asyncCallback);
+
+    void getStandaloneBoats(AsyncCallback<Iterable<BoatDTO>> asyncCallback);
 
     void addOrUpdateBoat(BoatDTO boat, AsyncCallback<BoatDTO> asyncCallback);
 

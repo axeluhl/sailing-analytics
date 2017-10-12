@@ -71,9 +71,9 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
         }
     }
 
-    public static CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO> create(final StringMessages stringMessages, CompetitorWithoutBoatDTO competitorToEdit,
+    public static CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO> create(StringMessages stringMessages, CompetitorWithoutBoatDTO competitorToEdit,
             DialogCallback<CompetitorWithoutBoatDTO> callback) {
-        return new CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO>(stringMessages, competitorToEdit,
+        return new CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO>(stringMessages.editCompetitor(), stringMessages, competitorToEdit,
                 new CompetitorWithoutBoatEditDialog.CompetitorWithoutBoatValidator<CompetitorWithoutBoatDTO>(stringMessages), callback);
     }
     
@@ -83,9 +83,9 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
      * @param competitorToEdit
      *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
      */
-    protected CompetitorWithoutBoatEditDialog(final StringMessages stringMessages, CompetitorDTOType competitorToEdit,
+    protected CompetitorWithoutBoatEditDialog(String dialogTitle, StringMessages stringMessages, CompetitorDTOType competitorToEdit,
             Validator<CompetitorDTOType> validator,  DialogCallback<CompetitorDTOType> callback) {
-        super(stringMessages.editCompetitor(), null, stringMessages.ok(), stringMessages.cancel(),
+        super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
                 validator, /* animationEnabled */true, callback);
         this.ensureDebugId("CompetitorEditDialog");
         this.stringMessages = stringMessages;

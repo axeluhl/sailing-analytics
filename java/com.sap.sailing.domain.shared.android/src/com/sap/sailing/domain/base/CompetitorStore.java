@@ -143,7 +143,12 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      * Obtains a non-live snapshot of the list of boats managed by this store.
      */
     Iterable<? extends Boat> getBoats();
-    
+
+    /**
+     * Obtains a non-live snapshot of the list of all boats which are NOT embedded into a competitor
+     */
+    Iterable<? extends Boat> getStandaloneBoats();
+
     void removeBoat(Boat boat);
 
     /**

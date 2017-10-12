@@ -442,7 +442,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<CompetitorDTO> addOrUpdateCompetitors(List<CompetitorDTO> competitors) throws Exception;
 
-    CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
+    CompetitorDTO addOrUpdateCompetitorWithBoat(CompetitorDTO competitor) throws Exception;
 
     CompetitorWithoutBoatDTO addOrUpdateCompetitorWithoutBoat(CompetitorWithoutBoatDTO competitor) throws Exception;
 
@@ -450,8 +450,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
 
-    Iterable<BoatDTO> getBoats();
-    
+    Iterable<BoatDTO> getAllBoats();
+
+    Iterable<BoatDTO> getStandaloneBoats();
+
     BoatDTO addOrUpdateBoat(BoatDTO boat) throws Exception;
 
     void allowBoatResetToDefaults(Iterable<BoatDTO> boats);

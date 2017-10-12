@@ -32,7 +32,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
      * If the {@code enablePager} constructur argument is set to {@code true} then this many entries are shown
      * at most on one page, and users will have to flip through the pages one by one.
      */
-    private static final int PAGING_SIZE = 100;
+    private static final int DEFAULT_PAGING_SIZE = 100;
     
     protected final FlushableCellTable<T> table;
     private S selectionModel;
@@ -52,14 +52,22 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
     public Widget asWidget() {
         return mainPanel;
     }
-    
+
     /**
      * @param entityIdentityComparator
      *            {@link EntityIdentityComparator} to create a {@link RefreshableSelectionModel}
      */
-
     public TableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, EntityIdentityComparator<T> entityIdentityComparator) {
+        this(sailingService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE, entityIdentityComparator);
+    }        
+
+    /**
+     * @param entityIdentityComparator
+     *            {@link EntityIdentityComparator} to create a {@link RefreshableSelectionModel}
+     */
+        public TableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages, ErrorReporter errorReporter,
+                boolean multiSelection, boolean enablePager, int pagingSize, EntityIdentityComparator<T> entityIdentityComparator) {
         this.entityIdentityComparator = entityIdentityComparator;
         this.multiSelection = multiSelection;
         this.sailingService = sailingService;
@@ -75,7 +83,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
         dataProvider.addDataDisplay(table);
         mainPanel.add(table);
         if (enablePager) {
-            table.setPageSize(PAGING_SIZE);
+            table.setPageSize(pagingSize);
             SimplePager pager = new SimplePager() {
                 protected String createText() {
                     HasRows display = getDisplay();

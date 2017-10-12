@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -587,6 +588,25 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
+    }
+
+    @Override
+    public Iterable<Boat> getStandaloneBoats() {
+        LockUtil.lockForRead(lock);
+        try {
+            List<Boat> boats = new ArrayList<>(boatCache.values());
+            Set<Boat> boatsEmbeddedInCompetitors = new HashSet<>();
+            for (Competitor competitor: competitorCache.values()) {
+                if (competitor instanceof CompetitorWithBoat) {
+                    boatsEmbeddedInCompetitors.add(((CompetitorWithBoat) competitor).getBoat()); 
+                }
+            }
+            boats.removeAll(boatsEmbeddedInCompetitors);
+            return boats;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+
     }
 
     @Override

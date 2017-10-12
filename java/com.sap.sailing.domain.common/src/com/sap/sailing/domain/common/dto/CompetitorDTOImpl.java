@@ -9,7 +9,9 @@ public class CompetitorDTOImpl extends CompetitorWithoutBoatDTOImpl implements C
     private static final long serialVersionUID = -4997852354821083154L;
     private BoatDTO boat;
     
-    public CompetitorDTOImpl() {}
+    public CompetitorDTOImpl() {
+        boat = new BoatDTO();
+    }
     
     public CompetitorDTOImpl(String name, String shortName, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String idAsString, String imageURL, String flagImageURL, 

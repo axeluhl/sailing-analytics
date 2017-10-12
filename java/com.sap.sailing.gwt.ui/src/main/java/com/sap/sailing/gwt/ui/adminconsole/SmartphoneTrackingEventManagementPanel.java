@@ -163,6 +163,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void update(int index, StrippedLeaderboardDTO leaderboardDTO, String value) {
                 final String leaderboardName = leaderboardDTO.name;
+                final boolean canBoatsOfCompetitorsChangePerRace = leaderboardDTO.canBoatsOfCompetitorsChangePerRace;
                 if (RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
                     denoteForRaceLogTracking(leaderboardDTO);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
@@ -170,7 +171,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         @Override
                         public void showWithBoatClass(String boatClassName) {
                             new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
-                                    errorReporter, /* editable */true, leaderboardName,
+                                    errorReporter, /* editable */true, leaderboardName, canBoatsOfCompetitorsChangePerRace,
                                     new DialogCallback<Set<CompetitorDTO>>() {
                                         @Override
                                         public void ok(Set<CompetitorDTO> registeredCompetitors) {
@@ -289,6 +290,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void update(int index, final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO, String value) {
                 final String leaderboardName = getSelectedLeaderboardName();
+                final boolean canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace();
                 final String raceColumnName = raceColumnDTOAndFleetDTO.getA().getName();
                 final String fleetName = raceColumnDTOAndFleetDTO.getB().getName();
                 final boolean editable = ! (doesTrackerExist(raceColumnDTOAndFleetDTO) &&
@@ -303,7 +305,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         @Override
                         public void showWithBoatClass(String boatClassName) {
                             new RaceLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
-                                    errorReporter, editable, leaderboardName, raceColumnName, fleetName,
+                                    errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
                                     raceColumnDTOAndFleetDTO.getA().getFleets(),
                                     new DialogCallback<Set<CompetitorDTO>>() {
 

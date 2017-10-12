@@ -10,8 +10,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatFactory;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -23,7 +23,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
-public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<CompetitorWithBoat> {
+public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<Competitor> {
     protected final CompetitorFactory competitorFactory;
     protected final BoatFactory boatFactory;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
@@ -45,7 +45,7 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
     }
 
     @Override
-    public CompetitorWithBoat deserialize(JSONObject object) throws JsonDeserializationException {
+    public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
         try {
             Class<?> idClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_ID_TYPE));
@@ -88,22 +88,29 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
 
             // if we find a boat identifier we try to find the boat with the boatfactory
             Serializable boatId = (Serializable) object.get(CompetitorJsonConstants.FIELD_BOAT_ID);
-            Class<?> boatIdClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_BOAT_ID_TYPE));
-            if (Number.class.isAssignableFrom(boatIdClass)) {
-                Constructor<?> constructorFromString = boatIdClass.getConstructor(String.class);
-                boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
-            } else if (UUID.class.isAssignableFrom(idClass)) {
-                boatId = Helpers.tryUuidConversion(boatId);
+            if (boatId != null) {
+                Class<?> boatIdClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_BOAT_ID_TYPE));
+                if (Number.class.isAssignableFrom(boatIdClass)) {
+                    Constructor<?> constructorFromString = boatIdClass.getConstructor(String.class);
+                    boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    boatId = Helpers.tryUuidConversion(boatId);
+                }
             }
 
             final Boat existingBoat = boatId != null ? boatFactory.getExistingBoatById(boatId) : null;
 
-            CompetitorWithBoat competitorWithBoat = competitorFactory.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
-                    flagImageURI, team, timeOnTimeFactor,
-                    timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
-                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, (DynamicBoat) existingBoat);
-            
-            return competitorWithBoat;
+            if (existingBoat != null) {
+                return competitorFactory.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
+                        flagImageURI, team, timeOnTimeFactor,
+                        timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
+                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, (DynamicBoat) existingBoat);
+            } else {
+                return competitorFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
+                        flagImageURI, team, timeOnTimeFactor,
+                        timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
+                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
+            }
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }

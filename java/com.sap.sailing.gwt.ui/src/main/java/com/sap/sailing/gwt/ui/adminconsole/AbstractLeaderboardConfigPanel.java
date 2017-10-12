@@ -504,6 +504,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         return getSelectedLeaderboard() != null ? getSelectedLeaderboard().name : null;
     }
 
+    protected boolean canBoatsOfCompetitorsChangePerRace() {
+        return getSelectedLeaderboard() != null ? getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace: false;
+    }
+
     protected abstract void leaderboardSelectionChanged();
 
     @Override

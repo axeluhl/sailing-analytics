@@ -167,7 +167,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
     }
 
     public void refreshBoatList(final Callback<Iterable<BoatDTO>, Throwable> callback) {
-        sailingService.getBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+        sailingService.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());

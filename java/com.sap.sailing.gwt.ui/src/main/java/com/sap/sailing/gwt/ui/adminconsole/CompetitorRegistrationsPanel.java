@@ -43,17 +43,15 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
  *
  */
 public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDisplay {
-    protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
-    protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
-    protected final boolean filterByLeaderBoardInitially = false;
-    final StringMessages stringMessages;
-    protected final SailingServiceAsync sailingService;
-    final ErrorReporter errorReporter;
+    private CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
+    private CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
+    private final ErrorReporter errorReporter;
     private Button registerBtn;
     private Button unregisterBtn;
-    private Button addCompetitorButton;
+    private Button addCompetitorWithBoatButton;
+    private Button addCompetitorWithoutBoatButton;
     private CheckBox showOnlyCompetitorsOfLogCheckBox;
-    protected String leaderboardName;
+    private final String leaderboardName;
     private final BusyIndicator busyIndicator;
     private final ImportCompetitorCallback importCompetitorCallback;
     private final Runnable validator;
@@ -79,11 +77,9 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
      */
     protected CompetitorRegistrationsPanel(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            String leaderboardName, final String boatClass, Runnable validator,
+            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
             Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
             boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
-        this.stringMessages = stringMessages;
-        this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.restrictPoolToLeaderboard = restrictPoolToLeaderboard;
         this.validator = validator;
@@ -92,12 +88,18 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         this.registeredCompetitorsRetriever = registeredCompetitorsRetriever;
         this.importCompetitorCallback = new RaceOrRegattaImportCompetitorCallback(this, sailingService, errorReporter, stringMessages);
         final HorizontalPanel buttonPanel = new HorizontalPanel();
-        addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
-        addCompetitorButton.addClickHandler(new ClickHandler() {
+        addCompetitorWithoutBoatButton = new Button(stringMessages.add("competitor"));
+        addCompetitorWithoutBoatButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // TODO bug2822: with or without boat, that's the question
-                registeredCompetitorsTable.openEditCompetitorWithBoatDialog(new CompetitorDTOImpl(), boatClass);
+                registeredCompetitorsTable.openEditCompetitorWithoutBoatDialog(new CompetitorDTOImpl());
+            }
+        });
+        addCompetitorWithBoatButton = new Button(stringMessages.add("competitor and boat"));
+        addCompetitorWithBoatButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                registeredCompetitorsTable.openCreateCompetitorWithBoatDialog(boatClass);
             }
         });
 
@@ -166,7 +168,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         competitorRegistrationPanel.add(movePanel);
         competitorRegistrationPanel.setCellVerticalAlignment(movePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         competitorRegistrationPanel.add(allCompetitorsPanel);
-        buttonPanel.add(addCompetitorButton);
+        if (canBoatsOfCompetitorsChangePerRace) {
+            buttonPanel.add(addCompetitorWithoutBoatButton);
+        } else {
+            buttonPanel.add(addCompetitorWithBoatButton);
+        }
         buttonPanel.add(inviteCompetitorsButton);
         buttonPanel.add(competitorImportButton);
         buttonPanel.add(busyIndicator);
@@ -266,10 +272,12 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     public void deactivateRegistrationButtons(String tooltip){
         registerBtn.setEnabled(false);
         unregisterBtn.setEnabled(false);
-        addCompetitorButton.setEnabled(false);
+        addCompetitorWithBoatButton.setEnabled(false);
+        addCompetitorWithoutBoatButton.setEnabled(false);
         registerBtn.setTitle(tooltip);
         unregisterBtn.setTitle(tooltip);
-        addCompetitorButton.setTitle(tooltip);
+        addCompetitorWithBoatButton.setTitle(tooltip);
+        addCompetitorWithoutBoatButton.setTitle(tooltip);
         validateAndUpdate();
     }
     
@@ -282,10 +290,12 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     public void activateRegistrationButtons(){
         registerBtn.setEnabled(true);
         unregisterBtn.setEnabled(true);
-        addCompetitorButton.setEnabled(true);
+        addCompetitorWithBoatButton.setEnabled(true);
+        addCompetitorWithoutBoatButton.setEnabled(true);
         registerBtn.setTitle("");
         unregisterBtn.setTitle("");
-        addCompetitorButton.setTitle("");
+        addCompetitorWithBoatButton.setTitle("");
+        addCompetitorWithoutBoatButton.setTitle("");
         validateAndUpdate();
     }
 

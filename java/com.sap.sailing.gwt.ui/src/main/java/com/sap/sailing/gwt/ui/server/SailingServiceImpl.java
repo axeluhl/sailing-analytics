@@ -104,6 +104,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
@@ -144,6 +145,7 @@ import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartMod
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
@@ -4865,11 +4867,46 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<CompetitorDTO> addOrUpdateCompetitors(List<CompetitorDTO> competitors) throws URISyntaxException {
         final List<CompetitorDTO> result = new ArrayList<>();
         for (final CompetitorDTO competitor : competitors) {
-            result.add(addOrUpdateCompetitor(competitor));
+            result.add(addOrUpdateCompetitorWithBoat(competitor));
         }
         return result;
     }
 
+    private CompetitorWithBoat addOrUpdateCompetitorWithBoatInternal(CompetitorDTO competitor) throws URISyntaxException {
+        CompetitorWithBoat result;
+        CompetitorWithBoat existingCompetitor = getService().getCompetitorStore().getExistingCompetitorWithBoatByIdAsString(competitor.getIdAsString());
+        Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
+            getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
+        if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
+            // new competitor
+            UUID competitorUUID = UUID.randomUUID();
+            DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
+            DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
+            // new boat
+            DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
+            
+            result = getBaseDomainFactory().getOrCreateCompetitorWithBoat(competitorUUID, competitor.getName(), competitor.getShortName(),
+                            competitor.getColor(), competitor.getEmail(), 
+                            competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
+                                    competitor.getTimeOnTimeFactor(),
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), boat);
+            
+        } else {
+            Competitor updatedCompetitor  = getService().apply(
+                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
+                                    competitor.getColor(), competitor.getEmail(), nationality,
+                                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
+                                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
+                                    competitor.getTimeOnTimeFactor(),
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), 
+                                    competitor.getSearchTag()));
+            DynamicBoat updatedBoat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
+            result = new CompetitorWithBoatImpl(updatedCompetitor, updatedBoat);
+        }
+        return result;
+    }
+
+    
     private Competitor addOrUpdateCompetitorWithoutBoatInternal(CompetitorWithoutBoatDTO competitor) throws URISyntaxException {
         Competitor result;
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
@@ -4905,14 +4942,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws URISyntaxException {
-        Boat addedOrUpdatedBoat = null;
-        if (competitor.getBoat() != null) {
-            addedOrUpdatedBoat = addOrUpdateBoatInternal(competitor.getBoat());
-        }
-        Competitor addedOrUpdatedCompetitor = addOrUpdateCompetitorWithoutBoatInternal(competitor);
-        return getBaseDomainFactory().convertToCompetitorDTO(addedOrUpdatedCompetitor, addedOrUpdatedBoat);
-        
+    public CompetitorDTO addOrUpdateCompetitorWithBoat(CompetitorDTO competitor) throws URISyntaxException {
+        return getBaseDomainFactory().convertToCompetitorDTO(addOrUpdateCompetitorWithBoatInternal(competitor));        
     }
 
     @Override
@@ -4964,8 +4995,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<BoatDTO> getBoats() {
+    public Iterable<BoatDTO> getAllBoats() {
         return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorStore().getBoats());
+    }
+
+    @Override
+    public Iterable<BoatDTO> getStandaloneBoats() {
+        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorStore().getStandaloneBoats());
     }
 
     @Override
