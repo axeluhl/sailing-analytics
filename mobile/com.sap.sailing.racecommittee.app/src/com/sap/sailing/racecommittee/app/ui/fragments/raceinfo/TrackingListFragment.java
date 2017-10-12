@@ -467,9 +467,7 @@ public class TrackingListFragment extends BaseFragment
             }
         }
         mFinishedData.removeAll(toBeDeleted);
-        for (Integer pos : positions) {
-            mFinishedAdapter.notifyItemRemoved(pos);
-        }
+        mFinishedAdapter.notifyDataSetChanged();
     }
 
     private void deleteCompetitorsFromCompetitorList() {
