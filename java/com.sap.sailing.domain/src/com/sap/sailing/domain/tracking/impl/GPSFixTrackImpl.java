@@ -1157,7 +1157,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 lastBearing = bearing;
                 lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
             }
-            if (timePoint.equals(toTimePoint)) {
+            if (!timePoint.before(toTimePoint)) {
                 break;
             }
         }
