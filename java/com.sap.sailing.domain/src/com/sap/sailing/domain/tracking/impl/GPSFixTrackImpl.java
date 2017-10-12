@@ -1122,20 +1122,15 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     
     @Override
     public List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration samplingRate) {
-        
-        if(samplingRate.asMillis() == 0) {
-            throw new IllegalArgumentException("Sampling rate must not be 0");
+        if (samplingRate.asMillis() <= 0) {
+            throw new IllegalArgumentException("Sampling rate must be a positive duration but was "+samplingRate);
         }
-        
         List<BearingStep> relevantBearings = new ArrayList<>();
         Bearing lastBearing = null;
         double lastCourseChangeAngleInDegrees = 0;
-        
-        //adjust tillTimePoint considering the samplingRate in a way, that
-        
-        for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint
-                .plus(samplingRate)) {
-            if(timePoint.after(toTimePoint)) {
+        // adjust tillTimePoint considering the samplingRate in a way, that
+        for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint.plus(samplingRate)) {
+            if (timePoint.after(toTimePoint)) {
                 timePoint = toTimePoint;
             }
             SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
@@ -1146,7 +1141,6 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 // If the condition is not met, the existing code which uses ManeuverBearingStep class will break.
                 double courseChangeAngleInDegrees = lastBearing == null ? 0
                         : lastBearing.getDifferenceTo(bearing).getDegrees();
-
                 // In extreme cases, the getDifferenceTo() might compute a bearing in a wrong maneuver direction due to
                 // fast turn and/or inaccurate GPS during penalty circles.
                 // We need to ensure that our totalCourseChange does not get reduced erroneously. It is more likely to
@@ -1163,10 +1157,9 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 lastBearing = bearing;
                 lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
             }
-            if(timePoint.equals(toTimePoint)) {
+            if (timePoint.equals(toTimePoint)) {
                 break;
             }
-
         }
         return relevantBearings;
     }
