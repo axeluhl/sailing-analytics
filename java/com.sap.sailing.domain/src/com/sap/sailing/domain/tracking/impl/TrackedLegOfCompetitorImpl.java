@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -380,12 +381,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         MarkPassing legStart = getMarkPassingForLegStart();
-        MarkPassing legEnd = getMarkPassingForLegEnd();
-        TimePoint start = timePoint;
-        TimePoint end = timePoint;
-        if (legStart != null) {
-            start = legStart.getTimePoint();
+        if(legStart == null) {
+            return Collections.emptyList();
         }
+        TimePoint start = legStart.getTimePoint();
+        MarkPassing legEnd = getMarkPassingForLegEnd();
+        TimePoint end = timePoint;
         if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
             // timePoint is after leg finish; take leg end and end time point
             end = legEnd.getTimePoint();
