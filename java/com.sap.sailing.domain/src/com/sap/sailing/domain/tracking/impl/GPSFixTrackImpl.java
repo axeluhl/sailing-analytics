@@ -1123,12 +1123,11 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     @Override
     public List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
         if (intervalBetweenBearingSteps.asMillis() <= 0) {
-            throw new IllegalArgumentException("Sampling rate must be a positive duration but was "+intervalBetweenBearingSteps);
+            throw new IllegalArgumentException("intervalBetweenBearingSteps must be a positive duration but was "+intervalBetweenBearingSteps);
         }
         List<BearingStep> relevantBearings = new ArrayList<>();
         Bearing lastBearing = null;
         double lastCourseChangeAngleInDegrees = 0;
-        // adjust tillTimePoint considering the samplingRate in a way, that
         for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint.plus(intervalBetweenBearingSteps)) {
             if (timePoint.after(toTimePoint)) {
                 timePoint = toTimePoint;
