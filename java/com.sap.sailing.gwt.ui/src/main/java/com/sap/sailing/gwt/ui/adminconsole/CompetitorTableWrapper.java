@@ -19,6 +19,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
@@ -107,7 +108,16 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return comparator.compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
+                BoatDTO boat1 = o1.getBoat();
+                BoatDTO boat2 = o2.getBoat();
+                if (boat1 == null && boat2 == null) {
+                    return 0;
+                } else if (boat1 != null && boat2 == null) { 
+                    return 1;
+                } else if (boat1 == null && boat2 != null) {
+                    return -1;
+                }
+                return comparator.compare(boat1.getBoatClass().getName(), boat2.getBoatClass().getName());
             }
         });
 
@@ -137,38 +147,31 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
 
-        Column<CompetitorDTO, SafeHtml> sailIdColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
+        TextColumn<CompetitorDTO> sailIdColumn = new TextColumn<CompetitorDTO>() {
             @Override
-            public SafeHtml getValue(CompetitorDTO competitor) {
-                SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                ImageResourceRenderer renderer = new ImageResourceRenderer();
-                final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-                final String flagImageURL = competitor.getFlagImageURL();
-                if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                    sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
-                    sb.appendHtmlConstant("&nbsp;");
-                } else {
-                    final ImageResource flagImageResource;
-                    if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                        flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
-                    } else {
-                        flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
-                    }
-                    if (flagImageResource != null) {
-                        sb.append(renderer.render(flagImageResource));
-                        sb.appendHtmlConstant("&nbsp;");
-                    }
+            public String getValue(CompetitorDTO competitor) {
+                if (competitor.getBoat() != null) {
+                    return competitor.getBoat().getSailId();
                 }
-                sb.appendEscaped(competitor.getSailID());
-                return sb.toSafeHtml();
+                return "";
             }
         };
+
         sailIdColumn.setSortable(true);
         competitorColumnListHandler.setComparator(sailIdColumn, new Comparator<CompetitorDTO>() {
             private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return comparator.compare(o1.getSailID(), o2.getSailID());
+                BoatDTO boat1 = o1.getBoat();
+                BoatDTO boat2 = o2.getBoat();
+                if (boat1 == null && boat2 == null) {
+                    return 0;
+                } else if (boat1 != null && boat2 == null) { 
+                    return 1;
+                } else if (boat1 == null && boat2 != null) {
+                    return -1;
+                }
+                return comparator.compare(boat1.getSailId(), boat2.getSailId());
             }
         });
 
@@ -301,11 +304,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public void update(int index, final CompetitorDTO competitor, String value) {
                 if (CompetitorConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    if (competitor instanceof CompetitorWithoutBoatDTO) {
-                        openEditCompetitorWithoutBoatDialog((CompetitorWithoutBoatDTO) competitor);
-                    } else {
-                        openEditCompetitorWithBoatDialog(competitor, competitor.getBoatClass() != null ? competitor.getBoatClass().getName() : null);
-                    }
+                    openEditCompetitorDialog(competitor);
                 } else if (CompetitorConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
                     allowUpdate(Collections.singleton(competitor));
                 }
@@ -317,8 +316,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumn(competitorNameColumn, stringMessages.name());
         table.addColumn(competitorShortNameColumn, stringMessages.shortName());
         table.addColumn(flagImageColumn, stringMessages.flags());
-//        table.addColumn(sailIdColumn, stringMessages.sailNumber());
-//        table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(timeOnTimeFactorColumn, stringMessages.timeOnTimeFactor());
         table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile());
         table.addColumn(displayColorColumn, stringMessages.color());
@@ -326,6 +323,8 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumn(competitorEMailColumn, stringMessages.email());
         table.addColumn(competitorSearchTagColumn, stringMessages.searchTag());
         table.addColumn(competitorIdColumn, stringMessages.id());
+        table.addColumn(sailIdColumn, stringMessages.sailNumber());
+        table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(competitorActionColumn, stringMessages.actions());
         table.ensureDebugId("CompetitorsTable");
     }
@@ -406,6 +405,18 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         dialog.show();
     }
 
+    public void openEditCompetitorDialog(final CompetitorDTO competitor) {
+        if (competitor.getBoat() != null) {
+            String boatClass = null;
+            if (competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
+                boatClass = competitor.getBoat().getBoatClass().getName();
+            }
+            openEditCompetitorWithBoatDialog(competitor, boatClass);
+        } else {
+            openEditCompetitorWithoutBoatDialog(competitor);
+        }
+    }
+    
     void openEditCompetitorWithBoatDialog(final CompetitorDTO originalCompetitor, String boatClass) {
         final CompetitorWithBoatEditDialog dialog = new CompetitorWithBoatEditDialog(stringMessages, 
                 originalCompetitor, new DialogCallback<CompetitorDTO>() {

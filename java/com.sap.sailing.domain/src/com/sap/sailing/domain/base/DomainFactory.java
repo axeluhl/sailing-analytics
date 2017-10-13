@@ -58,10 +58,7 @@ public interface DomainFactory extends SharedDomainFactory {
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
-    CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c);
-
-    /** Temporary functions -> REMOVE later on */
-    CompetitorDTO convertToCompetitorDTO(Competitor c);
+    <T extends Competitor> CompetitorDTO convertToCompetitorDTO(T c);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
 

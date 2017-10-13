@@ -13,7 +13,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -147,18 +146,13 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
-        return competitorAndBoatStore.convertToCompetitorDTO(competitor, null);
-    }
-
-    @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
         return competitorAndBoatStore.convertToCompetitorDTO(competitor, boat);
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c) {
-        return competitorAndBoatStore.convertToCompetitorDTO(c);
+    public <T extends Competitor> CompetitorDTO convertToCompetitorDTO(T competitor) {
+        return competitorAndBoatStore.convertToCompetitorDTO(competitor);
     }
 
     @Override

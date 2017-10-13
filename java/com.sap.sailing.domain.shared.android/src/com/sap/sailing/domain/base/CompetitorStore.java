@@ -88,6 +88,8 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
 
     CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c);
 
+    <T extends Competitor> CompetitorDTO convertToCompetitorDTO(T competitor);
+
     CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
 
     Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
@@ -112,8 +114,6 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
     
-    CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c);
-
     /**
      * If a valid boat is returned and the caller has information available that could be used to update the boat,
      * the caller must check the result of {@link #isBoatToUpdateDuringGetOrCreate(Competitor)}, and if <code>true</code>,

@@ -172,11 +172,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorCache.get(competitorId);
-            if (!(competitor instanceof CompetitorWithBoat)) {
-                return competitor;
-            } else {
-                return null;
-            }        
+            return competitor;
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
@@ -186,12 +182,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     public Competitor getExistingCompetitorByIdAsString(String competitorIdAsString) {
         LockUtil.lockForRead(lock);
         try {
-            Competitor competitor = competitorsByIdAsString.get(competitorIdAsString);
-            if (!(competitor instanceof CompetitorWithBoat)) {
-                return competitor;
-            } else {
-                return null;
-            }        
+            return competitorsByIdAsString.get(competitorIdAsString);
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
@@ -455,8 +446,12 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat competitorWithBoat) {
-        return convertToCompetitorDTO(competitorWithBoat, competitorWithBoat.getBoat());
+    public <T extends Competitor> CompetitorDTO convertToCompetitorDTO(T competitor) {
+        if (competitor instanceof CompetitorWithBoat) {
+            return convertToCompetitorDTO(competitor, ((CompetitorWithBoat) competitor).getBoat());
+        } else {
+            return convertToCompetitorDTO(competitor, null);
+        }
     }
     
     /** Boat stuff starts here */
