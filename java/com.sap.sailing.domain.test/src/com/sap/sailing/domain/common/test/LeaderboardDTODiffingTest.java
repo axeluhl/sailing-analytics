@@ -50,7 +50,8 @@ import com.sap.sse.util.ClonerImpl;
  * The data of a meaningful and non-trivial {@link LeaderboardDTO} is obtained by using an instrumented version of
  * <code>SailingServiceImpl.getLeaderboardByName(...)</code> which serializes the leaderboard at the end of the method
  * to a file used by this test. The leaderboard that this test wants to use is that of the 505 Worlds 2013, obtained
- * for an expanded Race R9 at time 2013-05-03T17:21:40Z.  
+ * for an expanded Race R9 at time 2013-05-03T17:21:40Z. The total distance traveled in meters has to be expanded
+ * for this test to work.
  * 
  * @author Axel Uhl (d043530)
  *
