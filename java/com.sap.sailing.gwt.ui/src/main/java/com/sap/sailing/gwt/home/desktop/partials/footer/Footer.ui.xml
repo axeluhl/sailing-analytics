@@ -1,6 +1,6 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-  xmlns:l="urn:import:com.sap.sailing.gwt.common.client.controls.languageselect"
+  xmlns:l="urn:import:com.sap.sse.gwt.client.controls.languageselect"
   xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />

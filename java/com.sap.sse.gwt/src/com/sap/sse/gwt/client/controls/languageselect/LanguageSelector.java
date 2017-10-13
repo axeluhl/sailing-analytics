@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.controls.languageselect;
+package com.sap.sse.gwt.client.controls.languageselect;
 
 import java.util.List;
 import java.util.Optional;
