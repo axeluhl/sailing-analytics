@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -44,17 +45,25 @@ public class LanguageSelector extends Composite {
     ValueListBox<String> languageSelectionUi;
 
     /**
-     * Creates a new {@link LanguageSelector} instance using the provided label text.
+     * Creates a new {@link LanguageSelector} instance.
+     */
+    @UiConstructor
+    public LanguageSelector() {
+        this.languageSelectionUi = new ValueListBox<>(new LanguageRenderer());
+        this.initWidget(uiBinder.createAndBindUi(this));
+        this.initLanguages(LocaleInfo.getCurrentLocale());
+        this.labelUi.getElement().getStyle().setDisplay(Display.NONE);
+    }
+
+    /**
+     * Sets the label text to use for this {@link LanguageSelector} instance.
      * 
      * @param labelText
      *            {@link String text} to show in front of the link / selection
      */
-    @UiConstructor
-    public LanguageSelector(String labelText) {
-        languageSelectionUi = new ValueListBox<>(new LanguageRenderer());
-        initWidget(uiBinder.createAndBindUi(this));
+    public void setLabelText(String labelText) {
+        this.labelUi.getElement().getStyle().clearDisplay();
         this.labelUi.setText(labelText);
-        this.initLanguages(LocaleInfo.getCurrentLocale());
     }
 
     private void initLanguages(final LocaleInfo currentLocale) {

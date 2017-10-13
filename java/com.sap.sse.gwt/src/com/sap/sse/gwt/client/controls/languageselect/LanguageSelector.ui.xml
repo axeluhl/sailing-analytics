@@ -7,7 +7,7 @@
         .label:after {
             content: ":";
         }
-        .languageSwichLink {
+        .languageSwichLink, .languageSelection {
             color: #efaa00;
             cursor: pointer;
         }
@@ -19,22 +19,18 @@
             -moz-appearance: none;
             -ms-appearance: none;
             appearance: none;
-            margin-top: 25px;
-            color: #efaa00;
             line-height: 1.5em;
             height: 1.5em;
             display: inline-block;
             border: transparent;
-            cursor: pointer;
             padding-right: 1.2em;
-            background: #333;
-            cursor: pointer;
-            background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
+            background: transparent;
+            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
             background-position: right center;
             background-repeat: no-repeat;
         }
     </ui:style>
-    <g:FlowPanel>
+    <g:FlowPanel tag="span">
         <g:InlineLabel ui:field="labelUi" addStyleNames="{style.label}"/>
         <g:Anchor ui:field="languageSwitchLinkUi" styleName="{style.languageSwichLink}"/>
         <g:ValueListBox ui:field="languageSelectionUi" addStyleNames="{style.languageSelection}"/>

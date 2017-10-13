@@ -16,6 +16,7 @@
 }
 .sitefooter_language select {
   font-size: 110%;
+  background-color: #333;
 }
 .sitefooter_links {
   font-weight: 600;

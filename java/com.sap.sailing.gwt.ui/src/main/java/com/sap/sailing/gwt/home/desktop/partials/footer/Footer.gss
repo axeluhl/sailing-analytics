@@ -43,6 +43,9 @@
 .sitefooter_language {
   text-align: left;
 }
+.sitefooter_language select {
+  background-color: #333;
+}
 @media (min-width: 45em) {
   .sitefooter_language {
     text-align: right;
