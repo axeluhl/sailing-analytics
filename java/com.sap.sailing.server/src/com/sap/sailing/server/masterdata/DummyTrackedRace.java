@@ -677,4 +677,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
         return null;
     }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return Collections.emptySet();
+    }
 }

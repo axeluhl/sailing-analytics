@@ -4,42 +4,23 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
-import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
-import com.sap.sailing.server.trackfiles.impl.BravoDataImporterImpl;
-import com.sap.sailing.server.trackfiles.impl.doublefix.DownsamplerTo1HzProcessor;
-import com.sap.sailing.server.trackfiles.impl.doublefix.LearningBatchProcessor;
 
-public class BravoDataImportTest {
+public class BravoDataImportTest extends AbstractBravoDataImportTest {
     
-    private LearningBatchProcessor batchProcessor;
-    private DownsamplerTo1HzProcessor downsampler;
-
-    private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl(BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix()) {
-        protected com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor createDownsamplingProcessor(
-                DoubleVectorFixImporter.Callback callback,
-                TrackFileImportDeviceIdentifier trackIdentifier) {
-            batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
-            downsampler = new DownsamplerTo1HzProcessor(BravoSensorDataMetadata.getTrackColumnCount(), batchProcessor);
-            return downsampler;
-        };
-    };
-    private int callbackCallCount = 0;
-    private double sumRideHeightInMeters = 0.0;
+    @Override
+    protected Map<String, Integer> getColumnData() {
+        return BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix();
+    }
     
-    @Before
-    public void setUp() {
-        this.callbackCallCount = 0;
-        this.sumRideHeightInMeters = 0.0;
+    @Override
+    protected int getTrackColumnCount() {
+        return BravoSensorDataMetadata.getTrackColumnCount();
     }
     
     @Test
@@ -67,48 +48,36 @@ public class BravoDataImportTest {
         testImport(ImportData.DUMMY_RANDOM_HAEDER_ONE_LINE);
     }
     
-    private void testImport(ImportData importData) throws FormatNotSupportedException, IOException {
-        bravoDataImporter.importFixes(importData.getInputStream(), (fixes, device) -> {
-            for (DoubleVectorFix fix : fixes) {
-                callbackCallCount++;
-                sumRideHeightInMeters += new BravoFixImpl(fix).getRideHeight().getMeters();
-            }
-        }, "filename", "source", /* downsample */ true);
-        Assert.assertEquals(importData.expectedFixesCount, downsampler.getCountSourceTtl());
-        Assert.assertEquals(importData.expectedFixesConsolidated, downsampler.getCountImportedTtl());
-        Assert.assertEquals(importData.expectedFixesConsolidated, callbackCallCount);
-    }
-    
-    private enum ImportData {
+    private enum ImportData implements ImportDataDefinition {
         // find out the number of fixes using the following bash line:
         //    tail -n +5 Undefined\ Race\ -\ BRAVO.txt | awk '{if ($5<$6) print v=$5; else v=$6; sum+=v; count++; } END {print "Sum: ", sum, "Count: ", count, "Average:", sum/count;}'
         FILE_UNDEFINED_RACE_BRAVO(870, 89) {
             @Override
-            protected InputStream getInputStream() {
+            public InputStream getInputStream() {
                 return getClass().getResourceAsStream("/Undefined Race - BRAVO.txt");
             }
         },
         FILE_NEW_BRAVO_FORMAT(6, 1) {
             @Override
-            protected InputStream getInputStream() {
+            public InputStream getInputStream() {
                 return getClass().getResourceAsStream("/FMU_out_new.txt");
             }
         },
         DUMMY_DEFAULT_HEADER_NO_DATA(0, 0) {
             @Override
-            protected InputStream getInputStream() {
+            public InputStream getInputStream() {
                 return new ByteArrayInputStream(HEADER_ORDER_DEFAULT.getBytes(StandardCharsets.UTF_8));
             }
         },
         DUMMY_DEAFULT_HEADER_ONE_LINE(1, 1) {
             @Override
-            protected InputStream getInputStream() {
+            public InputStream getInputStream() {
                 return new ByteArrayInputStream((HEADER_ORDER_DEFAULT + DUMMY_CONTENT).getBytes(StandardCharsets.UTF_8));
             }
         },
         DUMMY_RANDOM_HAEDER_ONE_LINE(1, 1) {
             @Override
-            protected InputStream getInputStream() {
+            public InputStream getInputStream() {
                 return new ByteArrayInputStream((HEADER_ORDER_RANDOM + DUMMY_CONTENT).getBytes(StandardCharsets.UTF_8));
             }
         };
@@ -121,7 +90,15 @@ public class BravoDataImportTest {
             this.expectedFixesConsolidated = expectedFixesConsolidated;
         }
         
-        protected abstract InputStream getInputStream();
+        @Override
+        public int getExpectedFixesCount() {
+            return expectedFixesCount;
+        }
+        
+        @Override
+        public int getExpectedFixesConsolidated() {
+            return expectedFixesConsolidated;
+        }
     }
     
     private static final String HEADER_ORDER_DEFAULT = "jjlDATE\tjjlTIME\tEpoch\tRideHeight\tRideHeightPortHull\t"

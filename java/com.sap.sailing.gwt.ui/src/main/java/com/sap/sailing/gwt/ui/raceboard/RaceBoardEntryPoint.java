@@ -2,6 +2,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Collections;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -11,6 +12,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
@@ -102,20 +104,38 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
-                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(StringMessages.INSTANCE);
-                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinition);
-                
-                componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
-                    @Override
-                    public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
-                        Timer timer = new Timer(PlayModes.Replay, 1000l);
-                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, componentContext, initialSettings,
-                                        raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
-                                if (finalMode != null) {
-                                    finalMode.getMode().applyTo(raceBoardPanel);
+                sailingService.determineDetailTypes(raceboardContextDefinition.getLeaderboardGroupName(),
+                        raceboardData.getRace().getRaceIdentifier(), new AsyncCallback<List<DetailType>>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                reportError("Error trying to create the raceboard: " + caught.getMessage());
                             }
-                        }
-                    });
+
+                            @Override
+                            public void onSuccess(List<DetailType> result) {
+                                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
+                                        StringMessages.INSTANCE, result);
+                                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle,
+                                        getUserService(), storageDefinition);
+
+                                componentContext.getInitialSettings(
+                                        new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
+                                            @Override
+                                            public void onSuccess(
+                                                    PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
+                                                Timer timer = new Timer(PlayModes.Replay, 1000l);
+                                                final RaceBoardPanel raceBoardPanel = createPerspectivePage(null,
+                                                        componentContext, initialSettings, raceboardData,
+                                                        showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
+                                                if (finalMode != null) {
+                                                    finalMode.getMode().applyTo(raceBoardPanel);
+                                                }
+                                            }
+                                        });
+                            }
+                        });
+                
             }
             
             @Override

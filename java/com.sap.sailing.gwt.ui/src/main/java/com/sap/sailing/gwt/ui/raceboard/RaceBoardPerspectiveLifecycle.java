@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.List;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
@@ -25,16 +28,16 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     //constructor used by Standalone RaceBoard
-    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages) {
-        this(null, stringMessages);
+    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages, List<DetailType> allowedDetailTypes) {
+        this(null, stringMessages, allowedDetailTypes);
     }
 
-    public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+    public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, List<DetailType> allowedDetailTypes) {
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages);
-        multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, false);
+        multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, allowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);
         

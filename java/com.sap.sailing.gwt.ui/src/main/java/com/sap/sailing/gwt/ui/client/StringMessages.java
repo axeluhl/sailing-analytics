@@ -1921,4 +1921,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chooseDifferentDimensionTitle();
     String chooseDifferentDimensionMessage();
     String pleaseSelectADimension();
+    String currentPortDaggerboardRake();
+    String currentPortDaggerboardRakeTooltip();
+    String currentStbdDaggerboardRake();
+    String currentStbdDaggerboardRakeTooltip();
+    String currentPortRudderRake();
+    String currentPortRudderRakeTooltip();
+    String currentStbdRudderRake();
+    String currentStbdRudderRakeTooltip();
+    String currentMastRotationInDegree();
+    String currentMastRotationInDegreeTooltip();
 }
