@@ -52,7 +52,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         final CompetitorResultEditableImpl item = mFiltered.get(position);
         int bgId = R.attr.sap_gray_black_30;
-        if (item.getOneBasedRank() == 0) {
+        if (item.getOneBasedRank() != 0) {
             bgId = R.attr.sap_gray_black_20;
         }
         holder.itemView.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
