@@ -714,6 +714,7 @@ public class TrackingListFragment extends BaseFragment
     private CompetitorResults getCompetitorResultsDiff() {
         CompetitorResults result = new CompetitorResultsImpl();
 
+        // all changed items
         for (CompetitorResult oldItem : mLastPublished) {
             boolean found = false;
             for (CompetitorResult newItem : mFinishedData) {
@@ -729,6 +730,21 @@ public class TrackingListFragment extends BaseFragment
             if (!found) {
                 result.add(new CompetitorResultImpl(oldItem.getCompetitorId(), oldItem.getCompetitorDisplayName(), 0, oldItem
                     .getMaxPointsReason(), oldItem.getScore(), oldItem.getFinishingTime(), oldItem.getComment()));
+            }
+        }
+
+        // all new items
+        for (CompetitorResultWithIdImpl newItem : mFinishedData) {
+            boolean found = false;
+            for (CompetitorResult oldItem : mLastPublished) {
+                if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem.getOneBasedRank(), newItem
+                    .getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment()));
             }
         }
 
