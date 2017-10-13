@@ -178,10 +178,10 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      *            The from time point (inclusive) for resulting bearing steps
      * @param toTimePoint
      *            The to time point (inclusive) for resulting bearing steps
-     * @param samplingRate
-     *            Time distance between bearing time point
+     * @param intervalBetweenBearingSteps
+     *            Time distance between bearing steps
      * @return The list of bearings between the provided time range
      */
-    Iterable<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration samplingRate);
+    Iterable<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps);
 
 }
