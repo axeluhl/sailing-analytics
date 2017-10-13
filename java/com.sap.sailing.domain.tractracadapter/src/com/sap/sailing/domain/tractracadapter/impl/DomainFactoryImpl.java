@@ -39,7 +39,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
@@ -259,15 +258,16 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private CompetitorWithBoat getOrCreateCompetitorWithBoat(ICompetitor competitor) {
+        final String sailId = competitor.getShortName(); // we take the sailId from the shortName attribute
         final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
         CompetitorWithBoat result = getOrCreateCompetitorWithBoat(competitor.getId(), competitor.getNationality(), competitor.getName(),
-                competitor.getShortName(), competitor.getHandicapToT(), competitor.getHandicapToD(), null, competitorClassName);
+                /* shortName */ null, competitor.getHandicapToT(), competitor.getHandicapToD(), null, competitorClassName, sailId);
         return result;
     }
 
     private CompetitorWithBoat getOrCreateCompetitorWithBoat(final UUID competitorId,
             final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
-            float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag, String competitorClassName) {
+            float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag, String competitorClassName, String sailId) {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         CompetitorWithBoat domainCompetitor = competitorStore.getExistingCompetitorWithBoatById(competitorId);
         if (domainCompetitor == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
@@ -281,8 +281,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            DynamicBoat boat = new BoatImpl(competitorId /* boatId is the same like competitorId */,
-                    null /* no boat name available */, boatClass, shortName /* shortName contains the sailId */);
+            DynamicBoat boat = (DynamicBoat) competitorStore.getOrCreateBoat(UUID.randomUUID(), null /* no boat name available */, boatClass, sailId, null);
             domainCompetitor = competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, (DynamicBoat) boat);
@@ -749,7 +748,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         if (competitorBoatInfo != null) {
                             newBoat = getOrCreateBoat(boatId, competitorBoatInfo.getName(), defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
                         } else {
-                            newBoat = getOrCreateBoat(boatId, "Boat of " + rc.getCompetitor().getShortName(), defaultBoatClass, sailId, null);
+                            newBoat = getOrCreateBoat(boatId, /* boat name*/ null, defaultBoatClass, sailId, null);
                         }
                         competitorsAndBoats.put(newCompetitor, newBoat);
                     }
