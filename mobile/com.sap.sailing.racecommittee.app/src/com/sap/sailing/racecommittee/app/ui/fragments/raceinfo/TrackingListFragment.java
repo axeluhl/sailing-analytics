@@ -107,7 +107,6 @@ public class TrackingListFragment extends BaseFragment
     public TrackingListFragment() {
         mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
         mFilteredCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
-        mLastPublished = new CompetitorResultsImpl();
     }
 
     public static TrackingListFragment newInstance(Bundle args, int startMode) {
@@ -255,6 +254,7 @@ public class TrackingListFragment extends BaseFragment
                     public void onClick(View v) {
                         sendUnconfirmed();
                         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
+                        initLastPublished();
                         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
@@ -273,6 +273,11 @@ public class TrackingListFragment extends BaseFragment
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
 
+        initLastPublished();
+    }
+
+    private void initLastPublished() {
+        mLastPublished = new CompetitorResultsImpl();
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
                 mLastPublished.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
