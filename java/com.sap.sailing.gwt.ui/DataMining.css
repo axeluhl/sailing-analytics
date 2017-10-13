@@ -258,3 +258,8 @@ input.magnifier {
 	background-color: white;
 	padding: 5px;
 }
+
+.languageSelector {
+	float: right;
+	line-height: 2.5em;
+}

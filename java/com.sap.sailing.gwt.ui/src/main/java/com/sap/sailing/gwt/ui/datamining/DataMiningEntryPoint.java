@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
@@ -20,6 +21,7 @@ import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithCo
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -48,7 +50,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     }
     
     private void createDataminingPanel() {
-        SAPHeaderWithAuthentication header  = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), getStringMessages().dataMining());
+        SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING, SailingPermissionsForRoleProvider.INSTANCE);
@@ -78,7 +80,9 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * Re-enable this, when this functionality is desired again.
                  */
 //                settingsControl.addSettingsComponent(queryRunner);
-                
+                final LanguageSelector languageSelector = new LanguageSelector();
+                languageSelector.addStyleName("languageSelector");
+                queryDefinitionProviderWithControls.addControl(languageSelector);
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(selectionDockPanel);
