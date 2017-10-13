@@ -260,6 +260,10 @@ input.magnifier {
 }
 
 .languageSelector {
-	float: right;
-	line-height: 2.5em;
+    float: right;
+    line-height: 2.5em;
+}
+
+.languageSelector select {
+    background-color: #ebebeb
 }
