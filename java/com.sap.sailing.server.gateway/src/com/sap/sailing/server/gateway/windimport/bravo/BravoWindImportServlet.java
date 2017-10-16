@@ -22,7 +22,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter.Callback;
+import com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImportServlet;
 import com.sap.sailing.server.trackfiles.impl.BaseBravoDataImporterImpl;
@@ -74,7 +74,7 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         for (final Fields field : Fields.values()) {
             columnsMap.put(field.name(), field.ordinal());
         }
-        final BaseBravoDataImporterImpl importer = new BaseBravoDataImporterImpl(columnsMap);
+        final BaseBravoDataImporterImpl importer = new BaseBravoDataImporterImpl(columnsMap, "BRAVO_WIND");
         final Callback callback = new Callback() {
             @Override
             public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {

@@ -14,6 +14,16 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
+    public double get(String valueName) {
+        BravoExtendedSensorDataMetadata colDefEnum = BravoExtendedSensorDataMetadata.byColumnName(valueName);
+        if (colDefEnum == null) {
+            throw new IllegalArgumentException("Unknown value \"" + valueName + "\" for " + getClass().getSimpleName());
+        }
+        int index = colDefEnum.getColumnIndex();
+        return fix.get(index);
+    }
+
+    @Override
     public double getPortDaggerboardRake() {
         return fix.get(BravoExtendedSensorDataMetadata.DB_RAKE_PORT.getColumnIndex());
     }

@@ -21,7 +21,6 @@ import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter.Callback;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleVectorFixData;
@@ -44,12 +43,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * TODO: access to columns enum actually by public static enum. Col definition should belong to instance, so we can have
  * different col definitions.
  */
-public class BaseBravoDataImporterImpl {
+public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
     private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
 
-    public BaseBravoDataImporterImpl(Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix) {
+    public BaseBravoDataImporterImpl(Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix, String type) {
+        super(type);
         this.columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     }
     
