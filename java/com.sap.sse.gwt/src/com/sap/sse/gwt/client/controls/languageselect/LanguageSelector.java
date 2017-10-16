@@ -80,7 +80,10 @@ public class LanguageSelector extends Composite {
     private void initLanguageSwitchLink(final List<String> available, final LocaleInfo current) {
         this.languageSelectionUi.removeFromParent();
         final Optional<String> other = available.stream().filter(l -> !current.getLocaleName().equals(l)).findFirst();
-        other.ifPresent(name -> languageSwitchLinkUi.addClickHandler(e -> switchLanguage(name)));
+        other.ifPresent(name -> {
+            languageSwitchLinkUi.setText(LocaleInfo.getLocaleNativeDisplayName(name));
+            languageSwitchLinkUi.addClickHandler(e -> switchLanguage(name));
+        });
     }
 
     private void initLanguageSelection(final List<String> available, final LocaleInfo current) {
