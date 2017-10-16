@@ -24,7 +24,6 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -62,7 +61,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     public ExpeditionExtendedDataImporterImpl() {
         super(EXPEDITION_EXTENDED_TYPE);
         columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = ExpeditionExtendedSensorDataMetadata.getColumnNamesToIndexInDoubleFix();
-        trackColumnCount = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.values().stream().max((x,y)->Integer.compare(x, y)).get();
+        trackColumnCount = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.values().stream().max((x,y)->Integer.compare(x, y)).get()+1;
     }
 
     @Override
@@ -96,8 +95,10 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                 final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
                 buffer.lines().forEach(line -> {
                     lineNr.incrementAndGet();
-                    DoubleVectorFixData fix = parseLine(lineNr.get(), filename, line, colIndices);
-                    callback.addFixes(Collections.singleton(new DoubleVectorFixImpl(fix.getTimepoint(), fix.getFix())), trackIdentifier);
+                    if (!line.trim().isEmpty()) {
+                        DoubleVectorFixData fix = parseLine(lineNr.get(), filename, line, colIndices);
+                        callback.addFixes(Collections.singleton(new DoubleVectorFixImpl(fix.getTimepoint(), fix.getFix())), trackIdentifier);
+                    }
                 });
                 buffer.close();
             }
@@ -115,13 +116,14 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private Map<String, Integer> validateAndParseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
         Map<String, Integer> colIndicesInFile = new HashMap<>();
-        for (int j = BravoSensorDataMetadata.HEADER_COLUMN_OFFSET; j < headerTokens.length; j++) {
-            String header = headerTokens[j];
+        int columnInResultingHeader = 0;
+        for (int columnInHeader = 0; columnInHeader < headerTokens.length; columnInHeader++) {
+            String header = headerTokens[columnInHeader];
             if (header.equals(ORIGINAL_POSITION_HEADER)) {
-                colIndicesInFile.put(GENERATED_LAT_HEADER, j++);
-                colIndicesInFile.put(GENERATED_LON_HEADER, j);
+                colIndicesInFile.put(GENERATED_LAT_HEADER, columnInResultingHeader++);
+                colIndicesInFile.put(GENERATED_LON_HEADER, columnInResultingHeader++);
             } else {
-                colIndicesInFile.put(header, j);
+                colIndicesInFile.put(header, columnInResultingHeader++);
             }
         }
         Iterable<String> requiredColumnsInFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.keySet();
@@ -156,8 +158,8 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                 dateFormatPattern = DATE_COLUMN_2_PATTERN;
             }
             final String time = fileContentTokens[columnsInFileFromHeader.get(TIME_COLUMN)];
-            final DateFormat df = new SimpleDateFormat(dateFormatPattern+"THHmmss");
-            final Date timestamp = df.parse(date+"T"+time);
+            final DateFormat df = new SimpleDateFormat(dateFormatPattern+"'T'HH:mm:ssX");
+            final Date timestamp = df.parse(date+"T"+time+"+00:00"); // assuming UTC
             if (timestamp != null) {
                 double[] trackFixData = new double[trackColumnCount];
                 for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
