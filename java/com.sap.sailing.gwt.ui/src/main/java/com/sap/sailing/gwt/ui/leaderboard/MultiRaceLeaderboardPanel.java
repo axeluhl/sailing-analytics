@@ -24,7 +24,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -84,13 +83,12 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
         for (RaceColumnDTO raceColumn : selectedRaceColumns) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(selectedManeuverDetails,
+        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(selectedManeuverDetails,
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, namesOfRaceColumnsToShow,
                 raceColumnSelection.getNumberOfLastRaceColumnsToShow(), timer.getRefreshInterval(),
                 raceColumnSelection.getType(), isShowAddedScores(),
                 isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
                 isShowCompetitorFullName(), isShowCompetitorNationality);
-        SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
     }
 
