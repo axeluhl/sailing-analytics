@@ -3133,17 +3133,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private ComputedManeuverEnteringAndExitingDetails computeManeuverEnteringAndExitingDetails(
             TimePoint maneuverTimePoint, Iterable<BearingStep> bearingStepsToAnalyze, NauticalSide maneuverDirection) {
-        // Compute course changes before and after maneuver timepoint
-        double currentCourseChangeInDegreesAfterManeuverClimax = 0;
-        double currentCourseChangeInDegreesBeforeManeuverClimax = 0;
+        double totalCourseChangeInDegrees = 0;
         for (BearingStep entry : bearingStepsToAnalyze) {
-            double courseChangeAngleInDegrees = entry.getCourseChangeInDegrees();
-            TimePoint timePoint = entry.getTimePoint();
-            if (timePoint.after(maneuverTimePoint)) {
-                currentCourseChangeInDegreesAfterManeuverClimax += courseChangeAngleInDegrees;
-            } else {
-                currentCourseChangeInDegreesBeforeManeuverClimax += courseChangeAngleInDegrees;
-            }
+            totalCourseChangeInDegrees += entry.getCourseChangeInDegrees();
         }
         // Refine the timePointBeforeManeuver by checking whether the total course changed before maneuver timepoint
         // may be increased or kept unchanged if we cut off bearing steps one by one from the left.
@@ -3151,7 +3143,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         SpeedWithBearing refinedSpeedWithBearingBeforeManeuver = null;
         boolean firstLoop = true;
         ManeuverEnteringExitingDetailsComputationHelper enteringDetailsComputationHelper = new ManeuverEnteringExitingDetailsComputationHelper(
-                currentCourseChangeInDegreesBeforeManeuverClimax, maneuverDirection);
+                totalCourseChangeInDegrees, maneuverDirection);
         for (BearingStep entry : bearingStepsToAnalyze) {
             TimePoint timePoint = entry.getTimePoint();
             if (!firstLoop) {
@@ -3176,7 +3168,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         SpeedWithBearing refinedSpeedWithBearingAfterManeuver = null;
         boolean setNextEntryAsBoundary = false;
         ManeuverEnteringExitingDetailsComputationHelper exitingDetailsComputationHelper = new ManeuverEnteringExitingDetailsComputationHelper(
-                currentCourseChangeInDegreesAfterManeuverClimax, maneuverDirection);
+                enteringDetailsComputationHelper.getMaxCourseChangeInDegrees(), maneuverDirection);
         final List<BearingStep> bearingStepsAsList = new ArrayList<>();
         Util.addAll(bearingStepsToAnalyze, bearingStepsAsList);
         for (ListIterator<BearingStep> iterator = bearingStepsAsList.listIterator(bearingStepsAsList.size()); iterator
@@ -3201,9 +3193,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 setNextEntryAsBoundary = true;
             }
         }
-        double refinedTotalCourseChangeInDegrees = enteringDetailsComputationHelper
-                .getMaxCourseChangeInDegreesBeforeManeuverClimax()
-                + exitingDetailsComputationHelper.getMaxCourseChangeInDegreesBeforeManeuverClimax();
+        double refinedTotalCourseChangeInDegrees = exitingDetailsComputationHelper.getMaxCourseChangeInDegrees();
         ComputedManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = new ComputedManeuverEnteringAndExitingDetails(
                 refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, refinedSpeedWithBearingBeforeManeuver,
                 refinedSpeedWithBearingAfterManeuver, refinedTotalCourseChangeInDegrees);
@@ -4288,43 +4278,39 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *
      */
     private static class ManeuverEnteringExitingDetailsComputationHelper {
-        private double currentCourseChangeInDegreesBeforeManeuverClimax;
-        private double maxCourseChangeInDegreesBeforeManeuverClimax;
+        private double currentCourseChangeInDegrees;
+        private double maxCourseChangeInDegrees;
         private final int totalCourseChangeSignum;
 
-        public ManeuverEnteringExitingDetailsComputationHelper(double courseChangeInDegreesBeforeManeuverClimax,
+        public ManeuverEnteringExitingDetailsComputationHelper(double totalCourseChange,
                 NauticalSide maneuverDirection) {
-            this.currentCourseChangeInDegreesBeforeManeuverClimax = courseChangeInDegreesBeforeManeuverClimax;
-            this.maxCourseChangeInDegreesBeforeManeuverClimax = courseChangeInDegreesBeforeManeuverClimax;
+            this.currentCourseChangeInDegrees = totalCourseChange;
+            this.maxCourseChangeInDegrees = totalCourseChange;
             this.totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
         }
 
+        /**
+         * 
+         * @param courseChangeAngleInDegrees
+         * @return {@code true}} if the
+         */
         public boolean checkIfManeuverCourseChangeBetterAfterSubstractingCourseChangeStep(
                 double courseChangeAngleInDegrees) {
-            currentCourseChangeInDegreesBeforeManeuverClimax -= courseChangeAngleInDegrees;
-
-            // adjust tolerance for zero-like value in order to be able to assign maneuver timepoint
-            // as refinedTimePointBefore/After. It is required due to accuracy drift in additive estimated values.
-            double currentCourseChangeForSignum = Math
-                    .abs(currentCourseChangeInDegreesBeforeManeuverClimax) < ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE
-                            ? 0 : currentCourseChangeInDegreesBeforeManeuverClimax;
+            currentCourseChangeInDegrees -= courseChangeAngleInDegrees;
             // Only allow consideration of the new cut step when remaining course change sign corresponds to the
             // direction of processed maneuver.
             // As initial maximal course change may not match the signum of direction of processed maneuver,
             // course changes after cut operation with the right signum must get priority over max course change with
             // wrong signum.
-            if (Math.abs(Math.signum(currentCourseChangeForSignum) - totalCourseChangeSignum) < 2
-                    && (Math.signum(maxCourseChangeInDegreesBeforeManeuverClimax) != totalCourseChangeSignum
-                            || Math.abs(maxCourseChangeInDegreesBeforeManeuverClimax) <= Math
-                                    .abs(currentCourseChangeInDegreesBeforeManeuverClimax))) {
-                maxCourseChangeInDegreesBeforeManeuverClimax = currentCourseChangeInDegreesBeforeManeuverClimax;
+            if(maxCourseChangeInDegrees * totalCourseChangeSignum <= currentCourseChangeInDegrees * totalCourseChangeSignum + ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE) {
+                maxCourseChangeInDegrees = currentCourseChangeInDegrees;
                 return true;
             }
             return false;
         }
 
-        public double getMaxCourseChangeInDegreesBeforeManeuverClimax() {
-            return maxCourseChangeInDegreesBeforeManeuverClimax;
+        public double getMaxCourseChangeInDegrees() {
+            return maxCourseChangeInDegrees;
         }
     }
 
