@@ -77,7 +77,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         // add 15 pixel spacing between bottom scrollpanel and scrolled content
         this.getElement().getStyle().setPaddingBottom(25, Unit.PX);
         contentToSyncWith = contentToScroll.getElement();
-        this.hasMutationObservationCapability = weCanObserve();
+        this.hasMutationObservationCapability = hasMutationObservationCapability();
         overlayWidget = uiBinder.createAndBindUi(this);
     }
 
@@ -116,7 +116,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         registrations.add(this.addScrollHandler(new ScrollHandler() {
             @Override
             public void onScroll(ScrollEvent event) {
-                GWT.log("scroll initiated by table");
                 if (ignoreTableScrollEvent) {
                     ignoreTableScrollEvent = false;
                 } else {
@@ -126,7 +125,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
             }
         }));
         createObserverForCurrentChild();
-        // only bind reverse scrolling through overlay scrollpanel in desktop
         DOM.sinkEvents(overlayScrollPanelUi, Event.ONSCROLL);
         DOM.setEventListener(overlayScrollPanelUi, new EventListener() {
             @Override
@@ -272,7 +270,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     /**
      * Check if the browser provides the mutation observer API.
      */
-    private native boolean weCanObserve() /*-{
+    private native boolean hasMutationObservationCapability() /*-{
 	if (MutationObserver) {
 	    return true;
 	}
