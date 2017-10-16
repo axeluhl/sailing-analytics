@@ -22,7 +22,7 @@ import java.util.zip.GZIPInputStream;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
@@ -68,7 +68,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     public RegattaLogDeviceCompetitorSensorDataMappingEvent createEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable id, Competitor mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
-        return new RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo,
+        return new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo,
                 device, from, to);
     }
 
