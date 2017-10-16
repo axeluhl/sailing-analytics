@@ -2,7 +2,7 @@
     height: 100%;
 }
 .header_right_extension {
-	margin-right: 4em;
+	margin-right: 12em;
 }
 .usermanagement_icon {
 	display: none;
@@ -12,7 +12,7 @@
 }
 .usermanagement_icon {
     position: absolute;
-    right: 0;
+    right: 7em;
     display: inline-block;
     width: 4rem;
     height: 100%;
@@ -41,4 +41,15 @@
 }
 .usermanagement_view * {
     font-size: 15px;
+}
+.languageSelector {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
+}
+.languageSelector select {
+    background-size: 1.333333em .75em;
+    font-size: 100% !important;
+    font-weight: normal;
 }
