@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithCo
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -80,9 +79,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * Re-enable this, when this functionality is desired again.
                  */
 //                settingsControl.addSettingsComponent(queryRunner);
-                final LanguageSelector languageSelector = new LanguageSelector();
-                languageSelector.addStyleName("languageSelector");
-                queryDefinitionProviderWithControls.addControl(languageSelector);
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(selectionDockPanel);

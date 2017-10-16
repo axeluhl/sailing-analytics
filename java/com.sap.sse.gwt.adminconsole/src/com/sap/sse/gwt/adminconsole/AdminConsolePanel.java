@@ -22,7 +22,6 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
-import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
 import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
@@ -210,9 +209,6 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         sysinfoPanel.ensureDebugId("SystemInformation");
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
         sysinfoPanel.add(releaseNotesLink);
-        final LanguageSelector languageSelector = new LanguageSelector();
-        languageSelector.getElement().getStyle().setMarginLeft(1, Unit.EM);
-        sysinfoPanel.add(languageSelector);
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
          informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.setFooterWidget(informationPanel);
