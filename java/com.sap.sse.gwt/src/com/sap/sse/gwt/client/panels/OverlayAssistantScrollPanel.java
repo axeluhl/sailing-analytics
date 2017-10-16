@@ -76,9 +76,9 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         super(contentToScroll);
         // add 15 pixel spacing between bottom scrollpanel and scrolled content
         this.getElement().getStyle().setPaddingBottom(25, Unit.PX);
-        contentToSyncWith = contentToScroll.getElement();
+        this.contentToSyncWith = contentToScroll.getElement();
         this.hasMutationObservationCapability = hasMutationObservationCapability();
-        overlayWidget = uiBinder.createAndBindUi(this);
+        this.overlayWidget = uiBinder.createAndBindUi(this);
     }
 
     /**
@@ -241,40 +241,40 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
      * on dom-level. As soon as we have changes, we execute the command provided by this method.
      */
     private native JavaScriptObject setupObserver(final Element elementToObserve, Command onChangeCommand) /*-{
-	if (MutationObserver) {
-	    var observer = new MutationObserver(
-		    function(mutations) {
-			onChangeCommand.@com.google.gwt.user.client.Command::execute()();
-		    });
-	    var observerConfig = {
-		attributes : true,
-		childList : true,
-		characterData : true
-	    }
-	    observer.observe(elementToObserve, observerConfig);
-	    return observer;
-	} else {
-	    return null;
-	}
+        if (MutationObserver) {
+            var observer = new MutationObserver(
+                function(mutations) {
+                    onChangeCommand.@com.google.gwt.user.client.Command::execute()();
+                });
+            var observerConfig = {
+                attributes : true,
+                childList : true,
+                characterData : true
+            }
+            observer.observe(elementToObserve, observerConfig);
+            return observer;
+        } else {
+            return null;
+        }
     }-*/;
 
     /**
      * Disconnect the mutation observer.
      */
     private native void disconnectObserver() /*-{
-	if (this.@com.sap.sse.gwt.client.panels.OverlayAssistantScrollPanel::observer) {
-	    this.@com.sap.sse.gwt.client.panels.OverlayAssistantScrollPanel::observer.disconnect();
-	}
+        if (this.@com.sap.sse.gwt.client.panels.OverlayAssistantScrollPanel::observer) {
+            this.@com.sap.sse.gwt.client.panels.OverlayAssistantScrollPanel::observer.disconnect();
+        }
     }-*/;
 
     /**
      * Check if the browser provides the mutation observer API.
      */
     private native boolean hasMutationObservationCapability() /*-{
-	if (MutationObserver) {
-	    return true;
-	}
-	return false;
+        if (MutationObserver) {
+            return true;
+        }
+        return false;
     }-*/;
 
     /**
@@ -299,8 +299,8 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         }
 
         /**
-         * Trigger overlay display animation The animation only fires if the current internal state and the target state
-         * are differ.
+         * Trigger overlay display animation. The animation only fires if the current internal state and the target
+         * state are differ.
          */
         public void animate(boolean requestedVisibleState, int duration) {
             boolean changed = overlayToolbarIsCurrentlyVisible != requestedVisibleState;
