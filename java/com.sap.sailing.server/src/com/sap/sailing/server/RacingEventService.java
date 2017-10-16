@@ -549,12 +549,33 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
+    
+    /**
+     * Forces a new end time identified by the passed parameters.
+     * @param leaderboardName name of the RaceLog's leaderboard.
+     * @param raceColumnName name of the RaceLog's column
+     * @param fleetName name of the RaceLog's fleet
+     * @param authorName name of the {@link AbstractLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorPriority priority of the author.
+     * @param passId Pass identifier of the new start time event.
+     * @param logicalTimePoint logical {@link TimePoint} of the new event.
+     * @param endTime the new End-Time
+     * @return
+     */
+    TimePoint setEndTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint endTime);
+
 
     /**
      * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
     Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
+    /**
+     * Gets the end time and pass identifier for the queried race. End time might be <code>null</code>.
+     */
+    Pair<TimePoint, Integer> getEndTime(String leaderboardName, String raceColumnName, String fleetName);
+    
     MongoObjectFactory getMongoObjectFactory();
     
     DomainObjectFactory getDomainObjectFactory();

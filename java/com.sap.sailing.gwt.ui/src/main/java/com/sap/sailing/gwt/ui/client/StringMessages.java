@@ -1021,8 +1021,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String overwriteRacingProceduresConfigurationHelpText();
     
     String setStartTime();
+    String setEndTime();
     String currentPass();
     String setStartTimeDescription();
+    String setEndTimeDescription();
     String setTrackingTimesDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();

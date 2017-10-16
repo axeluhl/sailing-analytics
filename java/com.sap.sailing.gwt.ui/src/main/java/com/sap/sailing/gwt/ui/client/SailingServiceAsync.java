@@ -62,6 +62,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetEndTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -619,12 +620,28 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
 
     /**
+     * Sets the a new end time.
+     * 
+     * @param dto
+     *            {@link RaceLogSetEndTimeDTO} identifying the race to set the end time on and the new
+     *            end time.
+     */
+    void setEndTime(RaceLogSetEndTimeDTO editedObject, AsyncCallback<Boolean> asyncCallback);
+    
+    /**
      * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the
      * pass identifier will still be returned, but the start time field will be <code>null</code>.
      */
     void getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Util.Triple<Date, Integer, RacingProcedureType>> callback);
 
+    /**
+     * Gets the race's current end time, current pass identifier. If no end time is set, the
+     * pass identifier will still be returned, but the start time field will be <code>null</code>.
+     */
+    void getEndTime(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Pair<Date, Integer>> asyncCallback);
+    
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
 
     void getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort, AsyncCallback<String> callback);
@@ -846,4 +863,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
             AsyncCallback<List<DetailType>> callback);
+
+
 }

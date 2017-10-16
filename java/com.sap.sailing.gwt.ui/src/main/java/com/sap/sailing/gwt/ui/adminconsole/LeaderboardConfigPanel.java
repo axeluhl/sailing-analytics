@@ -60,6 +60,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetEndTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -473,6 +474,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     refreshRaceLog(object.getA(), object.getB(), true);
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
                     setStartTime(object.getA(), object.getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SET_ENDTIME.equals(value)) {
+                    setEndTime(object.getA(), object.getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(object.getA(), object.getB());
                 }
@@ -594,28 +597,57 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
-        new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(), 
+        new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(),
                 fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeAndProcedureDTO>() {
-            @Override
-            public void ok(RaceLogSetStartTimeAndProcedureDTO editedObject) {
-                sailingService.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(caught.getMessage());
+                    public void ok(RaceLogSetStartTimeAndProcedureDTO editedObject) {
+                        sailingService.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Boolean result) {
+                                if (!result) {
+                                    Window.alert(stringMessages.failedToSetNewStartTime());
+                                }
+                            }
+                        });
+
                     }
 
                     @Override
-                    public void onSuccess(Boolean result) {
-                        if (!result) {
-                            Window.alert(stringMessages.failedToSetNewStartTime());
-                        }
+                    public void cancel() {
                     }
-                });
-            }
+                }).show();
+    }
+    
+    private void setEndTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
+        new SetEndTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(),
+                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetEndTimeDTO>() {
+                    @Override
+                    public void ok(RaceLogSetEndTimeDTO editedObject) {
+                        Window.alert(editedObject.toString());
+                        sailingService.setEndTime(editedObject, new AsyncCallback<Boolean>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
 
-            @Override
-            public void cancel() { }
-        }).show();
+                            @Override
+                            public void onSuccess(Boolean result) {
+                                if (!result) {
+                                    Window.alert(stringMessages.failedToSetNewStartTime());
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
     }
 
     private void removeRaceColumn(final RaceColumnDTO raceColumnDTO) {

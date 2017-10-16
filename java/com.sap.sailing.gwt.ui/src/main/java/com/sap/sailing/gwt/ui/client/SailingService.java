@@ -73,6 +73,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetEndTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -451,7 +452,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
+    boolean setEndTime(RaceLogSetEndTimeDTO dto);
+    
     Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
+    
+    Util.Pair<Date, Integer> getEndTime(String leaderboardName, String raceColumnName, String fleetName);
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 

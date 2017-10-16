@@ -48,6 +48,9 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/clock.png")
     ImageResource clockIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/clock2.png")
+    ImageResource clock2Icon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/flag_blue.png")
     ImageResource flagIcon();

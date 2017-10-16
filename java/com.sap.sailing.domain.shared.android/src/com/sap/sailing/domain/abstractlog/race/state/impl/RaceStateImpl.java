@@ -8,6 +8,8 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeResolver;
@@ -158,6 +160,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     public void forceNewDependentStartTime(TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentOnRace) {
         raceLog.add(new RaceLogDependentStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), dependentOnRace, startTimeDifference));
     }
+    
 
     @Override
     public void setFinishingTime(TimePoint timePoint) {
@@ -166,7 +169,27 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
 
     @Override
     public void setFinishedTime(TimePoint timePoint) {
-        raceLog.add(new RaceLogRaceStatusEventImpl(timePoint, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED));
+        raceLog.lockForRead();
+        try {
+            for (RaceLogEvent event : raceLog.getRawFixes()) {
+                if (event instanceof RaceLogRaceStatusEvent) {
+                    RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
+                    if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHED)) {
+                        try {
+                            raceLog.revokeEvent(author, statusEvent, "Finsihtime Override");
+                        } catch (NotRevokableException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        } finally {
+            raceLog.unlockAfterRead();
+        }
+        raceLog.add(new RaceLogRaceStatusEventImpl(timePoint, author, raceLog.getCurrentPassId(),
+                RaceLogRaceStatus.FINISHED));
+        // ensure caches are synched
+        forceUpdate();
     }
 
     @Override

@@ -3480,6 +3480,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         return result;
     }
+    
+    @Override
+    public TimePoint setEndTime(String leaderboardName, String raceColumnName, String fleetName,
+            String authorName, int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final TimePoint result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            RaceState state = RaceStateImpl.create(/* race log resolver */ this, raceLog, new LogEventAuthorImpl(authorName, authorPriority));
+            if (passId > raceLog.getCurrentPassId()) {
+                state.setAdvancePass(logicalTimePoint);
+            }
+            state.setFinishedTime(startTime);
+            result = state.getFinishedTime();
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
     public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
@@ -3503,6 +3522,22 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
             result = new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
                 raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public com.sap.sse.common.Util.Pair<TimePoint, Integer> getEndTime(
+            String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final Pair<TimePoint, Integer> result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
+            result = new com.sap.sse.common.Util.Pair<TimePoint, Integer>(state.getFinishedTime(),
+                raceLog.getCurrentPassId());
         } else {
             result = null;
         }
