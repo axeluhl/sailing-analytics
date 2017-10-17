@@ -5,6 +5,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
 
 /**
  * Default implementation of {@link AuthenticationMenuView.Presenter} and {@link FlyoutAuthenticationView.Presenter} to
@@ -47,7 +48,11 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
         eventBus.addHandler(AuthenticationRequestEvent.TYPE, new AuthenticationRequestEvent.Handler() {
             @Override
             public void onUserManagementRequestEvent(AuthenticationRequestEvent event) {
-                toggleFlyout();
+                if(event.isRegister()){
+                    showRegister();
+                }else{
+                    toggleFlyout();
+                }
             }
         });
         
@@ -58,6 +63,14 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
             }
         });
         authenticationMenuView.setAuthenticated(initialAuthentication.isLoggedIn());
+    }
+
+    public void showRegister() {
+        if (!flyoutAuthenticationView.isShowing()) {
+            flyoutAuthenticationView.show();
+            authenticationPlaceManagementController.start();
+            authenticationPlaceManagementController.goTo(new CreateAccountPlace());
+        }
     }
 
     @Override

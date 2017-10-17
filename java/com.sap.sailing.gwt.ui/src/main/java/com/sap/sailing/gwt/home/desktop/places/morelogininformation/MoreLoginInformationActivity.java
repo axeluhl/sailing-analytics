@@ -1,14 +1,17 @@
 package com.sap.sailing.gwt.home.desktop.places.morelogininformation;
 
 import com.google.gwt.activity.shared.Activity;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.desktop.app.DesktopClientFactory;
+import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 
 public class MoreLoginInformationActivity implements Activity {
+    private DesktopClientFactory clientFactory;
 
-    public MoreLoginInformationActivity(Place place) {
+    public MoreLoginInformationActivity(Place place, DesktopClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
     }
 
     @Override
@@ -31,8 +34,7 @@ public class MoreLoginInformationActivity implements Activity {
         panel.setWidget(new MoreLoginInformation(new Runnable() {
             @Override
             public void run() {
-                GWT.debugger();
-//                eventBus.fireEvent(new RegistrationRequestEvent());
+                clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent(true));
             }
         }));
     }

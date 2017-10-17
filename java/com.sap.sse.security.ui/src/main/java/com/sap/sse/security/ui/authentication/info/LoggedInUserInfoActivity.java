@@ -45,7 +45,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void gotoProfileUi() {
-        eventBus.fireEvent(new AuthenticationRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent(false));
         callback.handleUserProfileNavigation();
     }
 

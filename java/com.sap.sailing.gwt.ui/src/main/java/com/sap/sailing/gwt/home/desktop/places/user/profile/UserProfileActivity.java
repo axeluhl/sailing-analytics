@@ -91,7 +91,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     @Override
     public void doTriggerLoginForm() {
-        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent());
+        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent(false));
     }
     
     @Override

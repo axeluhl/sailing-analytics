@@ -11,13 +11,16 @@ import com.sap.sailing.gwt.home.shared.usermanagement.view.AuthenticationViewMob
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
+import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
 import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
 public class AuthenticationActivity extends AbstractActivity {
     private final MobileApplicationClientFactory clientFactory;
     private final AuthenticationView userManagementView = new AuthenticationViewMobile();
+    private boolean register;
 
     public AuthenticationActivity(AuthenticationPlace place, MobileApplicationClientFactory clientFactory) {
+        register = place.isRegisterView();
         this.clientFactory = clientFactory;
     }
 
@@ -30,6 +33,9 @@ public class AuthenticationActivity extends AbstractActivity {
                         new SignInSuccessfulNavigationMobile()),
                 userManagementView, eventBus);
         userManagementController.start();
+        if(register){
+            userManagementController.goTo(new CreateAccountPlace());
+        }
     }
     
     private class SignInSuccessfulNavigationMobile implements Runnable {

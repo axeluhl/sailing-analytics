@@ -9,15 +9,20 @@ import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class AuthenticationPlace extends Place implements HasMobileVersion, HasLocationTitle {
-    private boolean register;
 
-    public AuthenticationPlace(boolean register) {
-        this.register = register;
+    private boolean registerView;
+
+    public AuthenticationPlace(boolean registerView) {
+        this.registerView = registerView;
     }
     
     @Override
     public String getLocationTitle() {
         return StringMessages.INSTANCE.user();
+    }
+    
+    public boolean isRegisterView() {
+        return registerView;
     }
 
     @Prefix(PlaceTokenPrefixes.UserAuthentication)

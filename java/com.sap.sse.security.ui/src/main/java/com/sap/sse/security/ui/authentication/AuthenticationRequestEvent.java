@@ -9,10 +9,19 @@ import com.google.gwt.event.shared.GwtEvent;
 public class AuthenticationRequestEvent extends GwtEvent<AuthenticationRequestEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<AuthenticationRequestEvent.Handler>();
 
+    private final boolean register;
+
+    public AuthenticationRequestEvent(boolean register) {
+        this.register = register;
+    }
+
     public interface Handler extends EventHandler {
         void onUserManagementRequestEvent(AuthenticationRequestEvent event);
     }
-    
+
+    public boolean isRegister() {
+        return register;
+    }
 
     @Override
     public Type<Handler> getAssociatedType() {

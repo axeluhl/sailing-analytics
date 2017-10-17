@@ -19,6 +19,6 @@ public class FlyoutNotLoggedInPresenter implements NotLoggedInPresenter {
 
     @Override
     public void doTriggerLoginForm() {
-        eventBus.fireEvent(new AuthenticationRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent(false));
     }
 }

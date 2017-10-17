@@ -22,8 +22,8 @@ public class MobilePlacesNavigator extends HomePlacesNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
 
-    public PlaceNavigation<AuthenticationPlace> getSignInNavigation(boolean registration) {
-        return createLocalPlaceNavigation(new AuthenticationPlace(registration));
+    public PlaceNavigation<AuthenticationPlace> getSignInNavigation(boolean registerView) {
+        return createLocalPlaceNavigation(new AuthenticationPlace(registerView));
     }
     
 }

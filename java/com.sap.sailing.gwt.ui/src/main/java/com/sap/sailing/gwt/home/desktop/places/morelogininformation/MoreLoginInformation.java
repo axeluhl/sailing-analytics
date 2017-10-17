@@ -29,7 +29,6 @@ public class MoreLoginInformation extends Composite {
         Event.setEventListener(register, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                GWT.debugger();
                 onRegisterClick.run();
             }
         });

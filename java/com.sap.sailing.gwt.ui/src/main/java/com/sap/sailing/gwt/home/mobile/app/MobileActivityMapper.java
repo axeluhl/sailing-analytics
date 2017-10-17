@@ -78,8 +78,6 @@ public class MobileActivityMapper implements ActivityMapper {
             return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
-        } else if (place instanceof AuthenticationPlace) {
-            return new AuthenticationActivityProxy((AuthenticationPlace) place, clientFactory);
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else if (place instanceof PasswordResetPlace) {
