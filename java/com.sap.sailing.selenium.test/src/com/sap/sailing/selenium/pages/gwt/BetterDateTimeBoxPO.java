@@ -18,7 +18,7 @@ import com.sap.sailing.selenium.pages.PageObject;
 public class BetterDateTimeBoxPO extends PageArea {
 
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+    private static final DateFormat timeFormat = new SimpleDateFormat("hh:mm");
 
     @FindBy(how = BySeleniumId.class, using = "datebox")
     private WebElement datebox;
