@@ -110,7 +110,8 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public void createAccount(final String name, String email, String password, String fullName, 
             String company, SuccessCallback<UserDTO> callback) {
-        userManagementService.createSimpleUser(name, email, password, fullName, company, emailConfirmationUrl,
+        userManagementService.createSimpleUser(name, email, password, fullName, company,
+                LocaleInfo.getCurrentLocale().getLocaleName(), emailConfirmationUrl,
                 new AsyncCallbackImpl<UserDTO>(callback) {
                     @Override
                     public void onFailure(Throwable caught) {

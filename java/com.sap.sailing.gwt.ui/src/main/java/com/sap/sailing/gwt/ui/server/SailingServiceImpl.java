@@ -2981,6 +2981,42 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = rideHeight == null ? null : rideHeight.getMeters();
                 }
             }
+            case CURRENT_PORT_DAGGERBOARD_RAKE: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    result = bravoFixTrack.getPortDaggerboardRakeIfAvailable(timePoint);
+                }
+            }
+            case CURRENT_STBD_DAGGERBOARD_RAKE: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    result = bravoFixTrack.getStbdDaggerboardRakeStbdIfAvailable(timePoint);
+                }
+            }
+            case CURRENT_PORT_RUDDER_RAKE: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    result = bravoFixTrack.getPortRudderRakeIfAvailable(timePoint);
+                }
+            }
+            case CURRENT_STBD_RUDDER_RAKE: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    result = bravoFixTrack.getStbdRudderRakeIfAvailable(timePoint);
+                }
+            }
+            case CURRENT_MAST_ROTATION_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getMastRotationIfAvailable(timePoint);
+                    result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
                 break;
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
@@ -6574,5 +6610,41 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             newEliminatedCompetitors.add(getCompetitor(cDTO));
         }
         getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
+    }
+
+    @Override
+    public List<DetailType> determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
+        List<DetailType> availableDetailsTypes = DetailType.getDefaultDetailTypesForChart();
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
+        if (trackedRace != null) {
+            boolean hasBravoTrack = false;
+            boolean hasExtendedBravoFixes = false;
+            for (BravoFixTrack<Competitor> track : trackedRace.<BravoFix, BravoFixTrack<Competitor>>getSensorTracks(BravoFixTrack.TRACK_NAME)) {
+                hasBravoTrack = true;
+                if (track.hasExtendedFixes()) {
+                    hasExtendedBravoFixes = true;
+                    break;
+                }
+            }
+            if (hasBravoTrack) {
+                availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+                availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
+            }
+            if (hasExtendedBravoFixes) {
+                availableDetailsTypes.add(DetailType.CURRENT_PORT_DAGGERBOARD_RAKE);
+                availableDetailsTypes.add(DetailType.CURRENT_STBD_DAGGERBOARD_RAKE);
+                availableDetailsTypes.add(DetailType.CURRENT_PORT_RUDDER_RAKE);
+                availableDetailsTypes.add(DetailType.CURRENT_STBD_RUDDER_RAKE);
+                availableDetailsTypes.add(DetailType.CURRENT_MAST_ROTATION_IN_DEGREES);
+            }
+        }
+        if (leaderboardGroupName != null) {
+            LeaderboardGroupDTO group = getLeaderboardGroupByName(leaderboardGroupName, false);
+            if (group != null ? group.hasOverallLeaderboard() : false) {
+                availableDetailsTypes.add(DetailType.OVERALL_RANK);
+            }
+        }
+        return availableDetailsTypes;
     }
 }

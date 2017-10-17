@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
-import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.generic.sapheader.GenericLoginHintPopup;
 

@@ -19,10 +19,10 @@ public class StringHelper {
     }
 
     public String getAuthor(String author) {
-        if (AppConstants.AUTHOR_TYPE_OFFICER_START.equals(author)) {
-            author = mContext.getString(R.string.author_type_officer_start);
-        } else if (AppConstants.AUTHOR_TYPE_OFFICER_FINISH.equals(author)) {
-            author = mContext.getString(R.string.author_type_officer_finish);
+        if (AppConstants.AUTHOR_TYPE_OFFICER_VESSEL.equals(author)) {
+            author = mContext.getString(R.string.author_type_officer_vessel);
+        } else if (AppConstants.AUTHOR_TYPE_SUPERUSER.equals(author)) {
+            author = mContext.getString(R.string.author_type_superuser);
         } else if (AppConstants.AUTHOR_TYPE_SHORE_CONTROL.equals(author)) {
             author = mContext.getString(R.string.author_type_shore_control);
         } else if (AppConstants.AUTHOR_TYPE_VIEWER.equals(author)) {

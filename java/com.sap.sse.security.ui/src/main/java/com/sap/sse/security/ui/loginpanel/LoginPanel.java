@@ -5,6 +5,7 @@ import java.util.HashMap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -77,7 +78,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     @Override
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
-                                /* fullName */ null, /* company */ null,
+                                /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
                                 EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
