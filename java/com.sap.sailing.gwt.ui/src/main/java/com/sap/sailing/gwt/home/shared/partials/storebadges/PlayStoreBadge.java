@@ -7,6 +7,10 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * {@link AbstractStoreBadge} implementation for Google's Play Store / Google Play.
+ * 
+ * The badge link is stored in the i18n bundle. English is used for all badges, unless there is an localized (actually
+ * only german) version.
+ * 
  */
 public class PlayStoreBadge extends AbstractStoreBadge {
 
