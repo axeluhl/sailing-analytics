@@ -1463,6 +1463,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String latestRegattaStandings();
     String plainText();
     String columnChart();
+    String columnChartWithErrorBars();
     String choosePresentation();
     String cantDisplayDataOfType(String resultType);
     String shownDecimals();
@@ -1804,6 +1805,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String set();
     String gribWindImport_Title();
     String nmeaWindImport_Title();
+    String bravoWindImport_Title();
     String angleInDegree();
     String angleInRadian();
     String centralAngleInRadian();
@@ -1914,4 +1916,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String minimumDurationBetweenAdjacentFoilingSegmentsInSeconds();
     String minimumDurationBetweenAdjacentFoilingSegmentsInSecondsTooltip();
     String needToProvideValidMinimumRideHeight();
+    String dataMiningErrorMargins();
+    String elements(long count);
+    String chooseDifferentDimensionTitle();
+    String chooseDifferentDimensionMessage();
+    String pleaseSelectADimension();
+    String currentPortDaggerboardRake();
+    String currentPortDaggerboardRakeTooltip();
+    String currentStbdDaggerboardRake();
+    String currentStbdDaggerboardRakeTooltip();
+    String currentPortRudderRake();
+    String currentPortRudderRakeTooltip();
+    String currentStbdRudderRake();
+    String currentStbdRudderRakeTooltip();
+    String currentMastRotationInDegree();
+    String currentMastRotationInDegreeTooltip();
 }

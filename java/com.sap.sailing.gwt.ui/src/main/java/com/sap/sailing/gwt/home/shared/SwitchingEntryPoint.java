@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.shared;
 
-import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_LARGE;
-import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_NORMAL;
-import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_SMALL;
-import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_SMALLER;
-import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.setViewportToDeviceWidth;
+import static com.sap.sse.gwt.client.formfactor.MetaTagUtil.SCALE_VALUE_LARGE;
+import static com.sap.sse.gwt.client.formfactor.MetaTagUtil.SCALE_VALUE_NORMAL;
+import static com.sap.sse.gwt.client.formfactor.MetaTagUtil.SCALE_VALUE_SMALL;
+import static com.sap.sse.gwt.client.formfactor.MetaTagUtil.SCALE_VALUE_SMALLER;
+import static com.sap.sse.gwt.client.formfactor.MetaTagUtil.setViewportToDeviceWidth;
 
 import java.util.logging.Logger;
 
@@ -21,13 +21,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.home.desktop.DesktopEntryPoint;
 import com.sap.sailing.gwt.home.mobile.MobileEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.app.MobileSupport;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 
 /**
  * Wrapper EntryPoint for the Home module that decides if the desktop or mobile page will be shown and internally starts

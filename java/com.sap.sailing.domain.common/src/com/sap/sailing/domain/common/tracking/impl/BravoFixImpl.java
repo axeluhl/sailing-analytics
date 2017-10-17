@@ -5,35 +5,24 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
+import com.sap.sailing.domain.common.sensordata.ColumnMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sse.common.TimePoint;
 
 /**
  * Implementation of {@link BravoFix} that wraps a {@link DoubleVectorFix} which holds the actual sensor data. The
  * mapping metadata is stored in the {@link BravoSensorDataMetadata} enum.
  */
-public class BravoFixImpl implements BravoFix {
+public class BravoFixImpl extends SensorFixImpl implements BravoFix {
     private static final long serialVersionUID = 2033254212013221160L;
-    private final DoubleVectorFix fix;
 
     public BravoFixImpl(DoubleVectorFix fix) {
-        this.fix = fix;
+        super(fix);
     }
-
+    
     @Override
-    public double get(String valueName) {
-        BravoSensorDataMetadata colDefEnum = BravoSensorDataMetadata.byColumnName(valueName);
-        if (colDefEnum == null) {
-            throw new IllegalArgumentException("Unknown value \"" + valueName + "\" for " + getClass().getSimpleName());
-        }
-        int index = colDefEnum.getColumnIndex();
-        return fix.get(index);
-    }
-
-    @Override
-    public TimePoint getTimePoint() {
-        return fix.getTimePoint();
+    protected ColumnMetadata resolveMetadataFromValueName(String valueName) {
+        return BravoSensorDataMetadata.byColumnName(valueName);
     }
 
     @Override

@@ -349,6 +349,26 @@ public class Util {
         }
     }
 
+    /**
+     * Checks whether for all elements from {@code what} the method {@link #contains(Iterable, Object)}
+     * returns {@code true}. In case {@code what} is empty or {@code null}, {@code true} is returned if and only
+     * if {@code ts} is not {@code null}.
+     */
+    public static <T> boolean containsAll(Iterable<T> ts, Iterable<T> what) {
+        if (ts == null) {
+            return false;
+        }
+        if (what == null) {
+            return true;
+        }
+        for (final T w : what) {
+            if (!contains(ts, w)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static <T> boolean isEmpty(Iterable<T> ts) {
         if (ts instanceof Collection<?>) {
             return ((Collection<?>) ts).isEmpty();

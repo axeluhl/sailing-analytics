@@ -7,7 +7,8 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.server.trackfiles,
- com.sap.sailing.server.trackfiles.common
+ com.sap.sailing.server.trackfiles.common,
+ com.sap.sailing.server.trackfiles.impl
 Require-Bundle: 
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,

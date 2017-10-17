@@ -1,7 +1,7 @@
 package com.sap.sse.security.ui.settings;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 
 /**
  * Interface for a settings patch which may be applied to settings during its construction in
@@ -21,7 +21,7 @@ public interface SettingsPatch<S extends Settings> {
     /**
      * Implements the logic about how the settings should be modified/patched during its construction inside the
      * settings building pipeline. The settings instance may be modified directly by using
-     * {@link SettingsDefaultValuesUtils} and {@link SettingsMergeUtils}.
+     * {@link SettingsUtil}.
      * 
      * @param settingsToPatch
      *            Current settings in the settings building pipeline

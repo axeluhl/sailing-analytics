@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:style>
+        .badge {
+            margin: 20px 0;
+            display: block;
+        }
+        .badge > img {
+            height: 60px;
+        }
+    </ui:style>
+    <a target="_blank" ui:field="badgeLinkUi" class="{style.badge}">
+        <img ui:field="badgeImageUi" />
+    </a>
+</ui:UiBinder>

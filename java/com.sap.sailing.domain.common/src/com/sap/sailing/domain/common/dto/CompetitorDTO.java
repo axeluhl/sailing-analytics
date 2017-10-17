@@ -21,7 +21,8 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
     String getSearchTag();
 
     /**
-     * If the {@code searchTag} is not contained in {@link #getSearchTag()}, appends it to the search tag, separated by a space character 
+     * If the {@code searchTag} is not {@link String#contains(CharSequence) contained} in {@link #getSearchTag()},
+     * appends it to the search tag, separated by a space character
      */
     void addToSearchTag(String searchTag);
     

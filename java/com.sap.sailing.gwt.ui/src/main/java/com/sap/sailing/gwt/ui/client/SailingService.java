@@ -676,4 +676,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName);
 
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors);
+    
+    /**
+     * Used to determine for a Chart the available Detailtypes. This is for example used, to only show the RideHeight as
+     * an option for charts, if it actually recorded for the race.
+     */
+    List<DetailType> determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
 }

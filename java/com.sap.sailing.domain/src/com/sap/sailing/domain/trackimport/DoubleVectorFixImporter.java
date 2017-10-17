@@ -18,8 +18,8 @@ import com.sap.sse.common.TimePoint;
  */
 public interface DoubleVectorFixImporter {    
 
-    interface Callback {
-        void addFixes(Iterable<DoubleVectorFix> fix, TrackFileImportDeviceIdentifier device);
+    public interface Callback {
+        void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device);
     }
 
     /**
@@ -32,12 +32,13 @@ public interface DoubleVectorFixImporter {
      * @param sourceName
      *            the uploaded file's name. This can be used to identify the file type if the importer can import
      *            different formats.
+     * @param downsample TODO
      * @throws FormatNotSupportedException
      *             if the uploaded file can't be parsed by the importer
      * @throws IOException
      *             if there is a problem while reading the file
      */
-    void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName)
+    void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName, boolean downsample)
             throws FormatNotSupportedException, IOException;
 
     /**
