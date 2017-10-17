@@ -12,7 +12,6 @@ import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSett
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
-import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.AbstractEntryPointWithSettingsLinkFactory;
 
@@ -33,8 +32,7 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
 
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings,
             RegattaRaceStatesSettings regattaRaceStatesSettings) {
-        return new LinkWithSettingsGenerator<>(REGATTA_OVERVIEW_PATH, regattaOverviewSettings,
-                new IgnoreLocalSettings(true)).createUrl(regattaRaceStatesSettings);
+        return new LinkWithSettingsGenerator<>(REGATTA_OVERVIEW_PATH, regattaOverviewSettings).createUrl(regattaRaceStatesSettings);
     }
     
     public static String createLeaderboardLink(LeaderboardContextDefinition contextDefinition, LeaderboardPerspectiveOwnSettings perspectiveOwnSettings) {

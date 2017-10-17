@@ -4087,6 +4087,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             LockUtil.unlockAfterRead(sensorTracksLock);
         }
     }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return LockUtil.<Iterable<TrackT>>executeWithReadLockAndResult(sensorTracksLock, () -> {
+            final Set<TrackT> result = new HashSet<>();
+            for (Competitor competitor : tracks.keySet()) {
+                final Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+                final TrackT track = getTrackInternal(key);
+                if (track != null) {
+                    result.add(track);
+                }
+            }
+            return result;
+        });
+    }
 
     protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {

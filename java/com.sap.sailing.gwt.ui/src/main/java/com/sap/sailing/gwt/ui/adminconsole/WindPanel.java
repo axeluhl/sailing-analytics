@@ -89,6 +89,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
+    private static final String URL_SAILINGSERVER_BRAVO_IMPORT = "/../../sailingserver/bravo-wind-import";
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -129,7 +130,6 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         mainPanel.add(trackedRacesListComposite);
         refreshableRaceSelectionModel = (RefreshableMultiSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
         refreshableRaceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 updateWindDisplay();
@@ -262,6 +262,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         mainPanel.add(createExpeditionWindImportPanel());
         mainPanel.add(createGribWindImportPanel());
         mainPanel.add(createNmeaWindImportPanel());
+        mainPanel.add(createBravoWindImportPanel());
         mainPanel.add(createIgtimiWindImportPanel(mainPanel));
     }
 
@@ -490,31 +491,22 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     }
 
     private CaptionPanel createNmeaWindImportPanel() {
-        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_NMEA_IMPORT, /* multi */ true);
-        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.nmeaWindImport_Title());
-        VerticalPanel windImportContentPanel = new VerticalPanel();
-        windImportRootPanel.add(windImportContentPanel);
-        final FormPanel form = formAndFileUploadAndSubmitButton.getFormPanel();
-        windImportContentPanel.add(form);
-        VerticalPanel formContentPanel = formAndFileUploadAndSubmitButton.getFormContentPanel();
-        HorizontalPanel inputPanel = new HorizontalPanel();
-        formContentPanel.add(inputPanel);
-        final Panel importResultPanel = new VerticalPanel();
-        windImportContentPanel.add(importResultPanel);
-        formAndFileUploadAndSubmitButton.getSubmitButton().setEnabled(true);
-        final FileUpload fileUpload = formAndFileUploadAndSubmitButton.getFileUpload();
-        inputPanel.setSpacing(5);
-        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
-        return windImportRootPanel;
+        final String importServletUrl = URL_SAILINGSERVER_NMEA_IMPORT;
+        final String title = stringMessages.nmeaWindImport_Title();
+        return createWindImportPanel(title, importServletUrl);
     }
 
     private CaptionPanel createGribWindImportPanel() {
-        /*
-         * To style the "browse" button of the file upload widget
-         * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
-         */
-        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_GRIB_IMPORT, /* multi */ true);
-        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.gribWindImport_Title());
+        return createWindImportPanel(stringMessages.gribWindImport_Title(), URL_SAILINGSERVER_GRIB_IMPORT);
+    }
+
+    private CaptionPanel createBravoWindImportPanel() {
+        return createWindImportPanel(stringMessages.bravoWindImport_Title(), URL_SAILINGSERVER_BRAVO_IMPORT);
+    }
+
+    private CaptionPanel createWindImportPanel(final String title, final String importServletUrl) {
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(importServletUrl, /* multi */ true);
+        CaptionPanel windImportRootPanel = new CaptionPanel(title);
         VerticalPanel windImportContentPanel = new VerticalPanel();
         windImportRootPanel.add(windImportContentPanel);
         final FormPanel form = formAndFileUploadAndSubmitButton.getFormPanel();
@@ -530,7 +522,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
         return windImportRootPanel;
     }
-
+    
     private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {
         AddWindFixDialog windSettingDialog = new AddWindFixDialog(race, course, stringMessages, new DialogCallback<WindDTO>() {
             @Override

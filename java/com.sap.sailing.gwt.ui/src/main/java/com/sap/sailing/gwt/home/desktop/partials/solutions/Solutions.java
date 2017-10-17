@@ -2,11 +2,8 @@ package com.sap.sailing.gwt.home.desktop.partials.solutions;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -34,6 +31,8 @@ public class Solutions extends Composite {
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     @UiField StringMessages i18n;
+    @UiField
+    Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsAnchor;
     @UiField Anchor raceAnchor;
     @UiField Anchor inSightAnchor;
@@ -49,24 +48,12 @@ public class Solutions extends Composite {
     @UiField DivElement postRaceDiv;
     @UiField DivElement simulatorDiv;
 
-    @UiField Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsDetailsAnchor;
     @UiField Anchor raceCommitteeAppDetailsAnchor;
     @UiField Anchor inSightAppDetailsAnchor;
     @UiField Anchor buoyPingerAppDetailsAnchor;
     @UiField Anchor simulatorAppDetailsAnchor;
     
-    @UiField AnchorElement raceManagerPlayStoreLinkUi;
-    @UiField AnchorElement inSightAppStoreLinkUi;
-    @UiField AnchorElement buoyPingerPlayStoreLinkUi;
-    @UiField
-    AnchorElement inSightPlayStoreLinkUi;
-    
-    @UiField ImageElement raceManagerPlayStoreImgUi;
-    @UiField ImageElement inSightPlayStoreImgUi;
-    @UiField ImageElement buoyPingerPlayStoreImgUi;
-    @UiField ImageElement inSightAppStoreImgUi;
-
     private final PlaceNavigation<SolutionsPlace> sapInSailingNavigation;
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
@@ -87,24 +74,8 @@ public class Solutions extends Composite {
     public Solutions(SolutionsNavigationTabs navigationTab, DesktopPlacesNavigator placesNavigator) {
         this.navigationTab = navigationTab;
         this.placesNavigator = placesNavigator;
-        
         SolutionsResources.INSTANCE.css().ensureInjected();
-
         initWidget(uiBinder.createAndBindUi(this));
-        
-        String playstorebadgeSrc = UriUtils.fromString(i18n.playstoreBadge()).asString();
-        String insightAppstoreSrc = UriUtils.fromString("images/home/appstore" + i18n.appstoreBadgeSuffix() + ".svg")
-                .asString();
-
-
-        raceManagerPlayStoreLinkUi.setHref(UriUtils.fromString(i18n.playstoreRacecommitteeApp()));
-        inSightAppStoreLinkUi.setHref(UriUtils.fromString(i18n.appstoreSapSailInsight()));
-        buoyPingerPlayStoreLinkUi.setHref(UriUtils.fromString(i18n.playStoreBuoyPingerApp()));
-        inSightPlayStoreLinkUi.setHref(UriUtils.fromString(i18n.playstoreInsightApp()));
-        raceManagerPlayStoreImgUi.setSrc(playstorebadgeSrc);
-        inSightPlayStoreImgUi.setSrc(playstorebadgeSrc);
-        buoyPingerPlayStoreImgUi.setSrc(playstorebadgeSrc);
-        inSightAppStoreImgUi.setSrc(insightAppstoreSrc);
 
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);

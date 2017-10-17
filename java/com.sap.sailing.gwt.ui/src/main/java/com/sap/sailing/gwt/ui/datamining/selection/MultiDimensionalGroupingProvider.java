@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -88,7 +90,6 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         updateAvailableDimensions();
     }
     
-    
     @Override
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
         if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
@@ -138,16 +139,19 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         dimensionToGroupByBoxes.clear();
         availableDimensions.clear();
     }
+    
+    @Override
+    public Iterable<FunctionDTO> getAvailableDimensions() {
+        return Collections.unmodifiableList(availableDimensions);
+    }
+
+    @Override
+    public void setDimensionToGroupBy(int i, FunctionDTO dimensionToGroupBy) {
+        dimensionToGroupByBoxes.get(i).setValue(dimensionToGroupBy, /* fireEvents */ true);
+    }
 
     private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {
-        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
-            @Override
-            protected String convertObjectToString(FunctionDTO function) {
-                return function.getDisplayName();
-            }
-            
-        });
-        dimensionToGroupByBox.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = createDimensionToGroupByBoxWithoutEventHandler();
         dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             private boolean firstChange = true;
 
@@ -166,6 +170,19 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
                 notifyListeners();
             }
         });
+        return dimensionToGroupByBox;
+    }
+
+    @Override
+    public ValueListBox<FunctionDTO> createDimensionToGroupByBoxWithoutEventHandler() {
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
+            @Override
+            protected String convertObjectToString(FunctionDTO function) {
+                return function.getDisplayName();
+            }
+            
+        });
+        dimensionToGroupByBox.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
         return dimensionToGroupByBox;
     }
 
@@ -194,13 +211,26 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
 
     @Override
     public Collection<FunctionDTO> getDimensionsToGroupBy() {
-        Collection<FunctionDTO> dimensionsToGroupBy = new ArrayList<FunctionDTO>();
+        Collection<FunctionDTO> dimensionsToGroupBy = new ArrayList<>();
         for (ValueListBox<FunctionDTO> dimensionListBox : dimensionToGroupByBoxes) {
             if (dimensionListBox.getValue() != null) {
                 dimensionsToGroupBy.add(dimensionListBox.getValue());
             }
         }
         return dimensionsToGroupBy;
+    }
+    
+    @Override
+    public void removeDimensionToGroupBy(FunctionDTO dimension) {
+        for (final Iterator<ValueListBox<FunctionDTO>> i=dimensionToGroupByBoxes.iterator(); i.hasNext(); ) {
+            final ValueListBox<FunctionDTO> dimensionListBox = i.next();
+            if (Util.equalsWithNull(dimension, dimensionListBox.getValue())) {
+                i.remove();
+                mainPanel.remove(dimensionListBox);
+                updateAcceptableValues();
+                notifyListeners();
+            }
+        }
     }
 
     @Override

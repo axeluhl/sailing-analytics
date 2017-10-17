@@ -4,10 +4,12 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryAnnouncement;
-import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.DefaultPresenter;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
 
 public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnouncement {
@@ -52,7 +54,7 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
 
     @Override
     public void setLegalNotice(IsWidget content) {
-        final DefaultPresenter presenter = new DefaultPresenter(content, descriptionUi, getElement(), Direction.BOTTOM);
+        final LegalNoticePresenter presenter = new LegalNoticePresenter(content);
         presenter.registerTarget(legalNoticeUi);
     }
 
@@ -64,6 +66,32 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
     @Override
     public void setLinkUrl(String linkUrl) {
         this.linkUi.setHref(linkUrl);
+    }
+
+    private class LegalNoticePresenter implements EventListener {
+
+        private final Bubble popup;
+
+        private LegalNoticePresenter(IsWidget content) {
+            this.popup = new Bubble(content);
+        }
+
+        private void registerTarget(Element target) {
+            popup.addAutoHidePartner(target);
+            Event.sinkEvents(target, Event.ONCLICK | Event.ONMOUSEOVER);
+            Event.setEventListener(target, this);
+        }
+
+        @Override
+        public void onBrowserEvent(Event event) {
+            final int typeInt = event.getTypeInt();
+            if ((typeInt == Event.ONCLICK || typeInt == Event.ONMOUSEOVER) && !popup.isAttached()) {
+                popup.show(descriptionUi, getElement(), Direction.BOTTOM);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }
+
     }
 
     public interface Style extends CssResource {

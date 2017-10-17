@@ -66,7 +66,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
         AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = autoplayLifecycle
                 .createDefaultSettings();
-        LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(Window.Location.getPath(), apcd);
+        LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
         new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(settingsGenerator,
                 autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
     }

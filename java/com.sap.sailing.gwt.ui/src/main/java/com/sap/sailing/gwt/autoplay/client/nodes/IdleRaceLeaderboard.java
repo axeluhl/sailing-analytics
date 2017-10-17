@@ -26,12 +26,8 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
     public IdleRaceLeaderboard(AutoPlayClientFactory cf) {
         super(IdleRaceLeaderboard.class.getName());
         this.cf = cf;
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx()
-                .getAutoplaySettings();
         leaderboardTimer = new Timer(PlayModes.Live,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardTimer
-                .setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
         leaderboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
     }
 

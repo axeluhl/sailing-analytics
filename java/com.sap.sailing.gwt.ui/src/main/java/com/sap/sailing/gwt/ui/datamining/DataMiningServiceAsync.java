@@ -18,6 +18,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 
 public interface DataMiningServiceAsync {
 
@@ -31,10 +32,8 @@ public interface DataMiningServiceAsync {
             AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);
 
     void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
-    void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
-            AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
-    public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
-            AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
+    void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
+            String localeInfoName, AsyncCallback<ReducedDimensionsDTO> callback);
     
     void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>> asyncCallback);
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
@@ -61,5 +60,4 @@ public interface DataMiningServiceAsync {
      * look at bug 1503.<br />
      */
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
-
 }

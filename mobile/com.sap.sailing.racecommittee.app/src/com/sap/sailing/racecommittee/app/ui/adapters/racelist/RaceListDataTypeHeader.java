@@ -12,15 +12,13 @@ import android.view.ViewGroup;
 
 public class RaceListDataTypeHeader implements RaceListDataType, IsFleetFragment {
     private RaceGroupSeries data;
+    private boolean hasConflict;
     private final LayoutInflater mInflater;
 
-    public RaceListDataTypeHeader(RaceGroupSeries data, LayoutInflater layoutInflater) {
-        this(data, true, layoutInflater);
-    }
-
-    public RaceListDataTypeHeader(RaceGroupSeries data, boolean isFleetVisible, LayoutInflater layoutInflater) {
+    public RaceListDataTypeHeader(RaceGroupSeries data, LayoutInflater layoutInflater, boolean hasConflicts) {
         this.data = data;
         this.mInflater = layoutInflater;
+        this.hasConflict = hasConflicts;
     }
 
     public RaceGroupSeries getRegattaSeries() {
@@ -33,6 +31,14 @@ public class RaceListDataTypeHeader implements RaceListDataType, IsFleetFragment
 
     public SeriesBase getSeries() {
         return data.getSeries();
+    }
+
+    public void setHasConflict(boolean hasConflict) {
+        this.hasConflict = hasConflict;
+    }
+
+    public boolean hasConflict() {
+        return hasConflict;
     }
 
     @Override

@@ -1,5 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -14,12 +20,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
-
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
@@ -175,6 +175,12 @@ public abstract class BasePanelFragment extends RaceFragment {
             }
         }
         FragmentTransaction transaction = manager.beginTransaction();
+        if (idRes != R.id.race_content) {
+            Fragment frag = manager.findFragmentById(R.id.race_content);
+            if (frag != null) {
+                transaction.remove(frag);
+            }
+        }
         transaction.replace(idRes, fragment);
         transaction.commit();
     }
