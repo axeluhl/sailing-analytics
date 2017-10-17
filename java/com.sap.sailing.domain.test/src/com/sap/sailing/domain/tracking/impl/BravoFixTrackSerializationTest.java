@@ -31,7 +31,7 @@ public class BravoFixTrackSerializationTest {
     @Before
     public void setUp() {
         Competitor competitor = TrackBasedTest.createCompetitor("SAP Extreme Sailing Team");
-        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME);
+        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME, false);
     }
     
     @Test

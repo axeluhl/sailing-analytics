@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.desktop.app;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactActivityProxy;
@@ -37,6 +36,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 
 public class DesktopActivityMapper implements ActivityMapper {
     private final DesktopClientFactory clientFactory;

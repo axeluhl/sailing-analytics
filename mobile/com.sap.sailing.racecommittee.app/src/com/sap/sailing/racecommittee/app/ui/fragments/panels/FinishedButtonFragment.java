@@ -1,5 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
+
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,14 +20,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment {
 
@@ -32,6 +34,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
     private View mPhotoLock;
     private RelativeLayout mList;
     private View mListLock;
+    private ImageView mWarning;
 
     public FinishedButtonFragment() {
         mReceiver = new IntentReceiver();
@@ -78,6 +81,8 @@ public class FinishedButtonFragment extends BasePanelFragment {
         }
         mListLock = ViewHelper.get(layout, R.id.list_lock);
 
+        mWarning = ViewHelper.get(layout, R.id.panel_additional_image);
+
         return layout;
     }
 
@@ -94,6 +99,11 @@ public class FinishedButtonFragment extends BasePanelFragment {
 
         if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
             mList.setVisibility(View.GONE);
+        } else {
+            CompetitorResults results = getRaceState().getConfirmedFinishPositioningList();
+            if (results != null) {
+                mWarning.setVisibility(results.hasConflicts() ? View.VISIBLE : View.GONE);
+            }
         }
     }
 
@@ -158,7 +168,8 @@ public class FinishedButtonFragment extends BasePanelFragment {
                         break;
 
                     case LEVEL_TOGGLED:
-                        replaceFragment(PhotoListFragment.newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        replaceFragment(PhotoListFragment
+                            .newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                         break;
 
                     default:
@@ -181,7 +192,8 @@ public class FinishedButtonFragment extends BasePanelFragment {
                         break;
 
                     case LEVEL_TOGGLED:
-                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        replaceFragment(TrackingListFragment
+                            .newInstance(getRecentArguments(), 0), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                         break;
 
                     default:

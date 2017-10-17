@@ -238,7 +238,7 @@
 }
 .letItScroll {
   overflow-x: auto;
-  margin: 10px 0px;
+  padding: 10px 30px 10px 10px;
 }
 .regattaleaderboard_meta_fullscreen_button {
   background-color: #9f9f9f;

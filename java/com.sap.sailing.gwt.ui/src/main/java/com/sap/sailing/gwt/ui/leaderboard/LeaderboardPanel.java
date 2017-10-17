@@ -2300,11 +2300,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
                             try {
                                 final boolean wasEmptyRaceColumnSelection = Util.isEmpty(raceColumnSelection.getSelectedRaceColumns());
                                 updateLeaderboard(result);
-                                // reapply, as columns might have changed
+                                LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
+                                // reapply, when this is the first time we received the race columns or if columns have changed
                                 if (wasEmptyRaceColumnSelection || !potentiallyChangedSettings.equals(currentSettings)) {
                                     updateSettings(potentiallyChangedSettings);
                                 }

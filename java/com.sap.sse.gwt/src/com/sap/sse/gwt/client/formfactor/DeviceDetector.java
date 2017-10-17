@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.formfactor;
+package com.sap.sse.gwt.client.formfactor;
 
 import java.util.logging.Logger;
 
