@@ -13,7 +13,7 @@ import java.util.Objects;
  * 
  * The first columns need to be consistent with {@link BravoSensorDataMetadata}.
  */
-public enum BravoExtendedSensorDataMetadata {
+public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     RIDE_HEIGHT_PORT_HULL("RideHeightPort"), //
     RIDE_HEIGHT_STBD_HULL("RideHeightStbd"), //
     HEEL("Heel"), //
