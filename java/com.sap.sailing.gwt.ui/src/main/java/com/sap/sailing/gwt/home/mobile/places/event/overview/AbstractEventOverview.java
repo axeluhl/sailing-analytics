@@ -66,7 +66,7 @@ public abstract class AbstractEventOverview extends AbstractEventView<EventViewB
     
     protected void setupEventDescription(Panel container) {
         final String description = currentPresenter.getEventDTO().getDescription();
-        if (description != null && !description.trim().isEmpty()) {
+        if (description != null) {
             container.add(new EventDescription(description));
         }
     }

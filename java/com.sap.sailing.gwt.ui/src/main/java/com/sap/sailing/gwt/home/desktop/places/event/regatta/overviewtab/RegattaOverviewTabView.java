@@ -76,7 +76,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
         if (!currentPresenter.showRegattaMetadata()) {
             final String description = currentPresenter.getEventDTO().getDescription();
-            if (description != null && !description.trim().isEmpty()) {
+            if (description != null) {
                 descriptionUi.add(new EventDescription(description));
             } else {
                 descriptionUi.removeFromParent();
