@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
@@ -3120,83 +3119,83 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         List<BearingStep> maneuverBearingSteps = getRelevantBearingStepsForManeuver(bearingStepsToAnalyze,
                 maneuverEnteringAndExitingDetails.getTimepointBefore(),
                 maneuverEnteringAndExitingDetails.getTimepointAfter());
+        double totalCourseChangeInDegrees = 0;
+        for (BearingStep bearingStep : maneuverBearingSteps) {
+            totalCourseChangeInDegrees += bearingStep.getCourseChangeInDegrees();
+        }
         return new ComputedManeuverDetails(maneuverEnteringAndExitingDetails.getTimepointBefore(),
                 maneuverEnteringAndExitingDetails.getTimepointAfter(), maneuverTimePoint,
                 maneuverEnteringAndExitingDetails.getSpeedWithBearingBefore(),
                 maneuverEnteringAndExitingDetails.getSpeedWithBearingAfter(),
-                maneuverEnteringAndExitingDetails.getTotalCourseChangeInDegrees(), maneuverBearingSteps);
+                totalCourseChangeInDegrees, maneuverBearingSteps);
     }
 
     /**
-     * Computes entering and exiting maneuver timepoint and speed with bearing, as well as the total course change which
-     * may exceed 360 degrees.
+     * Computes entering and exiting maneuver time point and speed with bearing. The strategy here is to cut away
+     * bearing steps from the left and right in order to reach the a maximal course change corresponding to the target
+     * maneuver direction.
+     * 
+     * @param maneuverTimePoint
+     *            The computed time point of maneuver
+     * @param bearingStepsToAnalyze
+     *            The bearing steps contained within maneuver
+     * @param maneuverDirection
+     *            The nautical direction of the maneuver
+     * @return The computed entering and exiting time point with its speeds with bearings
      */
     private ComputedManeuverEnteringAndExitingDetails computeManeuverEnteringAndExitingDetails(
             TimePoint maneuverTimePoint, Iterable<BearingStep> bearingStepsToAnalyze, NauticalSide maneuverDirection) {
-        double totalCourseChangeInDegrees = 0;
-        for (BearingStep entry : bearingStepsToAnalyze) {
-            totalCourseChangeInDegrees += entry.getCourseChangeInDegrees();
-        }
-        // Refine the timePointBeforeManeuver by checking whether the total course changed before maneuver timepoint
-        // may be increased or kept unchanged if we cut off bearing steps one by one from the left.
+        double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
+        double maxCourseChangeInDegrees = 0;
+        double currentCourseChangeInDegrees = 0;
+        // Refine the time point before and after maneuver by checking whether the total course changed before maneuver
+        // time point may be increased or kept unchanged if we cut off bearing steps one by one from the left and right.
         TimePoint refinedTimePointBeforeManeuver = null;
         SpeedWithBearing refinedSpeedWithBearingBeforeManeuver = null;
-        boolean firstLoop = true;
-        ManeuverEnteringExitingDetailsComputationHelper enteringDetailsComputationHelper = new ManeuverEnteringExitingDetailsComputationHelper(
-                totalCourseChangeInDegrees, maneuverDirection);
+        TimePoint refinedTimePointAfterManeuver = null;
+        SpeedWithBearing refinedSpeedWithBearingAfterManeuver = null;
         for (BearingStep entry : bearingStepsToAnalyze) {
+            currentCourseChangeInDegrees += entry.getCourseChangeInDegrees();
             TimePoint timePoint = entry.getTimePoint();
-            if (!firstLoop) {
-                if (timePoint.after(maneuverTimePoint)) {
-                    break;
+            if (timePoint.after(maneuverTimePoint)) {
+                // Check whether the totalCourseChange gets better with the added course change of current bearing
+                // step, considering the target sign of the course change
+                if (maxCourseChangeInDegrees
+                        * totalCourseChangeSignum <= currentCourseChangeInDegrees * totalCourseChangeSignum
+                                - ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE) {
+                    maxCourseChangeInDegrees = currentCourseChangeInDegrees;
+                    refinedTimePointAfterManeuver = timePoint;
+                    refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
                 }
-                if (enteringDetailsComputationHelper.checkIfManeuverCourseChangeBetterAfterSubstractingCourseChangeStep(
-                        entry.getCourseChangeInDegrees())) {
+            } else {
+                // Check whether the course change is performed in the target direction of maneuver. If the direction
+                // sign does not match, or the course change is nearly zero => cut the bearing step from the left
+                if (ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE >= currentCourseChangeInDegrees
+                        * totalCourseChangeSignum) {
+                    currentCourseChangeInDegrees = 0;
                     refinedTimePointBeforeManeuver = timePoint;
                     refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
                 }
-            } else {
-                // apply the timepoint and speed with bearing of the first maneuver bearing step as default
-                refinedTimePointBeforeManeuver = entry.getTimePoint();
-                refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
-                firstLoop = false;
             }
         }
-        // Refine the timePointAfterManeuver by checking whether the total course changed after maneuver timepoint
-        // may be increased or kept unchanged if we cut off bearing steps one by one from the right.
-        TimePoint refinedTimePointAfterManeuver = null;
-        SpeedWithBearing refinedSpeedWithBearingAfterManeuver = null;
-        boolean setNextEntryAsBoundary = false;
-        ManeuverEnteringExitingDetailsComputationHelper exitingDetailsComputationHelper = new ManeuverEnteringExitingDetailsComputationHelper(
-                enteringDetailsComputationHelper.getMaxCourseChangeInDegrees(), maneuverDirection);
-        final List<BearingStep> bearingStepsAsList = new ArrayList<>();
-        Util.addAll(bearingStepsToAnalyze, bearingStepsAsList);
-        for (ListIterator<BearingStep> iterator = bearingStepsAsList.listIterator(bearingStepsAsList.size()); iterator
-                .hasPrevious();) {
-            BearingStep entry = iterator.previous();
-            if (refinedTimePointAfterManeuver == null) {
-                // apply the timepoint and speed with bearing of the last maneuver bearing step as default
-                refinedTimePointAfterManeuver = entry.getTimePoint();
-                refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
-            }
-            TimePoint timePoint = entry.getTimePoint();
-            if (setNextEntryAsBoundary) {
-                refinedTimePointAfterManeuver = timePoint;
-                refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
-                setNextEntryAsBoundary = false;
-            }
-            if (timePoint.equals(maneuverTimePoint)) {
-                break;
-            }
-            if (exitingDetailsComputationHelper.checkIfManeuverCourseChangeBetterAfterSubstractingCourseChangeStep(
-                    entry.getCourseChangeInDegrees())) {
-                setNextEntryAsBoundary = true;
+        if (refinedTimePointBeforeManeuver == null) {
+            // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() == 0
+            throw new IllegalArgumentException("bearingStepsToAnalyze must not be empty");
+        }
+        if (refinedSpeedWithBearingAfterManeuver == null) {
+            // Can only occur, when after maneuver time point different direction compared to the analyzed maneuver is
+            // sailed. Thus, the resulting time point until the cut operation should be performed is the maneuver time point itself.
+            for (BearingStep entry : bearingStepsToAnalyze) {
+                if (!entry.getTimePoint().before(maneuverTimePoint)) {
+                    refinedTimePointAfterManeuver = entry.getTimePoint();
+                    refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
+                    break;
+                }
             }
         }
-        double refinedTotalCourseChangeInDegrees = exitingDetailsComputationHelper.getMaxCourseChangeInDegrees();
         ComputedManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = new ComputedManeuverEnteringAndExitingDetails(
                 refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, refinedSpeedWithBearingBeforeManeuver,
-                refinedSpeedWithBearingAfterManeuver, refinedTotalCourseChangeInDegrees);
+                refinedSpeedWithBearingAfterManeuver);
         return maneuverEnteringAndExitingDetails;
     }
     
@@ -4212,16 +4211,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         private final TimePoint timepointAfter;
         private final SpeedWithBearing speedWithBearingBefore;
         private final SpeedWithBearing speedWithBearingAfter;
-        private final double totalCourseChangeInDegrees;
 
         public ComputedManeuverEnteringAndExitingDetails(TimePoint timepointBefore, TimePoint timepointAfter,
-                SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-                double totalCourseChangeInDegrees) {
+                SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter) {
             this.timepointBefore = timepointBefore;
             this.timepointAfter = timepointAfter;
             this.speedWithBearingBefore = speedWithBearingBefore;
             this.speedWithBearingAfter = speedWithBearingAfter;
-            this.totalCourseChangeInDegrees = totalCourseChangeInDegrees;
         }
 
         /**
@@ -4259,72 +4255,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         public SpeedWithBearing getSpeedWithBearingAfter() {
             return speedWithBearingAfter;
         }
-
-        /**
-         * Gets the total course change performed within maneuver in degrees. The port side course changes are negative.
-         * 
-         * @return The total course change in degrees
-         */
-        public double getTotalCourseChangeInDegrees() {
-            return totalCourseChangeInDegrees;
-        }
-    }
-
-    /**
-     * Stateful helper class for
-     * {@link TrackedRaceImpl#computeManeuverEnteringAndExitingDetails(TimePoint, Iterable, NauticalSide)}.
-     * 
-     * @author Vladislav Chumak (D069712)
-     *
-     */
-    private static class ManeuverEnteringExitingDetailsComputationHelper {
-        private double currentCourseChangeInDegrees;
-        private double maxCourseChangeInDegrees;
-        private final int totalCourseChangeSignum;
-
-        public ManeuverEnteringExitingDetailsComputationHelper(double totalCourseChange,
-                NauticalSide maneuverDirection) {
-            this.currentCourseChangeInDegrees = totalCourseChange;
-            this.maxCourseChangeInDegrees = totalCourseChange;
-            this.totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
-        }
-
-        /**
-         * 
-         * @param courseChangeAngleInDegrees
-         * @return {@code true}} if the
-         */
-        public boolean checkIfManeuverCourseChangeBetterAfterSubstractingCourseChangeStep(
-                double courseChangeAngleInDegrees) {
-            currentCourseChangeInDegrees -= courseChangeAngleInDegrees;
-            // Only allow consideration of the new cut step when remaining course change sign corresponds to the
-            // direction of processed maneuver.
-            // As initial maximal course change may not match the signum of direction of processed maneuver,
-            // course changes after cut operation with the right signum must get priority over max course change with
-            // wrong signum.
-            if(maxCourseChangeInDegrees * totalCourseChangeSignum <= currentCourseChangeInDegrees * totalCourseChangeSignum + ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE) {
-                maxCourseChangeInDegrees = currentCourseChangeInDegrees;
-                return true;
-            }
-            return false;
-        }
-
-        public double getMaxCourseChangeInDegrees() {
-            return maxCourseChangeInDegrees;
-        }
     }
 
     private static class ComputedManeuverDetails extends ComputedManeuverEnteringAndExitingDetails {
         private final TimePoint timepoint;
         private final List<BearingStep> maneuverBearingSteps;
+        private final double totalCourseChangeInDegrees;
 
         public ComputedManeuverDetails(TimePoint timepointBefore, TimePoint timepointAfter, TimePoint timepoint,
                 SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
                 double totalCourseChangeInDegrees, List<BearingStep> maneuverBearingSteps) {
-            super(timepointBefore, timepointAfter, speedWithBearingBefore, speedWithBearingAfter,
-                    totalCourseChangeInDegrees);
+            super(timepointBefore, timepointAfter, speedWithBearingBefore, speedWithBearingAfter);
             this.timepoint = timepoint;
             this.maneuverBearingSteps = maneuverBearingSteps;
+            this.totalCourseChangeInDegrees = totalCourseChangeInDegrees;
         }
 
         /**
@@ -4344,6 +4288,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
          */
         public List<BearingStep> getManeuverBearingSteps() {
             return maneuverBearingSteps;
+        }
+        
+        /**
+         * Gets the total course change performed within maneuver in degrees. The port side course changes are negative.
+         * 
+         * @return The total course change in degrees
+         */
+        public double getTotalCourseChangeInDegrees() {
+            return totalCourseChangeInDegrees;
         }
     }
 }
