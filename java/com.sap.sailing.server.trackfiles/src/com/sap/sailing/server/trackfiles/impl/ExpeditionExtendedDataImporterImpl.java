@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -49,6 +52,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private static final String DATE_COLUMN_2 = "mm/dd/yy";
     private static final String DATE_COLUMN_2_PATTERN = "MM/dd/yy";
     private static final String TIME_COLUMN = "hhmmss";
+    private static final String GPS_TIME_COLUMN = "GPS Time";
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     
     /**
@@ -177,25 +181,58 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             LineParserCallback callback) {
         try {
             String[] fileContentTokens = split(line);
+            final TimePoint timePoint;
             final String date;
             final String dateFormatPattern;
-            if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
-                date = fileContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)];
-                dateFormatPattern = DATE_COLUMN_1_PATTERN;
+            if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1) || columnsInFileFromHeader.containsKey(DATE_COLUMN_2)) {
+                if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
+                    date = fileContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)];
+                    dateFormatPattern = DATE_COLUMN_1_PATTERN;
+                } else {
+                    date = fileContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)];
+                    dateFormatPattern = DATE_COLUMN_2_PATTERN;
+                }
+                final String time = fileContentTokens[columnsInFileFromHeader.get(TIME_COLUMN)];
+                final DateFormat df = new SimpleDateFormat(dateFormatPattern+"'T'HH:mm:ssX");
+                final Date timestamp = df.parse(date+"T"+time+"+00:00"); // assuming UTC
+                timePoint = new MillisecondsTimePoint(timestamp);
             } else {
-                date = fileContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)];
-                dateFormatPattern = DATE_COLUMN_2_PATTERN;
+                // assume that "GPS Time" is present:
+                timePoint = getTimePoint(fileContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)]);
             }
-            final String time = fileContentTokens[columnsInFileFromHeader.get(TIME_COLUMN)];
-            final DateFormat df = new SimpleDateFormat(dateFormatPattern+"'T'HH:mm:ssX");
-            final Date timestamp = df.parse(date+"T"+time+"+00:00"); // assuming UTC
-            if (timestamp != null) {
-                callback.accept(new MillisecondsTimePoint(timestamp), fileContentTokens, columnsInFileFromHeader);
-            }
+            callback.accept(timePoint, fileContentTokens, columnsInFileFromHeader);
         } catch (Exception e) {
             logger.warning(
-                    "Error parsing line nr " + lineNr + " in file " + filename + "with exception: " + e.getMessage());
+                    "Error parsing line nr " + lineNr + " in file " + filename + " with exception: " + e.getMessage());
         }
+    }
+
+    /**
+     * The 1900 Date System http://support.microsoft.com/kb/180162/en-us
+     */
+    private static final Calendar EXCEL_EPOCH_START = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    static {
+        EXCEL_EPOCH_START.set(1899, Calendar.DECEMBER, 30, 0, 0, 0);
+        EXCEL_EPOCH_START.set(Calendar.MILLISECOND, 0);
+    }
+    private static final BigDecimal MILLISECONDS_PER_DAY = BigDecimal.valueOf(24 * 60 * 60 * 1000);
+    /**
+     * Converts a value from a column such as "GPS Time" to a {@link TimePoint}. The value is expected to be provided
+     * in decimal format, representing the days since the {@link #EXCEL_EPOCH_START "Excel Epoch Start"}. 
+     * @param time_ExcelEpoch
+     * @return
+     */
+    public static TimePoint getTimePoint(String time_ExcelEpoch) {
+        final TimePoint timePoint;
+        if (!time_ExcelEpoch.trim().isEmpty()) {
+            BigDecimal timeStamp = new BigDecimal(time_ExcelEpoch);
+            long millisecondsSinceExcelEpochStart = timeStamp.multiply(MILLISECONDS_PER_DAY).longValue();
+            timePoint = new MillisecondsTimePoint(
+                    EXCEL_EPOCH_START.getTimeInMillis() + millisecondsSinceExcelEpochStart);
+        } else {
+            timePoint = null;
+        }
+        return timePoint;
     }
 
 }
