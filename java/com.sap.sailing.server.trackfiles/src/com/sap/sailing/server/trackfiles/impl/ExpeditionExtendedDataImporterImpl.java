@@ -31,7 +31,6 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
-import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleVectorFixData;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -43,8 +42,8 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     public static final String EXPEDITION_EXTENDED_TYPE = "EXPEDITION_EXTENDED";
     private static final Logger logger = Logger.getLogger(ExpeditionExtendedDataImporterImpl.class.getName());
     private static final String ORIGINAL_POSITION_HEADER = "Pos[ddd.dd]";
-    private static final String GENERATED_LAT_HEADER = "Lat";
-    private static final String GENERATED_LON_HEADER = "Lon";
+    public static final String GENERATED_LAT_HEADER = "Lat";
+    public static final String GENERATED_LON_HEADER = "Lon";
     private static final String DATE_COLUMN_1 = "dd/mm/yy";
     private static final String DATE_COLUMN_1_PATTERN = "dd/MM/yy";
     private static final String DATE_COLUMN_2 = "mm/dd/yy";
@@ -73,7 +72,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     }
 
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName,
+    public void importFixes(InputStream inputStream, final Callback callback, String filename, String sourceName,
             boolean downsample) throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
@@ -92,12 +91,20 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                 String headerLine = buffer.readLine();
                 lineNr.incrementAndGet();
                 logger.fine("Validate and parse header columns");
-                final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
+                final Map<String, Integer> colIndices = parseHeader(headerLine);
+                validateHeader(colIndices);
                 buffer.lines().forEach(line -> {
                     lineNr.incrementAndGet();
                     if (!line.trim().isEmpty()) {
-                        DoubleVectorFixData fix = parseLine(lineNr.get(), filename, line, colIndices);
-                        callback.addFixes(Collections.singleton(new DoubleVectorFixImpl(fix.getTimepoint(), fix.getFix())), trackIdentifier);
+                        parseLine(lineNr.get(), filename, line, colIndices, (timePoint, fileContentTokens, columnsInFileFromHeader)->{
+                            double[] trackFixData = new double[trackColumnCount];
+                            for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
+                                Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
+                                trackFixData[columnNameToSearchForInFile.getValue()] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
+                            }
+                            callback.addFixes(Collections.singleton(new DoubleVectorFixImpl(
+                                    timePoint, trackFixData)), trackIdentifier);
+                        });
                     }
                 });
                 buffer.close();
@@ -113,7 +120,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * how positions are stored in Expedition files: as two comma-separated values, one for latitude, another
      * for longitude, although there is only one header field.
      */
-    private Map<String, Integer> validateAndParseHeader(String headerLine) {
+    public static Map<String, Integer> parseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
         Map<String, Integer> colIndicesInFile = new HashMap<>();
         int columnInResultingHeader = 0;
@@ -126,6 +133,15 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                 colIndicesInFile.put(header, columnInResultingHeader++);
             }
         }
+        return colIndicesInFile;
+    }
+
+    /**
+     * Ensures that all columns in {@link #columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix}'s key set
+     * are present in {@code colIndicesInFile}'s key set. If not, an exception is thrown that reports the columns
+     * missing.
+     */
+    private void validateHeader(Map<String, Integer> colIndicesInFile) {
         Iterable<String> requiredColumnsInFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.keySet();
         if (!Util.containsAll(colIndicesInFile.keySet(), requiredColumnsInFix)) {
             final Set<String> missingColumns = new HashSet<>();
@@ -134,19 +150,32 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             logger.log(Level.SEVERE, "Missing headers: "+missingColumns);
             throw new RuntimeException("Missing headers "+missingColumns+" in import files");
         }
-        return colIndicesInFile;
     }
 
-    private String[] split(String line) {
+    public static String[] split(String line) {
         return line.split("\\s*,\\s*");
     }
 
     /**
+     * Consumes a line split by the rules of the CSV format handled here; the first argument to
+     * {@link #accept(TimePoint, String[], Map) is the time stamp parsed from the line, the second is the tokenized
+     * array, each element representing one column in the current line; the third argument maps column names as found
+     * in the header line to their 0-based index in the array.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    @FunctionalInterface
+    public static interface LineParserCallback {
+        void accept(TimePoint timePoint, String[] columns, Map<String, Integer> header);
+    }
+    
+    /**
      * Parses the CSV line and reads the double data values in the order defined by the col enums.
      */
-    private DoubleVectorFixData parseLine(long lineNr, String filename, String line, Map<String, Integer> columnsInFileFromHeader) {
+    public static void parseLine(long lineNr, String filename, String line, Map<String, Integer> columnsInFileFromHeader,
+            LineParserCallback callback) {
         try {
-            final DoubleVectorFixData result;
             String[] fileContentTokens = split(line);
             final String date;
             final String dateFormatPattern;
@@ -161,20 +190,11 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             final DateFormat df = new SimpleDateFormat(dateFormatPattern+"'T'HH:mm:ssX");
             final Date timestamp = df.parse(date+"T"+time+"+00:00"); // assuming UTC
             if (timestamp != null) {
-                double[] trackFixData = new double[trackColumnCount];
-                for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
-                    Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
-                    trackFixData[columnNameToSearchForInFile.getValue()] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
-                }
-                result = new DoubleVectorFixData(timestamp.getTime(), trackFixData);
-            } else {
-                result = null;
+                callback.accept(new MillisecondsTimePoint(timestamp), fileContentTokens, columnsInFileFromHeader);
             }
-            return result;
         } catch (Exception e) {
             logger.warning(
                     "Error parsing line nr " + lineNr + " in file " + filename + "with exception: " + e.getMessage());
-            return null;
         }
     }
 
