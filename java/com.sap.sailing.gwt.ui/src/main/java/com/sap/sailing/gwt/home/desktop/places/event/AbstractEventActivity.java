@@ -232,7 +232,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 regattaRaceStatesSettings.getVisibleRegattaSettings().addValue(getRegattaId());
             }
         }
-        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(new RegattaOverviewContextDefinition(getCtx().getEventId()), regattaRaceStatesSettings);
+        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(
+                new RegattaOverviewContextDefinition(getCtx().getEventId()), regattaRaceStatesSettings, false);
     }
     
     @Override
