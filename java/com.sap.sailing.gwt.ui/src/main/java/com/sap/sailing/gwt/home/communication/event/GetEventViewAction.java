@@ -67,6 +67,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         dto.setState(HomeServiceUtil.calculateEventState(event));
         // bug2982: always show leaderboard and competitor analytics 
         dto.setHasAnalytics(true);
+        dto.setDescription(event.getDescription());
 
         final EventType eventType = EventUtil.getEventType(event);
         dto.setType(eventType);
