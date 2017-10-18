@@ -45,8 +45,8 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     public static final String EXPEDITION_EXTENDED_TYPE = "EXPEDITION_EXTENDED";
     private static final Logger logger = Logger.getLogger(ExpeditionExtendedDataImporterImpl.class.getName());
     private static final String ORIGINAL_POSITION_HEADER = "Pos[ddd.dd]";
-    public static final String GENERATED_LAT_HEADER = "Lat";
-    public static final String GENERATED_LON_HEADER = "Lon";
+    public static final String COL_NAME_LAT = "Lat";
+    public static final String COL_NAME_LON = "Lon";
     private static final String DATE_COLUMN_1 = "dd/mm/yy";
     private static final String DATE_COLUMN_1_PATTERN = "dd/MM/yy";
     private static final String DATE_COLUMN_2 = "mm/dd/yy";
@@ -120,7 +120,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
 
     /**
      * When the header contains one or more occurrences of {@link #ORIGINAL_POSITION_HEADER}, it is substituted
-     * by the two header columns {@link #GENERATED_LAT_HEADER} and {@link #GENERATED_LON_HEADER} because that's
+     * by the two header columns {@link #COL_NAME_LAT} and {@link #COL_NAME_LON} because that's
      * how positions are stored in Expedition files: as two comma-separated values, one for latitude, another
      * for longitude, although there is only one header field.
      */
@@ -131,8 +131,8 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
         for (int columnInHeader = 0; columnInHeader < headerTokens.length; columnInHeader++) {
             String header = headerTokens[columnInHeader];
             if (header.equals(ORIGINAL_POSITION_HEADER)) {
-                colIndicesInFile.put(GENERATED_LAT_HEADER, columnInResultingHeader++);
-                colIndicesInFile.put(GENERATED_LON_HEADER, columnInResultingHeader++);
+                colIndicesInFile.put(COL_NAME_LAT, columnInResultingHeader++);
+                colIndicesInFile.put(COL_NAME_LON, columnInResultingHeader++);
             } else {
                 colIndicesInFile.put(header, columnInResultingHeader++);
             }

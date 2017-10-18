@@ -74,16 +74,14 @@ public class WindLogParser {
     }
 
     private static final String COL_NAME_TRUE_WIND_SPEED = "Tws";
+    private static final String COL_NAME_TRUE_WIND_SPEED2 = "TW_speed";
     private static final String COL_NAME_TRUE_WIND_DIRECTION = "Twd";
-    private static final String COL_NAME_LAT = "Lat";
-    private static final String COL_NAME_LONG = "Lon";
+    private static final String COL_NAME_TRUE_WIND_DIRECTION2 = "TW_Dirn";
+    private static final String COL_NAME_LAT = ExpeditionExtendedDataImporterImpl.COL_NAME_LAT;
+    private static final String COL_NAME_LON = ExpeditionExtendedDataImporterImpl.COL_NAME_LON;
     
     /**
-     * See ExpeditionMessage, UDPExpeditionReceiver
-     * 
-     * @param windStream
-     * @return
-     * @throws IOException
+     * Reads an Expedition log file passed as the {@code windStream} input stream.
      */
     public static Iterable<Wind> importWind(InputStream windStream) throws IOException {
         BufferedReader csvReader = new BufferedReader(new InputStreamReader(windStream));
@@ -93,18 +91,27 @@ public class WindLogParser {
         WindBuffer windBuffer = new WindBuffer();
         final AtomicInteger lineNr = new AtomicInteger(1);
         csvReader.lines().forEach(line->{
-            ExpeditionExtendedDataImporterImpl.parseLine(lineNr.incrementAndGet(), "Expedition Wind Import",
-                    line, headers, (timePoint, columnValues, headerDefinitions)->{
-                        windBuffer.updateTime(timePoint);
-                        windBuffer.updateWindData(columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_SPEED)],
-                                columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_DIRECTION)]);
-                        windBuffer.updatePosition(columnValues[headerDefinitions.get(COL_NAME_LAT)],
-                                columnValues[headerDefinitions.get(COL_NAME_LONG)]);
-                        Wind wind = windBuffer.createWindIfReady();
-                        if (wind != null) {
-                            result.add(wind);
-                        }
-                    });
+            if (!line.trim().isEmpty()) {
+                ExpeditionExtendedDataImporterImpl.parseLine(lineNr.incrementAndGet(), "Expedition Wind Import",
+                        line, headers, (timePoint, columnValues, headerDefinitions)->{
+                            windBuffer.updateTime(timePoint);
+                            final String trueWindSpeedData = headerDefinitions.containsKey(COL_NAME_TRUE_WIND_SPEED) &&
+                                    columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_SPEED)] != null ? columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_SPEED)]
+                                            : headerDefinitions.containsKey(COL_NAME_TRUE_WIND_SPEED2) ? columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_SPEED2)]
+                                                    : null;
+                            final String trueWindDirectionData = headerDefinitions.containsKey(COL_NAME_TRUE_WIND_DIRECTION) &&
+                                    columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_DIRECTION)] != null ? columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_DIRECTION)]
+                                            : headerDefinitions.containsKey(COL_NAME_TRUE_WIND_DIRECTION2) ? columnValues[headerDefinitions.get(COL_NAME_TRUE_WIND_DIRECTION2)]
+                                                    : null;
+                            windBuffer.updateWindData(trueWindSpeedData, trueWindDirectionData);
+                            windBuffer.updatePosition(columnValues[headerDefinitions.get(COL_NAME_LAT)],
+                                    columnValues[headerDefinitions.get(COL_NAME_LON)]);
+                            Wind wind = windBuffer.createWindIfReady();
+                            if (wind != null) {
+                                result.add(wind);
+                            }
+                        });
+            }
         });
         return result;
     }
