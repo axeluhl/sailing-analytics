@@ -2961,8 +2961,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getHeel(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
+            }
             case CURRENT_PITCH_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
@@ -2970,10 +2970,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getPitch(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
-            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
-            {
+            }
+            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
@@ -3021,8 +3020,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getMastRotationIfAvailable(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
+            }
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
                         + "' in this method.");
