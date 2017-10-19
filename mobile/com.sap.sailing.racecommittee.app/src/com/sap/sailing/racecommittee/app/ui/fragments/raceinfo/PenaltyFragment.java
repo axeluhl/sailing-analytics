@@ -86,8 +86,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private PenaltyAdapter mAdapter;
     private TextView mEntryCount;
     private CompetitorResultsList<CompetitorResultEditableImpl> mCompetitorResults;
-    private CompetitorResultsList<CompetitorResultEditableImpl> mLastSend;
-    private CompetitorResults mLastPublished;
+    private CompetitorResults mDraftData;
+    private CompetitorResults mConfirmedData;
     private View mListButtonLayout;
     private ImageView mListButton;
     private HeaderLayout mHeader;
@@ -104,8 +104,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
         mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
-        mLastSend = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
-        mLastPublished = new CompetitorResultsImpl();
+        mDraftData = new CompetitorResultsImpl();
+        mConfirmedData = new CompetitorResultsImpl();
         SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
         if (searchView != null) {
             searchView.setSearchTextWatcher(this);
@@ -116,6 +116,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             mListButtonLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    sendUnconfirmed();
                     RaceFragment fragment = TrackingListFragment.newInstance(new Bundle(), 1);
                     int viewId = R.id.race_content;
                     switch (getRaceState().getStatus()) {
@@ -161,7 +162,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             applyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setReason((String) mPenaltyDropDown.getSelectedItem());
+                    setReason((String)mPenaltyDropDown.getSelectedItem());
                 }
             });
         }
@@ -191,7 +192,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 }
             });
         }
-        setPublishButton();
         mEntryCount = ViewHelper.get(layout, R.id.competitor_entry_count);
         mAdapter = new PenaltyAdapter(getActivity(), this);
         RecyclerView recyclerView = ViewHelper.get(layout, R.id.competitor_list);
@@ -270,19 +270,26 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     mListButtonLayout.setVisibility(View.GONE);
                 }
         }
+        initLocalData();
+        loadCompetitors();
+    }
 
+    private void initLocalData() {
+        mDraftData.clear();
         if (getRaceState().getFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
-                mLastSend.add(new CompetitorResultEditableImpl(item));
+                mDraftData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(),
+                    item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
             }
         }
+
+        mConfirmedData.clear();
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
-                mLastPublished.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(),
+                    item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
             }
         }
-        loadCompetitors();
     }
 
     @Override
@@ -317,10 +324,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     private void sendUnconfirmed() {
-        CompetitorResults results = getCompetitorResultsDiff();
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), results);
-        for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            item.setDirty(false);
+        CompetitorResultsImpl results = getCompetitorResultsDiff(mDraftData);
+        if (results.size() > 0) {
+            getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), results);
         }
     }
 
@@ -328,6 +334,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         sendUnconfirmed();
         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
+        initLocalData();
         loadCompetitors();
     }
 
@@ -472,9 +479,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 isChecked = true;
             }
         }
-        for (CompetitorResult item : getCompetitorResultsDiff()) {
+        CompetitorResults list = getCompetitorResultsDiff(mDraftData);
+        for (CompetitorResult item : list) {
             boolean found = false;
-            for (CompetitorResult server : mLastPublished) {
+            for (CompetitorResult server : mConfirmedData) {
                 if (server.equals(item)) {
                     found = true;
                     break;
@@ -507,9 +515,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             .getFinishingTime(), competitor.getComment());
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition() +
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition()+
                 /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
-            (item.getOneBasedRank() == 0 ? 1 : 0));
+            (item.getOneBasedRank()==0?1:0));
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -545,20 +553,29 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
     }
 
-    private CompetitorResults getCompetitorResultsDiff() {
+    private CompetitorResultsImpl getCompetitorResultsDiff(CompetitorResults results) {
         CompetitorResultsImpl result = new CompetitorResultsImpl();
 
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            if (item.isDirty()) {
+            boolean found = false;
+            for (CompetitorResult published : results) {
+                if (item.getCompetitorId().equals(published.getCompetitorId())) {
+                    result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
+                        .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                    found = true;
+                    break;
+                }
+            }
+            if (!found && item.isDirty()) {
                 result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
                     .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
             }
         }
 
-        for (CompetitorResult item : mLastSend) {
+        for (CompetitorResult item : results) {
             boolean found = false;
-            for (CompetitorResult dirtyItem : result) {
-                if (item.getCompetitorId().equals(dirtyItem.getCompetitorId())) {
+            for (CompetitorResult current : mCompetitorResults) {
+                if (item.getCompetitorId().equals(current.getCompetitorId())) {
                     found = true;
                 }
             }
