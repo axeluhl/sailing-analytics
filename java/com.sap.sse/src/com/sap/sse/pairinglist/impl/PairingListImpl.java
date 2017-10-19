@@ -1,14 +1,16 @@
 package com.sap.sse.pairinglist.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import com.sap.sse.pairinglist.PairingList;
 
 public class PairingListImpl implements PairingList {
-  
+    
     private ArrayList<ArrayList<ArrayList<Integer>>> pList;
     private double standardDev;
     
+    public PairingListImpl() {
+        
+    }
     
     public PairingListImpl(ArrayList<ArrayList<ArrayList<Integer>>> pList, double standardDev) {
         this.pList = pList;
@@ -25,6 +27,6 @@ public class PairingListImpl implements PairingList {
 
     public double getStandardDev() {
         return standardDev;
-    }  
+    }
     
 }
