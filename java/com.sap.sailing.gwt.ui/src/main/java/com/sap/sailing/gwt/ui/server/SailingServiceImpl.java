@@ -2980,6 +2980,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Distance rideHeight = bravoFixTrack.getRideHeight(timePoint);
                     result = rideHeight == null ? null : rideHeight.getMeters();
                 }
+                break;
             }
             case CURRENT_PORT_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -2987,6 +2988,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getPortDaggerboardRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_STBD_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -2994,6 +2996,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getStbdDaggerboardRakeStbdIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_PORT_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3001,6 +3004,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getPortRudderRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_STBD_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3008,6 +3012,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getStbdRudderRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_MAST_ROTATION_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
