@@ -10,7 +10,6 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
     }
 
     public PairingListTemplate createPairingListTemplate(int competitors, int flights) {
-        
         return new PairingListTemplateImpl();
     }
 
