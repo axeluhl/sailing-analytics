@@ -14,11 +14,8 @@
 .sitefooter_language {
   display: block;
 }
-a.sitefooter_language_link {
-  color: #fff;
-}
-a.sitefooter_language_linkactive {
-  color: #efaa00;
+.sitefooter_language select {
+  font-size: 110%;
 }
 .sitefooter_links {
   font-weight: 600;
