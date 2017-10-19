@@ -53,9 +53,8 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
                 }
             }
         });
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                false, true);
-
+        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                /* multiSelection */ false, /* enablePager */ true);
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

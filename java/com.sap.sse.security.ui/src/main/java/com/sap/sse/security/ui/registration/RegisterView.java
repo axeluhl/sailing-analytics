@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -77,7 +78,7 @@ public class RegisterView extends Composite {
     @UiHandler("signUpButton")
     void signUpButtonClicked(ClickEvent e) {
         userManagementService.createSimpleUser(usernameTextBox.getText(), emailTextBox.getText(), passwordTextBox.getText(),
-                /* fullName */ null, /* company */ null,
+                /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
                 EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {

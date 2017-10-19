@@ -17,6 +17,7 @@
         </attr>
 
         <attr name="buttonImage" format="reference" />
+        <attr name="buttonAdditionalImage" format="reference" />
         <attr name="buttonValue" format="reference|string" />
         <attr name="buttonSwitch" format="reference|string" />
 
@@ -32,7 +33,7 @@
             <enum name="bottom" value="1" />
         </attr>
 
-        <attr name="imageSize" format="reference|dimension"/>
+        <attr name="imageSize" format="reference|dimension" />
 
         <attr name="showLock" format="boolean" />
     </declare-styleable>

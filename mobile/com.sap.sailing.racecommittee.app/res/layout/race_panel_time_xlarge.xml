@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout
         android:id="@+id/race_content_header"
@@ -29,14 +29,14 @@
                     android:gravity="center"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/textSize_40"
-                    tools:text="@string/time"/>
+                    tools:text="@string/time" />
 
                 <ImageView
                     android:id="@+id/time_marker"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/thin_line"
                     android:layout_alignParentBottom="true"
-                    android:src="?attr/marker"/>
+                    android:src="?attr/marker" />
 
                 <RelativeLayout
                     android:layout_width="wrap_content"
@@ -59,7 +59,7 @@
                             android:layout_centerVertical="true"
                             android:layout_toRightOf="@+id/linked_locked_area"
                             android:textAppearance="?attr/textSmall"
-                            tools:text="@string/time_start"/>
+                            tools:text="@string/time_start" />
 
                         <LinearLayout
                             android:id="@+id/linked_locked_area"
@@ -75,7 +75,7 @@
                                 android:layout_height="wrap_content"
                                 android:src="?attr/lock_outline"
                                 android:visibility="gone"
-                                tools:visibility="visible"/>
+                                tools:visibility="visible" />
 
                             <ImageView
                                 android:id="@+id/linked_race"
@@ -84,7 +84,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:src="?attr/link_24dp"
                                 android:visibility="gone"
-                                tools:visibility="visible"/>
+                                tools:visibility="visible" />
                         </LinearLayout>
                     </RelativeLayout>
 
@@ -107,7 +107,7 @@
                             android:textAppearance="?attr/textSmall"
                             android:visibility="invisible"
                             tools:text="@string/time"
-                            tools:visibility="visible"/>
+                            tools:visibility="visible" />
                     </RelativeLayout>
                 </RelativeLayout>
             </RelativeLayout>
@@ -118,13 +118,14 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:visibility="gone"
+                app:buttonAdditionalImage="@drawable/ic_warning_yellow_36dp"
                 app:buttonCaption="@string/competitor_list"
                 app:buttonImage="?attr/competitor_list"
                 app:buttonType="typeImage"
                 app:captionPosition="bottom"
                 app:imageSize="64dp"
                 app:linePosition="left"
-                tools:visibility="visible"/>
+                tools:visibility="visible" />
         </LinearLayout>
     </com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout>
 </RelativeLayout>

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.formfactor;
+package com.sap.sse.gwt.client.formfactor;
 
 public enum DeviceCategory {
     DESKTOP,

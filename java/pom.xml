@@ -104,6 +104,7 @@
         <module>com.sap.sailing.datamining.shared</module>
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.deckmanadapter</module>
+        <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
         <module>com.sap.sailing.domain.tractracadapter.persistence</module>
         <module>com.sap.sailing.domain.igtimiadapter</module>

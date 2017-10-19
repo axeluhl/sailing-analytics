@@ -7,6 +7,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * {@link AbstractStoreBadge} implementation for Apple's App Store.
+ * 
+ * The badge images is delived from within the application. The suffix is stored in the i18n bundle and points to the
+ * localized badge images. English is used for all badges, unless there is an localized (actually only german) version.
  */
 public class AppStoreBadge extends AbstractStoreBadge {
 
