@@ -3071,7 +3071,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         TimePoint result = null;
         boolean firstEntry = true;
         for (BearingStep fixAndCourseChange : maneuverBearingSteps) {
-            if(firstEntry) {
+            if (firstEntry) {
                 firstEntry = false;
                 continue;
             }
