@@ -3001,7 +3001,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
                 if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt);
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(earliestManeuverStart, maneuverTimePoint, firstPenaltyCircleCompletedAt);
                 }
                 ComputedManeuverDetails refinedPenaltyDetails = computeManeuverDetails(competitor, timePointBeforeManeuver, firstPenaltyCircleCompletedAt, maneuverDirection);
                 Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimepoint(), /* extrapolate */ false);
@@ -3018,14 +3018,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 if (numberOfTacks > 0) {
                     maneuverType = ManeuverType.TACK;
                     if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
-                                maneuverTimePoint, timePointAfterManeuver);
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(earliestManeuverStart,
+                                maneuverTimePoint, latestManeuverEnd);
                     }
                 } else if (numberOfJibes > 0) {
                     maneuverType = ManeuverType.JIBE;
                     if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
-                                maneuverTimePoint, timePointAfterManeuver);
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(earliestManeuverStart,
+                                maneuverTimePoint, latestManeuverEnd);
                     }
                 } else {
                     if (wind != null) {
@@ -3041,8 +3041,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // no wind information; marking as UNKNOWN
                         maneuverType = ManeuverType.UNKNOWN;
                         if (legBeforeManeuver != null) {
-                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
-                                    maneuverTimePoint, timePointAfterManeuver);
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(earliestManeuverStart,
+                                    maneuverTimePoint, latestManeuverEnd);
                         }
                     }
                 }
