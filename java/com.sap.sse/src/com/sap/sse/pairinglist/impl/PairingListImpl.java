@@ -1,10 +1,10 @@
 package com.sap.sse.pairinglist.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 
-public class PairingListImpl implements PairingList {
+public class PairingListImpl<Flight, Group, Competitors> implements PairingList<Flight, Group, Competitors> {
   
     private ArrayList<ArrayList<ArrayList<Integer>>> pList;
     private double standardDev;
@@ -25,6 +25,14 @@ public class PairingListImpl implements PairingList {
 
     public double getStandardDev() {
         return standardDev;
+    }
+
+    public Iterable getCompetitors(Flight pFlight, Group pGroup) {
+        return null;
+    }
+
+    public PairingFrameProvider getProvider() {
+        return null;
     }  
     
 }
