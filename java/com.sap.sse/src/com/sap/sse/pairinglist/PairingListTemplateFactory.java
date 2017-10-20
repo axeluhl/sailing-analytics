@@ -2,9 +2,10 @@ package com.sap.sse.pairinglist;
 
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 
-public interface PairingListTemplateFactory {
+
+public interface PairingListTemplateFactory<Flight, Group, Competitor> {
     
-    public PairingListTemplateFactoryImpl INSTANCE = new PairingListTemplateFactoryImpl();
+    public static PairingListTemplateFactoryImpl INSTANCE = new PairingListTemplateFactoryImpl();
     
-    public PairingListTemplate createPairingListTemplate(int competitors, int flights);
+    public PairingListTemplate<Flight,Group,Competitor> createPairingListTemplate(PairingFrameProvider<Flight, Group, Competitor> pPFP);
 }
