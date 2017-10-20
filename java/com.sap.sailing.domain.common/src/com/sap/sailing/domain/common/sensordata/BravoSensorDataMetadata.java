@@ -11,7 +11,7 @@ import java.util.Objects;
  * 
  * The current implementation only stores a subset of the information available during the import.
  */
-public enum BravoSensorDataMetadata {
+public enum BravoSensorDataMetadata implements ColumnMetadata {
 
     RIDE_HEIGHT_PORT_HULL("RideHeightPortHull"), //
     RIDE_HEIGHT_STBD_HULL("RideHeightStbdHull"), //

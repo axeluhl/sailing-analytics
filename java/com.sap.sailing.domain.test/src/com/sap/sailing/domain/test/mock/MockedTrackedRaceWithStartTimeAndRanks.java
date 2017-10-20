@@ -702,4 +702,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
             String trackName) {
         return Collections.emptySet();
     }
+
+	@Override
+	public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+		return null;
+	}
 }

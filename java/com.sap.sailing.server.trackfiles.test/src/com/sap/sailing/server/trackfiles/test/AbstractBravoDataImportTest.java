@@ -13,6 +13,7 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.BaseBravoDataImporterImpl;
+import com.sap.sailing.server.trackfiles.impl.BravoDataImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DownsamplerTo1HzProcessor;
 import com.sap.sailing.server.trackfiles.impl.doublefix.LearningBatchProcessor;
 
@@ -38,14 +39,14 @@ public abstract class AbstractBravoDataImportTest {
     public void setUp() {
         this.callbackCallCount = 0;
         this.sumRideHeightInMeters = 0.0;
-        bravoDataImporter = new BaseBravoDataImporterImpl(getColumnData()) {
+        bravoDataImporter = new BaseBravoDataImporterImpl(getColumnData(), BravoDataImporterImpl.BRAVO_TYPE) {
             protected com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor createDownsamplingProcessor(
                     DoubleVectorFixImporter.Callback callback,
                     TrackFileImportDeviceIdentifier trackIdentifier) {
                 final LearningBatchProcessor batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
                 downsampler = new DownsamplerTo1HzProcessor(getTrackColumnCount(), batchProcessor);
                 return downsampler;
-            };
+            }
         };
     }
     

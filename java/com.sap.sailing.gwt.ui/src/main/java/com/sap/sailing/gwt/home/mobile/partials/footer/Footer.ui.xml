@@ -1,60 +1,17 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-    <ui:with field="i18n"
-        type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="res"
-        type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res"
-        type="com.sap.sailing.gwt.home.mobile.partials.footer.FooterResources" />
-
-    <ui:style gss="true">
-        .languageSelect::-ms-expand {
-        display: none;
-        }
-
-        .languageSelect {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        -ms-appearance: none;
-        appearance: none;
-        margin-top: 25px;
-        color: #efaa00;
-        line-height: 1.5em;
-        height: 1.5em;
-        display: inline-block;
-        border: transparent;
-        cursor: pointer;
-        padding-right: 1.2em;
-        background: #333;
-        cursor: pointer;
-        background-image:
-        url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
-        background-position: right center;
-        background-repeat: no-repeat;
-        font-size: 110%;
-        }
-    </ui:style>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:l="urn:import:com.sap.sse.gwt.client.controls.languageselect"
+             xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.footer.FooterResources" />
     <g:HTMLPanel>
         <!-- Footer mobile -->
         <footer class="{local_res.css.sitefooter}">
             <div class="{res.mediaCss.grid}">
-                <div ui:field="languageSelectionDiv"
-                    class="{local_res.css.sitefooter_language} {res.mediaCss.small12} {res.mediaCss.columns}">
-
-                    <span>
-                        <ui:text from='{i18n.footerLanguage}' />
-                        :
-                    </span>
-                    <g:Anchor ui:field="changeLanguageLink"
-                        styleName="{local_res.css.sitefooter_language_link}" />
-                    <g:ValueListBox addStyleNames="{style.languageSelect}"
-                        ui:field="changeLanguageList" />
-
-
-                </div>
-                <div
-                    class="{local_res.css.sitefooter_links} {res.mediaCss.small12} {res.mediaCss.columns}">
+                <l:LanguageSelector labelText="{i18n.footerLanguage}"
+                    addStyleNames="{local_res.css.sitefooter_language} {res.mediaCss.small12} {res.mediaCss.columns}"/>
+                <div class="{local_res.css.sitefooter_links} {res.mediaCss.small12} {res.mediaCss.columns}">
                     <a ui:field="imprintAnchorLink"> 
                         <ui:text from='{i18n.footerLegal}' />
                     </a>
@@ -72,14 +29,12 @@
 	                   <ui:text from='{i18n.footerJobs}'/>
 	                </a>
                     <br></br>
-                    <a
-                        href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback"
+                    <a href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback"
                         title="{i18n.footerFeedback}">
                         <ui:text from='{i18n.footerFeedback}' />
                     </a>
                     |
-                    <a ui:field="desktopUi" href="HomeDesktop.html"
-                        title="Desktop">
+                    <a ui:field="desktopUi" href="HomeDesktop.html" title="Desktop">
                         Desktop
                     </a>
                     |
