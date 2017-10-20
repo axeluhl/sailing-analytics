@@ -792,12 +792,12 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-    	Speed result = null;
+        Speed result = null;
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         final Distance totalDistanceSailed = this.getTotalDistanceTraveled(competitor, timePoint);
         if (totalDistanceSailed != null && totalTimeSailed != null) {
-        	result = new KnotSpeedImpl(totalDistanceSailed.getMeters() / 
-        			totalTimeSailed.asSeconds() / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
+            result = new KnotSpeedImpl(totalDistanceSailed.getMeters() / totalTimeSailed.asSeconds()
+                    / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
         }
         return result;
     }
