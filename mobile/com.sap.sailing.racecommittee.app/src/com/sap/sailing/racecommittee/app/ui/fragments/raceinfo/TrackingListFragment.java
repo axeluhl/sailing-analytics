@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +20,8 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -93,7 +96,8 @@ public class TrackingListFragment extends BaseFragment
     private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
-    private CompetitorResults mLastPublished;
+    private CompetitorResults mDraftData;
+    private CompetitorResults mConfirmedData;
     private List<Competitor> mCompetitorData;
     private List<Competitor> mFilteredCompetitorData;
     private int mId = 0;
@@ -103,6 +107,11 @@ public class TrackingListFragment extends BaseFragment
     private List<Comparator<Competitor>> mComparators;
     private String mFilter;
     private View mTools;
+
+    private StateChangeListener mStateChangeListener;
+
+    private boolean mRefreshAuto = false;
+    private boolean mRefreshManual = false;
 
     public TrackingListFragment() {
         mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
@@ -119,6 +128,9 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_tracking_list, container, false);
+
+        mStateChangeListener = new StateChangeListener(this);
+
         mHeader = ViewHelper.get(layout, R.id.header);
         mDots = new ArrayList<>();
         mPanels = new ArrayList<>();
@@ -209,6 +221,8 @@ public class TrackingListFragment extends BaseFragment
         mComparators.add(SORT_NAME, new NaturalNamedComparator<Competitor>());
         mComparator = mComparators.get(SORT_SAIL_NUMBER);
         mFinishedData = initializeFinishList();
+        mConfirmedData = new CompetitorResultsImpl();
+        mDraftData = new CompetitorResultsImpl();
         loadCompetitors();
         if (getView() != null) {
             RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
@@ -252,12 +266,14 @@ public class TrackingListFragment extends BaseFragment
                 mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        mRefreshManual = true;
                         sendUnconfirmed();
                         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
-                        initLastPublished();
+                        initLocalData();
                         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        mRefreshManual = false;
                     }
                 });
             }
@@ -273,14 +289,21 @@ public class TrackingListFragment extends BaseFragment
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
 
-        initLastPublished();
+        initLocalData();
     }
 
-    private void initLastPublished() {
-        mLastPublished = new CompetitorResultsImpl();
+    private void initLocalData() {
+        mDraftData.clear();
+        if (getRaceState().getFinishPositioningList() != null) {
+            for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
+                mDraftData.add(item);
+            }
+        }
+
+        mConfirmedData.clear();
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
-                mLastPublished.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
+                mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
                     .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
             }
         }
@@ -301,6 +324,10 @@ public class TrackingListFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
+        if (getRace() != null && getRaceState() != null) {
+            getRaceState().addChangedListener(mStateChangeListener);
+        }
+
         Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
@@ -311,7 +338,13 @@ public class TrackingListFragment extends BaseFragment
     public void onStop() {
         super.onStop();
 
-        sendUnconfirmed();
+        if (getRace() != null && getRaceState() != null) {
+            getRaceState().removeChangedListener(mStateChangeListener);
+        }
+
+        if (!mRefreshAuto && isDirty()) {
+            sendUnconfirmed();
+        }
 
         Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_STOP);
@@ -373,8 +406,27 @@ public class TrackingListFragment extends BaseFragment
         return true;
     }
 
+    private boolean isDirty() {
+        CompetitorResultsImpl diff = (CompetitorResultsImpl) getCompetitorResultsDiff(mConfirmedData);
+        boolean dirty = diff.size() != mDraftData.size();
+        if (!dirty) {
+            for (CompetitorResult item : getCompetitorResultsDiff(mConfirmedData)) {
+                for (CompetitorResult last : mDraftData) {
+                    if (item.getCompetitorId().equals(last) && !item.equals(last)) {
+                        dirty = true;
+                        break;
+                    }
+                }
+                if (dirty) {
+                    break;
+                }
+            }
+        }
+        return dirty;
+    }
+
     private void sendUnconfirmed() {
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResultsDiff());
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResultsDiff(mConfirmedData));
     }
 
     private void loadCompetitors() {
@@ -716,17 +768,18 @@ public class TrackingListFragment extends BaseFragment
         return result;
     }
 
-    private CompetitorResults getCompetitorResultsDiff() {
+    private CompetitorResults getCompetitorResultsDiff(CompetitorResults results) {
         CompetitorResults result = new CompetitorResultsImpl();
 
         // all changed items
-        for (CompetitorResult oldItem : mLastPublished) {
+        for (CompetitorResult oldItem : results) {
             boolean found = false;
             for (CompetitorResult newItem : mFinishedData) {
                 if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
-                    if (!oldItem.equals(newItem)) {
-                        result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem
-                            .getOneBasedRank(), newItem.getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment()));
+                    CompetitorResult temp = new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem
+                        .getOneBasedRank(), newItem.getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment());
+                    if (!oldItem.equals(temp)) {
+                        result.add(temp);
                     }
                     found = true;
                     break;
@@ -741,7 +794,7 @@ public class TrackingListFragment extends BaseFragment
         // all new items
         for (CompetitorResultWithIdImpl newItem : mFinishedData) {
             boolean found = false;
-            for (CompetitorResult oldItem : mLastPublished) {
+            for (CompetitorResult oldItem : results) {
                 if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
                     found = true;
                     break;
@@ -836,6 +889,46 @@ public class TrackingListFragment extends BaseFragment
                     if (StringHelper.on(getActivity()).containsIgnoreCase(name, mFilter)) {
                         mFilteredCompetitorData.add(competitor);
                     }
+                }
+            }
+        }
+    }
+
+    private static class StateChangeListener extends BaseRaceStateChangedListener {
+
+        private WeakReference<TrackingListFragment> mReference;
+
+        StateChangeListener(TrackingListFragment fragment) {
+            mReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositioningsChanged(state);
+
+            askForRefresh();
+        }
+
+        private void askForRefresh() {
+            TrackingListFragment fragment = mReference.get();
+            if (fragment != null) {
+                if (!fragment.mRefreshManual) {
+                    Context context = fragment.getActivity();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+                    builder.setTitle(context.getString(R.string.refresh_title));
+                    builder.setMessage(context.getString(R.string.refresh_message));
+                    builder.setPositiveButton(context.getString(R.string.refresh_positive), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            TrackingListFragment frag = mReference.get();
+                            if (frag != null) {
+                                frag.mRefreshAuto = true;
+                                frag.replaceFragment(TrackingListFragment.newInstance(frag.getRecentArguments(), 1), R.id.race_content);
+                            }
+                        }
+                    });
+                    builder.setCancelable(false);
+                    builder.show();
                 }
             }
         }
