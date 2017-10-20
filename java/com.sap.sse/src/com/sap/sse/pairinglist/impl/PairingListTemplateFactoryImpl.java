@@ -10,9 +10,8 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
     public PairingListTemplateFactoryImpl() {
         
     }
-
     public PairingListTemplate createPairingListTemplate(PairingFrameProvider<?,?,?> pPFP) {
-        
+ 
         return new PairingListTemplateImpl();
     }
 }
