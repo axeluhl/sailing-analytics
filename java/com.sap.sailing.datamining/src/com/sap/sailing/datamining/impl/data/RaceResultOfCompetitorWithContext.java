@@ -174,7 +174,14 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         double competitorCount = Util.size(leaderboard.getCompetitors());
         Double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
         if (points != null) {
-            double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ? competitorCount - points
+            double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
+                    // calculate the points for first rank (doesn't necessarily need to be the number
+                    // of competitors!) and subtract the points
+                    leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
+                            /* rank */ 1, // which score does the winner get in this high-point scheme?
+                            /* numberOfCompetitorsInRaceFetcher */ ()->Util.size(raceColumn.getAllCompetitors()),
+                            /* numberOfCompetitorsInLeaderboardFetcher */ leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(),
+                            now) - points
                     : points;
             final double result = relativeLowPoints / competitorCount;
             return result;
