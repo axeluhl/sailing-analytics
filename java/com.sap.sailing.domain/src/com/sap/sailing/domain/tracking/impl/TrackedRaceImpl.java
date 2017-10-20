@@ -4193,20 +4193,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-    	Speed result = null;
-    	Duration totalTimeSailedInRace = Duration.NULL;
-    	Distance totalDistanceSailedInRace = Distance.NULL;
-    	for (TrackedLeg legGeneral : getTrackedLegs()) {
-    		TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
-    		if (leg != null && leg.getTime(timePoint) != null) {
-    			totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
-    			totalTimeSailedInRace.plus(leg.getTime(timePoint));
-    		}
-    	}
-    	if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
-			result = new KnotSpeedImpl(totalDistanceSailedInRace.getMeters() / 
-					totalTimeSailedInRace.asSeconds() / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
-    	}
-    	return result;
+        Speed result = null;
+        Duration totalTimeSailedInRace = Duration.NULL;
+        Distance totalDistanceSailedInRace = Distance.NULL;
+        for (TrackedLeg legGeneral : getTrackedLegs()) {
+            TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
+            if (leg != null && leg.getTime(timePoint) != null) {
+                totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
+                totalTimeSailedInRace.plus(leg.getTime(timePoint));
+            }
+        }
+        if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
+            result = new KnotSpeedImpl(totalDistanceSailedInRace.getMeters() / totalTimeSailedInRace.asSeconds()
+                    / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
+        }
+        return result;
     }
 }
