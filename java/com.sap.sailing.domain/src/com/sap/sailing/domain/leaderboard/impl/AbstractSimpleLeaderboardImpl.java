@@ -25,9 +25,11 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
@@ -40,6 +42,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -789,31 +792,12 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-        Speed result = null;
-        for (TrackedRace trackedRace : getTrackedRaces()) {
-            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
-                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-                if (!markPassings.isEmpty()) {
-                    TimePoint from = markPassings.first().getTimePoint();
-                    TimePoint to;
-                    if (timePoint.after(markPassings.last().getTimePoint()) &&
-                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
-                        // stop counting when competitor finished the race
-                        to = markPassings.last().getTimePoint();
-                    } else {
-                        if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
-                                timePoint.after(markPassings.last().getTimePoint())) {
-                            result = null;
-                            break;
-                        }
-                        to = timePoint;
-                    }
-                    Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
-                    if (distanceTraveled != null) {
-                        result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
-                    }
-                }
-            }
+    	Speed result = null;
+        final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
+        final Distance totalDistanceSailed = this.getTotalDistanceTraveled(competitor, timePoint);
+        if (totalDistanceSailed != null && totalTimeSailed != null) {
+        	result = new KnotSpeedImpl(totalDistanceSailed.getMeters() / 
+        			totalTimeSailed.asSeconds() / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
         }
         return result;
     }

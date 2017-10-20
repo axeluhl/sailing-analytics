@@ -74,6 +74,7 @@ import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -4119,6 +4120,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             LockUtil.unlockAfterRead(sensorTracksLock);
         }
     }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return LockUtil.<Iterable<TrackT>>executeWithReadLockAndResult(sensorTracksLock, () -> {
+            final Set<TrackT> result = new HashSet<>();
+            for (Competitor competitor : tracks.keySet()) {
+                final Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+                final TrackT track = getTrackInternal(key);
+                if (track != null) {
+                    result.add(track);
+                }
+            }
+            return result;
+        });
+    }
 
     protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
@@ -4204,6 +4221,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return new HashSet<>(attachedRaceLogs.values());
+    }
+    
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+    	Speed result = null;
+    	Duration totalTimeSailedInRace = Duration.NULL;
+    	Distance totalDistanceSailedInRace = Distance.NULL;
+    	for (TrackedLeg legGeneral : getTrackedLegs()) {
+    		TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
+    		if (leg != null && leg.getTime(timePoint) != null) {
+    			totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
+    			totalTimeSailedInRace.plus(leg.getTime(timePoint));
+    		}
+    	}
+    	if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
+			result = new KnotSpeedImpl(totalDistanceSailedInRace.getMeters() / 
+					totalTimeSailedInRace.asSeconds() / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
+    	}
+    	return result;
     }
     
     private static class ComputedManeuverEnteringAndExitingDetails {

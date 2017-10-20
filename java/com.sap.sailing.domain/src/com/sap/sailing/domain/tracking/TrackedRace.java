@@ -233,6 +233,11 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @return the track associated to the given Competitor and name or <code>null</code> if there is none.
      */
     <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
+    
+    /**
+     * Returns all contained {@link SensorFixTrack SensorFixTracks} for the given trackName and associated to any competitor.
+     */
+    <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(String trackName);
 
     /**
      * Tells the leg on which the <code>competitor</code> was at time <code>at</code>. If the competitor hasn't passed
@@ -1006,5 +1011,13 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @return all currently attached {@link RaceLog}s or an empty Iterable if there aren't any
      */
     Iterable<RaceLog> getAttachedRaceLogs();
+
+    /**
+     * Computes the average speed over ground for a {@link Competitor} based on times and distances
+     * for all finished {@link TrackedLegOfCompetitor}s.
+     *  
+     * @param timePoint time point up and until to compute the speed
+     */
+	Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
 
 }
