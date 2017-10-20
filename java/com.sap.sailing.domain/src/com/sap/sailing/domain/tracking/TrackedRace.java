@@ -1013,11 +1013,12 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     Iterable<RaceLog> getAttachedRaceLogs();
 
     /**
-     * Computes the average speed over ground for a {@link Competitor} based on times and distances
-     * for all finished {@link TrackedLegOfCompetitor}s.
-     *  
-     * @param timePoint time point up and until to compute the speed
+     * Computes the average speed over ground for a {@link Competitor} based on times and distances for all
+     * {@link TrackedLegOfCompetitor legs} the competitor {@link TrackedLegOfCompetitor#hasStartedLeg(TimePoint) has
+     * started} already at {@code timePoint}.
+     * 
+     * @param timePoint
+     *            time point up and until to compute the speed
      */
-	Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
-
+    Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
 }
