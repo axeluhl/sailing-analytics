@@ -6,7 +6,7 @@ import java.util.Iterator;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 
-public class PairingListImpl<Flight, Group, Competitor> implements PairingList<Flight, Group, Competitor> {
+public class PairingListImpl<Flight, Group, Competitor> implements PairingList<Flight, Group, Competitor>  {
     
     private ArrayList<ArrayList<ArrayList<Competitor>>> pList;
     private double standardDev;
@@ -15,7 +15,7 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         
     }
     
-    /**
+    /*
      * @param pList: pairing list with specific information of flights, groups and competitors
      * @param standardDev: describes quality of our pList (the lower the standardDev, the better the pairing list)
      */
@@ -34,7 +34,6 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
 
     @Override
     public PairingFrameProvider<Object, Object, Object> getProvider() {
-        
         return null;
     }
     
