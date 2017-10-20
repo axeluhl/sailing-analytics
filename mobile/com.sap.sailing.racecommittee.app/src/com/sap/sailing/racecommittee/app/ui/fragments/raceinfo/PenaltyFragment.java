@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,6 +19,8 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.base.Competitor;
@@ -91,6 +94,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private View mListButtonLayout;
     private ImageView mListButton;
     private HeaderLayout mHeader;
+    private StateChangeListener mStateChangeListener;
+
+    private boolean mRefreshAuto = false;
+    private boolean mRefreshManual = false;
 
     public static PenaltyFragment newInstance() {
         Bundle args = new Bundle();
@@ -103,6 +110,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
+
+        mStateChangeListener = new StateChangeListener(this);
+
         mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
         mDraftData = new CompetitorResultsImpl();
         mConfirmedData = new CompetitorResultsImpl();
@@ -162,7 +172,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             applyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setReason((String)mPenaltyDropDown.getSelectedItem());
+                    setReason((String) mPenaltyDropDown.getSelectedItem());
                 }
             });
         }
@@ -217,6 +227,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         if (mPenaltyDropDown != null) {
             int selection = mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name());
             RacingProcedure procedure = getRaceState().getRacingProcedure();
@@ -272,22 +283,23 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
         initLocalData();
         loadCompetitors();
+
     }
 
     private void initLocalData() {
         mDraftData.clear();
         if (getRaceState().getFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
-                mDraftData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(),
-                    item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                mDraftData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
             }
         }
 
         mConfirmedData.clear();
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
-                mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(),
-                    item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
             }
         }
     }
@@ -295,6 +307,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public void onStart() {
         super.onStart();
+
+        if (getRace() != null && getRaceState() != null) {
+            getRaceState().addChangedListener(mStateChangeListener);
+        }
 
         Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
@@ -306,6 +322,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onStop() {
         super.onStop();
 
+        if (getRace() != null && getRaceState() != null) {
+            getRaceState().removeChangedListener(mStateChangeListener);
+        }
+
         boolean dirty = false;
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
             if (item.isDirty()) {
@@ -313,7 +333,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 break;
             }
         }
-        if (dirty) {
+        if (!mRefreshAuto && dirty) {
             sendUnconfirmed();
         }
 
@@ -331,11 +351,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     private void confirmData() {
+        mRefreshManual = true;
         sendUnconfirmed();
         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
         initLocalData();
         loadCompetitors();
+        mRefreshManual = false;
     }
 
     private String[] getAllMaxPointsReasons() {
@@ -515,9 +537,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             .getFinishingTime(), competitor.getComment());
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition()+
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition() +
                 /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
-            (item.getOneBasedRank()==0?1:0));
+            (item.getOneBasedRank() == 0 ? 1 : 0));
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -599,6 +621,46 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     mEntryCount.setVisibility(View.VISIBLE);
                 } else {
                     mEntryCount.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    private static class StateChangeListener extends BaseRaceStateChangedListener {
+
+        private WeakReference<PenaltyFragment> mReference;
+
+        StateChangeListener(PenaltyFragment fragment) {
+            mReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositioningsChanged(state);
+
+            askForRefresh();
+        }
+
+        private void askForRefresh() {
+            PenaltyFragment fragment = mReference.get();
+            if (fragment != null) {
+                if (!fragment.mRefreshManual) {
+                    Context context = fragment.getActivity();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+                    builder.setTitle(context.getString(R.string.refresh_title));
+                    builder.setMessage(context.getString(R.string.refresh_message));
+                    builder.setPositiveButton(context.getString(R.string.refresh_positive), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            PenaltyFragment frag = mReference.get();
+                            if (frag != null) {
+                                frag.mRefreshAuto = true;
+                                frag.replaceFragment(PenaltyFragment.newInstance(), R.id.race_content);
+                            }
+                        }
+                    });
+                    builder.setCancelable(false);
+                    builder.show();
                 }
             }
         }
