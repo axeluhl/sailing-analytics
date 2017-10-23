@@ -60,18 +60,6 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
      */
     
     private double calcStandardDev(int[][] associations) {
-        
-        // maxValue specifies the highest value in associations
-        int maxValue = 0;
-
-        // calculating maxValue
-        for (int[] key : associations) {
-            for (int i : key) {
-                if (i > maxValue) {
-                    maxValue = i;
-                }
-            }
-        }
 
         double standardDev = 0;
         double expectedValue = 0;
@@ -81,7 +69,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
          * hist shows how often a specific value of one association occurs.
          * A value specifies how often one team plays against another.
          */
-        int[] hist = new int[maxValue + 1];
+        int[] hist = new int[(int) (this.getMaxValueOfArray(associations) + 1)];
 
         // filling hist
         for (int[] key : associations) {
@@ -104,8 +92,56 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
 
         if (standardDev > 0) {
             standardDev = Math.sqrt(standardDev / valueCount);
-        }        
+        }
         
         return standardDev;
+    }
+    
+    private double getMaxValueOfArray(double[] arr) {
+        double maxValue = 0;
+        
+        for (double val: arr) {
+            if (val > maxValue) {
+                maxValue = val;
+            }
+        }
+        
+        return maxValue;
+    }
+    
+    private double getMaxValueOfArray(int[] arr) {
+        double maxValue = 0;
+        
+        for (int val: arr) {
+            if (val > maxValue) {
+                maxValue = val;
+            }
+        }
+        
+        return maxValue;
+    }
+    
+    private double getMaxValueOfArray(double[][] arr) {
+        double maxValue = 0;
+        
+        for (double[] val: arr) {
+            if (this.getMaxValueOfArray(val) > maxValue) {
+                maxValue = this.getMaxValueOfArray(val);
+            }
+        }
+        
+        return maxValue;
+    }
+    
+    private double getMaxValueOfArray(int[][] arr) {
+        double maxValue = 0;
+        
+        for (int[] val: arr) {
+            if (this.getMaxValueOfArray(val) > maxValue) {
+                maxValue = this.getMaxValueOfArray(val);
+            }
+        }
+        
+        return maxValue;
     }
 }
