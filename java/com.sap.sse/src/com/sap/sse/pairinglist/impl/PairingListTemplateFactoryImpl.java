@@ -1,11 +1,13 @@
 package com.sap.sse.pairinglist.impl;
 
+import java.awt.BufferCapabilities.FlipContents;
+
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 
 public class PairingListTemplateFactoryImpl<Flight,Group,Competitor> implements PairingListTemplateFactory<Flight,Group,Competitor>{
-    
+    PairingListTemplateImpl<Flight, Group, Competitor> pairingListTemplateImpl;
     
     public PairingListTemplateFactoryImpl() {
         
@@ -13,7 +15,10 @@ public class PairingListTemplateFactoryImpl<Flight,Group,Competitor> implements 
     @Override
     public PairingListTemplate<Flight, Group, Competitor> createPairingListTemplate(
             PairingFrameProvider<Flight, Group, Competitor> pPFP) {
-        // TODO Auto-generated method stub
-        return null;
+          if(pairingListTemplateImpl==null){
+              pairingListTemplateImpl= new PairingListTemplateImpl<>(pPFP);
+              return pairingListTemplateImpl;
+          }
+          return pairingListTemplateImpl;
     }
 }

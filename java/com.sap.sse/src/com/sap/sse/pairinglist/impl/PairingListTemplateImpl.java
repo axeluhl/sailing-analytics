@@ -61,17 +61,74 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
                         associationHigh[0]=flights+1;
                         System.arraycopy(currentAssociations[flightColumn[0][0]], 0, associationRow[1][zGroups], 0, competitors);
                             for(int comp=0;comp<competitors;comp++){
-                                if((this.sum(associationRow,1,comp)<=0) && true ){
-                                    
+                                if((this.sum(associationRow,0,comp)<=associationSum) && 
+                                      !this.contains(flightColumn,comp) &&
+                                           this.findMaxValue(associationRow, 0, comp)<=associationHigh[0] ){
+                                    flightColumn[0][zGroups]=comp;
+                                    associationSum=this.sum(associationRow,0,comp);
+                                    associationHigh[0]=this.findMaxValue(associationRow, 0, comp);
                                 }
                             }   
                     }
+                   for(int fleets=1;fleets<(competitors/groups)-1;fleets++){
+                     for(int aux=0;aux<competitors;aux++){
+                         if(! this.contains(flightColumn, aux)){
+                             flightColumn[fleets][0]=aux;
+                             break;
+                         }
+                     }
+                     for(int zGroups=1;zGroups<(competitors/groups)-1;zGroups++){
+                         int associationSum = Integer.MAX_VALUE;
+                         associationHigh[0]=flights+1;
+                         System.arraycopy(currentAssociations[flightColumn[0][0]], 0, associationRow[1][zGroups], 0, competitors);
+                             for(int comp=0;comp<competitors;comp++){
+                                 if((this.sum(associationRow,fleets,comp)<=associationSum) && 
+                                       !this.contains(flightColumn,comp) &&
+                                            this.findMaxValue(associationRow, fleets, comp)<=associationHigh[0] ){
+                                     flightColumn[0][zGroups]=comp;
+                                     associationSum=this.sum(associationRow,fleets,comp);
+                                     associationHigh[0]=this.findMaxValue(associationRow, fleets, comp);
+                                 }
+                             }   
+                     }
+                   }
+                   for(int j=0;j<(competitors/groups);j++){
+                       for(int z=0;z<competitors;z++){
+                           if(!this.contains(flightColumn, z)){
+                               flightColumn[groups][j]=z;
+                               break;
+                           }
+                       }
+                   }
+                   currentAssociations=this.match(currentAssociations,flightColumn);
+                   for(int m=0;m<groups;m++){
+                      System.arraycopy(flightColumn[m],0 , currentPLT[(zFlight*groups)+m], 0, competitors/groups);
+                   }
+                   
+            }
+            for(int j=0;j<currentAssociations.length;j++){
+                currentAssociations[j][j]=-1;
+            }
+            if(this.calcStandardDev(currentAssociations)<bestDev){
+                bestPLT=currentPLT;
+                bestTeamAssociations=currentAssociations;
+                bestDev=this.calcStandardDev(currentAssociations);
             }
         }
         
     }
     
 
+
+
+    private boolean contains(int[][] flightColumn, int comp) {
+        for(int i=0;i<flightColumn[0].length;i++){
+            for(int z=0;z<flightColumn.length;z++){
+                if(flightColumn[z][i]==comp) return true;
+            }
+        }
+        return false;
+    }
 
 
     private int sum(int[][][] associationRow, int i, int comp) {
@@ -81,9 +138,15 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
            }
            return Arrays.stream(temp).sum();
     }
+    private int findMaxValue(int[][][] associationRow, int i, int comp) {
+        int temp=0;
+           for(int z=0;z<associationRow[0].length;z++){
+               if(associationRow[i][z][comp]>temp) temp=associationRow[i][z][comp];
+              }
+           return temp;
+    }
 
-
-    public int randomBW(int min,int max){
+    private int randomBW(int min,int max){
         return min+(int)(Math.random()*((max-min)+1));
     }
     /**
