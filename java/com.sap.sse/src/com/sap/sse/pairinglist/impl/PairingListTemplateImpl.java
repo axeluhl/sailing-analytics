@@ -79,17 +79,18 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     }
     
     
-    private int[][] getAssociationsFromFlight(int[][] pairingList, int competitors) {
+    private int[][] getAssociationsFromPairingList(int[][] pairingList, int competitors) {
         int[][] associations = new int[competitors][competitors];
         
-        for (int group = 0; group < pairingList.length; group++) {
+        for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
                 for (int j = 0; j < pairingList[0].length; j++) {
-                    if (pairingList[group][i] == pairingList[group][j]) {
-                        associations[pairingList[group][i] - 1][pairingList[group][j] - 1] = -1;
+                    if (group[i] == group[j]) {
+                        associations[group[i] - 1][group[j] - 1] = -1;
                     } else {
-                        associations[pairingList[group][i] - 1][pairingList[group][j] - 1] =
-                                associations[pairingList[group][i] - 1][pairingList[group][j] - 1] + 1;
+                        System.out.println(group[i] + ", " + group[j]);
+                        associations[group[i] - 1][group[j] - 1] =
+                                associations[group[i] - 1][group[j] - 1] + 1;
                     }
 
                 }
