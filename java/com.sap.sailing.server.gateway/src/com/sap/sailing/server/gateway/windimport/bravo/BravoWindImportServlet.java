@@ -93,12 +93,13 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         };
         if (filename.toLowerCase().endsWith("zip")) {
             logger.info("Bravo file "+filename+" is a ZIP file");
-            final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-            ZipEntry entry;
-            while ((entry=zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().toLowerCase().endsWith(".txt")) {
-                    logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
-                    importer.importFixes(zipInputStream, callback, filename, filename, /* downsample */ false);
+            try (final ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+                ZipEntry entry;
+                while ((entry=zipInputStream.getNextEntry()) != null) {
+                    if (entry.getName().toLowerCase().endsWith(".txt")) {
+                        logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
+                        importer.importFixes(zipInputStream, callback, filename, filename, /* downsample */ false);
+                    }
                 }
             }
         } else {
