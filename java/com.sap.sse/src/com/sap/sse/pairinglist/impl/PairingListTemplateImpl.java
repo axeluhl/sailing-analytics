@@ -8,6 +8,13 @@ import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 
+/**
+ * @author D070307
+ *
+ * @param <Flight>
+ * @param <Group>
+ * @param <Competitor>
+ */
 public class PairingListTemplateImpl<Flight,Group,Competitor> implements PairingListTemplate<Flight,Group,Competitor> {
     
     private int[][] pairingListTemplate;
@@ -66,6 +73,64 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     
 
 
+
     public int randomBW(int min,int max){
         return min+(int)(Math.random()*((max-min)+1));
-    }}
+    }
+    /**
+     * @param associations: association describes a 2 dimensional array of integers, which contains the information 
+     *                      about how often the teams play against each other
+     * @return standardDev: returns how much the association values deviate from each other
+     */
+    
+    private double calcStandardDev(int[][] associations) {
+        
+        // maxValue specifies the highest value in associations
+        int maxValue = 0;
+
+        // calculating maxValue
+        for (int[] key : associations) {
+            for (int i : key) {
+                if (i > maxValue) {
+                    maxValue = i;
+                }
+            }
+        }
+
+        double standardDev = 0;
+        double expectedValue = 0;
+        double valueCount = associations.length * associations[0].length;
+
+        /*
+         * hist shows how often a specific value of one association occurs.
+         * A value specifies how often one team plays against another.
+         */
+        int[] hist = new int[maxValue + 1];
+
+        // filling hist
+        for (int[] key : associations) {
+            for (int value : key) {
+                hist[value] = hist[value] + 1;
+            }
+        }
+
+        // calculating the expected value of hist
+        for (int i = 0; i < hist.length; i++) {
+            expectedValue += i * (hist[i] / valueCount);
+        }
+
+        // calculating standard deviation by all values and expectedValue
+        for (int[] key : associations) {
+            for (int value : key) {
+                standardDev += Math.pow(value - expectedValue, 2);
+            }
+        }
+
+        if (standardDev > 0) {
+            standardDev = Math.sqrt(standardDev / valueCount);
+        }        
+        
+        return standardDev;
+    }
+}
+

@@ -15,7 +15,7 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         
     }
     
-    /*
+    /**
      * @param pList: pairing list with specific information of flights, groups and competitors
      * @param standardDev: describes quality of our pList (the lower the standardDev, the better the pairing list)
      */
@@ -37,7 +37,7 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         return null;
     }
     
-    /*
+    /**
      * SETTERS
      */
 
