@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -101,6 +102,9 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
                 }
             }
         } else {
+            if (filename.toLowerCase().endsWith("gz")) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
             importer.importFixes(inputStream, callback, filename, filename, /* downsample */ false);
         }
         return result;
