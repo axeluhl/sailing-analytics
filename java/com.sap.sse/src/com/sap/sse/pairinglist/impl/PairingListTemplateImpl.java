@@ -61,10 +61,10 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
                         associationHigh[0]=flights+1;
                         System.arraycopy(currentAssociations[flightColumn[0][0]], 0, associationRow[1][zGroups], 0, competitors);
                             for(int comp=0;comp<competitors;comp++){
-                                if(Arrays.stream(associationRow[1][][comp]).sum()<=0){
+                                if((this.sum(associationRow,1,comp)<=0) && true ){
                                     
                                 }
-                            }
+                            }   
                     }
             }
         }
@@ -72,6 +72,15 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     }
     
 
+
+
+    private int sum(int[][][] associationRow, int i, int comp) {
+        int[] temp=new int[associationRow[0].length];
+           for(int z=0;z<associationRow[0].length;z++){
+               temp[z]=associationRow[i][z][comp];
+           }
+           return Arrays.stream(temp).sum();
+    }
 
 
     public int randomBW(int min,int max){
