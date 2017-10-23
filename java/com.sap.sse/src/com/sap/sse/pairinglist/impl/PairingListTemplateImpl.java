@@ -77,6 +77,20 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     public int randomBW(int min,int max){
         return min+(int)(Math.random()*((max-min)+1));
     }
+    
+    
+    private int[][] getAssociationsFromFlight(int[][] pairingList, int competitors) {
+        int[][] associations = new int[competitors][competitors];
+        
+        for (int group = 0; group < pairingList.length; group++) {
+            for (int i = 0; i < pairingList[0].length; i++) {
+                
+            }
+        }
+        
+        return associations;
+    }
+    
     /**
      * @param associations: association describes a 2 dimensional array of integers, which contains the information 
      *                      about how often the teams play against each other
@@ -98,7 +112,9 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         // filling hist
         for (int[] key : associations) {
             for (int value : key) {
-                hist[value] = hist[value] + 1;
+                if (value >= 0) {
+                    hist[value] = hist[value] + 1;
+                }
             }
         }
 
@@ -110,7 +126,9 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         // calculating standard deviation by all values and expectedValue
         for (int[] key : associations) {
             for (int value : key) {
-                standardDev += Math.pow(value - expectedValue, 2);
+                if (value >= 0) {
+                    standardDev += Math.pow(value - expectedValue, 2);
+                }
             }
         }
 
