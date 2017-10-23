@@ -158,13 +158,11 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
             for (int i = 0; i < pairingList[0].length; i++) {
                 for (int j = 0; j < pairingList[0].length; j++) {
                     if (group[i] == group[j]) {
-                        associations[group[i] - 1][group[j] - 1] = -1;
+                        associations[group[i]][group[j]] = -1;
                     } else {
                         System.out.println(group[i] + ", " + group[j]);
-                        associations[group[i] - 1][group[j] - 1] =
-                                associations[group[i] - 1][group[j] - 1] + 1;
+                        associations[group[i]][group[j]] = associations[group[i]][group[j]] + 1;
                     }
-
                 }
             }
         }
