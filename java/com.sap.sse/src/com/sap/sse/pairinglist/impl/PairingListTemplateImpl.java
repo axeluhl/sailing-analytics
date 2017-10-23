@@ -60,35 +60,51 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
      */
     
     private double calcStandardDev(int[][] associations) {
-        double standardDev = Double.POSITIVE_INFINITY;
-        double expectedValue = 0;
         
-        /** 
+        // maxValue specifies the highest value in associations
+        int maxValue = 0;
+
+        // calculating maxValue
+        for (int[] key : associations) {
+            for (int i : key) {
+                if (i > maxValue) {
+                    maxValue = i;
+                }
+            }
+        }
+
+        double standardDev = 0;
+        double expectedValue = 0;
+        double valueCount = associations.length * associations[0].length;
+
+        /*
          * hist shows how often a specific value of one association occurs.
          * A value specifies how often one team plays against another.
          */
-        ArrayList<Integer> hist = new ArrayList<>();     
-        
+        int[] hist = new int[maxValue + 1];
+
         // filling hist
-        for (int[] key: associations) {
-            for (int value: key) {
-                hist.add(value, (hist.get(value) + 1));
+        for (int[] key : associations) {
+            for (int value : key) {
+                hist[value] = hist[value] + 1;
             }
         }
-        
+
         // calculating the expected value of hist
-        for (int i = 0; i < hist.size(); i++) {
-            expectedValue = (hist.get(i) / hist.size()) * i; 
+        for (int i = 0; i < hist.length; i++) {
+            expectedValue += i * (hist[i] / valueCount);
         }
-        
-        // calculating standard deviation from value and expectedValue
-        for (Integer val: hist) {
-            standardDev = standardDev + Math.pow((val - expectedValue), 2);
+
+        // calculating standard deviation by all values and expectedValue
+        for (int[] key : associations) {
+            for (int value : key) {
+                standardDev += Math.pow(value - expectedValue, 2);
+            }
         }
-        
+
         if (standardDev > 0) {
-            standardDev = Math.sqrt(standardDev / hist.size());
-        }
+            standardDev = Math.sqrt(standardDev / valueCount);
+        }        
         
         return standardDev;
     }
