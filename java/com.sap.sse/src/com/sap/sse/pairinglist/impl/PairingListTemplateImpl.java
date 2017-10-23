@@ -84,7 +84,15 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         
         for (int group = 0; group < pairingList.length; group++) {
             for (int i = 0; i < pairingList[0].length; i++) {
-                
+                for (int j = 0; j < pairingList[0].length; j++) {
+                    if (pairingList[group][i] == pairingList[group][j]) {
+                        associations[pairingList[group][i] - 1][pairingList[group][j] - 1] = -1;
+                    } else {
+                        associations[pairingList[group][i] - 1][pairingList[group][j] - 1] =
+                                associations[pairingList[group][i] - 1][pairingList[group][j] - 1] + 1;
+                    }
+
+                }
             }
         }
         
