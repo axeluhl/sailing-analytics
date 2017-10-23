@@ -1,6 +1,8 @@
 package com.sap.sse.pairinglist.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -44,15 +46,37 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         double bestDev = Double.POSITIVE_INFINITY;
         
         for(int iteration=0;iteration<100;iteration++){
+            
             int[][] currentAssociations = new int[competitors][competitors];
             int[][] currentPLT = new int[groups][competitors / groups];
+            
             for(int zFlight=0;zFlight<flights;zFlight++){
                 
+                int [][] flightColumn=new int[groups][competitors/groups];
+                int [][][] associationRow = new int[groups-1][(competitors/groups)-1][competitors];
+                int [] associationHigh= new int[groups-1];
+                flightColumn[0][0]=this.randomBW(1,competitors);
+                    for(int zGroups=1;zGroups<(competitors/groups)-1;zGroups++){
+                        int associationSum = Integer.MAX_VALUE;
+                        associationHigh[0]=flights+1;
+                        System.arraycopy(currentAssociations[flightColumn[0][0]], 0, associationRow[1][zGroups], 0, competitors);
+                            for(int comp=0;comp<competitors;comp++){
+                                if(Arrays.stream(associationRow[1][][comp]).sum()<=0){
+                                    
+                                }
+                            }
+                    }
             }
         }
         
     }
     
+
+
+
+    public int randomBW(int min,int max){
+        return min+(int)(Math.random()*((max-min)+1));
+    }
     /**
      * @param associations: association describes a 2 dimensional array of integers, which contains the information 
      *                      about how often the teams play against each other
@@ -145,3 +169,4 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         return maxValue;
     }
 }
+
