@@ -25,11 +25,9 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
@@ -792,12 +790,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-    	Speed result = null;
+        Speed result = null;
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         final Distance totalDistanceSailed = this.getTotalDistanceTraveled(competitor, timePoint);
-        if (totalDistanceSailed != null && totalTimeSailed != null) {
-        	result = new KnotSpeedImpl(totalDistanceSailed.getMeters() / 
-        			totalTimeSailed.asSeconds() / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
+        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Distance.NULL)) {
+            result = totalDistanceSailed.inTime(totalTimeSailed);
         }
         return result;
     }

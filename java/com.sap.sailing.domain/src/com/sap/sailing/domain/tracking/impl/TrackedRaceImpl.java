@@ -74,7 +74,6 @@ import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -4193,20 +4192,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-    	Speed result = null;
-    	Duration totalTimeSailedInRace = Duration.NULL;
-    	Distance totalDistanceSailedInRace = Distance.NULL;
-    	for (TrackedLeg legGeneral : getTrackedLegs()) {
-    		TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
-    		if (leg != null && leg.getTime(timePoint) != null) {
-    			totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
-    			totalTimeSailedInRace.plus(leg.getTime(timePoint));
-    		}
-    	}
-    	if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
-			result = new KnotSpeedImpl(totalDistanceSailedInRace.getMeters() / 
-					totalTimeSailedInRace.asSeconds() / Mile.METERS_PER_NAUTICAL_MILE * 3600.0);
-    	}
-    	return result;
+        Speed result = null;
+        Duration totalTimeSailedInRace = Duration.NULL;
+        Distance totalDistanceSailedInRace = Distance.NULL;
+        for (TrackedLeg legGeneral : getTrackedLegs()) {
+            TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
+            if (leg != null && leg.hasStartedLeg(timePoint)) {
+                totalDistanceSailedInRace = totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
+                totalTimeSailedInRace = totalTimeSailedInRace.plus(leg.getTime(timePoint));
+            }
+        }
+        if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
+            result = totalDistanceSailedInRace.inTime(totalTimeSailedInRace);
+        }
+        return result;
     }
 }
