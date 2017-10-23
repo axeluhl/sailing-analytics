@@ -36,7 +36,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
-import com.sap.sailing.domain.tracking.BearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -1121,11 +1121,11 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     }
     
     @Override
-    public List<BearingStep> getBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
+    public List<SpeedWithBearingStep> getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
         if (intervalBetweenBearingSteps.asMillis() <= 0) {
             throw new IllegalArgumentException("intervalBetweenBearingSteps must be a positive duration but was "+intervalBetweenBearingSteps);
         }
-        List<BearingStep> relevantBearings = new ArrayList<>();
+        List<SpeedWithBearingStep> relevantBearings = new ArrayList<>();
         Bearing lastBearing = null;
         double lastCourseChangeAngleInDegrees = 0;
         for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint.plus(intervalBetweenBearingSteps)) {
@@ -1152,7 +1152,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                         && Math.abs(courseChangeAngleInDegrees - lastCourseChangeAngleInDegrees) >= 180) {
                     courseChangeAngleInDegrees += courseChangeAngleInDegrees < 0 ? 360 : -360;
                 }
-                relevantBearings.add(new BearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees));
+                relevantBearings.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees));
                 lastBearing = bearing;
                 lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
             }
@@ -1163,7 +1163,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         return relevantBearings;
     }
 
-    public static class BearingStepImpl implements BearingStep {
+    public static class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
         private static final long serialVersionUID = 6541349657098710337L;
         
         private final TimePoint timePoint;
@@ -1171,7 +1171,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         private final double courseChangeInDegrees;
 
         /**
-         * Constructs a bearing step with details about speed, bearing and course change related to the previous step.
+         * Constructs a speed with bearing step with details about speed, bearing and course change related to the previous step.
          * 
          * @param timePoint
          *            The time point when the step details have been recorded
@@ -1180,7 +1180,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
          * @param courseChangeInDegrees
          *            Course change in degrees compared to the previous step. Zero, if this is a first step.
          */
-        public BearingStepImpl(TimePoint timePoint, SpeedWithBearing speedWithBearing, double courseChangeInDegrees) {
+        public SpeedWithBearingStepImpl(TimePoint timePoint, SpeedWithBearing speedWithBearing, double courseChangeInDegrees) {
             this.timePoint = timePoint;
             this.speedWithBearing = speedWithBearing;
             this.courseChangeInDegrees = courseChangeInDegrees;

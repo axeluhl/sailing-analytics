@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.tracking.BearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -71,7 +71,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor
             stepMillis = 1;
         }
 
-        final Iterable<BearingStep> maneuverBearingSteps = trackedRace.getTrack(competitor).getBearingSteps(
+        final Iterable<SpeedWithBearingStep> maneuverBearingSteps = trackedRace.getTrack(competitor).getSpeedWithBearingSteps(
                 maneuver.getTimePointBefore(), maneuver.getTimePointAfter(), new MillisecondsDurationImpl(stepMillis));
 
         NauticalSide maneuverDirection = maneuver.getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT
@@ -86,7 +86,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor
 
         int enteringTWA = -1;
 
-        for (BearingStep bearingStep : maneuverBearingSteps) {
+        for (SpeedWithBearingStep bearingStep : maneuverBearingSteps) {
             SpeedWithBearing speedWithBearing = bearingStep.getSpeedWithBearing();
             double twa = wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees();
             if (twa < 0) {
