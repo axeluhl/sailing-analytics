@@ -171,7 +171,12 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
-    private static final double ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE = 0.001;
+    /**
+     * Used in maneuver detection algorithm to approximate the start and end time of maneuver main curve performance. It
+     * defines the absolute course change in degrees between bearing steps to ignore in order shorten the approximated
+     * span between start and end time of maneuver main curve.
+     */
+    private static final double ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS = 0.001;
 
     private static final long serialVersionUID = -4825546964220003507L;
 
@@ -2995,7 +3000,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         refinedManeuverDetails.getManeuverBearingSteps(), wind);
                 if (firstPenaltyCircleCompletedAt == null) {
                     // This should really not happen!
-                    logger.warning("Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null");
+                    logger.warning(
+                            "Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null. Race-Id: "
+                                    + getRace().getId() + ", Competitor: " + competitor.getName()
+                                    + ", Time point before maneuver: " + timePointBeforeManeuver);
                     // Use already detected maneuver details as fallback data to prevent Nullpointer
                     firstPenaltyCircleCompletedAt = timePointAfterManeuver;
                 }
@@ -3162,7 +3170,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // step, considering the target sign of the course change
                 if (maxCourseChangeInDegrees
                         * totalCourseChangeSignum <= currentCourseChangeInDegrees * totalCourseChangeSignum
-                                - ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE) {
+                                - ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
                     maxCourseChangeInDegrees = currentCourseChangeInDegrees;
                     refinedTimePointAfterManeuver = timePoint;
                     refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
@@ -3170,7 +3178,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             } else {
                 // Check whether the course change is performed in the target direction of maneuver. If the direction
                 // sign does not match, or the course change is nearly zero => cut the bearing step from the left
-                if (ABS_COURSE_CHANGE_OF_BEARING_STEPS_TO_IGNORE >= currentCourseChangeInDegrees
+                if (ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS >= currentCourseChangeInDegrees
                         * totalCourseChangeSignum) {
                     currentCourseChangeInDegrees = 0;
                     refinedTimePointBeforeManeuver = timePoint;
