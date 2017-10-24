@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.old.leaderboard;
 
 import java.util.Date;
+import java.util.Objects;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -142,14 +143,19 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
             autoRefreshTimer.setPlayMode(PlayModes.Live);
         }
-        
-        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
-        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-        if (delegate != null) {
-            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-        }
+        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but style is lost
+        this.updateAutoRefreshStylesDependingOnPlayState();
     }
     
+    private void updateAutoRefreshStylesDependingOnPlayState() {
+        final boolean isPlaying = autoRefreshTimer != null && autoRefreshTimer.getPlayState() == PlayStates.Playing;
+        final String isPlayingStyleName = local_res.css().regattaleaderboard_meta_reload_live();
+        this.autoRefreshAnchor.setStyleName(isPlayingStyleName, isPlaying);
+        if (Objects.nonNull(delegate)) {
+            this.delegate.getAutoRefreshControl().setStyleName(isPlayingStyleName, isPlaying);
+        }
+    }
+
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
@@ -161,21 +167,10 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         if (autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
-                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
-                // autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
-                // if (delegate != null) {
-                // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("#8ab54e");
-                // delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
-                // }
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
-                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
-                autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-                if (delegate != null) {
-                    // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("red");
-                    delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-                }
+                this.updateAutoRefreshStylesDependingOnPlayState();
             }
         }
     }
