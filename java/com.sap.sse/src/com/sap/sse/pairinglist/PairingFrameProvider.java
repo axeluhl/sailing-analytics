@@ -1,12 +1,14 @@
 package com.sap.sse.pairinglist;
 
-public interface PairingFrameProvider<Flight, Group, Competitors> {
+
+public interface PairingFrameProvider<Flight, Group, Competitor> {
     
-        @SuppressWarnings("hiding")
-        public<Flight> Flight[] getFlights();
+        //Iterable<Flight> getFlights();
+        int getFlightsCount();
         
-        @SuppressWarnings("hiding")
-        public<Group> Group[] getGroups(Flight pFlight);
+        //Iterable<Group> getGroups(Flight flight);
+        int getGroupsCount();
         
-        int  getCompetitors();
+        Iterable<Competitor>  getCompetitors();
+        int getCompetitorCount();
 }
