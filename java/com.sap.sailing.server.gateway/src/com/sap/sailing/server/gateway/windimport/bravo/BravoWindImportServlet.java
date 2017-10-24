@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -92,15 +93,19 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         };
         if (filename.toLowerCase().endsWith("zip")) {
             logger.info("Bravo file "+filename+" is a ZIP file");
-            final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-            ZipEntry entry;
-            while ((entry=zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().toLowerCase().endsWith(".txt")) {
-                    logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
-                    importer.importFixes(zipInputStream, callback, filename, filename, /* downsample */ false);
+            try (final ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+                ZipEntry entry;
+                while ((entry=zipInputStream.getNextEntry()) != null) {
+                    if (entry.getName().toLowerCase().endsWith(".txt")) {
+                        logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
+                        importer.importFixes(zipInputStream, callback, filename, filename, /* downsample */ false);
+                    }
                 }
             }
         } else {
+            if (filename.toLowerCase().endsWith("gz")) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
             importer.importFixes(inputStream, callback, filename, filename, /* downsample */ false);
         }
         return result;

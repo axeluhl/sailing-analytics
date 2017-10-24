@@ -27,7 +27,6 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
 
@@ -64,7 +63,7 @@ public class TracTracCourseDesignUpdateHandler extends UpdateHandler implements 
         URL currentCourseDesignURL = buildUpdateURL();
         logger.info("Using " + currentCourseDesignURL.toString() + " for the course update!");
         logger.info("Payload is " + payload);
-        HttpURLConnection connection = HttpUrlConnectionHelper.redirectConnection(currentCourseDesignURL);
+        HttpURLConnection connection = (HttpURLConnection) currentCourseDesignURL.openConnection();
         try {
             setConnectionPropertiesAndSendWithPayload(connection, payload);
             try {

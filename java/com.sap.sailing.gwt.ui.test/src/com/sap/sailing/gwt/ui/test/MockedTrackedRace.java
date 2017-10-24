@@ -881,8 +881,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return Collections.emptySet();
     }
 
-	@Override
-	public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-		return null;
-	}
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
 }
