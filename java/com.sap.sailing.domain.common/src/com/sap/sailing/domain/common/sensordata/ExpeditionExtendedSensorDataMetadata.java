@@ -16,7 +16,8 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
  * The first columns need to be consistent with {@link BravoSensorDataMetadata}.
  */
 public enum ExpeditionExtendedSensorDataMetadata {
-    HEEL("Heel", BravoExtendedSensorDataMetadata.HEEL);
+    HEEL("Heel", BravoExtendedSensorDataMetadata.HEEL),
+    TRIM("TRIM", BravoExtendedSensorDataMetadata.PITCH);
 
     private String columnName;
     
