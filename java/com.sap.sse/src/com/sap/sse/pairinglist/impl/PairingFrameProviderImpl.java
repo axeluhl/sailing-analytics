@@ -6,21 +6,37 @@ public class PairingFrameProviderImpl<Flight, Group, Competitors> implements
     PairingFrameProvider<Flight, Group, Competitors>{
 
     @SuppressWarnings("hiding")
-    @Override
     public<Flight> Flight[] getFlights() {
   
         return null;
     }
 
     @SuppressWarnings("hiding")
-    @Override
     public<Group> Group[] getGroups(Flight pFlight) {
         
         return null;
     }
 
     @Override
-    public int getCompetitors() {
+    public Iterable<Competitors> getCompetitors() {
+        return null;
+    }
+
+    @Override
+    public int getFlightsCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getGroupsCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getCompetitorCount() {
+        // TODO Auto-generated method stub
         return 0;
     }
 }
