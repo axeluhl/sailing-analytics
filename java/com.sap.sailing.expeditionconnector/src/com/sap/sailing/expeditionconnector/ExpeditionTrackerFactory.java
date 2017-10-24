@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.declination.DeclinationService;
@@ -17,8 +18,10 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.expeditionconnector.impl.Activator;
+import com.sap.sailing.expeditionconnector.impl.ExpeditionGpsDeviceIdentifierImpl;
+import com.sap.sailing.expeditionconnector.impl.ExpeditionSensorDeviceIdentifierImpl;
 
-public class ExpeditionTrackerFactory implements WindTrackerFactory {
+public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry {
     private static Logger logger = Logger.getLogger(ExpeditionTrackerFactory.class.getName());
     
     private static ExpeditionTrackerFactory defaultInstance;
@@ -38,7 +41,14 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory {
      * {@link ExpeditionSensorDeviceIdentifier}, respectively, whose inner ID is the
      * {@link ExpeditionDeviceConfiguration#getDeviceUuid() UUID} of the device configuration.
      */
-    private final Map<UUID, ExpeditionDeviceConfiguration> deviceConfigurations;
+    private final ConcurrentHashMap<UUID, ExpeditionDeviceConfiguration> deviceConfigurations;
+    
+    /**
+     * Holds the mappings from Expedition boat IDs (default being 0, counting upwards) to the
+     * {@link ExpeditionDeviceConfiguration} that {@link ExpeditionDeviceConfiguration#getExpeditionBoatId() has this
+     * boat ID}.
+     */
+    private final ConcurrentHashMap<Integer, ExpeditionDeviceConfiguration> devicesPerBoatId;
     
     private final int defaultPort;
 
@@ -46,7 +56,8 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory {
         this.windTrackers = new HashMap<RaceDefinition, WindTracker>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
         defaultPort = Activator.getInstance().getExpeditionUDPPort();
-        deviceConfigurations = new HashMap<>(); // TODO add persistence; these need to be loaded from the DB
+        deviceConfigurations = new ConcurrentHashMap<>(); // TODO add persistence; these need to be loaded from the DB
+        devicesPerBoatId = new ConcurrentHashMap<>();
         logger.info("Created "+getClass().getName()+" with default UDP port "+defaultPort);
     }
 
@@ -122,10 +133,45 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory {
     }
     
     public void addOrReplaceDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
+        final ExpeditionDeviceConfiguration old = deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
+        if (old != null) {
+            devicesPerBoatId.remove(old.getExpeditionBoatId());
+        }
+        final ExpeditionDeviceConfiguration collision = devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId());
+        if (collision != null) {
+            throw new IllegalStateException("Trying to create an ambiguous Expedition Boat ID mapping: established is "+collision+
+                    " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
+                    " at the same time.");
+        }
+        devicesPerBoatId.put(deviceConfiguration.getExpeditionBoatId(), deviceConfiguration);
     }
-    
+
     public void removeDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         deviceConfigurations.remove(deviceConfiguration.getDeviceUuid());
+        devicesPerBoatId.remove(deviceConfiguration.getExpeditionBoatId());
+    }
+
+    @Override
+    public ExpeditionGpsDeviceIdentifier getGpsDeviceIdentifier(int boatId) {
+        final ExpeditionDeviceConfiguration deviceConfig = devicesPerBoatId.get(boatId);
+        final ExpeditionGpsDeviceIdentifier result;
+        if (deviceConfig == null) {
+            result = null;
+        } else {
+            result = new ExpeditionGpsDeviceIdentifierImpl(deviceConfig.getDeviceUuid());
+        }
+        return result;
+    }
+
+    @Override
+    public ExpeditionSensorDeviceIdentifier getSensorDeviceIdentifier(int boatId) {
+        final ExpeditionDeviceConfiguration deviceConfig = devicesPerBoatId.get(boatId);
+        final ExpeditionSensorDeviceIdentifier result;
+        if (deviceConfig == null) {
+            result = null;
+        } else {
+            result = new ExpeditionSensorDeviceIdentifierImpl(deviceConfig.getDeviceUuid());
+        }
+        return result;
     }
 }
