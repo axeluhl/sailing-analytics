@@ -1,9 +1,7 @@
 package com.sap.sse.pairinglist.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -80,7 +78,4 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
     public PairingFrameProvider<Flight, Group, Competitor> getFrameProvider() {
         return frameProvider;
     }
-    
-    
-
 }
