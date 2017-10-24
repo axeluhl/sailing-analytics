@@ -33,8 +33,8 @@
     <!-- Most likely, serialization/replication will fail with tycho versions based on Eclipse Neon R (4.6.0). -->
     <tycho-version>1.0.0</tycho-version>
     <gwt.version>2.8.2</gwt.version>
-    <!-- gwt-maven-plugin is typically in sync with the GWT version. But for GWT 2.8.2, there isn't a version yet. -->
-    <gwt.plugin.version>2.8.0</gwt.plugin.version>
+    <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
+    <gwt.plugin.version>2.8.2</gwt.plugin.version>
     <gwt.minVersion>2.8.0</gwt.minVersion>
     <gwt.workers>2</gwt.workers>
     <p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile -->
