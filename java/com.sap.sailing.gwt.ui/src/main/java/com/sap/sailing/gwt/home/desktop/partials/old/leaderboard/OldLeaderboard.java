@@ -228,6 +228,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         if (leaderboardPanel.getComponentContext() == null) {
             throw new IllegalStateException("Leaderboard Component with null Context");
         }
+        this.updateAutoRefreshStylesDependingOnPlayState();
         oldLeaderboardPanel.add(leaderboardPanel);
         leaderboardPanel.addBusyStateChangeListener(this);
     }
