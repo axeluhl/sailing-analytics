@@ -6,7 +6,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -21,17 +20,12 @@ public class MoreLoginInformationMobile extends Composite {
     }
 
     @UiField
-    public Element register;
+    public Element registerControl;
     
     public MoreLoginInformationMobile(Runnable onRegisterClick) {
         initWidget(uiBinder.createAndBindUi(this));
-        DOM.sinkEvents(register, Event.ONCLICK);
-        Event.setEventListener(register, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                onRegisterClick.run();
-            }
-        });
+        DOM.sinkEvents(registerControl, Event.ONCLICK);
+        Event.setEventListener(registerControl, event -> onRegisterClick.run());
     }
 
 }

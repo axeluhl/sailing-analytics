@@ -12,13 +12,12 @@
         font-size: 1.5em;
     }
     .register {
-        border-radius: .3846154em;
+        border-radius: .384615384615385em;
         width: 100%;
         text-align: center;
     }
-    
     .buttonContainer {
-        padding: 1em 0.625em;
+        margin-top: 1em;
     }
     </ui:style>
     <a:Accordion>
@@ -50,8 +49,10 @@
         </a:item>
         <a:footer>
             <g:HTMLPanel addStyleNames="{style.buttonContainer}">
-                <a ui:field="register"
-                    class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}"><ui:text from="{i18nsec.signUp}"/></a>
+                <a ui:field="registerControl" class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} 
+                        {res.mainCss.buttonarrowrightwhite}">
+                    <ui:text from="{i18n.moreLoginInformationRegisterControlText}"/>
+                </a>
             </g:HTMLPanel>
         </a:footer>
     </a:Accordion>
