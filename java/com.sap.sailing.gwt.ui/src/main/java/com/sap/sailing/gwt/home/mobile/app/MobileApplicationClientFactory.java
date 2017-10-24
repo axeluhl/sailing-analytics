@@ -80,7 +80,7 @@ public class MobileApplicationClientFactory extends
                 dismissCallback.run();
                 navigator.goToPlace(navigator.getMoreLoginInfo());
             },() -> {
-                navigator.goToPlace(navigator.getSignInNavigation());
+                navigator.goToPlace(navigator.getSignInNavigation(false));
             });
             root.setSubHeaderContent(content);
         });
