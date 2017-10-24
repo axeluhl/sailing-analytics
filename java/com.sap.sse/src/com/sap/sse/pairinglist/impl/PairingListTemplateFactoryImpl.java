@@ -1,7 +1,5 @@
 package com.sap.sse.pairinglist.impl;
 
-import java.awt.BufferCapabilities.FlipContents;
-
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
