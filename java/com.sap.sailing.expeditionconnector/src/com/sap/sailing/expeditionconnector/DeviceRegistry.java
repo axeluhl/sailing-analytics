@@ -1,5 +1,7 @@
 package com.sap.sailing.expeditionconnector;
 
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+
 /**
  * Makes accessible a mapping from "Expedition" boat IDs to device UUIDs.
  * 
@@ -19,4 +21,6 @@ public interface DeviceRegistry {
      * Otherwise, {@code null} is returned.
      */
     ExpeditionSensorDeviceIdentifier getSensorDeviceIdentifier(int boatId);
+    
+    SensorFixStore getSensorFixStore();
 }

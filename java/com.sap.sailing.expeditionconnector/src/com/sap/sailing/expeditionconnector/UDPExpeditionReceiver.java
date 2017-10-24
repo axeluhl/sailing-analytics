@@ -5,6 +5,9 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageParser;
 import com.sap.sailing.udpconnector.UDPReceiver;
 
@@ -23,6 +26,14 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
     private final Map<Integer, Long> timeStampOfLastMessageReceived;
     
     private final ExpeditionMessageParser parser;
+
+    /**
+     * An optional lookup facility for device identifiers for a {@link ExpeditionMessage#getBoatID() boat ID} as
+     * received in an Expedition UDP stream; if device identifiers are returned by a non-{@code null} registry, GPS /
+     * sensor fixes will be assembled upon receiving them, and they will be submitted to the {@link SensorFixStore}.
+     * Otherwise, only wind data will be forwarded.
+     */
+    private final DeviceRegistry deviceRegistry;
 
     /**
      * Launches a listener and dumps messages received to the console
@@ -46,11 +57,58 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * start this object in a new thread.
      */
     public UDPExpeditionReceiver(int listeningOnPort) throws SocketException {
-        super(listeningOnPort);
-        this.timeStampOfLastMessageReceived = new HashMap<Integer, Long>();
-        parser = new ExpeditionMessageParser(this);
+        this(listeningOnPort, /* DeviceRegistry */ null);
     }
     
+    /**
+     * You need call {@link #run} to actually start receiving events. To do this asynchronously, start this object in a
+     * new thread.
+     * 
+     * @param deviceRegistry
+     *            if not {@code null}, a look-up for each message's {@link ExpeditionMessage#getBoatID() boat ID} will
+     *            be performed; if valid device identifiers for GPS and sensor tracks are returned, this receiver will
+     *            produce GPS and sensor fixes, respectively, with the device identifiers produced by the
+     *            {@link DeviceRegistry} and submit them to the {@link SensorFixStore}.
+     */
+    public UDPExpeditionReceiver(int listeningOnPort, DeviceRegistry deviceRegistry) throws SocketException {
+        super(listeningOnPort);
+        this.deviceRegistry = deviceRegistry;
+        this.timeStampOfLastMessageReceived = new HashMap<Integer, Long>();
+        parser = new ExpeditionMessageParser(this);
+        addListener(msg->produceAndStoreOptionalFixes(msg), /* validMessagesOnly */ true);
+    }
+    
+    private void produceAndStoreOptionalFixes(ExpeditionMessage msg) {
+        final ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier = deviceRegistry.getGpsDeviceIdentifier(msg.getBoatID());
+        if (gpsDeviceIdentifier != null) {
+            tryToProduceAndStoreGpsFix(msg, gpsDeviceIdentifier);
+        }
+        final ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier = deviceRegistry.getSensorDeviceIdentifier(msg.getBoatID());
+        if (sensorDeviceIdentifier != null) {
+            tryToProduceAndStoreSensorFix(msg, sensorDeviceIdentifier);
+        }
+    }
+
+    /**
+     * If this message completes the set of data required to produce a sensor fix, do so and
+     * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
+     */
+    private void tryToProduceAndStoreSensorFix(ExpeditionMessage msg, ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier) {
+        // TODO Auto-generated method stub
+        final DoubleVectorFix fix = null;
+        deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);
+    }
+
+    /**
+     * If this message completes the set of data required to produce a GPS fix, do so and
+     * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
+     */
+    private void tryToProduceAndStoreGpsFix(ExpeditionMessage msg, ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier) {
+        // TODO Auto-generated method stub
+        final GPSFixMoving fix = null;
+        deviceRegistry.getSensorFixStore().storeFix(gpsDeviceIdentifier, fix);
+    }
+
     public Map<Integer, Long> getTimeStampOfLastMessageReceived() {
         return timeStampOfLastMessageReceived;
     }

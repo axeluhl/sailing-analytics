@@ -52,8 +52,11 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     
     private final int defaultPort;
 
-    public ExpeditionTrackerFactory() {
+    private final SensorFixStore sensorFixStore;
+
+    public ExpeditionTrackerFactory(SensorFixStore sensorFixStore) {
         this.windTrackers = new HashMap<RaceDefinition, WindTracker>();
+        this.sensorFixStore = sensorFixStore;
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
         defaultPort = Activator.getInstance().getExpeditionUDPPort();
         deviceConfigurations = new ConcurrentHashMap<>(); // TODO add persistence; these need to be loaded from the DB
@@ -62,8 +65,12 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     }
 
     public synchronized static ExpeditionTrackerFactory getInstance() {
+        return getInstance(/* sensorFixStore */ null);
+    }
+    
+    public static ExpeditionTrackerFactory getInstance(SensorFixStore sensorFixStore) {
         if (defaultInstance == null) {
-            defaultInstance = new ExpeditionTrackerFactory();
+            defaultInstance = new ExpeditionTrackerFactory(sensorFixStore);
         }
         return defaultInstance;
     }
@@ -94,7 +101,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     private synchronized UDPExpeditionReceiver getOrCreateWindReceiverForPort(int port) throws SocketException {
         UDPExpeditionReceiver receiver = windReceivers.get(port);
         if (receiver == null) {
-            receiver = new UDPExpeditionReceiver(port);
+            receiver = new UDPExpeditionReceiver(port, this);
             windReceivers.put(port, receiver);
             Thread t = new Thread(receiver, "Expedition Wind Receiver on port "+port);
             t.setDaemon(true);
@@ -173,5 +180,10 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
             result = new ExpeditionSensorDeviceIdentifierImpl(deviceConfig.getDeviceUuid());
         }
         return result;
+    }
+
+    @Override
+    public SensorFixStore getSensorFixStore() {
+        return sensorFixStore;
     }
 }
