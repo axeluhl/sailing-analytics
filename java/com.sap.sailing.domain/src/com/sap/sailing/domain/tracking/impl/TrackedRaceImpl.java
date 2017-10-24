@@ -2937,7 +2937,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         
         ComputedManeuverMainCurveDetails maneuverMainCurveDetails = computeManeuverMainCurveDetails(competitor, earliestTimePointBeforeManeuver, latestTimePointAfterManeuver, maneuverDirection);
         ComputedManeuverDetails maneuverDetails = computeManeuverDetails(competitor, maneuverMainCurveDetails, earliestManeuverStart, latestManeuverEnd);
-        
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
         Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimepoint(), /* extrapolate */false);
         final Wind wind = getWind(maneuverPosition, maneuverDetails.getTimepoint());
@@ -2945,8 +2944,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         ManeuverType maneuverType;
         Distance maneuverLoss = null;
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
-        TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, maneuverDetails.getTimepointBefore());
-        TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, maneuverDetails.getTimepointAfter());
+        TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, maneuverMainCurveDetails.getTimepointBefore());
+        TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, maneuverMainCurveDetails.getTimepointAfter());
         Waypoint waypointPassed = null; // set for MARK_PASSING maneuvers only
         NauticalSide sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
         // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being
@@ -3006,13 +3005,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
                 if (legBeforeManeuver != null) {
                     maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimepointBefore(),
-                            maneuverDetails.getTimepoint(), firstPenaltyCircleCompletedAt);;
+                            maneuverDetails.getTimepoint(), firstPenaltyCircleCompletedAt);
                 }
                 ComputedManeuverMainCurveDetails refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
-                        competitor, maneuverDetails.getTimepointBefore(), firstPenaltyCircleCompletedAt,
+                        competitor, maneuverMainCurveDetails.getTimepointBefore(), firstPenaltyCircleCompletedAt,
                         maneuverDirection);
                 ComputedManeuverDetails refinedPenaltyDetails = computeManeuverDetails(competitor,
-                        refinedPenaltyMainCurveDetails, earliestManeuverStart, firstPenaltyCircleCompletedAt);
+                        refinedPenaltyMainCurveDetails, maneuverDetails.getTimepointBefore(), firstPenaltyCircleCompletedAt);
                 Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimepoint(),
                         /* extrapolate */ false);
                 final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
