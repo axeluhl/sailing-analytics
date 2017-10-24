@@ -50,6 +50,12 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * Searches the requested importer in the importers provided by the OSGi registry and imports the priovided sensor
      * data file.
      * 
+     * @param files
+     *            the file items together with the names of the importer to use for importing the respective file's
+     *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for
+     *            all importers found registered in the OSGi registry. The first matching importer is used for the
+     *            file. The importer is selected on a per-file basis.
+     * 
      * @throws IOException
      */
     private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files)
@@ -113,22 +119,22 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         String importerName = null;
-        searchForPrefferedImporter: for (FileItem fi : fileItems) {
+        searchForPreferredImporter: for (FileItem fi : fileItems) {
             if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
                 importerName = fi.getString();
-                break searchForPrefferedImporter;
+                break searchForPreferredImporter;
             }
         }
         if (importerName == null) {
             throw new RuntimeException("Missing preferred importer");
         }
-        List<Pair<String, FileItem>> files = new ArrayList<>();
+        List<Pair<String, FileItem>> filesAndImporterNames = new ArrayList<>();
         for (FileItem fi : fileItems) {
             if ("file".equalsIgnoreCase(fi.getFieldName())) {
-                files.add(new Pair<>(importerName, fi));
+                filesAndImporterNames.add(new Pair<>(importerName, fi));
             }
         }
-        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files);
+        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(filesAndImporterNames);
         resp.setContentType("text/html");
         for (TrackFileImportDeviceIdentifier mapping : mappingList) {
             String stringRep = mapping.getId().toString();
