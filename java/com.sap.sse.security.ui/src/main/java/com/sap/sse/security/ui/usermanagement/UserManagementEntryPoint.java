@@ -6,7 +6,6 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.AbstractSecurityEntryPoint;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -44,7 +43,7 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
     }
 
     private boolean hasRequiredRole(UserDTO user) {
-        return user != null && user.hasRole(DefaultRoles.ADMIN.getRolename());
+        return user != null && user.hasRole("admin");
     }
 
 }

@@ -10,14 +10,17 @@ import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Role;
 
 public interface DomainObjectFactory {
-    Iterable<Owner> loadAllOwnerships();
-    
     Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore, AccessControlStore aclStore);
     
     AccessControlList loadAccessControlList(String id, UserStore userStore, AccessControlStore aclStore);
 
+    Iterable<Owner> loadAllOwnerships();
+    
+    Iterable<Role> loadAllRoles();
+    
     Collection<UUID> loadAllTenantIds();
     
     Iterable<UserGroup> loadAllUserGroups();

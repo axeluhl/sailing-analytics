@@ -198,7 +198,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                     return;
                 }
                 for (UserDTO user : users) {
-                    userManagementService.addUserToUserGroup(user.getName(), tenant.getName(), new AsyncCallback<UserGroupDTO>() {
+                    userManagementService.addUserToUserGroup(tenant.getId().toString(), user.getName(), new AsyncCallback<UserGroupDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert("Could not add user " + user.getName() + " to tenant.");
@@ -221,7 +221,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                     return;
                 }
                 for (String username : users) {
-                    userManagementService.removeUserFromUserGroup(username, tenant.getName(), new AsyncCallback<UserGroupDTO>() {
+                    userManagementService.removeUserFromUserGroup(tenant.getId().toString(), username, new AsyncCallback<UserGroupDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert("Could not remove user " + username + " from tenant.");

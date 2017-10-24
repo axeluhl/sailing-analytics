@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.sap.sse.security.shared.AbstractRoles;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.RolePermissionModel;
 
@@ -15,9 +14,11 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
     public Iterable<String> getPermissions(String role, RolePermissionModel rolePermissionModel) {
         final Iterable<String> result;
         if (rolePermissionModel == null) {
-            if (DefaultRoles.ADMIN.getRolename().equals(role)) {
-                result = DefaultRoles.ADMIN.getPermissions();
-            } else if (AbstractRoles.eventmanager.getRolename().equals(role)) {
+            if ("admin".equals(role)) {
+                ArrayList<String> permissions = new ArrayList<>();
+                permissions.add("*");
+                result = permissions;
+            } else if (AbstractRoles.eventmanager.getDisplayName().equals(role)) {
                 result = asList(
                         // RaceBoard:
                         Permission.MANAGE_MEDIA,
@@ -47,9 +48,9 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
                         Permission.LEADERBOARD,
                         Permission.LEADERBOARD_GROUP
                         );
-            } else if (AbstractRoles.mediaeditor.getRolename().equals(role)) {
+            } else if (AbstractRoles.mediaeditor.getDisplayName().equals(role)) {
                 result = asList(Permission.MANAGE_MEDIA);
-            } else if (AbstractRoles.moderator.getRolename().equals(role)) {
+            } else if (AbstractRoles.moderator.getDisplayName().equals(role)) {
                 result = asList(Permission.CAN_REPLAY_DURING_LIVE_RACES);
             } else {
                 result = Collections.emptyList();

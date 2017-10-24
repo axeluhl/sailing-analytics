@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;

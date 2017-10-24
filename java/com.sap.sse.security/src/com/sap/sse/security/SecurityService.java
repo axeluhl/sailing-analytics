@@ -17,7 +17,6 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;

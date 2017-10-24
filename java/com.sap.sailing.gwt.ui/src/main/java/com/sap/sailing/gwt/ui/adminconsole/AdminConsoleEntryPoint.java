@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +42,8 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
-import com.sap.sse.security.shared.AbstractRole;
+import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.AbstractRoles;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
@@ -275,8 +277,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
                 getStringMessages().localServer(), Permission.MANAGE_LOCAL_SERVER_INSTANCE);
 
+        ArrayList<Role> roles = new ArrayList<>();
+        for (AbstractRoles abstractRole : AbstractRoles.values()) {
+            Set<String> permissions = new HashSet<>();
+            for (String permission : abstractRole.getPermissions()) {
+                permissions.add(permission);
+            }
+            Role role = new RoleImpl(abstractRole.getId(), abstractRole.getDisplayName(), permissions);
+            roles.add(role);
+        }
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
-                SailingPermissionsForRoleProvider.INSTANCE, Arrays.<AbstractRole>asList(AbstractRoles.values()), Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()));
+                SailingPermissionsForRoleProvider.INSTANCE, roles, Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()));
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel),
                 getStringMessages().userManagement(), Permission.MANAGE_USERS);
         

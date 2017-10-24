@@ -13,6 +13,8 @@ import com.sap.sse.security.AccessControlListWithStore;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleImpl;
 
 public class AccessControlStoreImpl implements AccessControlStore {
     private static final long serialVersionUID = 2165649781000936074L;
@@ -27,6 +29,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     
     private final ConcurrentHashMap<String, Owner> ownershipList;
     
+    private final ConcurrentHashMap<UUID, Role> roleList;
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -40,6 +44,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, final UserStore userStore) {
         accessControlLists = new ConcurrentHashMap<>();
         ownershipList = new ConcurrentHashMap<>();
+        roleList = new ConcurrentHashMap<>();
         
         this.mongoObjectFactory = mongoObjectFactory;        
         this.domainObjectFactory = domainObjectFactory;
@@ -47,6 +52,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
         if (domainObjectFactory != null) {
             for (Owner ownership : domainObjectFactory.loadAllOwnerships()) {
                 ownershipList.put(ownership.getId().toString(), ownership);
+            }
+            for (Role role : domainObjectFactory.loadAllRoles()) {
+                roleList.put(UUID.fromString(role.getId().toString()), role);
             }
         }
         
@@ -172,6 +180,66 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override 
     public Iterable<Owner> getOwnerships() {
         return new ArrayList<>(ownershipList.values());
+    }
+    
+    @Override
+    public Iterable<Role> getRoles() {
+        return new ArrayList<>(roleList.values());
+    }
+
+    @Override
+    public Role getRole(UUID id) {
+        return roleList.get(id);
+    }
+
+    @Override
+    public Role createRole(UUID id, String displayName, Set<String> permissions) {
+        Role role = new RoleImpl(id, displayName, permissions);
+        roleList.put(id, role);
+        mongoObjectFactory.storeRole(role);
+        return role;
+    }
+
+    @Override
+    public AccessControlStore setRolePermissions(UUID id, Set<String> permissions) {
+        Role role = roleList.get(id);
+        role = new RoleImpl(id, role.getName(), permissions);
+        mongoObjectFactory.storeRole(role);
+        return this;
+    }
+
+    @Override
+    public AccessControlStore addRolePermission(UUID id, String permission) {
+        Role role = roleList.get(id);
+        Set<String> permissions = role.getPermissions();
+        permissions.add(permission);
+        role = new RoleImpl(id, role.getName(), permissions);
+        mongoObjectFactory.storeRole(role);
+        return this;
+    }
+
+    @Override
+    public AccessControlStore removeRolePermission(UUID id, String permission) {
+        Role role = roleList.get(id);
+        Set<String> permissions = role.getPermissions();
+        permissions.remove(permission);
+        role = new RoleImpl(id, role.getName(), permissions);
+        mongoObjectFactory.storeRole(role);
+        return this;
+    }
+
+    @Override
+    public AccessControlStore setDisplayName(UUID id, String displayName) {
+        Role role = roleList.get(id);
+        role = new RoleImpl(id, displayName, role.getPermissions());
+        mongoObjectFactory.storeRole(role);
+        return this;
+    }
+
+    @Override
+    public AccessControlStore removeRole(UUID id) {
+        mongoObjectFactory.deleteRole(roleList.get(id));
+        return this;
     }
 
     @Override

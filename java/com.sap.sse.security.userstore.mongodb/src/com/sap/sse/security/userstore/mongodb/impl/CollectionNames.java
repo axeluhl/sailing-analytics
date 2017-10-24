@@ -7,5 +7,6 @@ public enum CollectionNames {
     TENANTS,
     USER_GROUPS,
     ACCESS_CONTROL_LISTS,
-    OWNERSHIPS;
+    OWNERSHIPS,
+    ROLES;
 }

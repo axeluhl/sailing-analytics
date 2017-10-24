@@ -30,7 +30,6 @@ import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -137,6 +136,7 @@ public class UserStoreImpl implements UserStore {
             tenants.addAll(domainObjectFactory.loadAllTenantIds());
             for (UserGroup group : domainObjectFactory.loadAllUserGroups()) {
                 userGroups.put((UUID) group.getId(), group);
+                userGroupsByName.put(group.getName(), (UUID) group.getId());
             }
             for (User u : domainObjectFactory.loadAllUsers()) {
                 users.put(u.getName(), u);
@@ -175,6 +175,7 @@ public class UserStoreImpl implements UserStore {
     public void clear() {
         tenants.clear();
         userGroups.clear();
+        userGroupsByName.clear();
         
         clearAllPreferenceObjects();
         emailForUsername.clear();
@@ -205,6 +206,7 @@ public class UserStoreImpl implements UserStore {
         }
         for (UserGroup group : newUserStore.getUserGroups()) {
             userGroups.put((UUID) group.getId(), group);
+            userGroupsByName.put(group.getName(), (UUID) group.getId());
         }
         for (User user : newUserStore.getUsers()) {
             users.put(user.getName(), user);
@@ -246,7 +248,7 @@ public class UserStoreImpl implements UserStore {
     public String getAccessToken(String username) {
         // only the user or an administrator may request a user's access token
         final Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (SecurityUtils.getSubject().hasRole(DefaultRoles.ADMIN.getRolename()) ||
+        if (SecurityUtils.getSubject().hasRole("admin") ||
             (principal != null && principal.toString().equals(username))) {
             return getPreference(username, ACCESS_TOKEN_KEY);
         } else {
@@ -257,7 +259,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void removeAccessToken(String username) {
         // only the user or an administrator may request a user's access token
-        if (SecurityUtils.getSubject().hasRole(DefaultRoles.ADMIN.getRolename()) ||
+        if (SecurityUtils.getSubject().hasRole("admin") ||
             SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
             User user = users.get(username);
             if (user != null) {
@@ -344,6 +346,7 @@ public class UserStoreImpl implements UserStore {
             mongoObjectFactory.storeUserGroup(group);
         }
         userGroups.put(id, group);
+        userGroupsByName.put(name, id);
         return group;
     }
 
@@ -362,6 +365,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
         }
         logger.info("Deleting user group: " + id);
+        userGroupsByName.remove(userGroups.get(id).getName());
         userGroups.remove(id);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.deleteUserGroup(id);

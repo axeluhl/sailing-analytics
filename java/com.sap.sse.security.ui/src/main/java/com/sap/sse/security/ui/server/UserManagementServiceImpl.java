@@ -45,7 +45,6 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -109,7 +108,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
         AccessControlList acl = aclStore.getAccessControlList(userGroup.getId().toString());
-        Owner ownership = aclStore.getOwnership(userGroup.getName());
+        Owner ownership = aclStore.getOwnership(userGroup.getId().toString());
         return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
@@ -242,7 +241,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserGroupDTO addUserToUserGroup(String idAsString, String user) {
         if (SecurityUtils.getSubject().isPermitted("usergroup:add_user:" + idAsString + ":" + user)) {
-            return createUserGroupDTOFromUserGroup(getSecurityService().addUserToUserGroup((UUID) getSecurityService().getUserGroupByName(idAsString).getId(), user));
+            return createUserGroupDTOFromUserGroup(getSecurityService().addUserToUserGroup(UUID.fromString(idAsString), user));
         } else {
             return null; // TODO: implement this with exception
         }
@@ -251,7 +250,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserGroupDTO removeUserFromUserGroup(String idAsString, String user) {
         if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(UserGroup.class.getName() + ":remove-user:" + user, true))) {
-            return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup((UUID) getSecurityService().getUserGroupByName(idAsString).getId(), user));
+            return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup(UUID.fromString(idAsString), user));
         } else {
             return null; // TODO: implement this with exception
         }
@@ -332,7 +331,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) 
+        if (subject.hasRole("admin") 
             // someone knew a username and the correct password for that user
          || (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
             // someone provided the correct password reset secret for the correct username
@@ -355,7 +354,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
-        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
+        if (!subject.hasRole("admin") && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -412,7 +411,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setRolesForUser(String username, Iterable<String> roles) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
+        if (currentSubject.hasRole("admin")) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
@@ -439,7 +438,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename()) || currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
+        if (currentSubject.hasRole("admin") || currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);

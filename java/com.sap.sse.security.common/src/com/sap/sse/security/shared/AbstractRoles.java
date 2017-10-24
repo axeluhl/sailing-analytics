@@ -2,13 +2,14 @@ package com.sap.sse.security.shared;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.UUID;
 
-public enum AbstractRoles implements AbstractRole {
-    spectator("spectator", Collections.<String>emptyList()),
-    moderator("moderator", asList("race:live_replay")),
-    sailor("sailor", Collections.<String>emptyList()),
-    coach("coach", Collections.<String>emptyList()),
-    eventmanager("eventmanager",
+public enum AbstractRoles {
+    spectator(UUID.fromString("244cb84c-2b8a-4557-b175-db963072cfbc"), "spectator", Collections.<String>emptyList()),
+    moderator(UUID.fromString("91c88a11-c977-4c24-b0a6-15bac0525764"), "moderator", asList("race:live_replay")),
+    sailor(UUID.fromString("eb774a5c-9350-4094-97d5-6b15ab49feac"), "sailor", Collections.<String>emptyList()),
+    coach(UUID.fromString("8e72e67d-cc65-4de4-a985-03a7a3c48e93"), "coach", Collections.<String>emptyList()),
+    eventmanager(UUID.fromString("7920a761-1378-4c98-9129-0fbe586c5cd7"), "eventmanager",
             asList(
                 "race_board:*",
                 
@@ -34,21 +35,26 @@ public enum AbstractRoles implements AbstractRole {
                 "regatta:*",
                 "leaderboard:*",
                 "leaderboard_group:*")),
-    mediaeditor("mediaeditor", asList("media:*"));
+    mediaeditor(UUID.fromString("2e22583b-c9c1-4ee4-8231-e8e320a8a411"), "mediaeditor", asList("media:*"));
     
+    private final UUID id;
     private final String rolename;
     private final Iterable<String> permissions;
     
-    private AbstractRoles(String rolename, Iterable<String> permissions) {
+    private AbstractRoles(UUID id, String rolename, Iterable<String> permissions) {
+        this.id = id;
         this.rolename = rolename;
         this.permissions = permissions;
     }
     
-    public String getRolename() {
+    public String getDisplayName() {
         return rolename;
     }
+    
+    public UUID getId() {
+        return id;
+    }
 
-    @Override
     public Iterable<String> getPermissions() {
         return permissions;
     }

@@ -15,6 +15,12 @@ public class FieldNames {
         TENANT_OWNER
     }
     
+    public static enum Role {
+        ID,
+        DISPLAY_NAME,
+        PERMISSIONS
+    }
+    
     public static enum Tenant {
         ID
     }

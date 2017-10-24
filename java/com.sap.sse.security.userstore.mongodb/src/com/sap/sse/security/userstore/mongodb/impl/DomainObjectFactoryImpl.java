@@ -32,6 +32,8 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
@@ -85,6 +87,55 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             permissionMap.put(key, value);
         }
         AccessControlList result = new AccessControlListWithStore(id, displayName, permissionMap, userStore);
+        return result;
+    }
+    
+    @Override
+    public Iterable<Owner> loadAllOwnerships() {
+        ArrayList<Owner> result = new ArrayList<>();
+        DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
+        try {
+            for (DBObject o : ownershipCollection.find()) {
+                result.add(loadOwnership(o));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ownerships.");
+            logger.log(Level.SEVERE, "loadAllOwnerships", e);
+        }
+        return result;
+    }
+    
+    private Owner loadOwnership(DBObject ownershipDBObject) {
+        final String id = (String) ownershipDBObject.get(FieldNames.Ownership.ID.name());
+        final String displayName = (String) ownershipDBObject.get(FieldNames.Ownership.DISPLAY_NAME.name());
+        final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER.name());
+        final UUID tenantOwner = UUID.fromString((String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER.name()));
+        return new OwnerImpl(id, owner, tenantOwner, displayName);
+    }
+    
+    @Override
+    public Iterable<Role> loadAllRoles() {
+        ArrayList<Role> result = new ArrayList<>();
+        DBCollection roleCollection = db.getCollection(CollectionNames.ROLES.name());
+        try {
+            for (DBObject o : roleCollection.find()) {
+                result.add(loadRole(o));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load roles.");
+            logger.log(Level.SEVERE, "loadAllRoles", e);
+        }
+        return result;
+    }
+    
+    private Role loadRole(DBObject roleDBObject) {
+        final String id = (String) roleDBObject.get(FieldNames.Role.ID.name());
+        final String displayName = (String) roleDBObject.get(FieldNames.Role.DISPLAY_NAME.name());
+        final Set<String> permissions = new HashSet<>();
+        for (Object o : (BasicDBList) roleDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
+            permissions.add(o.toString());
+        }
+        Role result = new RoleImpl(UUID.fromString(id), displayName, permissions);
         return result;
     }
     
@@ -324,28 +375,5 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.put(key, value);
         }
         return result;
-    }
-
-    @Override
-    public Iterable<Owner> loadAllOwnerships() {
-        ArrayList<Owner> result = new ArrayList<>();
-        DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
-        try {
-            for (DBObject o : ownershipCollection.find()) {
-                result.add(loadOwnership(o));
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ownerships.");
-            logger.log(Level.SEVERE, "loadAllOwnerships", e);
-        }
-        return result;
-    }
-    
-    private Owner loadOwnership(DBObject ownershipDBObject) {
-        final String id = (String) ownershipDBObject.get(FieldNames.Ownership.ID.name());
-        final String displayName = (String) ownershipDBObject.get(FieldNames.Ownership.DISPLAY_NAME.name());
-        final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER.name());
-        final UUID tenantOwner = UUID.fromString((String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER.name()));
-        return new OwnerImpl(id, owner, tenantOwner, displayName);
     }
 }

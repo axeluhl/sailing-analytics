@@ -8,6 +8,7 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Role;
 
 public interface MongoObjectFactory {
     public void storeAccessControlList(AccessControlList acl);
@@ -17,6 +18,10 @@ public interface MongoObjectFactory {
     public void storeOwnership(Owner owner);
     
     public void deleteOwnership(Owner owner);
+    
+    public void storeRole(Role role);
+    
+    public void deleteRole(Role role);
     
     public void storeTenant(UUID id);
     

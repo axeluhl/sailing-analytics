@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -35,9 +34,9 @@ public interface UserManagementServiceAsync {
     
     void createTenant(String name, String owner, AsyncCallback<TenantDTO> callback);
     
-    void addUserToUserGroup(String user, String userGroup, AsyncCallback<UserGroupDTO> asyncCallback);
+    void addUserToUserGroup(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
     
-    void removeUserFromUserGroup(String user, String userGroup, AsyncCallback<UserGroupDTO> asyncCallback);
+    void removeUserFromUserGroup(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
     
     void deleteTenant(String name, AsyncCallback<SuccessInfo> callback);
 
