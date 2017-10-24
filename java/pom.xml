@@ -118,6 +118,7 @@
         <module>com.sap.sailing.declination</module>
         <module>com.sap.sailing.udpconnector</module>
         <module>com.sap.sailing.expeditionconnector</module>
+        <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>

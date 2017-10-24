@@ -53,7 +53,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.polars.datamining,
  com.sap.sse.datamining.annotations,
  com.sap.sse.shared.android,
- com.sap.sailing.competitorimport
+ com.sap.sailing.competitorimport,
+ com.sap.sailing.expeditionconnector
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",

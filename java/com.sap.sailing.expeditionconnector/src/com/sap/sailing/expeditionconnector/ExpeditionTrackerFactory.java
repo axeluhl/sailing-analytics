@@ -1,22 +1,27 @@
 package com.sap.sailing.expeditionconnector;
 
 import java.net.SocketException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.expeditionconnector.impl.Activator;
 
-public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
-    private static Logger logger = Logger.getLogger(ExpeditionWindTrackerFactory.class.getName());
+public class ExpeditionTrackerFactory implements WindTrackerFactory {
+    private static Logger logger = Logger.getLogger(ExpeditionTrackerFactory.class.getName());
     
-    private static ExpeditionWindTrackerFactory defaultInstance;
+    private static ExpeditionTrackerFactory defaultInstance;
 
     /**
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
@@ -26,18 +31,28 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
     
     private final Map<Integer, UDPExpeditionReceiver> windReceivers;
     
+    /**
+     * When one or more device configurations exist then each {@link UDPExpeditionReceiver} created by this factory will
+     * also produce {@link GPSFixMoving} and {@link DoubleVectorFix} fixes and send them to the {@link SensorFixStore},
+     * using device identifiers of type {@link ExpeditionGpsDeviceIdentifier} and
+     * {@link ExpeditionSensorDeviceIdentifier}, respectively, whose inner ID is the
+     * {@link ExpeditionDeviceConfiguration#getDeviceUuid() UUID} of the device configuration.
+     */
+    private final Map<UUID, ExpeditionDeviceConfiguration> deviceConfigurations;
+    
     private final int defaultPort;
 
-    public ExpeditionWindTrackerFactory() {
+    public ExpeditionTrackerFactory() {
         this.windTrackers = new HashMap<RaceDefinition, WindTracker>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
         defaultPort = Activator.getInstance().getExpeditionUDPPort();
+        deviceConfigurations = new HashMap<>(); // TODO add persistence; these need to be loaded from the DB
         logger.info("Created "+getClass().getName()+" with default UDP port "+defaultPort);
     }
 
-    public synchronized static ExpeditionWindTrackerFactory getInstance() {
+    public synchronized static ExpeditionTrackerFactory getInstance() {
         if (defaultInstance == null) {
-            defaultInstance = new ExpeditionWindTrackerFactory();
+            defaultInstance = new ExpeditionTrackerFactory();
         }
         return defaultInstance;
     }
@@ -81,7 +96,7 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
      * Notifies the factory that the wind tracker has stopped tracking wind for <code>race</code>. This
      * will remove the tracker from the respective caches.
      */
-    synchronized void windTrackerStopped(RaceDefinition race, ExpeditionWindTracker windTracker) {
+    synchronized void trackerStopped(RaceDefinition race, ExpeditionWindTracker windTracker) {
         if (windTrackers.get(race) != windTracker) {
             throw new IllegalArgumentException("Intenral error: expected to remove wind tracker "+windTracker+
                     ", but another wind tracker "+windTrackers.get(race)+" was registered.");
@@ -100,5 +115,17 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
     @Override
     public String toString() {
         return "ExpeditionWindTrackerFactory [defaultPort=" + defaultPort + "]";
+    }
+
+    public Iterable<? extends ExpeditionDeviceConfiguration> getDeviceConfigurations() {
+        return Collections.unmodifiableCollection(deviceConfigurations.values());
+    }
+    
+    public void addOrReplaceDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
+    }
+    
+    public void removeDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        deviceConfigurations.remove(deviceConfiguration.getDeviceUuid());
     }
 }
