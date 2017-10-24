@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Metadata that defines the column structure of Bravo fixes when imported as {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * Metadata that defines the column structure of Bravo fixes when imported as
+ * {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * <p>
  * 
  * The current implementation only stores a subset of the information available during the import.
  */
