@@ -14,13 +14,13 @@ public class RaceLogSetEndTimeDTO implements IsSerializable {
     public int passId;
     public String authorName;
     public Integer authorPriority;
-    public Date logicalTimePoint;
-    public Date endTime;
+    public Date finishTime;
+    public Date finishingTime;
 
     @Override
     public String toString() {
         return "RaceLogSetEndTimeDTO [leaderboardName=" + leaderboardName + ", raceColumnName=" + raceColumnName
                 + ", fleetName=" + fleetName + ", passId=" + passId + ", authorName=" + authorName + ", authorPriority="
-                + authorPriority + ", logicalTimePoint=" + logicalTimePoint + ", endTime=" + endTime + "]";
+                + authorPriority + ", finishTime=" + finishTime + ", endTime=" + finishingTime + "]";
     }
 }

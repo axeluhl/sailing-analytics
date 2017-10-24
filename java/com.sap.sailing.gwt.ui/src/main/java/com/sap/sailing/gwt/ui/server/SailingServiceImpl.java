@@ -5109,11 +5109,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public boolean setEndTime(RaceLogSetEndTimeDTO dto) {
-        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
+    public Pair<Boolean, Boolean> setEndTime(RaceLogSetEndTimeDTO dto) {
+        TimePoint newFinishTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
                 dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.endTime));
-        return new MillisecondsTimePoint(dto.endTime).equals(newEndTime);
+                dto.passId, new MillisecondsTimePoint(dto.finishTime));
+        
+        TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.finishingTime));
+        
+        return new Pair<Boolean,Boolean>(new MillisecondsTimePoint(dto.finishingTime).equals(newFinsihingTime),new MillisecondsTimePoint(dto.finishTime).equals(newFinishTime));
     }
 
     @Override
@@ -5197,6 +5202,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Pair<Date, Integer> getEndTime(String leaderboardName, String raceColumnName, String fleetName) {
         com.sap.sse.common.Util.Pair<TimePoint, Integer> result = getService().getEndTime(leaderboardName, raceColumnName, fleetName);
+        if (result == null || result.getA() == null) {
+            return null;
+        }
+        return new com.sap.sse.common.Util.Pair<Date, Integer>(result.getA() == null ? null : result.getA().asDate(), result.getB());
+    }
+    
+    @Override
+    public Pair<Date, Integer> getFinishingTime(String leaderboardName, String raceColumnName, String fleetName) {
+        com.sap.sse.common.Util.Pair<TimePoint, Integer> result = getService().getFinishingTime(leaderboardName, raceColumnName, fleetName);
         if (result == null || result.getA() == null) {
             return null;
         }

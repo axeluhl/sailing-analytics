@@ -95,30 +95,35 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
     protected abstract String getTimeLabel();
 
     private Widget createInputPanel() {
-        Grid content = new Grid(5, 2);
+        Grid content = new Grid(7, 2);
         timeBox = createDateTimeBox(new Date());
         timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         timeBox.ensureDebugId("StartTimeTimeBox");
         content.setWidget(0, 0, createLabel(getTimeLabel()));
         content.setWidget(0, 1, timeBox);
+        
+        additionalInput(content);
 
         authorNameBox = createTextBox("Shore");
         authorNameBox.ensureDebugId("AuthorNameTextBox");
-        content.setWidget(1, 0, createLabel(stringMessages.authorName()));
-        content.setWidget(1, 1, authorNameBox);
-        authorPriorityBox = createIntegerBox(4, 2);
+        content.setWidget(2, 0, createLabel(stringMessages.authorName()));
+        content.setWidget(2, 1, authorNameBox);
+        content.setWidget(3, 0, createLabel(stringMessages.authorPriority()));
+        authorPriorityBox = createIntegerBox(5, 1);
         authorPriorityBox.ensureDebugId("AuthorPriorityIntegerBox");
-        content.setWidget(2, 0, createLabel(stringMessages.authorPriority()));
-        content.setWidget(2, 1, authorPriorityBox);
+        content.setWidget(3, 1, authorPriorityBox);
 
         addAdditionalInput(content);
 
         advancePassIdCheckbox = createCheckbox(stringMessages.advancePassId());
         advancePassIdCheckbox.setValue(false);
         advancePassIdCheckbox.ensureDebugId("AnvancePassIdCheckBox");
-        content.setWidget(4, 1, advancePassIdCheckbox);
+        content.setWidget(5, 0, advancePassIdCheckbox);
+        
         return content;
     }
+
+    protected abstract void additionalInput(Grid content);
 
     protected abstract void addAdditionalInput(Grid content);
 

@@ -64,6 +64,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetEndTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -629,15 +630,15 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     @Override
                     public void ok(RaceLogSetEndTimeDTO editedObject) {
                         Window.alert(editedObject.toString());
-                        sailingService.setEndTime(editedObject, new AsyncCallback<Boolean>() {
+                        sailingService.setEndTime(editedObject, new AsyncCallback<Pair<Boolean, Boolean>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(caught.getMessage());
                             }
 
                             @Override
-                            public void onSuccess(Boolean result) {
-                                if (!result) {
+                            public void onSuccess(Pair<Boolean, Boolean> result) {
+                                if (!result.getA() || !result.getB()) {
                                     Window.alert(stringMessages.failedToSetNewStartTime());
                                 }
                             }

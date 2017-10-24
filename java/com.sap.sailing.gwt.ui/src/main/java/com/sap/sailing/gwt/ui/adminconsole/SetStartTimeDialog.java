@@ -112,8 +112,12 @@ public class SetStartTimeDialog extends SetTimeDialog<RaceLogSetStartTimeAndProc
             racingProcedureSelection.setValue(racingCounter++, racingType.name());
         }
         racingProcedureSelection.ensureDebugId("RacingProcedureListBox");
-        content.setWidget(3, 0, createLabel(stringMessages.racingProcedure()));
-        content.setWidget(3, 1, racingProcedureSelection);
+        content.setWidget(4, 0, createLabel(stringMessages.racingProcedure()));
+        content.setWidget(4, 1, racingProcedureSelection);
+    }
+
+    @Override
+    protected void additionalInput(Grid content) {
     }
 
 }

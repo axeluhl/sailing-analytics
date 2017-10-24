@@ -626,7 +626,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            {@link RaceLogSetEndTimeDTO} identifying the race to set the end time on and the new
      *            end time.
      */
-    void setEndTime(RaceLogSetEndTimeDTO editedObject, AsyncCallback<Boolean> asyncCallback);
+    void setEndTime(RaceLogSetEndTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
     
     /**
      * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the
@@ -640,6 +640,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * pass identifier will still be returned, but the start time field will be <code>null</code>.
      */
     void getEndTime(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Pair<Date, Integer>> asyncCallback);
+    
+    /**
+     * Gets the race's current finishing time, current pass identifier. If no finishing time is set, the
+     * pass identifier will still be returned, but the start time field will be <code>null</code>.
+     */
+    void getFinishingTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<Date, Integer>> asyncCallback);
     
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
@@ -863,6 +870,4 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
             AsyncCallback<List<DetailType>> callback);
-
-
 }
