@@ -8,32 +8,30 @@ import com.sap.sse.pairinglist.PairingList;
 public class PairingListImpl<Flight, Group, Competitor> implements PairingList<Flight, Group, Competitor>  {
     
     private ArrayList<ArrayList<ArrayList<Competitor>>> pList;
-    
-    
-    public PairingListImpl() {
-        
-    }
+    private int[][] pairingListTemplate;
+    private PairingFrameProvider<Flight, Group, Competitor> frameProvider;
     
     /**
      * @param pList: pairing list with specific information of flights, groups and competitors
      * @param standardDev: describes quality of our pList (the lower the standardDev, the better the pairing list)
      */
     
-    public PairingListImpl(ArrayList<ArrayList<ArrayList<Competitor>>> pList) {
-        this.pList = pList;
+    public PairingListImpl(int[][] template,PairingFrameProvider<Flight, Group, Competitor> pPFP) {
+        this.pairingListTemplate = template;
+        frameProvider = pPFP;
     }
     
     @Override
     public Iterable<Competitor> getCompetitors(Flight pFlight, Group pGroup) {
-        ArrayList<ArrayList<Competitor>> flight = new ArrayList<>();
-        flight = this.pList.get(this.pList.indexOf(pFlight));
-        //TODO
-        return null;
+        ArrayList<Competitor> flight = new ArrayList<>();
+        flight = this.pList.get(this.pList.indexOf(pFlight)).get(this.pList.indexOf(pGroup));
+        Iterable<Competitor> iterable = flight;
+        return iterable;
     }
 
     @Override
-    public PairingFrameProvider<Object, Object, Object> getProvider() {
-        return null;
+    public PairingFrameProvider<Flight, Group, Competitor> getProvider() {
+        return frameProvider;
     }
     
     /**
