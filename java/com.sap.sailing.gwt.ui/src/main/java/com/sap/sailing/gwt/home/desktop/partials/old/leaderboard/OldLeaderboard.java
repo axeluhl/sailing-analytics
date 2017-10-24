@@ -11,8 +11,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -25,14 +23,11 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
-import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
@@ -82,28 +77,6 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
-        
-        // adding handler on page loading
-        this.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                if (event.isAttached() && leaderboardPanel != null) {
-                    // waiting while leaderboard is loaded
-                    leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
-                        @Override
-                        public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-                            // If race or regatta is live then check button by default
-                            if (leaderboard.hasLiveRace(autoRefreshTimer.getLiveTimePointInMillis())) {
-                                turnOnAutoPlay();
-                            }
-                        }
-
-                        @Override
-                        public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) { }
-                    });
-                }
-            }
-        });
     }
     
     private void setupFullscreenDelegate() {
@@ -234,7 +207,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     }
 
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        boolean hasLiveRace = leaderboardPanel.hasLiveRace();
+        final boolean hasLiveRace = leaderboardPanel.hasLiveRace();
         if (leaderboard != null) {
             String comment = leaderboard.getComment() != null ? leaderboard.getComment() : "";
             String scoringScheme = leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "";
@@ -271,6 +244,9 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
                 setVisible(delegate.getLastScoringUpdateTextElement(), !hasLiveRace);
                 setVisible(delegate.getLastScoringUpdateTimeElement(), !hasLiveRace);
                 setVisible(delegate.getScoringSchemeElement(), true);
+            }
+            if (hasLiveRace) {
+                turnOnAutoPlay();
             }
         }
     }
