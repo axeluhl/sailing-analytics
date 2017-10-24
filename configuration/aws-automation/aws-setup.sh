@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# AWS automation script for setting up SAP Sailing Analytics instance infrasctructure 
+# AWS automation script for setting up SAP Sailing Analytics instance infrasctructure
 # ------------------------------------------------------
 
 version="1.0.0" # Sets version variable
@@ -41,7 +41,7 @@ printLog=false
 verbose=false
 force=false
 strict=false
-debug=false 
+debug=false
 args=()
 
 # Create temp directory with three random numbers and the process ID
@@ -69,18 +69,26 @@ if $instance_with_load_balancer; then
 	safeExit
 fi
 
+if $instance_with_elastic_ip; then
+	if $tail; then
+		check_if_tmux_is_used
+	fi
+	instance_with_elastic_ip_start
+	safeExit
+fi
+
 if $tail ; then
 	check_if_tmux_is_used
-	tail_start 
+	tail_start
 	safeExit
 fi
 
 }
 
 usage() {
-  echo -n "${scriptName} [OPTION]... 
+  echo -n "${scriptName} [OPTION]...
 
- This is an AWS automation bash script for deploying SAP Sailing Analytics 
+ This is an AWS automation bash script for deploying SAP Sailing Analytics
  instances and their depending infrastructure
 
  ${bold}Parameter:${reset}
@@ -93,41 +101,44 @@ usage() {
   -q, --user-password           Password of user to create
   -n, --instance-name           Name for instance (e.g. \"WC Santander 2017\")
   -l, --instance-short-name     Short name for instance (e.g. subdomain \"wcs17\")
-  -a, --new-admin-password      New password for the admin user 
+  -a, --new-admin-password      New password for the admin user
   -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
   -v, --verbose true	        Verbose mode
   -d, --debug true              Debug mode
-  
+
   ${bold}Scenarios:${reset}
-  --instance-with-load-balancer Create instance with elastic load balancer 
+  --instance-with-load-balancer Create instance with elastic load balancer
                                 and route53 entry
   --tail                        Tail logs from instance using tmux
-  
-  
+
+
   ${bold}Other:${reset}
   --version                  Output version information and exit
-  
+
 
   ${bold}Examples:${reset}
   Create standalone instance with load balancer and route53 entry:
   > ./aws-setup.sh --instance-with-load-balancer
- 
-  Create standalone instance with load balancer and route53 entry 
+
+  Create standalone instance with load balancer and route53 entry
   while automatically tailing important log files (tmux required):
   > ./aws-setup.sh --instance-with-load-balancer --tail
- 
+
+  Create standalone instance with elastic ip and route53 entry:
+  > ./aws-setup.sh --instance-with-elastic-ip
+
   Tail logfiles of running instance with dns name:
   > ./aws-setup.sh --tail --public-dns-name ec2-x.compute.amazonaws.com
 
   Create standalone instance with load balancer and route 53 entry by
-  passing all relevant parameters to script avoiding user input. 
+  passing all relevant parameters to script avoiding user input.
   Also use debug mode.
-  > ./aws-setup.sh --region eu-west-2 --instance-type t2.medium 
+  > ./aws-setup.sh --region eu-west-2 --instance-type t2.medium
   --key-name leonradeck-keypair --key-file /cygdrive/c/Users/d069485/
-  .ssh/leonradeck-keypair.pem --user-username test --user-password test 
-  --instance-name \"WC Santander 2017\" --instance-short-name test 
+  .ssh/leonradeck-keypair.pem --user-username test --user-password test
+  --instance-name \"WC Santander 2017\" --instance-short-name test
   --new-admin-password admin -d --instance-with-load-balancer
-  
+
 "
 }
 
@@ -171,8 +182,9 @@ unset options
 # Uncomment to force arguments when invoking the script
 [[ $# -eq 0 ]] && set -- "--help"
 
-# Set default value of variable without parameter value to false 
+# Set default value of variable without parameter value to false
 instance_with_load_balancer=false
+instance_with_elastic_ip=false
 tail=false
 
 # Read the options and set variables
@@ -194,6 +206,7 @@ while [[ $1 = -?* ]]; do
 	-v|--verbose) verbose=true ;;
 	-d|--debug) debug=true ;;
 	--instance-with-load-balancer) instance_with_load_balancer=true ;;
+	--instance-with-elastic-ip) instance_with_elastic_ip=true ;;
 	--tail) tail=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
@@ -228,7 +241,7 @@ set -o pipefail
 # Invoke the checkDependenices function to test for Bash packages.  Uncomment if needed.
 # checkDependencies
 
-# Run your scrip
+# Run script
 confirm_reset_panes
 mainScript
 

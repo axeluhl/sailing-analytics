@@ -1,126 +1,7 @@
 #!/usr/bin/env bash
 
-# Extension for simplifying user input 
 # ------------------------------------------------------
-
-# -----------------------------------------------------------
-# Prompt user for input and save value to variable
-# @param $1  prompt message
-# @param $2  default value
-# @param $3  variable that is receiving the value
-# -----------------------------------------------------------
-function require_input(){
-	 read -e -p "$1" -i "$2" $3
-}
-
-# -----------------------------------------------------------
-# As long as variable is empty, prompt again.
-# @param $1  prompt message
-# @param $2  default value
-# @param $3  variable that is receiving the value
-# -----------------------------------------------------------
-function ask(){
-	while [[ -z "${!3}" ]]
-	do
-	  require_input "$1" "$2" $3
-	done
-}
-
-# -----------------------------------------------------------
-# If the needed variable was not passed as a parameter and is not 
-# already set, then prompt the user to input a value and also 
-# show a default value. If the variable was passed by using a parameter, 
-# then set its value to the parameter value.
-# @param $1  parameter value
-# @param $2  variable
-# @param $3  default value
-# @param $4  prompt message
-# -----------------------------------------------------------
-function require_variable(){
-	if [ -z "$1" ]; then
-		if [ -z "${!2}" ]; then
-			ask "$4" "$3" $2
-		fi
-	else
-		read -r "$2" <<< "$1"
-	fi
-}
-
-
-# -----------------------------------------------------------
-# Creates a parameter from a key and value
-# @param $1  key
-# @param $2  value
-# @return    result ("--key value")
-# -----------------------------------------------------------
-function add_param() {
-	if [ ! -z "$2" ]; then
-		local result=" --$1 $2"
-	fi
-	echo "$result"
-}
-
-# -----------------------------------------------------------
-# Checks if event id follows the right pattern 
-# @param $1  event id 
-# @return    true if event id is valid
-# -----------------------------------------------------------
-function is_valid_event_id(){
-	[[ $1 =~ .{8}-.{4}-.{4}-.{4}-.{12} ]]
-}
-
-function is_valid_instance_id(){
-	[[ $1 =~ i-.{17} ]]
-}
-
-# Other
-# ------------------------------------------------------
-
-# -----------------------------------------------------------
-# Workaround: use stderr stream for console output 
-# @param $1  message
-# -----------------------------------------------------------
-function local_echo(){
-	echo "$1" >&2
-}
-
-# -----------------------------------------------------------
-# Check if return value is not equals 0
-# @param $1  return value
-# @return 0 if no error
-# -----------------------------------------------------------
-function is_error(){
-	[ $1 -ne 0 ]
-}
-
-# -----------------------------------------------------------
-# Checks if variable is a number
-# @param $1  returnvariablevalue
-# @return 0 if variable is a number
-# -----------------------------------------------------------
-function is_number(){
-	[[ $1 =~ ^-?[0-9]+$ ]]
-}
-
-# -----------------------------------------------------------
-# Check if variable is a number and its value is 200
-# @param $1  variable
-# @return 0 if value is 200
-# -----------------------------------------------------------
-function is_http_ok(){
-	is_number $1 && [ $1 == 200 ]
-}
-
-function get_response(){
-	echo "$1" | head -n-1
-}
-
-function get_status_code(){
-	echo "$1" | tail -n1
-}
-
-# ------------------------------------------------------
-# The following functions were part of a bash template 
+# The following functions were part of a bash template
 # and could be useful in the future
 # ------------------------------------------------------
 
@@ -675,7 +556,7 @@ httpStatus() {
                   --no-keepalive ${curlops} --output /dev/null  ${url})`
 
   #      __________ get the STATUS (from code) which is human interpretable:
-  
+
   status=$(get_http_code_message $code)
 
   # _______________ MAIN

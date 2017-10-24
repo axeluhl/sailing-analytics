@@ -4,7 +4,7 @@
 # ------------------------------------------------------
 
 # Script does not automatically source region specific variables
-# This functionality will be added in the future 
+# This functionality will be added in the future
 # Please comment out the variables of the region you are not using
 
 default_region=eu-west-2
@@ -16,8 +16,7 @@ default_new_admin_password=admin
 default_user_username=newuser
 default_user_password=newpassword
 
-
-# Variables for region "eu-west-2" (London) 
+# Variables for region "eu-west-2" (London)
 
 instance_security_group_ids=sg-871732ee
 image_id=ami-39f3e25d
@@ -49,17 +48,3 @@ admin_username=admin
 admin_password=admin
 instance_count=1
 ssh_user=root
-
-region_ask_message="Please enter the region for the instance: " 
-instance_type_ask_message="Please enter the instance type: " 
-key_name_ask_message="Please enter the name of your keypair to connect to the instance: " 
-instance_name_ask_message="Please enter a name for the instance: (e.g \"WC Santander 2017\"): "
-instance_short_name_ask_message="Please enter a short name for the instance (e.g. \"wcs17\"): " 
-key_file_ask_message="Please enter the file path of the keypair: "
-new_admin_password_ask_message="Please enter a new password for the admin user: " 
-mongo_db_host_ask_message="Please enter the ip adress of the mongo db server: " 
-mongo_db_port_ask_message="Please enter the port of the mongo db server: " 
-user_username_ask_message="Please enter the username of your new user: " 
-user_password_ask_message="Please enter the password of your new user: " 
-public_dns_name_ask_message="Please enter the public dns name: "
-ssh_user_ask_message="Please enter the ssh user: "

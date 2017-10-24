@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# ------------------------------------------------------
+# The following variables were part of a bash template
+# and could be useful in the future
+# ------------------------------------------------------
+
 # SCRIPTNAME
 scriptName=`basename $0` #Set Script Name variable
 scriptBasename="$(basename ${scriptName} .sh)" # Strips '.sh' from scriptName

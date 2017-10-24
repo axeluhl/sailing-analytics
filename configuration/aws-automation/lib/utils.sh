@@ -27,7 +27,7 @@ function _alert() {
   if [ "${1}" = "header" ]; then local color="${bold}""${tan}"; fi
   if [ "${1}" = "input" ]; then local color="${bold}"; printLog="false"; fi
   if [ "${1}" = "info" ] || [ "${1}" = "notice" ]; then local color=""; fi
-  
+
   # Don't use colors on pipes or non-recognized terminals
   # if [[ "${TERM}" != "xterm"* ]] || [ -t 1 ]; then color=""; reset=""; fi
 

@@ -6,18 +6,18 @@ function construct_ui() {
 
 	# enable named border at the top of panes
 	tmux set -g pane-border-status top
-	tmux set -g pane-border-format " [#{pane_index}] - #T "  
+	tmux set -g pane-border-format " [#{pane_index}] - #T "
 
 	# close all panes except one
 	reset_panes
 	sleep 1
-	
+
 	# construct pane layout
-	tmux split-window -h -p 50 
+	tmux split-window -h -p 50
 	tmux select-pane -t 0
-	tmux split-window -v -p 50 
-	tmux select-pane -t 2 
-	tmux split-window -v -p 50 
+	tmux split-window -v -p 50
+	tmux select-pane -t 2
+	tmux split-window -v -p 50
 	tmux select-pane -t 0
 }
 
@@ -40,7 +40,7 @@ function reset_panes(){
 }
 
 function get_number_of_panes(){
-	tmux display-message -p '#{window_panes}' 
+	tmux display-message -p '#{window_panes}'
 }
 
 function more_panes_are_open(){
@@ -68,7 +68,7 @@ function check_environment() {
 	if ! inside_tmux_session; then
 		echo "To tail instance log files, please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
 		safeExit
-	fi 
+	fi
 }
 
 function is_tmux_available(){
@@ -80,9 +80,9 @@ function inside_tmux_session(){
 }
 
 # -----------------------------------------------------------
-# Prompts user if open panes should be closed 
+# Prompts user if open panes should be closed
 # -----------------------------------------------------------
-function confirm_reset_panes(){ 
+function confirm_reset_panes(){
   if more_panes_are_open; then
 	seek_confirmation "Do you want to close all open panes?"
 	if is_confirmed; then
