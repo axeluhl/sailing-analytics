@@ -15,12 +15,14 @@ public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassing
     private final Waypoint waypointPassed;
     private final NauticalSide side;
 
-    public MarkPassingManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
+    public MarkPassingManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss,
+            TimePoint timePoint, TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, Distance maneuverLoss, TimePoint timePointBefore, TimePoint timePointAfter,
-            Waypoint waypointPassed, NauticalSide side) {
-        super(type, newTack, position, timePoint, speedWithBearingBefore, speedWithBearingAfter,
-                directionChangeInDegrees, maneuverLoss, timePointBefore, timePointAfter);
+            double directionChangeInDegrees, TimePoint timePointBeforeMainCurve, TimePoint timePointAfterMainCurve,
+            double directionChangeWithinMainCurveInDegrees, Waypoint waypointPassed, NauticalSide side) {
+        super(type, newTack, position, maneuverLoss, timePoint, timePointBefore, timePointAfter, speedWithBearingBefore,
+                speedWithBearingAfter, directionChangeInDegrees, timePointBeforeMainCurve, timePointAfterMainCurve,
+                directionChangeWithinMainCurveInDegrees);
         this.waypointPassed = waypointPassed;
         this.side = side;
     }

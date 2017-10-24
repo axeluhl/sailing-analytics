@@ -19,28 +19,34 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private final Tack newTack;
     private final Position position;
     private final TimePoint timePoint;
+    private final TimePoint timePointBefore;
+    private final TimePoint timePointAfter;
     private final SpeedWithBearing speedWithBearingBefore;
     private final SpeedWithBearing speedWithBearingAfter;
     private final double directionChangeInDegrees;
     private final Distance maneuverLoss;
-    private final TimePoint timePointBefore;
-    private final TimePoint timePointAfter;
+    private final TimePoint timePointBeforeMainCurve;
+    private final TimePoint timePointAfterMainCurve;
+    private final double directionChangeWithinMainCurveInDegrees;
 
-    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
-            SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, Distance maneuverLoss, TimePoint timePointBefore,
-            TimePoint timePointAfter) {
+    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
+            TimePoint timePointBefore, TimePoint timePointAfter, SpeedWithBearing speedWithBearingBefore,
+            SpeedWithBearing speedWithBearingAfter, double directionChangeInDegrees, TimePoint timePointBeforeMainCurve,
+            TimePoint timePointAfterMainCurve, double directionChangeWithinMainCurveInDegrees) {
         super();
         this.type = type;
         this.newTack = newTack;
         this.position = position;
+        this.maneuverLoss = maneuverLoss;
         this.timePoint = timePoint;
+        this.timePointBefore = timePointBefore;
+        this.timePointAfter = timePointAfter;
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
-        this.maneuverLoss = maneuverLoss;
-        this.timePointBefore = timePointBefore;
-        this.timePointAfter = timePointAfter;
+        this.timePointBeforeMainCurve = timePointBeforeMainCurve;
+        this.timePointAfterMainCurve = timePointAfterMainCurve;
+        this.directionChangeWithinMainCurveInDegrees = directionChangeWithinMainCurveInDegrees;
     }
 
     @Override
@@ -100,6 +106,21 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
                 + " speed after maneuver " + speedWithBearingAfter + ". The maneuver changed the course by "
                 + directionChangeInDegrees + "deg."
                 + (getManeuverLoss() == null ? "" : " Lost approximately " + getManeuverLoss());
+    }
+
+    @Override
+    public TimePoint getTimePointBeforeMainCurve() {
+        return timePointBeforeMainCurve;
+    }
+
+    @Override
+    public TimePoint getTimePointAfterMainCurve() {
+        return timePointAfterMainCurve;
+    }
+
+    @Override
+    public double getDirectionChangeWithinMainCurveInDegrees() {
+        return directionChangeWithinMainCurveInDegrees;
     }
 
 }

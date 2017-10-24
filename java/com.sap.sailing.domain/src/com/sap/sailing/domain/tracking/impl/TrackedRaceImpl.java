@@ -2935,17 +2935,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         TimePoint latestTimePointAfterManeuver = Collections.min(Arrays.asList(new MillisecondsTimePoint(group.get(group.size() - 1).getA()
                 .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds() / 2), latestManeuverEnd));
         
-        ComputedManeuverMainCurveDetails maneuverMainCurveDetails = computeManeuverMainCurveDetails(competitor, earliestTimePointBeforeManeuver, latestTimePointAfterManeuver, maneuverDirection);
-        ComputedManeuverDetails maneuverDetails = computeManeuverDetails(competitor, maneuverMainCurveDetails, earliestManeuverStart, latestManeuverEnd);
+        ManeuverDetailsWithBearingSteps maneuverMainCurveDetails = computeManeuverMainCurveDetails(competitor, earliestTimePointBeforeManeuver, latestTimePointAfterManeuver, maneuverDirection);
+        ManeuverCurveDetails maneuverDetails = computeManeuverDetails(competitor, maneuverMainCurveDetails, earliestManeuverStart, latestManeuverEnd);
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
-        Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimepoint(), /* extrapolate */false);
-        final Wind wind = getWind(maneuverPosition, maneuverDetails.getTimepoint());
-        final Tack tackAfterManeuver = wind == null ? null : getTack(maneuverPosition, maneuverDetails.getTimepointAfter(), maneuverDetails.getSpeedWithBearingAfter().getBearing());
+        Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimePoint(), /* extrapolate */false);
+        final Wind wind = getWind(maneuverPosition, maneuverDetails.getTimePoint());
+        final Tack tackAfterManeuver = wind == null ? null : getTack(maneuverPosition, maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingAfter().getBearing());
         ManeuverType maneuverType;
         Distance maneuverLoss = null;
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
-        TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, maneuverMainCurveDetails.getTimepointBefore());
-        TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, maneuverMainCurveDetails.getTimepointAfter());
+        TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, maneuverMainCurveDetails.getTimePointBefore());
+        TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, maneuverMainCurveDetails.getTimePointAfter());
         Waypoint waypointPassed = null; // set for MARK_PASSING maneuvers only
         NauticalSide sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
         // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being
@@ -2957,13 +2957,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
             waypointPassed = legAfterManeuver.getLeg().getFrom();
             MarkPassing markPassing = getMarkPassing(competitor, waypointPassed);
-            markPassingTimePoint = markPassing != null ? markPassing.getTimePoint() : maneuverDetails.getTimepoint();
+            markPassingTimePoint = markPassing != null ? markPassing.getTimePoint() : maneuverDetails.getTimePoint();
             Position markPassingPosition = markPassing != null ? competitorTrack.getEstimatedPosition(markPassingTimePoint, /* extrapolate */false) : maneuverPosition;
             sideToWhichWaypointWasPassed = maneuverDirection;
             // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
             result.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
-                    markPassingTimePoint, maneuverDetails.getSpeedWithBearingBefore(),
-                    maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(), maneuverLoss, maneuverDetails.getTimepointBefore(), maneuverDetails.getTimepointAfter(), waypointPassed,
+                    maneuverLoss, markPassingTimePoint, maneuverDetails.getTimePointBefore(),
+                    maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
+                    maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getDirectionChangeInDegrees(),
+                    maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
+                    maneuverMainCurveDetails.getDirectionChangeInDegrees(), waypointPassed,
                     sideToWhichWaypointWasPassed));
         } else {
             markPassingTimePoint = null;
@@ -2971,7 +2974,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         final Bearing courseBeforeManeuver = maneuverMainCurveDetails.getSpeedWithBearingBefore().getBearing();
         final Bearing courseAfterManeuver = maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing();
-        final double mainCurveTotalCourseChangeInDegrees = maneuverMainCurveDetails.getTotalCourseChangeInDegrees();
+        final double mainCurveTotalCourseChangeInDegrees = maneuverMainCurveDetails.getDirectionChangeInDegrees();
         int numberOfJibes = wind == null ? 0 : bearingChangeAnalyzer.didPass(courseBeforeManeuver, mainCurveTotalCourseChangeInDegrees, courseAfterManeuver, wind.getBearing());
         int numberOfTacks = wind == null ? 0 : bearingChangeAnalyzer.didPass(courseBeforeManeuver, mainCurveTotalCourseChangeInDegrees, courseAfterManeuver, wind.getFrom());
         if (markPassingTimePoint != null && (numberOfTacks + numberOfJibes > 0)) {
@@ -2982,8 +2985,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // kiwi drop.
             // Therefore, we recursively detect the maneuvers for the segment before and the segment after the
             // mark passing and add the results to our result.
-            result.addAll(detectManeuvers(competitor, maneuverDetails.getTimepointBefore(), markPassingTimePoint.minus(1), /* ignoreMarkPassings */ true));
-            result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), maneuverDetails.getTimepointAfter(), /* ignoreMarkPassings */ true));
+            result.addAll(detectManeuvers(competitor, maneuverDetails.getTimePointBefore(), markPassingTimePoint.minus(1), /* ignoreMarkPassings */ true));
+            result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), maneuverDetails.getTimePointAfter(), /* ignoreMarkPassings */ true));
         } else {
             // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
             // For the first tack/jibe combination (they must alternate because the course changes in the same direction and
@@ -2991,53 +2994,56 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
             if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
                 TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(
-                        competitor, maneuverMainCurveDetails.getTimepointBefore(), courseBeforeManeuver,
+                        competitor, maneuverMainCurveDetails.getTimePointBefore(), courseBeforeManeuver,
                         maneuverMainCurveDetails.getManeuverBearingSteps(), wind);
                 if (firstPenaltyCircleCompletedAt == null) {
                     // This should really not happen!
                     logger.warning(
                             "Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null. Race-Id: "
                                     + getRace().getId() + ", Competitor: " + competitor.getName()
-                                    + ", Time point before maneuver: " + maneuverDetails.getTimepointBefore());
+                                    + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
                     // Use already detected maneuver details as fallback data to prevent Nullpointer
-                    firstPenaltyCircleCompletedAt = maneuverDetails.getTimepointAfter();
+                    firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
                 }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
                 if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimepointBefore(),
-                            maneuverDetails.getTimepoint(), firstPenaltyCircleCompletedAt);
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                            maneuverDetails.getTimePoint(), firstPenaltyCircleCompletedAt);
                 }
-                ComputedManeuverMainCurveDetails refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
-                        competitor, maneuverMainCurveDetails.getTimepointBefore(), firstPenaltyCircleCompletedAt,
+                ManeuverDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
+                        competitor, maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
                         maneuverDirection);
-                ComputedManeuverDetails refinedPenaltyDetails = computeManeuverDetails(competitor,
-                        refinedPenaltyMainCurveDetails, maneuverDetails.getTimepointBefore(), firstPenaltyCircleCompletedAt);
-                Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimepoint(),
+                ManeuverCurveDetails refinedPenaltyDetails = computeManeuverDetails(competitor,
+                        refinedPenaltyMainCurveDetails, maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
+                Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimePoint(),
                         /* extrapolate */ false);
                 final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
-                        refinedPenaltyDetails.getTimepoint(), refinedPenaltyDetails.getSpeedWithBearingBefore(),
+                        maneuverLoss, refinedPenaltyDetails.getTimePoint(), refinedPenaltyDetails.getTimePointBefore(),
+                        refinedPenaltyDetails.getTimePointAfter(), refinedPenaltyDetails.getSpeedWithBearingBefore(),
                         refinedPenaltyDetails.getSpeedWithBearingAfter(),
-                        refinedPenaltyDetails.getTotalCourseChangeInDegrees(), maneuverLoss,
-                        refinedPenaltyDetails.getTimepointBefore(), refinedPenaltyDetails.getTimepointAfter());
+                        refinedPenaltyDetails.getDirectionChangeInDegrees(),
+                        refinedPenaltyMainCurveDetails.getTimePointBefore(),
+                        refinedPenaltyMainCurveDetails.getTimePointAfter(),
+                        refinedPenaltyMainCurveDetails.getDirectionChangeInDegrees());
                 result.add(maneuver);
                 // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes
                 // remain
                 if (numberOfTacks > 1 || numberOfJibes > 1) {
                     result.addAll(detectManeuvers(competitor, firstPenaltyCircleCompletedAt,
-                            maneuverDetails.getTimepointAfter(), /* ignoreMarkPassings */ true));
+                            maneuverDetails.getTimePointAfter(), /* ignoreMarkPassings */ true));
                 }
             } else {
                 if (numberOfTacks > 0) {
                     maneuverType = ManeuverType.TACK;
                     if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimepointBefore(),
-                                maneuverDetails.getTimepoint(), maneuverDetails.getTimepointAfter());
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                                maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                     }
                 } else if (numberOfJibes > 0) {
                     maneuverType = ManeuverType.JIBE;
                     if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimepointBefore(),
-                                maneuverDetails.getTimepoint(), maneuverDetails.getTimepointAfter());
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                                maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                     }
                 } else {
                     if (wind != null) {
@@ -3056,15 +3062,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // no wind information; marking as UNKNOWN
                         maneuverType = ManeuverType.UNKNOWN;
                         if (legBeforeManeuver != null) {
-                            maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimepointBefore(),
-                                    maneuverDetails.getTimepoint(), maneuverDetails.getTimepointAfter());
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                                    maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                         }
                     }
                 }
-                if (Math.floor(maneuverMainCurveDetails.getTotalCourseChangeInDegrees()) != 0) {
+                if (Math.floor(maneuverMainCurveDetails.getDirectionChangeInDegrees()) != 0) {
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                            maneuverDetails.getTimepoint(), maneuverDetails.getSpeedWithBearingBefore(),
-                            maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(), maneuverLoss, maneuverDetails.getTimepointBefore(), maneuverDetails.getTimepointAfter());
+                            maneuverLoss, maneuverDetails.getTimePoint(), maneuverDetails.getTimePointBefore(),
+                            maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
+                            maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getDirectionChangeInDegrees(),
+                            maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
+                            maneuverMainCurveDetails.getDirectionChangeInDegrees());
                     result.add(maneuver);
                 }
             }
@@ -3124,24 +3133,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * maneuver section with the highest (starboard maneuvers)/lowest (port side maneuvers) sum of differences between
      * bearing steps is defined as the main curve section.
      */
-    private ComputedManeuverMainCurveDetails computeManeuverMainCurveDetails(Competitor competitor, TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
+    private ManeuverDetailsWithBearingSteps computeManeuverMainCurveDetails(Competitor competitor, TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         Duration gpsInterval = track.getAverageIntervalBetweenRawFixes();
         Duration intervalBetweenSteps = gpsInterval.asMillis() > 1000 ? Duration.ONE_SECOND : gpsInterval;
         Iterable<SpeedWithBearingStep> stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
                 timePointAfterManeuver, intervalBetweenSteps);
         TimePoint maneuverTimePoint = computeManeuverTimePoint(stepsToAnalyze, maneuverDirection);
-        ComputedManeuverEnteringAndExitingDetails maneuverMainCurveEnteringAndExitingDetails = computeEnteringAndExitingDetailsOfManeuverMainCurve(
+        ManeuverEnteringAndExitingDetails maneuverMainCurveEnteringAndExitingDetails = computeEnteringAndExitingDetailsOfManeuverMainCurve(
                 maneuverTimePoint, stepsToAnalyze, maneuverDirection);
         List<SpeedWithBearingStep> maneuverMainCurveSpeedWithBearingSteps = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze,
-                maneuverMainCurveEnteringAndExitingDetails.getTimepointBefore(),
-                maneuverMainCurveEnteringAndExitingDetails.getTimepointAfter());
+                maneuverMainCurveEnteringAndExitingDetails.getTimePointBefore(),
+                maneuverMainCurveEnteringAndExitingDetails.getTimePointAfter());
         double totalCourseChangeInDegrees = 0;
         for (SpeedWithBearingStep speedWithBearingStep : maneuverMainCurveSpeedWithBearingSteps) {
             totalCourseChangeInDegrees += speedWithBearingStep.getCourseChangeInDegrees();
         }
-        return new ComputedManeuverMainCurveDetails(maneuverMainCurveEnteringAndExitingDetails.getTimepointBefore(),
-                maneuverMainCurveEnteringAndExitingDetails.getTimepointAfter(), maneuverTimePoint,
+        return new ManeuverDetailsWithBearingSteps(maneuverMainCurveEnteringAndExitingDetails.getTimePointBefore(),
+                maneuverMainCurveEnteringAndExitingDetails.getTimePointAfter(), maneuverTimePoint,
                 maneuverMainCurveEnteringAndExitingDetails.getSpeedWithBearingBefore(),
                 maneuverMainCurveEnteringAndExitingDetails.getSpeedWithBearingAfter(),
                 totalCourseChangeInDegrees, maneuverMainCurveSpeedWithBearingSteps);
@@ -3158,29 +3167,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * to this, the exiting time point of maneuver is approximated by speed maximum determination throughout
      * chronological iteration of speed steps starting from time of main curve finish towards the right.
      */
-    private ComputedManeuverDetails computeManeuverDetails(Competitor competitor,
-            ComputedManeuverMainCurveDetails maneuverMainCurveDetails, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
+    private ManeuverCurveDetails computeManeuverDetails(Competitor competitor,
+            ManeuverDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         ComputedManeuverSectionExtension beforeManeuverSectionExtension = expandBeforeManeuverSectionBySpeedTrendAnalysis(
                 competitor, maneuverMainCurveDetails, earliestManeuverStart);
         ComputedManeuverSectionExtension afterManeuverSectionExtension = expandAfterManeuverSectionBySpeedTrendAnalysis(
                 competitor, maneuverMainCurveDetails, latestManeuverEnd);
         double totalCourseChangeInDegrees = beforeManeuverSectionExtension.getTotalCourseChangeInDegreesExtension()
-                + maneuverMainCurveDetails.getTotalCourseChangeInDegrees()
+                + maneuverMainCurveDetails.getDirectionChangeInDegrees()
                 + afterManeuverSectionExtension.getTotalCourseChangeInDegreesExtension();
-        return new ComputedManeuverDetails(beforeManeuverSectionExtension.getExtensionTimePoint(),
-                afterManeuverSectionExtension.getExtensionTimePoint(), maneuverMainCurveDetails.getTimepoint(),
+        return new ManeuverCurveDetails(beforeManeuverSectionExtension.getExtensionTimePoint(),
+                afterManeuverSectionExtension.getExtensionTimePoint(), maneuverMainCurveDetails.getTimePoint(),
                 beforeManeuverSectionExtension.getSpeedWithBearingAtExtensionTimePoint(),
                 afterManeuverSectionExtension.getSpeedWithBearingAtExtensionTimePoint(), totalCourseChangeInDegrees);
     }
 
     private ComputedManeuverSectionExtension expandBeforeManeuverSectionBySpeedTrendAnalysis(Competitor competitor,
-            ComputedManeuverMainCurveDetails maneuverMainCurveDetails, TimePoint earliestManeuverStart) {
+            ManeuverDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint earliestManeuverStart) {
         Duration approximateManeuverDuration = competitor.getBoat().getBoatClass().getApproximateManeuverDuration();
         Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration.divide(2.0);
         Duration maxDurationForSpeedTrendAnalysis = approximateManeuverDuration;
         
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-        TimePoint latestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimepointBefore();
+        TimePoint latestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimePointBefore();
         TimePoint earliestTimePointForSpeedTrendAnalysis = latestTimePointForSpeedTrendAnalysis
                 .minus(maxDurationForSpeedTrendAnalysis);
         if(earliestTimePointForSpeedTrendAnalysis.before(earliestManeuverStart)) {
@@ -3221,7 +3230,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             previousSpeedInKnots = speedInKnots;
         }
         if (stepWithMaxSpeed == null) {
-            return new ComputedManeuverSectionExtension(maneuverMainCurveDetails.getTimepointBefore(),
+            return new ComputedManeuverSectionExtension(maneuverMainCurveDetails.getTimePointBefore(),
                     maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0);
         } else {
             return new ComputedManeuverSectionExtension(stepWithMaxSpeed.getTimePoint(),
@@ -3230,13 +3239,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private ComputedManeuverSectionExtension expandAfterManeuverSectionBySpeedTrendAnalysis(Competitor competitor,
-            ComputedManeuverMainCurveDetails maneuverMainCurveDetails, TimePoint latestManeuverEnd) {
+            ManeuverDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint latestManeuverEnd) {
         Duration approximateManeuverDuration = competitor.getBoat().getBoatClass().getApproximateManeuverDuration();
         Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration;
         Duration maxDurationForSpeedTrendAnalysis = approximateManeuverDuration.times(3.0);
         
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-        TimePoint earliestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimepointAfter();
+        TimePoint earliestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimePointAfter();
         TimePoint latestTimePointForSpeedTrendAnalysis = earliestTimePointForSpeedTrendAnalysis
                 .plus(maxDurationForSpeedTrendAnalysis);
         if(latestTimePointForSpeedTrendAnalysis.after(latestManeuverEnd)) {
@@ -3271,7 +3280,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             previousSpeedInKnots = speedInKnots;
         }
         if (stepWithMaxSpeed == null) {
-            return new ComputedManeuverSectionExtension(maneuverMainCurveDetails.getTimepointAfter(),
+            return new ComputedManeuverSectionExtension(maneuverMainCurveDetails.getTimePointAfter(),
                     maneuverMainCurveDetails.getSpeedWithBearingAfter(), 0);
         } else {
             return new ComputedManeuverSectionExtension(stepWithMaxSpeed.getTimePoint(),
@@ -3292,7 +3301,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            The nautical direction of the maneuver
      * @return The computed entering and exiting time point with its speeds with bearings
      */
-    private ComputedManeuverEnteringAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(
+    private ManeuverEnteringAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(
             TimePoint maneuverTimePoint, Iterable<SpeedWithBearingStep> bearingStepsToAnalyze, NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
         double maxCourseChangeInDegrees = 0;
@@ -3342,7 +3351,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             }
         }
-        ComputedManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = new ComputedManeuverEnteringAndExitingDetails(
+        ManeuverEnteringAndExitingDetails maneuverEnteringAndExitingDetails = new ManeuverEnteringAndExitingDetails(
                 refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, refinedSpeedWithBearingBeforeManeuver,
                 refinedSpeedWithBearingAfterManeuver);
         return maneuverEnteringAndExitingDetails;
@@ -4393,33 +4402,37 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         private final TimePoint extensionTimePoint;
         private final SpeedWithBearing speedWithBearingAtExtensionTimePoint;
         private final double totalCourseChangeInDegreesExtension;
+
         public ComputedManeuverSectionExtension(TimePoint extensionTimePoint,
                 SpeedWithBearing speedWithBearingAtExtensionTimePoint, double totalCourseChangeInDegreesExtension) {
             this.extensionTimePoint = extensionTimePoint;
             this.speedWithBearingAtExtensionTimePoint = speedWithBearingAtExtensionTimePoint;
             this.totalCourseChangeInDegreesExtension = totalCourseChangeInDegreesExtension;
         }
+
         public TimePoint getExtensionTimePoint() {
             return extensionTimePoint;
         }
+
         public SpeedWithBearing getSpeedWithBearingAtExtensionTimePoint() {
             return speedWithBearingAtExtensionTimePoint;
         }
+
         public double getTotalCourseChangeInDegreesExtension() {
             return totalCourseChangeInDegreesExtension;
         }
     }
-    
-    private static class ComputedManeuverEnteringAndExitingDetails {
-        private final TimePoint timepointBefore;
-        private final TimePoint timepointAfter;
+
+    private static class ManeuverEnteringAndExitingDetails {
+        private final TimePoint timePointBefore;
+        private final TimePoint timePointAfter;
         private final SpeedWithBearing speedWithBearingBefore;
         private final SpeedWithBearing speedWithBearingAfter;
 
-        public ComputedManeuverEnteringAndExitingDetails(TimePoint timepointBefore, TimePoint timepointAfter,
+        public ManeuverEnteringAndExitingDetails(TimePoint timePointBefore, TimePoint timePointAfter,
                 SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter) {
-            this.timepointBefore = timepointBefore;
-            this.timepointAfter = timepointAfter;
+            this.timePointBefore = timePointBefore;
+            this.timePointAfter = timePointAfter;
             this.speedWithBearingBefore = speedWithBearingBefore;
             this.speedWithBearingAfter = speedWithBearingAfter;
         }
@@ -4429,8 +4442,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
          * 
          * @return The time point of maneuver start
          */
-        public TimePoint getTimepointBefore() {
-            return timepointBefore;
+        public TimePoint getTimePointBefore() {
+            return timePointBefore;
         }
 
         /**
@@ -4438,8 +4451,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
          * 
          * @return The time point of maneuver end
          */
-        public TimePoint getTimepointAfter() {
-            return timepointAfter;
+        public TimePoint getTimePointAfter() {
+            return timePointAfter;
         }
 
         /**
@@ -4460,46 +4473,36 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             return speedWithBearingAfter;
         }
     }
-    
-    private static class ComputedManeuverDetails extends ComputedManeuverEnteringAndExitingDetails {
-        private final TimePoint timepoint;
-        private final double totalCourseChangeInDegrees;
 
-        public ComputedManeuverDetails(TimePoint timepointBefore, TimePoint timepointAfter, TimePoint timepoint,
+    private static class ManeuverCurveDetails extends ManeuverEnteringAndExitingDetails {
+        private final TimePoint timePoint;
+        private final double directionChangeInDegrees;
+
+        public ManeuverCurveDetails(TimePoint timePointBefore, TimePoint timePointAfter, TimePoint timePoint,
                 SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-                double totalCourseChangeInDegrees) {
-            super(timepointBefore, timepointAfter, speedWithBearingBefore, speedWithBearingAfter);
-            this.timepoint = timepoint;
-            this.totalCourseChangeInDegrees = totalCourseChangeInDegrees;
+                double directionChangeInDegrees) {
+            super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter);
+            this.timePoint = timePoint;
+            this.directionChangeInDegrees = directionChangeInDegrees;
         }
 
-        /**
-         * Gets the computed time point of the corresponding maneuver. The time point refers to a position within
-         * maneuver, where the highest course change has been recorded.
-         * 
-         * @return The computed maneuver time point
-         */
-        public TimePoint getTimepoint() {
-            return timepoint;
+        public TimePoint getTimePoint() {
+            return timePoint;
         }
 
-        /**
-         * Gets the total course change performed within maneuver in degrees. The port side course changes are negative.
-         * 
-         * @return The total course change in degrees
-         */
-        public double getTotalCourseChangeInDegrees() {
-            return totalCourseChangeInDegrees;
+        public double getDirectionChangeInDegrees() {
+            return directionChangeInDegrees;
         }
     }
 
-    private static class ComputedManeuverMainCurveDetails extends ComputedManeuverDetails {
+    private static class ManeuverDetailsWithBearingSteps extends ManeuverCurveDetails {
         private final List<SpeedWithBearingStep> maneuverBearingSteps;
 
-        public ComputedManeuverMainCurveDetails(TimePoint timepointBefore, TimePoint timepointAfter, TimePoint timepoint,
+        public ManeuverDetailsWithBearingSteps(TimePoint timepointBefore, TimePoint timepointAfter, TimePoint timepoint,
                 SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
                 double totalCourseChangeInDegrees, List<SpeedWithBearingStep> maneuverBearingSteps) {
-            super(timepointBefore, timepointAfter, timepoint, speedWithBearingBefore, speedWithBearingAfter, totalCourseChangeInDegrees);
+            super(timepointBefore, timepointAfter, timepoint, speedWithBearingBefore, speedWithBearingAfter,
+                    totalCourseChangeInDegrees);
             this.maneuverBearingSteps = maneuverBearingSteps;
         }
 
