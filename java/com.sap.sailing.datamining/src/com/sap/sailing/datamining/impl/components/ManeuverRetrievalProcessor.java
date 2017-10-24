@@ -35,7 +35,7 @@ public class ManeuverRetrievalProcessor
             try {
                 Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
-                    ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, maneuver);
+                    ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, maneuver, settings.isMainCurveAnalysis());
                     // Compute only numbers which are really required for filtering
                     double maneuverDuration = settings.getMinManeuverDuration() != null
                             || settings.getMaxManeuverDuration() != null ? maneuverWithContext.getManeuverDuration()

@@ -20,29 +20,49 @@ public class ManeuverWithContext implements HasManeuverContext {
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
     private final Maneuver maneuver;
     private Wind wind;
+    private TimePoint timePointBeforeForAnalysis;
+    private TimePoint timePointAfterForAnalysis;
+    private double directionChangeInDegreesForAnalysis;
 
-    public ManeuverWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver maneuver) {
+    public ManeuverWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver maneuver, boolean mainCurveAnalysis) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.maneuver = maneuver;
+        if(mainCurveAnalysis) {
+            this.timePointBeforeForAnalysis = maneuver.getTimePointBeforeMainCurve();
+            this.timePointAfterForAnalysis = maneuver.getTimePointAfterMainCurve();
+            this.directionChangeInDegreesForAnalysis = maneuver.getDirectionChangeWithinMainCurveInDegrees();
+        } else {
+            this.timePointBeforeForAnalysis = maneuver.getTimePointBefore();
+            this.timePointAfterForAnalysis = maneuver.getTimePointAfter();
+            this.directionChangeInDegreesForAnalysis = maneuver.getDirectionChangeInDegrees();
+        }
+    }
+    
+    public TimePoint getTimePointBeforeForAnalysis() {
+        return timePointBeforeForAnalysis;
+    }
+    
+    public TimePoint getTimePointAfterForAnalysis() {
+        return timePointAfterForAnalysis;
+    }
+    
+    public double getDirectionChangeInDegreesForAnalysis() {
+        return directionChangeInDegreesForAnalysis;
     }
 
+    @Override
     public Double getManeuverEnteringSpeed() {
-        Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
-        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
-                .getTrackedRace();
-        return trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePointBefore()).getKnots();
+        return getSpeedInKnotsAtTimePoint(getTimePointBeforeForAnalysis());
     }
 
+    @Override
     public Double getManeuverExitingSpeed() {
-        Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
-        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
-                .getTrackedRace();
-        return trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePointAfter()).getKnots();
+        return getSpeedInKnotsAtTimePoint(getTimePointAfterForAnalysis());
     }
 
     @Override
     public Double getManeuverDuration() {
-        return maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asSeconds();
+        return getTimePointBeforeForAnalysis().until(getTimePointAfterForAnalysis()).asSeconds();
     }
 
     @Override
@@ -72,12 +92,12 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     @Override
     public NauticalSide getToSide() {
-        return getManeuver().getDirectionChangeInDegrees() >= 0 ? NauticalSide.STARBOARD : NauticalSide.PORT;
+        return getDirectionChangeInDegreesForAnalysis() >= 0 ? NauticalSide.STARBOARD : NauticalSide.PORT;
     }
 
     @Override
     public Double getAbsoluteDirectionChangeInDegrees() {
-        return Math.abs(getManeuver().getDirectionChangeInDegrees());
+        return Math.abs(getDirectionChangeInDegreesForAnalysis());
     }
 
     @Override
@@ -97,12 +117,12 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     @Override
     public Double getEnteringAbsTWA() {
-        return getAbsTWAAtTimepoint(maneuver.getTimePointBefore());
+        return getAbsTWAAtTimepoint(getTimePointBeforeForAnalysis());
     }
 
     @Override
     public Double getExitingAbsTWA() {
-        return getAbsTWAAtTimepoint(maneuver.getTimePointAfter());
+        return getAbsTWAAtTimepoint(getTimePointAfterForAnalysis());
     }
 
     private Double getAbsTWAAtTimepoint(TimePoint timepoint) {
@@ -144,7 +164,7 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     @Override
     public Tack getTackBeforeManeuver() {
-        Double twa = getTWAAtTimepoint(maneuver.getTimePointBefore());
+        Double twa = getTWAAtTimepoint(getTimePointBeforeForAnalysis());
         if(twa == null) {
             return null;
         }
@@ -153,4 +173,12 @@ public class ManeuverWithContext implements HasManeuverContext {
         }
         return Tack.STARBOARD;
     }
+    
+    private Double getSpeedInKnotsAtTimePoint(TimePoint timePoint) {
+        Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
+                .getTrackedRace();
+        return trackedRace.getTrack(competitor).getEstimatedSpeed(timePoint).getKnots();
+    }
+
 }

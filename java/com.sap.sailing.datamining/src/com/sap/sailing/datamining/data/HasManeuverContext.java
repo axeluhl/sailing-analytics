@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -27,6 +28,9 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
     @Statistic(messageKey = "ManeuverLoss", resultDecimals = 0, ordinal = 4)
     Distance getManeuverLoss();
 
+    @Statistic(messageKey = "AbsTWAAtManeuverClimax", ordinal = 7)
+    Double getAbsTWAAtManeuverClimax();
+    
     @Statistic(messageKey = "ManeuverEnteringAbsTWA", ordinal = 5)
     Double getEnteringAbsTWA();
 
@@ -35,9 +39,6 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "ManeuverDurationInSeconds", ordinal = 8, resultDecimals = 2)
     Double getManeuverDuration();
-
-    @Statistic(messageKey = "AbsTWAAtManeuverClimax", ordinal = 7)
-    Double getAbsTWAAtManeuverClimax();
 
     @Statistic(messageKey = "EnteringManeuverSpeedMinusExitingSpeed", ordinal = 19, resultDecimals = 4)
     Double getEnteringManeuverSpeedMinusExitingSpeed();
@@ -50,5 +51,11 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "ManeuverExitingSpeedInKnots", ordinal = 18, resultDecimals = 2)
     Double getManeuverExitingSpeed();
+
+    TimePoint getTimePointBeforeForAnalysis();
+
+    TimePoint getTimePointAfterForAnalysis();
+
+    double getDirectionChangeInDegreesForAnalysis();
 
 }

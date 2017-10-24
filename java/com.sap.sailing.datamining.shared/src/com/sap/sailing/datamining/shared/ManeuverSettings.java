@@ -30,5 +30,7 @@ public abstract class ManeuverSettings extends SerializableSettings {
     public abstract Double getMinManeuverExitingAbsTWA();
 
     public abstract Double getMaxManeuverExitingAbsTWA();
+    
+    public abstract boolean isMainCurveAnalysis();
 
 }

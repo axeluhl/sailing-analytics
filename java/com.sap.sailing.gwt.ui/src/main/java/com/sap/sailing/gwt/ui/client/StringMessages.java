@@ -1952,4 +1952,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentStbdRudderRakeTooltip();
     String currentMastRotationInDegree();
     String currentMastRotationInDegreeTooltip();
+    String mainCurveAnalysis();
 }

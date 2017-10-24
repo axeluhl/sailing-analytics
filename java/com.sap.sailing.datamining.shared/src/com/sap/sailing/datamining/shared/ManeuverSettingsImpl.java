@@ -19,9 +19,10 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
     private Double maxManeuverEnteringAbsTWA;
     private Double minManeuverExitingAbsTWA;
     private Double maxManeuverExitingAbsTWA;
+    private boolean mainCurveAnalysis;
 
     public static ManeuverSettingsImpl createDefault() {
-        return new ManeuverSettingsImpl(1.0, null, 2.0, null, 1.0, null, null, null, null, null);
+        return new ManeuverSettingsImpl(1.0, null, 2.0, null, 1.0, null, null, null, null, null, false);
     }
 
     public ManeuverSettingsImpl() {
@@ -31,7 +32,7 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
             Double minManeuverEnteringSpeedInKnots, Double maxManeuverEnteringSpeedInKnots,
             Double minManeuverExitingSpeedInKnots, Double maxManeuverExitingSpeedInKnots,
             Double minManeuverEnteringAbsTWA, Double maxManeuverEnteringAbsTWA, Double minManeuverExitingAbsTWA,
-            Double maxManeuverExitingAbsTWA) {
+            Double maxManeuverExitingAbsTWA, boolean mainCurveAnalysis) {
         super();
         this.minManeuverDuration = minManeuverDuration;
         this.maxManeuverDuration = maxManeuverDuration;
@@ -43,6 +44,7 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
         this.maxManeuverEnteringAbsTWA = maxManeuverEnteringAbsTWA;
         this.minManeuverExitingAbsTWA = minManeuverExitingAbsTWA;
         this.maxManeuverExitingAbsTWA = maxManeuverExitingAbsTWA;
+        this.mainCurveAnalysis = mainCurveAnalysis;
     }
 
     public Double getMinManeuverDuration() {
@@ -84,11 +86,17 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
     public Double getMaxManeuverExitingAbsTWA() {
         return maxManeuverExitingAbsTWA;
     }
+    
+    @Override
+    public boolean isMainCurveAnalysis() {
+        return mainCurveAnalysis;
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (mainCurveAnalysis ? 1231 : 1237);
         result = prime * result + ((maxManeuverDuration == null) ? 0 : maxManeuverDuration.hashCode());
         result = prime * result + ((maxManeuverEnteringAbsTWA == null) ? 0 : maxManeuverEnteringAbsTWA.hashCode());
         result = prime * result
@@ -115,6 +123,8 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
         if (getClass() != obj.getClass())
             return false;
         ManeuverSettingsImpl other = (ManeuverSettingsImpl) obj;
+        if (mainCurveAnalysis != other.mainCurveAnalysis)
+            return false;
         if (maxManeuverDuration == null) {
             if (other.maxManeuverDuration != null)
                 return false;
@@ -167,5 +177,5 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
             return false;
         return true;
     }
-    
+
 }
