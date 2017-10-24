@@ -18,7 +18,7 @@ function tail_precondition(){
 function tail_user_input(){
 	require_key_file
 	require_ssh_user
-	require_public_dns_name	
+	require_public_dns_name
 }
 
 function tail_execute() {
