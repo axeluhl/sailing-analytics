@@ -36,14 +36,15 @@ public class DateTimeBoxFallbackStrategie extends Composite implements DateTimeB
         initWidget(uiBinder.createAndBindUi(this));
         // parser for low level, RFC compatible format
         dateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
-
         datebox.setFormat(new DefaultFormat(dateFormat));
+        datebox.getElement().setAttribute("placeholder", dateFormat.getPattern());
 
         datebox.ensureDebugId("datebox");
         UIObject.ensureDebugId(timebox, "timebox");
         
         if (format != Format.YEAR_TO_DAY) {
             timeFormat = DateTimeFormat.getFormat(format == Format.YEAR_TO_MINUTE ? "HH:mm" : "HH:mm:ss");
+            timebox.setAttribute("placeholder", timeFormat.getPattern());
             if (format == Format.YEAR_TO_SECOND) {
                 timebox.setAttribute("step", "1");
             } else {

@@ -19,6 +19,7 @@ public class BetterDateTimeBoxPO extends PageArea {
 
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final DateFormat timeFormat = new SimpleDateFormat("hh:mm");
+    private static final DateFormat timeFormatSeconds = new SimpleDateFormat("hh:mm:ss");
 
     @FindBy(how = BySeleniumId.class, using = "datebox")
     private WebElement datebox;
@@ -39,17 +40,23 @@ public class BetterDateTimeBoxPO extends PageArea {
      * 
      * @param date
      *            the {@link Date} object to set
+     * @param withSeconds true, if the used TimeBox requires also seconds and not only hours and minutes
      * 
      * @see DateFormat#format(Date)
      * @see #setText(String)
      */
-    public void setDate(Date date) {
+    public void setDate(Date date, boolean withSeconds) {
         String datein = dateFormat.format(date);
         datebox.clear();
         datebox.sendKeys(datein);
         // ensure popups are closed!
         datebox.sendKeys("\t");
-        String timein = timeFormat.format(date);
+        final String timein;
+        if(withSeconds){
+            timein = timeFormatSeconds.format(date);
+        }else{
+            timein = timeFormat.format(date);
+        }
         timebox.clear();
         timebox.sendKeys(timein);
         // ensure popups are closed!

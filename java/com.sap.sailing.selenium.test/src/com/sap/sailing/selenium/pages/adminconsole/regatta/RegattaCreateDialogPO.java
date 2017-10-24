@@ -56,8 +56,8 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
     public void setValues(String name, String boatClass, Date startDate, Date endDate) {
         this.setRegattaName(name);
         this.setBoatClass(boatClass);
-        BetterDateTimeBoxPO.create(driver, startDateTimeBox).setDate(startDate);
-        BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(endDate);
+        BetterDateTimeBoxPO.create(driver, startDateTimeBox).setDate(startDate, false);
+        BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(endDate, false);
     }
     
     // TODO: Scoring System, Event and Course Area

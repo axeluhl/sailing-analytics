@@ -50,8 +50,8 @@ public class EventCreateDialogPO extends DataEntryDialogPO {
         TextBoxPO.create(driver, nameTextBox).appendText(name);
         TextAreaPO.create(driver, descriptionTextArea).appendText(description);
         TextBoxPO.create(driver, venueTextBox).appendText(venue);
-        BetterDateTimeBoxPO.create(driver, startDateTimeBox).setDate(start);
-        BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(end);
+        BetterDateTimeBoxPO.create(driver, startDateTimeBox).setDate(start, false);
+        BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(end, false);
         CheckBoxPO.create(driver, isPublicCheckBox).setSelected(isPublic);
     }
     

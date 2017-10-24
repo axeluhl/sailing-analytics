@@ -28,7 +28,7 @@ public class SetStartTimeDialogPO extends DataEntryDialogPO {
     }
     
     public void setStartTimeValue(Date startTime) {
-        BetterDateTimeBoxPO.create(driver, startTimeTimeBox, true).setDate(startTime);
+        BetterDateTimeBoxPO.create(driver, startTimeTimeBox, true).setDate(startTime,true);
     }
 
     public void pressSetStartTime() {
