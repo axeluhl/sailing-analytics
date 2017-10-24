@@ -3,19 +3,17 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:login="urn:import:com.sap.sailing.gwt.home.desktop.places.morelogininformation">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="i18nsec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationResources" />
     <ui:style>
     .clear {
         clear: both;
     }
-    .register{
-        margin-bottom: 0.5em;
-        display: block;
+    .registerContainer {
         text-align: center;
-        margin-left: 20%;
-        margin-right: 20%;
+    }
+    .register {
+        cursor: pointer;
     }
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
@@ -23,7 +21,11 @@
         <p class="{res.mediaCss.small12} {res.mediaCss.columns}"><ui:text from="{i18n.moreLoginInformationIntroduction}" /></p>
         <login:MoreLoginInformationContent addStyleNames="{style.clear}" title="{i18n.moreLoginInformationSectionUserSettingsHeading}" image="{local_res.settings}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserSettingsDescription}" />
         <login:MoreLoginInformationContent title="{i18n.strategySimulator}" image="{local_res.simulator}" imageOnLeft="false" content="{i18n.moreLoginInformationSectionStrategySimulatorDescription}" />
-        <login:MoreLoginInformationContent addStyleNames="{res.mainCss.spacermarginbottommedium}" title="{i18n.moreLoginInformationSectionUserNotificationsHeading}" image="{local_res.notifications}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
-        <a ui:field="register" class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}"><ui:text from="{i18nsec.signUp}"/></a>
+        <login:MoreLoginInformationContent title="{i18n.moreLoginInformationSectionUserNotificationsHeading}" image="{local_res.notifications}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
+        <div class="{res.mainCss.spacermargintopmediumsmall} {res.mainCss.spacermarginbottommedium} {style.registerContainer}">
+            <a ui:field="registerControl" class="{res.mainCss.button} {style.register}">
+               <ui:text from="{i18n.moreLoginInformationRegisterControlText}"/>
+            </a>
+        </div>
     </g:HTMLPanel>
 </ui:UiBinder>
