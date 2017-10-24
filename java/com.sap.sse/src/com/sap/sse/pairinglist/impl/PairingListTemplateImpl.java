@@ -42,8 +42,6 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         double bestDev = Double.POSITIVE_INFINITY;
 
         for (int iteration = 0; iteration < 100000; iteration++) {
-            System.out.println("Iteration: " + iteration);
-            System.out.println(bestDev);
             int[][] currentAssociations = new int[competitors][competitors];
             int[][] currentPLT = new int[groups * flights][competitors / groups];
 
