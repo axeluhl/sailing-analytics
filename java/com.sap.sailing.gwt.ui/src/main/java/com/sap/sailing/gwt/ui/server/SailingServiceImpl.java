@@ -6666,4 +6666,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
+
+    @Override
+    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
+        }
+    }
+
+    @Override
+    public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
+        }
+    }
 }

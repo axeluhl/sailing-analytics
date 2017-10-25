@@ -685,4 +685,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<DetailType> determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
 
     List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations();
+
+    void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
+
+    void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
 }

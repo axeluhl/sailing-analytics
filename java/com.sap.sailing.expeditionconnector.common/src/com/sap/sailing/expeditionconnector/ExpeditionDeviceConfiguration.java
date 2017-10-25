@@ -12,11 +12,11 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializ
     
     /**
      * The ID listed as first element in a UDP message coming from Expedition, prefixed by a '#'
-     * character.
+     * character. If {@code null}, no mapping currently exists for the device.
      */
-    private final int expeditionBoatId;
+    private final Integer expeditionBoatId;
 
-    public ExpeditionDeviceConfiguration(String name, UUID deviceUuid, int expeditionBoatId) {
+    public ExpeditionDeviceConfiguration(String name, UUID deviceUuid, Integer expeditionBoatId) {
         super(name);
         this.deviceUuid = deviceUuid;
         this.expeditionBoatId = expeditionBoatId;
@@ -26,7 +26,7 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializ
         return deviceUuid;
     }
 
-    public int getExpeditionBoatId() {
+    public Integer getExpeditionBoatId() {
         return expeditionBoatId;
     }
 }

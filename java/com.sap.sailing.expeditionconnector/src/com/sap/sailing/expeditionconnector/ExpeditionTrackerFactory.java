@@ -141,7 +141,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     
     public void addOrReplaceDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         final ExpeditionDeviceConfiguration old = deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
-        if (old != null) {
+        if (old != null && old.getExpeditionBoatId() != null) {
             devicesPerBoatId.remove(old.getExpeditionBoatId());
         }
         final ExpeditionDeviceConfiguration collision = devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId());
@@ -150,12 +150,16 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
                     " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
                     " at the same time.");
         }
-        devicesPerBoatId.put(deviceConfiguration.getExpeditionBoatId(), deviceConfiguration);
+        if (deviceConfiguration.getExpeditionBoatId() != null) {
+            devicesPerBoatId.put(deviceConfiguration.getExpeditionBoatId(), deviceConfiguration);
+        }
     }
 
     public void removeDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         deviceConfigurations.remove(deviceConfiguration.getDeviceUuid());
-        devicesPerBoatId.remove(deviceConfiguration.getExpeditionBoatId());
+        if (deviceConfiguration.getExpeditionBoatId() != null) {
+            devicesPerBoatId.remove(deviceConfiguration.getExpeditionBoatId());
+        }
     }
 
     @Override

@@ -81,9 +81,9 @@ public class IgtimiAccountsPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        allAccounts = new BaseCelltable<String>(/* pageSize */10000, tableRes);
-        final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
-        ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());
+        allAccounts = new BaseCelltable<>(/* pageSize */10000, tableRes);
+        final ListDataProvider<String> filteredAccounts = new ListDataProvider<>();
+        ListHandler<String> accountColumnListHandler = new ListHandler<>(filteredAccounts.getList());
         filteredAccounts.addDataDisplay(allAccounts);
         final List<String> emptyList = Collections.emptyList();
         filterAccountsPanel = new LabeledAbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()),
@@ -94,7 +94,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 return strings;
             }
         };
-        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null,
+        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<>(null,
                 filterAccountsPanel.getAllListDataProvider());
         allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
