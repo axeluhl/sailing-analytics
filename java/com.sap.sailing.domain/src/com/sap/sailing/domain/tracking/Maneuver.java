@@ -9,17 +9,27 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
+/**
+ * Represents a maneuver detected within a competitor track. 
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public interface Maneuver extends GPSFix {
     ManeuverType getType();
 
     @Dimension(messageKey = "Tack", ordinal = 13)
     Tack getNewTack();
     
+    /**
+     * Gets the the maneuver loss of this maneuver which is the distance projected onto the average course between entering and exiting the
+     * maneuver that the boat lost compared to not having maneuvered.
+     */
     Distance getManeuverLoss();
 
     /**
-     * Gets the computed time point of the corresponding maneuver. The time point refers to a position within
-     * maneuver, where the highest course change has been recorded.
+     * Gets the time point of the corresponding maneuver. The time point refers to a position within
+     * the main curve of maneuver with the highest course change recorded toward the direction of maneuver.
      * 
      * @return The computed maneuver time point
      */
@@ -54,9 +64,11 @@ public interface Maneuver extends GPSFix {
     SpeedWithBearing getSpeedWithBearingAfter();
 
     /**
-     * Gets the total course change performed within maneuver in degrees. The port side course changes are negative.
+     * Gets the total course change performed within maneuver between {@link #getTimePointBefore()} and
+     * {@link #getTimePointAfter()} in degrees. The port side course changes are negative. The value may exceed 360
+     * degrees if the performed maneuver is a penalty circle.
      * 
-     * @return The total course change in degrees
+     * @return The total course change within the whole maneuver in degrees
      */
     @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
     double getDirectionChangeInDegrees();
@@ -65,6 +77,13 @@ public interface Maneuver extends GPSFix {
 
     TimePoint getTimePointAfterMainCurve();
     
+    /**
+     * Gets the total course change performed within the main curve of maneuver between
+     * {@link #getTimePointBeforeMainCurve()} and {@link #getTimePointAfterMainCurve()} in degrees. The port side course
+     * changes are negative. The value may exceed 360 degrees if the performed maneuver is a penalty circle.
+     * 
+     * @return The total course change with the main curve in degrees
+     */
     @Statistic(messageKey = "DirectionChangeWithinMainCurve", resultDecimals = 2, ordinal = 3)
     double getDirectionChangeWithinMainCurveInDegrees();
 
