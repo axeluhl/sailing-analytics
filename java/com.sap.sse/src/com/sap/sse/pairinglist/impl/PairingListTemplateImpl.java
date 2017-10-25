@@ -1,6 +1,6 @@
 package com.sap.sse.pairinglist.impl;
 
-import java.util.Arrays;
+
 
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -49,7 +49,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
 
         double bestDev = Double.POSITIVE_INFINITY;
 
-        for (int iteration = 0; iteration < 1000000; iteration++) {
+        for (int iteration = 0; iteration < 100000; iteration++) {
             int[][] currentAssociations = new int[competitors][competitors];
             int[][] currentPLT = new int[groups * flights][competitors / groups];
             int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
@@ -63,7 +63,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
                 for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[0] = flights + 1;
-                    System.arraycopy(currentAssociations[flightColumn[0][zGroups - 1] - 1], 0, associationRow[0][zGroups - 1], 0, competitors);
+                    associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups);
 
                     for (int comp = 1; comp <= competitors; comp++) {
                         if ((sum(associationRow, 0, comp - 1) <= associationSum) &&
@@ -132,6 +132,12 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         
         this.standardDev = bestDev;
         return bestPLT;
+    }
+
+    public int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
+            int[][] flightColumn, int zGroups) {
+        System.arraycopy(currentAssociations[flightColumn[0][zGroups - 1] -1], 0, associationRow[0][zGroups -1], 0, competitors);
+        return associationRow;
     }
     
     private boolean contains(int[][] flightColumn, int comp) {
