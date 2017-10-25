@@ -1,6 +1,6 @@
 package com.sap.sse.pairinglist.impl;
 
-import java.util.Arrays;
+
 
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -43,13 +43,17 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     public int[][] getPairingListTemplate(){
         return pairingListTemplate;
     }
+    
+    public int[][] create(int flights, int groups, int competitors) {
+        return this.create(flights, groups, competitors, 1000000);
+    }
 
-    public int[][] create(int flights, int groups, int competitors){
+    public int[][] create(int flights, int groups, int competitors, int iterationCount){
         int[][] bestPLT = new int[groups][competitors / groups];
 
         double bestDev = Double.POSITIVE_INFINITY;
 
-        for (int iteration = 0; iteration < 1000000; iteration++) {
+        for (int iteration = 0; iteration < iterationCount; iteration++) {
             int[][] currentAssociations = new int[competitors][competitors];
             int[][] currentPLT = new int[groups * flights][competitors / groups];
             int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
@@ -63,7 +67,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
                 for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[0] = flights + 1;
-                    System.arraycopy(currentAssociations[flightColumn[0][zGroups - 1] - 1], 0, associationRow[0][zGroups - 1], 0, competitors);
+                    associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,0);
 
                     for (int comp = 1; comp <= competitors; comp++) {
                         if ((sum(associationRow, 0, comp - 1) <= associationSum) &&
@@ -87,7 +91,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
                     for (int zGroups = 1; zGroups < (competitors / groups); zGroups++) {
                         int associationSum = Integer.MAX_VALUE;
                         associationHigh[fleets] = flights + 1;
-                        System.arraycopy(currentAssociations[flightColumn[fleets][zGroups - 1] - 1], 0, associationRow[fleets][zGroups - 1], 0, competitors);
+                        associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,fleets);
 
                         for (int comp = 1; comp <= competitors; comp++) {
                             if ((sum(associationRow, fleets, comp - 1) <= associationSum) &&
@@ -131,7 +135,14 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         }
         
         this.standardDev = bestDev;
+        this.pairingListTemplate=bestPLT;
         return bestPLT;
+    }
+
+    public int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
+            int[][] flightColumn, int zGroups,int fleet) {
+        System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1] -1], 0, associationRow[fleet][zGroups -1], 0, competitors);
+        return associationRow;
     }
     
     private boolean contains(int[][] flightColumn, int comp) {
