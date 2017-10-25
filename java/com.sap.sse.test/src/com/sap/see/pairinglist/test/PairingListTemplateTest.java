@@ -16,17 +16,17 @@ import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 import junit.framework.Assert;
 
 
-public class PairingListTemplateTest<Flight, Group, Competitor> {
-    PairingListTemplateImpl<Flight, Group, Competitor> aImpl;
+public class PairingListTemplateTest extends PairingListTemplateImpl{
+   
    
     
     @Before
     public void init() {
     
-            this.aImpl = new PairingListTemplateImpl<Flight, Group, Competitor>();
+           
             
             // creating pairing list template
-            this.aImpl.create(15, 3, 18,10000);
+            this.create(15, 3, 18,100000);
             
             
     }
@@ -34,7 +34,7 @@ public class PairingListTemplateTest<Flight, Group, Competitor> {
   
     @Test
     public void testPairingListCreation() {
-        int[][] plTemplate = this.aImpl.getPairingListTemplate();
+        int[][] plTemplate = this.getPairingListTemplate();
         
         assertNotNull(plTemplate);
         for(int[] i:plTemplate){
@@ -76,18 +76,18 @@ public class PairingListTemplateTest<Flight, Group, Competitor> {
         };
 
 
-        this.aImpl.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,0);
+        this.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,0);
         assertArrayEquals(currentAssociations[0],associationRow[0][0]);
-        this.aImpl.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,1);
+        this.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,1);
         assertArrayEquals(currentAssociations[6],associationRow[1][0]);
     }
     
     @Test 
     public void testTeamAssociationCreation() {
-        int[][] plTemplate = this.aImpl.getPairingListTemplate();
+        int[][] plTemplate = this.getPairingListTemplate();
         int[][] associations = new int[18][18];
         
-        this.aImpl.getAssociationsFromPairingList(plTemplate, associations);
+        this.getAssociationsFromPairingList(plTemplate, associations);
         
         for (int x = 0; x < associations.length; x++) {
             for (int y = 0; y < associations[0].length; y++) {
@@ -99,8 +99,8 @@ public class PairingListTemplateTest<Flight, Group, Competitor> {
     }
     @Test
     public void qualityCheck(){
-        if(aImpl.getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
-        aImpl.create(10, 3, 30,10000);
-        if(aImpl.getQuality()>=2) fail("Quality of Pairinglist is too bad!");
+        if(getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
+        create(10, 3, 30,100000);
+        if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
     }
 }

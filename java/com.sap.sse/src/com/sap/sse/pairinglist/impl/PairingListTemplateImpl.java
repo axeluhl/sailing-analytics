@@ -48,7 +48,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return this.create(flights, groups, competitors, 1000000);
     }
 
-    private int[][] create(int flights, int groups, int competitors, int iterationCount) {
+    protected int[][] create(int flights, int groups, int competitors, int iterationCount) {
         int[][] bestPLT = new int[groups][competitors / groups];
 
         double bestDev = Double.POSITIVE_INFINITY;
