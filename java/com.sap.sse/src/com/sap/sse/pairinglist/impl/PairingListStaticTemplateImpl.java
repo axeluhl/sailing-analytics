@@ -4,11 +4,7 @@ import java.util.Arrays;
 
 public class PairingListStaticTemplateImpl {
 
-    private static int[][] pairingListTemplate;
-    private static double standardDev;
-    
     public static void main(String[] args) {
-        pairingListTemplate= new int[3][6];
         create(15, 3, 18);
     }
     
@@ -100,9 +96,6 @@ public class PairingListStaticTemplateImpl {
             System.out.println(Arrays.toString(group));
         }
         System.out.println(bestDev);
-        
-        standardDev = bestDev;
-        pairingListTemplate = bestPLT;
     }
     
     private static boolean contains(int[][] flightColumn, int comp) {

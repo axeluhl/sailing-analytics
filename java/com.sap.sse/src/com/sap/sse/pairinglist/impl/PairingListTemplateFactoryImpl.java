@@ -1,22 +1,30 @@
 package com.sap.sse.pairinglist.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 
-public class PairingListTemplateFactoryImpl<Flight,Group,Competitor> implements PairingListTemplateFactory<Flight,Group,Competitor>{
-    PairingListTemplateImpl<Flight, Group, Competitor> pairingListTemplateImpl;
+public class PairingListTemplateFactoryImpl implements PairingListTemplateFactory {
+    private final Map<PairingFrameProvider, PairingListTemplate> pairingListTemplates;
     
     public PairingListTemplateFactoryImpl() {
-        
+        this(new HashMap<>());
     }
+    
+    public PairingListTemplateFactoryImpl(Map<PairingFrameProvider, PairingListTemplate> existingPairingListTemplates) {
+        this.pairingListTemplates = existingPairingListTemplates;
+    }
+
     @Override
-    public PairingListTemplate<Flight, Group, Competitor> createPairingListTemplate(
-            PairingFrameProvider<Flight, Group, Competitor> pPFP) {
-          if(pairingListTemplateImpl==null){
-              pairingListTemplateImpl= new PairingListTemplateImpl<>(pPFP);
-              return pairingListTemplateImpl;
-          }
-          return pairingListTemplateImpl;
+    public PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider) {
+        PairingListTemplate result = pairingListTemplates.get(pairingFrameProvider);
+        if (result == null) {
+            result = new PairingListTemplateImpl(pairingFrameProvider);
+            pairingListTemplates.put(pairingFrameProvider, result);
+        }
+        return result;
     }
 }

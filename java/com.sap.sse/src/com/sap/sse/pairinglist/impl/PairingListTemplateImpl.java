@@ -2,6 +2,7 @@ package com.sap.sse.pairinglist.impl;
 
 
 
+import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
@@ -10,10 +11,10 @@ import com.sap.sse.pairinglist.PairingListTemplate;
  * @author D070307
  *
  * @param <Flight>
- * @param <Group>
+ * @param <Group> 
  * @param <Competitor>
  */
-public class PairingListTemplateImpl<Flight,Group,Competitor> implements PairingListTemplate<Flight,Group,Competitor> {
+public class PairingListTemplateImpl implements PairingListTemplate {
     
     private int[][] pairingListTemplate;
     private double standardDev;
@@ -22,33 +23,32 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         
     }
     
-    public PairingListTemplateImpl(PairingFrameProvider<Flight,Group,Competitor> pPFP) {
-        pairingListTemplate= new int[pPFP.getGroupsCount()][pPFP.getCompetitorCount()/pPFP.getGroupsCount()];
-        this.create(pPFP.getFlightsCount(), pPFP.getGroupsCount(), pPFP.getCompetitorCount() );
+    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
+        pairingListTemplate = new int[pairingFrameProvider.getGroupsCount()][pairingFrameProvider.getCompetitorsCount()/pairingFrameProvider.getGroupsCount()];
+        this.create(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() );
     }
 
     @Override
-    public double getQualitiy() {
-        
+    public double getQuality() {
         return standardDev;
     }
 
     @Override
-    public PairingList<Flight, Group, Competitor> createPairingList(
-            PairingFrameProvider<Flight, Group, Competitor> pPFP) {
-        
+    public <Flight, Group, Competitor> PairingList<Flight, Group, Competitor> createPairingList(
+            CompetitionFormat<Flight, Group, Competitor> competitionFormat) {
         return null;
     }
     
+    @Override
     public int[][] getPairingListTemplate(){
         return pairingListTemplate;
     }
     
-    public int[][] create(int flights, int groups, int competitors) {
+    int[][] create(int flights, int groups, int competitors) {
         return this.create(flights, groups, competitors, 1000000);
     }
 
-    public int[][] create(int flights, int groups, int competitors, int iterationCount){
+    private int[][] create(int flights, int groups, int competitors, int iterationCount) {
         int[][] bestPLT = new int[groups][competitors / groups];
 
         double bestDev = Double.POSITIVE_INFINITY;

@@ -1,81 +1,38 @@
 package com.sap.sse.pairinglist.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
-import com.sap.sse.pairinglist.PairingFrameProvider;
+import com.sap.sse.common.Util;
+import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingList;
+import com.sap.sse.pairinglist.PairingListTemplate;
 
 public class PairingListImpl<Flight, Group, Competitor> implements PairingList<Flight, Group, Competitor>  {
-    
-    private HashMap<Flight, HashMap<Group, ArrayList<Competitor>>> pList;
-    private PairingListTemplateImpl<Flight, Group, Competitor> pairingListTemplate;
-    private PairingFrameProvider<Flight, Group, Competitor> frameProvider;
+    private PairingListTemplate pairingListTemplate;
+    private CompetitionFormat<Flight, Group, Competitor> competitionFormat;
     
     /**
      * @param pList: pairing list with specific information of flights, groups and competitors
      * @param standardDev: describes quality of our pList (the lower the standardDev, the better the pairing list)
      */
-    
-    public PairingListImpl(PairingListTemplateImpl<Flight, Group, Competitor> template,PairingFrameProvider<Flight, Group, Competitor> pPFP) {
+    public PairingListImpl(PairingListTemplate template, CompetitionFormat<Flight, Group, Competitor> competitionFormat) {
         this.pairingListTemplate = template;
-        this.frameProvider = pPFP;
-        
-        this.initializePairingList();
+        this.competitionFormat = competitionFormat;
     }
     
     @Override
-    public ArrayList<Competitor> getCompetitors(Flight pFlight, Group pGroup) {
-        return this.pList.get(pFlight).get(pGroup);
-    }
-
-    @Override
-    public PairingFrameProvider<Flight, Group, Competitor> getProvider() {
-        return frameProvider;
-    }
-    
-    private void initializePairingList() {
-        this.pList = new HashMap<>();
-        
-        int[][] template = this.pairingListTemplate.getPairingListTemplate();
-        
-        ArrayList<Competitor> competitorList = new ArrayList<>();
-        for (Competitor competitor : this.frameProvider.getCompetitors()) {
-            competitorList.add(competitor);
+    public Iterable<Competitor> getCompetitors(Flight flight, Group group) {
+        final int[][] competitorIndices = pairingListTemplate.getPairingListTemplate();
+        final int flightIndex = Util.indexOf(competitionFormat.getFlights(), flight);
+        final int groupIndex = Util.indexOf(competitionFormat.getGroups(flight), group);
+        final int[] competitorIndicesInRace = new int[competitionFormat.getCompetitorsCount() / competitionFormat.getGroupsCount()];
+        System.arraycopy(competitorIndices[flightIndex], groupIndex * competitorIndicesInRace.length,
+                competitorIndicesInRace, 0, competitorIndicesInRace.length);
+        final List<Competitor> result = new ArrayList<>();
+        for (final int competitorIndexInRace : competitorIndicesInRace) {
+            result.add(Util.get(competitionFormat.getCompetitors(), competitorIndexInRace));
         }
-     
-        int iGroup = 0;
-        
-        for (Flight flight: this.frameProvider.getFlights()) {            
-            HashMap<Group, ArrayList<Competitor>> groupMap = new HashMap<>();
-            
-            for (Group group: this.frameProvider.getGroups(flight)) {                
-                ArrayList<Competitor> compList = new ArrayList<>();
-                
-                for (int iCompInGroup = 0; iCompInGroup < this.frameProvider.getCompetitorCount() 
-                        / this.frameProvider.getGroupsCount(); iCompInGroup++) {
-                    int currentComp = template[iGroup][iCompInGroup];
-                    
-                    compList.add(iCompInGroup, competitorList.get(currentComp));
-                }
-                
-                groupMap.put(group, compList);
-                iGroup++;
-            }
-            
-            this.pList.put(flight, groupMap);
-        }
-    }
-
-    public HashMap<Flight, HashMap<Group, ArrayList<Competitor>>> getpList() {
-        return pList;
-    }
-
-    public PairingListTemplateImpl<Flight, Group, Competitor> getPairingListTemplate() {
-        return pairingListTemplate;
-    }
-
-    public PairingFrameProvider<Flight, Group, Competitor> getFrameProvider() {
-        return frameProvider;
+        return result;
     }
 }

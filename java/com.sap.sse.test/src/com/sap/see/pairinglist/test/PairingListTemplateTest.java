@@ -99,8 +99,8 @@ public class PairingListTemplateTest<Flight, Group, Competitor> {
     }
     @Test
     public void qualityCheck(){
-        if(aImpl.getQualitiy()>=0.7) fail("Quality of Pairinglist is too bad!");
+        if(aImpl.getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
         aImpl.create(10, 3, 30,10000);
-        if(aImpl.getQualitiy()>=2) fail("Quality of Pairinglist is too bad!");
+        if(aImpl.getQuality()>=2) fail("Quality of Pairinglist is too bad!");
     }
 }
