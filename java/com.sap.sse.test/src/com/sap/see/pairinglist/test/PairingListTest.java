@@ -4,8 +4,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 
@@ -40,7 +38,7 @@ public class PairingListTest<Flight, Group, Competitor> {
                   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                  {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18},
                   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -55,9 +53,11 @@ public class PairingListTest<Flight, Group, Competitor> {
                                       };
           
            
-           aImpl.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1);
-          
+           aImpl.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,0);
            assertArrayEquals(currentAssociations[0],associationRow[0][0]);
+           aImpl.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,1);
+          
+           assertArrayEquals(currentAssociations[6],associationRow[1][0]);
    }
    
 }

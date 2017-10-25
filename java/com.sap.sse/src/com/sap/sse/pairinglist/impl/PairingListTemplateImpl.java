@@ -63,7 +63,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
                 for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[0] = flights + 1;
-                    associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups);
+                    associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,0);
 
                     for (int comp = 1; comp <= competitors; comp++) {
                         if ((sum(associationRow, 0, comp - 1) <= associationSum) &&
@@ -87,7 +87,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
                     for (int zGroups = 1; zGroups < (competitors / groups); zGroups++) {
                         int associationSum = Integer.MAX_VALUE;
                         associationHigh[fleets] = flights + 1;
-                        System.arraycopy(currentAssociations[flightColumn[fleets][zGroups - 1] - 1], 0, associationRow[fleets][zGroups - 1], 0, competitors);
+                        associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,fleets);
 
                         for (int comp = 1; comp <= competitors; comp++) {
                             if ((sum(associationRow, fleets, comp - 1) <= associationSum) &&
@@ -135,8 +135,8 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     }
 
     public int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
-            int[][] flightColumn, int zGroups) {
-        System.arraycopy(currentAssociations[flightColumn[0][zGroups - 1] -1], 0, associationRow[0][zGroups -1], 0, competitors);
+            int[][] flightColumn, int zGroups,int fleet) {
+        System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1] -1], 0, associationRow[fleet][zGroups -1], 0, competitors);
         return associationRow;
     }
     
