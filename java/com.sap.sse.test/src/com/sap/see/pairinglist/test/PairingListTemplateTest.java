@@ -8,7 +8,7 @@ import static org.junit.Assert.assertNotNull;
 
 
 import org.junit.Before;
-import org.junit.BeforeClass;
+
 import org.junit.Test;
 
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
@@ -16,7 +16,7 @@ import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 import junit.framework.Assert;
 
 
-public class PairingListTest<Flight, Group, Competitor> {
+public class PairingListTemplateTest<Flight, Group, Competitor> {
     PairingListTemplateImpl<Flight, Group, Competitor> aImpl;
    
     
