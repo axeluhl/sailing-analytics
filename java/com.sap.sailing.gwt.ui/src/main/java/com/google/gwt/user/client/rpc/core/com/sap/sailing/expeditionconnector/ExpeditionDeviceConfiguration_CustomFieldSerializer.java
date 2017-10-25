@@ -20,7 +20,7 @@ public class ExpeditionDeviceConfiguration_CustomFieldSerializer extends CustomF
             throws SerializationException {
         streamWriter.writeString(instance.getName());
         streamWriter.writeObject(instance.getDeviceUuid());
-        streamWriter.writeInt(instance.getExpeditionBoatId());
+        streamWriter.writeObject(instance.getExpeditionBoatId());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ExpeditionDeviceConfiguration_CustomFieldSerializer extends CustomF
 
     public static ExpeditionDeviceConfiguration instantiate(SerializationStreamReader streamReader)
             throws SerializationException {
-        return new ExpeditionDeviceConfiguration(streamReader.readString(), (UUID) streamReader.readObject(), streamReader.readInt());
+        return new ExpeditionDeviceConfiguration(streamReader.readString(), (UUID) streamReader.readObject(), (Integer) streamReader.readObject());
     }
 
     @Override

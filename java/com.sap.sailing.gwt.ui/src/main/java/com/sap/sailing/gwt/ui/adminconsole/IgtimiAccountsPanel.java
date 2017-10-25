@@ -104,7 +104,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
             @Override
             public void onClick(ClickEvent event) {
                 if (refreshableAccountsSelectionModel.getSelectedObject() != null) {
-                    if (Window.confirm("Do you really want to remove the leaderboards?")) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
                         removeAccount(refreshableAccountsSelectionModel.getSelectedObject(), filteredAccounts);
                     }
                 }
@@ -142,6 +142,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         allAccounts.addColumn(accountActionColumn, stringMessages.actions());
+        allAccounts.addColumnSortHandler(accountColumnListHandler);
         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.addIgtimiAccount());
         addAccountButton.ensureDebugId("addIgtimiAccount");

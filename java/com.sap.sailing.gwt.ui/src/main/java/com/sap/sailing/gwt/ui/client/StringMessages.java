@@ -1940,4 +1940,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addExpeditionDeviceConfiguration();
     String editExpeditionDeviceConfiguration();
     String expeditionBoatId();
+    String doYouReallyWantToRemoveTheSelectedExpeditionDeviceConfigurations();
+    String doYouReallyWantToRemoveTheSelectedIgtimiAccounts();
 }

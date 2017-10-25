@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,8 +29,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -54,7 +53,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
 
     public static class DeviceConfigurationImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
-        public static final String ACTION_EDIT = "ACTION_REMOVE";
+        public static final String ACTION_EDIT = "ACTION_EDIT";
         private final StringMessages stringMessages;
         
         public DeviceConfigurationImagesBarCell(StringMessages stringMessages) {
@@ -70,8 +69,8 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         @Override
         protected Iterable<ImageSpec> getImageSpecs() {
             return Arrays.asList(
-                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())),
-                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));
+                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
+                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         }
     }
     
@@ -110,26 +109,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         }, filterDeviceConfigurationsPanel.getAllListDataProvider());
         allDeviceConfigurations.setSelectionModel(refreshableDeviceConfigurationsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
-        final Button removeAccountButton = new Button(stringMessages.remove());
-        removeAccountButton.setEnabled(false);
-        removeAccountButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (refreshableDeviceConfigurationsSelectionModel.getSelectedObject() != null) {
-                    if (Window.confirm("Do you really want to remove the leaderboards?")) {
-                        removeDeviceConfiguration(refreshableDeviceConfigurationsSelectionModel.getSelectedObject(), filteredDeviceConfigurations);
-                    }
-                }
-            }
-        });
-        refreshableDeviceConfigurationsSelectionModel.addSelectionChangeHandler(new Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                removeAccountButton.setEnabled(refreshableDeviceConfigurationsSelectionModel.getSelectedObject() != null);
-            }
-        });
         controlsPanel.add(filterDeviceConfigurationsPanel);
-        controlsPanel.add(removeAccountButton);
         add(controlsPanel);
         add(allDeviceConfigurations);
         Column<ExpeditionDeviceConfiguration, String> deviceConfigurationNameColumn = new TextColumn<ExpeditionDeviceConfiguration>() {
@@ -151,6 +131,16 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         deviceConfigurationColumnListHandler.setComparator(deviceConfigurationUuidColumn,
                 (c1, c2)->new NaturalComparator(/* caseSensitive */ false).compare(c1.getDeviceUuid().toString(), c2.getDeviceUuid().toString()));
         allDeviceConfigurations.addColumn(deviceConfigurationUuidColumn, stringMessages.id());
+        Column<ExpeditionDeviceConfiguration, String> deviceConfigurationBoatIdColumn = new TextColumn<ExpeditionDeviceConfiguration>() {
+            @Override
+            public String getValue(ExpeditionDeviceConfiguration object) {
+                return object.getExpeditionBoatId() == null ? "" : object.getExpeditionBoatId().toString();
+            }
+        };
+        deviceConfigurationBoatIdColumn.setSortable(true);
+        deviceConfigurationColumnListHandler.setComparator(deviceConfigurationBoatIdColumn,
+                Comparator.comparing(ExpeditionDeviceConfiguration::getExpeditionBoatId, Comparator.nullsLast(Comparator.naturalOrder())));
+        allDeviceConfigurations.addColumn(deviceConfigurationBoatIdColumn, stringMessages.expeditionBoatId());
         ImagesBarColumn<ExpeditionDeviceConfiguration, DeviceConfigurationImagesBarCell> deviceConfigurationActionColumn = new ImagesBarColumn<ExpeditionDeviceConfiguration, DeviceConfigurationImagesBarCell>(
                 new DeviceConfigurationImagesBarCell(stringMessages));
         deviceConfigurationActionColumn.setFieldUpdater(new FieldUpdater<ExpeditionDeviceConfiguration, String>() {
@@ -158,7 +148,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
             public void update(int index, ExpeditionDeviceConfiguration deviceConfiguration, String value) {
                 if (DeviceConfigurationImagesBarCell.ACTION_REMOVE.equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveExpeditionDeviceConfiguration(deviceConfiguration.getName()))) {
-                        removeDeviceConfiguration(deviceConfiguration, filteredDeviceConfigurations);
+                        removeDeviceConfiguration(deviceConfiguration, filterDeviceConfigurationsPanel);
                     }
                 } else if (DeviceConfigurationImagesBarCell.ACTION_EDIT.equals(value)) {
                     new EditDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingService, stringMessages, errorReporter, deviceConfiguration).show();
@@ -166,6 +156,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
             }
         });
         allDeviceConfigurations.addColumn(deviceConfigurationActionColumn, stringMessages.actions());
+        allDeviceConfigurations.addColumnSortHandler(deviceConfigurationColumnListHandler);
         updateAllAccounts(sailingService, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.add());
         addAccountButton.ensureDebugId("addExpeditionDeviceConfiguration");
@@ -180,18 +171,17 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                refresh(sailingService, errorReporter, stringMessages);
+                refresh();
             }
         });
         add(refreshButton);
     }
     
-    private void refresh(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages) {
+    public void refresh() {
         updateAllAccounts(sailingService, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
     }
 
-    private class AbstractDeviceConfigurationDialog extends DataEntryDialog<ExpeditionDeviceConfiguration> {
+    private abstract class AbstractDeviceConfigurationDialog extends DataEntryDialog<ExpeditionDeviceConfiguration> {
         protected TextBox boatName;
         protected com.sap.sse.gwt.client.controls.IntegerBox boatId;
         
@@ -231,11 +221,6 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         protected FocusWidget getInitialFocusWidget() {
             return boatName;
         }
-        
-        @Override
-        protected ExpeditionDeviceConfiguration getResult() {
-            return new ExpeditionDeviceConfiguration(boatName.getText(), UUID.randomUUID(), boatId.getValue());
-        }
     }
 
     private class AddDeviceConfigurationDialog extends AbstractDeviceConfigurationDialog {
@@ -264,6 +249,11 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 }
             });
             ensureDebugId("AddExpeditionDeviceConfigurationDialog");
+        }
+        
+        @Override
+        protected ExpeditionDeviceConfiguration getResult() {
+            return new ExpeditionDeviceConfiguration(boatName.getText(), UUID.randomUUID(), boatId.getValue());
         }
     }
 
@@ -307,6 +297,11 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
             boatId.setValue(valueToEdit.getExpeditionBoatId());
             return result;
         }
+
+        @Override
+        protected ExpeditionDeviceConfiguration getResult() {
+            return new ExpeditionDeviceConfiguration(this.boatName.getValue(), valueToEdit.getDeviceUuid(), this.boatId.getValue());
+        }
     }
 
     private static void updateAllAccounts(SailingServiceAsync sailingService, final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
@@ -328,7 +323,8 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         new AddDeviceConfigurationDialog(filterDeviceConfigurationsPanel, sailingService, stringMessages, errorReporter).show();
     }
     
-    private void removeDeviceConfiguration(final ExpeditionDeviceConfiguration expeditionDeviceConfiguration, final ListDataProvider<ExpeditionDeviceConfiguration> filteredDeviceConfigurations) {
+    private void removeDeviceConfiguration(final ExpeditionDeviceConfiguration expeditionDeviceConfiguration,
+            final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterDeviceConfigurationsPanel) {
         sailingService.removeExpeditionDeviceConfiguration(expeditionDeviceConfiguration, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -337,7 +333,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
 
             @Override
             public void onSuccess(Void result) {
-                filteredDeviceConfigurations.getList().remove(expeditionDeviceConfiguration);
+                filterDeviceConfigurationsPanel.remove(expeditionDeviceConfiguration);
             }
         });
     }

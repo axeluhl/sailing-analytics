@@ -140,15 +140,18 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     }
     
     public void addOrReplaceDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        final ExpeditionDeviceConfiguration old = deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
-        if (old != null && old.getExpeditionBoatId() != null) {
-            devicesPerBoatId.remove(old.getExpeditionBoatId());
-        }
-        final ExpeditionDeviceConfiguration collision = devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId());
-        if (collision != null) {
-            throw new IllegalStateException("Trying to create an ambiguous Expedition Boat ID mapping: established is "+collision+
+        if (deviceConfiguration.getExpeditionBoatId() != null &&
+                devicesPerBoatId.containsKey(deviceConfiguration.getExpeditionBoatId()) &&
+                !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).equals(deviceConfiguration)) {
+            throw new IllegalStateException("Trying to create an ambiguous Expedition Boat ID mapping: established is "+
+                    devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId())+
                     " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
                     " at the same time.");
+        }
+        deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
+        final ExpeditionDeviceConfiguration old = deviceConfigurations.get(deviceConfiguration.getDeviceUuid());
+        if (old != null && old.getExpeditionBoatId() != null) {
+            devicesPerBoatId.remove(old.getExpeditionBoatId());
         }
         if (deviceConfiguration.getExpeditionBoatId() != null) {
             devicesPerBoatId.put(deviceConfiguration.getExpeditionBoatId(), deviceConfiguration);
