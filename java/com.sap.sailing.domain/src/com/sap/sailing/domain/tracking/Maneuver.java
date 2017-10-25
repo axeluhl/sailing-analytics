@@ -10,7 +10,25 @@ import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
 /**
- * Represents a maneuver detected within a competitor track. 
+ * Represents a maneuver detected within a competitor track. There are two important sections within a maneuver.
+ * <ol>
+ * <li>The first section starts from sailing a stable speed at TWA and ends at getting back to a stable speed and target
+ * TWA. This section is defined as maneuver curve and its time range is represented by {@code timePointBefore} and
+ * {@code timePointAfter}. The target speeds and bearings are represented by {@code speedWithBearingBefore} and
+ * {@code speedWithBearingAfter}.</li>
+ * <li>The second section is called the main curve and is defined as the section within the maneuver curve, where
+ * highest course change has been performed. This means that the main curve is a subset of the maneuver curve which is
+ * represented by {@code timePointBeforeMainCurve} and {@code timePointAfterMainCurve}.</li>
+ * </ol>
+ * The maneuver curve is a expansion of the main curve. The expansion relates speed maxima location before and after
+ * main curve. In contrast to maneuver curve, the main curve computation does not take speed into account and is based
+ * only on gradual analysis of bearings within the maneuver progress. The main curve is supposed to deliver information
+ * about the acceleration during continues turning in the direction of maneuver which can be used for boat class
+ * oriented investigations. On the other side, the maneuver curve describes the period where enters from a period of
+ * stable TWA and speed in a section of changes and adjustments in order to perform the maneuver. Based on the maneuver
+ * curve, the maneuver loss is computed which is regarded as an important measurement feature in order to compare
+ * performances of competing racers. In contrast to main curve, the maneuver curve reveals strategic decision making of
+ * individual sailors to master a maneuver with minimal maneuver loss.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -36,7 +54,7 @@ public interface Maneuver extends GPSFix {
     TimePoint getTimePoint();
     
     /**
-     * Gets the computed time point of maneuver start.
+     * Gets the time point of maneuver start.
      * 
      * @return The time point of maneuver start
      */
