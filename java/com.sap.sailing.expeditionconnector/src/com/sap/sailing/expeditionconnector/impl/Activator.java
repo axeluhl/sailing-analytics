@@ -34,6 +34,8 @@ public class Activator implements BundleActivator {
     private static final int DEFAULT_PORT = 2013;
     
     private int port;
+
+    private BundleContext context;
     
     public Activator() {
         port = Integer.valueOf(System.getProperty(EXPEDITION_UDP_PORT_PROPERTY_NAME, ""+DEFAULT_PORT));
@@ -48,6 +50,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
+        this.context = context;
         if (instance == null) {
             instance = this;
         }
@@ -72,12 +75,21 @@ public class Activator implements BundleActivator {
         return instance;
     }
 
+    public BundleContext getContext() {
+        return context;
+    }
+
+    public void setContext(BundleContext context) {
+        this.context = context;
+    }
+
     @Override
     public void stop(BundleContext context) throws Exception {
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();
         }
         registrations.clear();
+        this.context = null;
     }
     
     public int getExpeditionUDPPort() {

@@ -8,11 +8,17 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -52,22 +58,65 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     
     private final int defaultPort;
 
-    private final SensorFixStore sensorFixStore;
+    /**
+     * Cached result from calling {@link SensorFixStoreSupplier#getSensorFixStore()} on any supplier discovered
+     * in the OSGi registry. Refreshed when the sensor fix store supplier changes in the OSGi registry.
+     */
+    private SensorFixStore sensorFixStore;
+
+    private ServiceTracker<SensorFixStoreSupplier, SensorFixStoreSupplier> sensorFixServiceTracker;
 
     public ExpeditionTrackerFactory(SensorFixStore sensorFixStore) {
         this.windTrackers = new HashMap<RaceDefinition, WindTracker>();
         this.sensorFixStore = sensorFixStore;
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
-        defaultPort = Activator.getInstance().getExpeditionUDPPort();
+        final Activator activator = Activator.getInstance();
+        defaultPort = activator.getExpeditionUDPPort();
         deviceConfigurations = new ConcurrentHashMap<>(); // TODO add persistence; these need to be loaded from the DB
         devicesPerBoatId = new ConcurrentHashMap<>();
+        final BundleContext context = activator.getContext();
+        if (context != null) {
+            startListeningForSensorFixStoreSuppliers(context);
+        }
         logger.info("Created "+getClass().getName()+" with default UDP port "+defaultPort);
+    }
+
+    private void startListeningForSensorFixStoreSuppliers(BundleContext context) {
+        sensorFixServiceTracker = new ServiceTracker<>(context, SensorFixStoreSupplier.class,
+                new ServiceTrackerCustomizer<SensorFixStoreSupplier, SensorFixStoreSupplier>() {
+                    @Override
+                    public SensorFixStoreSupplier addingService(ServiceReference<SensorFixStoreSupplier> reference) {
+                        final SensorFixStoreSupplier service = Activator.getInstance().getContext().getService(reference);
+                        sensorFixStore = service.getSensorFixStore();
+                        return service;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<SensorFixStoreSupplier> reference,
+                            SensorFixStoreSupplier service) {
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<SensorFixStoreSupplier> reference,
+                            SensorFixStoreSupplier service) {
+                        // check if there is still a supplier left:
+                        final SensorFixStoreSupplier nextService = sensorFixServiceTracker.getService();
+                        if (nextService != null) {
+                            sensorFixStore = nextService.getSensorFixStore();
+                        }
+                    }
+                });
+        sensorFixServiceTracker.open();
     }
 
     public synchronized static ExpeditionTrackerFactory getInstance() {
         return getInstance(/* sensorFixStore */ null);
     }
     
+    /**
+     * Use this constructor in non-OSGi scenarios such as plain JUnit test environments where the
+     * {@link SensorFixStoreSupplier} cannot be discovered through the registry.
+     */
     public static ExpeditionTrackerFactory getInstance(SensorFixStore sensorFixStore) {
         if (defaultInstance == null) {
             defaultInstance = new ExpeditionTrackerFactory(sensorFixStore);
