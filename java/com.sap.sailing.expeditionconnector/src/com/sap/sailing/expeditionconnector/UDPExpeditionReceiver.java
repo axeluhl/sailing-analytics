@@ -94,9 +94,10 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
      */
     private void tryToProduceAndStoreSensorFix(ExpeditionMessage msg, ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier) {
-        // TODO Auto-generated method stub
-        final DoubleVectorFix fix = null;
-        deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);
+        final DoubleVectorFix fix = null; // TODO try to produce a new fix from what we have if we have enough new evidence
+        if (fix != null) {
+            deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);
+        }
     }
 
     /**
@@ -104,9 +105,10 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
      */
     private void tryToProduceAndStoreGpsFix(ExpeditionMessage msg, ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier) {
-        // TODO Auto-generated method stub
-        final GPSFixMoving fix = null;
-        deviceRegistry.getSensorFixStore().storeFix(gpsDeviceIdentifier, fix);
+        final GPSFixMoving fix = null; // TODO assemble GPS fix from what we have if we have enough new evidence
+        if (fix != null) {
+            deviceRegistry.getSensorFixStore().storeFix(gpsDeviceIdentifier, fix);
+        }
     }
 
     public Map<Integer, Long> getTimeStampOfLastMessageReceived() {
