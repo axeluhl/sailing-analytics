@@ -1,5 +1,7 @@
 package com.sap.sse.pairinglist.impl;
 
+import java.util.Arrays;
+
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
@@ -16,6 +18,9 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     private int[][] pairingListTemplate;
     private double standardDev;
     
+    public PairingListTemplateImpl() {
+        
+    }
     
     public PairingListTemplateImpl(PairingFrameProvider<Flight,Group,Competitor> pPFP) {
         pairingListTemplate= new int[pPFP.getGroupsCount()][pPFP.getCompetitorCount()/pPFP.getGroupsCount()];
@@ -39,19 +44,20 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         return pairingListTemplate;
     }
 
-    private void create(int flights, int groups, int competitors){
+    public int[][] create(int flights, int groups, int competitors){
         int[][] bestPLT = new int[groups][competitors / groups];
 
         double bestDev = Double.POSITIVE_INFINITY;
 
-        for (int iteration = 0; iteration < 100000; iteration++) {
+        for (int iteration = 0; iteration < 1000000; iteration++) {
             int[][] currentAssociations = new int[competitors][competitors];
             int[][] currentPLT = new int[groups * flights][competitors / groups];
-
+            int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
+            
             for (int zFlight = 0; zFlight < flights; zFlight++) {
 
                 int[][] flightColumn = new int[groups][competitors / groups];
-                int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
+                associationRow= setZero(associationRow);
                 int[] associationHigh = new int[competitors / groups - 1];
                 flightColumn[0][0] = randomBW(1, competitors);
                 for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
@@ -125,7 +131,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
         }
         
         this.standardDev = bestDev;
-        this.pairingListTemplate = bestPLT;
+        return bestPLT;
     }
     
     private boolean contains(int[][] flightColumn, int comp) {
@@ -135,6 +141,14 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
             }
         }
         return false;
+    }
+    private int[][][] setZero(int[][][] temp){
+        for(int x=0;x<temp.length;x++){
+            for(int y=0;y<temp[0].length;y++){
+                for(int z=0;z<temp[0][0].length;z++) temp[x][y][z]=0;
+            }
+        }
+        return temp;
     }
 
     private int sum(int[][][] associationRow, int i, int comp) {
