@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNotNull;
 
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
@@ -17,13 +18,17 @@ import junit.framework.Assert;
 
 public class PairingListTest<Flight, Group, Competitor> {
     PairingListTemplateImpl<Flight, Group, Competitor> aImpl;
+   
     
     @Before
     public void init() {
-        this.aImpl = new PairingListTemplateImpl<Flight, Group, Competitor>();
-        
-        // creating pairing list template
-        this.aImpl.create(15, 3, 18);
+    
+            this.aImpl = new PairingListTemplateImpl<Flight, Group, Competitor>();
+            
+            // creating pairing list template
+            this.aImpl.create(15, 3, 18,10000);
+            
+            
     }
   
   
@@ -91,5 +96,11 @@ public class PairingListTest<Flight, Group, Competitor> {
                 }
             }
         }
+    }
+    @Test
+    public void qualityCheck(){
+        if(aImpl.getQualitiy()>=0.7) fail("Quality of Pairinglist is too bad!");
+        aImpl.create(10, 3, 30,10000);
+        if(aImpl.getQualitiy()>=2) fail("Quality of Pairinglist is too bad!");
     }
 }
