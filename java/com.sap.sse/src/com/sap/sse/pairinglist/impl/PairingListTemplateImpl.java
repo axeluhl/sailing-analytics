@@ -195,7 +195,7 @@ public class PairingListTemplateImpl<Flight,Group,Competitor> implements Pairing
     }
     
     
-    private int[][] getAssociationsFromPairingList(int[][] pairingList, int[][] associations) {
+    public int[][] getAssociationsFromPairingList(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
                 for (int j = 0; j < pairingList[0].length; j++) {
