@@ -117,6 +117,7 @@
         <module>com.sap.sailing.news</module>
         <module>com.sap.sailing.declination</module>
         <module>com.sap.sailing.udpconnector</module>
+        <module>com.sap.sailing.expeditionconnector.common</module>
         <module>com.sap.sailing.expeditionconnector</module>
         <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
