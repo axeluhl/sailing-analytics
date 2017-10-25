@@ -148,8 +148,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
                     " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
                     " at the same time.");
         }
-        deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
-        final ExpeditionDeviceConfiguration old = deviceConfigurations.get(deviceConfiguration.getDeviceUuid());
+        final ExpeditionDeviceConfiguration old = deviceConfigurations.put(deviceConfiguration.getDeviceUuid(), deviceConfiguration);
         if (old != null && old.getExpeditionBoatId() != null) {
             devicesPerBoatId.remove(old.getExpeditionBoatId());
         }
