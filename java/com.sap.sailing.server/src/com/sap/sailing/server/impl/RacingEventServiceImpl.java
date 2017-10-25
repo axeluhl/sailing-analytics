@@ -3512,7 +3512,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private Iterable<WindTrackerFactory> getWindTrackerFactories() {
         final Set<WindTrackerFactory> result;
         if (bundleContext == null) { // the non-OSGi case
-            result = Collections.singleton((WindTrackerFactory) ExpeditionTrackerFactory.getInstance());
+            result = Collections.singleton((WindTrackerFactory) ExpeditionTrackerFactory.getInstance(getSensorFixStore()));
         } else {
             ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
                     bundleContext, WindTrackerFactory.class, null);

@@ -6664,5 +6664,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (expeditionConnector != null) {
             Util.addAll(expeditionConnector.getDeviceConfigurations(), result);
         }
+        return result;
     }
 }
