@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -528,6 +529,16 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the
+     * <code>boatBearing</code> to the wind's bearing at that time and place and determined the tack.
+     * 
+     * @throws NoWindException
+     *             in case the wind cannot be determined because without a wind direction, the tack cannot be determined
+     *             either
+     */
+    Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException;
 
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
@@ -1021,4 +1032,5 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *            time point up and until to compute the speed
      */
     Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
+
 }
