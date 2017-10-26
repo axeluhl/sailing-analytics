@@ -9,4 +9,31 @@
   </parent>
   <artifactId>com.sap.sailing.expeditionconnector.common</artifactId>
   <packaging>eclipse-plugin</packaging>
+  <build>
+      <plugins>
+	  <plugin>
+	      <groupId>org.eclipse.tycho</groupId>
+	      <artifactId>tycho-compiler-plugin</artifactId>
+	      <version>${tycho-version}</version>
+	      <configuration>
+		  <source>1.7</source>
+		  <target>1.7</target>
+	      </configuration>
+	  </plugin>
+	  <plugin>
+	      <groupId>org.eclipse.tycho</groupId>
+	      <artifactId>tycho-source-plugin</artifactId>
+	      <version>${tycho-version}</version>
+	      <executions>
+		  <execution>
+		      <id>plugin-source</id>
+		      <phase>generate-sources</phase>
+		      <goals>
+			  <goal>plugin-source</goal>
+		      </goals>
+		  </execution>
+	      </executions>
+	  </plugin>
+      </plugins>
+  </build>
 </project>
