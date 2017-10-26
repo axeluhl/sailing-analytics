@@ -196,7 +196,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
         final com.sap.sse.common.Util.Function<BravoFix, ScalableValue<I, T>> converter =
               fix -> converterToScalableValue.apply(getter.apply((BravoExtendedFix) fix));  
-        return getInterpolatedValue(timePoint, converter);
+        return getInterpolatedValue(timePoint, converter); // TODO bug 4351: provide a "relevance" predicate function to be used by getSurroundingFixes such that, e.g., fixes with null values in the dimension to be retrieved can be skipped
     }
     
     public BravoExtendedFix getFirstFixAtOrAfterIfExtended(TimePoint timePoint) {
