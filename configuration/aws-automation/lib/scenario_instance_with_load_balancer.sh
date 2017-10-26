@@ -76,6 +76,10 @@ function instance_with_load_balancer_execute() {
 
 	route53_change_resource_record "$load_balancer_name" 60 "$load_balancer_dns_name"
 
+	header "Apache configuration"
+
+	configure_apache "$load_balancer_dns_name" "$event_id" "$key_file" "$ssh_user" "$public_dns_name"
+
 	echo "Finished."
 
 	confirm_reset_panes

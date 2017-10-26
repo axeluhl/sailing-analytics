@@ -24,15 +24,12 @@ function tail_user_input(){
 function tail_execute() {
 	echo "Open tmux panes and start tailing log files..."
 	construct_ui
+	wait_for_ssh_connection "$key_file" "$ssh_user" "$public_dns_name"
 	open_connections "$key_file" "$ssh_user" "$public_dns_name"
 	tail_logfiles
 }
 
 function tail_logfiles(){
-	local sailing_0='/home/sailing/servers/server/logs/sailing0.log.0'
-	local sailing_err='/var/log/sailing.err'
-	local sailing_out='/var/log/sailing.out'
-
 	tmux send-keys -t 1 "clear;echo \"Waiting for file $sailing_0 to appear...\";touch $sailing_0;cat $sailing_0;tail -F -v $sailing_0" C-m
 	tmux send-keys -t 2 "clear;cat $sailing_out;tail -F -v $sailing_out" C-m
 	tmux send-keys -t 3 "clear;cat $sailing_err;tail -F -v $sailing_err" C-m

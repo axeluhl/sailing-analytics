@@ -46,7 +46,7 @@ args=()
 
 # Create temp directory with three random numbers and the process ID
 # in the name.  This directory is removed automatically at exit.
-tmpDir="./tmp/"
+tmpDir="./tmp.$RANDOM.$RANDOM.$RANDOM.$$/"
 (umask 000 && mkdir "${tmpDir}") || {
   die "Could not create temporary directory! Exiting."
 }
@@ -80,6 +80,7 @@ fi
 if $tail ; then
 	check_if_tmux_is_used
 	tail_start
+  confirm_reset_panes
 	safeExit
 fi
 
@@ -242,7 +243,6 @@ set -o pipefail
 # checkDependencies
 
 # Run script
-confirm_reset_panes
 mainScript
 
 # Exit cleanlyd

@@ -7,14 +7,15 @@
 # -----------------------------------------------------------
 function query_public_dns_name(){
 	local_echo "Querying for the instance public dns name..."
-	local public_dns_name=$(query_public_dns_name_command $1)
+	local result=$(query_public_dns_name_command $1)
 
 	# not effective
 	if is_error $?; then
 		error "Querying for instance public dns name failed."
 	else
+		local public_dns_name=$(echo "$result" | tr -d '\r' )
 		success "Public dns name of instance \"$instance_id\" is \"$public_dns_name\"."
-		echo $public_dns_name | tr -d '\r'
+		echo $public_dns_name
 	fi
 }
 
@@ -98,17 +99,18 @@ function allocate_address(){
 	local_echo "Allocating elastic ip..."
 	local json_result=$(allocate_address_command)
 
+	# not effective
 	if is_error $?; then
 		error "Failed allocating elastic ip."
 	else
 		local elastic_ip=$(echo "$json_result" | jq -r '.PublicIp')
 		success "Successfully allocated elastic ip: $elastic_ip."
-		echo $elastic_ip
+		echo $elastic_ip | tr -d '\r'
 	fi
 }
 
 function allocate_address_command(){
-	aws ec2 allocate_address
+	aws ec2 allocate-address
 }
 
 # NOT TESTED
@@ -118,7 +120,7 @@ function allocate_address_command(){
 # @param $2  elastic_ip
 # -----------------------------------------------------------
 function associate_address(){
-	local_echo "Associating elastic ip \"$1\" with instance \"$2\"..."
+	local_echo "Associating instance \"$1\" with elastic ip \"$2\"..."
 	local json_result=$(associate_address_command $1 $2)
 
 	if is_error $?; then
@@ -172,4 +174,34 @@ function wait_for_ssh_connection(){
 
 function wait_for_ssh_connection_command(){
 	ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i $1 $2@$3 echo "ok" 2>&1 || true
+}
+
+# -----------------------------------------------------------
+# Patch 001-events.conf
+# @param $1  dns name
+# @param $2  event id
+# @param $3  keypair
+# @param $4  ssh user
+# @param $5  public dns name
+# -----------------------------------------------------------
+function configure_apache(){
+	local content=$(ssh -o StrictHostKeyChecking=no -i "$3" "$4"@"$5" "cat /etc/httpd/conf.d/001-events.conf")
+	local patched_content=$(comment_plain_ssl_entry "$content")
+	patched_content=$(append_event_entry "$patched_content" "$1" "$2")
+	echo "$patched_content" | ssh -o StrictHostKeyChecking=no -i $3 $4@$5 "cat > /etc/httpd/conf.d/001-events.conf"
+	#local result=$(ssh -o StrictHostKeyChecking=no -i $3 $4@$5 "/etc/init.d/httpd reload")
+}
+
+function comment_plain_ssl_entry(){
+	echo "$1" | sed -e '/Use Plain-SSL/ s/^#*/#/'
+}
+
+# -----------------------------------------------------------
+# Append Use Event-SSL entry to string
+# @param $1  content
+# @param $2  dns name
+# @param $2  event id
+# -----------------------------------------------------------
+function append_event_entry(){
+	echo -e "$1\nUse Event $2 \"$3\" 127.0.0.1 8888"
 }

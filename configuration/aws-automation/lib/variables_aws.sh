@@ -48,3 +48,7 @@ admin_username=admin
 admin_password=admin
 instance_count=1
 ssh_user=root
+sailing_0='/home/sailing/servers/server/logs/sailing0.log.0'
+sailing_err='/var/log/sailing.err'
+sailing_out='/var/log/sailing.out'
+events_conf='/etc/httpd/conf.d/001-events.conf'

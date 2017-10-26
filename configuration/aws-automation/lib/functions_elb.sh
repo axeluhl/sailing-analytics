@@ -62,7 +62,7 @@ function configure_health_check_http(){
 
 # $1: load_balancer_name
 function configure_health_check_http_command(){
-	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTP:80/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
+	aws elb configure-health-check --load-balancer-name "$1" --health-check Target=TCP:8888,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
 }
 
 # NOT TESTED

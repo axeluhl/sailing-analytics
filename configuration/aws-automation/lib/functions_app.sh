@@ -65,6 +65,7 @@ function create_event(){
 	if is_http_ok $status_code; then
 		local event_id=$(echo $response | jq -r '.eventid' | tr -d '\r')
 		success "Created event with id: \"$event_id\"."
+		echo "$event_id"
 	else
 		error "Failed creating event. [$status_code] $message"
 	fi

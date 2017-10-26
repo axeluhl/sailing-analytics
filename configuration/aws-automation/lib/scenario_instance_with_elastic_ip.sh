@@ -26,7 +26,7 @@ function instance_with_elastic_ip_require(){
 	require_user_password
 }
 
-function instance_with_elastic_ip__execute() {
+function instance_with_elastic_ip_execute() {
 	header "Instance Initialization"
 
 	local json_instance=$(run_instance)
@@ -66,6 +66,10 @@ function instance_with_elastic_ip__execute() {
 
 	local subdomain_name=$(echo "$instance_name" | trim)
 	route53_change_resource_record "$subdomain_name" 60 "$elastic_ip"
+
+	header "Apache configuration"
+
+	configure_apache "$elastic_ip" "$event_id" "$key_file" "$ssh_user" "$public_dns_name"
 
 	echo "Finished."
 
