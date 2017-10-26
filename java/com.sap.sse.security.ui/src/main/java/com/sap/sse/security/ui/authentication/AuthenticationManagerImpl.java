@@ -96,11 +96,13 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             }
         });
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @SuppressWarnings("unused")
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
                 // If a user is already authenticated while opening the page, we only trigger a reload if no locale is given by the URL
-                if (preAuthenticated && (localeParam == null || localeParam.isEmpty())) {
+                if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE && preAuthenticated
+                        && (localeParam == null || localeParam.isEmpty())) {
                     redirectWithLocaleForAuthenticatedUser();
                 }
             }
@@ -152,7 +154,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
                     // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
-                    redirectIfLocaleIsSetAndNotCurrentOne(result.getUserDTO().getLocale());
+                    redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getLocale());
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
                         view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
@@ -200,7 +202,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                 callback.onSuccess(result);
                 
                 if(!Util.equalsWithNull(locale, localeName)) {
-                    redirectIfLocaleIsSetAndNotCurrentOne(localeName);
+                    redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(localeName);
                 }
             }
         });
@@ -212,24 +214,29 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private void redirectWithLocaleForAuthenticatedUser() {
         final AuthenticationContext authenticationContext = getAuthenticationContext();
         if(authenticationContext.isLoggedIn()) {
-            redirectIfLocaleIsSetAndNotCurrentOne(authenticationContext.getCurrentUser().getLocale());
+            redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(authenticationContext.getCurrentUser().getLocale());
         }
     }
     
-    private void redirectIfLocaleIsSetAndNotCurrentOne(String locale) {
-        if(!isCurrentLocale(locale)) {
-            Window.Location.assign(Window.Location.createUrlBuilder()
-                    .setParameter(LocaleInfo.getLocaleQueryParam(), locale).buildString());
+    private void redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(String locale) {
+        if(shouldChangeLocale(locale)) {
+            Window.Location.reload();
         }
     }
     
-    private boolean isCurrentLocale(String locale) {
+    private boolean shouldChangeLocale(String locale) {
         if(locale == null || locale.isEmpty()) {
-            return true;
+            // If the user currently has no locale preference, we do not refresh
+            return false;
+        }
+        final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
+        if (localeParam != null && !localeParam.isEmpty()) {
+            // If the locale is specified in the URL, we do not refresh
+            return false;
         }
         final String currentLocale = LocaleInfo.getCurrentLocale().getLocaleName();
-        final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
-        return currentLocale.equals(locale) || locale.equals(localeParam);
+        // If the current locale is equal to the preferred language, a refresh isn't necessary
+        return !currentLocale.equals(locale);
     }
 
     @Override
