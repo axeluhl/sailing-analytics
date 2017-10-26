@@ -15,8 +15,11 @@
                the grouping dimension. If that was the last dimension removed, the user is asked to provide a new
                grouping dimension.
            </li>
-           <li>When signing in, the page will now switch to the user's preferred language if one is configured in the user profile.
-               In addition, when the user changes the preferred language in the user profile, the page will switch to this language on save.
+           <li>A user's language preference now also affects the website's language if one is set in the user profile.
+               This preference formerly only affected the language of notification mails.
+               Be aware that when signing in, the page will not be forced to be shown in the user's preferred language.
+               It will only take effect when refreshing the page or opening a new one, to prevent the state of the currently opened page to get lost.
+               When signing out, the language preference will also stop to take effect.
            </li>
         </ul>
         
