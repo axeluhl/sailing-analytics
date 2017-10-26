@@ -25,7 +25,7 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * Remembers, per boat ID, the milliseconds difference between the time the message was received
      * and the GPS time stamp provided by the message.
      */
-    private final Map<Integer, Long> timeStampOfLastMessageReceived;
+    private final Map<Integer, Long> delayBetweenMessageTimestampAndTimepointReceived;
     
     private final ExpeditionMessageParser parser;
 
@@ -75,7 +75,7 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
     public UDPExpeditionReceiver(int listeningOnPort, DeviceRegistry deviceRegistry) throws SocketException {
         super(listeningOnPort);
         this.deviceRegistry = deviceRegistry;
-        this.timeStampOfLastMessageReceived = new HashMap<Integer, Long>();
+        this.delayBetweenMessageTimestampAndTimepointReceived = new HashMap<Integer, Long>();
         parser = new ExpeditionMessageParser(this);
         addListener(msg->produceAndStoreOptionalFixes(msg), /* validMessagesOnly */ true);
     }
@@ -113,8 +113,12 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
         }
     }
 
-    public Map<Integer, Long> getTimeStampOfLastMessageReceived() {
-        return timeStampOfLastMessageReceived;
+    public Long getLastKnownMessageDelayInMillis(int boatID) {
+        return delayBetweenMessageTimestampAndTimepointReceived.get(boatID);
+    }
+    
+    public void updateLastKnownMessageDelay(int boatID, long timestampAsMillis) {
+        delayBetweenMessageTimestampAndTimepointReceived.put(boatID, timestampAsMillis);
     }
     
     protected ExpeditionMessageParser getParser() {
