@@ -32,7 +32,7 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     RUDDER_RAKE_STBD("RudderRakeAngleStbd"), //
     MAST_ROTATION("MastRotation");
 
-    private String columnName;
+    private final String columnName;
     
     private BravoExtendedSensorDataMetadata(String columnName) {
         this.columnName = columnName;
