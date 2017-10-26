@@ -51,6 +51,9 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "ManeuverExitingSpeedInKnots", ordinal = 18, resultDecimals = 2)
     Double getManeuverExitingSpeed();
+    
+    @Statistic(messageKey = "AbsCourseChangeAtManeuverTimePointInDegreesPerSecond", ordinal = 21, resultDecimals = 2)
+    Double getAbsCourseChangeAtManeuverTimePointInDegreesPerSecond();
 
     TimePoint getTimePointBeforeForAnalysis();
 
