@@ -3,6 +3,7 @@ package com.sap.sse.pairinglist.impl;
 
 
 
+
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -56,7 +57,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         for (int iteration = 0; iteration < iterationCount; iteration++) {
             int[][] currentAssociations = new int[competitors][competitors];
-            
             int[][] currentPLT = new int[groups * flights][competitors / groups];
             int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
 
@@ -72,11 +72,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,0);
 
                     for (int comp = 1; comp <= competitors; comp++) {
-                        if ((sum(associationRow, 0, comp - 1) <= associationSum) &&
+                        if ((sumOf3rdDimension(associationRow, 0, comp - 1) <= associationSum) &&
                                 !contains(flightColumn, comp) &&
                                 findMaxValue(associationRow, 0, comp - 1) <= associationHigh[0]) {
                             flightColumn[0][zGroups] = comp;
-                            associationSum = sum(associationRow, 0, comp - 1);
+                            associationSum = sumOf3rdDimension(associationRow, 0, comp - 1);
                             associationHigh[0] = findMaxValue(associationRow, 0, comp - 1);
                         }
                     }
@@ -96,11 +96,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,fleets);
 
                         for (int comp = 1; comp <= competitors; comp++) {
-                            if ((sum(associationRow, fleets, comp - 1) <= associationSum) &&
+                            if ((sumOf3rdDimension(associationRow, fleets, comp - 1) <= associationSum) &&
                                     !contains(flightColumn, comp) &&
                                     findMaxValue(associationRow, fleets, comp - 1) <= associationHigh[fleets]) {
                                 flightColumn[fleets][zGroups] = comp;
-                                associationSum = sum(associationRow, fleets, comp - 1);
+                                associationSum = sumOf3rdDimension(associationRow, fleets, comp - 1);
                                 associationHigh[fleets] = findMaxValue(associationRow, fleets, comp - 1);
 
                             }
@@ -135,6 +135,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         for(int[] group : bestPLT) {
             shuffle(group);
         }
+   
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         return bestPLT;
@@ -175,7 +176,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return temp;
     }
 
-    private int sum(int[][][] associationRow, int i, int comp) {
+    private int sumOf3rdDimension(int[][][] associationRow, int i, int comp) {
         int sum = 0;
         for (int z = 0; z < associationRow[0].length; z++) {
             if (associationRow[i][z][comp] > -1) {
@@ -242,7 +243,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return standardDev: returns how much the association values deviate from each other
      */
 
-    private double calcStandardDev(int[][] associations) {
+    protected double calcStandardDev(int[][] associations) {
 
         double standardDev = 0;
         double expectedValue = 0;
