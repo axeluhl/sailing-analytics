@@ -1167,48 +1167,4 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         }
         return relevantBearings;
     }
-
-    public static class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
-        private static final long serialVersionUID = 6541349657098710337L;
-        
-        private final TimePoint timePoint;
-        private final SpeedWithBearing speedWithBearing;
-        private final double courseChangeInDegrees;
-
-        /**
-         * Constructs a speed with bearing step with details about speed, bearing and course change related to the previous step.
-         * 
-         * @param timePoint
-         *            The time point when the step details have been recorded
-         * @param speedWithBearing
-         *            Speed with bearing at the provided time point
-         * @param courseChangeInDegrees
-         *            Course change in degrees compared to the previous step. Zero, if this is a first step.
-         */
-        public SpeedWithBearingStepImpl(TimePoint timePoint, SpeedWithBearing speedWithBearing, double courseChangeInDegrees) {
-            this.timePoint = timePoint;
-            this.speedWithBearing = speedWithBearing;
-            this.courseChangeInDegrees = courseChangeInDegrees;
-        }
-
-        @Override
-        public TimePoint getTimePoint() {
-            return timePoint;
-        }
-
-        @Override
-        public SpeedWithBearing getSpeedWithBearing() {
-            return speedWithBearing;
-        }
-
-        @Override
-        public double getCourseChangeInDegrees() {
-            return courseChangeInDegrees;
-        }
-        
-        @Override
-        public String toString() {
-            return "Speed: " + speedWithBearing.getKnots() + " kts, course change: " + courseChangeInDegrees + "°, bearing: " + speedWithBearing.getBearing().getDegrees() + "°";
-        }
-    }
 }

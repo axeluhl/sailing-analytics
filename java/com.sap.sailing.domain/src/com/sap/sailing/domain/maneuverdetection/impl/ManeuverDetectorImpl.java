@@ -32,9 +32,9 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl.SpeedWithBearingStepImpl;
 import com.sap.sailing.domain.tracking.impl.ManeuverImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingManeuverImpl;
+import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -447,7 +447,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         }
                     }
                 }
-                if (Math.abs(maneuverMainCurveDetails.getTotalCourseChangeInDegrees()) >= 1) {
+                if (Math.abs(maneuverMainCurveDetails.getTotalCourseChangeInDegrees()) >= 1 && maneuverMainCurveDetails.getTimePointBefore().until(maneuverMainCurveDetails.getTimePointAfter()).asMillis() >= 500) {
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverLoss, maneuverDetails.getTimePoint(), maneuverDetails.getTimePointBefore(),
                             maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
@@ -696,7 +696,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @return The time point and speed at located step with speed maximum, as well as the total course change from the
      *         step iteration started until the step with the speed maximum
      */
-    private CurveBoundaryExtension findSpeedMaximum(Iterable<SpeedWithBearingStep> stepsToAnalyze,
+    CurveBoundaryExtension findSpeedMaximum(Iterable<SpeedWithBearingStep> stepsToAnalyze,
             boolean timeBackwardSearch, TimePoint globalMaximumSearchUntilTimePoint) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
         final Predicate<SpeedWithBearingStep> localMaximumSearch;
@@ -740,6 +740,12 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             }
             previousSpeedInKnots = speedInKnots;
         }
+        // The course change contained in a speed with bearing step references the bearing difference with its preceding
+        // step back in time. We need to remove the added course change from the last step in order to not go further
+        // time backward.
+        if (timeBackwardSearch && stepWithMaxSpeed != null) {
+            courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees -= stepWithMaxSpeed.getCourseChangeInDegrees();
+        }
         return stepWithMaxSpeed == null ? null
                 : new CurveBoundaryExtension(stepWithMaxSpeed.getTimePoint(), stepWithMaxSpeed.getSpeedWithBearing(),
                         courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees);
@@ -758,7 +764,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The nautical direction of the maneuver
      * @return The computed entering and exiting time point with its speeds with bearings for the main curve
      */
-    private CurveEnterindAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(
+    CurveEnterindAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(
             TimePoint maneuverTimePoint, Iterable<SpeedWithBearingStep> bearingStepsToAnalyze,
             NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
