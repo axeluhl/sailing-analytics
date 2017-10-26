@@ -138,6 +138,16 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         this.pairingListTemplate=bestPLT;
         return bestPLT;
     }
+    
+    private int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
+        for (int[] group : pairingList) {
+            for (int i = 0; i < pairingList[0].length; i++) {
+                associations[group[i] - 1][i] += 1;
+            }
+        }
+        
+        return associations;
+    }
 
     public int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
             int[][] flightColumn, int zGroups,int fleet) {
