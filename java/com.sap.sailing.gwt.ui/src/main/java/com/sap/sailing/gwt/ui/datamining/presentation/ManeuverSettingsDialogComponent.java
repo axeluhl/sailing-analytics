@@ -55,6 +55,7 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
         Label mainCurveAnalysisLabel = dialog.createLabel(stringMessages.mainCurveAnalysis());
         grid.setWidget(0, 0, mainCurveAnalysisLabel);
         mainCurveAnalysisBox = dialog.createCheckbox("");
+        mainCurveAnalysisBox.setValue(settings.isMainCurveAnalysis());
         grid.setWidget(0, 1, mainCurveAnalysisBox);
         
         Label minManeuverDurationLabel = dialog.createLabel(stringMessages.minManeuverDuration());
