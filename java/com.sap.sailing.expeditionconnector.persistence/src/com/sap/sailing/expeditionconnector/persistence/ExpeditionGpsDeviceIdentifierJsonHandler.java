@@ -1,4 +1,4 @@
-package com.sap.sailing.expeditionconnector.impl;
+package com.sap.sailing.expeditionconnector.persistence;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;

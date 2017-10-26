@@ -1,6 +1,8 @@
 package com.sap.sailing.expeditionconnector;
 
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
 
 /**
  * Makes accessible a mapping from "Expedition" boat IDs to device UUIDs.

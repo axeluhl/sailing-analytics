@@ -1,10 +1,10 @@
-package com.sap.sailing.expeditionconnector;
+package com.sap.sailing.expeditionconnector.persistence;
 
 /**
  * A device identifier used to identify an installation of the regatta tool "Expedition"
  * regarding its basic GPS information.
  * 
- * @author Fredrik Teschke
+ * @author Axel Uhl (d043530)
  *
  */
 public interface ExpeditionGpsDeviceIdentifier extends ExpeditionDeviceIdentifier {

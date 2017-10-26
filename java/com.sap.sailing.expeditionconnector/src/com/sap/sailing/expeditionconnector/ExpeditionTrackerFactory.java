@@ -24,8 +24,13 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.expeditionconnector.impl.Activator;
-import com.sap.sailing.expeditionconnector.impl.ExpeditionGpsDeviceIdentifierImpl;
-import com.sap.sailing.expeditionconnector.impl.ExpeditionSensorDeviceIdentifierImpl;
+import com.sap.sailing.expeditionconnector.persistence.DomainObjectFactory;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifierImpl;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierImpl;
+import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
+import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 
 public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry {
     private static Logger logger = Logger.getLogger(ExpeditionTrackerFactory.class.getName());
@@ -66,23 +71,31 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
 
     private ServiceTracker<SensorFixStoreSupplier, SensorFixStoreSupplier> sensorFixServiceTracker;
 
-    public ExpeditionTrackerFactory(SensorFixStore sensorFixStore) {
+    private final MongoObjectFactory mongoObjectFactory;
+
+    public ExpeditionTrackerFactory(SensorFixStore sensorFixStore, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.windTrackers = new HashMap<RaceDefinition, WindTracker>();
         this.sensorFixStore = sensorFixStore;
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
         final Activator activator = Activator.getInstance();
         defaultPort = activator.getExpeditionUDPPort();
-        deviceConfigurations = new ConcurrentHashMap<>(); // TODO add persistence; these need to be loaded from the DB
+        deviceConfigurations = new ConcurrentHashMap<>();
         devicesPerBoatId = new ConcurrentHashMap<>();
         final BundleContext context = activator.getContext();
+        this.mongoObjectFactory = mongoObjectFactory;
+        for (final ExpeditionDeviceConfiguration expeditionDeviceConfigurationLoadedFromDB : domainObjectFactory.getExpeditionDeviceConfigurations()) {
+            addOrReplaceDeviceConfigurationNoPersistence(expeditionDeviceConfigurationLoadedFromDB);
+        }
         if (context != null) {
-            startListeningForSensorFixStoreSuppliers(context);
+            sensorFixServiceTracker = startListeningForSensorFixStoreSuppliers(context);
+        } else {
+            sensorFixServiceTracker = null;
         }
         logger.info("Created "+getClass().getName()+" with default UDP port "+defaultPort);
     }
 
-    private void startListeningForSensorFixStoreSuppliers(BundleContext context) {
-        sensorFixServiceTracker = new ServiceTracker<>(context, SensorFixStoreSupplier.class,
+    private ServiceTracker<SensorFixStoreSupplier, SensorFixStoreSupplier> startListeningForSensorFixStoreSuppliers(BundleContext context) {
+        final ServiceTracker<SensorFixStoreSupplier, SensorFixStoreSupplier> result = new ServiceTracker<>(context, SensorFixStoreSupplier.class,
                 new ServiceTrackerCustomizer<SensorFixStoreSupplier, SensorFixStoreSupplier>() {
                     @Override
                     public SensorFixStoreSupplier addingService(ServiceReference<SensorFixStoreSupplier> reference) {
@@ -106,20 +119,22 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
                         }
                     }
                 });
-        sensorFixServiceTracker.open();
+        result.open();
+        return result;
     }
 
     public synchronized static ExpeditionTrackerFactory getInstance() {
-        return getInstance(/* sensorFixStore */ null);
+        return getInstance(/* sensorFixStore */ null, PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
     }
     
     /**
      * Use this constructor in non-OSGi scenarios such as plain JUnit test environments where the
      * {@link SensorFixStoreSupplier} cannot be discovered through the registry.
      */
-    public static ExpeditionTrackerFactory getInstance(SensorFixStore sensorFixStore) {
+    public static ExpeditionTrackerFactory getInstance(SensorFixStore sensorFixStore, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         if (defaultInstance == null) {
-            defaultInstance = new ExpeditionTrackerFactory(sensorFixStore);
+            defaultInstance = new ExpeditionTrackerFactory(sensorFixStore, domainObjectFactory, mongoObjectFactory);
         }
         return defaultInstance;
     }
@@ -189,6 +204,11 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     }
     
     public void addOrReplaceDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        addOrReplaceDeviceConfigurationNoPersistence(deviceConfiguration);
+        mongoObjectFactory.storeExpeditionDeviceConfiguration(deviceConfiguration);
+    }
+    
+    private void addOrReplaceDeviceConfigurationNoPersistence(ExpeditionDeviceConfiguration deviceConfiguration) {
         if (deviceConfiguration.getExpeditionBoatId() != null &&
                 devicesPerBoatId.containsKey(deviceConfiguration.getExpeditionBoatId()) &&
                 !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).equals(deviceConfiguration)) {
@@ -211,6 +231,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
         if (deviceConfiguration.getExpeditionBoatId() != null) {
             devicesPerBoatId.remove(deviceConfiguration.getExpeditionBoatId());
         }
+        mongoObjectFactory.removeExpeditionDeviceConfiguration(deviceConfiguration);
     }
 
     @Override

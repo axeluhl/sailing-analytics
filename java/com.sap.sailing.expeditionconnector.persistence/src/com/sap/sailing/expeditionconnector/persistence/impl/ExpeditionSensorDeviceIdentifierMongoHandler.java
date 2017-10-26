@@ -3,7 +3,7 @@ package com.sap.sailing.expeditionconnector.persistence.impl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.expeditionconnector.impl.ExpeditionSensorDeviceIdentifierSerializationHandler;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierSerializationHandler;
 
 public class ExpeditionSensorDeviceIdentifierMongoHandler extends ExpeditionSensorDeviceIdentifierSerializationHandler
 implements DeviceIdentifierMongoHandler {

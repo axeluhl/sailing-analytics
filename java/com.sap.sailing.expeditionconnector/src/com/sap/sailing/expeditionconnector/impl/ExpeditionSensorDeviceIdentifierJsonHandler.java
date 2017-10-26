@@ -2,6 +2,7 @@ package com.sap.sailing.expeditionconnector.impl;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierSerializationHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
 public class ExpeditionSensorDeviceIdentifierJsonHandler extends ExpeditionSensorDeviceIdentifierSerializationHandler 

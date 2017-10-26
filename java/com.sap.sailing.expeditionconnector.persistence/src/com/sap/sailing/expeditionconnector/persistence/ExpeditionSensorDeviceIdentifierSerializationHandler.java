@@ -1,10 +1,9 @@
-package com.sap.sailing.expeditionconnector.impl;
+package com.sap.sailing.expeditionconnector.persistence;
 
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sse.common.Util;
 
 public class ExpeditionSensorDeviceIdentifierSerializationHandler {

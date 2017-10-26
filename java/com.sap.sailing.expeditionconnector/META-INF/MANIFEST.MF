@@ -15,7 +15,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.gateway.serialization.shared.android,
- com.sap.sailing.expeditionconnector.common
+ com.sap.sailing.expeditionconnector.common,
+ com.sap.sailing.expeditionconnector.persistence
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1"
