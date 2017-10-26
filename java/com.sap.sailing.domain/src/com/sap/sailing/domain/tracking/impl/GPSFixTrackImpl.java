@@ -1200,5 +1200,10 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         public double getCourseChangeInDegrees() {
             return courseChangeInDegrees;
         }
+        
+        @Override
+        public String toString() {
+            return "Speed: " + speedWithBearing.getKnots() + " kts, course change: " + courseChangeInDegrees + "°, bearing: " + speedWithBearing.getBearing().getDegrees() + "°";
+        }
     }
 }
