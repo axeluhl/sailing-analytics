@@ -10,13 +10,20 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Determines maneuvers within a tracked race.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public interface ManeuverDetector {
-    
+
     /**
      * @see ManeuverDetector#detectManeuvers(Competitor, Iterable, boolean, TimePoint, TimePoint)
      */
-    List<Maneuver> detectManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean ignoreMarkPassings) throws NoWindException;
-    
+    List<Maneuver> detectManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean ignoreMarkPassings)
+            throws NoWindException;
+
     /**
      * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
      * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
@@ -53,6 +60,7 @@ public interface ManeuverDetector {
      *         <code>to</code>, or else the list of maneuvers detected.
      */
     List<Maneuver> detectManeuvers(Competitor competitor, Iterable<GPSFixMoving> approximatingFixesToAnalyze,
-            boolean ignoreMarkPassings, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException;
+            boolean ignoreMarkPassings, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
+            throws NoWindException;
 
 }

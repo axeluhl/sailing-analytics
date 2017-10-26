@@ -5,8 +5,8 @@ import com.sap.sse.common.TimePoint;
 
 /**
  * Besides the parent class, the time point is contained where highest course change was recorded within the curve.
- * Additionally, the total course change of the curve which is calculated throughout the iteration of bearing steps
- * of the curve is also available.
+ * Additionally, the total course change of the curve which is calculated throughout the iteration of bearing steps of
+ * the curve is also available.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -24,8 +24,8 @@ class CurveDetails extends CurveEnterindAndExitingDetails {
     }
 
     /**
-     * Gets the computed time point of the corresponding curve. The time point refers to a position within
-     * maneuver, where the highest course change has been recorded.
+     * Gets the computed time point of the corresponding curve. The time point refers to a position within maneuver,
+     * where the highest course change has been recorded.
      * 
      * @return The computed maneuver time point
      */

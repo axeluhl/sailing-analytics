@@ -41,6 +41,11 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+/**
+ * @author Vladislav Chumak (D069712)
+ * @see ManeuverDetector
+ *
+ */
 public class ManeuverDetectorImpl implements ManeuverDetector {
 
     private static final Logger logger = Logger.getLogger(ManeuverDetectorImpl.class.getName());
