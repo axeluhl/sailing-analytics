@@ -3103,7 +3103,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         }
                     }
                 }
-                if (maneuverMainCurveDetails.getTotalCourseChangeInDegrees() >= 1) {
+                if (Math.abs(maneuverMainCurveDetails.getTotalCourseChangeInDegrees()) >= 1) {
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverLoss, maneuverDetails.getTimePoint(), maneuverDetails.getTimePointBefore(),
                             maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
