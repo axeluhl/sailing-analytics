@@ -2,6 +2,7 @@ package com.sap.sse.pairinglist.impl;
 
 
 
+
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -15,14 +16,14 @@ import com.sap.sse.pairinglist.PairingListTemplate;
  * @param <Competitor>
  */
 public class PairingListTemplateImpl implements PairingListTemplate {
-    
+
     private int[][] pairingListTemplate;
     private double standardDev;
-    
+
     public PairingListTemplateImpl() {
-        
+
     }
-    
+
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
         pairingListTemplate = new int[pairingFrameProvider.getGroupsCount()][pairingFrameProvider.getCompetitorsCount()/pairingFrameProvider.getGroupsCount()];
         this.create(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() );
@@ -38,12 +39,12 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             CompetitionFormat<Flight, Group, Competitor> competitionFormat) {
         return null;
     }
-    
+
     @Override
     public int[][] getPairingListTemplate(){
         return pairingListTemplate;
     }
-    
+
     int[][] create(int flights, int groups, int competitors) {
         return this.create(flights, groups, competitors, 1000000);
     }
@@ -55,9 +56,10 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         for (int iteration = 0; iteration < iterationCount; iteration++) {
             int[][] currentAssociations = new int[competitors][competitors];
+            
             int[][] currentPLT = new int[groups * flights][competitors / groups];
             int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
-            
+
             for (int zFlight = 0; zFlight < flights; zFlight++) {
 
                 int[][] flightColumn = new int[groups][competitors / groups];
@@ -79,7 +81,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         }
                     }
                 }
-                
+
                 for (int fleets = 1; fleets < groups - 1; fleets++) {
                     for (int aux = 0; aux < competitors; aux++) {
                         if (!contains(flightColumn, aux)) {
@@ -87,7 +89,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                             break;
                         }
                     }
-                    
+
                     for (int zGroups = 1; zGroups < (competitors / groups); zGroups++) {
                         int associationSum = Integer.MAX_VALUE;
                         associationHigh[fleets] = flights + 1;
@@ -105,7 +107,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         }
                     }
                 }
-                
+
                 for (int j = 0; j < (competitors / groups); j++) {
                     for (int z = 1; z <= competitors; z++) {
                         if (!contains(flightColumn, z)) {
@@ -129,22 +131,25 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 bestDev = this.calcStandardDev(currentAssociations);
             }
         }
-        
+
         for(int[] group : bestPLT) {
             shuffle(group);
         }
-        
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         return bestPLT;
     }
+    
+    
+
+    
 
     public int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
             int[][] flightColumn, int zGroups,int fleet) {
         System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1] -1], 0, associationRow[fleet][zGroups -1], 0, competitors);
         return associationRow;
     }
-    
+
     private boolean contains(int[][] flightColumn, int comp) {
         for (int i = 0; i < flightColumn.length; i++) {
             for (int z = 0; z < flightColumn[0].length; z++) {
@@ -171,7 +176,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return sum;
     }
-    
+
     private int findMaxValue(int[][][] associationRow, int i, int comp) {
         int temp = 0;
         for (int z = 0; z < associationRow[0].length; z++) {
@@ -183,20 +188,20 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private int randomBW(int min,int max){
         return min + (int) (Math.random() * ((max - min) + 1));
     }
-    
+
     private int[] shuffle(int[] src) {
         int[] result = src;
         for(int i = 0; i<(result.length*2); i++) {
             int o = randomBW(0, result.length-1);
             int n = randomBW(0, randomBW(0, src.length-1));
-            
+
             int temp = result[o];
             result[o] = result[n];
             result[n] = temp;
         }
         return result;
     }
-    
+
     private int[] getColumnIntArray(int[][] src, int row) {
         int[] result = new int[src[0].length];
         for (int i = 0; i < src[0].length; i++) {
@@ -204,8 +209,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return result;
     }
-    
-    
+
+
     public int[][] getAssociationsFromPairingList(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
@@ -222,13 +227,13 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         return associations;
     }
-    
+
     /**
      * @param associations: association describes a 2 dimensional array of integers, which contains the information 
      *                      about how often the teams play against each other
      * @return standardDev: returns how much the association values deviate from each other
      */
-    
+
     private double calcStandardDev(int[][] associations) {
 
         double standardDev = 0;
@@ -270,28 +275,28 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         return standardDev;
     }
-    
+
     private double getMaxValueOfArray(int[] arr) {
         double maxValue = 0;
-        
+
         for (int val: arr) {
             if (val > maxValue) {
                 maxValue = val;
             }
         }
-        
+
         return maxValue;
     }
-    
+
     private double getMaxValueOfArray(int[][] arr) {
         double maxValue = 0;
-        
+
         for (int[] val: arr) {
             if (this.getMaxValueOfArray(val) > maxValue) {
                 maxValue = this.getMaxValueOfArray(val);
             }
         }
-        
+
         return maxValue;
     }
 
