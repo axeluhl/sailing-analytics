@@ -1128,37 +1128,42 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         List<SpeedWithBearingStep> relevantBearings = new ArrayList<>();
         Bearing lastBearing = null;
         double lastCourseChangeAngleInDegrees = 0;
-        for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint.plus(intervalBetweenBearingSteps)) {
-            if (timePoint.after(toTimePoint)) {
-                timePoint = toTimePoint;
-            }
-            SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
-            if (estimatedSpeed != null) {
-                Bearing bearing = estimatedSpeed.getBearing();
-                // First bearing step supposed to have 0 as course change as
-                // it does not have any previous steps with bearings to compute bearing difference.
-                // If the condition is not met, the existing code which uses ManeuverBearingStep class will break.
-                double courseChangeAngleInDegrees = lastBearing == null ? 0
-                        : lastBearing.getDifferenceTo(bearing).getDegrees();
-                // In extreme cases, the getDifferenceTo() might compute a bearing in a wrong maneuver direction due to
-                // fast turn and/or inaccurate GPS during penalty circles.
-                // We need to ensure that our totalCourseChange does not get reduced erroneously. It is more likely to
-                // have a course change step sequence
-                // like 20, 70, 120, 200, 90, 20 which produces 520 degrees total course change than a sequence with 20,
-                // 70, 120, -160, 90, 20 which produces 160 degrees total course change.
-                // If we fail to take care of the signum, penalty circle computation will fail due to inconsistencies
-                // with douglas peucker fixes.
-                if (Math.abs(Math.signum(courseChangeAngleInDegrees) - Math.signum(lastCourseChangeAngleInDegrees)) == 2
-                        && Math.abs(courseChangeAngleInDegrees - lastCourseChangeAngleInDegrees) >= 180) {
-                    courseChangeAngleInDegrees += courseChangeAngleInDegrees < 0 ? 360 : -360;
+        lockForRead();
+        try {
+            for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint.plus(intervalBetweenBearingSteps)) {
+                if (timePoint.after(toTimePoint)) {
+                    timePoint = toTimePoint;
                 }
-                relevantBearings.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees));
-                lastBearing = bearing;
-                lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
+                SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
+                if (estimatedSpeed != null) {
+                    Bearing bearing = estimatedSpeed.getBearing();
+                    // First bearing step supposed to have 0 as course change as
+                    // it does not have any previous steps with bearings to compute bearing difference.
+                    // If the condition is not met, the existing code which uses ManeuverBearingStep class will break.
+                    double courseChangeAngleInDegrees = lastBearing == null ? 0
+                            : lastBearing.getDifferenceTo(bearing).getDegrees();
+                    // In extreme cases, the getDifferenceTo() might compute a bearing in a wrong maneuver direction due to
+                    // fast turn and/or inaccurate GPS during penalty circles.
+                    // We need to ensure that our totalCourseChange does not get reduced erroneously. It is more likely to
+                    // have a course change step sequence
+                    // like 20, 70, 120, 200, 90, 20 which produces 520 degrees total course change than a sequence with 20,
+                    // 70, 120, -160, 90, 20 which produces 160 degrees total course change.
+                    // If we fail to take care of the signum, penalty circle computation will fail due to inconsistencies
+                    // with douglas peucker fixes.
+                    if (Math.abs(Math.signum(courseChangeAngleInDegrees) - Math.signum(lastCourseChangeAngleInDegrees)) == 2
+                            && Math.abs(courseChangeAngleInDegrees - lastCourseChangeAngleInDegrees) >= 180) {
+                        courseChangeAngleInDegrees += courseChangeAngleInDegrees < 0 ? 360 : -360;
+                    }
+                    relevantBearings.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees));
+                    lastBearing = bearing;
+                    lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
+                }
+                if (!timePoint.before(toTimePoint)) {
+                    break;
+                }
             }
-            if (!timePoint.before(toTimePoint)) {
-                break;
-            }
+        } finally {
+            unlockAfterRead();
         }
         return relevantBearings;
     }
