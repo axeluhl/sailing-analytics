@@ -5,8 +5,10 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageParser;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
@@ -96,7 +98,12 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
      */
     private void tryToProduceAndStoreSensorFix(ExpeditionMessage msg, ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier) {
-        final DoubleVectorFix fix = null; // TODO try to produce a new fix from what we have if we have enough new evidence
+        final Double heelInDegrees = msg.hasValue(ExpeditionMessage.ID_HEEL) ? msg.getValue(ExpeditionMessage.ID_HEEL) : null;
+        final Double trimInDegrees = msg.hasValue(ExpeditionMessage.ID_TRIM) ? msg.getValue(ExpeditionMessage.ID_TRIM) : null;
+        final Double[] vector = new Double[Math.max(ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex(), ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex())-1];
+        vector[ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex()] = heelInDegrees;
+        vector[ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex()] = trimInDegrees;
+        final DoubleVectorFix fix = new DoubleVectorFixImpl(msg.getTimePoint(), vector);
         if (fix != null) {
             deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);
         }
@@ -107,7 +114,7 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
      */
     private void tryToProduceAndStoreGpsFix(ExpeditionMessage msg, ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier) {
-        final GPSFixMoving fix = null; // TODO assemble GPS fix from what we have if we have enough new evidence
+        final GPSFixMoving fix = msg.getGPSFixMoving();
         if (fix != null) {
             deviceRegistry.getSensorFixStore().storeFix(gpsDeviceIdentifier, fix);
         }

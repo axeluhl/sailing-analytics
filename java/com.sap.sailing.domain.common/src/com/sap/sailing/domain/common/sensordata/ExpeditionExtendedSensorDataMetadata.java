@@ -40,6 +40,9 @@ public enum ExpeditionExtendedSensorDataMetadata {
         return columnName;
     }
 
+    /**
+     * The index in the {@link DoubleVectorFix} where this data item will be stored
+     */
     public int getColumnIndex() {
         return mappedToBravoField.getColumnIndex();
     }

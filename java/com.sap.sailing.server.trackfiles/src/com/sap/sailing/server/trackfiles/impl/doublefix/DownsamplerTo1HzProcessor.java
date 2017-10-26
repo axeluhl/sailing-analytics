@@ -49,13 +49,13 @@ public final class DownsamplerTo1HzProcessor implements DoubleFixProcessor {
     }
 
     private void computeDownsampledFixForCurrentSecond() {
-        final double[] computedAverage = new double[nrOfColumsInTrack];
+        final Double[] computedAverage = new Double[nrOfColumsInTrack];
         final int numberOfFixesInSecond = fixesInTheCurrentSecond.size();
         if (numberOfFixesInSecond == 0) {
             return;
         }
         for (DoubleVectorFixData d : fixesInTheCurrentSecond) {
-            final double[] fix = d.getFix();
+            final Double[] fix = d.getFix();
             for (int colIdx = 0; colIdx < nrOfColumsInTrack; colIdx++) {
                 computedAverage[colIdx] += fix[colIdx];
             }
