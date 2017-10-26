@@ -1,9 +1,7 @@
 package com.sap.see.pairinglist.test;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertArrayEquals; 
 import static org.junit.Assert.fail;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -30,7 +28,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
            
             
             // creating pairing list template
-            this.create(15, 3, 18,10000);
+            //create(15, 3, 18,10000);
             
             
     }
@@ -104,7 +102,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     @Test
     public void qualityCheck(){
         if(getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
-        create(10, 3, 30,10000);
+        //create(10, 3, 30,10000);
         if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
     }
   
