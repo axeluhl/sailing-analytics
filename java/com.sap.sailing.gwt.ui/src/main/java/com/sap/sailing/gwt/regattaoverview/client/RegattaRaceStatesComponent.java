@@ -182,11 +182,9 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         boolean canRemoveBoatClass = true;
         boolean canRemoveLastUpdate = true;
         boolean canRemoveProtestTime = true;
-        
         boolean first = true;
         for (RegattaOverviewEntryDTO loopEntryDTO : allEntries) {
             final RaceInfoDTO loopRaceInfo = loopEntryDTO.raceInfo;
-            
             if (canRemoveLastUpdate && timePassedInSeconds(loopRaceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveLastUpdate = false;
             }
@@ -194,42 +192,34 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                     && timePassedInSeconds(loopRaceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveProtestTime = false;
             }
-
             if (first) {
                 firstRegattaName = loopEntryDTO.regattaDisplayName;
                 firstRegattaNameEntry = loopEntryDTO;
-                
                 firstCourseAreaName = loopEntryDTO.courseAreaName;
-                
                 firstCourseName = loopRaceInfo.lastCourseName;
                 firstCourseRegattaOverviewEntry = loopRaceInfo;
-                
                 lastBoatClass = loopEntryDTO.boatClassName;
             } else {
                 if (canRemoveRegatta && !Util.equalsWithNull(firstRegattaName, loopEntryDTO.regattaDisplayName)) {
                     canRemoveRegatta = false;
                 }
-                
                 if (canRemoveCourseArea && !Util.equalsWithNull(firstCourseAreaName, loopEntryDTO.courseAreaName)) {
                     canRemoveCourseArea = false;
                 }
-                
-                if (canRemoveCourse && !Util.equalsWithNull(firstCourseName, loopRaceInfo.lastCourseName)
-                        && !Util.equalsWithNull(firstCourseRegattaOverviewEntry.lastCourseDesign,
-                                loopRaceInfo.lastCourseDesign)) {
+                // a course must be shown individually for a race if its name or its course design differs
+                if (canRemoveCourse && (!Util.equalsWithNull(firstCourseName, loopRaceInfo.lastCourseName)
+                        || !Util.equalsWithNull(firstCourseRegattaOverviewEntry.lastCourseDesign,
+                                loopRaceInfo.lastCourseDesign))) {
                     canRemoveCourse = false;
                 }
-                
                 if (canRemoveBoatClass && !Util.equalsWithNull(lastBoatClass, loopEntryDTO.boatClassName)) {
                     canRemoveBoatClass = false;
                 }
             }
-            
             first = false;
         }
         // final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
         repeatedInfoLabel.clear();
-
         boolean isAppending = false;
         RegattaOverviewEntryDTO _firstRegattaNameEntry = firstRegattaNameEntry;
         isAppending |= collectRepeatedInfos(stringMessages.regatta(), firstRegattaName, canRemoveRegatta,

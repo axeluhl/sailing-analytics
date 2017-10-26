@@ -21,7 +21,7 @@ public class BravoExtendedDataFixMapper implements SensorFixMapper<BravoFix, Dyn
     @Override
     public DynamicSensorFixTrack<Competitor, BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
         return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, 
-                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, true));
+                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ true));
     }
     
     @Override

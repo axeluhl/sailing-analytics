@@ -67,7 +67,7 @@ public interface ExpeditionMessage extends UDPMessage {
     /**
      * variable ID for the GPS-measured speed over ground (SoG)
      */
-    final int ID_GPS_SOG = 50;
+    final int ID_GPS_SOG = 51;
     
     /**
      * variable ID for the GPS-measured time as days since 31.12.1899 UTC, meaning 1.0 is 1.1.1900 0:00:00 UTC

@@ -4189,4 +4189,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return new HashSet<>(attachedRaceLogs.values());
     }
+    
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        Speed result = null;
+        Duration totalTimeSailedInRace = Duration.NULL;
+        Distance totalDistanceSailedInRace = Distance.NULL;
+        for (TrackedLeg legGeneral : getTrackedLegs()) {
+            TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
+            if (leg != null && leg.hasStartedLeg(timePoint)) {
+                totalDistanceSailedInRace = totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
+                totalTimeSailedInRace = totalTimeSailedInRace.plus(leg.getTime(timePoint));
+            }
+        }
+        if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
+            result = totalDistanceSailedInRace.inTime(totalTimeSailedInRace);
+        }
+        return result;
+    }
 }

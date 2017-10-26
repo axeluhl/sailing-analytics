@@ -2961,8 +2961,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getHeel(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
+            }
             case CURRENT_PITCH_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
@@ -2970,16 +2970,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getPitch(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
-            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
-            {
+            }
+            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
                     final Distance rideHeight = bravoFixTrack.getRideHeight(timePoint);
                     result = rideHeight == null ? null : rideHeight.getMeters();
                 }
+                break;
             }
             case CURRENT_PORT_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -2987,6 +2987,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getPortDaggerboardRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_STBD_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -2994,6 +2995,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getStbdDaggerboardRakeStbdIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_PORT_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3001,6 +3003,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getPortRudderRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_STBD_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3008,6 +3011,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getStbdRudderRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_MAST_ROTATION_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3016,8 +3020,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getMastRotationIfAvailable(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
+            }
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
                         + "' in this method.");

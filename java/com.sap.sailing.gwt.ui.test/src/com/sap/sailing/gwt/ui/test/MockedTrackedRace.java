@@ -720,7 +720,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public boolean isUsingMarkPassingCalculator() {
-        // TODO Auto-generated method stub
         return false;
     }
     
@@ -880,5 +879,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
             String trackName) {
         return Collections.emptySet();
+    }
+
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
     }
 }
