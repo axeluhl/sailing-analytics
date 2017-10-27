@@ -1,22 +1,13 @@
 package com.sap.sse.pairinglist.impl;
 
 
-
-
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 
-/**
- * @author D070307
- *
- * @param <Flight>
- * @param <Group> 
- * @param <Competitor>
- */
 public class PairingListTemplateImpl implements PairingListTemplate{
-
+    
     private int[][] pairingListTemplate;
     private double standardDev;
 
@@ -141,11 +132,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             shuffle(group);
         }
 
+
         bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
+
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         return bestPLT;
     }
+
 
 
     protected int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
@@ -327,45 +321,30 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     protected double calcStandardDev(int[][] associations) {
 
         double standardDev = 0;
-        double expectedValue = 0;
-        double valueCount = associations.length * associations[0].length;
+        
+        int k = associations[0][0],     // first value of association array
+            n = 0,                      // count of elements in association array
+            exp = 0,                    //
+            exp2 = 0;                   //
 
-        /*
-         * hist shows how often a specific value of one association occurs.
-         * A value specifies how often one team plays against another.
-         */
-        int[] hist = new int[(int) (getMaxValueOfArray(associations) + 1)];
-
-        // filling hist
-        for (int[] key : associations) {
-            for (int value : key) {
-                if (value >= 0) {
-                    hist[value] = hist[value] + 1;
+        for (int i = 0; i < associations.length; i++) {
+            for (int j = 0; j < associations[0].length; j++) {
+                if (associations[i][j] < 0) {
+                    continue;
                 }
+
+                n += 1;
+                exp += associations[i][j] - k;
+                exp2 += Math.pow(associations[i][j] - k, 2);
             }
         }
 
-        // calculating the expected value of hist
-        for (int i = 0; i < hist.length; i++) {
-            expectedValue += i * (hist[i] / valueCount);
-        }
-
-        // calculating standard deviation by all values and expectedValue
-        for (int[] key : associations) {
-            for (int value : key) {
-                if (value >= 0) {
-                    standardDev += Math.pow(value - expectedValue, 2);
-                }
-            }
-        }
-
-        if (standardDev > 0) {
-            standardDev = Math.sqrt(standardDev / valueCount);
-        }
-
+        // expression in Math.sqrt() is equal to variance / n
+        standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / (n - 1));
+        
         return standardDev;
     }
-
+    
     private double getMaxValueOfArray(int[] arr) {
         double maxValue = 0;
 
@@ -389,7 +368,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 
         return maxValue;
     }
-
 }
 
 
