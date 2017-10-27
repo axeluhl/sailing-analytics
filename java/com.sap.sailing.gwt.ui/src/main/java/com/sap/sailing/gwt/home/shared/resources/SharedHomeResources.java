@@ -8,6 +8,8 @@ public interface SharedHomeResources extends ClientBundle {
     
     public static final SharedHomeResources INSTANCE = GWT.create(SharedHomeResources.class);
     
+    public static final String GSS = "com/sap/sailing/gwt/home/shared/resources/SharedHomeRecources.gss";
+    
     @Source("default_event_logo.jpg")
     ImageResource defaultEventLogoImage();
     
@@ -19,5 +21,11 @@ public interface SharedHomeResources extends ClientBundle {
     
     @Source("default_video_preview.jpg")
     ImageResource defaultVideoPreviewImage();
+    
+    @Source("arrow-down-grey.png")
+    ImageResource arrowDownGrey();
+    
+    @Source("arrow-grey-right.png")
+    ImageResource arrowRightGrey();
     
 }

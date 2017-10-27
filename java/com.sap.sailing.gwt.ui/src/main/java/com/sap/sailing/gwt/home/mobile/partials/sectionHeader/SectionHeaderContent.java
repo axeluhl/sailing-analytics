@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
 import com.sap.sailing.gwt.home.shared.partials.bubble.BubbleContentBoatClass;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sse.gwt.client.LinkUtil;
@@ -94,7 +95,7 @@ public class SectionHeaderContent extends Composite {
                 animation.animate(collapsed);
             }
         });
-        actionArrowUi.setSrc("images/mobile/arrow-down-grey.png");
+        actionArrowUi.setSrc(SharedHomeResources.INSTANCE.arrowDownGrey().getSafeUri().asString());
         actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());

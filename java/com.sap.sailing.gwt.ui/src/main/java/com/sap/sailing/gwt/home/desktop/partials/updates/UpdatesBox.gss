@@ -45,7 +45,7 @@
   color: #0a0a0a;
 }
 .updatesbox_itemlink {
-  background-image: url("images/home/arrow-grey-right.png");
+  background-image: resourceUrl("arrowRightGrey");
   background-repeat: no-repeat;
   background-size: 9px 16px;
   background-position: 95% 50%;

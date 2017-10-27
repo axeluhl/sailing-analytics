@@ -3,12 +3,19 @@ package com.sap.sailing.gwt.home.desktop.partials.regattanavigation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 
 public interface RegattaNavigationResources extends ClientBundle {
     public static final RegattaNavigationResources INSTANCE = GWT.create(RegattaNavigationResources.class);
 
     @Source("RegattaNavigation.gss")
     LocalCss css();
+    
+    @Source("arrow-down-filled-black.png")
+    ImageResource arrowDownFilledBlack();
+    
+    @Source("arrow-down-filled-yellow.png")
+    ImageResource arrowDownFilledYellow();
 
     public interface LocalCss extends CssResource {
         String jsdropdown();

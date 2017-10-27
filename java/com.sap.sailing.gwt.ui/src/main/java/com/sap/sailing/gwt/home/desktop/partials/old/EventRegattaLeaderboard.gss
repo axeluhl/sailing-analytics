@@ -194,7 +194,7 @@
   margin-right: 0.333333333333333em;
   background-repeat: no-repeat;
   background-position: center center;
-  background-image: url("images/home/arrow-down-yellow.png");
+  background-image: resourceUrl("arrowDownYellow");
 }
 .regattaleaderboard_header_itemascending:before,
 .regattaleaderboard_header_itemdata_elementascending:before {
@@ -206,7 +206,7 @@
   margin-right: 0.333333333333333em;
   background-repeat: no-repeat;
   background-position: center center;
-  background-image: url("images/home/arrow-up-yellow.png");
+  background-image: resourceUrl("arrowUpYellow");
 }
 .regattaleaderboard_header_table {
   width: 100%;

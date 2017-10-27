@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.partials.regattaheader;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
-public interface RegattaHeaderResources extends ClientBundle {
+public interface RegattaHeaderResources extends SharedHomeResources {
     public static final RegattaHeaderResources INSTANCE = GWT.create(RegattaHeaderResources.class);
 
     @Source("RegattaHeader.gss")
