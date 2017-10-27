@@ -2,33 +2,18 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals; 
 import static org.junit.Assert.fail;
-
 import static org.junit.Assert.assertNotNull;
 
-
-
-
-
 import org.junit.Before;
-
 import org.junit.Test;
-
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
-
 import junit.framework.Assert;
-
 
 public class PairingListTemplateTest extends PairingListTemplateImpl{
    
-   
-    
     @Before
     public void init() {
-    
-           
-            
-            // creating pairing list template
-            create(15, 3, 18,10000); 
+        create(15, 3, 18,10000); 
     }
   
   
@@ -75,7 +60,6 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
         };
 
-
         this.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,0);
         assertArrayEquals(currentAssociations[0],associationRow[0][0]);
         this.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,1);
@@ -100,8 +84,12 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     @Test
     public void qualityCheck(){
         if(getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
-        //create(10, 3, 30,10000);
+        create(10, 3, 30,10000);
         if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
     }
-  
+    
+    @Test
+    public void testImprovingAssignments() {
+        this.improveAssignments(this.getPairingListTemplate(), 3, 18,15);
+    }
 }

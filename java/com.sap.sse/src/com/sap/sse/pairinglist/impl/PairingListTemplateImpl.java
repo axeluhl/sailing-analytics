@@ -62,7 +62,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         for (int iteration = 0; iteration < iterationCount; iteration++) {
             int[][] currentAssociations = new int[competitors][competitors];
-            
             int[][] currentPLT = new int[groups * flights][competitors / groups];
             int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
 
@@ -78,11 +77,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,0);
 
                     for (int comp = 1; comp <= competitors; comp++) {
-                        if ((sum(associationRow, 0, comp - 1) <= associationSum) &&
+                        if ((sumOf3rdDimension(associationRow, 0, comp - 1) <= associationSum) &&
                                 !contains(flightColumn, comp) &&
                                 findMaxValue(associationRow, 0, comp - 1) <= associationHigh[0]) {
                             flightColumn[0][zGroups] = comp;
-                            associationSum = sum(associationRow, 0, comp - 1);
+                            associationSum = sumOf3rdDimension(associationRow, 0, comp - 1);
                             associationHigh[0] = findMaxValue(associationRow, 0, comp - 1);
                         }
                     }
@@ -102,11 +101,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,fleets);
 
                         for (int comp = 1; comp <= competitors; comp++) {
-                            if ((sum(associationRow, fleets, comp - 1) <= associationSum) &&
+                            if ((sumOf3rdDimension(associationRow, fleets, comp - 1) <= associationSum) &&
                                     !contains(flightColumn, comp) &&
                                     findMaxValue(associationRow, fleets, comp - 1) <= associationHigh[fleets]) {
                                 flightColumn[fleets][zGroups] = comp;
-                                associationSum = sum(associationRow, fleets, comp - 1);
+                                associationSum = sumOf3rdDimension(associationRow, fleets, comp - 1);
                                 associationHigh[fleets] = findMaxValue(associationRow, fleets, comp - 1);
 
                             }
@@ -159,7 +158,10 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return bestPLT;
     }
     
-
+    protected int[][] improveAssignments(int[][] pairingList, int groups, int competitors, int flights) {
+        return null;
+    }
+    
     private int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
@@ -193,7 +195,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return temp;
     }
 
-    private int sum(int[][][] associationRow, int i, int comp) {
+    private int sumOf3rdDimension(int[][][] associationRow, int i, int comp) {
         int sum = 0;
         for (int z = 0; z < associationRow[0].length; z++) {
             if (associationRow[i][z][comp] > -1) {
@@ -260,48 +262,33 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return standardDev: returns how much the association values deviate from each other
      */
 
-    private double calcStandardDev(int[][] associations) {
+    protected double calcStandardDev(int[][] associations) {
 
         double standardDev = 0;
-        double expectedValue = 0;
-        double valueCount = associations.length * associations[0].length;
+        
+        int k = associations[0][0],     // first value of association array
+            n = 0,                      // count of elements in association array
+            exp = 0,                    //
+            exp2 = 0;                   //
 
-        /*
-         * hist shows how often a specific value of one association occurs.
-         * A value specifies how often one team plays against another.
-         */
-        int[] hist = new int[(int) (getMaxValueOfArray(associations) + 1)];
-
-        // filling hist
-        for (int[] key : associations) {
-            for (int value : key) {
-                if (value >= 0) {
-                    hist[value] = hist[value] + 1;
+        for (int i = 0; i < associations.length; i++) {
+            for (int j = 0; j < associations[0].length; j++) {
+                if (associations[i][j] < 0) {
+                    continue;
                 }
+
+                n += 1;
+                exp += associations[i][j] - k;
+                exp2 += Math.pow(associations[i][j] - k, 2);
             }
         }
 
-        // calculating the expected value of hist
-        for (int i = 0; i < hist.length; i++) {
-            expectedValue += i * (hist[i] / valueCount);
-        }
-
-        // calculating standard deviation by all values and expectedValue
-        for (int[] key : associations) {
-            for (int value : key) {
-                if (value >= 0) {
-                    standardDev += Math.pow(value - expectedValue, 2);
-                }
-            }
-        }
-
-        if (standardDev > 0) {
-            standardDev = Math.sqrt(standardDev / valueCount);
-        }
-
+        // expression in Math.sqrt() is equal to variance / n
+        standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / (n - 1));
+        
         return standardDev;
     }
-
+    
     private double getMaxValueOfArray(int[] arr) {
         double maxValue = 0;
 
@@ -325,7 +312,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         return maxValue;
     }
-
 }
 
 
