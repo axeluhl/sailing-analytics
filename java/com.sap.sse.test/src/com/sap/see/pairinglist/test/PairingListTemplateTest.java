@@ -26,7 +26,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
            
             
             // creating pairing list template
-            this.create(15, 3, 18,100000);
+            this.create(15, 3, 18,10000);
             
             
     }
@@ -100,7 +100,12 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     @Test
     public void qualityCheck(){
         if(getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
-        create(10, 3, 30,100000);
+        create(10, 3, 30,10000);
         if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
+    }
+    
+    @Test
+    public void testImprovingAssignments() {
+        this.improveAssignments(this.getPairingListTemplate(), 3, 18,15);
     }
 }

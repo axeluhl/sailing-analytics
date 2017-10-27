@@ -1,19 +1,10 @@
 package com.sap.sse.pairinglist.impl;
 
-
-
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 
-/**
- * @author D070307
- *
- * @param <Flight>
- * @param <Group> 
- * @param <Competitor>
- */
 public class PairingListTemplateImpl implements PairingListTemplate {
     
     private int[][] pairingListTemplate;
@@ -57,7 +48,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             int[][] currentAssociations = new int[competitors][competitors];
             int[][] currentPLT = new int[groups * flights][competitors / groups];
             int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
-            
+
             for (int zFlight = 0; zFlight < flights; zFlight++) {
 
                 int[][] flightColumn = new int[groups][competitors / groups];
@@ -70,16 +61,16 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,0);
 
                     for (int comp = 1; comp <= competitors; comp++) {
-                        if ((sum(associationRow, 0, comp - 1) <= associationSum) &&
+                        if ((sumOf3rdDimension(associationRow, 0, comp - 1) <= associationSum) &&
                                 !contains(flightColumn, comp) &&
                                 findMaxValue(associationRow, 0, comp - 1) <= associationHigh[0]) {
                             flightColumn[0][zGroups] = comp;
-                            associationSum = sum(associationRow, 0, comp - 1);
+                            associationSum = sumOf3rdDimension(associationRow, 0, comp - 1);
                             associationHigh[0] = findMaxValue(associationRow, 0, comp - 1);
                         }
                     }
                 }
-                
+
                 for (int fleets = 1; fleets < groups - 1; fleets++) {
                     for (int aux = 0; aux < competitors; aux++) {
                         if (!contains(flightColumn, aux)) {
@@ -87,25 +78,25 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                             break;
                         }
                     }
-                    
+
                     for (int zGroups = 1; zGroups < (competitors / groups); zGroups++) {
                         int associationSum = Integer.MAX_VALUE;
                         associationHigh[fleets] = flights + 1;
                         associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,fleets);
 
                         for (int comp = 1; comp <= competitors; comp++) {
-                            if ((sum(associationRow, fleets, comp - 1) <= associationSum) &&
+                            if ((sumOf3rdDimension(associationRow, fleets, comp - 1) <= associationSum) &&
                                     !contains(flightColumn, comp) &&
                                     findMaxValue(associationRow, fleets, comp - 1) <= associationHigh[fleets]) {
                                 flightColumn[fleets][zGroups] = comp;
-                                associationSum = sum(associationRow, fleets, comp - 1);
+                                associationSum = sumOf3rdDimension(associationRow, fleets, comp - 1);
                                 associationHigh[fleets] = findMaxValue(associationRow, fleets, comp - 1);
 
                             }
                         }
                     }
                 }
-                
+
                 for (int j = 0; j < (competitors / groups); j++) {
                     for (int z = 1; z <= competitors; z++) {
                         if (!contains(flightColumn, z)) {
@@ -129,14 +120,18 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 bestDev = this.calcStandardDev(currentAssociations);
             }
         }
-        
+
         for(int[] group : bestPLT) {
             shuffle(group);
         }
-        
+        System.out.println(bestDev);
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         return bestPLT;
+    }
+    
+    protected int[][] improveAssignments(int[][] pairingList, int groups, int competitors, int flights) {
+        return null;
     }
     
     private int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
@@ -172,7 +167,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return temp;
     }
 
-    private int sum(int[][][] associationRow, int i, int comp) {
+    private int sumOf3rdDimension(int[][][] associationRow, int i, int comp) {
         int sum = 0;
         for (int z = 0; z < associationRow[0].length; z++) {
             if (associationRow[i][z][comp] > -1) {
@@ -242,68 +237,65 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private double calcStandardDev(int[][] associations) {
 
         double standardDev = 0;
-        double expectedValue = 0;
-        double valueCount = associations.length * associations[0].length;
+        
+        int k = associations[0][0],     // first value of association array
+            n = 0,                      // count of elements in association array
+            exp = 0,                    //
+            exp2 = 0;                   //
 
-        /*
-         * hist shows how often a specific value of one association occurs.
-         * A value specifies how often one team plays against another.
-         */
-        int[] hist = new int[(int) (getMaxValueOfArray(associations) + 1)];
-
-        // filling hist
-        for (int[] key : associations) {
-            for (int value : key) {
-                if (value >= 0) {
-                    hist[value] = hist[value] + 1;
+        for (int i = 0; i < associations.length; i++) {
+            for (int j = 0; j < associations[0].length; j++) {
+                if (associations[i][j] < 0) {
+                    continue;
                 }
+
+                n += 1;
+                exp += associations[i][j] - k;
+                exp2 += Math.pow(associations[i][j] - k, 2);
             }
         }
 
-        // calculating the expected value of hist
-        for (int i = 0; i < hist.length; i++) {
-            expectedValue += i * (hist[i] / valueCount);
-        }
-
-        // calculating standard deviation by all values and expectedValue
-        for (int[] key : associations) {
-            for (int value : key) {
-                if (value >= 0) {
-                    standardDev += Math.pow(value - expectedValue, 2);
-                }
-            }
-        }
-
-        if (standardDev > 0) {
-            standardDev = Math.sqrt(standardDev / valueCount);
-        }
-
+        // expression in Math.sqrt() is equal to variance / n
+        standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / (n - 1));
+        
         return standardDev;
     }
     
-    private double getMaxValueOfArray(int[] arr) {
-        double maxValue = 0;
-        
-        for (int val: arr) {
-            if (val > maxValue) {
-                maxValue = val;
-            }
-        }
-        
-        return maxValue;
-    }
-    
-    private double getMaxValueOfArray(int[][] arr) {
-        double maxValue = 0;
-        
-        for (int[] val: arr) {
-            if (this.getMaxValueOfArray(val) > maxValue) {
-                maxValue = this.getMaxValueOfArray(val);
-            }
-        }
-        
-        return maxValue;
-    }
+//    private double getMaxValueOfArray(int[] arr) {
+//        double maxValue = 0;
+//        
+//        for (int val: arr) {
+//            if (val > maxValue) {
+//                maxValue = val;
+//            }
+//        }
+//        
+//        return maxValue;
+//    }
+//    
+//    private double getMaxValueOfArray(int[][] arr) {
+//        double maxValue = 0;
+//        
+//        for (int[] val: arr) {
+//            if (this.getMaxValueOfArray(val) > maxValue) {
+//                maxValue = this.getMaxValueOfArray(val);
+//            }
+//        }
+//        
+//        return maxValue;
+//    }
+//    
+//    private int getMinValueOfArray(int[] arr) {
+//        int minValue = Integer.MAX_VALUE;
+//        
+//        for (int val: arr) {
+//            if (minValue>val) {
+//                minValue = val;
+//            }
+//        }
+//        
+//        return minValue;
+//    }
 
 }
 
