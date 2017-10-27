@@ -20,6 +20,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 

@@ -20,14 +20,11 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.OwnerImpl;
-import com.sap.sse.security.AccessControlListWithStore;
+import com.sap.sse.security.AccessControlListImpl;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserGroupImpl;
-import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -35,6 +32,7 @@ import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 
@@ -48,12 +46,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore, AccessControlStore aclStore) {
+    public Iterable<AccessControlList> loadAllAccessControlLists() {
         ArrayList<AccessControlList> result = new ArrayList<>();
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         try {
             for (DBObject o : aclCollection.find()) {
-                result.add(loadAccessControlList(o, userStore, aclStore));
+                result.add(loadAccessControlList(o));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ACLs.");
@@ -63,17 +61,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public AccessControlList loadAccessControlList(String id, UserStore userStore, AccessControlStore aclStore) {
+    public AccessControlList loadAccessControlList(String id) {
         DBObject query = new BasicDBObject();
         query.put(FieldNames.AccessControlList.ID.name(), id);
         DBCursor cursor = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).find(query);
         if (cursor.hasNext()) {
-            return loadAccessControlList(cursor.next(), userStore, aclStore);
+            return loadAccessControlList(cursor.next());
         }
         return null;
     }
 
-    public AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore, AccessControlStore aclStore) {
+    public AccessControlList loadAccessControlList(DBObject aclDBObject) {
         final String id = (String) aclDBObject.get(FieldNames.AccessControlList.ID.name());
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.DISPLAY_NAME.name());
         Map<?, ?> permissionMapAsBSON = ((BSONObject) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name())).toMap();
@@ -86,7 +84,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             permissionMap.put(key, value);
         }
-        AccessControlList result = new AccessControlListWithStore(id, displayName, permissionMap, userStore);
+        AccessControlList result = new AccessControlListImpl(id, displayName, permissionMap);
         return result;
     }
     

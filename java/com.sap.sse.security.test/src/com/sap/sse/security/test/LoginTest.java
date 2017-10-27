@@ -38,7 +38,7 @@ public class LoginTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
-        aclStore = new AccessControlStoreImpl(null, null, store);
+        aclStore = new AccessControlStoreImpl(null, null);
         
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);

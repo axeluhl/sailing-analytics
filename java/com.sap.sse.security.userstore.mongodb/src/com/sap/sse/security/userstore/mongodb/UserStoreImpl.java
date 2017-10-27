@@ -26,12 +26,12 @@ import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 

@@ -168,7 +168,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             }
             
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
-                    user, directPermissions, 
+                    user, getUserStore().getUserGroups(), directPermissions, 
                     getUserStore().getRolesFromUser(user), this, 
                     getAccessControlListStore().getOwnership(parts[2]), 
                     getAccessControlListStore().getAccessControlList(parts[2]));

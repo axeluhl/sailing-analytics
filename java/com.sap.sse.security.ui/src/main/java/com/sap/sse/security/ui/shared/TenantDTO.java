@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public class TenantDTO extends UserGroupDTO {
+    private static final long serialVersionUID = -285516174788451726L;
+
     TenantDTO() {} // just for serialization
     
     public TenantDTO(UUID id, String name, AccessControlListDTO acl, OwnerDTO ownership, Set<String> usernames) {

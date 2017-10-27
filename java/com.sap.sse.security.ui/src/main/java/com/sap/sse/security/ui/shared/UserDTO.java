@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class UserDTO implements IsSerializable {
@@ -125,15 +126,8 @@ public class UserDTO implements IsSerializable {
     }
     
     public boolean hasPermission(WildcardPermission permission, AccessControlListDTO acl, OwnerDTO owner) {
-        return PermissionChecker.isPermitted(permission, name, permissions, roles, rolePermissionModelDTO, 
-                owner, acl);
-        
-        /*for (String stringPermission : getAllPermissions(SailingPermissionsForRoleProvider.INSTANCE)) {
-            if (new WildcardPermission(stringPermission).implies(permission)) {
-                return true;
-            }
-        }
-        return false;*/
+        return PermissionChecker.isPermitted(permission, name, new ArrayList<UserGroup>(acl.getUserGroupPermissionMap().keySet()), 
+                permissions, roles, rolePermissionModelDTO, owner, acl);
     }
 
     public List<AccountDTO> getAccounts() {

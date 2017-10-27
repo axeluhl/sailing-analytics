@@ -31,7 +31,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
             protected SecurityServiceImpl createNewMaster()
                     throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
                 final UserStore userStore = new UserStoreImpl(null, null); // no persistence
-                final AccessControlStore aclStore = new AccessControlStoreImpl(null, null, userStore); // no persistence
+                final AccessControlStore aclStore = new AccessControlStoreImpl(null, null); // no persistence
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, aclStore);
                 newMaster.clearReplicaState();
                 newMaster.createSimpleUser(username, email, password, fullName, company, /* validationBaseURL */ null);

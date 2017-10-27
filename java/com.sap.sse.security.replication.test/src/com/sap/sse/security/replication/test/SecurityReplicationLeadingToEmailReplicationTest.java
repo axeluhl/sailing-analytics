@@ -54,7 +54,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl();
-            final AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
+            final AccessControlStore aclStore = new AccessControlStoreImpl();
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, aclStore);
             result.clearReplicaState();
             return result;
@@ -66,7 +66,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl();
-            final AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
+            final AccessControlStore aclStore = new AccessControlStoreImpl();
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, aclStore);
             return result;
         }

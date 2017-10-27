@@ -9,8 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.OwnerImpl;
-import com.sap.sse.security.AccessControlListWithStore;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.AccessControlListImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Role;
@@ -23,8 +22,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     
     private String name = "Access control store";
     
-    private UserStore userStore;
-    
     private final ConcurrentHashMap<String, AccessControlList> accessControlLists;
     
     private final ConcurrentHashMap<String, Owner> ownershipList;
@@ -35,21 +32,22 @@ public class AccessControlStoreImpl implements AccessControlStore {
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
     private final transient MongoObjectFactory mongoObjectFactory;
-    private final transient DomainObjectFactory domainObjectFactory;
     
-    public AccessControlStoreImpl(final UserStore userStore) {
-        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
+    public AccessControlStoreImpl() {
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
     }
     
-    public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, final UserStore userStore) {
+    public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         accessControlLists = new ConcurrentHashMap<>();
         ownershipList = new ConcurrentHashMap<>();
         roleList = new ConcurrentHashMap<>();
         
-        this.mongoObjectFactory = mongoObjectFactory;        
-        this.domainObjectFactory = domainObjectFactory;
+        this.mongoObjectFactory = mongoObjectFactory;
         
         if (domainObjectFactory != null) {
+            for (AccessControlList acl : domainObjectFactory.loadAllAccessControlLists()) {
+                accessControlLists.put(acl.getId().toString(), acl);
+            }
             for (Owner ownership : domainObjectFactory.loadAllOwnerships()) {
                 ownershipList.put(ownership.getId().toString(), ownership);
             }
@@ -57,8 +55,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 roleList.put(UUID.fromString(role.getId().toString()), role);
             }
         }
-        
-        this.userStore = userStore;
     }
     
     @Override
@@ -72,17 +68,13 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public AccessControlList getAccessControlList(String idAsString) {
         AccessControlList acl = accessControlLists.get(idAsString);
-        if (acl != null) {
-            return acl;
-        }
-        acl = domainObjectFactory.loadAccessControlList(idAsString, userStore, this);
         accessControlLists.put(acl.getId().toString(), acl);
         return acl;
     }
 
     @Override
     public AccessControlList createAccessControlList(String idAsString, String displayName) {
-        AccessControlList acl = new AccessControlListWithStore(idAsString, displayName, userStore);
+        AccessControlList acl = new AccessControlListImpl(idAsString, displayName);
         accessControlLists.put(idAsString, acl);
         mongoObjectFactory.storeAccessControlList(acl);
         return acl;
@@ -93,7 +85,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         AccessControlList acl = accessControlLists.get(idAsString);
         Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         permissionMap.put(group, permissions);
-        acl = new AccessControlListWithStore(idAsString, acl.getDisplayName(), permissionMap, userStore);
+        acl = new AccessControlListImpl(idAsString, acl.getDisplayName(), permissionMap);
         mongoObjectFactory.storeAccessControlList(acl);
         return this;
     }
@@ -108,7 +100,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
             permissionMap.put(group, permissionsGroup);
         }
         permissionsGroup.add(permission);
-        acl = new AccessControlListWithStore(idAsString, acl.getDisplayName(), permissionMap, userStore);
+        acl = new AccessControlListImpl(idAsString, acl.getDisplayName(), permissionMap);
         mongoObjectFactory.storeAccessControlList(acl);
         return this;
     }
@@ -120,7 +112,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         Set<String> permissionsGroup = permissionMap.get(group);
         if (permissionsGroup != null) {
             permissionsGroup.remove(permission);
-            acl = new AccessControlListWithStore(idAsString, acl.getDisplayName(), permissionMap, userStore);
+            acl = new AccessControlListImpl(idAsString, acl.getDisplayName(), permissionMap);
             mongoObjectFactory.storeAccessControlList(acl);
         }
         return this;
@@ -136,19 +128,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public String getName() {
         return name;
-    }
-    
-    /**
-     * Loads all the ACLs that were not loaded when the user store was initialized
-     */
-    public void loadRemainingACLs() {
-        if (domainObjectFactory != null) {
-            for (AccessControlList acl : domainObjectFactory.loadAllAccessControlLists(userStore, this)) {
-                if (!accessControlLists.containsKey(acl.getId().toString())) {
-                    accessControlLists.put(acl.getId().toString(), acl);
-                }
-            }
-        }
     }
     
     @Override

@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.shared;
 
 import java.util.Set;
 

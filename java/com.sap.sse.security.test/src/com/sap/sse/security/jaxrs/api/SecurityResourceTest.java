@@ -43,7 +43,7 @@ public class SecurityResourceTest {
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             final UserStoreImpl store = new UserStoreImpl();
-            final AccessControlStore aclStore = new AccessControlStoreImpl(store);
+            final AccessControlStore aclStore = new AccessControlStoreImpl();
             Activator.setTestUserStore(store);
             UsernamePasswordRealm.setTestUserStore(store);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,

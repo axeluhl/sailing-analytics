@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
+import com.sap.sse.security.shared.UserGroup;
 
 public class AccessControlListDTO implements AccessControlList, IsSerializable {
     private String idAsString;
@@ -35,7 +36,7 @@ public class AccessControlListDTO implements AccessControlList, IsSerializable {
     }
     
     @Override
-    public PermissionChecker.PermissionState hasPermission(String user, String action) {
+    public PermissionChecker.PermissionState hasPermission(String user, String action, Iterable<UserGroup> tenants) {
         for (Map.Entry<UserGroupDTO, Set<String>> entry : permissionMap.entrySet()) {
             if (entry.getKey().contains(user)) {
                 if (entry.getValue().contains("!" + action)) {

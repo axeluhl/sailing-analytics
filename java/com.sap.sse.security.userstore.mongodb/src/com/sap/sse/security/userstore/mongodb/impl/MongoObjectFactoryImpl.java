@@ -12,13 +12,13 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 

@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sse.security.shared.UserGroup;
+
 public class UserGroupImpl implements UserGroup {
     private static final long serialVersionUID = -6387489363559803841L;
 

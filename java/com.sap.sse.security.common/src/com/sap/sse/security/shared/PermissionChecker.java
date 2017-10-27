@@ -31,7 +31,7 @@ public class PermissionChecker {
      *          The instance id can be omitted when a general permission for the data
      *          object type is asked after (e.g. "event:create").
      */
-    public static boolean isPermitted(WildcardPermission permission, String user, Iterable<WildcardPermission> directPermissions, Iterable<String> roles, 
+    public static boolean isPermitted(WildcardPermission permission, String user, Iterable<UserGroup> tenants, Iterable<WildcardPermission> directPermissions, Iterable<String> roles, 
             RolePermissionModel rolePermissionModel, Owner ownership, AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
@@ -48,7 +48,7 @@ public class PermissionChecker {
         }
         // 2. check ACL
         else if (acl != null) {
-            result = acl.hasPermission(user, action);
+            result = acl.hasPermission(user, action, tenants);
         }
         // 3. check direct permissions
         if (result == PermissionState.NONE) {

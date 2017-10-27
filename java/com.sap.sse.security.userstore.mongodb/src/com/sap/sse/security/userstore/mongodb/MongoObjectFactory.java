@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import com.mongodb.DB;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.UserGroup;
 
 public interface MongoObjectFactory {
     public void storeAccessControlList(AccessControlList acl);

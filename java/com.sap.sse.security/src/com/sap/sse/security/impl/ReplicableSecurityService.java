@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 

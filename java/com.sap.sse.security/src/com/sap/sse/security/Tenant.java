@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.UserGroupImpl;
+import com.sap.sse.security.shared.UserGroup;
 
 public class Tenant extends UserGroupImpl {
     private static final long serialVersionUID = -8831840409264252279L;

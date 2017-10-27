@@ -4,8 +4,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.security.shared.UserGroup;
 
-public class UserGroupDTO implements IsSerializable {
+public class UserGroupDTO implements UserGroup, IsSerializable {
+    private static final long serialVersionUID = -436112808617164216L;
+    
     private UUID id;
     private String name;
     private AccessControlListDTO acl;
@@ -44,5 +47,15 @@ public class UserGroupDTO implements IsSerializable {
     
     public Set<String> getUsernames() {
         return usernames;
+    }
+
+    @Override
+    public void add(String user) {
+        // TODO Remove in next refactoring
+    }
+
+    @Override
+    public void remove(String user) {
+        // TODO Remove in next refactoring
     }
 }
