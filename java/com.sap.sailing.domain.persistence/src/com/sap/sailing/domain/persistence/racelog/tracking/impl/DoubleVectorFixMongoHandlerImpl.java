@@ -40,7 +40,7 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
     
     private DBObject toDBObject(Double[] data) {
         BasicDBList result = new BasicDBList();
-        for (double value : data) {
+        for (Double value : data) {
             result.add(value);
         }
         return result;
