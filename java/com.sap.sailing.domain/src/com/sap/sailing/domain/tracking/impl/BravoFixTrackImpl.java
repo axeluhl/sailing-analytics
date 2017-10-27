@@ -46,19 +46,19 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Distance getRideHeight(TimePoint timePoint) {
-        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getRideHeight,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getRideHeight,
                 ScalableDistance::new);
     }
 
     @Override
     public Bearing getHeel(TimePoint timePoint) {
-        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getHeel,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getHeel,
                 ScalableBearing::new);
     }
 
     @Override
     public Bearing getPitch(TimePoint timePoint) {
-        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getPitch,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getPitch,
                 ScalableBearing::new);
     }
     
@@ -156,14 +156,20 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * This way it is possible to skip fixes that don't make a statement with regard to the attribute extracted by the
      * {@code getter}.
      */
-    private <T, I> T getValueFromExtendedFixSkippingNullValues(final TimePoint timePoint, final Function<BravoExtendedFix, T> getter,
+    private <T, I, BravoFixType extends BravoFix> T getValueFromExtendedFixSkippingNullValues(
+            final TimePoint timePoint, final Function<BravoFixType, T> getter,
             Function<T, ScalableValue<I, T>> converterToScalableValue) {
-        if (!hasExtendedFixes) {
-            return null;
-        }
         final com.sap.sse.common.Util.Function<BravoFix, ScalableValue<I, T>> converter =
-              fix -> converterToScalableValue.apply(getter.apply((BravoExtendedFix) fix));  
-        return getInterpolatedValue(timePoint, converter, fix->getter.apply((BravoExtendedFix) fix) != null);
+              fix -> {
+                  @SuppressWarnings("unchecked")
+                final BravoFixType castFix = (BravoFixType) fix;
+                  return converterToScalableValue.apply(getter.apply(castFix));  
+              };
+        return getInterpolatedValue(timePoint, converter, fix->{
+            @SuppressWarnings("unchecked")
+            final BravoFixType castFix = (BravoFixType) fix;
+            return getter.apply(castFix) != null;
+        });
     }
     
     public BravoExtendedFix getFirstFixAtOrAfterIfExtended(TimePoint timePoint) {
