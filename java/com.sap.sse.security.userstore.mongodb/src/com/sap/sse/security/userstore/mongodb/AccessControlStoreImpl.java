@@ -81,7 +81,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore putPermissions(String idAsString, UUID group, Set<String> permissions) {
+    public AccessControlStore putAclPermissions(String idAsString, UUID group, Set<String> permissions) {
         AccessControlList acl = accessControlLists.get(idAsString);
         Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         permissionMap.put(group, permissions);
@@ -91,7 +91,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore addPermission(String idAsString, UUID group, String permission) {
+    public AccessControlStore addAclPermission(String idAsString, UUID group, String permission) {
         AccessControlList acl = accessControlLists.get(idAsString);
         Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         Set<String> permissionsGroup = permissionMap.get(group);
@@ -106,7 +106,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore removePermission(String idAsString, UUID group, String permission) {
+    public AccessControlStore removeAclPermission(String idAsString, UUID group, String permission) {
         AccessControlList acl = accessControlLists.get(idAsString);
         Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         Set<String> permissionsGroup = permissionMap.get(group);
@@ -208,7 +208,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore setDisplayName(UUID id, String displayName) {
+    public AccessControlStore setRoleDisplayName(UUID id, String displayName) {
         Role role = roleList.get(id);
         role = new RoleImpl(id, displayName, role.getPermissions());
         mongoObjectFactory.storeRole(role);

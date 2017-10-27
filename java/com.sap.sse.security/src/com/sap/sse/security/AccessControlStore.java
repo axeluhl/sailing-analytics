@@ -16,9 +16,9 @@ public interface AccessControlStore extends Named {
      * @param owner Owner of the object the ACL is attached to
      */
     AccessControlList createAccessControlList(String idAsString, String displayName);
-    AccessControlStore putPermissions(String idAsString, UUID group, Set<String> permissions);
-    AccessControlStore addPermission(String idAsString, UUID group, String permission);
-    AccessControlStore removePermission(String idAsString, UUID group, String permission);
+    AccessControlStore putAclPermissions(String idAsString, UUID group, Set<String> permissions);
+    AccessControlStore addAclPermission(String idAsString, UUID group, String permission);
+    AccessControlStore removeAclPermission(String idAsString, UUID group, String permission);
     AccessControlStore removeAccessControlList(String idAsString);
     
     Iterable<Owner> getOwnerships();
@@ -33,7 +33,7 @@ public interface AccessControlStore extends Named {
     AccessControlStore setRolePermissions(UUID id, Set<String> permissions);
     AccessControlStore addRolePermission(UUID id, String permission);
     AccessControlStore removeRolePermission(UUID id, String permission);
-    AccessControlStore setDisplayName(UUID id, String displayName);
+    AccessControlStore setRoleDisplayName(UUID id, String displayName);
     AccessControlStore removeRole(UUID id);
     
     void clear();
