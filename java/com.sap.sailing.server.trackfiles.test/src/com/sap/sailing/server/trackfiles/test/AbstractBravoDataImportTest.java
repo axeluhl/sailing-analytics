@@ -51,15 +51,17 @@ public abstract class AbstractBravoDataImportTest {
     }
     
     protected void testImport(ImportDataDefinition importData) throws FormatNotSupportedException, IOException {
-        bravoDataImporter.importFixes(importData.getInputStream(), (fixes, device) -> {
-            for (DoubleVectorFix fix : fixes) {
-                callbackCallCount++;
-                sumRideHeightInMeters += new BravoFixImpl(fix).getRideHeight().getMeters();
-            }
-        }, "filename", "source", /* downsample */ true);
-        Assert.assertEquals(importData.getExpectedFixesCount(), downsampler.getCountSourceTtl());
-        Assert.assertEquals(importData.getExpectedFixesConsolidated(), downsampler.getCountImportedTtl());
-        Assert.assertEquals(importData.getExpectedFixesConsolidated(), callbackCallCount);
+        try (final InputStream is = importData.getInputStream()) {
+            bravoDataImporter.importFixes(is, (fixes, device) -> {
+                for (DoubleVectorFix fix : fixes) {
+                    callbackCallCount++;
+                    sumRideHeightInMeters += new BravoFixImpl(fix).getRideHeight().getMeters();
+                }
+            }, "filename", "source", /* downsample */ true);
+            Assert.assertEquals(importData.getExpectedFixesCount(), downsampler.getCountSourceTtl());
+            Assert.assertEquals(importData.getExpectedFixesConsolidated(), downsampler.getCountImportedTtl());
+            Assert.assertEquals(importData.getExpectedFixesConsolidated(), callbackCallCount);
+        }
     }
 
 }
