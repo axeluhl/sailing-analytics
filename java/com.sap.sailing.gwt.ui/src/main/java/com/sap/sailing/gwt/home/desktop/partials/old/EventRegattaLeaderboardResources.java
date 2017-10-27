@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.home.desktop.partials.old;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
-public interface EventRegattaLeaderboardResources extends ClientBundle {
+public interface EventRegattaLeaderboardResources extends SharedDesktopResources {
     public static final EventRegattaLeaderboardResources INSTANCE = GWT.create(EventRegattaLeaderboardResources.class);
 
     @Source("EventRegattaLeaderboard.gss")

@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.home.shared.resources;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 import com.google.gwt.resources.client.ImageResource;
 
 public interface SharedHomeResources extends ClientBundle {
@@ -27,5 +29,21 @@ public interface SharedHomeResources extends ClientBundle {
     
     @Source("arrow-grey-right.png")
     ImageResource arrowRightGrey();
+    
+    @Source("close.svg")
+    @MimeType("image/svg+xml")
+    DataResource close();
+    
+    @Source("reload.svg")
+    @MimeType("image/svg+xml")
+    DataResource reload();
+    
+    @Source("settings.svg")
+    @MimeType("image/svg+xml")
+    DataResource settings();
+    
+    @Source("fullscreen.svg")
+    @MimeType("image/svg+xml")
+    DataResource fullscreen();
     
 }
