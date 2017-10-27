@@ -6,8 +6,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class RoleImpl implements Role {
-    private static final long serialVersionUID = 1530130914120936419L;
-    
     private final UUID id;
     private final String displayName;
     private final Set<String> permissions;
@@ -28,7 +26,7 @@ public class RoleImpl implements Role {
     }
 
     @Override
-    public String getName() {
+    public String getDisplayName() {
         return displayName;
     }
 

@@ -207,7 +207,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
                         /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
-                addRoleForUser("admin", AdminRole.getInstance().getName());
+                addRoleForUser("admin", AdminRole.getInstance().getDisplayName());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
@@ -223,7 +223,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Set<String> adminPermissions = new HashSet<>();
             adminPermissions.add("*");
             AdminRole role = AdminRole.getInstance();
-            aclStore.createRole((UUID) role.getId(), role.getName(), role.getPermissions());
+            aclStore.createRole((UUID) role.getId(), role.getDisplayName(), role.getPermissions());
         }
     }
     
@@ -1127,7 +1127,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
         final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(AdminRole.getInstance().getDisplayName()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
                     : subject.getPrincipal().toString();
@@ -1228,7 +1228,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeAccessToken(String username) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(AdminRole.getInstance().getName()) || username.equals(subject.getPrincipal().toString())) {
+        if (subject.hasRole(AdminRole.getInstance().getDisplayName()) || username.equals(subject.getPrincipal().toString())) {
             apply(s -> s.internalRemoveAccessToken(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()

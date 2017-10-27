@@ -68,7 +68,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @Produces("text/plain;charset=UTF-8")
     public Response changePassword(@FormParam("username") String username, @FormParam("password") String password) {
         final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(AdminRole.getInstance().getDisplayName()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
@@ -144,7 +144,7 @@ public class SecurityResource extends AbstractSecurityResource {
         final Subject subject = SecurityUtils.getSubject();
         // ADMIN can query all; otherwise, only the owning user can query
         // TODO: ideally, we would introduce a USER:READ:<username> permission which later can be granted to tenant admins for all users of that tenant
-        if (subject.getPrincipal() == null || (username != null && !subject.hasRole(AdminRole.getInstance().getName()))) {
+        if (subject.getPrincipal() == null || (username != null && !subject.hasRole(AdminRole.getInstance().getDisplayName()))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
             final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
@@ -167,7 +167,7 @@ public class SecurityResource extends AbstractSecurityResource {
     public Response deleteUser(@QueryParam("username") String username) {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(AdminRole.getInstance().getDisplayName()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
@@ -188,7 +188,7 @@ public class SecurityResource extends AbstractSecurityResource {
             @QueryParam("company") String company) {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(AdminRole.getInstance().getDisplayName()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {

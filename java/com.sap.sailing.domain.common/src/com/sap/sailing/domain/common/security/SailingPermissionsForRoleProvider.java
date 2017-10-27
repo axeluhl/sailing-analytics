@@ -15,7 +15,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
     public Iterable<String> getPermissions(String role, RolePermissionModel rolePermissionModel) {
         final Iterable<String> result;
         if (rolePermissionModel == null) {
-            if (AdminRole.getInstance().getName().equals(role)) {
+            if (AdminRole.getInstance().getDisplayName().equals(role)) {
                 ArrayList<String> permissions = new ArrayList<>();
                 permissions.add("*");
                 result = permissions;

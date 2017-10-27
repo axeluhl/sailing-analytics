@@ -203,7 +203,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public AccessControlStore setRolePermissions(UUID id, Set<String> permissions) {
         Role role = roleList.get(id);
-        role = new RoleImpl(id, role.getName(), permissions);
+        role = new RoleImpl(id, role.getDisplayName(), permissions);
         mongoObjectFactory.storeRole(role);
         return this;
     }
@@ -213,7 +213,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         Role role = roleList.get(id);
         Set<String> permissions = role.getPermissions();
         permissions.add(permission);
-        role = new RoleImpl(id, role.getName(), permissions);
+        role = new RoleImpl(id, role.getDisplayName(), permissions);
         mongoObjectFactory.storeRole(role);
         return this;
     }
@@ -223,7 +223,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         Role role = roleList.get(id);
         Set<String> permissions = role.getPermissions();
         permissions.remove(permission);
-        role = new RoleImpl(id, role.getName(), permissions);
+        role = new RoleImpl(id, role.getDisplayName(), permissions);
         mongoObjectFactory.storeRole(role);
         return this;
     }

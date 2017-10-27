@@ -83,7 +83,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbRole = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Role.ID.name(), role.getId().toString());
         dbRole.put(FieldNames.Role.ID.name(), role.getId().toString());
-        dbRole.put(FieldNames.Role.DISPLAY_NAME.name(), role.getName());
+        dbRole.put(FieldNames.Role.DISPLAY_NAME.name(), role.getDisplayName());
         dbRole.put(FieldNames.Role.PERMISSIONS.name(), role.getPermissions());
         roleCollection.update(query, dbRole, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
