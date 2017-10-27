@@ -101,14 +101,18 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.AbstractRegattaLogDeviceCompetitorSensorDataMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -1707,6 +1711,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RegattaLogDeviceCompetitorBravoMappingEventImpl.class.getSimpleName())) {
             return loadRegattaLogDeviceCompetitorBravoMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
                     regattaLogIdentifier, o);
+        } else if (eventClass.equals(RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl.class.getSimpleName())) {
+            return loadRegattaLogDeviceCompetitorBravoExtendedMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                    regattaLogIdentifier, o);
+        } else if (eventClass.equals(RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl.class.getSimpleName())) {
+            return loadRegattaLogDeviceCompetitorExpeditionExtendedMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                    regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogDeviceMarkMappingEvent.class.getSimpleName())) {
             return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
@@ -1894,6 +1904,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RegattaLogDeviceCompetitorBravoMappingEventImpl loadRegattaLogDeviceCompetitorBravoMappingEvent(
             TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
             final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        return loadRegattaLogDeviceCompetitorSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                regattaLogIdentifier, outerDBObject, RegattaLogDeviceCompetitorBravoMappingEventImpl::new);
+    }
+    
+    private RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl loadRegattaLogDeviceCompetitorBravoExtendedMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        return loadRegattaLogDeviceCompetitorSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                regattaLogIdentifier, outerDBObject, RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl::new);
+    }
+    
+    private RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl loadRegattaLogDeviceCompetitorExpeditionExtendedMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        return loadRegattaLogDeviceCompetitorSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                regattaLogIdentifier, outerDBObject, RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl::new);
+    }
+    
+    private <MappingT extends RegattaLogDeviceCompetitorSensorDataMappingEvent> MappingT loadRegattaLogDeviceCompetitorSensorDataMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject,
+            AbstractRegattaLogDeviceCompetitorSensorDataMappingEventImpl.Factory<MappingT> factory) {
         DeviceIdentifier device = null;
         try {
             device = loadDeviceId(deviceIdentifierServiceFinder, (DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
@@ -1914,7 +1946,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final TimePoint from = times.getA();
         final TimePoint to = times.getB();
         final boolean needsMigration = times.getC();
-        final RegattaLogDeviceCompetitorBravoMappingEventImpl result = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
+        final MappingT result = factory.create(
                 createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
         if (needsMigration) {
             // remove old version of mapping event

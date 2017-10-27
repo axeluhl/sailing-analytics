@@ -17,6 +17,7 @@ import com.sap.sse.datamining.components.management.QueryDefinitionDTOProvider;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
@@ -40,7 +41,7 @@ public interface DataMiningServer {
     Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
     Iterable<Function<?>> getDimensionsFor(Class<?> sourceType);
     Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
-    Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    ReducedDimensions getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     Function<?> getFunctionForDTO(FunctionDTO functionDTO);
 
     DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();

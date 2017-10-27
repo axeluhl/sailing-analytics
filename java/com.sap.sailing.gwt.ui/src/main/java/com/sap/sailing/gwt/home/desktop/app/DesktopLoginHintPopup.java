@@ -12,7 +12,7 @@ public class DesktopLoginHintPopup extends LoginHintPopup {
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css();
 
     public DesktopLoginHintPopup(AuthenticationManager authenticationManager, DesktopPlacesNavigator placesNavigator) {
-        super(authenticationManager, () -> placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo()));
+        super(authenticationManager, () -> placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo()), null);
         this.addStyleName(LOCAL_CSS.flyover_small_hidden());
         this.addStyleName(LOCAL_CSS.flyover_position_grid());
     }

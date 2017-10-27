@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.io.Serializable;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -14,6 +18,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Specific {@link SensorFixTrackImpl} used for {@link BravoFix}es.
@@ -22,7 +27,9 @@ import com.sap.sse.common.WithID;
  */
 public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends SensorFixTrackImpl<ItemType, BravoFix>
         implements DynamicBravoFixTrack<ItemType> {
-    private static final long serialVersionUID = 5517848726456424386L;
+    private static final long serialVersionUID = 460944392510182976L;
+    
+    private final boolean hasExtendedFixes;
 
     /**
      * @param trackedItem
@@ -30,8 +37,9 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * @param trackName
      *            the name of the track by which it can be obtained from the {@link TrackedRace}.
      */
-    public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
+    public BravoFixTrackImpl(ItemType trackedItem, String trackName, boolean hasExtendedFixes) {
         super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
+        this.hasExtendedFixes = hasExtendedFixes;
     }
 
     @Override
@@ -166,5 +174,100 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
             unlockAfterRead();
         }
         return result;
+    }
+
+    @Override
+    public boolean hasExtendedFixes() {
+        return hasExtendedFixes;
+    }
+    
+    /**
+     * Generic implementation to get values from extended fixes. The implementation ensured that in case of simple
+     * {@link BravoFix} instances, just {@code null} is returned. If valid {@link BravoExtendedFix BravoExtendedFixes}
+     * are found, the provided getter is used to extract the value from the identified fix.
+     * 
+     * In case of a mix of {@link BravoFix} and {@link BravoExtendedFix} instances, this method may return null values
+     * for specific {@link TimePoint TimePoints}.
+     */
+    private <T, I> T getValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, T> getter,
+            Function<T, ScalableValue<I, T>> converterToScalableValue) {
+        if (!hasExtendedFixes) {
+            return null;
+        }
+        final com.sap.sse.common.Util.Function<BravoFix, ScalableValue<I, T>> converter =
+              fix -> converterToScalableValue.apply(getter.apply((BravoExtendedFix) fix));  
+        return getInterpolatedValue(timePoint, converter);
+    }
+    
+    public BravoExtendedFix getFirstFixAtOrAfterIfExtended(TimePoint timePoint) {
+        BravoFix fix = getFirstFixAtOrAfter(timePoint);
+        return fix instanceof BravoExtendedFix ? (BravoExtendedFix) fix : null;
+    }
+    
+    public BravoExtendedFix getLastFixAtOrBeforeIfExtended(TimePoint timePoint) {
+        BravoFix fix = getLastFixAtOrBefore(timePoint);
+        return fix instanceof BravoExtendedFix ? (BravoExtendedFix) fix : null;
+    }
+
+    @Override
+    public Double getPortDaggerboardRakeIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortDaggerboardRake,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Double getStbdDaggerboardRakeStbdIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdDaggerboardRake,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Double getPortRudderRakeIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortRudderRake,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Double getStbdRudderRakeIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdRudderRake,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Bearing getMastRotationIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getMastRotation,
+                NaivelyScalableBearing::new);
+    }
+    
+    private static class NaivelyScalableBearing implements ScalableValue<Double, Bearing> {
+        private final double deg;
+        
+        public NaivelyScalableBearing(Bearing b) {
+            deg = b.getDegrees();
+        }
+        
+        private NaivelyScalableBearing(double deg) {
+            this.deg = deg;
+        }
+        
+        @Override
+        public ScalableValue<Double, Bearing> multiply(double factor) {
+            return new NaivelyScalableBearing(deg*factor);
+        }
+
+        @Override
+        public ScalableValue<Double, Bearing> add(ScalableValue<Double, Bearing> t) {
+            return new NaivelyScalableBearing(deg+t.getValue());
+        }
+
+        @Override
+        public Bearing divide(double divisor) {
+            return new DegreeBearingImpl(deg/divisor);
+        }
+
+        @Override
+        public Double getValue() {
+            return deg;
+        }
     }
 }
