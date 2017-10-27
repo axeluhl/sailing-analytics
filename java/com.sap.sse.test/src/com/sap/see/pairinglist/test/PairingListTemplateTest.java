@@ -28,9 +28,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
            
             
             // creating pairing list template
-            //create(15, 3, 18,10000);
-            
-            
+            create(15, 3, 18,10000); 
     }
   
   

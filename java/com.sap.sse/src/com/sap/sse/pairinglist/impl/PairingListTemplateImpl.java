@@ -1,7 +1,9 @@
 package com.sap.sse.pairinglist.impl;
 
-
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
@@ -10,12 +12,8 @@ import com.sap.sse.pairinglist.PairingListTemplate;
 
 /**
  * @author D070307
- *
- * @param <Flight>
- * @param <Group> 
- * @param <Competitor>
  */
-public class PairingListTemplateImpl implements PairingListTemplate{
+public class PairingListTemplateImpl implements PairingListTemplate {
 
     private int[][] pairingListTemplate;
     private double standardDev;
@@ -51,13 +49,15 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         return pairingListTemplate;
     }
 
-    int[][] create(int flights, int groups, int competitors) {
+    protected int[][] create(int flights, int groups, int competitors) {
         return this.create(flights, groups, competitors, 1000000);
     }
 
-    int[][] create(int flights, int groups, int competitors, int iterationCount) {
+    protected int[][] create(int flights, int groups, int competitors, int iterationCount) {
         int[][] bestPLT = new int[groups][competitors / groups];
-
+        int[][] boatAssignments = new int[competitors][competitors/groups];
+        
+        
         double bestDev = Double.POSITIVE_INFINITY;
 
         for (int iteration = 0; iteration < iterationCount; iteration++) {
@@ -137,12 +137,25 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 bestDev = this.calcStandardDev(currentAssociations);
             }
         }
-
-        for(int[] group : bestPLT) {
-            shuffle(group);
+        
+        for(int i = 0; i<bestPLT.length; i++) {
+            int[] group = bestPLT[i];
+            Integer[] nums = Arrays.stream(group).boxed().toArray(Integer[]::new);
+            System.out.println(Arrays.toString(nums));
+            List<Integer> groupShuffled = new ArrayList<>();
+            Collections.shuffle(Arrays.asList(nums));
+            System.out.println(Arrays.toString(nums));
+            bestPLT[i] = Arrays.stream(nums).mapToInt(Integer::intValue).toArray();
         }
+        
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
+        
+        System.out.println(Arrays.deepToString(pairingListTemplate));
+        
+        boatAssignments = getAssignmentAssociations(pairingListTemplate, new int[competitors][competitors/groups]);
+        System.out.println("Output standard deviation: " + this.calcStandardDev(boatAssignments));
+        
         return bestPLT;
     }
     
@@ -153,7 +166,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 associations[group[i] - 1][i] += 1;
             }
         }
-        
         return associations;
     }
 

@@ -76,5 +76,4 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
         }
         return currentBest;
     }
-
 }
