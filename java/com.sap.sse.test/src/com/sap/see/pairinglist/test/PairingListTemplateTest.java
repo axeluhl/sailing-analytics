@@ -17,7 +17,9 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     @Before
     public void init() {
         // creating pairing list template
+
         this.create(16, 3, 24 ,10000);
+
 
     }
   

@@ -132,9 +132,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             shuffle(group);
         }
 
-
         bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
-
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         return bestPLT;
@@ -340,7 +338,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
 
         // expression in Math.sqrt() is equal to variance / n
-        standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / (n - 1));
+        standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / n);
         
         return standardDev;
     }
