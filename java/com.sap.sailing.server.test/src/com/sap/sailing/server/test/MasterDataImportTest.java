@@ -35,6 +35,7 @@ import com.mongodb.DB;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -918,9 +919,9 @@ public class MasterDataImportTest {
         TimePoint logTimePoint2 = logTimePoint.plus(10);
         CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
         positionedCompetitors.add(new CompetitorResultImpl(
-                competitor.getId(), competitor.getName(), /* rank */ 1, MaxPointsReason.DNS, /* score */ null, /* finishingTime */ null, /* comment */ null));
+                competitor.getId(), competitor.getName(), /* rank */ 1, MaxPointsReason.DNS, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         positionedCompetitors.add(new CompetitorResultImpl(
-                competitor2.getId(), competitor2.getName(), /* rank */ 2, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
+                competitor2.getId(), competitor2.getName(), /* rank */ 2, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = new RaceLogFinishPositioningConfirmedEventImpl(
                 logTimePoint2, author, 1, positionedCompetitors);
         raceColumn.getRaceLog(testFleet1).add(finishPositioningConfirmedEvent);
