@@ -8,19 +8,20 @@
 # Please comment out the variables of the region you are not using
 
 default_region=eu-west-2
-default_key_name=leonradeck-keypair
-default_key_file='/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem'
+default_key_name=Administrator
+default_key_file='~/.ssh/id_rsa'
 default_instance_type=t2.medium
 default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
 default_user_username=newuser
 default_user_password=newpassword
 
+hosted_zone_id=Z1R8UBAEXAMPLE
+
 # Variables for region "eu-west-2" (London)
 
 instance_security_group_ids=sg-871732ee
 image_id=ami-39f3e25d
-hosted_zone_id=Z1R8UBAEXAMPLE
 certificate_arn='arn:aws:iam::123456789012:server-certificate/my-server-cert'
 elb_security_group_ids=sg-871732ee
 mongodb_host=35.176.143.232
@@ -30,7 +31,6 @@ mongodb_port=27017
 
 # instance_security_group_ids=sg-eaf31e85
 # image_id=
-# hosted_zone_id=
 # certificate_arn=''
 # elb_security_group_ids=
 # mongodb_host=54.76.64.42
