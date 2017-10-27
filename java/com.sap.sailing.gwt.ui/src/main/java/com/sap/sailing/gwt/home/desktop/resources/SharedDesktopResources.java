@@ -7,5 +7,8 @@ public interface SharedDesktopResources extends SharedHomeResources {
     
     @Source("dropdown__check@2x.png")
     ImageResource dropdownCheck();
+    
+    @Source("breadcrumb-arrow.png")
+    ImageResource breadcrumbArrow();
 
 }

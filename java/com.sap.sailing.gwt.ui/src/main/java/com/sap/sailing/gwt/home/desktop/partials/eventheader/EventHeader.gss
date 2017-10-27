@@ -141,7 +141,7 @@
   width: 1.333333333333333em;
   border-right: 1px solid #cfcfcf;
   background-color: #dedede;
-  background-image: url("images/home/breadcrumb-arrow__back.png");
+  background-image: resourceUrl("breadcrumbArrow");
   background-position: center center;
   background-repeat: no-repeat;
   background-size: 50%;
