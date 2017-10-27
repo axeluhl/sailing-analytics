@@ -153,8 +153,10 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(SuccessInfo result) {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
-                    // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
-                    redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getLocale());
+                    if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
+                        // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
+                        redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getLocale());
+                    }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
                         view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
