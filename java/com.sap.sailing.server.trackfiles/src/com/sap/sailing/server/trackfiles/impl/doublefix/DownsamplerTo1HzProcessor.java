@@ -50,6 +50,7 @@ public final class DownsamplerTo1HzProcessor implements DoubleFixProcessor {
 
     private void computeDownsampledFixForCurrentSecond() {
         final Double[] computedAverage = new Double[nrOfColumsInTrack];
+        final int[] counts = new int[nrOfColumsInTrack];
         final int numberOfFixesInSecond = fixesInTheCurrentSecond.size();
         if (numberOfFixesInSecond == 0) {
             return;
@@ -57,12 +58,21 @@ public final class DownsamplerTo1HzProcessor implements DoubleFixProcessor {
         for (DoubleVectorFixData d : fixesInTheCurrentSecond) {
             final Double[] fix = d.getFix();
             for (int colIdx = 0; colIdx < nrOfColumsInTrack; colIdx++) {
-                computedAverage[colIdx] += fix[colIdx];
+                if (fix[colIdx] != null) {
+                    if (computedAverage[colIdx] == null) {
+                        computedAverage[colIdx] = fix[colIdx];
+                    } else {
+                        computedAverage[colIdx] += fix[colIdx];
+                    }
+                    counts[colIdx]++;
+                }
             }
         }
         fixesInTheCurrentSecond.clear();
         for (int colIdx = 0; colIdx < nrOfColumsInTrack; colIdx++) {
-            computedAverage[colIdx] /= (double) numberOfFixesInSecond;
+            if (computedAverage[colIdx] != null) {
+                computedAverage[colIdx] /= (double) counts[colIdx];
+            }
         }
         delegateProcesssor.accept(new DoubleVectorFixData(currentSecond * 1000 + 500, computedAverage));
         countImportedTtl++;
