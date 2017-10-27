@@ -29,11 +29,11 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
             }
         }
         System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
-//        for(int x=0;x<100;x++){
-//            create(15, 3, 18,10000);
-//            plTemplate=this.getPairingListTemplate();
-//            System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
-//        }
+        for(int x=0;x<100;x++){
+            create(15, 3, 18,10000);
+            plTemplate=this.getPairingListTemplate();
+            System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
+        }
     }
     
     @Test

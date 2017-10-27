@@ -158,7 +158,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         double neededAssigments= flights/(competitors/groups);
         double bestDev=Double.POSITIVE_INFINITY;
         int[][] bestPLT=new int[flights*groups][competitors/groups];
-        for(int iteration=0;iteration<100;iteration++){
+        for(int iteration=0;iteration<10;iteration++){
             for(int zGroup=0;zGroup<assignments.length;zGroup++){
                 int[][] groupAssignments=new int[competitors/groups][competitors/groups];
                 for(int zPlace=0;zPlace<(competitors/groups);zPlace++){
