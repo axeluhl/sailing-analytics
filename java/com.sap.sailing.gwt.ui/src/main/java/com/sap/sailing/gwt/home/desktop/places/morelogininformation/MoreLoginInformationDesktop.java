@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.morelogininformation;
+package com.sap.sailing.gwt.home.desktop.places.morelogininformation;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -6,16 +6,16 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.morelogininformation.AbstractMoreLoginInformation;
 
 /**
- * Mobile page that shows the benefits of logging in on sapsailing.com.
+ * Desktop page that shows the benefits of logging in on sapsailing.com.
  */
-public class MoreLoginInformationMobile extends AbstractMoreLoginInformation {
+public class MoreLoginInformationDesktop extends AbstractMoreLoginInformation {
 
     private static MoreLoginInformationUiBinder uiBinder = GWT.create(MoreLoginInformationUiBinder.class);
 
     interface MoreLoginInformationUiBinder extends UiBinder<Widget, AbstractMoreLoginInformation> {
     }
 
-    public MoreLoginInformationMobile(Runnable registerCallback) {
+    public MoreLoginInformationDesktop(Runnable registerCallback) {
         super(uiBinder, registerCallback);
     }
 
