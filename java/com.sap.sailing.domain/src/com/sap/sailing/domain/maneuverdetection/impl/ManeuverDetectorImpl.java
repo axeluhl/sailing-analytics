@@ -618,7 +618,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private CurveBoundaryExtension expandBeforeManeuverSectionBySpeedAndBearingTrendAnalysis(Competitor competitor,
             CurveDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint earliestManeuverStart) {
         Duration approximateManeuverDuration = getApproximateManeuverDuration(competitor);
-        Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration.divide(2.0);
+        Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration.divide(4.0);
         Duration maxDurationForSpeedTrendAnalysis = approximateManeuverDuration;
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         TimePoint latestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimePointBefore();
@@ -717,12 +717,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         final Predicate<SpeedWithBearingStep> localMaximumSearch;
         if (timeBackwardSearch) {
             // reverse the steps to iterate through
-            ArrayList<SpeedWithBearingStep> tempSteps = new ArrayList<>();
-            for (SpeedWithBearingStep step : stepsToAnalyze) {
-                tempSteps.add(step);
-            }
-            Collections.reverse(tempSteps);
-            finalStepsToAnalyze = tempSteps;
+            finalStepsToAnalyze = cloneAndReverseIterable(stepsToAnalyze);
             localMaximumSearch = step -> globalMaximumSearchUntilTimePoint == null ? false
                     : step.getTimePoint().before(globalMaximumSearchUntilTimePoint);
         } else {
@@ -766,17 +761,22 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees);
     }
 
+    private Iterable<SpeedWithBearingStep> cloneAndReverseIterable(Iterable<SpeedWithBearingStep> stepsToAnalyze) {
+        final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
+        ArrayList<SpeedWithBearingStep> tempSteps = new ArrayList<>();
+        for (SpeedWithBearingStep step : stepsToAnalyze) {
+            tempSteps.add(step);
+        }
+        Collections.reverse(tempSteps);
+        finalStepsToAnalyze = tempSteps;
+        return finalStepsToAnalyze;
+    }
+
     CurveBoundaryExtension findStableBearingWithMaxAbsCourseChangeSpeed(Iterable<SpeedWithBearingStep> stepsToAnalyze,
             boolean timeBackwardSearch, double maxCourseChangeInDegreesPerSecond) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
         if (timeBackwardSearch) {
-            // reverse the steps to iterate through
-            ArrayList<SpeedWithBearingStep> tempSteps = new ArrayList<>();
-            for (SpeedWithBearingStep step : stepsToAnalyze) {
-                tempSteps.add(step);
-            }
-            Collections.reverse(tempSteps);
-            finalStepsToAnalyze = tempSteps;
+            finalStepsToAnalyze = cloneAndReverseIterable(stepsToAnalyze);
         } else {
             finalStepsToAnalyze = stepsToAnalyze;
         }
