@@ -91,6 +91,7 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -206,7 +207,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
                         /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
-                addRoleForUser("admin", "admin");
+                addRoleForUser("admin", AdminRole.getInstance().getName());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
@@ -221,7 +222,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             logger.info("No roles found. Creating default role \"admin\" with permission \"*\"");
             Set<String> adminPermissions = new HashSet<>();
             adminPermissions.add("*");
-            aclStore.createRole(UUID.randomUUID(), "admin", adminPermissions);
+            AdminRole role = AdminRole.getInstance();
+            aclStore.createRole((UUID) role.getId(), role.getName(), role.getPermissions());
         }
     }
     
@@ -1125,7 +1127,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
         final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole("admin") && (subject.getPrincipal() == null
+        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
                     : subject.getPrincipal().toString();
@@ -1226,7 +1228,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeAccessToken(String username) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole("admin") || username.equals(subject.getPrincipal().toString())) {
+        if (subject.hasRole(AdminRole.getInstance().getName()) || username.equals(subject.getPrincipal().toString())) {
             apply(s -> s.internalRemoveAccessToken(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()

@@ -30,6 +30,7 @@ import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -248,7 +249,7 @@ public class UserStoreImpl implements UserStore {
     public String getAccessToken(String username) {
         // only the user or an administrator may request a user's access token
         final Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (SecurityUtils.getSubject().hasRole("admin") ||
+        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
             (principal != null && principal.toString().equals(username))) {
             return getPreference(username, ACCESS_TOKEN_KEY);
         } else {
@@ -259,7 +260,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void removeAccessToken(String username) {
         // only the user or an administrator may request a user's access token
-        if (SecurityUtils.getSubject().hasRole("admin") ||
+        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
             SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
             User user = users.get(username);
             if (user != null) {

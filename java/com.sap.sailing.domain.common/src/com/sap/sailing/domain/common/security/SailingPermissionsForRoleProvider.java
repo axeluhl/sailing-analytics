@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.sap.sse.security.shared.AbstractRoles;
+import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.RolePermissionModel;
 
@@ -14,7 +15,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
     public Iterable<String> getPermissions(String role, RolePermissionModel rolePermissionModel) {
         final Iterable<String> result;
         if (rolePermissionModel == null) {
-            if ("admin".equals(role)) {
+            if (AdminRole.getInstance().getName().equals(role)) {
                 ArrayList<String> permissions = new ArrayList<>();
                 permissions.add("*");
                 result = permissions;
