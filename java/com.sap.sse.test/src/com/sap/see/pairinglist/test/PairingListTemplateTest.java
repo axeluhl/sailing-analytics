@@ -14,7 +14,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     @Before
     public void init() {
         // creating pairing list template
-        this.create(15, 3, 18,10000);
+        this.create(15, 3, 18,100000);
     }
   
   
