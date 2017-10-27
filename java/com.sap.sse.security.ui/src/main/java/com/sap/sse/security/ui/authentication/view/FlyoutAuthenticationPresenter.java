@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.authentication.view;
 
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -34,7 +35,7 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
      */
     public FlyoutAuthenticationPresenter(final FlyoutAuthenticationView flyoutAuthenticationView,
             final AuthenticationMenuView authenticationMenuView,
-            WrappedPlaceManagementController authenticationPlaceManagementController,
+            AuthenticationPlaceManagementController authenticationPlaceManagementController,
             EventBus eventBus, AuthenticationContext initialAuthentication) {
         this.flyoutAuthenticationView = flyoutAuthenticationView;
         this.authenticationMenuView = authenticationMenuView;
@@ -45,15 +46,9 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
         authenticationMenuView.setPresenter(this);
         flyoutAuthenticationView.setAutoHidePartner(authenticationMenuView);
         
-        eventBus.addHandler(AuthenticationRequestEvent.TYPE, new AuthenticationRequestEvent.Handler() {
-            @Override
-            public void onUserManagementRequestEvent(AuthenticationRequestEvent event) {
-                if(event.isRegister()){
-                    showRegister();
-                }else{
-                    toggleFlyout();
-                }
-            }
+        eventBus.addHandler(AuthenticationRequestEvent.TYPE, event -> {
+            flyoutAuthenticationView.show();
+            authenticationPlaceManagementController.goTo(event.getRequestedPlace());
         });
         
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {

@@ -8,7 +8,7 @@ public class MoreLoginInformationActivity extends AbstractMoreLoginInformationAc
 
     public MoreLoginInformationActivity(Place place, MobileApplicationClientFactory clientFactory) {
         super(clientFactory, new MoreLoginInformationMobile(
-                () -> clientFactory.getNavigator().getSignInNavigation(true).goToPlace()));
+                () -> clientFactory.getNavigator().getCreateAccountNavigation().goToPlace()));
     }
 
 }

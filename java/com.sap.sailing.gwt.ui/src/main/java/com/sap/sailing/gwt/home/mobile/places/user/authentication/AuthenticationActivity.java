@@ -10,39 +10,27 @@ import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl
 import com.sap.sailing.gwt.home.shared.usermanagement.view.AuthenticationViewMobile;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
-import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
-import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
 import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
 public class AuthenticationActivity extends AbstractActivity {
     private final MobileApplicationClientFactory clientFactory;
     private final AuthenticationView userManagementView = new AuthenticationViewMobile();
-    private boolean register;
+    private final AuthenticationPlace place;
 
     public AuthenticationActivity(AuthenticationPlace place, MobileApplicationClientFactory clientFactory) {
-        register = place.isRegisterView();
         this.clientFactory = clientFactory;
+        this.place = place;
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(userManagementView);
-        WrappedPlaceManagementController userManagementController = new AuthenticationPlaceManagementController(
+        final AuthenticationPlaceManagementController userManagementController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(clientFactory.getAuthenticationManager(), SharedResources.INSTANCE),
                 new AuthenticationCallbackImpl(clientFactory.getNavigator().getUserProfileNavigation(),
-                        new SignInSuccessfulNavigationMobile()),
+                        () -> History.back()),
                 userManagementView, eventBus);
-        userManagementController.start();
-        if(register){
-            userManagementController.goTo(new CreateAccountPlace());
-        }
+        userManagementController.goTo(place.getRequestedPlace());
     }
-    
-    private class SignInSuccessfulNavigationMobile implements Runnable {
-        @Override
-        public void run() {
-            History.back();
-        }
-    }
-    
+
 }

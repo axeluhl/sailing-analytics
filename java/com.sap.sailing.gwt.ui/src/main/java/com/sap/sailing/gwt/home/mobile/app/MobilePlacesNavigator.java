@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.authentication.Authentication
 import com.sap.sailing.gwt.home.shared.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaces;
 
 public class MobilePlacesNavigator extends HomePlacesNavigator {
 
@@ -22,8 +23,12 @@ public class MobilePlacesNavigator extends HomePlacesNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
 
-    public PlaceNavigation<AuthenticationPlace> getSignInNavigation(boolean registerView) {
-        return createLocalPlaceNavigation(new AuthenticationPlace(registerView));
+    public PlaceNavigation<AuthenticationPlace> getSignInNavigation() {
+        return createLocalPlaceNavigation(new AuthenticationPlace(AuthenticationPlaces.SIGN_IN));
+    }
+
+    public PlaceNavigation<AuthenticationPlace> getCreateAccountNavigation() {
+        return createLocalPlaceNavigation(new AuthenticationPlace(AuthenticationPlaces.CREATE_ACCOUNT));
     }
     
 }

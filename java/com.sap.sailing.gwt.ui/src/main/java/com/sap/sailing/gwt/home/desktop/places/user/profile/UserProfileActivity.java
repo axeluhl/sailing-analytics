@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaces;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -91,7 +92,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     @Override
     public void doTriggerLoginForm() {
-        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent(false));
+        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent(AuthenticationPlaces.SIGN_IN));
     }
     
     @Override
