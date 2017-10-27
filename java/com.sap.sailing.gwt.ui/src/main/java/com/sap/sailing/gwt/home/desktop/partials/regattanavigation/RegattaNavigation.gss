@@ -98,7 +98,7 @@
   text-decoration: underline;
 }
 .regattanavigation_filter_dropdown_linkactive {
-  background: url("images/home/dropdown__check@2x.png") no-repeat;
+  background: resourceUrl("dropdownCheck") no-repeat;
   background-position: 95%;
   background-size: 1.2em 0.933333333333333em;
 }

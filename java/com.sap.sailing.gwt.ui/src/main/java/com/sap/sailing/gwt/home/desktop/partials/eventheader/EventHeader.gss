@@ -107,7 +107,7 @@
   top: 50%;
   height: 0.933333333333333em;
   width: 0.933333333333333em;
-  background-image: url("images/home/dropdown__check@2x.png");
+  background-image: resourceUrl("dropdownCheck");
   background-repeat: no-repeat;
   background-position: right center;
   background-size: contain;
