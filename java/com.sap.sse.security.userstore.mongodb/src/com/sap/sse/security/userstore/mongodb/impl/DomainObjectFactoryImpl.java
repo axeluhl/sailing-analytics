@@ -34,6 +34,7 @@ import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
@@ -129,9 +130,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Role loadRole(DBObject roleDBObject) {
         final String id = (String) roleDBObject.get(FieldNames.Role.ID.name());
         final String displayName = (String) roleDBObject.get(FieldNames.Role.DISPLAY_NAME.name());
-        final Set<String> permissions = new HashSet<>();
+        final Set<WildcardPermission> permissions = new HashSet<>();
         for (Object o : (BasicDBList) roleDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
-            permissions.add(o.toString());
+            permissions.add(new WildcardPermission(o.toString(), true));
         }
         Role result = new RoleImpl(UUID.fromString(id), displayName, permissions);
         return result;

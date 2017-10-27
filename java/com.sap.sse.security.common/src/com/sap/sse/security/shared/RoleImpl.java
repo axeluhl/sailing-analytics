@@ -8,20 +8,20 @@ import java.util.UUID;
 public class RoleImpl implements Role {
     private final UUID id;
     private final String displayName;
-    private final Set<String> permissions;
+    private final Set<WildcardPermission> permissions;
 
     public RoleImpl(UUID id, String displayName) {
-        this(id, displayName, new HashSet<String>());
+        this(id, displayName, new HashSet<WildcardPermission>());
     }
 
-    public RoleImpl(UUID id, String displayName, Set<String> permissions) {
+    public RoleImpl(UUID id, String displayName, Set<WildcardPermission> permissions) {
         this.id = id;
         this.displayName = displayName;
         this.permissions = permissions;
     }
 
     @Override
-    public Set<String> getPermissions() {
+    public Set<WildcardPermission> getPermissions() {
         return permissions;
     }
 

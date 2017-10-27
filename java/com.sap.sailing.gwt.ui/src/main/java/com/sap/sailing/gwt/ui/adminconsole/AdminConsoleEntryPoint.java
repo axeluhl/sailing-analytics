@@ -44,6 +44,7 @@ import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.AbstractRoles;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
@@ -279,9 +280,9 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         ArrayList<Role> roles = new ArrayList<>();
         for (AbstractRoles abstractRole : AbstractRoles.values()) {
-            Set<String> permissions = new HashSet<>();
+            Set<WildcardPermission> permissions = new HashSet<>();
             for (String permission : abstractRole.getPermissions()) {
-                permissions.add(permission);
+                permissions.add(new WildcardPermission(permission, true));
             }
             Role role = new RoleImpl(abstractRole.getId(), abstractRole.getDisplayName(), permissions);
             roles.add(role);

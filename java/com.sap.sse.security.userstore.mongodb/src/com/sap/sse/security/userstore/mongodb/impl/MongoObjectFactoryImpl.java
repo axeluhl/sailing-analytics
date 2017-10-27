@@ -1,5 +1,6 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -84,6 +86,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.Role.ID.name(), role.getId().toString());
         dbRole.put(FieldNames.Role.ID.name(), role.getId().toString());
         dbRole.put(FieldNames.Role.DISPLAY_NAME.name(), role.getDisplayName());
+        HashSet<String> stringPermissions = new HashSet<>();
+        for (WildcardPermission permission : role.getPermissions()) {
+            stringPermissions.add(permission.toString());
+        }
         dbRole.put(FieldNames.Role.PERMISSIONS.name(), role.getPermissions());
         roleCollection.update(query, dbRole, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }

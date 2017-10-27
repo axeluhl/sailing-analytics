@@ -14,6 +14,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class AccessControlStoreImpl implements AccessControlStore {
     private static final long serialVersionUID = 2165649781000936074L;
@@ -172,7 +173,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public Role createRole(UUID id, String displayName, Set<String> permissions) {
+    public Role createRole(UUID id, String displayName, Set<WildcardPermission> permissions) {
         Role role = new RoleImpl(id, displayName, permissions);
         roleList.put(id, role);
         mongoObjectFactory.storeRole(role);
@@ -180,7 +181,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore setRolePermissions(UUID id, Set<String> permissions) {
+    public AccessControlStore setRolePermissions(UUID id, Set<WildcardPermission> permissions) {
         Role role = roleList.get(id);
         role = new RoleImpl(id, role.getDisplayName(), permissions);
         mongoObjectFactory.storeRole(role);
@@ -188,9 +189,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore addRolePermission(UUID id, String permission) {
+    public AccessControlStore addRolePermission(UUID id, WildcardPermission permission) {
         Role role = roleList.get(id);
-        Set<String> permissions = role.getPermissions();
+        Set<WildcardPermission> permissions = role.getPermissions();
         permissions.add(permission);
         role = new RoleImpl(id, role.getDisplayName(), permissions);
         mongoObjectFactory.storeRole(role);
@@ -198,9 +199,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore removeRolePermission(UUID id, String permission) {
+    public AccessControlStore removeRolePermission(UUID id, WildcardPermission permission) {
         Role role = roleList.get(id);
-        Set<String> permissions = role.getPermissions();
+        Set<WildcardPermission> permissions = role.getPermissions();
         permissions.remove(permission);
         role = new RoleImpl(id, role.getDisplayName(), permissions);
         mongoObjectFactory.storeRole(role);
