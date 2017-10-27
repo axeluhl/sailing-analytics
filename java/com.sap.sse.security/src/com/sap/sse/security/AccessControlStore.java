@@ -16,7 +16,7 @@ public interface AccessControlStore extends Named {
      * @param owner Owner of the object the ACL is attached to
      */
     AccessControlList createAccessControlList(String idAsString, String displayName);
-    AccessControlStore putAclPermissions(String idAsString, UUID group, Set<String> permissions);
+    AccessControlStore setAclPermissions(String idAsString, UUID group, Set<String> permissions);
     AccessControlStore addAclPermission(String idAsString, UUID group, String permission);
     AccessControlStore removeAclPermission(String idAsString, UUID group, String permission);
     AccessControlStore removeAccessControlList(String idAsString);

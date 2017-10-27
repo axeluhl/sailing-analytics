@@ -331,7 +331,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalAclPutPermissions(String id, UUID group, Set<String> permissions) {
-        aclStore.putAclPermissions(id, group, permissions);
+        aclStore.setAclPermissions(id, group, permissions);
         return null;
     }
 

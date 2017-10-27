@@ -81,7 +81,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlStore putAclPermissions(String idAsString, UUID group, Set<String> permissions) {
+    public AccessControlStore setAclPermissions(String idAsString, UUID group, Set<String> permissions) {
         AccessControlList acl = accessControlLists.get(idAsString);
         Map<UUID, Set<String>> permissionMap = acl.getPermissionMap();
         permissionMap.put(group, permissions);
