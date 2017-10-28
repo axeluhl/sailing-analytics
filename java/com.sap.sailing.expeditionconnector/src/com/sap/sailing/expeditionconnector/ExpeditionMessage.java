@@ -106,6 +106,19 @@ public interface ExpeditionMessage extends UDPMessage {
      * True wind speed over ground, cleansed using the GPS device
      */
     final int ID_GWS = 95;
+
+    /**
+     * Heel (inclination along the axis parallel to the boat's keel) in decimal degrees; negative values indicate heel
+     * to port, positive values to starboard
+     */
+    final int ID_HEEL = 000; // TODO find out the ID of the HEEL value in the Expedition UDP stream
+    
+    /**
+     * Trim (also called "pitch" or "nick"; the boat's inclination along the axis parallel to the water surface and
+     * perpendicular to the keel direction in which the boat is generally moving) in decimal degrees; negative values
+     * indicate that the bow is lower than the stern; 
+     */
+    final int ID_TRIM = 000; // TODO find out the ID of the TRIM value in the Expedition UDP stream
             
     /**
      * A message's checksum determines whether the package is to be considered valid.

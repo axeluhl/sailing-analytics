@@ -39,7 +39,7 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTracker;
-import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -261,7 +261,7 @@ public class UDPExpeditionReceiverTest {
         MockedTrackedRace race = new MockedTrackedRace();
         DeclinationService declinationService = DeclinationService.INSTANCE;
         ExpeditionWindTracker windTracker = new ExpeditionWindTracker(race, declinationService, receiver,
-                (ExpeditionWindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
+                (ExpeditionTrackerFactory) ExpeditionTrackerFactory.getInstance());
         receiver.addListener(listener, /* validMessagesOnly */ true);
         receiver.addListener(windTracker, /* validMessagesOnly */ true);
         String[] lines = new String[validLines.length+1];

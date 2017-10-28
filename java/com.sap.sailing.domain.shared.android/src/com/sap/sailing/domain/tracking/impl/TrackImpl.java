@@ -6,6 +6,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.tracking.FixAcceptancePredicate;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -148,14 +149,25 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
 
     @Override
     public FixType getLastFixAtOrBefore(TimePoint timePoint) {
+        return getLastFixAtOrBefore(timePoint, /* fixAcceptancePredicate == null means accept all */ null);
+    }
+    
+    private FixType getLastFixAtOrBefore(TimePoint timePoint, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
         lockForRead();
         try {
-            return (FixType) getInternalFixes().floor(getDummyFix(timePoint));
+            final NavigableSet<FixType> headSet = getInternalFixes().headSet(getDummyFix(timePoint), /* inclusive */ true);
+            for (final Iterator<FixType> i=headSet.descendingIterator(); i.hasNext(); ) {
+                final FixType next = i.next();
+                if (fixAcceptancePredicate == null || fixAcceptancePredicate.isAcceptFix(next)) {
+                    return next;
+                }
+            }
+            return null;
         } finally {
             unlockAfterRead();
         }
     }
-    
+
     @Override
     public FixType getLastFixBefore(TimePoint timePoint) {
         lockForRead();
@@ -188,9 +200,20 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
 
     @Override
     public FixType getFirstFixAtOrAfter(TimePoint timePoint) {
+        return getFirstFixAtOrAfter(timePoint, /* fixAcceptancePredicate==null means accept all fixes */ null);
+    }
+
+    private FixType getFirstFixAtOrAfter(TimePoint timePoint, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
         lockForRead();
         try {
-            return (FixType) getInternalFixes().ceiling(getDummyFix(timePoint));
+            final NavigableSet<FixType> tailSet = getInternalFixes().tailSet(getDummyFix(timePoint), /* inclusive */ true);
+            for (final Iterator<FixType> i=tailSet.iterator(); i.hasNext(); ) {
+                final FixType next = i.next();
+                if (fixAcceptancePredicate == null || fixAcceptancePredicate.isAcceptFix(next)) {
+                    return next;
+                }
+            }
+            return null;
         } finally {
             unlockAfterRead();
         }
@@ -254,9 +277,16 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         }
     }
     
-    private Pair<FixType, FixType> getSurroundingFixes(TimePoint timePoint) {
-        FixType left = getLastFixAtOrBefore(timePoint);
-        FixType right = getFirstFixAtOrAfter(timePoint);
+    /**
+     * @param fixAcceptancePredicate
+     *            if not {@code null}, adjacent fixes will be skipped as long as this predicate does not
+     *            {@link FixAcceptancePredicate#isAcceptFix(Object) accept} the fix. This can, e.g., be used to skip
+     *            fixes that don't have values in a dimension required. If {@code null}, the next fixes left and right
+     *            (including the exact {@code timePoint} if a fix exists there) will be used without further check.
+     */
+    private Pair<FixType, FixType> getSurroundingFixes(TimePoint timePoint, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
+        FixType left = getLastFixAtOrBefore(timePoint, fixAcceptancePredicate);
+        FixType right = getFirstFixAtOrAfter(timePoint, fixAcceptancePredicate);
         com.sap.sse.common.Util.Pair<FixType, FixType> result = new com.sap.sse.common.Util.Pair<>(left, right);
         return result;
     }
@@ -274,9 +304,15 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     }
 
     @Override
-    public <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint, Function<FixType, ScalableValue<InternalType, ValueType>> converter) {
+    public <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint,
+            Function<FixType, ScalableValue<InternalType, ValueType>> converter) {
+        return getInterpolatedValue(timePoint, converter, /* fixAcceptancePredicate==null means accept all */ null);
+    }
+
+    protected <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint,
+            Function<FixType, ScalableValue<InternalType, ValueType>> converter, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
         final ValueType result;
-        Pair<FixType, FixType> fixPair = getSurroundingFixes(timePoint);
+        Pair<FixType, FixType> fixPair = getSurroundingFixes(timePoint, fixAcceptancePredicate);
         if (fixPair.getA() == null) {
             if (fixPair.getB() == null) {
                 result = null;

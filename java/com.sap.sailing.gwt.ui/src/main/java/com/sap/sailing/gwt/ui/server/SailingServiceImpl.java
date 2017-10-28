@@ -303,6 +303,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -525,6 +527,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final MongoObjectFactory mongoObjectFactory;
 
+    private final ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> expeditionConnectorTracker;
+
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     
     private final ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> swissTimingAdapterTracker;
@@ -597,6 +601,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         swissTimingReplayService = ServiceTrackerFactory.createAndOpen(context, SwissTimingReplayServiceFactory.class)
                 .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory(),
                 /* raceLogResolver */ getService());
+        expeditionConnectorTracker = ServiceTrackerFactory.createAndOpen(context, ExpeditionTrackerFactory.class);
         scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
                 ScoreCorrectionProvider.class);
         competitorProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context, CompetitorProvider.class);
@@ -6650,5 +6655,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return availableDetailsTypes;
+    }
+    
+    @Override
+    public List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() {
+        final List<ExpeditionDeviceConfiguration> result = new ArrayList<>();
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            Util.addAll(expeditionConnector.getDeviceConfigurations(), result);
+        }
+        return result;
+    }
+
+    @Override
+    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        // TODO consider replication
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
+        }
+    }
+
+    @Override
+    public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        // TODO consider replication
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
+        }
     }
 }
