@@ -81,9 +81,9 @@ public class IgtimiAccountsPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        allAccounts = new BaseCelltable<String>(/* pageSize */10000, tableRes);
-        final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
-        ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());
+        allAccounts = new BaseCelltable<>(/* pageSize */10000, tableRes);
+        final ListDataProvider<String> filteredAccounts = new ListDataProvider<>();
+        ListHandler<String> accountColumnListHandler = new ListHandler<>(filteredAccounts.getList());
         filteredAccounts.addDataDisplay(allAccounts);
         final List<String> emptyList = Collections.emptyList();
         filterAccountsPanel = new LabeledAbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()),
@@ -94,7 +94,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 return strings;
             }
         };
-        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null,
+        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<>(null,
                 filterAccountsPanel.getAllListDataProvider());
         allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
@@ -104,7 +104,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
             @Override
             public void onClick(ClickEvent event) {
                 if (refreshableAccountsSelectionModel.getSelectedObject() != null) {
-                    if (Window.confirm("Do you really want to remove the leaderboards?")) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
                         removeAccount(refreshableAccountsSelectionModel.getSelectedObject(), filteredAccounts);
                     }
                 }
@@ -142,6 +142,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         allAccounts.addColumn(accountActionColumn, stringMessages.actions());
+        allAccounts.addColumnSortHandler(accountColumnListHandler);
         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.addIgtimiAccount());
         addAccountButton.ensureDebugId("addIgtimiAccount");

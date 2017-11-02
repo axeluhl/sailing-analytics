@@ -133,7 +133,7 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
             if (epochColValue != null && epochColValue.length() > 0) {
                 epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
                 epoch = Long.parseLong(epochColValue);
-                double[] trackFixData = new double[getTrackColumnCount()];
+                Double[] trackFixData = new Double[getTrackColumnCount()];
                 for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
                     Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
                     trackFixData[columnNameToSearchForInFile.getValue()] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);

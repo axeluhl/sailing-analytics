@@ -20,7 +20,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTracker;
 
 /**
- * Can be subscribed to a {@link UDPExpeditionReceiver} and forwards the wind information
+ * Can be subscribed to a {@link UDPExpeditionReceiver} and forwards wind information
  * received to the {@link DynamicTrackedRace} passed to the constructor.
  * 
  * @author Axel Uhl (d043530)
@@ -35,7 +35,7 @@ public class ExpeditionWindTracker extends AbstractWindTracker implements Expedi
     
     private final UDPExpeditionReceiver receiver;
     
-    private final ExpeditionWindTrackerFactory factory;
+    private final ExpeditionTrackerFactory factory;
 
     /**
      * @param declinationService
@@ -47,7 +47,7 @@ public class ExpeditionWindTracker extends AbstractWindTracker implements Expedi
      *            calling {@link #stop}, this subscription will be removed again.
      */
     public ExpeditionWindTracker(DynamicTrackedRace race, DeclinationService declinationService,
-            UDPExpeditionReceiver receiver, ExpeditionWindTrackerFactory factory) {
+            UDPExpeditionReceiver receiver, ExpeditionTrackerFactory factory) {
         super(race);
         this.lastKnownPositionPerBoatID = new HashMap<Integer, Position>();
         this.declinationService = declinationService;
@@ -60,7 +60,7 @@ public class ExpeditionWindTracker extends AbstractWindTracker implements Expedi
     public void stop() {
         synchronized (factory) {
             receiver.removeListener(this);
-            factory.windTrackerStopped(getTrackedRace().getRace(), this);
+            factory.trackerStopped(getTrackedRace().getRace(), this);
         }
     }
     
