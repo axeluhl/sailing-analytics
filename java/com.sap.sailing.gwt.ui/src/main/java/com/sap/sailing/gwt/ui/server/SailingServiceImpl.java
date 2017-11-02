@@ -5288,8 +5288,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private class TimeoutExtendingInputStream extends FilterInputStream {
 
     	// default timeout is high to ensure that long running client operations
-    	// such as compressing data will not have the server run into a timeout
-    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*10;
+    	// such as compressing data will not have the server run into a timeout.
+    	// this especially applies to foiling data where compression on slower machines
+    	// can take up to two hours.
+    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*60*2;
 
         private final HttpURLConnection connection;
 

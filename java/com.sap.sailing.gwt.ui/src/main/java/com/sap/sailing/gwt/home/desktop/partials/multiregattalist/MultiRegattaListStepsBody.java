@@ -94,10 +94,11 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
     }
     
     private String caculateSeriesName(RegattaProgressSeriesDTO seriesProgress) {
-        if (seriesProgress.getName() == null || seriesProgress.getName().isEmpty()) {
+        if (seriesProgress.getName() == null || seriesProgress.getName().isEmpty()
+                || DEFAULT_SERIES_NAME.equals(seriesProgress.getName())) {
             return I18N.races();
         } else {
-            return DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName();
+            return seriesProgress.getName();
         }
     }
     
