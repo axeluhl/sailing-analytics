@@ -58,11 +58,13 @@ public class BravoFixImpl extends SensorFixImpl implements BravoFix {
 
     @Override
     public Bearing getPitch() {
-        return new DegreeBearingImpl(fix.get(BravoSensorDataMetadata.PITCH.getColumnIndex()));
+        final Double bearingDeg = fix.get(BravoSensorDataMetadata.PITCH.getColumnIndex());
+        return bearingDeg == null ? null : new DegreeBearingImpl(bearingDeg);
     }
 
     @Override
     public Bearing getHeel() {
-        return new DegreeBearingImpl(fix.get(BravoSensorDataMetadata.HEEL.getColumnIndex()));
+        final Double bearingDeg = fix.get(BravoSensorDataMetadata.HEEL.getColumnIndex());
+        return bearingDeg == null ? null : new DegreeBearingImpl(bearingDeg);
     }
 }

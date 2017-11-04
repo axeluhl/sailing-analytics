@@ -1,0 +1,18 @@
+.box {
+  font-size: 1rem;
+  border: 1px solid #dedede;
+  border-radius: 0.333333333333333em;
+  overflow: hidden;
+}
+.box_header {
+  color: #333;
+  font-size: 1.2em;
+  font-weight: 700;
+  background: #f2f2f2;
+  padding: 1.111111111111111em;
+  border-bottom: 1px solid #dedede;
+}
+.box_content {
+  margin: 0;
+  padding: 1em;
+}
