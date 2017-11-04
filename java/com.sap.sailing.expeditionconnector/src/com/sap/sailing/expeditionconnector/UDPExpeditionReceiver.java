@@ -100,13 +100,14 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
      */
     private void tryToProduceAndStoreSensorFix(ExpeditionMessage msg, ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier) {
-        final Double heelInDegrees = msg.hasValue(ExpeditionMessage.ID_HEEL) ? msg.getValue(ExpeditionMessage.ID_HEEL) : null;
-        final Double trimInDegrees = msg.hasValue(ExpeditionMessage.ID_TRIM) ? msg.getValue(ExpeditionMessage.ID_TRIM) : null;
-        final Double[] vector = new Double[Math.max(ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex(), ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex())-1];
+        final Double heelInDegrees = msg.hasValue(ExpeditionMessage.ID_ROLL) ? msg.getValue(ExpeditionMessage.ID_ROLL) : null;
+        final Double trimInDegrees = msg.hasValue(ExpeditionMessage.ID_PITCH) ? msg.getValue(ExpeditionMessage.ID_PITCH) : null;
+        final Double[] vector = new Double[Math.max(ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex(),
+                                                    ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex())+1];
         vector[ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex()] = heelInDegrees;
         vector[ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex()] = trimInDegrees;
         final DoubleVectorFix fix = new DoubleVectorFixImpl(msg.getTimePoint(), vector);
-        if (fix != null) {
+        if (fix != null && fix.hasValidData()) {
             deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);
         }
     }
