@@ -83,13 +83,15 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
     }
     
     private void produceAndStoreOptionalFixes(ExpeditionMessage msg) {
-        final ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier = deviceRegistry.getGpsDeviceIdentifier(msg.getBoatID());
-        if (gpsDeviceIdentifier != null) {
-            tryToProduceAndStoreGpsFix(msg, gpsDeviceIdentifier);
-        }
-        final ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier = deviceRegistry.getSensorDeviceIdentifier(msg.getBoatID());
-        if (sensorDeviceIdentifier != null) {
-            tryToProduceAndStoreSensorFix(msg, sensorDeviceIdentifier);
+        if (deviceRegistry != null) {
+            final ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier = deviceRegistry.getGpsDeviceIdentifier(msg.getBoatID());
+            if (gpsDeviceIdentifier != null) {
+                tryToProduceAndStoreGpsFix(msg, gpsDeviceIdentifier);
+            }
+            final ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier = deviceRegistry.getSensorDeviceIdentifier(msg.getBoatID());
+            if (sensorDeviceIdentifier != null) {
+                tryToProduceAndStoreSensorFix(msg, sensorDeviceIdentifier);
+            }
         }
     }
 

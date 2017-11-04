@@ -5,7 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -38,8 +40,8 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
-import com.sap.sailing.expeditionconnector.ExpeditionWindTracker;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTracker;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -60,7 +62,7 @@ public class UDPExpeditionReceiverTest {
     private Thread receiverThread;
 
     @Before
-    public void setUp() throws UnknownHostException, SocketException {
+    public void setUp() throws UnknownHostException, SocketException, InterruptedException {
         validLines = new String[] {
                 "#0,1,7.700,2,-39.0,3,23.00,9,319.0,12,1.17,146,40348.390035*37",
                 "#0,4,-54.9,5,17.69,6,263.1,9,318.0*0D",
@@ -117,6 +119,7 @@ public class UDPExpeditionReceiverTest {
         receiver = new UDPExpeditionReceiver(PORT);
         receiverThread = new Thread(receiver, "Expedition Receiver");
         receiverThread.start();
+        Thread.sleep(10); // to give receiver enough time to start listening on UDP socket
         listener = new ExpeditionListener() {
             @Override
             public void received(ExpeditionMessage message) {
@@ -175,6 +178,23 @@ public class UDPExpeditionReceiverTest {
         assertEquals(windFixes.get(0).getPosition(), windFixes.get(2).getPosition());
     }
 
+    @Test
+    public void testBasicPhoenixUDPProperties() throws IOException, InterruptedException {
+        receiver.addListener(listener, /* validMessagesOnly */ true);
+        final InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream("/Expedition_28Oct17_0820.txt"));
+        final BufferedReader br = new BufferedReader(reader);
+        final List<String> lines = new ArrayList<>();
+        String line;
+        while ((line=br.readLine()) != null) {
+            if (!line.trim().isEmpty()) {
+                lines.add(line.trim());
+            }
+        }
+        br.close();
+        sendAndWaitABit(lines.toArray(new String[0]));
+        assertEquals(159, lines.size());
+        assertEquals(159, messages.size());
+    }
 
     @Test
     public void testTimeStampConversion() throws IOException, InterruptedException {
