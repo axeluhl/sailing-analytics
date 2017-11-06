@@ -56,6 +56,30 @@ public class DetailTypeFormatter {
             return stringMessages.currentStbdRudderRake();
         case CURRENT_MAST_ROTATION_IN_DEGREES:
             return stringMessages.currentMastRotationInDegree();
+        case CURRENT_DEPTH_IN_METERS:
+            return stringMessages.currentDepthInMeters();
+        case CURRENT_DRIFT_IN_DEGREES:
+            return stringMessages.currentDriftInDegrees();
+        case CURRENT_LEEWAY_IN_DEGREES:
+            return stringMessages.currentLeewayInDegrees();
+        case CURRENT_RUDDER_IN_DEGREES:
+            return stringMessages.currentRudderInDegrees();
+        case CURRENT_SET:
+            return stringMessages.currentSet();
+        case CURRENT_TACK_ANGLE_IN_DEGREES:
+            return stringMessages.currentTackAngleInDegrees();
+        case CURRENT_DEFLECTOR_IN_MILLIMETERS:
+            return stringMessages.currentDeflectorInMillimeters();
+        case CURRENT_DEFLECTOR_PERCENTAGE:
+            return stringMessages.currentDeflectorPercentage();
+        case CURRENT_FORESTAY_LOAD:
+            return stringMessages.currentForestayLoad();
+        case CURRENT_RAKE_IN_DEGREES:
+            return stringMessages.currentRakeInDegrees();
+        case CURRENT_TARGET_BOATSPEED_PERCENTAGE:
+            return stringMessages.currentTargetBoatspeedPercentage();
+        case CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES:
+            return stringMessages.currentTargetHeelAngleInDegrees();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
             return stringMessages.estimatedTimeToNextWaypointInSeconds();
         case VELOCITY_MADE_GOOD_IN_KNOTS:
@@ -162,6 +186,8 @@ public class DetailTypeFormatter {
             return stringMessages.beatAngle();
         case COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegrees();
+        default:
+            break;
         }
         return null;
     }
@@ -188,6 +214,10 @@ public class DetailTypeFormatter {
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
             return stringMessages.knotsUnit();
 
+        case CURRENT_DEFLECTOR_PERCENTAGE:
+        case CURRENT_TARGET_BOATSPEED_PERCENTAGE:
+            return stringMessages.percent();
+        
         case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case DISTANCE_TRAVELED:
@@ -209,18 +239,30 @@ public class DetailTypeFormatter {
         case DISTANCE_TO_START_LINE:
         case CURRENT_RIDE_HEIGHT_IN_METERS:
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case CURRENT_DEPTH_IN_METERS:
             return stringMessages.metersUnit();
+
+        case CURRENT_DEFLECTOR_IN_MILLIMETERS:
+            return stringMessages.millimetersUnit();
             
         case COURSE_OVER_GROUND_TRUE_DEGREES:
         case CURRENT_HEEL_IN_DEGREES:
         case CURRENT_PITCH_IN_DEGREES:
         case CURRENT_MAST_ROTATION_IN_DEGREES:
+        case CURRENT_DRIFT_IN_DEGREES:
+        case CURRENT_LEEWAY_IN_DEGREES:
+        case CURRENT_RAKE_IN_DEGREES:
+        case CURRENT_RUDDER_IN_DEGREES:
+        case CURRENT_TACK_ANGLE_IN_DEGREES:
+        case CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES:
             return stringMessages.degreesShort();
         
         case CURRENT_PORT_DAGGERBOARD_RAKE:
         case CURRENT_STBD_DAGGERBOARD_RAKE:
         case CURRENT_PORT_RUDDER_RAKE:
         case CURRENT_STBD_RUDDER_RAKE:
+        case CURRENT_FORESTAY_LOAD:
+        case CURRENT_SET:
             // We currently do not show a specific unit for these measures because these are specific "uninterpreted" values
             return "";
 
@@ -270,6 +312,8 @@ public class DetailTypeFormatter {
         case BEAT_ANGLE:
         case TIME_ON_TIME_FACTOR:
             return "";
+        default:
+            break;
         }
         // Throwing an exception to get notified if an implementation of
         // a detail type is missing.
@@ -348,6 +392,30 @@ public class DetailTypeFormatter {
             return stringMessages.currentStbdRudderRakeTooltip();
         case CURRENT_MAST_ROTATION_IN_DEGREES:
             return stringMessages.currentMastRotationInDegreeTooltip();
+        case CURRENT_DEPTH_IN_METERS:
+            return stringMessages.currentDepthInMetersTooltip();
+        case CURRENT_DRIFT_IN_DEGREES:
+            return stringMessages.currentDriftInDegreesTooltip();
+        case CURRENT_LEEWAY_IN_DEGREES:
+            return stringMessages.currentLeewayInDegreesTooltip();
+        case CURRENT_RUDDER_IN_DEGREES:
+            return stringMessages.currentRudderInDegreesTooltip();
+        case CURRENT_SET:
+            return stringMessages.currentSetTooltip();
+        case CURRENT_TACK_ANGLE_IN_DEGREES:
+            return stringMessages.currentTackAngleInDegreesTooltip();
+        case CURRENT_DEFLECTOR_IN_MILLIMETERS:
+            return stringMessages.currentDeflectorInMillimetersTooltip();
+        case CURRENT_DEFLECTOR_PERCENTAGE:
+            return stringMessages.currentDeflectorPercentageTooltip();
+        case CURRENT_FORESTAY_LOAD:
+            return stringMessages.currentForestayLoadTooltip();
+        case CURRENT_RAKE_IN_DEGREES:
+            return stringMessages.currentRakeInDegreesTooltip();
+        case CURRENT_TARGET_BOATSPEED_PERCENTAGE:
+            return stringMessages.currentTargetBoatspeedPercentageTooltip();
+        case CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES:
+            return stringMessages.currentTargetHeelAngleInDegreesTooltip();
         case CURRENT_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegreeTooltip();
         case CURRENT_PITCH_IN_DEGREES:

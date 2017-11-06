@@ -52,8 +52,9 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
-    public Double getLeeway() {
-        return fix.get(BravoExtendedSensorDataMetadata.LEEWAY.getColumnIndex());
+    public Bearing getLeeway() {
+        final Double leeway = fix.get(BravoExtendedSensorDataMetadata.LEEWAY.getColumnIndex());
+        return leeway == null ? null : new DegreeBearingImpl(leeway);
     }
 
     @Override
@@ -62,8 +63,9 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
-    public Double getDrift() {
-        return fix.get(BravoExtendedSensorDataMetadata.DRIFT.getColumnIndex());
+    public Bearing getDrift() {
+        final Double drift = fix.get(BravoExtendedSensorDataMetadata.DRIFT.getColumnIndex());
+        return drift == null ? null : new DegreeBearingImpl(drift);
     }
 
     @Override

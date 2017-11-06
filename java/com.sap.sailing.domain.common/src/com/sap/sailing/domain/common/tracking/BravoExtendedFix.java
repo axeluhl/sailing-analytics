@@ -12,9 +12,9 @@ public interface BravoExtendedFix extends BravoFix {
     Double getPortRudderRake();
     Double getStbdRudderRake();
     Bearing getMastRotation();
-    Double getLeeway();
+    Bearing getLeeway();
     Double getSet();
-    Double getDrift();
+    Bearing getDrift();
     Distance getDepth();
     Bearing getRudder();
     Double getForestayLoad();
