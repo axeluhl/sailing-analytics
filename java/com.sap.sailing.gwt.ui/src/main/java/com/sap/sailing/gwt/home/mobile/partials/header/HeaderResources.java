@@ -3,12 +3,22 @@ package com.sap.sailing.gwt.home.mobile.partials.header;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 
 public interface HeaderResources extends ClientBundle {
     public static final HeaderResources INSTANCE = GWT.create(HeaderResources.class);
 
     @Source("Header.gss")
     LocalCss css();
+
+    @Source("navigation-icon-signedin.svg")
+    @MimeType("image/svg+xml")
+    DataResource navigationSignedin();
+    
+    @Source("navigation-icon.svg")
+    @MimeType("image/svg+xml")
+    DataResource navigation();
 
     public interface LocalCss extends CssResource {
         String header();

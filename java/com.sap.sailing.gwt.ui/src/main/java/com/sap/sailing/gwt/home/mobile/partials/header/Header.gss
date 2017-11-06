@@ -155,12 +155,12 @@ img.header_logo_image {
           transform: translate(-50%, -50%);
   width: 1em;
   height: 1.333333333333333em;
-  background-image: url("images/mobile/navigation-icon.svg");
+  background-image: resourceUrl("navigation");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center center;
 }
 .header_navigation_iconsignedin {
   width: 1.666666666666667em;
-  background-image: url("images/mobile/navigation-icon-signedin.svg");
+  background-image: resourceUrl("navigationSignedin");
 }
