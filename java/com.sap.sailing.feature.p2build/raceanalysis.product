@@ -47,6 +47,7 @@
       <plugin id="com.sap.sailing.domain.tractracadapter" autoStart="false" startLevel="4" />
       <plugin id="com.sap.sailing.domain.tractracadapter.persistence" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.ess40.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.expeditionconnector.persistence" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.freg.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="3" />

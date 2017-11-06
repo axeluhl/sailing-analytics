@@ -101,7 +101,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                     lineNr.incrementAndGet();
                     if (!line.trim().isEmpty()) {
                         parseLine(lineNr.get(), filename, line, colIndices, (timePoint, fileContentTokens, columnsInFileFromHeader)->{
-                            double[] trackFixData = new double[trackColumnCount];
+                            Double[] trackFixData = new Double[trackColumnCount];
                             for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
                                 Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
                                 trackFixData[columnNameToSearchForInFile.getValue()] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
