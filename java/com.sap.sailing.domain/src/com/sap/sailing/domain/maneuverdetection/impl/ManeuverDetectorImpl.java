@@ -449,8 +449,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         }
                     }
                 }
-                if (Math.abs(maneuverMainCurveDetails.getTotalCourseChangeInDegrees()) >= 1 && maneuverMainCurveDetails
-                        .getTimePointBefore().until(maneuverMainCurveDetails.getTimePointAfter()).asMillis() > 0) {
+                if (Math.abs(maneuverMainCurveDetails.getTotalCourseChangeInDegrees()) > 0) {
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverLoss, maneuverDetails.getTimePoint(), maneuverDetails.getTimePointBefore(),
                             maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
