@@ -647,11 +647,17 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 timePointSinceGlobalMaximumSearch);
         TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
                 : maneuverStart.getExtensionTimePoint();
+        double courseChangeSinceManeuverMainCurveInDegrees = maneuverStart == null ? 0
+                : maneuverStart.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
                 stableBearingAnalysisUntil);
         maneuverStart = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze, true,
                 MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
-        return maneuverStart != null ? maneuverStart
+        return maneuverStart != null
+                ? new CurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
+                        maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
+                        courseChangeSinceManeuverMainCurveInDegrees
+                                + maneuverStart.getCourseChangeInDegreesWithinExtensionArea())
                 : new CurveBoundaryExtension(maneuverMainCurveDetails.getTimePointBefore(),
                         maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0);
     }
@@ -702,11 +708,17 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         CurveBoundaryExtension maneuverEnd = findSpeedMaximum(stepsToAnalyze, false, timePointBeforeLocalMaximumSearch);
         TimePoint stableBearingAnalysisFrom = maneuverEnd == null ? maneuverMainCurveDetails.getTimePointAfter()
                 : maneuverEnd.getExtensionTimePoint();
+        double courseChangeSinceManeuverMainCurveInDegrees = maneuverEnd == null ? 0
+                : maneuverEnd.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, stableBearingAnalysisFrom,
                 latestTimePointForSpeedTrendAnalysis);
         maneuverEnd = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze, false,
                 MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
-        return maneuverEnd != null ? maneuverEnd
+        return maneuverEnd != null
+                ? new CurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
+                        maneuverEnd.getSpeedWithBearingAtExtensionTimePoint(),
+                        courseChangeSinceManeuverMainCurveInDegrees
+                                + maneuverEnd.getCourseChangeInDegreesWithinExtensionArea())
                 : new CurveBoundaryExtension(maneuverMainCurveDetails.getTimePointAfter(),
                         maneuverMainCurveDetails.getSpeedWithBearingAfter(), 0);
     }
