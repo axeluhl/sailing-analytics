@@ -27,6 +27,12 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 if(z<=0) fail("Problem in .create!");
             }
         }
+        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
+        for(int x=0;x<100;x++){
+            create(15, 3, 18,10000);
+            plTemplate=this.getPairingListTemplate();
+            System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
+        }
     }
     
     @Test
@@ -88,8 +94,5 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
     }
     
-    @Test
-    public void testImprovingAssignments() {
-        this.improveAssignments(this.getPairingListTemplate(), 3, 18,15);
-    }
+
 }
