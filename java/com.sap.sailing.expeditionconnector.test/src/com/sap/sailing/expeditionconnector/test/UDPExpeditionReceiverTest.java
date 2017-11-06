@@ -17,12 +17,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -42,7 +44,11 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.BravoExtendedFixImpl;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -179,7 +185,13 @@ public class UDPExpeditionReceiverTest {
         @Override
         public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices)
                 throws TransformationException, NoCorrespondingServiceRegisteredException {
-            return null;
+            final Map<DeviceIdentifier, FixT> result = new HashMap<>();
+            for (final Entry<DeviceIdentifier, List<Timed>> fixes : fixesReceived.entrySet()) {
+                @SuppressWarnings("unchecked")
+                final List<FixT> fixList = (List<FixT>) fixes.getValue();
+                result.put(fixes.getKey(), fixList.get(fixList.size()-1));
+            }
+            return result;
         }
 
         @Override
@@ -333,7 +345,12 @@ public class UDPExpeditionReceiverTest {
         final ExpeditionGpsDeviceIdentifier gpsDevice = deviceRegistry.getGpsDeviceIdentifier(0);
         final ExpeditionSensorDeviceIdentifier sensorDevice = deviceRegistry.getSensorDeviceIdentifier(0);
         assertTrue(sensorFixStore.getNumberOfFixes(gpsDevice) > 0);
+        assertEquals(-33.907350, ((GPSFixMoving) sensorFixStore.getLastFix(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLatDeg(), 0.0001);
+        assertEquals(18.419951, ((GPSFixMoving) sensorFixStore.getLastFix(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLngDeg(), 0.0001);
         assertTrue(sensorFixStore.getNumberOfFixes(sensorDevice) > 0);
+        final BravoExtendedFix sensorFix = new BravoExtendedFixImpl((DoubleVectorFix) sensorFixStore.getLastFix(Collections.singleton(sensorDevice)).get(sensorDevice));
+        assertEquals(1.872, sensorFix.getRake().getDegrees(), 0.000001);
+        assertEquals(18.4, sensorFix.getRudder().getDegrees(), 0.05);
     }
 
     @Test
