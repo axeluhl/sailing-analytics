@@ -116,7 +116,7 @@ public class BravoFixTrackSerializationTest {
         }
         
         private void addOrReplaceBravoFixToTrack(boolean replace) {
-            double[] fixData = new double[BravoSensorDataMetadata.getTrackColumnCount()];
+            Double[] fixData = new Double[BravoSensorDataMetadata.getTrackColumnCount()];
             // fill the port/starboard columns as well because their minimum defines the true ride height
             fixData[BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex()] = rideHeight;
             fixData[BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex()] = rideHeight;

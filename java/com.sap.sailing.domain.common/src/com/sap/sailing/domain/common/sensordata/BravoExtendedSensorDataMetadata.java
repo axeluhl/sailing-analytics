@@ -6,12 +6,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
+
 /**
- * Metadata that defines the column structure of BravoExtended fixes when imported as {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * Metadata that defines the column structure of BravoExtended fixes when imported as
+ * {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * <p>
  * 
  * The current implementation only stores a subset of the information available during the import.
+ * <p>
  * 
- * The first columns need to be consistent with {@link BravoSensorDataMetadata}.
+ * The first columns need to be consistent with {@link BravoSensorDataMetadata}. Furthermore,
+ * once data has been stored in a sensor store, the order of literals must remain constant,
+ * and no literals must be deleted anymore because the ordinal is used to determine the index
+ * into the {@link DoubleVectorFix}.
  */
 public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     RIDE_HEIGHT_PORT_HULL("RideHeightPort"), //
@@ -24,7 +32,7 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     RUDDER_RAKE_STBD("RudderRakeAngleStbd"), //
     MAST_ROTATION("MastRotation");
 
-    private String columnName;
+    private final String columnName;
     
     private BravoExtendedSensorDataMetadata(String columnName) {
         this.columnName = columnName;
@@ -34,6 +42,9 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
         return columnName;
     }
 
+    /**
+     * The index in the {@link DoubleVectorFix} where this data item will be stored
+     */
     public int getColumnIndex() {
         return this.ordinal();
     }

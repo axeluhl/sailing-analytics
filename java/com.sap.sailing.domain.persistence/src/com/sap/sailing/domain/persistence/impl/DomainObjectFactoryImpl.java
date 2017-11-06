@@ -112,6 +112,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpe
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -1713,6 +1714,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl.class.getSimpleName())) {
             return loadRegattaLogDeviceCompetitorBravoExtendedMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
                     regattaLogIdentifier, o);
+        } else if (eventClass.equals(RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl.class.getSimpleName())) {
+            return loadRegattaLogDeviceCompetitorExpeditionExtendedMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                    regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogDeviceMarkMappingEvent.class.getSimpleName())) {
             return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
@@ -1909,6 +1913,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
         return loadRegattaLogDeviceCompetitorSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
                 regattaLogIdentifier, outerDBObject, RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl::new);
+    }
+    
+    private RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl loadRegattaLogDeviceCompetitorExpeditionExtendedMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        return loadRegattaLogDeviceCompetitorSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                regattaLogIdentifier, outerDBObject, RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl::new);
     }
     
     private <MappingT extends RegattaLogDeviceCompetitorSensorDataMappingEvent> MappingT loadRegattaLogDeviceCompetitorSensorDataMappingEvent(

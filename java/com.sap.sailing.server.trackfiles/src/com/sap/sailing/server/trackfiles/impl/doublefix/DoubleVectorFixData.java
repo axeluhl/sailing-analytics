@@ -5,9 +5,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public final class DoubleVectorFixData {
     private long timepointInMs;
-    private double[] fix;
+    private Double[] fix;
 
-    public DoubleVectorFixData(long timepoint, double[] fix) {
+    public DoubleVectorFixData(long timepoint, Double[] fix) {
         super();
         this.timepointInMs = timepoint;
         this.fix = fix;
@@ -25,7 +25,7 @@ public final class DoubleVectorFixData {
         return timepointInMs / 1000;
     }
 
-    public double[] getFix() {
+    public Double[] getFix() {
         return fix;
     }
 
