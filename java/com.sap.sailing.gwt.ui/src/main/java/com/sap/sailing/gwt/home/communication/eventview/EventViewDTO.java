@@ -23,6 +23,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private ImageDTO logoImage;
     private String officialWebsiteURL;
     private String sailorsInfoWebsiteURL;
+    private String description;
 
     public EventType getType() {
         return type;
@@ -115,5 +116,13 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
             return venue + ", " + getVenueCountry();
         }
         return venue;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

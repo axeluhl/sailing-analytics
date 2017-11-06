@@ -24,28 +24,29 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
-    public double getPortDaggerboardRake() {
+    public Double getPortDaggerboardRake() {
         return fix.get(BravoExtendedSensorDataMetadata.DB_RAKE_PORT.getColumnIndex());
     }
 
     @Override
-    public double getStbdDaggerboardRake() {
+    public Double getStbdDaggerboardRake() {
         return fix.get(BravoExtendedSensorDataMetadata.DB_RAKE_STBD.getColumnIndex());
     }
 
     @Override
-    public double getPortRudderRake() {
+    public Double getPortRudderRake() {
         return fix.get(BravoExtendedSensorDataMetadata.RUDDER_RAKE_PORT.getColumnIndex());
     }
 
     @Override
-    public double getStbdRudderRake() {
+    public Double getStbdRudderRake() {
         return fix.get(BravoExtendedSensorDataMetadata.RUDDER_RAKE_STBD.getColumnIndex());
     }
 
     @Override
     public Bearing getMastRotation() {
-        return new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.MAST_ROTATION.getColumnIndex()));
+        final Double bearingDeg = fix.get(BravoExtendedSensorDataMetadata.MAST_ROTATION.getColumnIndex());
+        return bearingDeg == null ? null : new DegreeBearingImpl(bearingDeg);
     }
 
 }

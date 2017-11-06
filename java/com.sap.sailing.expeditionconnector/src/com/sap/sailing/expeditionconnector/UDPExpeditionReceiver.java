@@ -5,7 +5,14 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageParser;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.udpconnector.UDPReceiver;
 
 /**
@@ -20,9 +27,17 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * Remembers, per boat ID, the milliseconds difference between the time the message was received
      * and the GPS time stamp provided by the message.
      */
-    private final Map<Integer, Long> timeStampOfLastMessageReceived;
+    private final Map<Integer, Long> delayBetweenMessageTimestampAndTimepointReceived;
     
     private final ExpeditionMessageParser parser;
+
+    /**
+     * An optional lookup facility for device identifiers for a {@link ExpeditionMessage#getBoatID() boat ID} as
+     * received in an Expedition UDP stream; if device identifiers are returned by a non-{@code null} registry, GPS /
+     * sensor fixes will be assembled upon receiving them, and they will be submitted to the {@link SensorFixStore}.
+     * Otherwise, only wind data will be forwarded.
+     */
+    private final DeviceRegistry deviceRegistry;
 
     /**
      * Launches a listener and dumps messages received to the console
@@ -46,13 +61,74 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * start this object in a new thread.
      */
     public UDPExpeditionReceiver(int listeningOnPort) throws SocketException {
-        super(listeningOnPort);
-        this.timeStampOfLastMessageReceived = new HashMap<Integer, Long>();
-        parser = new ExpeditionMessageParser(this);
+        this(listeningOnPort, /* DeviceRegistry */ null);
     }
     
-    public Map<Integer, Long> getTimeStampOfLastMessageReceived() {
-        return timeStampOfLastMessageReceived;
+    /**
+     * You need call {@link #run} to actually start receiving events. To do this asynchronously, start this object in a
+     * new thread.
+     * 
+     * @param deviceRegistry
+     *            if not {@code null}, a look-up for each message's {@link ExpeditionMessage#getBoatID() boat ID} will
+     *            be performed; if valid device identifiers for GPS and sensor tracks are returned, this receiver will
+     *            produce GPS and sensor fixes, respectively, with the device identifiers produced by the
+     *            {@link DeviceRegistry} and submit them to the {@link SensorFixStore}.
+     */
+    public UDPExpeditionReceiver(int listeningOnPort, DeviceRegistry deviceRegistry) throws SocketException {
+        super(listeningOnPort);
+        this.deviceRegistry = deviceRegistry;
+        this.delayBetweenMessageTimestampAndTimepointReceived = new HashMap<Integer, Long>();
+        parser = new ExpeditionMessageParser(this);
+        addListener(msg->produceAndStoreOptionalFixes(msg), /* validMessagesOnly */ true);
+    }
+    
+    private void produceAndStoreOptionalFixes(ExpeditionMessage msg) {
+        if (deviceRegistry != null) {
+            final ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier = deviceRegistry.getGpsDeviceIdentifier(msg.getBoatID());
+            if (gpsDeviceIdentifier != null) {
+                tryToProduceAndStoreGpsFix(msg, gpsDeviceIdentifier);
+            }
+            final ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier = deviceRegistry.getSensorDeviceIdentifier(msg.getBoatID());
+            if (sensorDeviceIdentifier != null) {
+                tryToProduceAndStoreSensorFix(msg, sensorDeviceIdentifier);
+            }
+        }
+    }
+
+    /**
+     * If this message completes the set of data required to produce a sensor fix, do so and
+     * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
+     */
+    private void tryToProduceAndStoreSensorFix(ExpeditionMessage msg, ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier) {
+        final Double heelInDegrees = msg.hasValue(ExpeditionMessage.ID_ROLL) ? msg.getValue(ExpeditionMessage.ID_ROLL) : null;
+        final Double trimInDegrees = msg.hasValue(ExpeditionMessage.ID_PITCH) ? msg.getValue(ExpeditionMessage.ID_PITCH) : null;
+        final Double[] vector = new Double[Math.max(ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex(),
+                                                    ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex())+1];
+        vector[ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex()] = heelInDegrees;
+        vector[ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex()] = trimInDegrees;
+        final DoubleVectorFix fix = new DoubleVectorFixImpl(msg.getTimePoint(), vector);
+        if (fix != null && fix.hasValidData()) {
+            deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);
+        }
+    }
+
+    /**
+     * If this message completes the set of data required to produce a GPS fix, do so and
+     * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
+     */
+    private void tryToProduceAndStoreGpsFix(ExpeditionMessage msg, ExpeditionGpsDeviceIdentifier gpsDeviceIdentifier) {
+        final GPSFixMoving fix = msg.getGPSFixMoving();
+        if (fix != null) {
+            deviceRegistry.getSensorFixStore().storeFix(gpsDeviceIdentifier, fix);
+        }
+    }
+
+    public Long getLastKnownMessageDelayInMillis(int boatID) {
+        return delayBetweenMessageTimestampAndTimepointReceived.get(boatID);
+    }
+    
+    public void updateLastKnownMessageDelay(int boatID, long timestampAsMillis) {
+        delayBetweenMessageTimestampAndTimepointReceived.put(boatID, timestampAsMillis);
     }
     
     protected ExpeditionMessageParser getParser() {

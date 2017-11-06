@@ -76,7 +76,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
             };
         }.start();
         
-        store.storeFix(device, new DoubleVectorFixImpl(new MillisecondsTimePoint(1), new double[]{0.0}));
+        store.storeFix(device, new DoubleVectorFixImpl(new MillisecondsTimePoint(1), new Double[]{0.0}));
     }
 
 }
