@@ -19,5 +19,16 @@ public interface SharedDesktopResources extends SharedHomeResources {
     @Source("liveraces.svg")
     @MimeType("image/svg+xml")
     DataResource liveraces();
-
+    
+    @Source("icon-audio.png")
+    ImageResource audio();
+    
+    @Source("icon-video.png")
+    ImageResource video();
+    
+    @Source("icon-wind.png")
+    ImageResource wind();
+    
+    @Source("raw_gps_fixes.png")
+    ImageResource gpsFixes();
 }

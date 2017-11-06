@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
-public interface RaceListResources extends ClientBundle {
+public interface RaceListResources extends SharedDesktopResources {
     public static final RaceListResources INSTANCE = GWT.create(RaceListResources.class);
 
     @Source("RaceList.gss")
@@ -51,5 +51,11 @@ public interface RaceListResources extends ClientBundle {
 
         String racesListIcon();
         String racesListHideColumn();
+        
+        String iconGPS();
+        String iconWind();
+        String iconVideo();
+        String iconAudio();
+        String legend();
     }
 }

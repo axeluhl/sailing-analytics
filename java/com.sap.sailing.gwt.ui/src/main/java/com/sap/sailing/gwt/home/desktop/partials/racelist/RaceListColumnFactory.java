@@ -19,7 +19,6 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
@@ -36,6 +35,7 @@ import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.Loca
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadCell;
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadController;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -570,9 +570,9 @@ public class RaceListColumnFactory {
     }
     
     private static abstract class DataCountColumn<T extends RaceListRaceDTO> extends SortableRaceListColumn<T, Number> {
-        private static final SafeUri ICON_WIND = UriUtils.fromTrustedString("images/home/icon-wind.png"); 
-        private static final SafeUri ICON_VIDEO = UriUtils.fromTrustedString("images/home/icon-video.png"); 
-        private static final SafeUri ICON_AUDIO = UriUtils.fromTrustedString("images/home/icon-audio.png"); 
+        private static final SafeUri ICON_WIND = SharedDesktopResources.INSTANCE.wind().getSafeUri(); 
+        private static final SafeUri ICON_VIDEO = SharedDesktopResources.INSTANCE.video().getSafeUri(); 
+        private static final SafeUri ICON_AUDIO = SharedDesktopResources.INSTANCE.audio().getSafeUri(); 
         
         private DataCountColumn(final SafeUri imageUri, RaceListColumnComparator<T, ?> comparator) {
             super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Number>() {

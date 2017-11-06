@@ -231,3 +231,33 @@ img.race_item_flag {
 .racesListHideColumn > * {
   display: none !important;
 }
+.iconGPS, .iconWind, .iconVideo, .iconAudio{
+    position: relative;
+    display: none;
+    margin-left: 0.666666666666667em;
+    padding-left: 2.333333333333333em;
+    background-size: 1.666666666666667rem 1.666666666666667rem;
+    background-position: left;
+    background-repeat: no-repeat;
+}
+.iconGPS {
+    background-image: resourceUrl('gpsFixes');
+}
+.iconWind {
+    background-image: resourceUrl('wind');
+}
+.iconVideo {
+    background-image: resourceUrl('video');
+    border-left: 1px solid #ccc;
+}
+.iconAudio {
+    background-image: resourceUrl('audio');
+    border-left: 1px solid #ccc;
+}
+.legend {
+    text-align: right;
+    vertical-align: baseline;
+    line-height: 1.333em;
+    padding-right:0px;
+    margin: 0 0 .5em;
+}
