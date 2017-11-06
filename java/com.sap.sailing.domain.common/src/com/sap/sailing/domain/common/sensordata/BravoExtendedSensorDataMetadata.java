@@ -25,12 +25,13 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     RIDE_HEIGHT_PORT_HULL("RideHeightPort"), //
     RIDE_HEIGHT_STBD_HULL("RideHeightStbd"), //
     HEEL("Heel"), //
-    PITCH("PitchRate"),
+    PITCH("PitchRate"), //
     DB_RAKE_PORT("DaggerBoardRakeAnglePort"), //
     DB_RAKE_STBD("DaggerBoardRakeAngleStbd"), //
     RUDDER_RAKE_PORT("RudderRakeAnglePort"), //
     RUDDER_RAKE_STBD("RudderRakeAngleStbd"), //
-    MAST_ROTATION("MastRotation");
+    MAST_ROTATION("MastRotation"), //
+    ;
 
     private final String columnName;
     
