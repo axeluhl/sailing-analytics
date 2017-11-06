@@ -46,4 +46,12 @@ public interface SharedHomeResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource fullscreen();
     
+    @Source("facebook-logo.svg")
+    @MimeType("image/svg+xml")
+    DataResource facebookLogo();
+    
+    @Source("twitter-logo.svg")
+    @MimeType("image/svg+xml")
+    DataResource twitterLogo();
+    
 }
