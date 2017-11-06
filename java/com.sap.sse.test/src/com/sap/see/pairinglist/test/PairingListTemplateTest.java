@@ -10,6 +10,8 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
+import com.sap.sse.pairinglist.impl.PairingListTemplateImpl_OLD;
+
 import junit.framework.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl{
@@ -18,7 +20,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     public void init() {
         // creating pairing list template
 
-        this.create(16, 3, 24 ,10000);
+       
 
 
     }
@@ -101,6 +103,12 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         create(10, 3, 30,10000);
         if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
     }
+    
+    @Test
+    public void testSingleFlightCreation(){
+        this.createPairingListTemplate(15, 3, 18);
+    }
+ 
     
 
 }
