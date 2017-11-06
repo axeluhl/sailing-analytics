@@ -48,7 +48,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class ManeuverDetectorImpl implements ManeuverDetector {
 
-    static final double MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 1;
+    static final double MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 2;
 
     private static final Logger logger = Logger.getLogger(ManeuverDetectorImpl.class.getName());
 
@@ -618,7 +618,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private CurveBoundaryExtension expandBeforeManeuverSectionBySpeedAndBearingTrendAnalysis(Competitor competitor,
             CurveDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint earliestManeuverStart) {
         Duration approximateManeuverDuration = getApproximateManeuverDuration(competitor);
-        Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration.divide(4.0);
+        Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration.divide(8.0);
         Duration maxDurationForSpeedTrendAnalysis = approximateManeuverDuration;
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         TimePoint latestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimePointBefore();
