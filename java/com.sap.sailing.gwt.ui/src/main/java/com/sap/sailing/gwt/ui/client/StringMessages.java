@@ -1953,4 +1953,15 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentMastRotationInDegree();
     String currentMastRotationInDegreeTooltip();
     String mainCurveAnalysis();
+    String boatNameMustNotBeEmpty();
+    String errorUpdatingExpeditionDeviceConfiguration(String name, String message);
+    String doYouReallyWantToRemoveExpeditionDeviceConfiguration(String name);
+    String errorTryingToRemoveExpeditionDeviceConfiguration(String name, String message);
+    String errorFetchingExpeditionDeviceConfigurations(String message);
+    String expeditionDeviceConfigurations();
+    String addExpeditionDeviceConfiguration();
+    String editExpeditionDeviceConfiguration();
+    String expeditionBoatId();
+    String doYouReallyWantToRemoveTheSelectedExpeditionDeviceConfigurations();
+    String doYouReallyWantToRemoveTheSelectedIgtimiAccounts();
 }

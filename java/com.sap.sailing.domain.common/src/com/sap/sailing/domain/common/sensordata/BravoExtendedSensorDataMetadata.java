@@ -42,6 +42,9 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
         return columnName;
     }
 
+    /**
+     * The index in the {@link DoubleVectorFix} where this data item will be stored
+     */
     public int getColumnIndex() {
         return this.ordinal();
     }
