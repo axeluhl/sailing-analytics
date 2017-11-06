@@ -10,4 +10,8 @@ import com.sap.sse.common.Timed;
 public interface DoubleVectorFix extends Timed {
     Double[] get();
     Double get(int index);
+    /**
+     * Tells whether at least one component is not {@code null}
+     */
+    boolean hasValidData();
 }
