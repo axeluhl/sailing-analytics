@@ -561,13 +561,17 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     /**
      * Computes the details of maneuver such as maneuver entering and exiting time point with speed and bearing, time
      * point of maneuver climax and total course change. The provided details of maneuver main curve are used as minimal
-     * maneuver section which gets expanded by analyzing the speed trend before and after the main curve of maneuver.
-     * The goal is to determine the maneuver entering and exiting time points such that the speed and course values
-     * ideally represent stable segments leading into and out of the maneuver. It is assumed that before maneuver the
-     * speed starts to slow down. Thus, in order to approximate the beginning time point of the maneuver, the speed
-     * maximum is determined throughout forward in time iteration of speed steps starting from time point of main curve
-     * beginning. The exiting time point of maneuver is approximated analogously by speed maximum determination
-     * throughout backwards in time iteration of speed steps starting from time of main curve finish.
+     * maneuver section which gets expanded by analyzing the speed and bearing trend regarding stability before and
+     * after the main curve of maneuver. The goal is to determine the maneuver entering and exiting time points such
+     * that the speed and course values ideally represent stable segments leading into and out of the maneuver. It is
+     * assumed that before maneuver the speed starts to slow down. Thus, in order to approximate the beginning time
+     * point of the maneuver, the speed maximum is determined throughout forward in time iteration of speed steps
+     * starting from time point of main curve beginning. From the determined speed maximum, the iteration continues
+     * until the point, when the bearing changes occur only with a maximum of
+     * {@value #MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
+     * stable course. The exiting time point of maneuver is approximated analogously by speed maximum determination
+     * throughout backward in time iteration of speed steps starting from time of main curve end, followed by a search
+     * of stable course.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -597,12 +601,19 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Performs a search for speed maximum which starts at the time point of main curve start (in the following
-     * referenced as {@code t} and lasts at least ({@link BoatClass#getApproximateManeuverDurationInMilliseconds()
-     * maneuver duration} / 2) and maximal {@link BoatClass#getApproximateManeuverDurationInMilliseconds() maneuver
-     * duration} backwards in time. In interval {@code [t - minimal search duration; t]} global speed maximum is
-     * searched, whereas in interval {@code [t - maximal search duration; t - minimal search duration)} the search
-     * continues only if the speed keeps rising. 
+     * Determines the start of maneuver by analysis of speed and bearing trend starting from the start of provided
+     * maneuver main curve. Firstly, speed maximum is located by iterating through the speed with bearings steps
+     * backward in time, starting from the time point of main curve start {@code t}. In interval {@code [t -}
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code / 8; t]} global
+     * speed maximum is considered, whereas in interval {@code [t -}
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code ; t - }
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code / 8)} the
+     * search continues only if the speed keeps rising. After the time point with speed maximum {@code t'} is
+     * determined, the course changes get analyzed starting from {@code t'} until {@code (t -}
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration}{@code )} in order to
+     * locate the point where the bearing starts to change with a rate of maximal
+     * {@value #MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
+     * stable course.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -646,12 +657,19 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Performs a search for speed maximum which starts at the time point of main curve finish (in the following
-     * referenced as {@code t} and lasts at least {@link BoatClass#getApproximateManeuverDurationInMilliseconds()
-     * maneuver duration} and maximal ({@link BoatClass#getApproximateManeuverDurationInMilliseconds() maneuver
-     * duration} * 3) forward in time. In interval {@code [t; t + minimal search duration]} global speed maximum is
-     * searched, whereas in interval {@code (t + minimal search duration; t + maximal search duration]} the search
-     * continues only if the speed keeps rising.
+     * Determines the end of maneuver by analysis of speed and bearing trend starting from the end of provided maneuver
+     * main curve. Firstly, speed maximum is located by iterating through the speed with bearings steps forward in time,
+     * starting from the time point of main curve end {@code t}. In interval {@code [t; t +}
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code ]} global speed
+     * maximum is considered, whereas in interval {@code (t +}
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code ; t + }
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code * 3)} the
+     * search continues only if the speed keeps rising. After the time point with speed maximum {@code t'} is
+     * determined, the course changes get analyzed starting from {@code t'} until {@code (t +}
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code * 3)} in order
+     * to locate the point where the bearing starts to change with a rate of maximal
+     * {@value #MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
+     * stable course.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -711,8 +729,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @return The time point and speed at located step with speed maximum, as well as the total course change from the
      *         step iteration started until the step with the speed maximum
      */
-    public CurveBoundaryExtension findSpeedMaximum(Iterable<SpeedWithBearingStep> stepsToAnalyze, boolean timeBackwardSearch,
-            TimePoint globalMaximumSearchUntilTimePoint) {
+    public CurveBoundaryExtension findSpeedMaximum(Iterable<SpeedWithBearingStep> stepsToAnalyze,
+            boolean timeBackwardSearch, TimePoint globalMaximumSearchUntilTimePoint) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
         final Predicate<SpeedWithBearingStep> localMaximumSearch;
         if (timeBackwardSearch) {
@@ -772,8 +790,28 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         return finalStepsToAnalyze;
     }
 
-    public CurveBoundaryExtension findStableBearingWithMaxAbsCourseChangeSpeed(Iterable<SpeedWithBearingStep> stepsToAnalyze,
-            boolean timeBackwardSearch, double maxCourseChangeInDegreesPerSecond) {
+    /**
+     * Finds a first section within the provided {@code stepsToAnalyze} where the bearing starts to change with a
+     * maximal rate of {@code maxCourseChangeInDegreesPerSecond}.
+     * 
+     * @param stepsToAnalyze
+     * @param timeBackwardSearch
+     * @param maxCourseChangeInDegreesPerSecond
+     * @return
+     * @param stepsToAnalyze
+     *            Steps which are used for stable bearing search. Must be in chronological order (forward in time).
+     * @param timeBackwardSearch
+     *            {@code true} if the search should be performed backward in time, {@code false} for forward in time.
+     *            When the search is performed backward in time, then the provided {@code stepsToAnalyze} are going to
+     *            be iterated in the reverse order.
+     * @param maxCourseChangeInDegreesPerSecond
+     *            Defines the course change rate which is regarded as a stable course
+     * @return The time point and speed at located step with the first stable course, as well as the total course change
+     *         from the step iteration started until the located step
+     */
+    public CurveBoundaryExtension findStableBearingWithMaxAbsCourseChangeSpeed(
+            Iterable<SpeedWithBearingStep> stepsToAnalyze, boolean timeBackwardSearch,
+            double maxCourseChangeInDegreesPerSecond) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
         if (timeBackwardSearch) {
             finalStepsToAnalyze = cloneAndReverseIterable(stepsToAnalyze);
@@ -818,8 +856,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The nautical direction of the maneuver
      * @return The computed entering and exiting time point with its speeds with bearings for the main curve
      */
-    public CurveEnterindAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(TimePoint maneuverTimePoint,
-            Iterable<SpeedWithBearingStep> bearingStepsToAnalyze, NauticalSide maneuverDirection) {
+    public CurveEnterindAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(
+            TimePoint maneuverTimePoint, Iterable<SpeedWithBearingStep> bearingStepsToAnalyze,
+            NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
         double maxCourseChangeInDegrees = 0;
         double currentCourseChangeInDegrees = 0;
