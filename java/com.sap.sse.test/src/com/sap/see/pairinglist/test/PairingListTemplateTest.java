@@ -2,9 +2,6 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals; 
 import static org.junit.Assert.fail;
-
-import java.util.Arrays;
-
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
@@ -20,8 +17,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     public void init() {
         // creating pairing list template
 
-       
-
+        this.create(15, 3, 18,10000);
 
     }
   
@@ -36,12 +32,11 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 if(z<=0) fail("Problem in .create!");
             }
         }
-        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[24][24/3])));
-        System.out.println(Arrays.deepToString(this.getAssignmentAssociations(plTemplate,new  int[24][24/3])));
+        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
         for(int x=0;x<100;x++){
-            create(16, 3, 24,10000);
+            create(15, 3, 18,10000);
             plTemplate=this.getPairingListTemplate();
-            System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[24][24/3])));
+            System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
         }
     }
     
