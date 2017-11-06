@@ -49,6 +49,7 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
@@ -682,4 +683,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * an option for charts, if it actually recorded for the race.
      */
     List<DetailType> determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
+
+    List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations();
+
+    void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
+
+    void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
 }

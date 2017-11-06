@@ -17,6 +17,23 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.7.7 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 29/10/2017
+Build number: 14418
+
+ 1) Bugs
+
+ - Selector.wakeup() throws an IOException in Android 5. It seems a bug on this platform
+ (Reported by André Borud, 30/08/2017)
+ - There is a synchronization bug on the implementation of the IAttachable interface
+ (Reported by Axel Uhl, 29/10/2017)
+
+
+********************************************
 ************* TracAPI 3.7.6 ****************
 ********************************************
  This is a final version.It fixes bugs in the implementation and it adds a some features.
