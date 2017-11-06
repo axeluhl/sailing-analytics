@@ -9,7 +9,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-class CurveEnterindAndExitingDetails {
+public class CurveEnterindAndExitingDetails {
     private final TimePoint timePointBefore;
     private final TimePoint timePointAfter;
     private final SpeedWithBearing speedWithBearingBefore;

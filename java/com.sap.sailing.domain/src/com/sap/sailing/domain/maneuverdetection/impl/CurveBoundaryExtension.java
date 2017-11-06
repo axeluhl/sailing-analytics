@@ -10,7 +10,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-class CurveBoundaryExtension {
+public class CurveBoundaryExtension {
     private final TimePoint extensionTimePoint;
     private final SpeedWithBearing speedWithBearingAtExtensionTimePoint;
     private final double courseChangeInDegreesWithinExtensionArea;

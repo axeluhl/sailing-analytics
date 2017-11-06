@@ -711,7 +711,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @return The time point and speed at located step with speed maximum, as well as the total course change from the
      *         step iteration started until the step with the speed maximum
      */
-    CurveBoundaryExtension findSpeedMaximum(Iterable<SpeedWithBearingStep> stepsToAnalyze, boolean timeBackwardSearch,
+    public CurveBoundaryExtension findSpeedMaximum(Iterable<SpeedWithBearingStep> stepsToAnalyze, boolean timeBackwardSearch,
             TimePoint globalMaximumSearchUntilTimePoint) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
         final Predicate<SpeedWithBearingStep> localMaximumSearch;
@@ -772,7 +772,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         return finalStepsToAnalyze;
     }
 
-    CurveBoundaryExtension findStableBearingWithMaxAbsCourseChangeSpeed(Iterable<SpeedWithBearingStep> stepsToAnalyze,
+    public CurveBoundaryExtension findStableBearingWithMaxAbsCourseChangeSpeed(Iterable<SpeedWithBearingStep> stepsToAnalyze,
             boolean timeBackwardSearch, double maxCourseChangeInDegreesPerSecond) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
         if (timeBackwardSearch) {
@@ -818,7 +818,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The nautical direction of the maneuver
      * @return The computed entering and exiting time point with its speeds with bearings for the main curve
      */
-    CurveEnterindAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(TimePoint maneuverTimePoint,
+    public CurveEnterindAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(TimePoint maneuverTimePoint,
             Iterable<SpeedWithBearingStep> bearingStepsToAnalyze, NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
         double maxCourseChangeInDegrees = 0;
@@ -879,7 +879,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     /**
      * Gets a new list with bearing steps which are lying between provided time range (inclusive the boundaries).
      */
-    List<SpeedWithBearingStep> getSpeedWithBearingStepsWithinTimeRange(
+    public List<SpeedWithBearingStep> getSpeedWithBearingStepsWithinTimeRange(
             Iterable<SpeedWithBearingStep> bearingStepsToAnalyze, TimePoint timePointBefore, TimePoint timePointAfter) {
         List<SpeedWithBearingStep> maneuverBearingSteps = new ArrayList<>();
         for (SpeedWithBearingStep entry : bearingStepsToAnalyze) {
