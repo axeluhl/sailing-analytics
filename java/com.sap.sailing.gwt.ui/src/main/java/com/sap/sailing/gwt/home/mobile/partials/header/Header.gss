@@ -133,7 +133,7 @@ img.header_logo_image {
 	background: none;
 }
 .header_navigation_nav_sublist_item:before {
-	background: url('images/home/arrow-down-grey.png');
+	background: resourceUrl('arrowDownGrey');
     display: block;
     height: 25px;
     background-position: center;

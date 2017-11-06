@@ -93,7 +93,7 @@
 }
 .searchresult_item_arrow {
   font-size: 1rem;
-  background: url("images/home/arrow-down-grey.png");
+  background: resourceUrl("arrowDownGrey");
   background-size: contain;
   display: block;
   width: 1.333333333333333em;
