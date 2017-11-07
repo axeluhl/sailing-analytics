@@ -26,6 +26,7 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
         super(presenter, false, false);
         FlowPanel container = new FlowPanel();
         this.setupOverviewStage(container);
+        this.setupEventDescription(container);
         this.setupRegattaStatusList(container);
         this.setupUpdateBox(container);
         this.setupImpressions(container);

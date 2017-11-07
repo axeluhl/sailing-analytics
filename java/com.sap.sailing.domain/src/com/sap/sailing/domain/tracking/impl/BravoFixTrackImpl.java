@@ -8,6 +8,8 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableDistance;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -44,62 +46,20 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Distance getRideHeight(TimePoint timePoint) {
-        BravoFix fixAfter = getFirstFixAtOrAfter(timePoint);
-        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return fixAfter.getRideHeight();
-        }
-        BravoFix fixBefore = getLastFixAtOrBefore(timePoint);
-        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return fixBefore.getRideHeight();
-        }
-        if (fixAfter == null || fixBefore == null) {
-            // the fix is out of the TimeRange where we have fixes
-            return null;
-        }
-        // TODO interpolate if necessary
-        return fixBefore.getRideHeight();
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getRideHeight,
+                ScalableDistance::new);
     }
 
     @Override
     public Bearing getHeel(TimePoint timePoint) {
-        BravoFix fixAfter = getFirstFixAtOrAfter(timePoint);
-        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return fixAfter.getHeel();
-        }
-        BravoFix fixBefore = getLastFixAtOrBefore(timePoint);
-        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return fixBefore.getHeel();
-        }
-        if (fixAfter == null || fixBefore == null) {
-            // the fix is out of the TimeRange where we have fixes
-            return null;
-        }
-        // TODO interpolate if necessary
-        return fixBefore.getHeel();
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getHeel,
+                ScalableBearing::new);
     }
 
     @Override
     public Bearing getPitch(TimePoint timePoint) {
-        BravoFix fixAfter = getFirstFixAtOrAfter(timePoint);
-        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return fixAfter.getPitch();
-        }
-        BravoFix fixBefore = getLastFixAtOrBefore(timePoint);
-        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
-            // exact match of timepoint -> no interpolation necessary
-            return fixBefore.getPitch();
-        }
-        if (fixAfter == null || fixBefore == null) {
-            // the fix is out of the TimeRange where we have fixes
-            return null;
-        }
-        // TODO interpolate if necessary
-        return fixBefore.getPitch();
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getPitch,
+                ScalableBearing::new);
     }
     
     @Override
@@ -185,18 +145,31 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * Generic implementation to get values from extended fixes. The implementation ensured that in case of simple
      * {@link BravoFix} instances, just {@code null} is returned. If valid {@link BravoExtendedFix BravoExtendedFixes}
      * are found, the provided getter is used to extract the value from the identified fix.
+     * <p>
      * 
      * In case of a mix of {@link BravoFix} and {@link BravoExtendedFix} instances, this method may return null values
      * for specific {@link TimePoint TimePoints}.
+     * <p>
+     * 
+     * If the value extracted by the {@code getter} is {@code null}, the next fix will be probed, until no more fix
+     * exists in that direction or a fix is found that delivers a non-{@code null} value for the {@code getter} result.
+     * This way it is possible to skip fixes that don't make a statement with regard to the attribute extracted by the
+     * {@code getter}.
      */
-    private <T, I> T getValueFromExtendedFix(final TimePoint timePoint, final Function<BravoExtendedFix, T> getter,
+    private <T, I, BravoFixType extends BravoFix> T getValueFromExtendedFixSkippingNullValues(
+            final TimePoint timePoint, final Function<BravoFixType, T> getter,
             Function<T, ScalableValue<I, T>> converterToScalableValue) {
-        if (!hasExtendedFixes) {
-            return null;
-        }
         final com.sap.sse.common.Util.Function<BravoFix, ScalableValue<I, T>> converter =
-              fix -> converterToScalableValue.apply(getter.apply((BravoExtendedFix) fix));  
-        return getInterpolatedValue(timePoint, converter);
+              fix -> {
+                  @SuppressWarnings("unchecked")
+                final BravoFixType castFix = (BravoFixType) fix;
+                  return converterToScalableValue.apply(getter.apply(castFix));  
+              };
+        return getInterpolatedValue(timePoint, converter, fix->{
+            @SuppressWarnings("unchecked")
+            final BravoFixType castFix = (BravoFixType) fix;
+            return getter.apply(castFix) != null;
+        });
     }
     
     public BravoExtendedFix getFirstFixAtOrAfterIfExtended(TimePoint timePoint) {
@@ -211,31 +184,31 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Double getPortDaggerboardRakeIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortDaggerboardRake,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getPortDaggerboardRake,
                 ScalableDouble::new);
     }
 
     @Override
     public Double getStbdDaggerboardRakeStbdIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdDaggerboardRake,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getStbdDaggerboardRake,
                 ScalableDouble::new);
     }
 
     @Override
     public Double getPortRudderRakeIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getPortRudderRake,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getPortRudderRake,
                 ScalableDouble::new);
     }
 
     @Override
     public Double getStbdRudderRakeIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getStbdRudderRake,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getStbdRudderRake,
                 ScalableDouble::new);
     }
 
     @Override
     public Bearing getMastRotationIfAvailable(TimePoint timePoint) {
-        return getValueFromExtendedFix(timePoint, BravoExtendedFix::getMastRotation,
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getMastRotation,
                 NaivelyScalableBearing::new);
     }
     

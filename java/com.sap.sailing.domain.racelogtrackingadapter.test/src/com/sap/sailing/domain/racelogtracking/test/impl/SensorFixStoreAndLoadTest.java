@@ -542,7 +542,7 @@ public class SensorFixStoreAndLoadTest {
     }
 
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
-        double[] fixData = new double[BravoSensorDataMetadata.getTrackColumnCount()];
+        Double[] fixData = new Double[BravoSensorDataMetadata.getTrackColumnCount()];
         // fill the port/starboard columns as well because their minimum defines the true ride height
         fixData[BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex()] = rideHeight;
         fixData[BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex()] = rideHeight;
@@ -554,7 +554,7 @@ public class SensorFixStoreAndLoadTest {
     }
     
     private DoubleVectorFix createTestDoubleVectorFixWithTestValue(long timestamp, double testValue) {
-        double[] fixData = new double[TestFixImpl.COLUMNS.size()];
+        Double[] fixData = new Double[TestFixImpl.COLUMNS.size()];
         fixData[TestFixImpl.TEST_COLUMN_INDEX] = testValue;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
     }

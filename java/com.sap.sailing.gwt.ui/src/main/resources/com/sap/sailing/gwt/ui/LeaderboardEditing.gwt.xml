@@ -17,6 +17,7 @@
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sse.security.ui.Settings" />
         <inherits name='com.sap.sailing.gwt.settings.Settings'/>
+        <inherits name="com.sap.sailing.ExpeditionConnectorCommon" />
 	
   	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />

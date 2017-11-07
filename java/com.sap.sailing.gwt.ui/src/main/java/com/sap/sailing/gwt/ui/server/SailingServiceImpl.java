@@ -303,6 +303,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -526,6 +528,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final MongoObjectFactory mongoObjectFactory;
 
+    private final ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> expeditionConnectorTracker;
+
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     
     private final ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> swissTimingAdapterTracker;
@@ -598,6 +602,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         swissTimingReplayService = ServiceTrackerFactory.createAndOpen(context, SwissTimingReplayServiceFactory.class)
                 .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory(),
                 /* raceLogResolver */ getService());
+        expeditionConnectorTracker = ServiceTrackerFactory.createAndOpen(context, ExpeditionTrackerFactory.class);
         scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
                 ScoreCorrectionProvider.class);
         competitorProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context, CompetitorProvider.class);
@@ -2962,8 +2967,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getHeel(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
+            }
             case CURRENT_PITCH_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
@@ -2971,16 +2976,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getPitch(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
-            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
-            {
+            }
+            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
                     final Distance rideHeight = bravoFixTrack.getRideHeight(timePoint);
                     result = rideHeight == null ? null : rideHeight.getMeters();
                 }
+                break;
             }
             case CURRENT_PORT_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -2988,6 +2993,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getPortDaggerboardRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_STBD_DAGGERBOARD_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -2995,6 +3001,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getStbdDaggerboardRakeStbdIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_PORT_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3002,6 +3009,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getPortRudderRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_STBD_RUDDER_RAKE: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3009,6 +3017,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getStbdRudderRakeIfAvailable(timePoint);
                 }
+                break;
             }
             case CURRENT_MAST_ROTATION_IN_DEGREES: {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
@@ -3017,8 +3026,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final Bearing bearing = bravoFixTrack.getMastRotationIfAvailable(timePoint);
                     result = bearing == null ? null : bearing.getDegrees();
                 }
-            }
                 break;
+            }
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
                         + "' in this method.");
@@ -5312,8 +5321,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private class TimeoutExtendingInputStream extends FilterInputStream {
 
     	// default timeout is high to ensure that long running client operations
-    	// such as compressing data will not have the server run into a timeout
-    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*10;
+    	// such as compressing data will not have the server run into a timeout.
+    	// this especially applies to foiling data where compression on slower machines
+    	// can take up to two hours.
+    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*60*2;
 
         private final HttpURLConnection connection;
 
@@ -6679,5 +6690,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return availableDetailsTypes;
+    }
+    
+    @Override
+    public List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() {
+        final List<ExpeditionDeviceConfiguration> result = new ArrayList<>();
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            Util.addAll(expeditionConnector.getDeviceConfigurations(), result);
+        }
+        return result;
+    }
+
+    @Override
+    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        // TODO consider replication
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
+        }
+    }
+
+    @Override
+    public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        // TODO consider replication
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
+        }
     }
 }

@@ -89,6 +89,7 @@ public class Activator implements BundleActivator {
                 new MasterDataImportClassLoaderServiceImpl(), null));
         registrations.add(context.registerService(SensorFixMapper.class, new BravoDataFixMapper(), null));
         registrations.add(context.registerService(SensorFixMapper.class, new BravoExtendedDataFixMapper(), null));
+        registrations.add(context.registerService(SensorFixMapper.class, new ExpeditionExtendedDataFixMapper(), null));
         
         sensorFixMapperTracker = createSensorFixMapperServiceTracker(context);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);

@@ -31,6 +31,7 @@ import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.data.AverageWithStats;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
@@ -174,9 +175,8 @@ public class DataMiningResource extends AbstractSailingServerResource {
 
                 race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
             }
-            
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO, regattaName, raceName, null, "kn", 2);
+            response = runQuery(queryDefinitionDTO, regattaName, raceName, (AverageWithStats<Double> aws)->aws.getAverage(), "kn", 2);
         }
         return response;
     }

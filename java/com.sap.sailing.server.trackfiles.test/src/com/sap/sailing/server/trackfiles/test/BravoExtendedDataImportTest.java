@@ -54,34 +54,36 @@ public class BravoExtendedDataImportTest extends AbstractBravoDataImportTest {
     @Test
     public void testReadingTwoLinesAndInterpolating() throws FormatNotSupportedException, IOException {
         DynamicBravoFixTrack<Competitor> track = new BravoFixTrackImpl<>(null, "Test Track", /* hasExtendedFixes */ true);
-        bravoDataImporter.importFixes(new ByteArrayInputStream((
-                HEADER_ORDER_DEFAULT+DUMMY_CONTENT+DUMMY_CONTENT2).getBytes(StandardCharsets.UTF_8)),
-                (fixes, device) -> {
-            for (DoubleVectorFix fix : fixes) {
-                track.add(new BravoExtendedFixImpl(fix));
+        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream((
+                HEADER_ORDER_DEFAULT+DUMMY_CONTENT+DUMMY_CONTENT2).getBytes(StandardCharsets.UTF_8))) {
+            bravoDataImporter.importFixes(inputStream,
+                    (fixes, device) -> {
+                for (DoubleVectorFix fix : fixes) {
+                    track.add(new BravoExtendedFixImpl(fix));
+                }
+            }, "filename", "source", /* downsample */ true);
+            final TimePoint t1 = new MillisecondsTimePoint(1500648308500l);
+            final TimePoint t2 = new MillisecondsTimePoint(1500648309500l);
+            final BravoExtendedFix bef1, bef2;
+            track.lockForRead();
+            try {
+                final Iterator<BravoFix> i = track.getFixes().iterator();
+                bef1 = (BravoExtendedFix) i.next();
+                bef2 = (BravoExtendedFix) i.next();
+            } finally {
+                track.unlockAfterRead();
             }
-        }, "filename", "source", /* downsample */ true);
-        final TimePoint t1 = new MillisecondsTimePoint(1500648308500l);
-        final TimePoint t2 = new MillisecondsTimePoint(1500648309500l);
-        final BravoExtendedFix bef1, bef2;
-        track.lockForRead();
-        try {
-            final Iterator<BravoFix> i = track.getFixes().iterator();
-            bef1 = (BravoExtendedFix) i.next();
-            bef2 = (BravoExtendedFix) i.next();
-        } finally {
-            track.unlockAfterRead();
+            assertEquals(t1, bef1.getTimePoint());
+            assertEquals(t2, bef2.getTimePoint());
+            assertEquals(0.915471, bef1.getPortRudderRake(), 0.00001);
+            assertEquals(0.913729, bef2.getPortRudderRake(), 0.00001);
+            assertEquals(0.915471, track.getPortRudderRakeIfAvailable(t1), 0.00001);
+            assertEquals(0.913729, track.getPortRudderRakeIfAvailable(t2), 0.00001);
+            assertEquals((0.915471+0.913729)/2., track.getPortRudderRakeIfAvailable(t1.plus(t1.until(t2).divide(2.))), 0.00001);
+            assertEquals(new DegreeBearingImpl(-46.507845).getDegrees(), track.getMastRotationIfAvailable(t1).getDegrees(), 0.00001);
+            assertEquals(new DegreeBearingImpl(-46.845317).getDegrees(), track.getMastRotationIfAvailable(t2).getDegrees(), 0.00001);
+            assertEquals(new DegreeBearingImpl((-46.507845-46.845317)/2.).getDegrees(), track.getMastRotationIfAvailable(t1.plus(t1.until(t2).divide(2.))).getDegrees(), 0.00001);
         }
-        assertEquals(t1, bef1.getTimePoint());
-        assertEquals(t2, bef2.getTimePoint());
-        assertEquals(0.915471, bef1.getPortRudderRake(), 0.00001);
-        assertEquals(0.913729, bef2.getPortRudderRake(), 0.00001);
-        assertEquals(0.915471, track.getPortRudderRakeIfAvailable(t1), 0.00001);
-        assertEquals(0.913729, track.getPortRudderRakeIfAvailable(t2), 0.00001);
-        assertEquals((0.915471+0.913729)/2., track.getPortRudderRakeIfAvailable(t1.plus(t1.until(t2).divide(2.))), 0.00001);
-        assertEquals(new DegreeBearingImpl(-46.507845).getDegrees(), track.getMastRotationIfAvailable(t1).getDegrees(), 0.00001);
-        assertEquals(new DegreeBearingImpl(-46.845317).getDegrees(), track.getMastRotationIfAvailable(t2).getDegrees(), 0.00001);
-        assertEquals(new DegreeBearingImpl((-46.507845-46.845317)/2.).getDegrees(), track.getMastRotationIfAvailable(t1.plus(t1.until(t2).divide(2.))).getDegrees(), 0.00001);
     }
     
     private enum ImportData implements ImportDataDefinition {
