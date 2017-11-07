@@ -30,6 +30,9 @@ public interface SharedHomeResources extends ClientBundle {
     @Source("arrow-grey-right.png")
     ImageResource arrowRightGrey();
     
+    @Source("news-i.png")
+    ImageResource news();
+    
     @Source("close.svg")
     @MimeType("image/svg+xml")
     DataResource close();

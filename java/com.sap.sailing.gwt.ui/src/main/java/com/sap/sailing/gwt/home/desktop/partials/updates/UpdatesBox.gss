@@ -68,6 +68,7 @@
   background-repeat: no-repeat;
   -webkit-filter: grayscale(100%);
           filter: grayscale(100%);
+  background-image: resourceUrl("news");
 }
 @media (max-width: 1190px) {
   .updatesbox_item_icon {

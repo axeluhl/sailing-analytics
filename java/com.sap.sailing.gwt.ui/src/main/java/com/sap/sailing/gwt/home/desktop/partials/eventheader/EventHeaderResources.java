@@ -13,6 +13,9 @@ public interface EventHeaderResources extends SharedDesktopResources {
     
     @Source("dropdown__button--arrow@2x.png")
     ImageResource dropdown();
+    
+    @Source("location-icon.png")
+    ImageResource location();
 
     public interface LocalCss extends CssResource {
         String jsdropdown();

@@ -7,7 +7,7 @@
     <div style="display: none;" class="{res.mediaCss.grid}">
 		<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 			<div class="{local_res.css.message}">
-				<img src="images/home/notification.png" class="{local_res.css.message_icon}"></img>
+				<img src="{local_res.notification.getSafeUri}" class="{local_res.css.message_icon}"></img>
 				<span ui:field="text" class="{local_res.css.message_text}"><!-- event.notification --></span>
 				<!-- <img src="images/home/icon-close-cross.png" class="{local_res.css.message_close}"></img> -->
 			</div>
