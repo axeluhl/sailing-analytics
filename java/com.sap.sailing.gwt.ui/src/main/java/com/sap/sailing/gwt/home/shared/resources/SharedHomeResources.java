@@ -54,4 +54,8 @@ public interface SharedHomeResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource twitterLogo();
     
+    @Source("icon-green-check.svg")
+    @MimeType("image/svg+xml")
+    DataResource greenCheck();
+    
 }
