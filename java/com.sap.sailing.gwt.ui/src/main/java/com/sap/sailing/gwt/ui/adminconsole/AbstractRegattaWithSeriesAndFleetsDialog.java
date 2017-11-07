@@ -72,9 +72,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
             final NodeList<OptionElement> options = selectElement.getOptions();
             options.getItem(options.getLength()-1).setTitle(RankingMetricTypeFormatter.getDescription(rankingMetricType, stringMessages));
         }
-        startDateBox = createDateTimeBox(regatta.startDate,HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
+        startDateBox = createDateTimeBox(regatta.startDate, HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
         startDateBox.ensureDebugId("StartDateTimeBox");
-        endDateBox = createDateTimeBox(regatta.endDate,HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
+        endDateBox = createDateTimeBox(regatta.endDate, HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
         endDateBox.ensureDebugId("EndDateTimeBox");
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");
