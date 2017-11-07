@@ -28,7 +28,6 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
     private static final String IS_AUTOPLAYING_STYLE = SailingFullscreenViewerResources.INSTANCE.css().is_autoplaying();
     
     private final EventNavigationHandler eventNavigationHandler;
-    // private final Button eventLinkControl = new Button();
     private final Anchor eventLinkControl = new Anchor();
     private final Image autoRefreshControl = new Image("images/home/reload.svg");
     private SailingGalleryPlayer player = null;
