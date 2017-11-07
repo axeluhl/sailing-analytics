@@ -86,6 +86,11 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
+    public Double getForestayPressure() {
+        return fix.get(BravoExtendedSensorDataMetadata.FORESTAY_PRESSURE.getColumnIndex());
+    }
+
+    @Override
     public Bearing getTackAngle() {
         final Double tackAngleDeg = fix.get(BravoExtendedSensorDataMetadata.TACK_ANGLE.getColumnIndex());
         return tackAngleDeg == null ? null : new DegreeBearingImpl(tackAngleDeg);

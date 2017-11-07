@@ -18,6 +18,7 @@ public interface BravoExtendedFix extends BravoFix {
     Distance getDepth();
     Bearing getRudder();
     Double getForestayLoad();
+    Double getForestayPressure();
     Bearing getTackAngle();
     Bearing getRake();
     Double getDeflectorPercentage();

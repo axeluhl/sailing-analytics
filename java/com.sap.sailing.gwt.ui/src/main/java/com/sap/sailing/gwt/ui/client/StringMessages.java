@@ -1952,6 +1952,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentDeflectorInMillimeters();
     String currentDeflectorPercentage();
     String currentForestayLoad();
+    String currentForestayPressure();
     String currentRakeInDegrees();
     String currentTargetBoatspeedPercentage();
     String currentTargetHeelAngleInDegrees();
@@ -1960,6 +1961,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentTargetBoatspeedPercentageTooltip();
     String currentRakeInDegreesTooltip();
     String currentForestayLoadTooltip();
+    String currentForestayPressureTooltip();
     String currentDeflectorPercentageTooltip();
     String currentDeflectorInMillimetersTooltip();
     String currentTackAngleInDegreesTooltip();
@@ -1968,4 +1970,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentLeewayInDegreesTooltip();
     String currentDriftInDegreesTooltip();
     String currentDepthInMetersTooltip();
+    String tonsUnit();
 }

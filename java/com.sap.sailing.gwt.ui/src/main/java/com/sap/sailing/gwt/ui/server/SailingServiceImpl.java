@@ -3038,6 +3038,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 result = getBravoDoubleValue(BravoFixTrack::getForestayLoadIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
+            case CURRENT_FORESTAY_PRESSURE: {
+                result = getBravoDoubleValue(BravoFixTrack::getForestayPressureIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
             case CURRENT_TARGET_BOATSPEED_PERCENTAGE: {
                 result = getBravoDoubleValue(BravoFixTrack::getTargetBoatspeedPIfAvailable, trackedRace, competitor, timePoint);
                 break;
@@ -6704,6 +6708,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 availableDetailsTypes.add(DetailType.CURRENT_RAKE_IN_DEGREES);
                 availableDetailsTypes.add(DetailType.CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES);
                 availableDetailsTypes.add(DetailType.CURRENT_FORESTAY_LOAD);
+                availableDetailsTypes.add(DetailType.CURRENT_FORESTAY_PRESSURE);
                 availableDetailsTypes.add(DetailType.CURRENT_TARGET_BOATSPEED_PERCENTAGE);
             }
         }

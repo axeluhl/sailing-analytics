@@ -249,6 +249,12 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
+    public Double getForestayPressureIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getForestayPressure,
+                ScalableDouble::new);
+    }
+
+    @Override
     public Bearing getTackAngleIfAvailable(TimePoint timePoint) {
         return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getTackAngle,
                 NaivelyScalableBearing::new);

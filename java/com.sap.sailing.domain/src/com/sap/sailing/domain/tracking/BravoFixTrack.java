@@ -94,6 +94,7 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Distance getDepthIfAvailable(TimePoint timePoint);
     Bearing getRudderIfAvailable(TimePoint timePoint);
     Double getForestayLoadIfAvailable(TimePoint timePoint);
+    Double getForestayPressureIfAvailable(TimePoint timePoint);
     Bearing getTackAngleIfAvailable(TimePoint timePoint);
     Bearing getRakeIfAvailable(TimePoint timePoint);
     Double getDeflectorPercentageIfAvailable(TimePoint timePoint);

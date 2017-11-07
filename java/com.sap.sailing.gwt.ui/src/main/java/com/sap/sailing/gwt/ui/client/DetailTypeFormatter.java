@@ -74,6 +74,8 @@ public class DetailTypeFormatter {
             return stringMessages.currentDeflectorPercentage();
         case CURRENT_FORESTAY_LOAD:
             return stringMessages.currentForestayLoad();
+        case CURRENT_FORESTAY_PRESSURE:
+            return stringMessages.currentForestayPressure();
         case CURRENT_RAKE_IN_DEGREES:
             return stringMessages.currentRakeInDegrees();
         case CURRENT_TARGET_BOATSPEED_PERCENTAGE:
@@ -261,11 +263,14 @@ public class DetailTypeFormatter {
         case CURRENT_STBD_DAGGERBOARD_RAKE:
         case CURRENT_PORT_RUDDER_RAKE:
         case CURRENT_STBD_RUDDER_RAKE:
-        case CURRENT_FORESTAY_LOAD:
         case CURRENT_SET:
             // We currently do not show a specific unit for these measures because these are specific "uninterpreted" values
             return "";
 
+        case CURRENT_FORESTAY_LOAD:
+        case CURRENT_FORESTAY_PRESSURE:
+            return stringMessages.tonsUnit();
+            
         case GAP_TO_LEADER_IN_SECONDS:
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
@@ -410,6 +415,8 @@ public class DetailTypeFormatter {
             return stringMessages.currentDeflectorPercentageTooltip();
         case CURRENT_FORESTAY_LOAD:
             return stringMessages.currentForestayLoadTooltip();
+        case CURRENT_FORESTAY_PRESSURE:
+            return stringMessages.currentForestayPressureTooltip();
         case CURRENT_RAKE_IN_DEGREES:
             return stringMessages.currentRakeInDegreesTooltip();
         case CURRENT_TARGET_BOATSPEED_PERCENTAGE:
