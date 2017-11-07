@@ -37,7 +37,7 @@
   margin-left: -2.333333333333333em;
   border: none;
   vertical-align: middle;
-  background: url("images/mobile/search-icon-yellow.svg") no-repeat;
+  background: resourceUrl("search") no-repeat;
   background-size: 1.333333333333333em 1.333333333333333em;
   background-position: center;
 }

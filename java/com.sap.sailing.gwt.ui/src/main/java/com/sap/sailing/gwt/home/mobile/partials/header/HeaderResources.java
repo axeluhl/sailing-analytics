@@ -19,6 +19,10 @@ public interface HeaderResources extends SharedHomeResources {
     @Source("navigation-icon.svg")
     @MimeType("image/svg+xml")
     DataResource navigation();
+    
+    @Source("search-icon.svg")
+    @MimeType("image/svg+xml")
+    DataResource search();
 
     public interface LocalCss extends CssResource {
         String header();
