@@ -78,8 +78,6 @@ public class MobileActivityMapper implements ActivityMapper {
             return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
-        } else if (place instanceof AuthenticationPlace) {
-            return new AuthenticationActivityProxy((AuthenticationPlace) place, clientFactory);
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else if (place instanceof PasswordResetPlace) {
@@ -87,7 +85,7 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof ImprintPlace) {
             return new ImprintActivityProxy((ImprintPlace) place);
         } else if (place instanceof MoreLoginInformationPlace) {
-            return new MoreLoginInformationActivity(place);
+            return new MoreLoginInformationActivity(place, clientFactory);
         } else {
             return null;
         }
