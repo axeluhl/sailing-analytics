@@ -9,7 +9,7 @@
 		<g:HTMLPanel ui:field="header" addStyleNames="{local_res.css.eventsoverviewupcoming_header} {local_res.css.accordion_trigger}">
 			<div class="{res.mediaCss.grid}">
 				<div class="{res.mediaCss.small9} {res.mediaCss.columns}">
-					<img src="images/home/upcoming-events-icon.png" class="{local_res.css.eventsoverviewupcoming_header_icon}"></img>
+					<img src="{local_res.upcomingEvents.getSafeUri}" class="{local_res.css.eventsoverviewupcoming_header_icon}"></img>
 					<!-- IF upcomingEvents.events.length < 2 -->
 					<span>
 						<h3 class="{local_res.css.eventsoverviewupcoming_header_title}">
