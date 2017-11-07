@@ -131,6 +131,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                                     }
                                 });
             } else {
+                leaderboardPanel.loadCompleteLeaderboard(false);
                 leaderboardConsumer.consume(leaderboardPanel);
             }
         } else {

@@ -13,8 +13,6 @@ public interface FooterResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String sitefooter();
         String sitefooter_language();
-        String sitefooter_language_link();
-        String sitefooter_language_linkactive();
         String sitefooter_links();
         
     }

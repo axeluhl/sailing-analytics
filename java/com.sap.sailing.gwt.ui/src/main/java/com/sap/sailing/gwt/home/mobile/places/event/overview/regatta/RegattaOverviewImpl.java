@@ -37,6 +37,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
         }
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
+            this.setupEventDescription(container);
         }
         this.setupMiniLeaderboard(container);
         initRacesNavigation(container);

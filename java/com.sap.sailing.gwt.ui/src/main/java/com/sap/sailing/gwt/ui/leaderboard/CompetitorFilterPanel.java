@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -198,11 +196,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
     @Override
     public boolean matches(CompetitorDTO competitor) {
-        final String[] keywords = searchTextBox.getText().split(" ");
-        final List<String> lowercaseKeywords = new ArrayList<>(keywords.length);
-        for (String keyword : keywords) {
-            lowercaseKeywords.add(keyword.toLowerCase());
-        }
+        final Iterable<String> lowercaseKeywords = Util
+                .splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchTextBox.getText().toLowerCase());
         return !Util.isEmpty(filter.applyFilter(lowercaseKeywords, Collections.singleton(competitor)));
     }
 

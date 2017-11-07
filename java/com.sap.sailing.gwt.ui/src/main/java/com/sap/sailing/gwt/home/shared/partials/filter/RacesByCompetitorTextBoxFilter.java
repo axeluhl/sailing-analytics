@@ -39,7 +39,7 @@ public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter
     protected Filter<SimpleRaceMetadataDTO> getFilter(String searchValue) {
         this.filter.keywords.clear();
         if (searchValue != null && !searchValue.isEmpty()) {
-            this.filter.keywords.add(searchValue.trim());
+            Util.addAll(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchValue), this.filter.keywords);
         }
         return filter;
     }

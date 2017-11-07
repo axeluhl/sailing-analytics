@@ -20,5 +20,7 @@ public interface SAPHeaderWithAuthenticationResources extends ClientBundle {
         String usermanagement_loggedin();
         String usermanagement_view();
         String usermanagement_open();
+
+        String languageSelector();
     }
 }

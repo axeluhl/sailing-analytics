@@ -1897,6 +1897,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String moreLoginInformationSectionStrategySimulatorDescription();
     String moreLoginInformationSectionUserNotificationsHeading();
     String moreLoginInformationSectionUserNotificationsDescription();
+    String moreLoginInformationRegisterControlText();
     String anniversaryUnitText(@Optional @PluralCount(DefaultRule_1_0n.class) int count);
     String anniversaryMajorCountdownTeaser(@PluralCount(DefaultRule_1_0n.class) int countdown, int anniversary);
     String anniversaryMajorCountdownDescription(int anniversary);
@@ -1921,4 +1922,25 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chooseDifferentDimensionTitle();
     String chooseDifferentDimensionMessage();
     String pleaseSelectADimension();
+    String currentPortDaggerboardRake();
+    String currentPortDaggerboardRakeTooltip();
+    String currentStbdDaggerboardRake();
+    String currentStbdDaggerboardRakeTooltip();
+    String currentPortRudderRake();
+    String currentPortRudderRakeTooltip();
+    String currentStbdRudderRake();
+    String currentStbdRudderRakeTooltip();
+    String currentMastRotationInDegree();
+    String currentMastRotationInDegreeTooltip();
+    String boatNameMustNotBeEmpty();
+    String errorUpdatingExpeditionDeviceConfiguration(String name, String message);
+    String doYouReallyWantToRemoveExpeditionDeviceConfiguration(String name);
+    String errorTryingToRemoveExpeditionDeviceConfiguration(String name, String message);
+    String errorFetchingExpeditionDeviceConfigurations(String message);
+    String expeditionDeviceConfigurations();
+    String addExpeditionDeviceConfiguration();
+    String editExpeditionDeviceConfiguration();
+    String expeditionBoatId();
+    String doYouReallyWantToRemoveTheSelectedExpeditionDeviceConfigurations();
+    String doYouReallyWantToRemoveTheSelectedIgtimiAccounts();
 }

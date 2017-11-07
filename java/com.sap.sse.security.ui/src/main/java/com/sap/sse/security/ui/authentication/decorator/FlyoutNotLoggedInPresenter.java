@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.authentication.decorator;
 
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaces;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 
 /**
@@ -19,6 +20,6 @@ public class FlyoutNotLoggedInPresenter implements NotLoggedInPresenter {
 
     @Override
     public void doTriggerLoginForm() {
-        eventBus.fireEvent(new AuthenticationRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent(AuthenticationPlaces.SIGN_IN));
     }
 }

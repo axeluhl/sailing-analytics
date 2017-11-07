@@ -1,10 +1,13 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.util.function.Supplier;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.UrlBuilder;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -25,6 +28,7 @@ public class LinkWithSettingsGenerator<S extends Settings> {
 
     private final String baseUrl, path;
     private final GenericSerializableSettings[] contextDefinition;
+    private final Supplier<S> settingsWithDefaultsFactory;
     
     /**
      * Constructs a link based on the current location's URL including the path.
@@ -49,7 +53,24 @@ public class LinkWithSettingsGenerator<S extends Settings> {
     public LinkWithSettingsGenerator(String path, GenericSerializableSettings... contextDefinition) {
         this(null, path, contextDefinition);
     }
-
+    
+    /**
+     * Constructs a link based on the current location's URL but using the given path instead of the current path.
+     * 
+     * @param path
+     *            the path to use for the generated link
+     * @param contextDefinition
+     *            {@link GenericSerializableSettings} instances that in sum define the context parameters of the
+     *            {@link EntryPoint} the link is created for.
+     * @param settingsWithDefaultsFactory
+     *            factory to create a settings instance with defaults correctly set. The created instance is used as a
+     *            base for the serialization. This is needed in cases where defaults are dynamic, because it is not up
+     *            to the dialog component to set the correct defaults for returned settings in case of dynamic defaults.
+     */
+    public LinkWithSettingsGenerator(String path, Supplier<S> settingsWithDefaultsFactory, GenericSerializableSettings... contextDefinition) {
+        this(null, path, settingsWithDefaultsFactory, contextDefinition);
+    }
+    
     /**
      * Constructs a link based on the given base URL and path arguments.
      * 
@@ -62,8 +83,28 @@ public class LinkWithSettingsGenerator<S extends Settings> {
      *            {@link EntryPoint} the link is created for.
      */
     public LinkWithSettingsGenerator(String baseUrl, String path, GenericSerializableSettings... contextDefinition) {
+        this(baseUrl, path, null, contextDefinition);
+    }
+
+    /**
+     * Constructs a link based on the given base URL and path arguments.
+     * 
+     * @param baseUrl
+     *            the base URL to use for the generated link
+     * @param path
+     *            the path to use for the generated link
+     * @param contextDefinition
+     *            {@link GenericSerializableSettings} instances that in sum define the context parameters of the
+     *            {@link EntryPoint} the link is created for.
+     * @param settingsWithDefaultsFactory
+     *            factory to create a settings instance with defaults correctly set. The created instance is used as a
+     *            base for the serialization. This is needed in cases where defaults are dynamic, because it is not up
+     *            to the dialog component to set the correct defaults for returned settings in case of dynamic defaults.
+     */
+    public LinkWithSettingsGenerator(String baseUrl, String path, Supplier<S> settingsWithDefaultsFactory, GenericSerializableSettings... contextDefinition) {
         this.baseUrl = baseUrl;
         this.path = path;
+        this.settingsWithDefaultsFactory = settingsWithDefaultsFactory;
         this.contextDefinition = contextDefinition;
     }
 
@@ -86,7 +127,14 @@ public class LinkWithSettingsGenerator<S extends Settings> {
         } else {
             urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         }
-        serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinition);
+        final S settingsToSerialize;
+        if (settingsWithDefaultsFactory == null) {
+            settingsToSerialize = settings;
+        } else {
+            settingsToSerialize = settingsWithDefaultsFactory.get();
+            SettingsUtil.copyValues(settings, settingsToSerialize);
+        }
+        serializeSettingsToUrlBuilder(urlBuilder, settingsToSerialize, contextDefinition);
         return urlBuilder.buildString();
     }
 

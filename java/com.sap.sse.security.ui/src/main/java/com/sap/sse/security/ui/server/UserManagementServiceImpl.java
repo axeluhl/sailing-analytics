@@ -129,10 +129,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
+            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());
@@ -181,7 +181,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
         ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         getSecurityService().updateUserProperties(username, fullName, company,
-                localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
+                getLocaleFromLocaleName(localeName));
+    }
+
+    private Locale getLocaleFromLocaleName(String localeName) {
+        try {
+            return localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e, () -> "Error while parsing locale with name '" + localeName + "'");
+            return null;
+        }
     }
     
     @Override

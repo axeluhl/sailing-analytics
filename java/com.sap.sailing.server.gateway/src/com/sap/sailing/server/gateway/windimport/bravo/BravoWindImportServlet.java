@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -22,10 +23,10 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter.Callback;
+import com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImportServlet;
-import com.sap.sailing.server.trackfiles.impl.BravoDataImporterImpl;
+import com.sap.sailing.server.trackfiles.impl.BaseBravoDataImporterImpl;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -74,14 +75,14 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         for (final Fields field : Fields.values()) {
             columnsMap.put(field.name(), field.ordinal());
         }
-        BravoDataImporterImpl importer = new BravoDataImporterImpl(columnsMap);
+        final BaseBravoDataImporterImpl importer = new BaseBravoDataImporterImpl(columnsMap, "BRAVO_WIND");
         final Callback callback = new Callback() {
             @Override
             public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
                 for (final DoubleVectorFix fix : fixes) {
                     // latitude / longitude are represented in funny NMEA-like way; the value divided by 100 as
                     // a floored integer represents the full degrees; the value modulo 100 represents the decimal
-                    // minutes. Example: the pair (4124.645890, 213.738670) stands for N41°24.645890 E002°13.738670
+                    // minutes. Example: the pair (4124.645890, 213.738670) stands for N41ï¿½24.645890 E002ï¿½13.738670
                     final Wind wind = new WindImpl(new DegreePosition(FunnyDegreeConverter.funnyLatLng(fix.get(Fields.Lat.ordinal())),
                             FunnyDegreeConverter.funnyLatLng(fix.get(Fields.Lon.ordinal()))),
                             fix.getTimePoint(), new KnotSpeedWithBearingImpl(fix.get(Fields.TWS.ordinal()),
@@ -92,15 +93,19 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         };
         if (filename.toLowerCase().endsWith("zip")) {
             logger.info("Bravo file "+filename+" is a ZIP file");
-            final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-            ZipEntry entry;
-            while ((entry=zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().toLowerCase().endsWith(".txt")) {
-                    logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
-                    importer.importFixes(zipInputStream, callback, filename, filename, /* downsample */ false);
+            try (final ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+                ZipEntry entry;
+                while ((entry=zipInputStream.getNextEntry()) != null) {
+                    if (entry.getName().toLowerCase().endsWith(".txt")) {
+                        logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
+                        importer.importFixes(zipInputStream, callback, filename, filename, /* downsample */ false);
+                    }
                 }
             }
         } else {
+            if (filename.toLowerCase().endsWith("gz")) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
             importer.importFixes(inputStream, callback, filename, filename, /* downsample */ false);
         }
         return result;
