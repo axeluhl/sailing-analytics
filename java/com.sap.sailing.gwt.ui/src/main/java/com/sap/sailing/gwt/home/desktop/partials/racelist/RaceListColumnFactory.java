@@ -57,8 +57,8 @@ public class RaceListColumnFactory {
         @Template("<div>{3}</div><div class=\"{0}\"><div style=\"{2}\" class=\"{1}\"></div></div>")
         SafeHtml viewStateRunning(String styleNamesBar, String styleNamesProgress, SafeStyles width, String text);
 
-        @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
-        SafeHtml windDirection(SafeStyles rotation);
+        @Template("<img style=\"{0}\" src=\"{1}\"/>")
+        SafeHtml windDirection(SafeStyles rotation, SafeUri imageUrl);
 
         @Template("<img src=\"{3}\" class=\"{0}\" /><span class=\"{1}\">{4}</span><div class=\"{2}\" title=\"{5}\">{5}</div>")
         SafeHtml winner(String styleNamesFlag, String styleNamesSailId, String styleNamesText, SafeUri flagImageURL, String sailId, String name);
@@ -275,7 +275,7 @@ public class RaceListColumnFactory {
                     safeStyles.trustedNameAndValue("-webkit-transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
                     safeStyles.trustedNameAndValue("transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
                     safeStyles.width(2.75, Unit.EM).height(2.75, Unit.EM);
-                    sb.append(TEMPLATE.windDirection(safeStyles.toSafeStyles()));
+                    sb.append(TEMPLATE.windDirection(safeStyles.toSafeStyles(), RaceListResources.INSTANCE.compass().getSafeUri()));
                 }
             }
         };
