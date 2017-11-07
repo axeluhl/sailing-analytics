@@ -1,5 +1,6 @@
 package com.sap.sse.pairinglist.impl;
 
+import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList; 
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,7 +69,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
                 int[][] flightColumn = new int[groups][competitors / groups];
                 associationRow= setZero(associationRow);
-                int[] associationHigh = new int[competitors / groups - 1];
+                //+++
+                //int[] associationHigh = new int[competitors / groups - 1];
+                int[] associationHigh = new int[groups - 1];
                 flightColumn[0][0] = randomBW(1, competitors);
                 for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
                     int associationSum = Integer.MAX_VALUE;
@@ -139,7 +142,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         for(int i = 0; i<bestPLT.length; i++) {
             int[] group = bestPLT[i];
             Integer[] nums = Arrays.stream(group).boxed().toArray(Integer[]::new);
-            System.out.println(Arrays.toString(nums));
+            //System.out.println(Arrays.toString(nums));
             List<Integer> groupShuffled = new ArrayList<>();
             Collections.shuffle(Arrays.asList(nums));
             System.out.println(Arrays.toString(nums));
@@ -147,13 +150,16 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
 
         bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
-        bestPLT = this.improveAssignmentChanges(bestPLT, flights, competitors);
+        //bestPLT = this.improveAssignmentChanges(bestPLT, flights, competitors);
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         
         System.out.println(Arrays.deepToString(pairingListTemplate));
-        
+
         boatAssignments = getAssignmentAssociations(pairingListTemplate, new int[competitors][competitors/groups]);
+        
+        System.out.println(Arrays.deepToString(boatAssignments));
+        
         System.out.println("Output standard deviation: " + this.calcStandardDev(boatAssignments));
         
         return bestPLT;
