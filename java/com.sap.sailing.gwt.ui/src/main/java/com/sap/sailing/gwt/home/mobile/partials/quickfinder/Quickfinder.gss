@@ -20,7 +20,7 @@
     padding: 0.666666666666667em 0.666666666666667em 0.666666666666667em 1em;
      /* @alternate */
     background: transparent;
-    background: url("images/mobile/quickfinder-arrow.svg") 100% no-repeat #ffffff;
+    background: resourceUrl("arrow") 100% no-repeat #ffffff;
     background-size: 3em 3em;
 }
 
