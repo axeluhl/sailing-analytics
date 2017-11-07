@@ -10,7 +10,7 @@
 
 	<g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewupcoming} {local_res.css.accordion}">
 	    <g:HTMLPanel ui:field="header" addStyleNames="{local_res.css.eventsoverviewupcoming_header} {local_res.css.accordion_trigger}">
-	      <img src="images/mobile/calender-icon-blue.svg" class="{local_res.css.eventsoverviewupcoming_header_icon} {local_res.css.eventsoverviewupcoming_headeritem}"></img>
+	      <img src="{local_res.calendar.getSafeUri}" class="{local_res.css.eventsoverviewupcoming_header_icon} {local_res.css.eventsoverviewupcoming_headeritem}"></img>
 	      <h3 class="{local_res.css.eventsoverviewupcoming_header_title} {local_res.css.eventsoverviewupcoming_headeritem}">
 	        <ui:text from="{i18n.seriesHeaderUpcoming}" />
 	      </h3>
