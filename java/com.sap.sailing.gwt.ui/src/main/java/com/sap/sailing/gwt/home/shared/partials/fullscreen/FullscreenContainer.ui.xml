@@ -50,10 +50,18 @@
 			padding: 10px;
 			vertical-align: top;
 		}
-		button.toolbarAction {
-			background-color: transparent;
+		a.toolbarAction, button.toolbarAction {
 			border-radius: initial;
 			font-size: 1.25em;
+		}
+		a.toolbarAction {
+			color: #fff;
+			text-decoration: none;
+			outline: none;
+			padding-top: 0.666666666666667em
+		}
+		button.toolbarAction {
+			background-color: transparent;
 		}
 		.toolbarBusyIndicator {
 			display: inline-block;
