@@ -1,6 +1,6 @@
 .media {
- font-size: 15px;
- font-size: 1rem;
+ /* @alternate */ font-size: 15px;
+ /* @alternate */ font-size: 1rem;
 }
 
 .media_swipecontainer {
@@ -76,8 +76,8 @@
 }
 
 .videopreview {
- font-size: 15px;
- font-size: 1rem;
+ /* @alternate */ font-size: 15px;
+ /* @alternate */ font-size: 1rem;
  margin-bottom: 2.666666666666667em;
 }
 
