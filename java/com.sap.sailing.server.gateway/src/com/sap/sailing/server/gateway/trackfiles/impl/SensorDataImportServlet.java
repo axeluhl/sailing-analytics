@@ -4,12 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
@@ -27,7 +26,6 @@ import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -52,17 +50,13 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @param files
      *            the file items together with the names of the importer to use for importing the respective file's
-     *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for
-     *            all importers found registered in the OSGi registry. The first matching importer is used for the
-     *            file. The importer is selected on a per-file basis.
+     *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
+     *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
+     *            importer is selected on a per-file basis.
      * 
      * @throws IOException
      */
-    private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files)
-            throws IOException {
-        final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
-        final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
-        final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
+    private void importFiles(JsonHolder jsonResult, Iterable<Pair<String, FileItem>> files) throws IOException {
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
         for (Pair<String, FileItem> file : files) {
@@ -76,40 +70,26 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                 }
             }
             if (importerToUse == null) {
-                throw new RuntimeException("Sensor importer not found");
+                throw new RuntimeException("Sensor importer not found: " + requestedImporterName);
             }
             logger.log(Level.INFO,
-                    "Going to import sensor data file  with importer " + importerToUse.getClass().getSimpleName());
+                    "Start import sensor data file with importer " + importerToUse.getClass().getSimpleName());
             try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
+                final String filename = fi.getName();
                 try {
                     importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
                         @Override
                         public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
-                            deviceIds.add(device);
                             storeFixes(fixes, device);
-                            TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
-                            TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
-                            for (DoubleVectorFix fix : fixes) {
-                                if (earliestFixSoFarFromCurrentDevice == null
-                                        || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
-                                    earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                    from.put(device, earliestFixSoFarFromCurrentDevice);
-                                }
-                                if (latestFixSoFarFromCurrentDevice == null
-                                        || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
-                                    latestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                    to.put(device, latestFixSoFarFromCurrentDevice);
-                                }
-                            }
+                            jsonResult.add(device);
                         }
-                    }, fi.getName(), requestedImporterName, /* downsample */ true);
+                    }, filename, requestedImporterName, /* downsample */ true);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
                 } catch (FormatNotSupportedException e) {
-                    logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
+                    jsonResult.add(requestedImporterName, filename, e);
                 }
             }
         }
-        return deviceIds;
     }
 
     /**
@@ -118,27 +98,29 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        String importerName = null;
-        searchForPreferredImporter: for (FileItem fi : fileItems) {
-            if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
-                importerName = fi.getString();
-                break searchForPreferredImporter;
+        JsonHolder jsonResult = new JsonHolder(logger);
+        try {
+            String importerName = null;
+            searchForPreferredImporter: for (FileItem fi : fileItems) {
+                if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
+                    importerName = fi.getString();
+                    break searchForPreferredImporter;
+                }
             }
-        }
-        if (importerName == null) {
-            throw new RuntimeException("Missing preferred importer");
-        }
-        List<Pair<String, FileItem>> filesAndImporterNames = new ArrayList<>();
-        for (FileItem fi : fileItems) {
-            if ("file".equalsIgnoreCase(fi.getFieldName())) {
-                filesAndImporterNames.add(new Pair<>(importerName, fi));
+            if (importerName == null) {
+                throw new RuntimeException("Missing preferred importer");
             }
-        }
-        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(filesAndImporterNames);
-        resp.setContentType("text/html");
-        for (TrackFileImportDeviceIdentifier mapping : mappingList) {
-            String stringRep = mapping.getId().toString();
-            resp.getWriter().println(stringRep);
+            List<Pair<String, FileItem>> filesAndImporterNames = new ArrayList<>();
+            for (FileItem fi : fileItems) {
+                if ("file".equalsIgnoreCase(fi.getFieldName())) {
+                    filesAndImporterNames.add(new Pair<>(importerName, fi));
+                }
+            }
+            importFiles(jsonResult, filesAndImporterNames);
+        } catch (Exception e) {
+            jsonResult.add(e);
+        } finally {
+            jsonResult.writeJSONString(resp);
         }
     }
 
@@ -159,5 +141,53 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
             logger.log(Level.WARNING, "Could not create OSGi filter");
         }
         return result;
+    }
+
+    public static class JsonHolder {
+        private final JSONObject jsonResponseObj = new JSONObject();
+        private final JSONArray jsonErrorObj = new JSONArray();
+        private final JSONArray jsonUuidObj = new JSONArray();
+        private final Logger logger;
+
+        public JsonHolder(Logger logger) {
+            this.logger = logger;
+            jsonResponseObj.put("errors", jsonErrorObj);
+            jsonResponseObj.put("uploads", jsonUuidObj);
+        }
+
+        public void add(String requestedImporterName, String filename,
+                Exception exception) {
+            logger.log(Level.SEVERE, "Sensordata import importer: " + requestedImporterName);
+            logger.log(Level.SEVERE, "Sensordata import filename: " + filename);
+            JSONObject jsonExceptionObj = logException(exception);
+            jsonExceptionObj.put("filename", filename);
+            jsonExceptionObj.put("requestedImporter", requestedImporterName);
+
+        }
+
+        public void add(Exception exception) {
+            logException(exception);
+        }
+
+        private JSONObject logException(Exception e) {
+            final String exUUID = UUID.randomUUID().toString();
+            logger.log(Level.SEVERE, "Sensordata import ExUUID: " + exUUID, e);
+            JSONObject jsonExceptionObj = new JSONObject();
+            jsonErrorObj.add(jsonExceptionObj);
+            jsonExceptionObj.put("exUUID", exUUID);
+            jsonExceptionObj.put("className", e.getClass().getName());
+            jsonExceptionObj.put("message", e.getMessage());
+            return jsonExceptionObj;
+        }
+
+        public void add(TrackFileImportDeviceIdentifier mapping) {
+            String stringRep = mapping.getId().toString();
+            jsonUuidObj.add(stringRep);
+        }
+
+        public void writeJSONString(HttpServletResponse resp) throws IOException {
+            resp.setContentType("text/html");
+            jsonResponseObj.writeJSONString(resp.getWriter());
+        }
     }
 }
