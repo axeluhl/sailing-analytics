@@ -7,7 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
-import com.sap.sse.pairinglist.impl.PairingListTemplateImpl_OLD;
+import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 
 import junit.framework.Assert;
 
