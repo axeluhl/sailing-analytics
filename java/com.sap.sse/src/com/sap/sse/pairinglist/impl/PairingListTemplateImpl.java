@@ -1,9 +1,7 @@
 package com.sap.sse.pairinglist.impl;
 
-import java.util.ArrayList; 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
@@ -69,8 +67,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
                 int[][] flightColumn = new int[groups][competitors / groups];
                 associationRow= setZero(associationRow);
-                //+++
-                //int[] associationHigh = new int[competitors / groups - 1];
                 int[] associationHigh = new int[groups - 1];
                 flightColumn[0][0] = randomBW(1, competitors);
                 for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
@@ -142,7 +138,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             int[] group = bestPLT[i];
             Integer[] nums = Arrays.stream(group).boxed().toArray(Integer[]::new);
             //System.out.println(Arrays.toString(nums));
-            List<Integer> groupShuffled = new ArrayList<>();
+            //List<Integer> groupShuffled = new ArrayList<>();
             Collections.shuffle(Arrays.asList(nums));
             System.out.println(Arrays.toString(nums));
             bestPLT[i] = Arrays.stream(nums).mapToInt(Integer::intValue).toArray();
