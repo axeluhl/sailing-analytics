@@ -1105,7 +1105,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         public SortableExpandableColumnHeader getHeader() {
             SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
                     /* title */race.getRaceColumnName(),
-                    /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this,
+                    /* iconURL */race.isMedalRace() ? style.getResources().medalSmall().getSafeUri() : null, LeaderboardPanel.this, this,
                     stringMessages);
             return header;
         }
