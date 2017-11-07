@@ -52,6 +52,12 @@
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.expeditionconnector.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sailing.domain.common</artifactId>
       <version>${project.version}</version>
       <classifier>sources</classifier>

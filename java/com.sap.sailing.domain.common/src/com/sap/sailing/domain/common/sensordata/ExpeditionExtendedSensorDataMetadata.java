@@ -16,8 +16,22 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
  * The first columns need to be consistent with {@link BravoSensorDataMetadata}.
  */
 public enum ExpeditionExtendedSensorDataMetadata {
-    HEEL("Heel", BravoExtendedSensorDataMetadata.HEEL),
-    TRIM("TRIM", BravoExtendedSensorDataMetadata.PITCH);
+    HEEL("Heel", BravoExtendedSensorDataMetadata.HEEL), //
+    TRIM("TRIM", BravoExtendedSensorDataMetadata.PITCH), //
+    LEEWAY(null, BravoExtendedSensorDataMetadata.LEEWAY), //
+    SET(null, BravoExtendedSensorDataMetadata.SET), //
+    DRIFT(null, BravoExtendedSensorDataMetadata.DRIFT), //
+    DEPTH(null, BravoExtendedSensorDataMetadata.DEPTH), //
+    RUDDER(null, BravoExtendedSensorDataMetadata.RUDDER), //
+    FORESTAY_LOAD(null, BravoExtendedSensorDataMetadata.FORESTAY_LOAD), //
+    TACK_ANGLE(null, BravoExtendedSensorDataMetadata.TACK_ANGLE), //
+    RAKE_DEG(null, BravoExtendedSensorDataMetadata.RAKE_DEG), //
+    DEFLECTOR_PERCENTAGE(null, BravoExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE), //
+    TARGET_HEEL(null, BravoExtendedSensorDataMetadata.TARGET_HEEL), //
+    DEFLECTOR_MILLIMETERS(null, BravoExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS), //
+    TARGET_BOATSPEED_P(null, BravoExtendedSensorDataMetadata.TARGET_BOATSPEED_P), //
+
+    ;
 
     private String columnName;
     
@@ -29,7 +43,7 @@ public enum ExpeditionExtendedSensorDataMetadata {
      * the ordinals of this enum's literals insignificant; the position is taken solely from
      * the Bravo metadata.
      */
-    private BravoExtendedSensorDataMetadata mappedToBravoField;
+    private final BravoExtendedSensorDataMetadata mappedToBravoField;
     
     private ExpeditionExtendedSensorDataMetadata(String columnName, BravoExtendedSensorDataMetadata mappedToBravoField) {
         this.columnName = columnName;
@@ -40,8 +54,15 @@ public enum ExpeditionExtendedSensorDataMetadata {
         return columnName;
     }
 
+    /**
+     * The index in the {@link DoubleVectorFix} where this data item will be stored
+     */
     public int getColumnIndex() {
         return mappedToBravoField.getColumnIndex();
+    }
+
+    public boolean isExpectedInLogFile() {
+        return mappedToBravoField.isExpectedInLogFile();
     }
 
     public static ExpeditionExtendedSensorDataMetadata byColumnName(String valueName) {
@@ -69,7 +90,9 @@ public enum ExpeditionExtendedSensorDataMetadata {
     public static Map<String, Integer> getColumnNamesToIndexInDoubleFix() {
         final Map<String, Integer> columnNamesToIndexInDoubleFix = new HashMap<>();
         for (final ExpeditionExtendedSensorDataMetadata column : ExpeditionExtendedSensorDataMetadata.values()) {
-            columnNamesToIndexInDoubleFix.put(column.getColumnName(), column.getColumnIndex());
+            if (column.isExpectedInLogFile()) {
+                columnNamesToIndexInDoubleFix.put(column.getColumnName(), column.getColumnIndex());
+            }
         }
         return columnNamesToIndexInDoubleFix;
     }
