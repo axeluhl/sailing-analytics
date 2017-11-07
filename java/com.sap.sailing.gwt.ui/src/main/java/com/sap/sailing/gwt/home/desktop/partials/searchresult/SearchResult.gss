@@ -41,7 +41,7 @@
   height: 0;
   overflow: hidden;
   border: 0;
-  background-image: url("images/home/paging-icons.png");
+  background-image: resourceUrl("paging");
   background-repeat: no-repeat;
   background-position: left center;
   background-size: cover;
@@ -130,7 +130,7 @@
 .searchresult_form_input {
   display: block;
   padding: 0.625em 0 0.5625em 2.5em;
-  background-image: url("images/home/search-icon-grey.png");
+  background-image: resourceUrl("search");
   background-repeat: no-repeat;
   background-color: #f6f9fc;
   background-position: 0.625em center;
