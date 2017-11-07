@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 public interface SearchResultResources extends ClientBundle {
     public static final SearchResultResources INSTANCE = GWT.create(SearchResultResources.class);
 
-    @Source("SearchResult.css")
+    @Source("SearchResult.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

@@ -2,8 +2,8 @@
  * styles for search result page
  */
 .paging {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
   margin-top: 1.875em;
 }
 .paging_perpage {
@@ -51,8 +51,8 @@
   background-position: -2.5em center;
 }
 .dropdown {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
   width: 18.75em;
   display: inline-block;
 }
@@ -114,8 +114,8 @@
   font-size: 1em;
 }
 .searchresult {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
 }
 .searchresult_form {
   display: block;
@@ -139,8 +139,8 @@
   float: left;
 }
 .searchresult_form_button {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
   width: 10%;
   float: right;
   text-transform: uppercase;
