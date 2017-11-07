@@ -3,12 +3,18 @@ package com.sap.sailing.gwt.home.mobile.partials.sectionHeader;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 
 public interface SectionHeaderResources extends ClientBundle {
     public static final SectionHeaderResources INSTANCE = GWT.create(SectionHeaderResources.class);
 
     @Source("SectionHeader.gss")
     LocalCss css();
+    
+    @Source("filter.svg")
+    @MimeType("image/svg+xml")
+    DataResource filter();
 
     public interface LocalCss extends CssResource {
         String sectionheader();

@@ -112,7 +112,7 @@ img.sectionheader_item_arrow.accordion.collapsed {
   border: none;
   border-radius: 0;
   padding: 0.666666666666667em 2em 0.666666666666667em 1em;
-  background: url("images/mobile/filter.svg") 100% no-repeat transparent;
+  background: resourceUrl("filter") 100% no-repeat transparent;
   background-size: 1.333333333333333em;
 }
 .sectionheader_item_adjust_title_left {
