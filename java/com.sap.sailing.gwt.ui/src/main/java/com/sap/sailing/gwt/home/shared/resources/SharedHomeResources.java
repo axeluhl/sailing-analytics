@@ -58,4 +58,12 @@ public interface SharedHomeResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource greenCheck();
     
+    @Source("launch-loupe.svg")
+    @MimeType("image/svg+xml")
+    DataResource launchLoupe();
+    
+    @Source("launch-play.svg")
+    @MimeType("image/svg+xml")
+    DataResource launchPlay();
+    
 }
