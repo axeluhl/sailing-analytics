@@ -26,8 +26,6 @@ public interface SharedResources extends ClientBundle, CommonSharedResources {
         String buttonprimary();
         String buttonprimaryoutlined();
         String buttonred();
-        String buttonrefresh();
-        String buttonarrowdown();
         String buttonsearch();
         String buttonarrowrightwhite();
         String label();
