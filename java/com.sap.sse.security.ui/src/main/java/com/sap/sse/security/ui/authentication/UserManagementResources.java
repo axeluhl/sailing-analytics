@@ -1,28 +1,18 @@
 package com.sap.sse.security.ui.authentication;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.DataResource;
-import com.google.gwt.resources.client.DataResource.MimeType;
+import com.sap.sse.gwt.common.CommonIcons;
 
 /**
  * Resources used by the authentication framework.
  */
-public interface UserManagementResources extends ClientBundle {
+public interface UserManagementResources extends CommonIcons {
     
     public static final UserManagementResources INSTANCE = GWT.create(UserManagementResources.class);
 
     @Source("UserManagement.gss")
     LocalCss css();
-    
-    @Source("facebook.svg")
-    @MimeType("image/svg+xml")
-    DataResource facebook();
-    
-    @Source("google.svg")
-    @MimeType("image/svg+xml")
-    DataResource google();
 
     public interface LocalCss extends CssResource {
         String flyover();

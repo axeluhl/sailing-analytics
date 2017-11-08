@@ -22,6 +22,7 @@
 .eventheader_sharing_itemtwitter {
   background-color: #32b5e2;
   background-image: resourceUrl("twitter");
+  background-size: 20px auto;
 }
 .eventheader_sharing_itemtwitter:hover,
 .eventheader_sharing_itemtwitter:focus {
@@ -30,6 +31,7 @@
 .eventheader_sharing_itemfacebook {
   background-color: #3b5998;
   background-image: resourceUrl("facebook");
+  background-size: 10px auto;
 }
 .eventheader_sharing_itemfacebook:hover,
 .eventheader_sharing_itemfacebook:focus {

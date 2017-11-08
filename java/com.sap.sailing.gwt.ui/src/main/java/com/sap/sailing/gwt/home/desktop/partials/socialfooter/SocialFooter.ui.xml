@@ -15,7 +15,7 @@
         </h3>
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemleft} {res.mediaCss.small6} {res.mediaCss.columns}">
           <a href="http://twitter.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrappertwitter}">
-            <img src="{shr.twitterLogo.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
+            <img src="{shr.twitter.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
             <div class="{local_res.css.socialfooter_item_text}">
               <div class="{local_res.css.socialfooter_item_text_top}">
                 <ui:text from='{i18n.sapSportsOn}' />
@@ -26,7 +26,7 @@
         </div>
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemright} {res.mediaCss.small6} {res.mediaCss.columns}">
           <a href="http://www.facebook.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrapperfacebook}">
-            <img src="{shr.facebookLogo.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
+            <img src="{shr.facebook.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
             <div class="{local_res.css.socialfooter_item_text}">
               <div class="{local_res.css.socialfooter_item_text_top}">
                 <ui:text from='{i18n.sapSportsOn}' />

@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.home.shared.resources;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
 import com.google.gwt.resources.client.ImageResource;
+import com.sap.sse.gwt.common.CommonIcons;
 
-public interface SharedHomeResources extends ClientBundle {
+public interface SharedHomeResources extends CommonIcons {
     
     public static final SharedHomeResources INSTANCE = GWT.create(SharedHomeResources.class);
     
@@ -45,14 +45,6 @@ public interface SharedHomeResources extends ClientBundle {
     @Source("fullscreen.svg")
     @MimeType("image/svg+xml")
     DataResource fullscreen();
-    
-    @Source("facebook-logo.svg")
-    @MimeType("image/svg+xml")
-    DataResource facebookLogo();
-    
-    @Source("twitter-logo.svg")
-    @MimeType("image/svg+xml")
-    DataResource twitterLogo();
     
     @Source("icon-green-check.svg")
     @MimeType("image/svg+xml")

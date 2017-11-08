@@ -185,6 +185,7 @@ a.form_social_button_facebook:hover {
 }
 a.form_social_button_facebook:before {
     background-image: resourceUrl("facebook");
+    background-size: 12px auto;
 }
 a.form_social_button_google {
     background-color: #de5342;
