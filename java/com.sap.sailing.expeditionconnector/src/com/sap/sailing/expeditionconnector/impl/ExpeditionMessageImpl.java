@@ -1,6 +1,5 @@
 package com.sap.sailing.expeditionconnector.impl;
 
-import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;

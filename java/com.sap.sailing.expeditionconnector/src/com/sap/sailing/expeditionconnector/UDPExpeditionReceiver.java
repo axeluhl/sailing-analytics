@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageParser;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
-import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.udpconnector.UDPReceiver;
 
 /**
