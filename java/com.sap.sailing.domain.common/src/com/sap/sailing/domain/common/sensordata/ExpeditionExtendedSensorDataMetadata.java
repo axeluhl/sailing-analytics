@@ -30,8 +30,8 @@ public enum ExpeditionExtendedSensorDataMetadata {
     FORESTAY_PRESSURE("ForestayPres", BravoExtendedSensorDataMetadata.FORESTAY_PRESSURE, /* expected in logfile */ true), //
     TACK_ANGLE(null, BravoExtendedSensorDataMetadata.TACK_ANGLE), //
     RAKE_DEG("RakeDeg", BravoExtendedSensorDataMetadata.RAKE_DEG, /* expected in logfile */ true), //
-    DEFLECTOR_PERCENTAGE("DeflectorP", BravoExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE, /* expected in logfile */ true), //
-    TARGET_HEEL("TG Heel1", BravoExtendedSensorDataMetadata.TARGET_HEEL, /* expected in logfile */ true), //
+    DEFLECTOR_PERCENTAGE("DflectrPP", BravoExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE, /* expected in logfile */ true), //
+    TARGET_HEEL("TG Heell", BravoExtendedSensorDataMetadata.TARGET_HEEL, /* expected in logfile */ true), //
     DEFLECTOR_MILLIMETERS("DflectrMM", BravoExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS, /* expected in logfile */ true), //
     TARGET_BOATSPEED_P("BspTr", BravoExtendedSensorDataMetadata.TARGET_BOATSPEED_P, /* expected in logfile */ true), //
     ;
