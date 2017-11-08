@@ -1,5 +1,6 @@
 package com.sap.sailing.expeditionconnector.impl;
 
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -71,6 +72,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
             if (gpsTimeValue <= 1.0) { // "Phoenix" law: if between 0 and 1 then it's likely a day-relative time point
                 // so add the millis of today midnight UTC
                 Calendar todayMidnightUTC = new GregorianCalendar();
+                todayMidnightUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 todayMidnightUTC.set(Calendar.HOUR_OF_DAY, 0);
                 todayMidnightUTC.set(Calendar.MINUTE, 0);
                 todayMidnightUTC.set(Calendar.SECOND, 0);
