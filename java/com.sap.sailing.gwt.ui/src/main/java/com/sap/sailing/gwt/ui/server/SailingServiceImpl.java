@@ -800,7 +800,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
                 // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
-                boolean storeLeaderboardForTesting = true;
+                boolean storeLeaderboardForTesting = false;
                 if (storeLeaderboardForTesting) {
                     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/Projekte/sailing/dev/git/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
                     oos.writeObject(leaderboardDTO);
