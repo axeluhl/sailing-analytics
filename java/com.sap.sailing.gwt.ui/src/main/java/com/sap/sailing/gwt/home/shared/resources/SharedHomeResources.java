@@ -27,9 +27,6 @@ public interface SharedHomeResources extends ClientBundle {
     @Source("arrow-down-grey.png")
     ImageResource arrowDownGrey();
     
-    @Source("arrow-grey-right.png")
-    ImageResource arrowRightGrey();
-    
     @Source("news-i.png")
     ImageResource news();
     

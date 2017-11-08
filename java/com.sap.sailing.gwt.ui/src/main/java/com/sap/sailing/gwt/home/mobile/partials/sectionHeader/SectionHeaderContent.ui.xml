@@ -18,8 +18,7 @@
 			</div>
 			<div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}" style="display:none;" ui:field="headerRightUi">
 				<div class="{local_res.css.sectionheader_item_infotext}" style="display:none;" ui:field="infoTextUi"></div>
-				<img src="{shr.arrowRightGrey.getSafeUri}" alt="" class="{local_res.css.sectionheader_item_arrow}"
-					style="display:none;" ui:field="actionArrowUi"></img>
+				<div class="{local_res.css.sectionheader_item_arrow}" style="display:none;" ui:field="actionArrowUi"></div>
 				<g:SimplePanel ui:field="filterSelectContainerUi"></g:SimplePanel>
 			</div>
 		</a>

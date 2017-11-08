@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -20,7 +19,6 @@ import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
 import com.sap.sailing.gwt.home.shared.partials.bubble.BubbleContentBoatClass;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sse.gwt.client.LinkUtil;
@@ -43,7 +41,7 @@ public class SectionHeaderContent extends Composite {
     @UiField DivElement subtitleUi;
     @UiField DivElement headerRightUi;
     @UiField DivElement infoTextUi;
-    @UiField ImageElement actionArrowUi;
+    @UiField DivElement actionArrowUi;
     @UiField SimplePanel filterSelectContainerUi;
 
     public SectionHeaderContent() {
@@ -95,7 +93,6 @@ public class SectionHeaderContent extends Composite {
                 animation.animate(collapsed);
             }
         });
-        actionArrowUi.setSrc(SharedHomeResources.INSTANCE.arrowDownGrey().getSafeUri().asString());
         actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
