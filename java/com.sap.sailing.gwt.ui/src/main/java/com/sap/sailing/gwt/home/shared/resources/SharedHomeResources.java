@@ -10,8 +10,6 @@ public interface SharedHomeResources extends CommonIcons {
     
     public static final SharedHomeResources INSTANCE = GWT.create(SharedHomeResources.class);
     
-    public static final String GSS = "com/sap/sailing/gwt/home/shared/resources/SharedHomeRecources.gss";
-    
     @Source("default_event_logo.jpg")
     ImageResource defaultEventLogoImage();
     
