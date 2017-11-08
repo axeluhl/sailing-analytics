@@ -11,9 +11,6 @@ public interface EventHeaderResources extends SharedDesktopResources {
     @Source("EventHeader.gss")
     LocalCss css();
     
-    @Source("dropdown__button--arrow@2x.png")
-    ImageResource dropdown();
-    
     @Source("location-icon.png")
     ImageResource location();
 

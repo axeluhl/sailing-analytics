@@ -11,9 +11,6 @@ public interface RegattaNavigationResources extends SharedDesktopResources {
     @Source("RegattaNavigation.gss")
     LocalCss css();
     
-    @Source("arrow-down-filled-black.png")
-    ImageResource arrowDownFilledBlack();
-    
     @Source("arrow-down-filled-yellow.png")
     ImageResource arrowDownFilledYellow();
 

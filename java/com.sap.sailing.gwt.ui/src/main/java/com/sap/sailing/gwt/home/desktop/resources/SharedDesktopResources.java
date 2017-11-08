@@ -28,4 +28,7 @@ public interface SharedDesktopResources extends SharedHomeResources {
     
     @Source("raw_gps_fixes.png")
     ImageResource gpsFixes();
+    
+    @Source("arrow-down-filled-black.png")
+    ImageResource arrowDownFilledBlack();
 }
