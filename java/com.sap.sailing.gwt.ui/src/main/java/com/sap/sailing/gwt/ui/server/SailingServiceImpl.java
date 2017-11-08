@@ -800,7 +800,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
                 // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
-                boolean storeLeaderboardForTesting = false;
+                boolean storeLeaderboardForTesting = true;
                 if (storeLeaderboardForTesting) {
                     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/Projekte/sailing/dev/git/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
                     oos.writeObject(leaderboardDTO);
@@ -1097,7 +1097,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<? extends Competitor> iterable) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (Competitor c : iterable) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(c);
+            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(c);
             result.add(competitorDTO);
         }
         return result;
@@ -1806,9 +1806,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            for (Entry<Competitor, Boat> competitorAndBoat : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
+                Competitor competitor = competitorAndBoat.getKey();
                 if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
-                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
                     List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
                     result.put(competitorDTO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
@@ -2252,7 +2253,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
                 if (trackedLeg != null) {
                     int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
-                    QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor),
+                    Boat boatOfCompetitor = trackedRace.getBoatOfCompetitor(competitor);
+                    QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor, boatOfCompetitor),
                             oneBasedRank, legNumberOneBased);
                     result.add(quickRankDTO);
                 }
@@ -3133,7 +3135,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         List<CompetitorDTO> competitorDTOs = new ArrayList<>();
                         List<Double> pointSums = new ArrayList<>();
                         for (Entry<Competitor, Double> e2 : e.getValue().entrySet()) {
-                            competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(e2.getKey()));
+                            competitorDTOs.add(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(e2.getKey()));
                             pointSums.add(e2.getValue());
                         }
                         result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, pointSums)); 
@@ -3149,7 +3151,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
                         for (Competitor competitor : e.getValue()) {
                             values.add(new Double(rank));
-                            competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
+                            competitorDTOs.add(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(competitor));
                             rank++;
                         }
                         result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
@@ -3202,8 +3204,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             MeterDistance maxDistance = new MeterDistance(meters);
-            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+            for (Entry<Competitor, Boat> competitorAndBoat : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
+                Competitor competitor = competitorAndBoat.getKey();
+                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
                 if (from.containsKey(competitorDTO)) {
                     // get Track of competitor
                     GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
@@ -3259,8 +3262,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Map<CompetitorDTO, Future<List<ManeuverDTO>>> futures = new HashMap<CompetitorDTO, Future<List<ManeuverDTO>>>();
-            for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+            for (Entry<Competitor, Boat> competitorAndBoat : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
+                Competitor competitor = competitorAndBoat.getKey();
+                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
                 if (from.containsKey(competitorDTO)) {
                     final TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDTO));
                     final TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDTO));
@@ -4851,11 +4855,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceColumn != null && fleet != null) {
                 result = new ArrayList<>();
                 for (Competitor competitor: leaderboard.getCompetitors(raceColumn, fleet)) {
-                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                     Boat boatOfCompetitor = competitorAndBoats.get(competitor);
-                    if (boatOfCompetitor != null) {
-                        competitorDTO.setBoat(baseDomainFactory.convertToBoatDTO(boatOfCompetitor));
-                    }
+                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, boatOfCompetitor);
                     result.add(competitorDTO);
                 }
             }
@@ -4943,7 +4944,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public CompetitorDTO addOrUpdateCompetitorWithBoat(CompetitorDTO competitor) throws URISyntaxException {
-        return getBaseDomainFactory().convertToCompetitorDTO(addOrUpdateCompetitorWithBoatInternal(competitor));        
+        CompetitorWithBoat competitorWithBoat = addOrUpdateCompetitorWithBoatInternal(competitor);
+        return getBaseDomainFactory().convertToCompetitorWithOptionalBoatDTO(competitorWithBoat);        
     }
 
     @Override

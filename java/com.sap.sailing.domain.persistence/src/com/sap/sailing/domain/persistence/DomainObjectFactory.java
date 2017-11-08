@@ -132,7 +132,8 @@ public interface DomainObjectFactory {
     Collection<CompetitorWithBoat> loadAllLegacyCompetitorsWithBoat();
 
     /**
-     * Loads all competitors and resolves them via the domain factory.
+     * Loads all competitors (with and without embedded boats) and resolves them via the domain factory.
+     * Returns a collection of {@link Competitor} or {@link CompetitorWithBoat} objects. 
      */
     Collection<Competitor> loadAllCompetitors();
 

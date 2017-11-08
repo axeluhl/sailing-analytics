@@ -366,7 +366,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
 
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
-            result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
+            result.setSuppressed(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(suppressedCompetitor), true);
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
@@ -453,7 +453,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
             row.competitor = competitorDTO;
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();

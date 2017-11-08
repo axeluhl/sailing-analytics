@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -147,11 +148,16 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
 
     @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
-        return competitorAndBoatStore.convertToCompetitorDTO(competitor, boat);
+        return competitorAndBoatStore.convertToCompetitorWithBoatDTO(competitor, boat);
     }
 
     @Override
-    public <T extends Competitor> CompetitorDTO convertToCompetitorDTO(T competitor) {
+    public CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
+        return competitorAndBoatStore.convertToCompetitorWithOptionalBoatDTO(competitor);
+    }
+
+    @Override
+    public CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor competitor) {
         return competitorAndBoatStore.convertToCompetitorDTO(competitor);
     }
 
@@ -371,12 +377,11 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return result;
     }
 
-    /** TODO bug2822: Check usage of this method */ 
     @Override
     public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (Competitor competitor : competitors) {
-            result.add(convertToCompetitorDTO(competitor, null));
+            result.add(convertToCompetitorWithOptionalBoatDTO(competitor));
         }
         return result;
     }

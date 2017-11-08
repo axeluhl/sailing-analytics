@@ -86,11 +86,11 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
 
     void addCompetitors(Iterable<Competitor> competitors);
 
-    CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c);
+    CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor competitor);
 
-    <T extends Competitor> CompetitorDTO convertToCompetitorDTO(T competitor);
+    CompetitorDTO convertToCompetitorWithBoatDTO(Competitor c, Boat b);
 
-    CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
+    CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor c);
 
     Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
 

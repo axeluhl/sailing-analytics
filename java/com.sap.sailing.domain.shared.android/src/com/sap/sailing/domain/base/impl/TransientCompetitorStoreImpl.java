@@ -297,7 +297,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c) {
+    public CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor c) {
         LockUtil.lockForRead(lock);
         boolean needToUnlockReadLock = true;
         try {
@@ -330,30 +330,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         }
     }
     
-    @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
-        CompetitorWithoutBoatDTO c = convertToCompetitorWithoutBoatDTO(competitor);
-        BoatDTO boatDTO = null;
-        if (boat != null) {
-            boatDTO = convertToBoatDTO(boat); 
-        }
-        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c, boatDTO);
-
-        return competitorDTO;
-    }
-
-    @Override
-    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
-        Map<CompetitorDTO, BoatDTO> result = new HashMap<>();
-        for (Entry<Competitor, Boat> entry: competitorsAndBoats.entrySet()) {
-            CompetitorWithoutBoatDTO c = convertToCompetitorWithoutBoatDTO(entry.getKey());
-            BoatDTO boatDTO = convertToBoatDTO(entry.getValue());
-            CompetitorDTO competitorDTO = new CompetitorDTOImpl(c, null);
-            result.put(competitorDTO, boatDTO);
-        }
-        return result;
-    }
-
     @Override
     public void allowCompetitorResetToDefaults(Competitor competitor) {
         LockUtil.lockForWrite(lock);
@@ -445,15 +421,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         return (CompetitorWithBoat) competitor;
     }
 
-    @Override
-    public <T extends Competitor> CompetitorDTO convertToCompetitorDTO(T competitor) {
-        if (competitor instanceof CompetitorWithBoat) {
-            return convertToCompetitorDTO(competitor, ((CompetitorWithBoat) competitor).getBoat());
-        } else {
-            return convertToCompetitorDTO(competitor, null);
-        }
-    }
-    
     /** Boat stuff starts here */
     
     @Override
@@ -492,7 +459,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     @Override
     public Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
-        // create compound boat ID here?
         Boat result = getExistingBoatById(id); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
@@ -689,4 +655,37 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             LockUtil.unlockAfterWrite(lock);
         }
     }
+    
+    @Override
+    public CompetitorDTO convertToCompetitorWithBoatDTO(Competitor competitor, Boat boat) {
+        CompetitorWithoutBoatDTO c = convertToCompetitorDTO(competitor);
+        BoatDTO boatDTO = null;
+        if (boat != null) {
+            boatDTO = convertToBoatDTO(boat); 
+        }
+        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c, boatDTO);
+
+        return competitorDTO;
+    }
+
+    @Override
+    public CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
+        if (competitor instanceof CompetitorWithBoat) {
+            return convertToCompetitorWithBoatDTO(competitor, ((CompetitorWithBoat) competitor).getBoat());
+        } else {
+            return convertToCompetitorWithBoatDTO(competitor, null);
+        }
+    }
+
+    @Override
+    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
+        Map<CompetitorDTO, BoatDTO> result = new HashMap<>();
+        for (Entry<Competitor, Boat> entry: competitorsAndBoats.entrySet()) {
+            CompetitorDTO competitorDTO = convertToCompetitorWithOptionalBoatDTO(entry.getKey());
+            BoatDTO boatDTO = convertToBoatDTO(entry.getValue());
+            result.put(competitorDTO, boatDTO);
+        }
+        return result;
+    }
+
 }
