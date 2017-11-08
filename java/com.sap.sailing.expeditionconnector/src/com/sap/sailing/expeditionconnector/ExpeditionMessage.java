@@ -173,6 +173,31 @@ public interface ExpeditionMessage extends UDPMessage {
     final int ID_TACK_ANGLE = 152;
     
     /**
+     * variable ID for rake in degrees
+     */
+    final int ID_RAKE_DEG = 172;
+    
+    /**
+     * variable ID for deflector percentage
+     */
+    final int ID_DFLCTR_PP = 173;
+    
+    /**
+     * variable ID for target heel angle
+     */
+    final int ID_TG_HEEL = 174;
+    
+    /**
+     * variable ID for forestay pressure
+     */
+    final int ID_FORESTAY_PRES = 175;
+    
+    /**
+     * variable ID for deflector in millimeters
+     */
+    final int ID_DFLECTR_MM = 176;
+    
+    /**
      * variable ID for target boat speed (P?), presumably in knots
      */
     final int ID_TARG_BSP_P = 238;

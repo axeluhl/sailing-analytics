@@ -4,6 +4,7 @@
     xmlns:login="urn:import:com.sap.sailing.gwt.home.mobile.places.morelogininformation"
     xmlns:a="urn:import:com.sap.sailing.gwt.home.mobile.partials.accordion">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18nsec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationResources" />
     <ui:style>
@@ -11,13 +12,12 @@
         font-size: 1.5em;
     }
     .register {
-        border-radius: .3846154em;
+        border-radius: .384615384615385em;
         width: 100%;
         text-align: center;
     }
-    
     .buttonContainer {
-        padding: 1em 0.625em;
+        margin-top: 1em;
     }
     </ui:style>
     <a:Accordion>
@@ -47,13 +47,13 @@
                 image="{local_res.notifications}"
                 content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
         </a:item>
-        <!-- 
         <a:footer>
             <g:HTMLPanel addStyleNames="{style.buttonContainer}">
-                <a
-                    class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}">TODO: register</a>
+                <a ui:field="registerControl" class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} 
+                        {res.mainCss.buttonarrowrightwhite}">
+                    <ui:text from="{i18n.moreLoginInformationRegisterControlText}"/>
+                </a>
             </g:HTMLPanel>
         </a:footer>
-         -->
     </a:Accordion>
 </ui:UiBinder>

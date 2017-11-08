@@ -176,7 +176,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public void logout() {
         userService.logout();
-        eventBus.fireEvent(new AuthenticationRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent(AuthenticationPlaces.SIGN_IN));
     }
     
     /**
