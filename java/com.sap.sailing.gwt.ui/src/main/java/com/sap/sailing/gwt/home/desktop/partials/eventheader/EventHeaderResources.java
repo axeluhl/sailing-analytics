@@ -34,7 +34,6 @@ public interface EventHeaderResources extends SharedDesktopResources {
         String leaderboardquickaccess();
         String eventheader();
         String eventheader_breadcrumb();
-        String eventheader_breadcrumbback();
         String eventheader_intro();
         String eventheader_intro_logo();
         String eventheader_intro_logo_image();
