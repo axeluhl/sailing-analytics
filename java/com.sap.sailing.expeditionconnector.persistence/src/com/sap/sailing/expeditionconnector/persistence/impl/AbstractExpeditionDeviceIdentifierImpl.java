@@ -2,7 +2,7 @@ package com.sap.sailing.expeditionconnector.persistence.impl;
 
 import java.util.UUID;
 
-import com.sap.sailing.expeditionconnector.persistence.ExpeditionDeviceIdentifier;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceIdentifier;
 
 public abstract class AbstractExpeditionDeviceIdentifierImpl implements ExpeditionDeviceIdentifier {
     private static final long serialVersionUID = -6605059302775505785L;

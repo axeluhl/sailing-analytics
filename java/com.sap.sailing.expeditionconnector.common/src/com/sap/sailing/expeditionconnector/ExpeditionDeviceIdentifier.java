@@ -1,9 +1,8 @@
-package com.sap.sailing.expeditionconnector.persistence;
+package com.sap.sailing.expeditionconnector;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 
 public interface ExpeditionDeviceIdentifier extends DeviceIdentifier {
     /**

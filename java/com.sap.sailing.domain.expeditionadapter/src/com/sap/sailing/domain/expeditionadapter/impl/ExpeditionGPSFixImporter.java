@@ -23,8 +23,8 @@ import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl
 public class ExpeditionGPSFixImporter implements GPSFixImporter {
     private static final String LAT_COLUMN_HEADING = ExpeditionExtendedDataImporterImpl.COL_NAME_LAT;
     private static final String LON_COLUMN_HEADING = ExpeditionExtendedDataImporterImpl.COL_NAME_LON;
-    private static final String COG_COLUMN_HEADING = "Ext_COG";
-    private static final String SOG_COLUMN_HEADING = "Ext_SOG";
+    private static final String COG_COLUMN_HEADING = "Cog";
+    private static final String SOG_COLUMN_HEADING = "Sog";
     @Override
     public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, final String sourceName)
             throws FormatNotSupportedException, IOException {
