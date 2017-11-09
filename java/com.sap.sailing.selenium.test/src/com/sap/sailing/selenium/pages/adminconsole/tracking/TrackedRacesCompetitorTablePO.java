@@ -48,7 +48,7 @@ public class TrackedRacesCompetitorTablePO extends CellTablePO<CompetitorEntry> 
         public TrackedRacesCompetitorEditDialogPO clickEditButton() {
             WebElement action = ActionsHelper.findEditAction(getWebElement());
             action.click();
-            WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorEditDialog");
+            WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorWithBoatEditDialog");
             return new TrackedRacesCompetitorEditDialogPO(this.driver, dialog);
         }
     }
