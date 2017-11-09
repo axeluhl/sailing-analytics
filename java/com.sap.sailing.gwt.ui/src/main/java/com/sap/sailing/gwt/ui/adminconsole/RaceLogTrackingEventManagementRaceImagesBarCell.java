@@ -51,7 +51,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
-        result.add(new ImageSpec(ACTION_SET_FINISHING_AND_END_TIME, stringMessages.setEndTime(), makeImagePrototype(resources.clock2Icon())));
+        result.add(new ImageSpec(ACTION_SET_FINISHING_AND_END_TIME, stringMessages.setFinishingAndEndTime(), makeImagePrototype(resources.clock2Icon())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
         

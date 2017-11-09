@@ -1021,10 +1021,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String overwriteRacingProceduresConfigurationHelpText();
     
     String setStartTime();
-    String setEndTime();
+    String endTime();
+    String setFinishingAndEndTime();
     String currentPass();
     String setStartTimeDescription();
-    String setEndTimeDescription();
+    String setFinishingAndEndTimeDescription();
     String setTrackingTimesDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
@@ -1934,7 +1935,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentStbdRudderRakeTooltip();
     String currentMastRotationInDegree();
     String currentMastRotationInDegreeTooltip();
-    String setFinishingTime();
+    String finishingTime();
     String boatNameMustNotBeEmpty();
     String errorUpdatingExpeditionDeviceConfiguration(String name, String message);
     String doYouReallyWantToRemoveExpeditionDeviceConfiguration(String name);

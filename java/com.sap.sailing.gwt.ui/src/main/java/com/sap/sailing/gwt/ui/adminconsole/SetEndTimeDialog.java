@@ -18,8 +18,8 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
     public SetEndTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName,
             String raceColumnName, String fleetName, StringMessages stringMessages,
             DataEntryDialog.DialogCallback<RaceLogSetFinishingAndEndTimeDTO> callback) {
-        super(service, errorReporter, stringMessages.setEndTime(), stringMessages.setEndTimeDescription(),
-                stringMessages.setEndTime(), stringMessages.cancel(), leaderboardName, raceColumnName, fleetName,
+        super(service, errorReporter, stringMessages.setFinishingAndEndTime(), stringMessages.setFinishingAndEndTimeDescription(),
+                stringMessages.endTime(), stringMessages.cancel(), leaderboardName, raceColumnName, fleetName,
                 stringMessages, new EndTimeValidator(stringMessages), callback);
         this.ensureDebugId("SetEndTimeDialog");
     }
@@ -117,7 +117,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
 
     @Override
     protected String getTimeLabel() {
-        return stringMessages.setFinishingTime();
+        return stringMessages.finishingTime();
     }
 
     @Override
@@ -129,8 +129,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
         finishTimeBox = createDateTimeBox(new Date());
         finishTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         finishTimeBox.ensureDebugId("FinishTimeBox");
-        content.setWidget(1, 0, createLabel(stringMessages.setEndTime()));
-        content.setWidget(1, 1, finishTimeBox);        
+        content.setWidget(1, 0, createLabel(stringMessages.endTime()));
+        content.setWidget(1, 1, finishTimeBox);
     }
-
 }
