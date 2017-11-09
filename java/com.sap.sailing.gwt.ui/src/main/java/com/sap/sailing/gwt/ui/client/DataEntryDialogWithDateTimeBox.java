@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox.Format;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -11,31 +9,29 @@ import com.sap.sse.gwt.client.dialog.DialogUtils;
 
 public abstract class DataEntryDialogWithDateTimeBox<T> extends DataEntryDialog<T> {
 
-    public DataEntryDialogWithDateTimeBox(String title, String message, String okButtonName, String cancelButtonName,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<T> validator, boolean animationEnabled,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<T> callback) {
+    protected DataEntryDialogWithDateTimeBox(String title, String message, String okButtonName, String cancelButtonName,
+            Validator<T> validator, boolean animationEnabled, DialogCallback<T> callback) {
         super(title, message, okButtonName, cancelButtonName, validator, animationEnabled, callback);
     }
 
     protected DataEntryDialogWithDateTimeBox(String title, String message, String okButtonName, String cancelButtonName,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<T> validator,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<T> callback) {
+            Validator<T> validator, DialogCallback<T> callback) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
     }
     
     /**
-     * Call the requested format will be honored by the underlying implementation if the native components can support it
-     * @param yearToMinute 
+     * Creates a new {@link HTML5DateTimeBox} instance, where the requested {@link Format format} will be honored by the
+     * underlying implementation, if the native components can support it.
+     * 
+     * @param initialValue
+     *            the initial {@link Date value} to set to the created {@link HTML5DateTimeBox}
+     * @param format
+     *            the {@link Format format} to set to the created {@link HTML5DateTimeBox}
      */
-    public HTML5DateTimeBox createDateTimeBox(Date initialValue, Format format) {
+    protected HTML5DateTimeBox createDateTimeBox(Date initialValue, Format format) {
         final HTML5DateTimeBox result = new HTML5DateTimeBox(format);
         result.setValue(initialValue);
-        result.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                validateAndUpdate();
-            }
-        });
+        result.addValueChangeHandler(event -> validateAndUpdate());
         DialogUtils.linkEnterToButton(getOkButton(), result);
         DialogUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
