@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -162,6 +163,8 @@ public class LeaderboardCourseChangeTest {
         Map<Competitor, Boat> competitorAndBoatMap = createCompetitorAndBoatMap(boatClass);
         when(mockedRaceDefinition.getCompetitors()).thenReturn(competitorAndBoatMap.keySet());
         when(mockedRaceDefinition.getCompetitorsAndTheirBoats()).thenReturn(competitorAndBoatMap);
+        Boat boat = competitorAndBoatMap.get(competitorAndBoatMap.keySet().iterator().next());
+        when(mockedRaceDefinition.getBoatOfCompetitorById(any())).thenReturn(boat);
         return mockedRaceDefinition;
     }
 
