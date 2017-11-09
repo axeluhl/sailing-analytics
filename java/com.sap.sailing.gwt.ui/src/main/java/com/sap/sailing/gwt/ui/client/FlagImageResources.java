@@ -214,7 +214,7 @@ public interface FlagImageResources extends ClientBundle {
 	@Source("com/sap/sailing/gwt/ui/client/images/flags/EU.png")
 	ImageResource flagEUROPEANUNION();
 
-	@Source("com/sap/sailing/gwt/ui/client/images/flags/FAM.png")
+	@Source("com/sap/sailing/gwt/ui/client/images/flags/fam_old.png")
 	ImageResource flagFAM();
 
 	@Source("com/sap/sailing/gwt/ui/client/images/flags/FI.png")
