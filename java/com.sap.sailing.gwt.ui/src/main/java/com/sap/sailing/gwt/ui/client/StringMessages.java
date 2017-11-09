@@ -1899,6 +1899,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String moreLoginInformationSectionStrategySimulatorDescription();
     String moreLoginInformationSectionUserNotificationsHeading();
     String moreLoginInformationSectionUserNotificationsDescription();
+    String moreLoginInformationRegisterControlText();
     String anniversaryUnitText(@Optional @PluralCount(DefaultRule_1_0n.class) int count);
     String anniversaryMajorCountdownTeaser(@PluralCount(DefaultRule_1_0n.class) int countdown, int anniversary);
     String anniversaryMajorCountdownDescription(int anniversary);
