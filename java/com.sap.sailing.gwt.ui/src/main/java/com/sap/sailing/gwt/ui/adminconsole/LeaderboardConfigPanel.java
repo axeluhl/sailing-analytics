@@ -60,7 +60,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetEndTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndEndTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -626,10 +626,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     
     private void setEndTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
         new SetEndTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(),
-                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetEndTimeDTO>() {
+                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetFinishingAndEndTimeDTO>() {
                     @Override
-                    public void ok(RaceLogSetEndTimeDTO editedObject) {
-                        sailingService.setEndTime(editedObject, new AsyncCallback<Pair<Boolean, Boolean>>() {
+                    public void ok(RaceLogSetFinishingAndEndTimeDTO editedObject) {
+                        sailingService.setFinishingAndEndTime(editedObject, new AsyncCallback<Pair<Boolean, Boolean>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(caught.getMessage());

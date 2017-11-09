@@ -63,7 +63,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetEndTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndEndTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -621,13 +621,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
 
     /**
-     * Sets the a new end time.
+     * Sets the a new finishing and end time.
      * 
      * @param dto
-     *            {@link RaceLogSetEndTimeDTO} identifying the race to set the end time on and the new
+     *            {@link RaceLogSetFinishingAndEndTimeDTO} identifying the race and the new finishing and
      *            end time.
      */
-    void setEndTime(RaceLogSetEndTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
+    void setFinishingAndEndTime(RaceLogSetFinishingAndEndTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
     
     /**
      * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the

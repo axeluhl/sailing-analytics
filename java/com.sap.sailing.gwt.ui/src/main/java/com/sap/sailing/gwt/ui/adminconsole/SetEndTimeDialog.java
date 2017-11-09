@@ -8,16 +8,16 @@ import com.google.gwt.user.client.ui.Grid;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetEndTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndEndTimeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetEndTimeDTO> {
+public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTimeDTO> {
     private BetterDateTimeBox finishTimeBox;
 
     public SetEndTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName,
             String raceColumnName, String fleetName, StringMessages stringMessages,
-            DataEntryDialog.DialogCallback<RaceLogSetEndTimeDTO> callback) {
+            DataEntryDialog.DialogCallback<RaceLogSetFinishingAndEndTimeDTO> callback) {
         super(service, errorReporter, stringMessages.setEndTime(), stringMessages.setEndTimeDescription(),
                 stringMessages.setEndTime(), stringMessages.cancel(), leaderboardName, raceColumnName, fleetName,
                 stringMessages, new EndTimeValidator(stringMessages), callback);
@@ -25,8 +25,8 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetEndTimeDTO> {
     }
 
     @Override
-    protected RaceLogSetEndTimeDTO getResult() {
-        RaceLogSetEndTimeDTO dto = new RaceLogSetEndTimeDTO();
+    protected RaceLogSetFinishingAndEndTimeDTO getResult() {
+        RaceLogSetFinishingAndEndTimeDTO dto = new RaceLogSetFinishingAndEndTimeDTO();
         dto.leaderboardName = leaderboardName;
         dto.raceColumnName = raceColumnName;
         dto.fleetName = fleetName;
@@ -97,7 +97,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetEndTimeDTO> {
                 });
     }
 
-    private static class EndTimeValidator implements Validator<RaceLogSetEndTimeDTO> {
+    private static class EndTimeValidator implements Validator<RaceLogSetFinishingAndEndTimeDTO> {
 
         private final StringMessages stringMessages;
 
@@ -106,7 +106,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetEndTimeDTO> {
         }
 
         @Override
-        public String getErrorMessage(RaceLogSetEndTimeDTO dto) {
+        public String getErrorMessage(RaceLogSetFinishingAndEndTimeDTO dto) {
             if (dto.authorName == null || dto.authorName.isEmpty() || dto.authorPriority == null || dto.finishTime == null) {
                 return stringMessages.pleaseEnterAValue();
             }
