@@ -76,8 +76,11 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
             Distance sum = Distance.NULL;
             int count = 0;
             for (final BravoFix fix : getFixes(from, true, to, true)) {
-                sum = sum.add(fix.getRideHeight());
-                count++;
+                final Distance rideHeight = fix.getRideHeight();
+                if (rideHeight != null) {
+                    sum = sum.add(rideHeight);
+                    count++;
+                }
             }
             if (count > 0) {
                 result = sum.scale(1./count);
