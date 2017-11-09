@@ -44,7 +44,7 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
         Callable<PairingListTemplate> callable = new Callable<PairingListTemplate>() {
             @Override
             public PairingListTemplate call() throws Exception {
-                return new PairingListTemplateImpl(pairingFrameProvider, (1000000/threadPoolSize));
+                return new PairingListTemplateImpl(pairingFrameProvider, (10000/threadPoolSize));
             }
         };
 
@@ -76,5 +76,4 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
         }
         return currentBest;
     }
-
 }

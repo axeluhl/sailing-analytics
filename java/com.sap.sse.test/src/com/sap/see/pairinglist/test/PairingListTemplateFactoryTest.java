@@ -13,9 +13,12 @@ public class PairingListTemplateFactoryTest extends PairingListTemplateFactoryIm
     @Test
     public void testGeneratePairingListTemplate() {
         PairingListTemplate testTemplate = generatePairingList(new PairingFrameProviderTest(15, 3, 18));
+        //PairingListTemplate testTemplate = generatePairingList(new PairingFrameProviderTest(45, 6, 18));
+        //PairingListTemplate testTemplate = generatePairingList(new PairingFrameProviderTest(10, 3, 30));
         assertNotNull(testTemplate);
-        System.out.println(Arrays.deepToString(testTemplate.getPairingListTemplate()));
+        for(int[] row : testTemplate.getPairingListTemplate()) {
+            System.out.println(Arrays.toString(row));
+        }
         System.out.println(testTemplate.getQuality());
     }
-
 }

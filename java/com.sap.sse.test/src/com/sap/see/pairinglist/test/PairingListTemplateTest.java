@@ -1,6 +1,6 @@
 package com.sap.see.pairinglist.test;
 
-import static org.junit.Assert.assertArrayEquals; 
+import static org.junit.Assert.assertArrayEquals;  
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
@@ -10,17 +10,16 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
-import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
-
 import junit.framework.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl{
    
     @Before
     public void init() {
+       // create(15, 3, 18,10000); 
         // creating pairing list template
-
        // this.create(15, 3, 18,10000);
+
 
     }
   
@@ -80,6 +79,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         assertArrayEquals(currentAssociations[6],associationRow[1][0]);
     }
     
+
 //    @Test 
 //    public void testTeamAssociationCreation() {
 //        int[][] plTemplate = this.getPairingListTemplate();
@@ -157,5 +157,4 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
   public void test2(){
       createPairingListTemplate(15, 3, 18);
   }
-
 }

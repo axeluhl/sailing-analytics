@@ -3,7 +3,7 @@ package com.sap.see.pairinglist.test;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 
 /**
- * This test class is used for reproducing a PairingFrameProvider
+ * This test class is used for test generations of PairingLists
  * @author D070264
  *
  */

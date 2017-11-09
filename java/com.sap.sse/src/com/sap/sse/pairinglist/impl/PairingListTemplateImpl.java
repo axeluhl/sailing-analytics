@@ -1,5 +1,7 @@
 package com.sap.sse.pairinglist.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
 
 
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class PairingListTemplateImpl implements PairingListTemplate{
+
 
     private int[][] pairingListTemplate;
     private double standardDev;
@@ -243,7 +246,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 //first Flight
                 int[][] flightColumn = new int[groups][competitors / groups];
                 associationRow= setZero(associationRow);
-                int[] associationHigh = new int[competitors / groups - 1];
+                int[] associationHigh = new int[groups - 1];
                 flightColumn[0][0] = randomBW(1, competitors);
                 for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
                     int associationSum = Integer.MAX_VALUE;
@@ -311,15 +314,26 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 bestDev = this.calcStandardDev(currentAssociations);
             }
         }
-
-        for(int[] group : bestPLT) {
-            shuffle(group);
+        
+        for(int i = 0; i<bestPLT.length; i++) {
+            int[] group = bestPLT[i];
+            Integer[] nums = Arrays.stream(group).boxed().toArray(Integer[]::new);
+            //System.out.println(Arrays.toString(nums));
+            //List<Integer> groupShuffled = new ArrayList<>();
+            Collections.shuffle(Arrays.asList(nums));
+            System.out.println(Arrays.toString(nums));
+            bestPLT[i] = Arrays.stream(nums).mapToInt(Integer::intValue).toArray();
         }
 
         //bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
         //bestPLT = this.improveAssignmentChanges(bestPLT, flights, competitors);
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
+        
+        System.out.println(Arrays.deepToString(pairingListTemplate));
+
+
+        
         return bestPLT;
     }
 
@@ -331,7 +345,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 associations[group[i] - 1][i] += 1;
             }
         }
-
         return associations;
     }
 
