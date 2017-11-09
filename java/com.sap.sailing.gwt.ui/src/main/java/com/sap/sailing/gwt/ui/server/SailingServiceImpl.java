@@ -5119,15 +5119,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public Pair<Boolean, Boolean> setEndTime(RaceLogSetEndTimeDTO dto) {
-        TimePoint newFinishTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
-                dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.finishTime));
-        
         TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
                 dto.fleetName, dto.authorName, dto.authorPriority,
                 dto.passId, new MillisecondsTimePoint(dto.finishingTime));
         
-        return new Pair<Boolean,Boolean>(new MillisecondsTimePoint(dto.finishingTime).equals(newFinsihingTime),new MillisecondsTimePoint(dto.finishTime).equals(newFinishTime));
+        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.finishTime));
+        
+        return new Pair<Boolean, Boolean>(new MillisecondsTimePoint(dto.finishingTime).equals(newFinsihingTime),
+                new MillisecondsTimePoint(dto.finishTime).equals(newEndTime));
     }
 
     @Override
