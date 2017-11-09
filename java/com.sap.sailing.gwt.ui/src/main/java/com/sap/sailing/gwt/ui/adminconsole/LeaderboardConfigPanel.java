@@ -629,7 +629,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetEndTimeDTO>() {
                     @Override
                     public void ok(RaceLogSetEndTimeDTO editedObject) {
-                        Window.alert(editedObject.toString());
                         sailingService.setEndTime(editedObject, new AsyncCallback<Pair<Boolean, Boolean>>() {
                             @Override
                             public void onFailure(Throwable caught) {
