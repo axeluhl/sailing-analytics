@@ -2,6 +2,9 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals; 
 import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
@@ -17,28 +20,28 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     public void init() {
         // creating pairing list template
 
-        this.create(15, 3, 18,10000);
+       // this.create(15, 3, 18,10000);
 
     }
   
   
-    @Test
-    public void testPairingListCreation() {
-        int[][] plTemplate = this.getPairingListTemplate();
-        
-        assertNotNull(plTemplate);
-        for(int[] i:plTemplate){
-            for (int z: i){
-                if(z<=0) fail("Problem in .create!");
-            }
-        }
-        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
-        for(int x=0;x<100;x++){
-            create(15, 3, 18,10000);
-            plTemplate=this.getPairingListTemplate();
-            System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
-        }
-    }
+//    @Test
+//    public void testPairingListCreation() {
+//        int[][] plTemplate = this.getPairingListTemplate();
+//        
+//        assertNotNull(plTemplate);
+//        for(int[] i:plTemplate){
+//            for (int z: i){
+//                if(z<=0) fail("Problem in .create!");
+//            }
+//        }
+//        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
+//        for(int x=0;x<1;x++){
+//            create(15, 3, 18,1000000);
+//            plTemplate=this.getPairingListTemplate();
+//            System.out.println("DEV:"+this.calcStandardDev(this.getAssociationsFromPairingList(plTemplate, new int[18][18])));
+//        }
+//    }
     
     @Test
     public void testArrayCopy() {
@@ -77,33 +80,82 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         assertArrayEquals(currentAssociations[6],associationRow[1][0]);
     }
     
-    @Test 
-    public void testTeamAssociationCreation() {
-        int[][] plTemplate = this.getPairingListTemplate();
-        int[][] associations = new int[18][18];
-        
-        this.getAssociationsFromPairingList(plTemplate, associations);
-        
-        for (int x = 0; x < associations.length; x++) {
-            for (int y = 0; y < associations[0].length; y++) {
-                if ((x == y) && (associations[x][y] != -1)) {
-                    Assert.fail("In 'getAssociationsFromPairingList' the diagonal of association matrix has to be -1.");
-                }
-            }
-        }
-    }
-    @Test
-    public void qualityCheck(){
-        if(getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
-        create(10, 3, 30,10000);
-        if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
-    }
-    
-    @Test
-    public void testSingleFlightCreation(){
-        this.createPairingListTemplate(15, 3, 18);
-    }
- 
-    
+//    @Test 
+//    public void testTeamAssociationCreation() {
+//        int[][] plTemplate = this.getPairingListTemplate();
+//        int[][] associations = new int[18][18];
+//        
+//        this.getAssociationsFromPairingList(plTemplate, associations);
+//        
+//        for (int x = 0; x < associations.length; x++) {
+//            for (int y = 0; y < associations[0].length; y++) {
+//                if ((x == y) && (associations[x][y] != -1)) {
+//                    Assert.fail("In 'getAssociationsFromPairingList' the diagonal of association matrix has to be -1.");
+//                }
+//            }
+//        }
+//    }
+//    @Test
+//    public void qualityCheck(){
+//        if(getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
+//        create(10, 3, 30,10000);
+//        if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
+//    }
+//    
+   @Test
+   public void test(){
+      int[][] plt={
+               {1,2,3,4,5,6},
+               {7,8,9,10,11,12},
+               {13,14,15,16,17,18},
+               {1,18,2,17,3,16},
+               {4,15,5,14,6,13},
+               {7,12,8,11,9,10},
+               {2,4,6,8,10,12},
+               {14,16,18,1,3,5},
+               {7,9,11,13,15,17},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+               {0,0,0,0,0,0},
+       };
+      for(int x=0;x<10000;x++)System.out.println(calcStandardDev(getAssociationsFromPairingList(create(15, 3, 18,100,getAssociationsFromPairingList(plt, new int[18][18]),plt),new int[18][18])));
+   }
+  @Test
+  public void test2(){
+      createPairingListTemplate(15, 3, 18);
+  }
 
 }
