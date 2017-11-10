@@ -13,7 +13,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -175,9 +175,11 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     }
 
     private void openAddCompetitorDialog() {
-        competitorTable.openEditCompetitorWithoutBoatDialog(new CompetitorWithoutBoatDTOImpl());
+        CompetitorDTOImpl competitorDTO = new CompetitorDTOImpl();
+        competitorDTO.setBoat(null);
+        competitorTable.openEditCompetitorDialog(competitorDTO);
     }
-    
+
     public void refreshCompetitorList() {
         competitorTable.refreshCompetitorList(leaderboardName);
     }

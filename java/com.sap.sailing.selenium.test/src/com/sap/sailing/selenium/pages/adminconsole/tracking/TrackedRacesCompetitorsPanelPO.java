@@ -12,8 +12,11 @@ public class TrackedRacesCompetitorsPanelPO extends PageArea {
     private WebElement refreshButton;
     
     @FindBy(how = BySeleniumId.class, using = "AddCompetitorButton")
-    private WebElement addButton;
-    
+    private WebElement addCompetitorButton;
+
+    @FindBy(how = BySeleniumId.class, using = "AddCompetitorWithBoatButton")
+    private WebElement addCompetitorWithBoatButton;
+
     @FindBy(how = BySeleniumId.class, using = "CompetitorsTable")
     private WebElement competitorsTable;
     
@@ -24,13 +27,20 @@ public class TrackedRacesCompetitorsPanelPO extends PageArea {
         this.driver = driver;
     }
     
-    public TrackedRacesCompetitorEditDialogPO pushAddButton() {
-        this.addButton.click();
+    public TrackedRacesCompetitorEditDialogPO pushAddCompetitorButton() {
+        this.addCompetitorButton.click();
         waitForAjaxRequests();
-        WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorWithBoatCreateDialog");
+        WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorEditDialog");
         return new TrackedRacesCompetitorEditDialogPO(this.driver, dialog);
     }
-    
+
+    public TrackedRacesCompetitorWithBoatEditDialogPO pushAddCompetitorWithBoatButton() {
+        this.addCompetitorWithBoatButton.click();
+        waitForAjaxRequests();
+        WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorWithBoatEditDialog");
+        return new TrackedRacesCompetitorWithBoatEditDialogPO(this.driver, dialog);
+    }
+
     public void pushRefreshButton() {
         this.refreshButton.click();
         waitForAjaxRequests();

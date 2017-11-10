@@ -21,13 +21,13 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfig
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetailsCompositePO;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.SeriesEditDialogPO;
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.RaceColumnTableWrapperPO;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorEditDialogPO;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorTablePO.CompetitorEntry;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorWithBoatEditDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
@@ -84,14 +84,14 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
 
         for (int i = 0; i < 2; i++) {
-            TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddButton();
+            TrackedRacesCompetitorWithBoatEditDialogPO dialog = competitorsPanel.pushAddCompetitorWithBoatButton();
             dialog.setNameTextBox("" + System.currentTimeMillis());
             dialog.setSailIdTextBox("" + System.currentTimeMillis());
             dialog.setBoatClassNameSuggestBox("RS-X");
             dialog.pressOk();
         }
 
-        TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddButton();
+        TrackedRacesCompetitorWithBoatEditDialogPO dialog = competitorsPanel.pushAddCompetitorWithBoatButton();
         final String name = "" + System.currentTimeMillis();
         dialog.setNameTextBox(name);
         final String sailId = "" + System.currentTimeMillis();
@@ -131,7 +131,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         assertEquals(boatClassName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName());
         // change competitor
         windowForEdit.switchToWindow();
-        dialog = competitorEntry.clickEditButton();
+        dialog = competitorEntry.clickEditWithBoatButton();
         final String changedName = "" + System.currentTimeMillis();
         dialog.setNameTextBox(changedName);
         final String changedSailId = "" + System.currentTimeMillis();

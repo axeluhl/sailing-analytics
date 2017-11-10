@@ -33,7 +33,6 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
@@ -444,7 +443,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     CompetitorDTO addOrUpdateCompetitorWithBoat(CompetitorDTO competitor) throws Exception;
 
-    CompetitorWithoutBoatDTO addOrUpdateCompetitorWithoutBoat(CompetitorWithoutBoatDTO competitor) throws Exception;
+    CompetitorDTO addOrUpdateCompetitorWithoutBoat(CompetitorDTO competitor) throws Exception;
 
     List<CompetitorDTO> addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag) throws Exception;
     

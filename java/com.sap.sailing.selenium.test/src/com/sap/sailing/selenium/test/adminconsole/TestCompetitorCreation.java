@@ -24,7 +24,7 @@ public class TestCompetitorCreation extends AbstractSeleniumTest {
     @Test
     public void testOpenCreateCompetitorDialog() {
         final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
-        final TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddButton(); // fails with an exception if the dialog is not found
+        final TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton(); // fails with an exception if the dialog is not found
         assertNotNull(dialog);
     }
 
@@ -37,24 +37,22 @@ public class TestCompetitorCreation extends AbstractSeleniumTest {
     @Test
     public void testCompetitorCreation() {
         final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
-        final TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddButton();
+        final TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
         final String name = ""+System.currentTimeMillis();
+        final String shortName = "NRV";
         dialog.setNameTextBox(name);
-        String sailId = ""+System.currentTimeMillis();
-        dialog.setSailIdTextBox(sailId);
-        final String boatClassName = "Laser Int.";
-        dialog.setBoatClassNameSuggestBox(boatClassName);
-        dialog.pressOk();
+        dialog.setShortNameTextBox(shortName);
+        dialog.pressOk(true);
         boolean found = false;
         for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
             String itName = it.getName();
             if (itName.equals(name)) {
                 found = true;
                 // found a candidate:
-                assertEquals(sailId, it.getSailId());
-                assertEquals(boatClassName, it.getBoatClassName());
+                assertEquals(shortName, it.getShortName());
             }
         }
         assertTrue(found);
     }
+
 }

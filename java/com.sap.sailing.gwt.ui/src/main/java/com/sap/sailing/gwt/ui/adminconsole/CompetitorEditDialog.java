@@ -13,8 +13,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
@@ -34,8 +33,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends CompetitorWithoutBoatDTO> extends DataEntryDialog<CompetitorDTOType> {
-    private final CompetitorDTOType competitorToEdit;
+public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
+    private final CompetitorDTO competitorToEdit;
     private final TextBox name;
     private final TextBox shortName;
     private final TextBox displayColorTextBox;
@@ -49,7 +48,7 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
     private final DoubleBox timeOnTimeFactor;
     private final DoubleBox timeOnDistanceAllowanceInSecondsPerNauticalMile;
     
-    protected static class CompetitorWithoutBoatValidator<T extends CompetitorWithoutBoatDTO> implements Validator<T> {
+    protected static class CompetitorWithoutBoatValidator implements Validator<CompetitorDTO> {
         protected final StringMessages stringMessages;
 
         public CompetitorWithoutBoatValidator(StringMessages stringMessages) {
@@ -57,13 +56,13 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
         }
         
         @Override
-        public String getErrorMessage(T valueToValidate) {
+        public String getErrorMessage(CompetitorDTO valueToValidate) {
             String result = null;
             if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                 result = stringMessages.pleaseEnterAName();
             } else if (valueToValidate.getColor() != null) {
                 Color displayColor = valueToValidate.getColor();
-                if (displayColor instanceof CompetitorWithoutBoatEditDialog.InvalidColor) {
+                if (displayColor instanceof CompetitorEditDialog.InvalidColor) {
                     result = displayColor.getAsHtml();
                 }
             }
@@ -71,10 +70,10 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
         }
     }
 
-    public static CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO> create(StringMessages stringMessages, CompetitorWithoutBoatDTO competitorToEdit,
-            DialogCallback<CompetitorWithoutBoatDTO> callback) {
-        return new CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO>(stringMessages.editCompetitor(), stringMessages, competitorToEdit,
-                new CompetitorWithoutBoatEditDialog.CompetitorWithoutBoatValidator<CompetitorWithoutBoatDTO>(stringMessages), callback);
+    public static CompetitorEditDialog create(StringMessages stringMessages, CompetitorDTO competitorToEdit,
+            DialogCallback<CompetitorDTO> callback) {
+        return new CompetitorEditDialog(stringMessages.editCompetitor(), stringMessages, competitorToEdit,
+                new CompetitorEditDialog.CompetitorWithoutBoatValidator(stringMessages), callback);
     }
     
     /**
@@ -83,8 +82,8 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
      * @param competitorToEdit
      *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
      */
-    protected CompetitorWithoutBoatEditDialog(String dialogTitle, StringMessages stringMessages, CompetitorDTOType competitorToEdit,
-            Validator<CompetitorDTOType> validator,  DialogCallback<CompetitorDTOType> callback) {
+    protected CompetitorEditDialog(String dialogTitle, StringMessages stringMessages, CompetitorDTO competitorToEdit,
+            Validator<CompetitorDTO> validator,  DialogCallback<CompetitorDTO> callback) {
         super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
                 validator, /* animationEnabled */true, callback);
         this.ensureDebugId("CompetitorEditDialog");
@@ -174,9 +173,8 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected CompetitorDTOType getResult() {
+    protected CompetitorDTO getResult() {
         Color color;
         if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
             color = null;
@@ -187,15 +185,15 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
                 color = new InvalidColor(iae);
             }
         }
-        CompetitorWithoutBoatDTO result = new CompetitorWithoutBoatDTOImpl(name.getText(), shortName.getText(), color, email.getText(),
+        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), shortName.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, competitorToEdit.getIdAsString(),
                 imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(),
                 timeOnTimeFactor.getValue(),
                 timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue() == null ? null :
-                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)), searchTag.getValue());
-        return (CompetitorDTOType) result;
+                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)), searchTag.getValue(), null);
+        return result;
     }
 
     @Override
@@ -224,7 +222,7 @@ public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends Competito
         return result;
     }
 
-    protected CompetitorDTOType getCompetitorToEdit() {
+    protected CompetitorDTO getCompetitorToEdit() {
         return competitorToEdit;
     }
 

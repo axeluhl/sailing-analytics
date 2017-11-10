@@ -198,7 +198,6 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
@@ -4908,7 +4907,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     
-    private Competitor addOrUpdateCompetitorWithoutBoatInternal(CompetitorWithoutBoatDTO competitor) throws URISyntaxException {
+    private Competitor addOrUpdateCompetitorWithoutBoatInternal(CompetitorDTO competitor) throws URISyntaxException {
         Competitor result;
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
         Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
@@ -4938,14 +4937,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CompetitorWithoutBoatDTO addOrUpdateCompetitorWithoutBoat(CompetitorWithoutBoatDTO competitor) throws URISyntaxException {
-        return getBaseDomainFactory().convertToCompetitorDTO(addOrUpdateCompetitorWithoutBoatInternal(competitor));
+    public CompetitorDTO addOrUpdateCompetitorWithoutBoat(CompetitorDTO competitorDTO) throws URISyntaxException {
+        Competitor competitor = addOrUpdateCompetitorWithoutBoatInternal(competitorDTO);
+        return getBaseDomainFactory().convertToCompetitorWithOptionalBoatDTO(competitor);        
     }
     
     @Override
-    public CompetitorDTO addOrUpdateCompetitorWithBoat(CompetitorDTO competitor) throws URISyntaxException {
-        CompetitorWithBoat competitorWithBoat = addOrUpdateCompetitorWithBoatInternal(competitor);
-        return getBaseDomainFactory().convertToCompetitorWithOptionalBoatDTO(competitorWithBoat);        
+    public CompetitorDTO addOrUpdateCompetitorWithBoat(CompetitorDTO competitorDTO) throws URISyntaxException {
+        CompetitorWithBoat competitor = addOrUpdateCompetitorWithBoatInternal(competitorDTO);
+        return getBaseDomainFactory().convertToCompetitorWithOptionalBoatDTO(competitor);        
     }
 
     @Override

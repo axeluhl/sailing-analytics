@@ -23,7 +23,6 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -434,7 +433,12 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
                         getFilterField().remove(originalCompetitor);
-                        getFilterField().add(editedCompetitorIndex, updatedCompetitor);
+                        if (editedCompetitorIndex >= 0){
+                            getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                        } else {
+                            //in case competitor was not present --> not edit, but create
+                            getDataProvider().getList().add(updatedCompetitor);
+                        }
                         getDataProvider().refresh();
                     }  
                 });
@@ -447,18 +451,29 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         dialog.show();
     }
 
-    void openEditCompetitorWithoutBoatDialog(final CompetitorWithoutBoatDTO originalCompetitor) {
-        final CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO> dialog = CompetitorWithoutBoatEditDialog.create(stringMessages, originalCompetitor, new DialogCallback<CompetitorWithoutBoatDTO>() {
+    void openEditCompetitorWithoutBoatDialog(final CompetitorDTO originalCompetitor) {
+        final CompetitorEditDialog dialog = CompetitorEditDialog.create(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
-            public void ok(final CompetitorWithoutBoatDTO competitor) {
-                sailingService.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorWithoutBoatDTO>() {
+            public void ok(final CompetitorDTO competitor) {
+                sailingService.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(CompetitorWithoutBoatDTO updatedCompetitor) {
+                    public void onSuccess(CompetitorDTO updatedCompetitor) {
+                        //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
+                        //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
+                        int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
+                        getFilterField().remove(originalCompetitor);
+                        if (editedCompetitorIndex >= 0){
+                            getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                        } else {
+                            //in case competitor was not present --> not edit, but create
+                            getDataProvider().getList().add(updatedCompetitor);
+                        }
+                        getDataProvider().refresh();
                     }  
                 });
             }
@@ -467,7 +482,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             public void cancel() {
             }
         });
-        dialog.ensureDebugId("CompetitorWithoutBoatEditDialog");
         dialog.show();
     }
 
