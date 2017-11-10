@@ -82,6 +82,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     private static final long serialVersionUID = 2708044935347796930L;
     private final TimePoint startTime;
     private final List<Competitor> competitorsFromBestToWorst;
+    private final Map<Competitor, Boat> competitorsAndBoats;
     private final Regatta regatta;
     private RaceDefinition race;
 
@@ -100,7 +101,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
         this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
         BoatClass boatClass = new BoatClassImpl("49er", /* upwind start */ true);
-        final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats = new HashMap<>();
         int i = 1;
         for (Competitor c: competitorsFromBestToWorst) {
             Boat b = new BoatImpl("Boat" + i++, c.getName(), boatClass, c.getName(), null);
@@ -706,7 +707,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public Boat getBoatOfCompetitor(Competitor competitor) {
-        return null;
+        return competitorsAndBoats.get(competitor);
     }
 
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
