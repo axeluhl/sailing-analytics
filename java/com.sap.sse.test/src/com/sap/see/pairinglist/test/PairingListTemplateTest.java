@@ -155,15 +155,15 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
    }
   @Test
   public void test2(){
-      long[] a=new long[5]; 
-      for(int i=0;i<5;i++){
+      long[] a=new long[450]; 
+      for(int i=0;i<450;i++){
       long time = System.currentTimeMillis();
       createPairingListTemplate(15, 3, 18);
       time=System.currentTimeMillis()-time;
       a[i]=time;
       }
       long sum=0;
-      for(int i=0;i<5;i++) sum+=a[i];
-      System.out.println(sum/5);
+      for(int i=0;i<450;i++) sum+=a[i];
+      System.out.println(sum/450);
   }
 }
