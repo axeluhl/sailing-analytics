@@ -230,9 +230,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             System.arraycopy(constantPLT[m], 0, bestPLT[m], 0, constantPLT[0].length);
         }
         int[][] currentAssociations = new int[competitors][competitors];
-        for (int m = 0; m < associations.length; m++) {
-            System.arraycopy(associations[m], 0, currentAssociations[m], 0, associations[0].length);
-        }
         double bestDev = Double.POSITIVE_INFINITY;
 
         for (int iteration = 0; iteration < iterationCount; iteration++) {
