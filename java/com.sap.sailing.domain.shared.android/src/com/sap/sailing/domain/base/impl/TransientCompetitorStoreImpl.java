@@ -358,6 +358,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         CompetitorWithBoat result = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
         addNewCompetitor(id, result);
+        addNewBoat(boat.getId(), boat);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
