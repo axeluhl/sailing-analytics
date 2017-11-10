@@ -88,4 +88,17 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Double getPortRudderRakeIfAvailable(TimePoint timePoint);
     Double getStbdRudderRakeIfAvailable(TimePoint timePoint);
     Bearing getMastRotationIfAvailable(TimePoint timePoint);
+    Bearing getLeewayIfAvailable(TimePoint timePoint);
+    Double getSetIfAvailable(TimePoint timePoint);
+    Bearing getDriftIfAvailable(TimePoint timePoint);
+    Distance getDepthIfAvailable(TimePoint timePoint);
+    Bearing getRudderIfAvailable(TimePoint timePoint);
+    Double getForestayLoadIfAvailable(TimePoint timePoint);
+    Double getForestayPressureIfAvailable(TimePoint timePoint);
+    Bearing getTackAngleIfAvailable(TimePoint timePoint);
+    Bearing getRakeIfAvailable(TimePoint timePoint);
+    Double getDeflectorPercentageIfAvailable(TimePoint timePoint);
+    Bearing getTargetHeelIfAvailable(TimePoint timePoint);
+    Distance getDeflectorIfAvailable(TimePoint timePoint);
+    Double getTargetBoatspeedPIfAvailable(TimePoint timePoint);
 }

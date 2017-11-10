@@ -76,8 +76,11 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
             Distance sum = Distance.NULL;
             int count = 0;
             for (final BravoFix fix : getFixes(from, true, to, true)) {
-                sum = sum.add(fix.getRideHeight());
-                count++;
+                final Distance rideHeight = fix.getRideHeight();
+                if (rideHeight != null) {
+                    sum = sum.add(rideHeight);
+                    count++;
+                }
             }
             if (count > 0) {
                 result = sum.scale(1./count);
@@ -212,6 +215,84 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                 NaivelyScalableBearing::new);
     }
     
+    @Override
+    public Bearing getLeewayIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getLeeway,
+                NaivelyScalableBearing::new);
+    }
+
+    @Override
+    public Double getSetIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getSet,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Bearing getDriftIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getDrift,
+                NaivelyScalableBearing::new);
+    }
+
+    @Override
+    public Distance getDepthIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getDepth,
+                ScalableDistance::new);
+    }
+
+    @Override
+    public Bearing getRudderIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getRudder,
+                NaivelyScalableBearing::new);
+    }
+
+    @Override
+    public Double getForestayLoadIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getForestayLoad,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Double getForestayPressureIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getForestayPressure,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Bearing getTackAngleIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getTackAngle,
+                NaivelyScalableBearing::new);
+    }
+
+    @Override
+    public Bearing getRakeIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getRake,
+                NaivelyScalableBearing::new);
+    }
+
+    @Override
+    public Double getDeflectorPercentageIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getDeflectorPercentage,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Bearing getTargetHeelIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getTargetHeel,
+                NaivelyScalableBearing::new);
+    }
+
+    @Override
+    public Distance getDeflectorIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getDeflector,
+                ScalableDistance::new);
+    }
+
+    @Override
+    public Double getTargetBoatspeedPIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getTargetBoatspeedP,
+                ScalableDouble::new);
+    }
+
     private static class NaivelyScalableBearing implements ScalableValue<Double, Bearing> {
         private final double deg;
         
