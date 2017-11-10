@@ -1,50 +1,32 @@
 package com.sap.see.pairinglist.test;
 
-import static org.junit.Assert.assertArrayEquals;  
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertArrayEquals;
 
-import java.util.Arrays;
-
-import static org.junit.Assert.assertNotNull;
-
-import org.junit.Before;
 import org.junit.Test;
+
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
+
 import junit.framework.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl{
-   
-    @Before
-    public void init() {
-       // create(15, 3, 18,10000); 
-        // creating pairing list template
-       // this.create(15, 3, 18,10000);
 
+    @Test
+    public void testPairingListCreationForValidValues() {
+        this.createPairingListTemplate(15, 3, 18);
 
+        int[][] plTemplate = this.getPairingListTemplate();
+
+        Assert.assertNotNull(plTemplate);
+        for(int[] i:plTemplate){
+            for (int z: i){
+                if(z<=0) Assert.fail("Values of Pairing List Template must not be 0!");
+            }
+        }
     }
-  
-  
-//    @Test
-//    public void testPairingListCreation() {
-//        int[][] plTemplate = this.getPairingListTemplate();
-//        
-//        assertNotNull(plTemplate);
-//        for(int[] i:plTemplate){
-//            for (int z: i){
-//                if(z<=0) fail("Problem in .create!");
-//            }
-//        }
-//        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(plTemplate, new int[18][18/3])));
-//        for(int x=0;x<1;x++){
-//            create(15, 3, 18,1000000);
-//            plTemplate=this.getPairingListTemplate();
-//            System.out.println("DEV:"+this.calcStandardDev(this.getAssociationsFromPairingList(plTemplate, new int[18][18])));
-//        }
-//    }
-    
+
     @Test
     public void testArrayCopy() {
-        
+
         int[][] flightColumn={
                 {1,2,3,4,5,6},
                 {7,8,9,10,11,12},
@@ -78,92 +60,58 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         this.copyInto3rdDimension(18, currentAssociations, associationRow, flightColumn, 1,1);
         assertArrayEquals(currentAssociations[6],associationRow[1][0]);
     }
-    
 
-//    @Test 
-//    public void testTeamAssociationCreation() {
-//        int[][] plTemplate = this.getPairingListTemplate();
-//        int[][] associations = new int[18][18];
-//        
-//        this.getAssociationsFromPairingList(plTemplate, associations);
-//        
-//        for (int x = 0; x < associations.length; x++) {
-//            for (int y = 0; y < associations[0].length; y++) {
-//                if ((x == y) && (associations[x][y] != -1)) {
-//                    Assert.fail("In 'getAssociationsFromPairingList' the diagonal of association matrix has to be -1.");
-//                }
-//            }
-//        }
-//    }
-//    @Test
-//    public void qualityCheck(){
-//        if(getQuality()>=0.7) fail("Quality of Pairinglist is too bad!");
-//        create(10, 3, 30,10000);
-//        if(getQuality()>=2) fail("Quality of Pairinglist is too bad!");
-//    }
-//    
-   @Test
-   public void test(){
-      int[][] plt={
-               {1,2,3,4,5,6},
-               {7,8,9,10,11,12},
-               {13,14,15,16,17,18},
-               {1,18,2,17,3,16},
-               {4,15,5,14,6,13},
-               {7,12,8,11,9,10},
-               {2,4,6,8,10,12},
-               {14,16,18,1,3,5},
-               {7,9,11,13,15,17},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-               {0,0,0,0,0,0},
-       };
-      for(int x=0;x<10000;x++)System.out.println(calcStandardDev(getAssociationsFromPairingList(create(15, 3, 18,100,getAssociationsFromPairingList(plt, new int[18][18]),plt),new int[18][18])));
-   }
-  @Test
-  public void test2(){
-      long[] a=new long[450]; 
-      for(int i=0;i<450;i++){
-      long time = System.currentTimeMillis();
-      createPairingListTemplate(15, 3, 18);
-      time=System.currentTimeMillis()-time;
-      a[i]=time;
-      }
-      long sum=0;
-      for(int i=0;i<450;i++) sum+=a[i];
-      System.out.println(sum/450);
-  }
+    @Test 
+    public void testTeamAssociationCreation() {
+        this.createPairingListTemplate(15, 3, 18);
+        
+        int[][] plTemplate = this.getPairingListTemplate();
+        int[][] associations = new int[18][18];
+
+        this.getAssociationsFromPairingList(plTemplate, associations);
+
+        for (int x = 0; x < associations.length; x++) {
+            for (int y = 0; y < associations[0].length; y++) {
+                if ((x == y) && (associations[x][y] != -1)) {
+                    Assert.fail("The diagonal of association matrix has to be -1.");
+                }
+            }
+        }
+    }
+
+    @Test
+    public void qualityCheck(){
+        this.createPairingListTemplate(15, 3, 18);
+        if(getQuality()>=0.7) {
+            Assert.fail("Quality of Pairinglist is worse than usual!");
+        }
+        
+        this.createPairingListTemplate(10, 3, 30);
+        if(getQuality()>=1.2) {
+            Assert.fail("Quality of Pairinglist is worse than usual!");
+        }
+    }
+
+    @Test
+    public void testAverageTimeForSingleCase(){
+        final int iterations = 5;
+        long[] a=new long[iterations]; 
+        
+        for(int i = 0;i < iterations; i++){
+            long time = System.currentTimeMillis();
+            
+            this.createPairingListTemplate(15, 3, 18);
+            
+            time = System.currentTimeMillis() - time;
+            a[i] = time;
+        }
+        
+        long sum = 0;
+        for(int i = 0; i < iterations; i++) sum += a[i];
+        double average = sum/iterations;
+        
+        if (average > 8000) {
+            Assert.fail("The calculation of Pairing Lists took longer than expected!");
+        }
+    }
 }

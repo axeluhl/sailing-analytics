@@ -1,9 +1,5 @@
 package com.sap.sse.pairinglist.impl;
 
-import java.util.Arrays;
-import java.util.Collections;
-
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -61,26 +57,28 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
     protected void createPairingListTemplate(int flights,int groups,int competitors){
-        int[][] currentPLT=new int[flights*groups][competitors/groups];
-        int[] seeds= this.generateSeeds(flights, competitors);
-        int[][] bestPLT=new int[flights*groups][competitors/groups];
-        double bestDev =Double.POSITIVE_INFINITY;
-        this.createPairingListTemplate_(flights, groups, competitors, new int[competitors][competitors],currentPLT,seeds);
-        for(int z=0;z<futures.size();z++){
+        int[] seeds = this.generateSeeds(flights, competitors);
+        int[][] bestPLT = new int[flights*groups][competitors/groups];
+        double bestDev = Double.POSITIVE_INFINITY;
+        this.createConstantFlights(flights, groups, competitors, new int[competitors][competitors],
+                new int[flights*groups][competitors/groups], seeds);
+        
+        for(int i = 0; i < futures.size(); i++){
             try{
-            int[][] future=futures.get(z).get();
-            double x= calcStandardDev(getAssociationsFromPairingList(future,new int[competitors][competitors]));
-            if(x<bestDev){
-                bestPLT=future;
-                bestDev=x;
-            }
+                int[][] currentPLT = futures.get(i).get();
+                double currentStandardDev = calcStandardDev(getAssociationsFromPairingList(currentPLT,new int[competitors][competitors]));
+                
+                if(currentStandardDev < bestDev){
+                    bestPLT=currentPLT;
+                    bestDev=currentStandardDev;
+                }
             }catch (Exception e) {
                 e.printStackTrace();
             }
         }
         
-       //bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
-       //bestPLT= this.improveAssignmentChanges(bestPLT, flights, competitors);
+        //bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
+        //bestPLT= this.improveAssignmentChanges(bestPLT, flights, competitors);
         //System.out.println(calcStandardDev(getAssociationsFromPairingList(bestPLT, new int[competitors][competitors])));
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
@@ -92,12 +90,16 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         int[] seeds=new int[(int)(Math.log(ITERATIONS)/Math.log(flights))];
         for(int x=0;x<seeds.length;x++){
             int random=this.randomBW(1, competitors);
-            while(this.contains(seeds, random)) random=this.randomBW(1, competitors);
+            while(this.contains(seeds, random)) {
+                random=this.randomBW(1, competitors);
+            }
             seeds[x]=random;
         }
         return seeds;
     }
-    private void createPairingListTemplate_(int flights,int groups,int competitors,int[][] associations,int[][]currentPLT,int[] seeds){
+    
+    private void createConstantFlights(int flights, int groups, int competitors, int[][] associations,
+            int[][]currentPLT, int[] seeds) {
         //Workcopy of associations
         int[][] currentAssociations=new int [competitors][competitors];
         for(int m=0;m<competitors;m++){
@@ -116,44 +118,52 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 class Task implements Callable<int[][]> {
                     int flights,groups,competitors;
                     int[][] plt,associations;
-                    //constantplt= constant part of PL for one task
-                    //associations= constant associations from constantplt
-                    Task(int flights,int groups,int competitors,int[][] constantplt,int[][] associations){ 
+                    
+                    /**
+                     * @param flights: count of flights
+                     * @param groups: count of groups
+                     * @param competitors: count of competitors
+                     * @param constantPLT: constant generated flights on which the tasks is based on  
+                     * @param associations: associations created from constantPLT
+                     */
+                    
+                    Task(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations){ 
                         this.flights=flights;
                         this.groups=groups;
                         this.competitors=competitors;
                         plt=new int[flights*groups][competitors/groups];
                         this.associations=new int[competitors][competitors];
-                        for(int i=0;i<constantplt.length;i++) System.arraycopy(constantplt[i], 0, plt[i], 0, competitors/groups);
+                        for(int i=0;i<constantPLT.length;i++) System.arraycopy(constantPLT[i], 0, plt[i], 0, competitors/groups);
                         for(int i=0;i<associations.length;i++) System.arraycopy(associations[i], 0, this.associations[i], 0, competitors);
-                        }
+                    }
+                    
                     @Override
                     public int[][] call() {
                         //TODO change order of param.
-                        return create(flights, groups, competitors,(int)(ITERATIONS/Math.pow(seeds.length, MAX_CONSTANT_FLIGHTS)) , associations, plt );          
+                        return create(flights, groups, competitors, (int)(ITERATIONS/Math.pow(seeds.length, MAX_CONSTANT_FLIGHTS)), 
+                                associations, plt);          
                     }
                 }
+                
                 Future<int[][]> future= executorService.submit((new Task(flights,groups,competitors,currentPLT,currentAssociations)));
                 futures.add(future);
-               
-                
                 
                 Arrays.fill(currentPLT[z], 0);
                 Arrays.fill(currentPLT[z+1], 0);
                 Arrays.fill(currentPLT[z+2], 0);
                 return;
-                }
+            }
         }
         //calculate Flights for current recurrency level
         for(int x=0;x<seeds.length;x++){
             int[][] temp=this.createFlight(flights, groups, competitors, currentAssociations, seeds[x]);
             for (int m = 0; m < groups; m++) {
-           //TODO delete gCIA    
+                //TODO delete gCIA    
                 System.arraycopy(getColumnIntArray(temp, m), 0, currentPLT[(fleet) + m], 0, competitors / groups);
             }
             
             currentAssociations=this.getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]);
-            this.createPairingListTemplate_(flights, groups, competitors, currentAssociations, currentPLT,seeds);
+            this.createConstantFlights(flights, groups, competitors, currentAssociations, currentPLT,seeds);
         }
         for(int i=fleet;i<fleet+groups;i++){
             Arrays.fill(currentPLT[i], 0);
@@ -218,11 +228,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
    
-    protected int[][] create(int flights, int groups, int competitors, int iterationCount,int[][] associations,int[][] constantPLT) {
+    protected int[][] create(int flights, int groups, int competitors, int iterationCount, int[][] associations,
+            int[][] constantPLT) {
+
         int[][] bestPLT = new int[groups*flights][competitors / groups];
         for (int m = 0; m < MAX_CONSTANT_FLIGHTS*groups; m++) {
             System.arraycopy(constantPLT[m], 0, bestPLT[m], 0, constantPLT[0].length);
         }
+
         int[][] currentAssociations = new int[competitors][competitors];
         double bestDev = Double.POSITIVE_INFINITY;
 
@@ -233,62 +246,63 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             int[][] currentPLT = new int[groups * flights][competitors / groups];
             int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
 
-            for (int zFlight = MAX_CONSTANT_FLIGHTS; zFlight < flights; zFlight++) {
-                //first Flight
+            for (int flightIndex = MAX_CONSTANT_FLIGHTS; flightIndex < flights; flightIndex++) {
+                //first Fleet
                 int[][] flightColumn = new int[groups][competitors / groups];
                 associationRow= setZero(associationRow);
                 int[] associationHigh = new int[groups - 1];
                 flightColumn[0][0] = randomBW(1, competitors);
-                for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
+                for (int groupIndex = 1; groupIndex <= (competitors / groups) - 1; groupIndex++) {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[0] = flights + 1;
-                   
-                    associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,0);
 
-                    for (int comp = 1; comp <= competitors; comp++) {
-                        if ((sumOf3rdDimension(associationRow, 0, comp - 1) <= associationSum) &&
-                                !contains(flightColumn, comp) &&
-                                findMaxValue(associationRow, 0, comp - 1) <= associationHigh[0]) {
-                            flightColumn[0][zGroups] = comp;
-                            associationSum = sumOf3rdDimension(associationRow, 0, comp - 1);
-                            associationHigh[0] = findMaxValue(associationRow, 0, comp - 1);
+                    associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, groupIndex,0);
+
+                    for (int competitorIndex = 1; competitorIndex <= competitors; competitorIndex++) {
+                        if ((sumOf3rdDimension(associationRow, 0, competitorIndex - 1) <= associationSum) &&
+                                !contains(flightColumn, competitorIndex) &&
+                                findMaxValue(associationRow, 0, competitorIndex - 1) <= associationHigh[0]) {
+                            flightColumn[0][groupIndex] = competitorIndex;
+                            associationSum = sumOf3rdDimension(associationRow, 0, competitorIndex - 1);
+                            associationHigh[0] = findMaxValue(associationRow, 0, competitorIndex - 1);
                         }
                     }
                 }
-                
-                //second to pre-last Flight
-                for (int fleets = 1; fleets < groups - 1; fleets++) {
+
+                //second to pre-last Fleet
+                for (int groupIndex = 1; groupIndex < groups - 1; groupIndex++) {
                     for (int aux = 0; aux < competitors; aux++) {
                         if (!contains(flightColumn, aux)) {
-                            flightColumn[fleets][0] = aux;
+                            flightColumn[groupIndex][0] = aux;
                             break;
                         }
                     }
-                    
-                    for (int zGroups = 1; zGroups < (competitors / groups); zGroups++) {
+
+                    for (int assignmentIndex = 1; assignmentIndex < (competitors / groups); assignmentIndex++) {
                         int associationSum = Integer.MAX_VALUE;
-                        associationHigh[fleets] = flights + 1;
+                        associationHigh[groupIndex] = flights + 1;
                         try{
-                            associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,fleets);
+                            associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, 
+                                    flightColumn, assignmentIndex, groupIndex);
                         }catch (Exception e){
                             System.out.println(Arrays.deepToString(flightColumn));
                         }
                         for (int comp = 1; comp <= competitors; comp++) {
-                            if ((sumOf3rdDimension(associationRow, fleets, comp - 1) <= associationSum) &&
+                            if ((sumOf3rdDimension(associationRow, groupIndex, comp - 1) <= associationSum) &&
                                     !contains(flightColumn, comp) &&
-                                    findMaxValue(associationRow, fleets, comp - 1) <= associationHigh[fleets]) {
-                                flightColumn[fleets][zGroups] = comp;
-                                associationSum = sumOf3rdDimension(associationRow, fleets, comp - 1);
-                                associationHigh[fleets] = findMaxValue(associationRow, fleets, comp - 1);
+                                    findMaxValue(associationRow, groupIndex, comp - 1) <= associationHigh[groupIndex]) {
+                                flightColumn[groupIndex][assignmentIndex] = comp;
+                                associationSum = sumOf3rdDimension(associationRow, groupIndex, comp - 1);
+                                associationHigh[groupIndex] = findMaxValue(associationRow, groupIndex, comp - 1);
                             }
                         }
                     }
                 }
-                //last Flight
-                for (int j = 0; j < (competitors / groups); j++) {
+                //last Fleet
+                for (int assignmentIndex = 0; assignmentIndex < (competitors / groups); assignmentIndex++) {
                     for (int z = 1; z <= competitors; z++) {
                         if (!contains(flightColumn, z)) {
-                            flightColumn[groups - 1][j] = z;
+                            flightColumn[groups - 1][assignmentIndex] = z;
                             break;
                         }
                     }
@@ -296,7 +310,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 
                 currentAssociations = this.getAssociationsFromPairingList(flightColumn, currentAssociations);
                 for (int m = 0; m < groups; m++) {
-                    System.arraycopy(getColumnIntArray(flightColumn, m), 0, currentPLT[(zFlight * groups) + m], 0, competitors / groups);
+                    System.arraycopy(getColumnIntArray(flightColumn, m), 0, currentPLT[(flightIndex * groups) + m], 0, competitors / groups);
                 }
 
             }
@@ -310,8 +324,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return bestPLT;
     }
-
-
 
     protected int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
@@ -373,10 +385,10 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     //TODO FIX IT!
     private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
         int boatChanges[] = new int[competitors - 1];
-        
+
         for (int i = 1; i < flights; i++) {
             int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
-            
+
             int[] groupNext = new int[pairingList[0].length];
             int bestMatchesIndex = -1;
             int bestMatch = 0;
@@ -388,36 +400,36 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                     bestMatchesIndex = j;
                 }
             }
-            
+
             if (bestMatchesIndex > 0) {
                 int[] temp = new int[groupNext.length];
                 System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
-                
+
                 System.arraycopy(pairingList[i * pairingList.length / flights], 0,
                         pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, groupNext.length);
                 System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, temp.length);
             }
-            
+
             boatChanges[i - 1] = groupNext.length - bestMatch;
         }
-        
+
         //System.out.println(Arrays.toString(boatChanges));
-        
+
         return pairingList;
     }
-    
+
     private int getMatches(int[] arr1, int[] arr2) {
         int matches = 0;
-        
+
         for (int value: arr1) {
             if (this.contains(arr2, value)) {
                 matches++;
             }
         }
-        
+
         return matches;
     }
-    
+
     private int[] findWorstValue(int[][] groupAssignments, int neededAssigments) {
         int[] worstValuePos=new int[2];
         int worstValue=0;
