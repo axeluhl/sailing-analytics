@@ -36,7 +36,7 @@ public class BoatsResource extends AbstractSailingServerResource {
         Boat boat = getService().getCompetitorStore().getExistingBoatByIdAsString(boatIdAsString);
         if (boat == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(boatIdAsString) + "'.")
+                    .entity("Could not find a boat with id '" + StringEscapeUtils.escapeHtml(boatIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             String jsonString = getBoatJSON(boat).toJSONString();
