@@ -184,6 +184,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String secondsUnit();
     String secondsPerNauticalMileUnit();
     String metersUnit();
+    String millimetersUnit();
     String degreesUnit();
     @Override
     String close();
@@ -1914,6 +1915,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String moreLoginInformationSectionStrategySimulatorDescription();
     String moreLoginInformationSectionUserNotificationsHeading();
     String moreLoginInformationSectionUserNotificationsDescription();
+    String moreLoginInformationRegisterControlText();
     String anniversaryUnitText(@Optional @PluralCount(DefaultRule_1_0n.class) int count);
     String anniversaryMajorCountdownTeaser(@PluralCount(DefaultRule_1_0n.class) int countdown, int anniversary);
     String anniversaryMajorCountdownDescription(int anniversary);
@@ -1964,4 +1966,32 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionBoatId();
     String doYouReallyWantToRemoveTheSelectedExpeditionDeviceConfigurations();
     String doYouReallyWantToRemoveTheSelectedIgtimiAccounts();
+    String currentDepthInMeters();
+    String currentDriftInDegrees();
+    String currentLeewayInDegrees();
+    String currentRudderInDegrees();
+    String currentSet();
+    String currentTackAngleInDegrees();
+    String currentDeflectorInMillimeters();
+    String currentDeflectorPercentage();
+    String currentForestayLoad();
+    String currentForestayPressure();
+    String currentRakeInDegrees();
+    String currentTargetBoatspeedPercentage();
+    String currentTargetHeelAngleInDegrees();
+    String percent();
+    String currentTargetHeelAngleInDegreesTooltip();
+    String currentTargetBoatspeedPercentageTooltip();
+    String currentRakeInDegreesTooltip();
+    String currentForestayLoadTooltip();
+    String currentForestayPressureTooltip();
+    String currentDeflectorPercentageTooltip();
+    String currentDeflectorInMillimetersTooltip();
+    String currentTackAngleInDegreesTooltip();
+    String currentSetTooltip();
+    String currentRudderInDegreesTooltip();
+    String currentLeewayInDegreesTooltip();
+    String currentDriftInDegreesTooltip();
+    String currentDepthInMetersTooltip();
+    String tonsUnit();
 }

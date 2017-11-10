@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelogtracking;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sse.common.Util;

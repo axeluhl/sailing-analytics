@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
@@ -12,7 +13,6 @@ import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageParser;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
-import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.udpconnector.UDPReceiver;
 
 /**
@@ -100,12 +100,31 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
      * store in the {@link DeviceRegistry#getSensorFixStore() sensor fix store}.
      */
     private void tryToProduceAndStoreSensorFix(ExpeditionMessage msg, ExpeditionSensorDeviceIdentifier sensorDeviceIdentifier) {
-        final Double heelInDegrees = msg.hasValue(ExpeditionMessage.ID_ROLL) ? msg.getValue(ExpeditionMessage.ID_ROLL) : null;
-        final Double trimInDegrees = msg.hasValue(ExpeditionMessage.ID_PITCH) ? msg.getValue(ExpeditionMessage.ID_PITCH) : null;
-        final Double[] vector = new Double[Math.max(ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex(),
-                                                    ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex())+1];
-        vector[ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex()] = heelInDegrees;
-        vector[ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex()] = trimInDegrees;
+        final Map<Integer, ExpeditionExtendedSensorDataMetadata> mapExpeditionMessageFieldIdToMetadata = new HashMap<>();
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_ROLL, ExpeditionExtendedSensorDataMetadata.HEEL);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_PITCH, ExpeditionExtendedSensorDataMetadata.TRIM);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_RUDDER, ExpeditionExtendedSensorDataMetadata.RUDDER);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TACK_ANGLE, ExpeditionExtendedSensorDataMetadata.TACK_ANGLE);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_RAKE_DEG, ExpeditionExtendedSensorDataMetadata.RAKE_DEG);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLCTR_PP, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TG_HEEL, ExpeditionExtendedSensorDataMetadata.TARGET_HEEL);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_LOAD, ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_PRES, ExpeditionExtendedSensorDataMetadata.FORESTAY_PRESSURE);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLECTR_MM, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TARG_BSP_P, ExpeditionExtendedSensorDataMetadata.TARGET_BOATSPEED_P);
+        
+        int maxColumnIndex = -1;
+        final Map<Integer, Double> valuesPerDoubleVectorFixColumnIndices = new HashMap<>();
+        for (final Entry<Integer, ExpeditionExtendedSensorDataMetadata> mapEntry : mapExpeditionMessageFieldIdToMetadata.entrySet()) {
+            if (msg.hasValue(mapEntry.getKey())) {
+                valuesPerDoubleVectorFixColumnIndices.put(mapEntry.getValue().getColumnIndex(), msg.getValue(mapEntry.getKey()));
+                maxColumnIndex = Math.max(maxColumnIndex, mapEntry.getValue().getColumnIndex());
+            }
+        }
+        final Double[] vector = new Double[maxColumnIndex+1];
+        for (final Entry<Integer, Double> valuesPerDoubleVectorFixColumnIndex : valuesPerDoubleVectorFixColumnIndices.entrySet()) {
+            vector[valuesPerDoubleVectorFixColumnIndex.getKey()] = valuesPerDoubleVectorFixColumnIndex.getValue();
+        }
         final DoubleVectorFix fix = new DoubleVectorFixImpl(msg.getTimePoint(), vector);
         if (fix != null && fix.hasValidData()) {
             deviceRegistry.getSensorFixStore().storeFix(sensorDeviceIdentifier, fix);

@@ -17,12 +17,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -31,29 +33,35 @@ import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.BravoExtendedFixImpl;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.expeditionconnector.DeviceRegistry;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTracker;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifierImpl;
-import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -63,7 +71,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class UDPExpeditionReceiverTest {
-//    @Rule public Timeout TestTimeout = new Timeout(60 * 1000);
+    @Rule public Timeout TestTimeout = new Timeout(60 * 1000);
     
     private String[] validLines;
     private String[] someValidWithFourInvalidLines;
@@ -177,7 +185,13 @@ public class UDPExpeditionReceiverTest {
         @Override
         public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices)
                 throws TransformationException, NoCorrespondingServiceRegisteredException {
-            return null;
+            final Map<DeviceIdentifier, FixT> result = new HashMap<>();
+            for (final Entry<DeviceIdentifier, List<Timed>> fixes : fixesReceived.entrySet()) {
+                @SuppressWarnings("unchecked")
+                final List<FixT> fixList = (List<FixT>) fixes.getValue();
+                result.put(fixes.getKey(), fixList.get(fixList.size()-1));
+            }
+            return result;
         }
 
         @Override
@@ -331,7 +345,12 @@ public class UDPExpeditionReceiverTest {
         final ExpeditionGpsDeviceIdentifier gpsDevice = deviceRegistry.getGpsDeviceIdentifier(0);
         final ExpeditionSensorDeviceIdentifier sensorDevice = deviceRegistry.getSensorDeviceIdentifier(0);
         assertTrue(sensorFixStore.getNumberOfFixes(gpsDevice) > 0);
+        assertEquals(-33.907350, ((GPSFixMoving) sensorFixStore.getLastFix(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLatDeg(), 0.0001);
+        assertEquals(18.419951, ((GPSFixMoving) sensorFixStore.getLastFix(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLngDeg(), 0.0001);
         assertTrue(sensorFixStore.getNumberOfFixes(sensorDevice) > 0);
+        final BravoExtendedFix sensorFix = new BravoExtendedFixImpl((DoubleVectorFix) sensorFixStore.getLastFix(Collections.singleton(sensorDevice)).get(sensorDevice));
+        assertEquals(1.872, sensorFix.getRake().getDegrees(), 0.000001);
+        assertEquals(18.4, sensorFix.getRudder().getDegrees(), 0.05);
     }
 
     @Test

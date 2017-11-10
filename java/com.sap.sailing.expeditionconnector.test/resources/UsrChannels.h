@@ -225,11 +225,11 @@ enum ExChannels
 	ExLeadStbd,       // #170
 	ExBackstay,
 	
-	ExUser0,				// user channels must be consecutive
-	ExUser1,
-	ExUser2,
-	ExUser3,
-	ExUser4,
+	ExUser0,		// #172: RakeDeg (Rake in degrees)		// user channels must be consecutive
+	ExUser1,		// #173: DflectrPP (Deflector percentage)
+	ExUser2,		// #174: TG Heel (Target Heel)
+	ExUser3,		// #175: ForestayPres (Forestay Pressure)
+	ExUser4,		// #176: DflectrMM (Deflector in mm)
 	ExUser5,
 	ExUser6,
 	ExUser7,
