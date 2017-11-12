@@ -59,8 +59,6 @@ function run_instance(){
 # Creates a file with user data for instance creation
 # -----------------------------------------------------------
 function write_user_data_to_file(){
-	local CR_LF=$'\r'$'\n'
-
 	local MONGODB_HOST="$mongodb_host"
 	local MONGODB_PORT="$mongodb_port"
 	local MONGODB_NAME="$(lower_trim $instance_name)"
@@ -71,23 +69,25 @@ function write_user_data_to_file(){
 	local SERVER_STARTUP_NOTIFY="$default_server_startup_notify"
 
 	local content=
-	content+="MONGODB_HOST=$MONGODB_HOST"
-	content+=$CR_LF
-	content+="MONGODB_PORT=$MONGODB_PORT"
-	content+=$CR_LF
-	content+="MONGODB_NAME=$MONGODB_NAME"
-	content+=$CR_LF
-	content+="INSTALL_FROM_RELEASE=$INSTALL_FROM_RELEASE"
-	content+=$CR_LF
-	content+="USE_ENVIRONMENT=$USE_ENVIRONMENT"
-	content+=$CR_LF
-	content+="REPLICATION_CHANNEL=$REPLICATION_CHANNEL"
-	content+=$CR_LF
-	content+="SERVER_NAME=$SERVER_NAME"
-	content+=$CR_LF
-	content+="SERVER_STARTUP_NOTIFY=$SERVER_STARTUP_NOTIFY"
+	content+=$(add_user_data_variable "MONGODB_HOST" $MONGODB_HOST)
+	content+=$(add_user_data_variable "MONGODB_PORT" $MONGODB_PORT)
+	content+=$(add_user_data_variable "MONGODB_NAME" $MONGODB_NAME)
+	content+=$(add_user_data_variable "INSTALL_FROM_RELEASE" $INSTALL_FROM_RELEASE)
+	content+=$(add_user_data_variable "USE_ENVIRONMENT" $USE_ENVIRONMENT)
+	content+=$(add_user_data_variable "REPLICATION_CHANNEL" $REPLICATION_CHANNEL)
+	content+=$(add_user_data_variable "SERVER_NAME" $SERVER_NAME)
+	content+=$(add_user_data_variable "SERVER_STARTUP_NOTIFY" $SERVER_STARTUP_NOTIFY)
 
 	echo "$content" > "${tmpDir}/$user_data_file"
+}
+
+function add_user_data_variable(){
+		if ! [ -z "$2" ]; then
+			local CR_LF=$'\r'$'\n'
+			local content="$1=$2"
+			content+=$CR_LF
+			echo "$content"
+		fi
 }
 
 # NOT TESTED
