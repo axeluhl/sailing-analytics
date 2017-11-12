@@ -53,6 +53,7 @@ function get_access_token_command(){
 # Creates a new event with no regatta and venuename="Default"
 # @param $1  access token of privileged user
 # @param $2  dns name of instance
+# @param $3  event name
 # @return    event_id of created event
 # -----------------------------------------------------------
 function create_event(){
@@ -72,7 +73,7 @@ function create_event(){
 }
 
 function create_event_command(){
-	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "venuename=Default" --data "createregatta=false" 2>/dev/null
+	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "eventname=$3"--data "venuename=Default" --data "createregatta=false" 2>/dev/null
 }
 
 # -----------------------------------------------------------

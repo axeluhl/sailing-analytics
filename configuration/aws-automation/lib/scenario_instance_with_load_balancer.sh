@@ -50,7 +50,7 @@ function instance_with_load_balancer_execute() {
 	local access_token=$(get_access_token "$admin_username" "$admin_password" "$public_dns_name")
 
 	wait_for_create_event_resource "$public_dns_name"
-	local event_id=$(create_event "$access_token" "$public_dns_name")
+	local event_id=$(create_event "$access_token" "$public_dns_name" "$instance_name")
 
 	change_admin_password "$access_token" "$public_dns_name" "$admin_username" "$new_admin_password"
 	create_new_user "$access_token" "$public_dns_name" "$user_username" "$user_password"
