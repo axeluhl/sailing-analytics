@@ -57,6 +57,20 @@ function add_param() {
 }
 
 # -----------------------------------------------------------
+# Constructs string of user data variable name and value plus linebreak
+# @param $1  user data variable name
+# @param $2  user data variable value
+# @return    name=value (linebreak) if value not empty else nothing
+# -----------------------------------------------------------
+function add_user_data_variable(){
+		if ! [ -z "$2" ]; then
+			local CR_LF=$'\r'$'\n'
+			local content="$1=$2"
+			content+=$CR_LF
+			echo "$content"
+		fi
+}
+# -----------------------------------------------------------
 # Checks if event id follows the right pattern
 # @param $1  event id
 # @return    true if event id is valid

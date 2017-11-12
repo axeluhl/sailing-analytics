@@ -11,13 +11,10 @@ default_region=eu-west-2
 default_key_name=leonradeck-keypair
 default_key_file='/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem'
 default_instance_type=t2.medium
-default_instance_name="$timestamp"
-default_instance_short_name=$default_instance_name
 default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
 default_user_username=newuser
 default_user_password=newpassword
-
 hosted_zone_id=Z1R8UBAEXAMPLE
 
 # Variables for region "eu-west-2" (London)
@@ -50,6 +47,8 @@ admin_username=admin
 admin_password=admin
 instance_count=1
 ssh_user=root
+default_instance_name="$timestamp"
+default_instance_short_name=$default_instance_name
 sailing_0='/home/sailing/servers/server/logs/sailing0.log.0'
 sailing_err='/var/log/sailing.err'
 sailing_out='/var/log/sailing.out'

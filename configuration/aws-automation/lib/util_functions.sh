@@ -221,12 +221,8 @@ function is_os() {
 function seek_confirmation() {
   # echo ""
   input "$@"
-  if "${force}"; then
-    notice "Forcing confirmation with '--force' flag set"
-  else
-    read -p " (y/n) " -n 1
-    echo ""
-  fi
+  read -p " (y/n) " -n 1
+  echo ""
 }
 
 # Test whether the result of an 'ask' is a confirmation
