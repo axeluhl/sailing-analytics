@@ -204,6 +204,7 @@ while [[ $1 = -?* ]]; do
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
+  -f|--force) force=true ;;
 	-v|--verbose) verbose=true ;;
 	-d|--debug) debug=true ;;
 	--instance-with-load-balancer) instance_with_load_balancer=true ;;

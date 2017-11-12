@@ -11,6 +11,8 @@ default_region=eu-west-2
 default_key_name=leonradeck-keypair
 default_key_file='/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem'
 default_instance_type=t2.medium
+default_instance_name="$timestamp"
+default_instance_short_name=$default_instance_name
 default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
 default_user_username=newuser
@@ -24,9 +26,8 @@ instance_security_group_ids=sg-871732ee
 image_id=ami-39f3e25d
 certificate_arn='arn:aws:iam::123456789012:server-certificate/my-server-cert'
 elb_security_group_ids=sg-871732ee
-#mongodb_host=35.176.143.232
-mongodb_host=
-#mongodb_port=27017
+mongodb_host=35.176.143.232
+mongodb_port=27017
 
 # Variables for region "eu-west-1" (Ireland)
 

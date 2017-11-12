@@ -24,11 +24,20 @@ function ask(){
 # @param $4  prompt message
 # -----------------------------------------------------------
 function require_variable(){
+	# if parameter is empty
 	if [ -z "$1" ]; then
+		# if required variable is empty
 		if [ -z "${!2}" ]; then
+			# if force is enabled
+			if [ "$force" = true ]; then
+				# read default value into required variable
+				read -r "$2" <<< "$3"
+			fi
+			# if force not enabled, ask user for input
 			ask "$4" "$3" $2
 		fi
 	else
+		# if parameter is not empty, read its value into required variable
 		read -r "$2" <<< "$1"
 	fi
 }
