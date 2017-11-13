@@ -25,8 +25,8 @@ import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositeP
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.SeriesEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.RaceColumnTableWrapperPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorTablePO.CompetitorEntry;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorWithBoatEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
@@ -84,20 +84,17 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
 
         for (int i = 0; i < 2; i++) {
-            TrackedRacesCompetitorWithBoatEditDialogPO dialog = competitorsPanel.pushAddCompetitorWithBoatButton();
+            TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
             dialog.setNameTextBox("" + System.currentTimeMillis());
-            dialog.setSailIdTextBox("" + System.currentTimeMillis());
-            dialog.setBoatClassNameSuggestBox("RS-X");
+            dialog.setShortNameTextBox("" + System.currentTimeMillis());
             dialog.pressOk();
         }
 
-        TrackedRacesCompetitorWithBoatEditDialogPO dialog = competitorsPanel.pushAddCompetitorWithBoatButton();
+        TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
         final String name = "" + System.currentTimeMillis();
         dialog.setNameTextBox(name);
-        final String sailId = "" + System.currentTimeMillis();
-        dialog.setSailIdTextBox(sailId);
-        final String boatClassName = "Laser Int.";
-        dialog.setBoatClassNameSuggestBox(boatClassName);
+        final String shortName = "" + System.currentTimeMillis();
+        dialog.setShortNameTextBox(shortName);
         dialog.pressOk();
 
         boolean found = false;
@@ -127,15 +124,14 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
 
         assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
         assertEquals(name, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
-        assertEquals(sailId, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId());
-        assertEquals(boatClassName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName());
+        assertEquals(shortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
         // change competitor
         windowForEdit.switchToWindow();
         dialog = competitorEntry.clickEditWithBoatButton();
         final String changedName = "" + System.currentTimeMillis();
         dialog.setNameTextBox(changedName);
-        final String changedSailId = "" + System.currentTimeMillis();
-        dialog.setSailIdTextBox(changedSailId);
+        final String changedShortName = "" + System.currentTimeMillis();
+        dialog.setShortNameTextBox(changedShortName);
         dialog.pressOk();
 
         // assert selection
@@ -162,8 +158,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         }
         assertTrue(found);
         assertEquals(changedName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
-        assertEquals(changedSailId, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId());
-        assertEquals(boatClassName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName());
+        assertEquals(changedShortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
     }
 
     private void setUpTestRefreshOfDependingUIElements() {

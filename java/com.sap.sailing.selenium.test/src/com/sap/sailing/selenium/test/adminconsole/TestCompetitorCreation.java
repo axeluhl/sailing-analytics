@@ -42,7 +42,7 @@ public class TestCompetitorCreation extends AbstractSeleniumTest {
         final String shortName = "NRV";
         dialog.setNameTextBox(name);
         dialog.setShortNameTextBox(shortName);
-        dialog.pressOk(true);
+        dialog.pressOk();
         boolean found = false;
         for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
             String itName = it.getName();
