@@ -68,13 +68,14 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final boolean canBoatsOfCompetitorsChangePerRaceRegatta1 = true;
         final boolean canBoatsOfCompetitorsChangePerRaceRegatta2 = false;
         final Iterable<Series> series = Collections.emptyList();
-        final UUID regattaId = UUID.randomUUID();
+        final UUID regattaId1 = UUID.randomUUID();
+        final UUID regattaId2 = UUID.randomUUID();
         Regatta masterRegatta1 = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClass1Name), boatClass1Name,
-                canBoatsOfCompetitorsChangePerRaceRegatta1, /*startDate*/ null, /*endDate*/ null, regattaId, series,
+                canBoatsOfCompetitorsChangePerRaceRegatta1, /*startDate*/ null, /*endDate*/ null, regattaId1, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         Regatta masterRegatta2 = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClass2Name), boatClass2Name,
-                canBoatsOfCompetitorsChangePerRaceRegatta2, /*startDate*/ null, /*endDate*/ null, regattaId, series,
+                canBoatsOfCompetitorsChangePerRaceRegatta2, /*startDate*/ null, /*endDate*/ null, regattaId2, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         
