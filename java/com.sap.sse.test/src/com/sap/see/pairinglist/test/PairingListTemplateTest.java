@@ -122,8 +122,8 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
             Assert.fail("Quality of Boat Assignments is worse than usual!");
         }
         
-        this.createPairingListTemplate(10, 3, 30);
-        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[30][10]))>=0.6) {
+        this.createPairingListTemplate(7, 5, 10);
+        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[30][10]))>=10.6) {
             Assert.fail("Quality of Boat Assignments is worse than usual!");
         }
     }
