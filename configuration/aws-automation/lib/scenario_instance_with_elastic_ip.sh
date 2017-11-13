@@ -30,7 +30,7 @@ function instance_with_elastic_ip_execute() {
 	header "Instance Initialization"
 
 	local json_instance=$(run_instance)
-	local instance_id=$(get_instance_id "$json_instance")
+	local instance_id=$(echo "$json_instance" | get_attribute '.Instances[0].InstanceId')
 
 	wait_instance_exists "$instance_id"
 

@@ -32,25 +32,14 @@ function get_latest_release(){
 # -----------------------------------------------------------
 function get_access_token(){
 	local_echo "Getting access token..."
-	local out=$(get_access_token_command $1 $2 $3)
-	local status_code=$(get_status_code "$out")
-	local response=$(get_response "$out")
-	local message=$(get_http_code_message $status_code)
+	response=$(curl_wrapper curl -qSfsw '\n%{http_code}' -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token")
 
-	if is_http_ok $status_code; then
-		local access_token=$(echo "$response" | jq -r '.access_token' | tr -d '\r')
+	if command_was_successful $?; then
+		local access_token=$(echo "$response" | get_attribute '.access_token')
 		success "Access token is: \"$access_token\""
-		echo "$access_token"
-	else
-		error "Failed getting access token. Error [$status_code] $message"
+		echo $access_token
 	fi
 }
-
-function get_access_token_command(){
-	curl -qSfsw '\n%{http_code}' -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token"
-}
-
-
 
 # -----------------------------------------------------------
 # Creates a new event with no regatta and venuename="Default"
@@ -60,23 +49,13 @@ function get_access_token_command(){
 # @return    event_id of created event
 # -----------------------------------------------------------
 function create_event(){
-	local_echo "Creating event..."
-	local out=$(create_event_command $1 $2 $3)
-	local status_code=$(get_status_code "$out")
-	local response=$(get_response "$out")
-	local message=$(get_http_code_message $status_code)
+	local_echo "Creating event with name $3..."
+  response=$(curl_wrapper curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "eventname=$3" --data "venuename=Default" --data "createregatta=false")
 
-	if is_http_ok $status_code; then
-		local event_id=$(echo $response | jq -r '.eventid' | tr -d '\r')
-		success "Created event with id: \"$event_id\"."
-		echo "$event_id"
-	else
-		error "Failed creating event. [$status_code] $message"
+	if command_was_successful $?; then
+		local event_id=$(echo $response | get_attribute '.eventid' )
+		echo $event_id
 	fi
-}
-
-function create_event_command(){
-	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "eventname=$3" --data "venuename=Default" --data "createregatta=false" 2>/dev/null
 }
 
 # -----------------------------------------------------------
@@ -88,21 +67,8 @@ function create_event_command(){
 # @return    status code
 # -----------------------------------------------------------
 function change_admin_password(){
-	local_echo "Changing password of user \"$3\" to \"$4\"..."
-	local out=$(change_admin_password_command $1 $2 $3 $4)
-	local status_code=$(get_status_code "$out")
-	local response=$(get_response "$out")
-	local message=$(get_http_code_message $status_code)
-
-	if is_http_ok $status_code; then
-		success "Changed password to \"$4\"."
-	else
-		error "Failed changing password. [$status_code] $message"
-	fi
-}
-
-function change_admin_password_command(){
-	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
+	local_echo "Changing password of user $3 to $4..."
+	curl_wrapper curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/change_password" --data "username=$3" --data "password=$4"
 }
 
 # -----------------------------------------------------------
@@ -115,21 +81,7 @@ function change_admin_password_command(){
 # -----------------------------------------------------------
 function create_new_user(){
 	local_echo "Creating new user \"$3\" with password \"$4\"..."
-	local out=$(create_new_user_command $1 $2 $3 $4)
-	local status_code=$(get_status_code "$out")
-	local response=$(get_response "$out")
-	local message=$(get_http_code_message $status_code)
-
-	if is_http_ok $result; then
-		success "Successfully created user \"$3\"."
-	else
-		error "Failed creating user. [$status_code] $message"
-	fi
-}
-
-# $1: access_token $2: public_dns_name $3: user_username $4: user_password
-function create_new_user_command(){
-	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
+	curl_wrapper curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/security/api/restsecurity/create_user" --data "username=$3" --data "password=$4"
 }
 
 # -----------------------------------------------------------
@@ -140,17 +92,7 @@ function create_new_user_command(){
 # -----------------------------------------------------------
 function wait_for_access_token_resource(){
 	echo -n "Wait until resource \"/security/api/restsecurity/access_token\" is available..."
-	while [[ $(wait_for_access_token_resource_command $1 $2 $3) != "200" ]];
-	do
-		echo -n "."
-		sleep $http_retry_interval;
-	done
-	echo ""
-	success "Resource \"/security/api/restsecurity/access_token\" is now available."
-}
-
-function wait_for_access_token_resource_command(){
-	curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval http://$1:$2@$3:8888/security/api/restsecurity/access_token
+	do_until_http_200 curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval http://$1:$2@$3:8888/security/api/restsecurity/access_token
 }
 
 # -----------------------------------------------------------
@@ -159,14 +101,5 @@ function wait_for_access_token_resource_command(){
 # -----------------------------------------------------------
 function wait_for_create_event_resource(){
 	echo 'Wait until resource "/sailingserver/api/v1/events/createEvent" is available...'
-	while [[ $(wait_for_create_event_resource_command $1) != "401" ]];
-	do
-		sleep $http_retry_interval;
-	done
-	success "Resource \"/sailingserver/api/v1/events/createEvent\" is now available."
-	echo ""
-}
-
-function wait_for_create_event_resource_command(){
-	curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval http://$1:8888/sailingserver/api/v1/events/createEvent
+	do_until_http_401 curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval http://$1:8888/sailingserver/api/v1/events/createEvent
 }

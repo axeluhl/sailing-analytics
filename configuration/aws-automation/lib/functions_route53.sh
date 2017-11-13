@@ -10,21 +10,8 @@
 # -----------------------------------------------------------
 function route53_change_resource_record(){
 	create_route53_record_file "$1" "$2" "$3"
-
 	local_echo "Creating Route53 record set (Name: $1.sapsailing.com Value: $3 Type: CNAME)..."
-	local json_result=$(route53_change_resource_record_command $1 $2 $3)
-
-	# condition does not work, will add a validator
-	if is_error $?; then
-		error "Failed creating Route53 record."
-	else
-		# success "Successfully created Route53 record."
-		echo $json_result
-	fi
-}
-
-function route53_change_resource_record_command(){
-	aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "file://${tmpDir}/$change_resource_record_set_file"
+	aws_wrapper aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "file://${tmpDir}/$change_resource_record_set_file"
 }
 
 # -----------------------------------------------------------

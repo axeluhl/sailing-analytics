@@ -91,6 +91,10 @@ function local_echo(){
 	echo "$1" >&2
 }
 
+function command_was_successful(){
+	[ $1 -eq 0 ]
+}
+
 # -----------------------------------------------------------
 # Check if return value is not equals 0
 # @param $1  return value

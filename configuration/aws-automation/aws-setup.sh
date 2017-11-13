@@ -61,8 +61,6 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 function mainScript() {
 echo -n
 
-curl_wrapper curl -qSfsw '\n%{http_code}' -X POST -H 'Authorization: Bearer zI1uQ2HBf5w4eRKvOeIYQsugtayB4Am0uC99FuYmeZ4=' http://ec2-35-177-81-152.eu-west-2.compute.amazonaws.com:8888/sailingserver/api/v1/events/createEvent --data eventname=Test --data venuename=Default --data createregatta=false
-safeExit
 if $instance_with_load_balancer; then
 	if $tail; then
 		check_if_tmux_is_used
@@ -230,7 +228,7 @@ trap trapCleanup EXIT INT TERM
 IFS=$'\n\t'
 
 # Exit on error. Append '||true' when you run the script if you expect an error.
-set -o errexit
+# set -o errexit
 
 # Run in debug mode, if set
 if ${debug}; then set -x ; fi

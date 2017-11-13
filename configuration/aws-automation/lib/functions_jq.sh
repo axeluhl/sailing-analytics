@@ -18,6 +18,14 @@ function get_instance_id(){
 	echo $1 | jq -r '.Instances[0].InstanceId' | tr -d '\r'
 }
 
+function get_attribute(){
+	jq -r $1 | sanitize
+}
+
+function sanitize(){
+	tr -d '\r'
+}
+
 # -----------------------------------------------------------
 # Get load balancer dns name
 # @param $1  json load balancer
