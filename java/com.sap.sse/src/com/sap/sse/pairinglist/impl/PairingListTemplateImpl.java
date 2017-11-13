@@ -81,6 +81,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         //executorService.shutdown();
+        futures.clear();
     }
     
     
@@ -149,9 +150,9 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                     
                     @Override
                     public int[][] call() {
-                        //TODO change order of param.
+                       
                         return create(flights, groups, competitors, (int)(ITERATIONS/Math.pow(seeds.length, MAX_CONSTANT_FLIGHTS)), 
-                                associations, plt);          
+                                plt,associations );          
                     }
                 }
                 
@@ -168,8 +169,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         //calculate Flights for current recurrency level
         for(int x=0;x<seeds.length;x++){
             int[][] temp=this.createFlight(flights, groups, competitors, associations, seeds[x]);
-            for (int m = 0; m < groups; m++) {
-                //TODO delete gCIA    
+            for (int m = 0; m < groups; m++) { 
                 System.arraycopy(temp[m], 0, currentPLT[(fleet) + m], 0, competitors / groups);
             }
             
@@ -240,8 +240,8 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
    
-    protected int[][] create(int flights, int groups, int competitors, int iterationCount, int[][] associations,
-            int[][] constantPLT) {
+    protected int[][] create(int flights, int groups, int competitors, int iterationCount,
+            int[][] constantPLT, int[][] associations) {
 
         int[][] bestPLT = new int[groups*flights][competitors / groups];
         for (int m = 0; m < MAX_CONSTANT_FLIGHTS*groups; m++) {
@@ -334,7 +334,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return bestPLT;
     }
-//    //TODO FIX IT!
 //    private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
 //        int boatChanges[] = new int[competitors - 1];
 //
