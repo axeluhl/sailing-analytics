@@ -81,14 +81,7 @@ function write_user_data_to_file(){
 	echo "$content" > "${tmpDir}/$user_data_file"
 }
 
-function add_user_data_variable(){
-		if ! [ -z "$2" ]; then
-			local CR_LF=$'\r'$'\n'
-			local content="$1=$2"
-			content+=$CR_LF
-			echo "$content"
-		fi
-}
+
 
 # NOT TESTED
 # -----------------------------------------------------------
@@ -173,7 +166,11 @@ function wait_for_ssh_connection(){
 }
 
 function wait_for_ssh_connection_command(){
-	ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i $1 $2@$3 echo "ok" 2>&1 || true
+	if ! [ -z "$1" ]; then
+		ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i $1 $2@$3 echo "ok" 2>&1 || true
+	else
+		ssh -o BatchMode=yes -o StrictHostKeyChecking=no $2@$3 echo "ok" 2>&1 || true
+	fi
 }
 
 # -----------------------------------------------------------

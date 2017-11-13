@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 # -----------------------------------------------------------
 # Get latest release build from releases.sapsailing.com
 # @return  latest build
@@ -49,6 +50,8 @@ function get_access_token_command(){
 	curl -qSfsw '\n%{http_code}' -X GET "http://$1:$2@$3:8888/security/api/restsecurity/access_token"
 }
 
+
+
 # -----------------------------------------------------------
 # Creates a new event with no regatta and venuename="Default"
 # @param $1  access token of privileged user
@@ -58,7 +61,7 @@ function get_access_token_command(){
 # -----------------------------------------------------------
 function create_event(){
 	local_echo "Creating event..."
-	local out=$(create_event_command $1 $2)
+	local out=$(create_event_command $1 $2 $3)
 	local status_code=$(get_status_code "$out")
 	local response=$(get_response "$out")
 	local message=$(get_http_code_message $status_code)
@@ -73,7 +76,7 @@ function create_event(){
 }
 
 function create_event_command(){
-	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "eventname=$3"--data "venuename=Default" --data "createregatta=false" 2>/dev/null
+	curl -qSfsw '\n%{http_code}' -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "eventname=$3" --data "venuename=Default" --data "createregatta=false" 2>/dev/null
 }
 
 # -----------------------------------------------------------
