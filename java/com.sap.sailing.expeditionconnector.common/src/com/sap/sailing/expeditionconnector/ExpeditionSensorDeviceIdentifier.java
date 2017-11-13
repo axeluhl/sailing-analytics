@@ -1,4 +1,4 @@
-package com.sap.sailing.expeditionconnector.persistence;
+package com.sap.sailing.expeditionconnector;
 
 /**
  * A device identifier used to identify an installation of the regatta tool "Expedition"

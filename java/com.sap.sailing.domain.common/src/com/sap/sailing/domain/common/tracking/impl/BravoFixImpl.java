@@ -27,10 +27,15 @@ public class BravoFixImpl extends SensorFixImpl implements BravoFix {
 
     @Override
     public Distance getRideHeight() {
-        double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex());
-        double rideHeightStarboardHullasDouble = fix
+        Double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex());
+        Double rideHeightStarboardHullAsDouble = fix
                 .get(BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex());
-        return new MeterDistance(Math.min(rideHeightPortHullasDouble, rideHeightStarboardHullasDouble));
+        return rideHeightPortHullasDouble == null ?
+                rideHeightStarboardHullAsDouble == null ? null :
+                    new MeterDistance(rideHeightStarboardHullAsDouble) :
+                rideHeightStarboardHullAsDouble == null ?
+                        new MeterDistance(rideHeightPortHullasDouble) :
+                            new MeterDistance(Math.min(rideHeightPortHullasDouble, rideHeightStarboardHullAsDouble));
     }
 
     @Override

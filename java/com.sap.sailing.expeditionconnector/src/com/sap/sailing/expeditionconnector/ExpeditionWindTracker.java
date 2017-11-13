@@ -87,7 +87,7 @@ public class ExpeditionWindTracker extends AbstractWindTracker implements Expedi
                     try {
                         Declination declination = declinationService.getDeclination(message.getTimePoint(),
                                 lastKnownPositionPerBoatID.get(message.getBoatID()),
-                                /* timeoutForOnlineFetchInMilliseconds */5000);
+                                /* timeoutForOnlineFetchInMilliseconds */500);
                         if (declination != null) {
                             windSpeed = new KnotSpeedWithBearingImpl(windSpeed.getKnots(), new DegreeBearingImpl(
                                     windSpeed.getBearing().getDegrees()).add(declination.getBearingCorrectedTo(message.getTimePoint())));
