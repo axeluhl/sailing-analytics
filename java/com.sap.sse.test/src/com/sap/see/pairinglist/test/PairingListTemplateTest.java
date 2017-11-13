@@ -22,6 +22,8 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 if(z<=0) Assert.fail("Values of Pairing List Template must not be 0!");
             }
         }
+        
+        System.out.println(getQuality());
     }
 
     @Test

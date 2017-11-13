@@ -56,7 +56,35 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         return pairingListTemplate;
     }
     
-    protected void createPairingListTemplate(int flights,int groups,int competitors){
+    
+    /**
+     * Creates a pairing list template.
+     * 
+     * <p>
+     * The generation of pairing list templates follow two general steps:
+     * </p>
+     * <p>
+     *     1. Because of the huge amount of generated pairing lists, we first try to create
+     *        some constant flights which the other flights are based on. The constant flights
+     *        are generated in a recursive way, which can be imagined as a tree structure.
+     *        The nodes are represented by a competitor number, that is used as seed to generate
+     *        a flight (generation of seeds: generateSeeds()). Each level in our recursive method 
+     *        equates to a new constant flight. By reaching a leave of the tree, we start a task 
+     *        that contains step 2. At the end of this algorithm there are 
+     *        <code>Math.pow(seeds, maxConstantFlights)</code> tasks.</p><p>
+     *     2. Every single task fills the pairing list by generating the rest of the flights. From 
+     *        now on, every seed is a randomized competitor. The tasks perform <code>iterations/tasks</code>
+     *        iterations. Every task returns its best result in a <code>Future<int[][]></code>. In the end
+     *        we compare all futures and return the best result, after improving the boat assignments. </p>
+     *        
+     * </p>
+     * 
+     * @param flights: count of flights
+     * @param groups: count of groups per flight
+     * @param competitors: count of total competitors
+     */
+    
+    protected void createPairingListTemplate(int flights, int groups, int competitors){
         int[] seeds = this.generateSeeds(flights, competitors);
         int[][] bestPLT = new int[flights*groups][competitors/groups];
         double bestDev = Double.POSITIVE_INFINITY;
@@ -97,7 +125,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
     /**
-     * Returns a number of calculated flights based on random generated seeds. 
+     * 
      *  
      * 
      * @param flights: count of flights

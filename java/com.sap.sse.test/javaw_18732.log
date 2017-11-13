@@ -1,0 +1,11 @@
+---
+VM version: Oct  9 2017 15:07:17 - 81_REL - optU - windows amd64 - 6 - bas2:294982 (mixed mode)
+
+Time:2017-11-1312:12:01
+Pid: 18732
+Hostname: WDFN34222622A
+current dir: C:\Users\D070307\.git\.projects\git\java\com.sap.sse.test
+---
+   :    [1328]  12:12:01 ***ERROR (:0): OutOfMemoryError: Could not allocate 0 bytes
+   :    [1328]  12:12:07 ***ERROR (:0): OutOfMemoryError: Could not allocate 0 bytes
+   :    [14432] 12:12:12 ***ERROR (:0): OutOfMemoryError: Could not allocate 0 bytes
