@@ -29,7 +29,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
         pairingListTemplate = new int[pairingFrameProvider.getGroupsCount()][pairingFrameProvider.getCompetitorsCount()/pairingFrameProvider.getGroupsCount()];
-        //this.create(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
+        this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
     }
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations) {
