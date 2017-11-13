@@ -33,7 +33,7 @@ public class AbstractMoreLoginInformationActivity extends AbstractActivity {
 
     @Override
     public final void start(AcceptsOneWidget panel, EventBus eventBus) {
-        final UserStatusEventHandler handler = user -> view.setRegisterControlVisible(Objects.isNull(user));
+        final UserStatusEventHandler handler = (user, preAuthenticated) -> view.setRegisterControlVisible(Objects.isNull(user));
         this.clientFactory.getUserService().addUserStatusEventHandler(handler, true);
         panel.setWidget(view);
     }

@@ -1,8 +1,6 @@
-package com.sap.sailing.domain.racelogtracking;
+package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
-
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
 
 /**
  * Identifies any kind of tracking device. Should be implemented accordingly for different tracking
@@ -37,6 +35,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
  * {@link Object#equals(Object)} and {@link Object#hashCode()} should be implemented so that multiple
  * deserializations of same device identifier (conceptually) result in objects that are be identified
  * as being equal through these two methods.
+ * 
  * @author Fredrik Teschke
  *
  */
