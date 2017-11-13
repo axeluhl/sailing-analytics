@@ -94,10 +94,10 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
 
     @Test
     public void testAverageTimeForSingleCase(){
-        final int iterations = 5;
-        long[] a=new long[iterations]; 
+        final int tests = 5;
+        long[] a=new long[tests]; 
         
-        for(int i = 0;i < iterations; i++){
+        for(int i = 0;i < tests; i++){
             long time = System.currentTimeMillis();
             
             this.createPairingListTemplate(15, 3, 18);
@@ -107,11 +107,22 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         }
         
         long sum = 0;
-        for(int i = 0; i < iterations; i++) sum += a[i];
-        double average = sum/iterations;
-        
+        for(int i = 0; i < tests; i++) sum += a[i];
+        double average = sum/tests;
         if (average > 8000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
+        }
+    }
+    @Test
+    public void testAssignmentQuality(){
+        this.createPairingListTemplate(15, 3, 18);
+        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6]))>=1.2) {
+            Assert.fail("Quality of Boat Assignments is worse than usual!");
+        }
+        
+        this.createPairingListTemplate(10, 3, 30);
+        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[30][10]))>=0.6) {
+            Assert.fail("Quality of Boat Assignments is worse than usual!");
         }
     }
 }

@@ -77,9 +77,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             }
         }
         
-        //bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
-        //bestPLT= this.improveAssignmentChanges(bestPLT, flights, competitors);
-        //System.out.println(calcStandardDev(getAssociationsFromPairingList(bestPLT, new int[competitors][competitors])));
+        bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         //executorService.shutdown();
@@ -103,7 +101,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         //Workcopy of associations
         int[][] currentAssociations=new int [competitors][competitors];
         for(int m=0;m<competitors;m++){
-            System.arraycopy(getColumnIntArray(associations, m), 0, currentAssociations[m], 0, competitors);
+            System.arraycopy(associations[m], 0, currentAssociations[m], 0, competitors);
         }
         int fleet=Integer.MAX_VALUE;
         for(int z=0;z<currentPLT.length;z++){
@@ -159,7 +157,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             int[][] temp=this.createFlight(flights, groups, competitors, currentAssociations, seeds[x]);
             for (int m = 0; m < groups; m++) {
                 //TODO delete gCIA    
-                System.arraycopy(getColumnIntArray(temp, m), 0, currentPLT[(fleet) + m], 0, competitors / groups);
+                System.arraycopy(temp[m], 0, currentPLT[(fleet) + m], 0, competitors / groups);
             }
             
             currentAssociations=this.getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]);
@@ -310,7 +308,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 
                 currentAssociations = this.getAssociationsFromPairingList(flightColumn, currentAssociations);
                 for (int m = 0; m < groups; m++) {
-                    System.arraycopy(getColumnIntArray(flightColumn, m), 0, currentPLT[(flightIndex * groups) + m], 0, competitors / groups);
+                    System.arraycopy(flightColumn[m], 0, currentPLT[(flightIndex * groups) + m], 0, competitors / groups);
                 }
 
             }
@@ -382,53 +380,53 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return bestPLT;
     }
-    //TODO FIX IT!
-    private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
-        int boatChanges[] = new int[competitors - 1];
-
-        for (int i = 1; i < flights; i++) {
-            int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
-
-            int[] groupNext = new int[pairingList[0].length];
-            int bestMatchesIndex = -1;
-            int bestMatch = 0;
-            for (int j = 0; j < pairingList.length / flights; j++) {
-                System.arraycopy(pairingList[i * pairingList.length / flights + j], 0, groupNext, 0, groupNext.length);
-                int currentMatch = this.getMatches(groupPrev, groupNext);
-                if (currentMatch > bestMatch) {
-                    bestMatch = currentMatch;
-                    bestMatchesIndex = j;
-                }
-            }
-
-            if (bestMatchesIndex > 0) {
-                int[] temp = new int[groupNext.length];
-                System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
-
-                System.arraycopy(pairingList[i * pairingList.length / flights], 0,
-                        pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, groupNext.length);
-                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, temp.length);
-            }
-
-            boatChanges[i - 1] = groupNext.length - bestMatch;
-        }
-
-        //System.out.println(Arrays.toString(boatChanges));
-
-        return pairingList;
-    }
-
-    private int getMatches(int[] arr1, int[] arr2) {
-        int matches = 0;
-
-        for (int value: arr1) {
-            if (this.contains(arr2, value)) {
-                matches++;
-            }
-        }
-
-        return matches;
-    }
+//    //TODO FIX IT!
+//    private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
+//        int boatChanges[] = new int[competitors - 1];
+//
+//        for (int i = 1; i < flights; i++) {
+//            int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
+//
+//            int[] groupNext = new int[pairingList[0].length];
+//            int bestMatchesIndex = -1;
+//            int bestMatch = 0;
+//            for (int j = 0; j < pairingList.length / flights; j++) {
+//                System.arraycopy(pairingList[i * pairingList.length / flights + j], 0, groupNext, 0, groupNext.length);
+//                int currentMatch = this.getMatches(groupPrev, groupNext);
+//                if (currentMatch > bestMatch) {
+//                    bestMatch = currentMatch;
+//                    bestMatchesIndex = j;
+//                }
+//            }
+//
+//            if (bestMatchesIndex > 0) {
+//                int[] temp = pairingList[i * pairingList.length / flights];
+//                //System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
+//
+//                System.arraycopy(pairingList[i * pairingList.length / flights], 0,
+//                        pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, groupNext.length);
+//                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, temp.length);
+//            }
+//
+//            boatChanges[i - 1] = groupNext.length - bestMatch;
+//        }
+//
+//        //System.out.println(Arrays.toString(boatChanges));
+//
+//        return pairingList;
+//    }
+//
+//    private int getMatches(int[] arr1, int[] arr2) {
+//        int matches = 0;
+//
+//        for (int value: arr1) {
+//            if (this.contains(arr2, value)) {
+//                matches++;
+//            }
+//        }
+//
+//        return matches;
+//    }
 
     private int[] findWorstValue(int[][] groupAssignments, int neededAssigments) {
         int[] worstValuePos=new int[2];
@@ -510,28 +508,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         return min + (int) (Math.random() * ((max - min) + 1));
     }
 
-    private int[] shuffle(int[] src) {
-        int[] result = src;
-        for(int i = 0; i<(result.length*2); i++) {
-            int o = randomBW(0, result.length-1);
-            int n = randomBW(0, randomBW(0, src.length-1));
-
-            int temp = result[o];
-            result[o] = result[n];
-            result[n] = temp;
-        }
-        return result;
-    }
-
-    private int[] getColumnIntArray(int[][] src, int row) {
-        int[] result = new int[src[0].length];
-        for (int i = 0; i < src[0].length; i++) {
-            result[i] = src[row][i];
-        }
-        return result;
-    }
-
-
     public int[][] getAssociationsFromPairingList(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
@@ -584,30 +560,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / n);
 
         return standardDev;
-    }
-
-    private double getMaxValueOfArray(int[] arr) {
-        double maxValue = 0;
-
-        for (int val: arr) {
-            if (val > maxValue) {
-                maxValue = val;
-            }
-        }
-
-        return maxValue;
-    }
-
-    private double getMaxValueOfArray(int[][] arr) {
-        double maxValue = 0;
-
-        for (int[] val: arr) {
-            if (this.getMaxValueOfArray(val) > maxValue) {
-                maxValue = this.getMaxValueOfArray(val);
-            }
-        }
-
-        return maxValue;
     }
 }
 
