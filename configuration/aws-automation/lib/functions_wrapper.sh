@@ -12,7 +12,6 @@ function curl_wrapper(){
     if is_http_ok $status_code; then
         success "[ OK ]"
         echo $response
-        return 0
       else
         error "[ ERROR ]"
         notice "Function (${FUNCNAME[1]}): [$status_code] $message\n\n$command"
@@ -28,6 +27,7 @@ function aws_wrapper(){
     echo $out | sanitize
   else
     error "[ ERROR ]"
+    return 1
   fi
 }
 
