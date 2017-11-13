@@ -3546,29 +3546,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public com.sap.sse.common.Util.Pair<TimePoint, Integer> getEndTime(
+    public com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndEndTime(
             String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        final Pair<TimePoint, Integer> result;
+        final Triple<TimePoint, TimePoint, Integer> result;
         if (leaderboard instanceof HasRegattaLike && raceLog != null) {
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
-            result = new com.sap.sse.common.Util.Pair<TimePoint, Integer>(state.getFinishedTime(),
-                raceLog.getCurrentPassId());
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
-    @Override
-    public Pair<TimePoint, Integer> getFinishingTime(String leaderboardName, String raceColumnName, String fleetName) {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        final Pair<TimePoint, Integer> result;
-        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
-            result = new com.sap.sse.common.Util.Pair<TimePoint, Integer>(state.getFinishingTime(),
+            result = new com.sap.sse.common.Util.Triple<>(state.getFinishingTime(), state.getFinishedTime(),
                 raceLog.getCurrentPassId());
         } else {
             result = null;

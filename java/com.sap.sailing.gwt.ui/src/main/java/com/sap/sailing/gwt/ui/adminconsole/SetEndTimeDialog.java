@@ -42,25 +42,19 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
 
     @Override
     protected void refreshCurrentTime() {
-        service.getEndTime(leaderboardName, raceColumnName, fleetName,
-                new AsyncCallback<com.sap.sse.common.Util.Pair<Date, Integer>>() {
+        service.getFinishingAndEndTime(leaderboardName, raceColumnName, fleetName,
+                new AsyncCallback<com.sap.sse.common.Util.Triple<Date, Date, Integer>>() {
 
                     @Override
-                    public void onSuccess(com.sap.sse.common.Util.Pair<Date, Integer> result) {
+                    public void onSuccess(com.sap.sse.common.Util.Triple<Date, Date, Integer> result) {
                         if (result == null) {
                             currentEndTimeLabel.setText(stringMessages.notAvailable());
                             currentPassIdBox.setText(stringMessages.notAvailable());
                         } else {
-                            Date startTime = result.getA();
-                            if (startTime == null) {
-                                currentEndTimeLabel.setText(stringMessages.unknown());
-                            } else {
-                                finishTimeBox.setValue(startTime);
-                                currentEndTimeLabel.setText(DateTimeFormat
-                                        .getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM).format(startTime));
-                            }
-                            currentPassId = result.getB().intValue();
-                            currentPassIdBox.setText(result.getB().toString());
+                            setDate(result.getA(), currentStartOrEndTimeLabel, timeBox);
+                            setDate(result.getB(), currentEndTimeLabel, finishTimeBox);
+                            currentPassId = result.getC().intValue();
+                            currentPassIdBox.setText(result.getC().toString());
                         }
                     }
 
@@ -69,34 +63,16 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
                         errorReporter.reportError(caught.getMessage());
                     }
                 });
-        
-        service.getFinishingTime(leaderboardName, raceColumnName, fleetName,
-                new AsyncCallback<com.sap.sse.common.Util.Pair<Date, Integer>>() {
-
-                    @Override
-                    public void onSuccess(com.sap.sse.common.Util.Pair<Date, Integer> result) {
-                        if (result == null) {
-                            currentStartOrEndTimeLabel.setText(stringMessages.notAvailable());
-                            currentPassIdBox.setText(stringMessages.notAvailable());
-                        } else {
-                            Date startTime = result.getA();
-                            if (startTime == null) {
-                                currentStartOrEndTimeLabel.setText(stringMessages.unknown());
-                            } else {
-                                timeBox.setValue(startTime);
-                                currentStartOrEndTimeLabel.setText(DateTimeFormat
-                                        .getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM).format(startTime));
-                            }
-                            currentPassId = result.getB().intValue();
-                            currentPassIdBox.setText(result.getB().toString());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(caught.getMessage());
-                    }
-                });
+    }
+    
+    void setDate(Date date, Label currentValueLabel, BetterDateTimeBox dateTimeBox) {
+        if (date == null) {
+            currentValueLabel.setText(stringMessages.unknown());
+        } else {
+            dateTimeBox.setValue(date);
+            currentValueLabel.setText(DateTimeFormat
+                    .getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM).format(date));
+        }
     }
 
     private static class EndTimeValidator implements Validator<RaceLogSetFinishingAndEndTimeDTO> {

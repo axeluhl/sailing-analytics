@@ -637,18 +637,11 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Util.Triple<Date, Integer, RacingProcedureType>> callback);
 
     /**
-     * Gets the race's current end time, current pass identifier. If no end time is set, the
-     * pass identifier will still be returned, but the start time field will be <code>null</code>.
+     * Gets the race's current finishing and end times as well as the current pass identifier. If no finishing or end time is set, the
+     * pass identifier will still be returned, but the finishing/end time field will be <code>null</code>.
      */
-    void getEndTime(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Pair<Date, Integer>> asyncCallback);
-    
-    /**
-     * Gets the race's current finishing time, current pass identifier. If no finishing time is set, the
-     * pass identifier will still be returned, but the start time field will be <code>null</code>.
-     */
-    void getFinishingTime(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Pair<Date, Integer>> asyncCallback);
+    void getFinishingAndEndTime(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Util.Triple<Date, Date, Integer>> asyncCallback);
     
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
 

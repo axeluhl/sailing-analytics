@@ -5261,21 +5261,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
 
     @Override
-    public Pair<Date, Integer> getEndTime(String leaderboardName, String raceColumnName, String fleetName) {
-        com.sap.sse.common.Util.Pair<TimePoint, Integer> result = getService().getEndTime(leaderboardName, raceColumnName, fleetName);
+    public com.sap.sse.common.Util.Triple<Date, Date, Integer> getFinishingAndEndTime(String leaderboardName, String raceColumnName, String fleetName) {
+        com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> result = getService().getFinishingAndEndTime(leaderboardName, raceColumnName, fleetName);
         if (result == null || result.getA() == null) {
             return null;
         }
-        return new com.sap.sse.common.Util.Pair<Date, Integer>(result.getA() == null ? null : result.getA().asDate(), result.getB());
-    }
-    
-    @Override
-    public Pair<Date, Integer> getFinishingTime(String leaderboardName, String raceColumnName, String fleetName) {
-        com.sap.sse.common.Util.Pair<TimePoint, Integer> result = getService().getFinishingTime(leaderboardName, raceColumnName, fleetName);
-        if (result == null || result.getA() == null) {
-            return null;
-        }
-        return new com.sap.sse.common.Util.Pair<Date, Integer>(result.getA() == null ? null : result.getA().asDate(), result.getB());
+        return new com.sap.sse.common.Util.Triple<>(result.getA() == null ? null : result.getA().asDate(),
+                result.getB() == null ? null : result.getB().asDate(), result.getC());
     }
 
     @Override
