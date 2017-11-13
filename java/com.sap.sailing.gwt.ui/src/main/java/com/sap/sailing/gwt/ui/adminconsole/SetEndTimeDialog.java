@@ -5,6 +5,7 @@ import java.util.Date;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
@@ -14,6 +15,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTimeDTO> {
     private BetterDateTimeBox finishTimeBox;
+    private Label currentEndTimeLabel;
 
     public SetEndTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName,
             String raceColumnName, String fleetName, StringMessages stringMessages,
@@ -46,15 +48,15 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
                     @Override
                     public void onSuccess(com.sap.sse.common.Util.Pair<Date, Integer> result) {
                         if (result == null) {
-                            currentStartOrEndTimeLabel.setText(stringMessages.notAvailable());
+                            currentEndTimeLabel.setText(stringMessages.notAvailable());
                             currentPassIdBox.setText(stringMessages.notAvailable());
                         } else {
                             Date startTime = result.getA();
                             if (startTime == null) {
-                                currentStartOrEndTimeLabel.setText(stringMessages.unknown());
+                                currentEndTimeLabel.setText(stringMessages.unknown());
                             } else {
                                 finishTimeBox.setValue(startTime);
-                                currentStartOrEndTimeLabel.setText(DateTimeFormat
+                                currentEndTimeLabel.setText(DateTimeFormat
                                         .getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM).format(startTime));
                             }
                             currentPassId = result.getB().intValue();
@@ -118,6 +120,13 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
     @Override
     protected String getTimeLabel() {
         return stringMessages.finishingTime();
+    }
+    
+    @Override
+    protected void additionalCurrentTimeLabel(Grid content) {
+        currentEndTimeLabel = new Label("");
+        content.setWidget(1, 0, createLabel(stringMessages.endTime()));
+        content.setWidget(1, 1, currentEndTimeLabel);
     }
 
     @Override

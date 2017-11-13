@@ -69,14 +69,16 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
         CaptionPanel current = new CaptionPanel(stringMessages.liveData());
         HorizontalPanel currentPanel = new HorizontalPanel();
         currentPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        Grid grid = new Grid(2, 2);
+        Grid grid = new Grid(3, 2);
         currentStartOrEndTimeLabel = new Label("");
         grid.setWidget(0, 0, createLabel(getTimeLabel()));
         grid.setWidget(0, 1, currentStartOrEndTimeLabel);
+        
+        additionalCurrentTimeLabel(grid);
 
         currentPassIdBox = new Label("");
-        grid.setWidget(1, 0, createLabel(stringMessages.currentPass()));
-        grid.setWidget(1, 1, currentPassIdBox);
+        grid.setWidget(2, 0, createLabel(stringMessages.currentPass()));
+        grid.setWidget(2, 1, currentPassIdBox);
         currentPanel.add(grid);
 
         PushButton refreshButton = new PushButton(new Image(resources.reloadIcon()));
@@ -121,6 +123,9 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
         content.setWidget(5, 0, advancePassIdCheckbox);
         
         return content;
+    }
+    
+    protected void additionalCurrentTimeLabel(Grid content) {
     }
 
     protected abstract void additionalInput(Grid content);
