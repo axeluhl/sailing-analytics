@@ -1024,6 +1024,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String setStartTime();
     String endTime();
     String setFinishingAndEndTime();
+    String endTimeMustBeAtOrAfterFinishingTime();
     String currentPass();
     String setStartTimeDescription();
     String setFinishingAndEndTimeDescription();

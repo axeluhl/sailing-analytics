@@ -109,12 +109,16 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
 
         @Override
         public String getErrorMessage(RaceLogSetFinishingAndEndTimeDTO dto) {
-            if (dto.authorName == null || dto.authorName.isEmpty() || dto.authorPriority == null || dto.finishTime == null) {
+            if (dto.authorName == null || dto.authorName.isEmpty() || dto.authorPriority == null
+                    || dto.finishTime == null || dto.finishingTime == null) {
                 return stringMessages.pleaseEnterAValue();
+            }
+            // both times are != null at this point
+            if (dto.finishTime.before(dto.finishingTime)) {
+                return stringMessages.endTimeMustBeAtOrAfterFinishingTime();
             }
             return null;
         }
-
     }
 
     @Override
