@@ -96,6 +96,18 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         return seeds;
     }
     
+    /**
+     * Returns a number of calculated flights based on random generated seeds. 
+     *  
+     * 
+     * @param flights: count of flights
+     * @param groups: count of groups
+     * @param competitors: count of competitors
+     * @param associations
+     * @param currentPLT
+     * @param seeds
+     */
+    
     private void createConstantFlights(int flights, int groups, int competitors, int[][] associations,
             int[][]currentPLT, int[] seeds) {
         //Workcopy of associations
@@ -173,53 +185,53 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     protected int[][] createFlight(int flights, int groups, int competitors, int[][] currentAssociations,int seed){
         int[][] flightColumn = new int[groups][competitors / groups];
         int[][][] associationRow=new int[groups][(competitors / groups) - 1][competitors];
-        int[] associationHigh = new int[competitors / groups - 1];
+        int[] associationHigh = new int[groups - 1];
         flightColumn[0][0] = seed;
-        for (int zGroups = 1; zGroups <= (competitors / groups) - 1; zGroups++) {
+        for (int assignmentIndex = 1; assignmentIndex <= (competitors / groups) - 1; assignmentIndex++) {
             int associationSum = Integer.MAX_VALUE;
             associationHigh[0] = flights + 1;
-            associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,0);
+            associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, assignmentIndex,0);
 
-            for (int comp = 1; comp <= competitors; comp++) {
-                if ((sumOf3rdDimension(associationRow, 0, comp - 1) <= associationSum) &&
-                        !contains(flightColumn, comp) &&
-                        findMaxValue(associationRow, 0, comp - 1) <= associationHigh[0]) {
-                    flightColumn[0][zGroups] = comp;
-                    associationSum = sumOf3rdDimension(associationRow, 0, comp - 1);
-                    associationHigh[0] = findMaxValue(associationRow, 0, comp - 1);
+            for (int competitorIndex = 1; competitorIndex <= competitors; competitorIndex++) {
+                if ((sumOf3rdDimension(associationRow, 0, competitorIndex - 1) <= associationSum) &&
+                        !contains(flightColumn, competitorIndex) &&
+                        findMaxValue(associationRow, 0, competitorIndex - 1) <= associationHigh[0]) {
+                    flightColumn[0][assignmentIndex] = competitorIndex;
+                    associationSum = sumOf3rdDimension(associationRow, 0, competitorIndex - 1);
+                    associationHigh[0] = findMaxValue(associationRow, 0, competitorIndex - 1);
                 }
             }
         }
-        for (int fleets = 1; fleets < groups - 1; fleets++) {
+        for (int groupIndex = 1; groupIndex < groups - 1; groupIndex++) {
             for (int aux = 0; aux < competitors; aux++) {
                 if (!contains(flightColumn, aux)) {
-                    flightColumn[fleets][0] = aux;
+                    flightColumn[groupIndex][0] = aux;
                     break;
                 }
             }
             
-            for (int zGroups = 1; zGroups < (competitors / groups); zGroups++) {
+            for (int assignmentIndex = 1; assignmentIndex < (competitors / groups); assignmentIndex++) {
                 int associationSum = Integer.MAX_VALUE;
-                associationHigh[fleets] = flights + 1;
-                associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, zGroups,fleets);
+                associationHigh[groupIndex] = flights + 1;
+                associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, assignmentIndex,groupIndex);
 
-                for (int comp = 1; comp <= competitors; comp++) {
-                    if ((sumOf3rdDimension(associationRow, fleets, comp - 1) <= associationSum) &&
-                            !contains(flightColumn, comp) &&
-                            findMaxValue(associationRow, fleets, comp - 1) <= associationHigh[fleets]) {
-                        flightColumn[fleets][zGroups] = comp;
-                        associationSum = sumOf3rdDimension(associationRow, fleets, comp - 1);
-                        associationHigh[fleets] = findMaxValue(associationRow, fleets, comp - 1);
+                for (int competitorIndex = 1; competitorIndex <= competitors; competitorIndex++) {
+                    if ((sumOf3rdDimension(associationRow, groupIndex, competitorIndex - 1) <= associationSum) &&
+                            !contains(flightColumn, competitorIndex) &&
+                            findMaxValue(associationRow, groupIndex, competitorIndex - 1) <= associationHigh[groupIndex]) {
+                        flightColumn[groupIndex][assignmentIndex] = competitorIndex;
+                        associationSum = sumOf3rdDimension(associationRow, groupIndex, competitorIndex - 1);
+                        associationHigh[groupIndex] = findMaxValue(associationRow, groupIndex, competitorIndex - 1);
 
                     }
                 }
             }
         }
         //last Flight
-        for (int j = 0; j < (competitors / groups); j++) {
+        for (int assignmentIndex = 0; assignmentIndex < (competitors / groups); assignmentIndex++) {
             for (int z = 1; z <= competitors; z++) {
                 if (!contains(flightColumn, z)) {
-                    flightColumn[groups - 1][j] = z;
+                    flightColumn[groups - 1][assignmentIndex] = z;
                     break;
                 }
             }
@@ -407,14 +419,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 if (flightColumn[i] == comp) return true;
         }
         return false;
-    }
-    private int[][][] setZero(int[][][] temp){
-        for(int x=0;x<temp.length;x++){
-            for(int y=0;y<temp[0].length;y++){
-                for(int z=0;z<temp[0][0].length;z++) temp[x][y][z]=0;
-            }
-        }
-        return temp;
     }
 
     private int sumOf3rdDimension(int[][][] associationRow, int i, int comp) {
