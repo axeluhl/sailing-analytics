@@ -79,9 +79,9 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      *        
      * </p>
      * 
-     * @param flights: count of flights
-     * @param groups: count of groups per flight
-     * @param competitors: count of total competitors
+     * @param flights count of flights
+     * @param groups count of groups per flight
+     * @param competitors count of total competitors
      */
     
     protected void createPairingListTemplate(int flights, int groups, int competitors){
@@ -114,6 +114,15 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         futures.clear();
     }
     
+    /**
+     * Creates seeds for constant flights.
+     * 
+     * No duplicates allowed.
+     * 
+     * @param flights count of flights
+     * @param competitors count of competitors
+     * @return int array of random competitors
+     */
     
     private int[] generateSeeds(int flights, int competitors) {
         int[] seeds=new int[(int)(Math.log(ITERATIONS)/Math.log(flights)*0.5)];
@@ -128,12 +137,13 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
     /**
+     * Creates constant flights. 
      * 
-     *  
+     * Recursive method, called in createPairingListTemplate(). Method is described in its javadoc.
      * 
-     * @param flights: count of flights
-     * @param groups: count of groups
-     * @param competitors: count of competitors
+     * @param flights count of flights
+     * @param groups count of groups
+     * @param competitors count of competitors
      * @param associations
      * @param currentPLT
      * @param seeds
@@ -161,11 +171,11 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                     int[][] plt,associations;
                     
                     /**
-                     * @param flights: count of flights
-                     * @param groups: count of groups
-                     * @param competitors: count of competitors
-                     * @param constantPLT: constant generated flights on which the tasks is based on  
-                     * @param associations: associations created from constantPLT
+                     * @param flights count of flights
+                     * @param groups count of groups
+                     * @param competitors count of competitors
+                     * @param constantPLT constant generated flights on which the tasks is based on  
+                     * @param associations associations created from constantPLT
                      */
                     
                     Task(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations){ 
@@ -211,6 +221,19 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         associations=getAssociationsFromPairingList(currentPLT, associations);
     }
+    
+    /**
+     * Generates a single flight, that depends on a specific seed. 
+     * 
+     * @param flights count of flights
+     * @param groups count of groups in flight
+     * @param competitors count of competitors
+     * @param currentAssociations current matrix that describes how often a competitor competed
+     *                             against another competitor. 
+     * @param seed generation bases on this competitor number.
+     * 
+     * @return generated flight as <code>int[groups][competitors / groups]</code> array
+     */
     
     protected int[][] createFlight(int flights, int groups, int competitors, int[][] currentAssociations,int seed){
         int[][] flightColumn = new int[groups][competitors / groups];
@@ -269,6 +292,19 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         return flightColumn;
     }
     
+    /**
+     * This method is called in every task to generate a number of different pairing lists 
+     * to compare and choose the best. 
+     * 
+     * @param flights count of flights
+     * @param groups count of groups in flight
+     * @param competitors count of competitors
+     * @param iterationCount repetitions of generating pairing lists
+     * @param constantPLT constant generated flights
+     * @param associations current matrix that describes how often a competitor competed
+     *                      against another competitor. 
+     * @return best complete pairing list out of given iterations
+     */
    
     protected int[][] create(int flights, int groups, int competitors, int iterationCount,
             int[][] constantPLT, int[][] associations) {
@@ -306,6 +342,15 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return bestPLT;
     }
+    
+    /**
+     * Returns a matrix that describes how often the competitors competed on a boat.
+     * The matrix has the following dimension: <code>assignmentAssociations[competitors][boats]</code>.
+     * 
+     * @param pairingList current pairing list from which the associations will be created
+     * @param associations int array on which the assignment will be written
+     * @return matrix that represents the assignment associations
+     */
 
     protected int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
@@ -316,6 +361,19 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         return associations;
     }
 
+    /**
+     * Switches competitors inside a group to improve assignments.
+     * Method does not change the order of groups or flights. The standard deviation
+     * of team associations will not be influenced by this method. After executing the 
+     * method the assignment should be well distributed. 
+     * 
+     * @param pairinglist current pairing list
+     * @param flights count of flights
+     * @param groups count of groups
+     * @param competitors count of competitors
+     * @return improved pairing list template
+     */
+    
     protected int[][] improveAssignment(int[][] pairinglist,int flights, int groups, int competitors){
         int[][] assignments= this.getAssignmentAssociations(pairinglist, new int[competitors][competitors/groups]);
         double neededAssigments= flights/(competitors/groups);
@@ -328,7 +386,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                     System.arraycopy(assignments[pairinglist[zGroup][zPlace]-1], 0, groupAssignments[zPlace], 0, (competitors/groups));
                 }
                 for(int zPlace=0;zPlace<competitors*50;zPlace++){
-                    int[] position=this.findWorstValue(groupAssignments,(int)neededAssigments);
+                    int[] position=this.findWorstValuePosition(groupAssignments,(int)neededAssigments);
                     if(groupAssignments[position[0]][position[1]]>neededAssigments-1&&groupAssignments[position[0]][position[1]]<neededAssigments+1){
                         break;
                     }else if(groupAssignments[position[0]][position[1]]<neededAssigments){
@@ -410,8 +468,16 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 //
 //        return matches;
 //    }
+    
+    /**
+     * Returns an index that has the greatest difference to neededAssignments
+     * 
+     * @param groupAssignments array that contains the values
+     * @param neededAssigments reference value
+     * @return int array with 2 indices that represent row and column of the worst value
+     */
 
-    private int[] findWorstValue(int[][] groupAssignments, int neededAssigments) {
+    private int[] findWorstValuePosition(int[][] groupAssignments, int neededAssigments) {
         int[] worstValuePos=new int[2];
         int worstValue=0;
         for(int i=0;i<groupAssignments.length;i++){
@@ -435,30 +501,40 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
 
-    private boolean contains(int[][] flightColumn, int comp) {
-        for (int i = 0; i < flightColumn.length; i++) {
-            for (int z = 0; z < flightColumn[0].length; z++) {
-                if (flightColumn[i][z] == comp) return true;
+    private boolean contains(int[][] arr, int value) {
+        for (int i = 0; i < arr.length; i++) {
+            for (int z = 0; z < arr[0].length; z++) {
+                if (arr[i][z] == value) return true;
             }
         }
         return false;
     }
-    private boolean contains(int[] flightColumn, int comp) {
-        for (int i = 0; i < flightColumn.length; i++) {
-                if (flightColumn[i] == comp) return true;
+    
+    private boolean contains(int[] arr, int value) {
+        for (int i = 0; i < arr.length; i++) {
+                if (arr[i] == value) return true;
         }
         return false;
     }
 
-    private int sumOf3rdDimension(int[][][] associationRow, int i, int comp) {
+    /**
+     * Calculates the sum of a specific row in the 3rd dimension
+     * 
+     * @param arr 3 dimensional array
+     * @param depth 3rd dimension of array
+     * @return sum
+     */
+    
+    private int sumOf3rdDimension(int[][][] arr, int row, int depth) {
         int sum = 0;
-        for (int z = 0; z < associationRow[0].length; z++) {
-            if (associationRow[i][z][comp] > -1) {
-                sum += associationRow[i][z][comp];
+        for (int z = 0; z < arr[0].length; z++) {
+            if (arr[row][z][depth] > -1) {
+                sum += arr[row][z][depth];
             }
         }
         return sum;
     }
+    
     private int findMinValuePosition(int[] arr){
         int temp=Integer.MAX_VALUE;
         int position=-1;
@@ -478,11 +554,36 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return temp;
     }
+    
+    /**
+     * Returns a random number between min and max
+     * 
+     * @param min
+     * @param max
+     * @return a random number
+     */
 
     private int randomBW(int min,int max){
         return min + (int) (Math.random() * ((max - min) + 1));
     }
 
+    /**
+     * Creates a matrix that describes how often the team competes against each other.
+     * Its dimensions are <code>associations[competitors][competitors]</code>, e.g.:
+     * 
+     *   1 2 3 4
+     * 1 \ 2 3 1
+     * 2 2 \ 1 3
+     * 3 3 1 \ 2
+     * 4 1 3 2 \
+     * 
+     * In this example, team 2 competed 3 times against team 4.
+     * 
+     * @param pairingList current pairing list template
+     * @param associations int array in which the association will be written
+     * @return int arryay of associations
+     */
+    
     public int[][] getAssociationsFromPairingList(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
@@ -505,9 +606,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
 
     /**
-     * @param associations: association describes a 2 dimensional array of integers, which contains the information 
+     * Calculates the standard deviation from all numbers in association matrix.
+     * The method ignores all numbers smaller 0, because senseless values are marked 
+     * with -1.
+     * The return value is used to compare the quality of different pairing list templates.
+     * 
+     * @param associations association describes a 2 dimensional array of integers, which contains the information 
      *                      about how often the teams play against each other
-     * @return standardDev: returns how much the association values deviate from each other
+     * @return standardDev returns how much the association values deviate from each other
      */
 
     protected double calcStandardDev(int[][] associations) {
