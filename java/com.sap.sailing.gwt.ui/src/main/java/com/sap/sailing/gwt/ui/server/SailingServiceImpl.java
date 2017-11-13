@@ -5263,7 +5263,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public com.sap.sse.common.Util.Triple<Date, Date, Integer> getFinishingAndEndTime(String leaderboardName, String raceColumnName, String fleetName) {
         com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> result = getService().getFinishingAndEndTime(leaderboardName, raceColumnName, fleetName);
-        if (result == null || result.getA() == null) {
+        if (result == null) {
             return null;
         }
         return new com.sap.sse.common.Util.Triple<>(result.getA() == null ? null : result.getA().asDate(),
