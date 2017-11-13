@@ -21,7 +21,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
             String raceColumnName, String fleetName, StringMessages stringMessages,
             DataEntryDialog.DialogCallback<RaceLogSetFinishingAndEndTimeDTO> callback) {
         super(service, errorReporter, stringMessages.setFinishingAndEndTime(), stringMessages.setFinishingAndEndTimeDescription(),
-                stringMessages.endTime(), stringMessages.cancel(), leaderboardName, raceColumnName, fleetName,
+                stringMessages.setFinishingAndEndTime(), stringMessages.cancel(), leaderboardName, raceColumnName, fleetName,
                 stringMessages, new EndTimeValidator(stringMessages), callback);
         this.ensureDebugId("SetEndTimeDialog");
     }
