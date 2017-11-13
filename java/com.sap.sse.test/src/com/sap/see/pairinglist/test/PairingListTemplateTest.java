@@ -1,11 +1,14 @@
 package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 
 import org.junit.Test;
 
+import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 
 import junit.framework.Assert;
@@ -126,5 +129,18 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[2][1]))>=0.6) {
             Assert.fail("Quality of Boat Assignments is worse than usual!");
         }
+    }
+    
+    @Test
+    public void testGeneratePairingListTemplate() {
+        PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
+        PairingListTemplate testTemplate = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
+        //PairingListTemplate testTemplate = generatePairingList(new PairingFrameProviderTest(45, 6, 18));
+        //PairingListTemplate testTemplate = generatePairingList(new PairingFrameProviderTest(10, 3, 30));
+        assertNotNull(testTemplate);
+        for(int[] row : testTemplate.getPairingListTemplate()) {
+            System.out.println(Arrays.toString(row));
+        }
+        System.out.println(testTemplate.getQuality());
     }
 }
