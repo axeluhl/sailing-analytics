@@ -34,7 +34,7 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
     protected final StringMessages stringMessages;
 
     protected int currentPassId = -1;
-    protected Label currentStartOrEndTimeLabel;
+    protected Label currentStartOrFinishingTimeLabel;
     protected Label currentPassIdBox;
     protected BetterDateTimeBox timeBox;
     protected TextBox authorNameBox;
@@ -68,9 +68,9 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
         HorizontalPanel currentPanel = new HorizontalPanel();
         currentPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         Grid grid = new Grid(3, 2);
-        currentStartOrEndTimeLabel = new Label("");
+        currentStartOrFinishingTimeLabel = new Label("");
         grid.setWidget(0, 0, createLabel(getTimeLabel()));
-        grid.setWidget(0, 1, currentStartOrEndTimeLabel);
+        grid.setWidget(0, 1, currentStartOrFinishingTimeLabel);
         
         grid.setText(1, 0, "");
         grid.setText(1, 1, "");

@@ -9,26 +9,26 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndEndTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTimeDTO> {
+public class SetFinishingAndFinishedTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndFinishTimeDTO> {
     private BetterDateTimeBox finishTimeBox;
-    private Label currentEndTimeLabel;
+    private Label currentFinishTimeLabel;
 
-    public SetEndTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName,
+    public SetFinishingAndFinishedTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName,
             String raceColumnName, String fleetName, StringMessages stringMessages,
-            DataEntryDialog.DialogCallback<RaceLogSetFinishingAndEndTimeDTO> callback) {
-        super(service, errorReporter, stringMessages.setFinishingAndEndTime(), stringMessages.setFinishingAndEndTimeDescription(),
-                stringMessages.setFinishingAndEndTime(), stringMessages.cancel(), leaderboardName, raceColumnName, fleetName,
+            DataEntryDialog.DialogCallback<RaceLogSetFinishingAndFinishTimeDTO> callback) {
+        super(service, errorReporter, stringMessages.setFinishingAndFinishTime(), stringMessages.setFinishingAndFinishTimeDescription(),
+                stringMessages.setFinishingAndFinishTime(), stringMessages.cancel(), leaderboardName, raceColumnName, fleetName,
                 stringMessages, new EndTimeValidator(stringMessages), callback);
-        this.ensureDebugId("SetEndTimeDialog");
+        this.ensureDebugId("SetFinishingAndFinishedTimeDialog");
     }
 
     @Override
-    protected RaceLogSetFinishingAndEndTimeDTO getResult() {
-        RaceLogSetFinishingAndEndTimeDTO dto = new RaceLogSetFinishingAndEndTimeDTO();
+    protected RaceLogSetFinishingAndFinishTimeDTO getResult() {
+        RaceLogSetFinishingAndFinishTimeDTO dto = new RaceLogSetFinishingAndFinishTimeDTO();
         dto.leaderboardName = leaderboardName;
         dto.raceColumnName = raceColumnName;
         dto.fleetName = fleetName;
@@ -42,17 +42,17 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
 
     @Override
     protected void refreshCurrentTime() {
-        service.getFinishingAndEndTime(leaderboardName, raceColumnName, fleetName,
+        service.getFinishingAndFinishTime(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<com.sap.sse.common.Util.Triple<Date, Date, Integer>>() {
 
                     @Override
                     public void onSuccess(com.sap.sse.common.Util.Triple<Date, Date, Integer> result) {
                         if (result == null) {
-                            currentEndTimeLabel.setText(stringMessages.notAvailable());
+                            currentFinishTimeLabel.setText(stringMessages.notAvailable());
                             currentPassIdBox.setText(stringMessages.notAvailable());
                         } else {
-                            setDate(result.getA(), currentStartOrEndTimeLabel, timeBox);
-                            setDate(result.getB(), currentEndTimeLabel, finishTimeBox);
+                            setDate(result.getA(), currentStartOrFinishingTimeLabel, timeBox);
+                            setDate(result.getB(), currentFinishTimeLabel, finishTimeBox);
                             currentPassId = result.getC().intValue();
                             currentPassIdBox.setText(result.getC().toString());
                         }
@@ -75,7 +75,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
         }
     }
 
-    private static class EndTimeValidator implements Validator<RaceLogSetFinishingAndEndTimeDTO> {
+    private static class EndTimeValidator implements Validator<RaceLogSetFinishingAndFinishTimeDTO> {
 
         private final StringMessages stringMessages;
 
@@ -84,14 +84,14 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
         }
 
         @Override
-        public String getErrorMessage(RaceLogSetFinishingAndEndTimeDTO dto) {
+        public String getErrorMessage(RaceLogSetFinishingAndFinishTimeDTO dto) {
             if (dto.authorName == null || dto.authorName.isEmpty() || dto.authorPriority == null
                     || dto.finishTime == null || dto.finishingTime == null) {
                 return stringMessages.pleaseEnterAValue();
             }
             // both times are != null at this point
             if (dto.finishTime.before(dto.finishingTime)) {
-                return stringMessages.endTimeMustBeAtOrAfterFinishingTime();
+                return stringMessages.finishTimeMustBeAtOrAfterFinishingTime();
             }
             return null;
         }
@@ -104,9 +104,9 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
     
     @Override
     protected void additionalCurrentTimeLabel(Grid content) {
-        currentEndTimeLabel = new Label("");
-        content.setWidget(1, 0, createLabel(stringMessages.endTime()));
-        content.setWidget(1, 1, currentEndTimeLabel);
+        currentFinishTimeLabel = new Label("");
+        content.setWidget(1, 0, createLabel(stringMessages.finishTimeString()));
+        content.setWidget(1, 1, currentFinishTimeLabel);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
         finishTimeBox = createDateTimeBox(new Date());
         finishTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         finishTimeBox.ensureDebugId("FinishTimeBox");
-        content.setWidget(1, 0, createLabel(stringMessages.endTime()));
+        content.setWidget(1, 0, createLabel(stringMessages.finishTimeString()));
         content.setWidget(1, 1, finishTimeBox);
     }
 }

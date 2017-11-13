@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 /**
  * DTO holding all information to set a new start time on a specific race.
  */
-public class RaceLogSetFinishingAndEndTimeDTO implements IsSerializable {
+public class RaceLogSetFinishingAndFinishTimeDTO implements IsSerializable {
     public String leaderboardName;
     public String raceColumnName;
     public String fleetName;

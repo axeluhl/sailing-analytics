@@ -63,7 +63,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndEndTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -624,10 +624,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * Sets the a new finishing and end time.
      * 
      * @param dto
-     *            {@link RaceLogSetFinishingAndEndTimeDTO} identifying the race and the new finishing and
+     *            {@link RaceLogSetFinishingAndFinishTimeDTO} identifying the race and the new finishing and
      *            end time.
      */
-    void setFinishingAndEndTime(RaceLogSetFinishingAndEndTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
+    void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
     
     /**
      * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the
@@ -637,10 +637,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Util.Triple<Date, Integer, RacingProcedureType>> callback);
 
     /**
-     * Gets the race's current finishing and end times as well as the current pass identifier. If no finishing or end time is set, the
-     * pass identifier will still be returned, but the finishing/end time field will be <code>null</code>.
+     * Gets the race's current finishing and finish times as well as the current pass identifier. If no finishing or finish time is set, the
+     * pass identifier will still be returned, but the finishing/finish time field will be <code>null</code>.
      */
-    void getFinishingAndEndTime(String leaderboardName, String raceColumnName, String fleetName,
+    void getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Util.Triple<Date, Date, Integer>> asyncCallback);
     
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);

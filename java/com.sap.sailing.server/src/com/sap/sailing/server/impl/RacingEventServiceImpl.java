@@ -3546,7 +3546,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndEndTime(
+    public com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndFinishTime(
             String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);

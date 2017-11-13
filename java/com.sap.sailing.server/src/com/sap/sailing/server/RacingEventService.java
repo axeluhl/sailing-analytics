@@ -586,10 +586,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
-     * Gets the finishing and end times as well as the pass identifier for the queried race. The first TimePoint is the
-     * finishing time, the second on is the end time. Finishing and/or end times might be <code>null</code>.
+     * Gets the finishing and finish times as well as the pass identifier for the queried race. The first TimePoint is the
+     * finishing time, the second on is the finish time. Finishing and/or finish times might be <code>null</code>.
      */
-    com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndEndTime(
+    com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndFinishTime(
             String leaderboardName, String raceColumnName, String fleetName);
     
     MongoObjectFactory getMongoObjectFactory();

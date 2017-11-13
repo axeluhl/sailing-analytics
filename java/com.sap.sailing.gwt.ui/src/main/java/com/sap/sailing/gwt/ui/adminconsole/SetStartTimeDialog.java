@@ -50,14 +50,14 @@ public class SetStartTimeDialog extends SetTimeDialog<RaceLogSetStartTimeAndProc
                     @Override
                     public void onSuccess(com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType> result) {
                         if (result == null) {
-                            currentStartOrEndTimeLabel.setText(stringMessages.notAvailable());
+                            currentStartOrFinishingTimeLabel.setText(stringMessages.notAvailable());
                             currentPassIdBox.setText(stringMessages.notAvailable());
                         } else {
                             Date startTime = result.getA();
                             if (startTime == null) {
-                                currentStartOrEndTimeLabel.setText(stringMessages.unknown());
+                                currentStartOrFinishingTimeLabel.setText(stringMessages.unknown());
                             } else {
-                                currentStartOrEndTimeLabel.setText(DateTimeFormat
+                                currentStartOrFinishingTimeLabel.setText(DateTimeFormat
                                         .getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM).format(startTime));
                             }
                             currentPassId = result.getB().intValue();
