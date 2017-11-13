@@ -22,8 +22,6 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 if(z<=0) Assert.fail("Values of Pairing List Template must not be 0!");
             }
         }
-        
-        System.out.println(getQuality());
     }
 
     @Test
@@ -118,12 +116,12 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     @Test
     public void testAssignmentQuality(){
         this.createPairingListTemplate(15, 3, 18);
-        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6]))>=1.2) {
+        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6]))>=1.5) {
             Assert.fail("Quality of Boat Assignments is worse than usual!");
         }
         
-        this.createPairingListTemplate(7, 5, 10);
-        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[30][10]))>=10.6) {
+        this.createPairingListTemplate(10, 3, 30);
+        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[30][10]))>=0.6) {
             Assert.fail("Quality of Boat Assignments is worse than usual!");
         }
     }

@@ -109,7 +109,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
-        System.out.println(Arrays.deepToString(getAssociationsFromPairingList(bestPLT, new int[competitors][competitors])));
         //executorService.shutdown();
         futures.clear();
     }
