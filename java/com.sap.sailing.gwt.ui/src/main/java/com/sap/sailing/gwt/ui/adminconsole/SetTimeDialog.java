@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -40,7 +39,6 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
     protected BetterDateTimeBox timeBox;
     protected TextBox authorNameBox;
     protected com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
-    protected CheckBox advancePassIdCheckbox;
 
     public SetTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String title, String message,
             String okButtonName, String cancelButtonName, String leaderboardName, String raceColumnName,
@@ -122,11 +120,6 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
         content.setWidget(3, 1, authorPriorityBox);
 
         addAdditionalInput(content);
-
-        advancePassIdCheckbox = createCheckbox(stringMessages.advancePassId());
-        advancePassIdCheckbox.setValue(false);
-        advancePassIdCheckbox.ensureDebugId("AnvancePassIdCheckBox");
-        content.setWidget(5, 0, advancePassIdCheckbox);
         
         return content;
     }

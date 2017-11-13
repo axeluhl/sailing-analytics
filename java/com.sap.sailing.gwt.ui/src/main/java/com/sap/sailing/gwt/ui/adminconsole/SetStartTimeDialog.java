@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -15,6 +16,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetStartTimeDialog extends SetTimeDialog<RaceLogSetStartTimeAndProcedureDTO> {
     protected ListBox racingProcedureSelection;
+    protected CheckBox advancePassIdCheckbox;
 
     public SetStartTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName,
             String raceColumnName, String fleetName, StringMessages stringMessages,
@@ -114,6 +116,11 @@ public class SetStartTimeDialog extends SetTimeDialog<RaceLogSetStartTimeAndProc
         racingProcedureSelection.ensureDebugId("RacingProcedureListBox");
         content.setWidget(4, 0, createLabel(stringMessages.racingProcedure()));
         content.setWidget(4, 1, racingProcedureSelection);
+
+        advancePassIdCheckbox = createCheckbox(stringMessages.advancePassId());
+        advancePassIdCheckbox.setValue(false);
+        advancePassIdCheckbox.ensureDebugId("AnvancePassIdCheckBox");
+        content.setWidget(5, 0, advancePassIdCheckbox);
     }
 
     @Override

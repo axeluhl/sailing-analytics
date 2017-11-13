@@ -36,7 +36,7 @@ public class SetEndTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndEndTim
         dto.authorPriority = authorPriorityBox.getValue();
         dto.finishTime = finishTimeBox.getValue();
         dto.finishingTime = timeBox.getValue();
-        dto.passId = advancePassIdCheckbox.getValue() ? currentPassId + 1 : currentPassId;
+        dto.passId = currentPassId;
         return dto;
     }
 
