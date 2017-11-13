@@ -562,6 +562,3 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         return standardDev;
     }
 }
-
-
-
