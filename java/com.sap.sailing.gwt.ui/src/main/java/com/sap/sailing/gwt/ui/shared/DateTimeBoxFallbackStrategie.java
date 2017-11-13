@@ -91,7 +91,6 @@ public class DateTimeBoxFallbackStrategie extends Composite implements DateTimeB
             datebox.setValue(dateFormated);
             if (timeFormat != null) {
                 String timeFormated = timeFormat.format(newValue);
-                com.google.gwt.core.shared.GWT.log(timeFormated);
                 timebox.setValue(timeFormated);
             }
         }else{
