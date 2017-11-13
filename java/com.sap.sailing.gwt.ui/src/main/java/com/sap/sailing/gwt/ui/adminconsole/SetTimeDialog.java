@@ -74,6 +74,9 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
         grid.setWidget(0, 0, createLabel(getTimeLabel()));
         grid.setWidget(0, 1, currentStartOrEndTimeLabel);
         
+        grid.setText(1, 0, "");
+        grid.setText(1, 1, "");
+        
         additionalCurrentTimeLabel(grid);
 
         currentPassIdBox = new Label("");
@@ -103,6 +106,9 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
         timeBox.ensureDebugId("StartTimeTimeBox");
         content.setWidget(0, 0, createLabel(getTimeLabel()));
         content.setWidget(0, 1, timeBox);
+        
+        content.setText(1, 0, "");
+        content.setText(1, 1, "");
         
         additionalInput(content);
 
