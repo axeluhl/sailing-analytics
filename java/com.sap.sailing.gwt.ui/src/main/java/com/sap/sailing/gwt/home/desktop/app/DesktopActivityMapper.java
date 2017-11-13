@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.events.EventsActivityProxy;
-import com.sap.sailing.gwt.home.desktop.places.morelogininformation.MoreLoginInformationActivity;
+import com.sap.sailing.gwt.home.desktop.places.morelogininformation.MoreLoginInformationActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
@@ -84,11 +84,11 @@ public class DesktopActivityMapper implements ActivityMapper {
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else if (place instanceof PasswordResetPlace) {
-            return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);            
+            return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else if (place instanceof ImprintPlace) {
             return new ImprintActivityProxy((ImprintPlace) place);
         } else if (place instanceof MoreLoginInformationPlace) {
-            return new MoreLoginInformationActivity(place);
+            return new MoreLoginInformationActivityProxy((MoreLoginInformationPlace) place, clientFactory);
         } else {
             return null;
         }

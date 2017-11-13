@@ -13,11 +13,12 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -34,6 +35,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -152,11 +154,15 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     
     private void createErrorPage(String message) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        final SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication();
+        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         RootLayoutPanel.get().add(vp);
-        vp.addNorth(logoAndTitlePanel, 100);
-        vp.add(new Label(message));
+        vp.addNorth(header, 100);
+        final Label infoText = new Label(message);
+        infoText.getElement().getStyle().setMargin(1, Unit.EM);
+        vp.add(infoText);
+        // TODO: Styling of error page slightly differs from the other usages of SAPSailingHeaderWithAuthentication
+        // because of the root font-size. Adjustments are postponed because they might affect the hole page content.
     }
 
     private RaceBoardPanel createPerspectivePage(Component<?> parent,

@@ -164,7 +164,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
     }
 
     @Override
-    public void onUserStatusChange(UserDTO user) {
+    public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         updateStatus();
     }
 }

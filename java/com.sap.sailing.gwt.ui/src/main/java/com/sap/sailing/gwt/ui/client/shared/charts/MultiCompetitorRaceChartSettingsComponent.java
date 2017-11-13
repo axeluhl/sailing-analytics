@@ -29,7 +29,6 @@ public class MultiCompetitorRaceChartSettingsComponent extends
     private final DetailType initialFirstDetailType;
     private final DetailType initialSecondDetailType;
     private final List<DetailType> availableDetailsTypes;
-
     
     public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings,
             StringMessages stringMessages, List<DetailType> availableDetailTypes) {

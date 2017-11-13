@@ -40,6 +40,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -90,6 +92,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEnde
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.BaseRegattaLogDeviceMappingFinder;
@@ -152,6 +155,7 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -256,7 +260,6 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
@@ -303,6 +306,9 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -525,6 +531,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final MongoObjectFactory mongoObjectFactory;
 
+    private final ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> expeditionConnectorTracker;
+
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     
     private final ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> swissTimingAdapterTracker;
@@ -597,6 +605,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         swissTimingReplayService = ServiceTrackerFactory.createAndOpen(context, SwissTimingReplayServiceFactory.class)
                 .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory(),
                 /* raceLogResolver */ getService());
+        expeditionConnectorTracker = ServiceTrackerFactory.createAndOpen(context, ExpeditionTrackerFactory.class);
         scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
                 ScoreCorrectionProvider.class);
         competitorProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context, CompetitorProvider.class);
@@ -2955,71 +2964,88 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case CURRENT_HEEL_IN_DEGREES: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    final Bearing bearing = bravoFixTrack.getHeel(timePoint);
-                    result = bearing == null ? null : bearing.getDegrees();
-                }
+                result = getBravoBearingInDegrees(BravoFixTrack::getHeel, trackedRace, competitor, timePoint);
                 break;
             }
             case CURRENT_PITCH_IN_DEGREES: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    final Bearing bearing = bravoFixTrack.getPitch(timePoint);
-                    result = bearing == null ? null : bearing.getDegrees();
-                }
+                result = getBravoBearingInDegrees(BravoFixTrack::getPitch, trackedRace, competitor, timePoint);
                 break;
             }
             case RACE_CURRENT_RIDE_HEIGHT_IN_METERS: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    final Distance rideHeight = bravoFixTrack.getRideHeight(timePoint);
-                    result = rideHeight == null ? null : rideHeight.getMeters();
-                }
+                result = getBravoDistanceInMeters(BravoFixTrack::getRideHeight, trackedRace, competitor, timePoint);
                 break;
             }
             case CURRENT_PORT_DAGGERBOARD_RAKE: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getPortDaggerboardRakeIfAvailable(timePoint);
-                }
+                result = getBravoDoubleValue(BravoFixTrack::getPortDaggerboardRakeIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case CURRENT_STBD_DAGGERBOARD_RAKE: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getStbdDaggerboardRakeStbdIfAvailable(timePoint);
-                }
+                result = getBravoDoubleValue(BravoFixTrack::getStbdDaggerboardRakeStbdIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case CURRENT_PORT_RUDDER_RAKE: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getPortRudderRakeIfAvailable(timePoint);
-                }
+                result = getBravoDoubleValue(BravoFixTrack::getPortRudderRakeIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case CURRENT_STBD_RUDDER_RAKE: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getStbdRudderRakeIfAvailable(timePoint);
-                }
+                result = getBravoDoubleValue(BravoFixTrack::getStbdRudderRakeIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case CURRENT_MAST_ROTATION_IN_DEGREES: {
-                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
-                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-                if (bravoFixTrack != null) {
-                    final Bearing bearing = bravoFixTrack.getMastRotationIfAvailable(timePoint);
-                    result = bearing == null ? null : bearing.getDegrees();
-                }
+                result = getBravoBearingInDegrees(BravoFixTrack::getMastRotationIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_LEEWAY_IN_DEGREES: {
+                result = getBravoBearingInDegrees(BravoFixTrack::getLeewayIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_SET: {
+                result = getBravoDoubleValue(BravoFixTrack::getSetIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_DRIFT_IN_DEGREES: {
+                result = getBravoBearingInDegrees(BravoFixTrack::getDriftIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_DEPTH_IN_METERS: {
+                result = getBravoDistanceInMeters(BravoFixTrack::getDepthIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_RUDDER_IN_DEGREES: {
+                result = getBravoBearingInDegrees(BravoFixTrack::getRudderIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_TACK_ANGLE_IN_DEGREES: {
+                result = getBravoBearingInDegrees(BravoFixTrack::getTackAngleIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_DEFLECTOR_PERCENTAGE: {
+                result = getBravoDoubleValue(BravoFixTrack::getDeflectorPercentageIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_DEFLECTOR_IN_MILLIMETERS: {
+                Double deflectorInMeters = getBravoDistanceInMeters(BravoFixTrack::getDeflectorIfAvailable, trackedRace, competitor, timePoint);
+                result = deflectorInMeters == null ? null : (deflectorInMeters * 1000.);
+                break;
+            }
+            case CURRENT_RAKE_IN_DEGREES: {
+                result = getBravoBearingInDegrees(BravoFixTrack::getRakeIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES: {
+                result = getBravoBearingInDegrees(BravoFixTrack::getTargetHeelIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_FORESTAY_LOAD: {
+                result = getBravoDoubleValue(BravoFixTrack::getForestayLoadIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_FORESTAY_PRESSURE: {
+                result = getBravoDoubleValue(BravoFixTrack::getForestayPressureIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case CURRENT_TARGET_BOATSPEED_PERCENTAGE: {
+                result = getBravoDoubleValue(BravoFixTrack::getTargetBoatspeedPIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             default:
@@ -3030,6 +3056,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } finally {
             course.unlockAfterRead();
         }
+    }
+
+    private Double getBravoDoubleValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, Double> valueGetter,
+            TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(valueGetter, d->d, trackedRace, competitor, timePoint);
+    }
+    
+    private Double getBravoBearingInDegrees(BiFunction<BravoFixTrack<Competitor>, TimePoint, Bearing> valueGetter,
+            TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(valueGetter, b->b.getDegrees(), trackedRace, competitor, timePoint);
+    }
+    
+    private Double getBravoDistanceInMeters(BiFunction<BravoFixTrack<Competitor>, TimePoint, Distance> valueGetter,
+            TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(valueGetter, d->d.getMeters(), trackedRace, competitor, timePoint);
+    }
+    
+    private <T> Double getBravoValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, T> valueGetter,
+            Function<T, Double> mapperToDouble,
+            TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+        final Double result;
+        final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+        if (bravoFixTrack != null) {
+            final T t = valueGetter.apply(bravoFixTrack, timePoint);
+            result = t == null ? null : mapperToDouble.apply(t);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
@@ -5283,8 +5339,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private class TimeoutExtendingInputStream extends FilterInputStream {
 
     	// default timeout is high to ensure that long running client operations
-    	// such as compressing data will not have the server run into a timeout
-    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*10;
+    	// such as compressing data will not have the server run into a timeout.
+    	// this especially applies to foiling data where compression on slower machines
+    	// can take up to two hours.
+    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*60*2;
 
         private final HttpURLConnection connection;
 
@@ -5695,8 +5753,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
-                    competitor, mapping.getDevice(), from, to);                  
+            if (mapping.getDevice().getIdentifierType().equals(ExpeditionSensorDeviceIdentifier.TYPE)) {
+                event = new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(
+                        now, now, getService().getServerAuthor(), UUID.randomUUID(), 
+                        competitor, mapping.getDevice(), from, to);
+            } else {
+                event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
+                        competitor, mapping.getDevice(), from, to);
+            }
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
@@ -6641,6 +6705,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 availableDetailsTypes.add(DetailType.CURRENT_PORT_RUDDER_RAKE);
                 availableDetailsTypes.add(DetailType.CURRENT_STBD_RUDDER_RAKE);
                 availableDetailsTypes.add(DetailType.CURRENT_MAST_ROTATION_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_LEEWAY_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_SET);
+                availableDetailsTypes.add(DetailType.CURRENT_DRIFT_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_DEPTH_IN_METERS);
+                availableDetailsTypes.add(DetailType.CURRENT_RUDDER_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_TACK_ANGLE_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_DEFLECTOR_PERCENTAGE);
+                availableDetailsTypes.add(DetailType.CURRENT_DEFLECTOR_IN_MILLIMETERS);
+                availableDetailsTypes.add(DetailType.CURRENT_RAKE_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES);
+                availableDetailsTypes.add(DetailType.CURRENT_FORESTAY_LOAD);
+                availableDetailsTypes.add(DetailType.CURRENT_FORESTAY_PRESSURE);
+                availableDetailsTypes.add(DetailType.CURRENT_TARGET_BOATSPEED_PERCENTAGE);
             }
         }
         if (leaderboardGroupName != null) {
@@ -6650,5 +6727,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return availableDetailsTypes;
+    }
+    
+    @Override
+    public List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() {
+        final List<ExpeditionDeviceConfiguration> result = new ArrayList<>();
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            Util.addAll(expeditionConnector.getDeviceConfigurations(), result);
+        }
+        return result;
+    }
+
+    @Override
+    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        // TODO consider replication
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
+        }
+    }
+
+    @Override
+    public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        // TODO consider replication
+        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+        if (expeditionConnector != null) {
+            expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
+        }
     }
 }

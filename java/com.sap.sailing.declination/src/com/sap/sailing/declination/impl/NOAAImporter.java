@@ -8,6 +8,8 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -30,6 +32,7 @@ import com.sap.sse.common.TimePoint;
  * 
  */
 public class NOAAImporter {
+    private static final Logger logger = Logger.getLogger(NOAAImporter.class.getName());
     private static final String QUERY_URL = "https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
     private static final String REGEXP_DECLINATION = "<p class=\"indent\"><b>Declination</b> = ([0-9]*)&deg; ([0-9]*)' *([EW])";
     private static final String REGEXP_ANNUAL_CHANGE = "changing by *([0-9]*)&deg; *([0-9]*)' ([EW])/year *</p>";
@@ -102,7 +105,7 @@ public class NOAAImporter {
                         result.notifyAll();
                     }
                 } catch (IOException | ParserConfigurationException | SAXException e) {
-                    throw new RuntimeException(e);
+                    logger.log(Level.FINE, "Exception while trying to load magnetic declination online", e);
                 }
             }
         };

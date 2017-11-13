@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.communication.event.eventoverview.GetEventOvervi
 import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.mobile.partials.eventdescription.EventDescription;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.MobileStatisticsBoxView;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
@@ -61,5 +62,12 @@ public abstract class AbstractEventOverview extends AbstractEventView<EventViewB
         impressionsUi.addImages(images);
         // TODO: desktop media navigation
         impressionsUi.setClickDestinaton(currentPresenter.getMediaPageNavigation());
+    }
+    
+    protected void setupEventDescription(Panel container) {
+        final String description = currentPresenter.getEventDTO().getDescription();
+        if (description != null) {
+            container.add(new EventDescription(description));
+        }
     }
 }
