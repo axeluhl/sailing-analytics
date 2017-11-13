@@ -20,7 +20,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     private ExecutorService executorService= ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     ArrayList<Future<int[][]>> futures= new ArrayList<Future<int[][]>>();
     
-    private final int MAX_CONSTANT_FLIGHTS = 3;
+    private int maxConstantFlights;
     private final int ITERATIONS= 100000;
     
     public PairingListTemplateImpl() {
@@ -85,6 +85,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      */
     
     protected void createPairingListTemplate(int flights, int groups, int competitors){
+        maxConstantFlights = (int)(flights*0.9);
         int[] seeds = this.generateSeeds(flights, competitors);
         int[][] bestPLT = new int[flights*groups][competitors/groups];
         double bestDev = Double.POSITIVE_INFINITY;
@@ -108,13 +109,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
+        System.out.println(Arrays.deepToString(getAssociationsFromPairingList(bestPLT, new int[competitors][competitors])));
         //executorService.shutdown();
         futures.clear();
     }
     
     
     private int[] generateSeeds(int flights, int competitors) {
-        int[] seeds=new int[(int)(Math.log(ITERATIONS)/Math.log(flights))];
+        int[] seeds=new int[(int)(Math.log(ITERATIONS)/Math.log(flights)*0.5)];
         for(int x=0;x<seeds.length;x++){
             int random=this.randomBW(1, competitors);
             while(this.contains(seeds, random)) {
@@ -146,7 +148,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 //        }
         int fleet=Integer.MAX_VALUE;
         for(int z=0;z<currentPLT.length;z++){
-            if(z<this.MAX_CONSTANT_FLIGHTS*groups){
+            if(z<this.maxConstantFlights*groups){
                 if(currentPLT[z][0]==0){
                     fleet=z;
                     break;
@@ -179,7 +181,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                     @Override
                     public int[][] call() {
                        
-                        return create(flights, groups, competitors, (int)(ITERATIONS/Math.pow(seeds.length, MAX_CONSTANT_FLIGHTS)), 
+                        return create(flights, groups, competitors, (int)(ITERATIONS/Math.pow(seeds.length, maxConstantFlights)), 
                                 plt,associations );          
                     }
                 }
@@ -272,7 +274,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             int[][] constantPLT, int[][] associations) {
 
         int[][] bestPLT = new int[groups*flights][competitors / groups];
-        for (int m = 0; m < MAX_CONSTANT_FLIGHTS*groups; m++) {
+        for (int m = 0; m < maxConstantFlights*groups; m++) {
             System.arraycopy(constantPLT[m], 0, bestPLT[m], 0, constantPLT[0].length);
         }
 
@@ -285,7 +287,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             }
             int[][] currentPLT = new int[groups * flights][competitors / groups];
 
-            for (int flightIndex = MAX_CONSTANT_FLIGHTS; flightIndex < flights; flightIndex++) {
+            for (int flightIndex = maxConstantFlights; flightIndex < flights; flightIndex++) {
                 
                 int[][] flightColumn = this.createFlight(flights, groups, competitors, currentAssociations, this.randomBW(1, competitors));
                 currentAssociations = this.getAssociationsFromPairingList(flightColumn, currentAssociations);
@@ -298,7 +300,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 currentAssociations[j][j] = -1;
             }
             if (this.calcStandardDev(currentAssociations) < bestDev) {
-                for(int z=MAX_CONSTANT_FLIGHTS*groups;z<flights*groups;z++)  bestPLT[z] = currentPLT[z];
+                for(int z=maxConstantFlights*groups;z<flights*groups;z++)  bestPLT[z] = currentPLT[z];
                 bestDev = this.calcStandardDev(currentAssociations);
             }
         }
