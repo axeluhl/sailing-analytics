@@ -20,7 +20,7 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         this.pairingListTemplate = template;
         this.competitionFormat = competitionFormat;
     }
-    
+        
     @Override
     public Iterable<Competitor> getCompetitors(Flight flight, Group group) {
         final int[][] competitorIndices = pairingListTemplate.getPairingListTemplate();

@@ -26,7 +26,11 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
         }
         return result;
     }
-
+     /**
+      * Creates a new ParingListTemplate which depends on the parameters of the given pairingFrameProvider.
+      * @param pairingFrameProvider
+      * @return new PariningListTemplate object
+      */
     protected PairingListTemplate generatePairingList(PairingFrameProvider pairingFrameProvider) {
         return new PairingListTemplateImpl(pairingFrameProvider);
     }
