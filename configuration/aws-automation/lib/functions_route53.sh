@@ -11,7 +11,7 @@
 function route53_change_resource_record(){
 	create_route53_record_file "$1" "$2" "$3"
 	local_echo "Creating Route53 record set (Name: $1.sapsailing.com Value: $3 Type: CNAME)..."
-	aws_wrapper aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "file://${tmpDir}/$change_resource_record_set_file"
+	aws_wrapper route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "file://${tmpDir}/$change_resource_record_set_file"
 }
 
 # -----------------------------------------------------------

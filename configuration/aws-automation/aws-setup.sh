@@ -38,7 +38,7 @@ function deleteTemp () {
 
 quiet=false
 printLog=false
-verbose=false
+verbose=true
 force=false
 strict=false
 debug=false
@@ -57,7 +57,6 @@ tmpDir="./tmp.$RANDOM.$RANDOM.$RANDOM.$$/"
 # -----------------------------------
 logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
-
 function mainScript() {
 echo -n
 
@@ -66,6 +65,16 @@ if $instance_with_load_balancer; then
 		check_if_tmux_is_used
 	fi
 	instance_with_load_balancer_start
+  confirm_reset_panes
+	safeExit
+fi
+
+if $instance; then
+	if $tail; then
+		check_if_tmux_is_used
+	fi
+	instance_start
+  confirm_reset_panes
 	safeExit
 fi
 
@@ -74,6 +83,7 @@ if $instance_with_elastic_ip; then
 		check_if_tmux_is_used
 	fi
 	instance_with_elastic_ip_start
+  confirm_reset_panes
 	safeExit
 fi
 
@@ -96,7 +106,7 @@ usage() {
   -r, --region                  AWS region (e.g. \"eu-west-2\" for London)
   -t, --instance-type           Instance type (e.g. \"t2.medium\")
   -k, --key-name                IAM keypair name (e.g. \"leonradeck-keypair\")
-  -f, --key-file                Path to keypair file
+  -i, --key-file                Path to keypair file
   -s, --ssh-user                SSH user to connect to instance (e.g. \"root\")
   -u, --user-username           Username of user to create
   -q, --user-password           Password of user to create
@@ -104,41 +114,52 @@ usage() {
   -l, --instance-short-name     Short name for instance (e.g. subdomain \"wcs17\")
   -a, --new-admin-password      New password for the admin user
   -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
-  -v, --verbose true	        Verbose mode
-  -d, --debug true              Debug mode
+  -f, --force                   Skip user input and use default variables
+  -d, --debug                   Debug mode
 
   ${bold}Scenarios:${reset}
+  --instance                    Create instance
   --instance-with-load-balancer Create instance with elastic load balancer
-                                and route53 entry
+  --instance-with-elastic-ip    Create instance with elastic elastic ip.
   --tail                        Tail logs from instance using tmux
-
 
   ${bold}Other:${reset}
   --version                  Output version information and exit
 
 
   ${bold}Examples:${reset}
-  Create standalone instance with load balancer and route53 entry:
+  Create instance:
+  > ./aws-setup.sh --instance
+
+  Create standalone instance with load balancer:
   > ./aws-setup.sh --instance-with-load-balancer
 
-  Create standalone instance with load balancer and route53 entry
-  while automatically tailing important log files (tmux required):
+  Create standalone instance with load balancer while
+  automatically tailing important log files (tmux required):
   > ./aws-setup.sh --instance-with-load-balancer --tail
 
-  Create standalone instance with elastic ip and route53 entry:
+  Create standalone instance with elastic ip:
   > ./aws-setup.sh --instance-with-elastic-ip
 
   Tail logfiles of running instance with dns name:
   > ./aws-setup.sh --tail --public-dns-name ec2-x.compute.amazonaws.com
 
-  Create standalone instance with load balancer and route 53 entry by
-  passing all relevant parameters to script avoiding user input.
+  Create instance and use default values:
+  > ./aws-setup.sh --instance --force
+
+  Create instance and use default values except instance name
+  and instance short name:
+  > ./aws-setup.sh --instance --instance-name Test --instance-short-name t --force
+
+  Create standalone instance with load balancer by
+  passing all relevant parameters to script.
   Also use debug mode.
   > ./aws-setup.sh --region eu-west-2 --instance-type t2.medium
   --key-name leonradeck-keypair --key-file /cygdrive/c/Users/d069485/
   .ssh/leonradeck-keypair.pem --user-username test --user-password test
   --instance-name \"WC Santander 2017\" --instance-short-name test
   --new-admin-password admin -d --instance-with-load-balancer
+
 
 "
 }
@@ -186,6 +207,7 @@ unset options
 # Set default value of variable without parameter value to false
 instance_with_load_balancer=false
 instance_with_elastic_ip=false
+instance=false
 tail=false
 
 # Read the options and set variables
@@ -196,7 +218,7 @@ while [[ $1 = -?* ]]; do
     -r|--region) shift; region_param=${1} ;;
 	-t|--instance-type) shift; instance_type_param=${1} ;;
 	-k|--key-name) shift; key_name_param=${1} ;;
-	-f|--key-file) shift; key_file_param=${1} ;;
+	-i|--key-file) shift; key_file_param=${1} ;;
 	-s|--ssh-user) shift; ssh_user_param=${1} ;;
 	-u|--user-username) shift; user_username_param=${1} ;;
 	-q|--user-password) shift; user_password_param=${1} ;;
@@ -205,9 +227,9 @@ while [[ $1 = -?* ]]; do
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
   -f|--force) force=true ;;
-	-v|--verbose) verbose=true ;;
 	-d|--debug) debug=true ;;
 	--instance-with-load-balancer) instance_with_load_balancer=true ;;
+  --instance) instance=true ;;
 	--instance-with-elastic-ip) instance_with_elastic_ip=true ;;
 	--tail) tail=true ;;
     --endopts) shift; break ;;

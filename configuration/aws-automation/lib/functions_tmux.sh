@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# -----------------------------------------------------------
+# Construct tmux user interface
+# -----------------------------------------------------------
 function construct_ui() {
 	# enable scrolling, clicking on panes etc.
 	tmux set -g mouse on
@@ -22,17 +25,28 @@ function construct_ui() {
 }
 
 # -----------------------------------------------------------
-# Opens ssh connections on all four panes
-# @param $1  key file
-# @param $2  ssh user
-# @param $3  dns name of instance
+# Opens ssh connections on all three panes
+# @param $1  ssh user
+# @param $2  dns name of instance
 # -----------------------------------------------------------
 function open_connections() {
-	tmux send-keys -t 1 "ssh -o StrictHostKeyChecking=no -i $1 $2@$3" C-m
-	tmux send-keys -t 2 "ssh -o StrictHostKeyChecking=no -i $1 $2@$3" C-m
-	tmux send-keys -t 3 "ssh -o StrictHostKeyChecking=no -i $1 $2@$3" C-m
+
+	# Can't use ssh wrapper at this point because function cannot be export within tmux environment.
+	if [ -z $key_file ]; then
+		command="ssh -o StrictHostKeyChecking=no $1@$2"
+	else
+	  command="ssh -o StrictHostKeyChecking=no -i $key_file $1@$2"
+	fi
+
+	# Send $command to all three panes and execute
+	tmux send-keys -t 1 $command C-m
+	tmux send-keys -t 2 $command C-m
+	tmux send-keys -t 3 $command C-m
 }
 
+# -----------------------------------------------------------
+# Close all panes except first
+# -----------------------------------------------------------
 function reset_panes(){
 	if more_panes_are_open; then
 		tmux kill-pane -a -t 0

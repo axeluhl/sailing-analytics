@@ -11,7 +11,7 @@ scriptBasename="$(basename ${scriptName} .sh)" # Strips '.sh' from scriptName
 
 # TIMESTAMPS
 
-now=$(LC_ALL=C date +"%m-%d-%Y %r")        # Returns: 06-14-2015 10:34:40 PM
+now=$(LC_ALL=C date +"%Y-%m-%d %H:%M:%S")        # Returns: 2015-06-15 22:34:40
 datestamp=$(LC_ALL=C date +%Y-%m-%d)       # Returns: 2015-06-14
 hourstamp=$(LC_ALL=C date +%r)             # Returns: 10:34:40 PM
 timestamp=$(LC_ALL=C date +%Y%m%d_%H%M%S)  # Returns: 20150614_223440

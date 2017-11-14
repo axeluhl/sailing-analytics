@@ -42,92 +42,12 @@ function require_variable(){
 	fi
 }
 
-
-# -----------------------------------------------------------
-# Creates a parameter from a key and value
-# @param $1  key
-# @param $2  value
-# @return    result ("--key value")
-# -----------------------------------------------------------
-function add_param() {
-	if [ ! -z "$2" ]; then
-		local result=" --$1 $2"
-	fi
-	echo "$result"
-}
-
-# -----------------------------------------------------------
-# Constructs string of user data variable name and value plus linebreak
-# @param $1  user data variable name
-# @param $2  user data variable value
-# @return    name=value (linebreak) if value not empty else nothing
-# -----------------------------------------------------------
-function add_user_data_variable(){
-		if ! [ -z "$2" ]; then
-			local CR_LF=$'\r'$'\n'
-			local content="$1=$2"
-			content+=$CR_LF
-			echo "$content"
-		fi
-}
-# -----------------------------------------------------------
-# Checks if event id follows the right pattern
-# @param $1  event id
-# @return    true if event id is valid
-# -----------------------------------------------------------
-function is_valid_event_id(){
-	[[ $1 =~ .{8}-.{4}-.{4}-.{4}-.{12} ]]
-}
-
-function is_valid_instance_id(){
-	[[ $1 =~ i-.{17} ]]
-}
-
 # -----------------------------------------------------------
 # Workaround: use stderr stream for console output
 # @param $1  message
 # -----------------------------------------------------------
 function local_echo(){
 	echo "$1" >&2
-}
-
-function command_was_successful(){
-	[ $1 -eq 0 ]
-}
-
-# -----------------------------------------------------------
-# Check if return value is not equals 0
-# @param $1  return value
-# @return 0 if no error
-# -----------------------------------------------------------
-function is_error(){
-	[ $1 -ne 0 ]
-}
-
-# -----------------------------------------------------------
-# Checks if variable is a number
-# @param $1  returnvariablevalue
-# @return 0 if variable is a number
-# -----------------------------------------------------------
-function is_number(){
-	[[ $1 =~ ^-?[0-9]+$ ]]
-}
-
-# -----------------------------------------------------------
-# Check if variable is a number and its value is 200
-# @param $1  variable
-# @return 0 if value is 200
-# -----------------------------------------------------------
-function is_http_ok(){
-	is_number $1 && [ $1 == 200 ]
-}
-
-function get_response(){
-	echo "$1" | head -n-1
-}
-
-function get_status_code(){
-	echo "$1" | tail -n1
 }
 
 # -----------------------------------------------------------
@@ -139,20 +59,6 @@ function get_status_code(){
 function require_input(){
 	 read -e -p "$1" -i "$2" $3
 }
-
-region_ask_message="Please enter the region for the instance: "
-instance_type_ask_message="Please enter the instance type: "
-key_name_ask_message="Please enter the name of your keypair to connect to the instance: "
-instance_name_ask_message="Please enter a name for the instance: (e.g \"WC Santander 2017\"): "
-instance_short_name_ask_message="Please enter a short name for the instance (e.g. \"wcs17\"): "
-key_file_ask_message="Please enter the file path of the keypair or leave empty to use default ssh key: "
-new_admin_password_ask_message="Please enter a new password for the admin user: "
-mongo_db_host_ask_message="Please enter the ip adress of the mongo db server: "
-mongo_db_port_ask_message="Please enter the port of the mongo db server: "
-user_username_ask_message="Please enter the username of your new user: "
-user_password_ask_message="Please enter the password of your new user: "
-public_dns_name_ask_message="Please enter the public dns name: "
-ssh_user_ask_message="Please enter the ssh user: "
 
 function require_region(){
 	require_variable "$region_param" region "$default_region" "$region_ask_message"
@@ -197,3 +103,17 @@ function require_public_dns_name(){
 function require_ssh_user(){
 	require_variable "$ssh_user_param" ssh_user "" "$ssh_user_ask_message"
 }
+
+region_ask_message="Please enter the region for the instance: "
+instance_type_ask_message="Please enter the instance type: "
+key_name_ask_message="Please enter the name of your keypair to connect to the instance: "
+instance_name_ask_message="Please enter a name for the instance: (e.g \"WC Santander 2017\"): "
+instance_short_name_ask_message="Please enter a short name for the instance (e.g. \"wcs17\"): "
+key_file_ask_message="Please enter the file path of the keypair or leave empty to use default ssh key: "
+new_admin_password_ask_message="Please enter a new password for the admin user: "
+mongo_db_host_ask_message="Please enter the ip adress of the mongo db server: "
+mongo_db_port_ask_message="Please enter the port of the mongo db server: "
+user_username_ask_message="Please enter the username of your new user: "
+user_password_ask_message="Please enter the password of your new user: "
+public_dns_name_ask_message="Please enter the public dns name: "
+ssh_user_ask_message="Please enter the ssh user: "

@@ -1,5 +1,71 @@
 #!/usr/bin/env bash
 
+# -----------------------------------------------------------
+# Creates a parameter from a key and value
+# @param $1  key
+# @param $2  value
+# @return    result ("--key value")
+# -----------------------------------------------------------
+function add_param() {
+	if [ ! -z "$2" ]; then
+		local result=" --$1 $2"
+	fi
+	echo "$result"
+}
+
+# -----------------------------------------------------------
+# Constructs string of user data variable name and value plus linebreak
+# @param $1  user data variable name
+# @param $2  user data variable value
+# @return    name=value (linebreak) if value not empty else nothing
+# -----------------------------------------------------------
+function add_user_data_variable(){
+		if ! [ -z "$2" ]; then
+			local CR_LF=$'\r'$'\n'
+			local content="$1=$2"
+			content+=$CR_LF
+			echo "$content"
+		fi
+}
+
+function command_was_successful(){
+	[ $1 -eq 0 ]
+}
+
+# -----------------------------------------------------------
+# Checks if variable is a number
+# @param $1  returnvariablevalue
+# @return 0 if variable is a number
+# -----------------------------------------------------------
+function is_number(){
+	[[ $1 =~ ^-?[0-9]+$ ]]
+}
+
+# -----------------------------------------------------------
+# Check if variable is a number and its value is 200
+# @param $1  variable
+# @return 0 if value is 200
+# -----------------------------------------------------------
+function is_http_ok(){
+	is_number $1 && [ $1 == 200 ]
+}
+
+function get_response(){
+	echo "$1" | head -n-1
+}
+
+function get_status_code(){
+	echo "$1" | tail -n1
+}
+
+function get_attribute(){
+	jq -r $1 | sanitize
+}
+
+function sanitize(){
+	tr -d '\r'
+}
+
 # ------------------------------------------------------
 # The following functions were part of a bash template
 # and could be useful in the future
@@ -35,6 +101,8 @@ function readFile() {
     echo "${result}"
   done < "$1"
 }
+
+
 
 # Escape a string
 # ------------------------------------------------------
@@ -351,6 +419,10 @@ lttrim() {
   # Usage examples:
   #     echo "  foo  bar baz " | trim  #==> "foo  bar baz"
   ltrim "$1" | rtrim "$1"
+}
+
+only_letters_and_numbers(){
+  tr -d -c '[:alnum:]'
 }
 
 squeeze() {

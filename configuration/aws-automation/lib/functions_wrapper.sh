@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 
+# -----------------------------------------------------------
+# Does the error checking for curl commands.
+# Captures response and http code of curl command into variable $out.
+# Checks if http code is 200.
+# If yes print success and return response.
+# If not then print error.
+# @return  latest build
+# -----------------------------------------------------------
 function curl_wrapper(){
     local out;
-    out=$("$@")
+    out=$(curl -qSfsw '\n%{http_code}' "$@")
     #local return_code=$?
     local command=$(echo "$@" | tr '\n' ' ')
     local status_code=$(get_status_code "$out")
@@ -19,9 +27,13 @@ function curl_wrapper(){
       fi
 }
 
+# -----------------------------------------------------------
+# Does the error checking for aws commands. It also remove all
+# carriage return symbols from response.
+# -----------------------------------------------------------
 function aws_wrapper(){
   local out;
-  out=$("$@")
+  out=$(aws "$@")
   if command_was_successful $?; then
     success "[ OK ]"
     echo $out | sanitize
@@ -31,8 +43,22 @@ function aws_wrapper(){
   fi
 }
 
-function do_until_http_200(){
-	while [[ $("$@") != "200" ]];
+# -----------------------------------------------------------
+# Automatically uses key file for ssh if possible.
+# -----------------------------------------------------------
+function ssh_wrapper(){
+  if [ -z $key_file ]; then
+    ssh -o StrictHostKeyChecking=no "$@"
+  else
+    ssh -o StrictHostKeyChecking=no -i $key_file "$@"
+  fi
+}
+
+# -----------------------------------------------------------
+# Executes curl command until status code is 200
+# -----------------------------------------------------------
+function curl_until_http_200(){
+	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "200" ]];
 	do
 		echo -n "."
 		sleep $http_retry_interval;
@@ -41,8 +67,12 @@ function do_until_http_200(){
   success "[ OK ]"
 }
 
-function do_until_http_401(){
-	while [[ $("$@") != "401" ]];
+# -----------------------------------------------------------
+# Executes curl command until status code is 401.
+# TODO: Fix code duplication (curl_until_http_200, curl_until_http_401)
+# -----------------------------------------------------------
+function curl_until_http_401(){
+	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "401" ]];
 	do
 		echo -n "."
 		sleep $http_retry_interval;

@@ -24,8 +24,8 @@ function tail_user_input(){
 function tail_execute() {
 	echo "Open tmux panes and start tailing log files..."
 	construct_ui
-	wait_for_ssh_connection "$key_file" "$ssh_user" "$public_dns_name"
-	open_connections "$key_file" "$ssh_user" "$public_dns_name"
+	wait_for_ssh_connection "$ssh_user" "$public_dns_name"
+	open_connections "$ssh_user" "$public_dns_name"
 	tail_logfiles
 }
 
