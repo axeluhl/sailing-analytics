@@ -15,7 +15,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -23,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
@@ -81,6 +84,20 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
                 }
             }
         });
+        Drawable mergeIcon;
+        switch (item.getMergeState()) {
+            case WARNING:
+                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+                break;
+
+            case ERROR:
+                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+                break;
+
+            default:
+                mergeIcon = null;
+        }
+        holder.mItemMergeState.setImageDrawable(mergeIcon);
     }
 
     @Override
@@ -195,6 +212,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         private TextView mItemText;
         private TextView mItemPenalty;
         private View mItemEdit;
+        private ImageView mItemMergeState;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -203,6 +221,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             mItemText = ViewHelper.get(itemView, R.id.item_text);
             mItemPenalty = ViewHelper.get(itemView, R.id.item_penalty);
             mItemEdit = ViewHelper.get(itemView, R.id.item_edit);
+            mItemMergeState = ViewHelper.get(itemView, R.id.item_merge_state);
         }
     }
 }

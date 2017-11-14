@@ -559,7 +559,7 @@
     <string name="competitor_count">%d</string>
 
     <string name="refresh_title">Data changed</string>
-    <string name="refresh_message">The data has changed and the view needs to be refreshed. All unsaved changes will be lost.</string>
+    <string name="refresh_message">The data of following competitors has changed. Please review:\n\n%s</string>
     <string name="refresh_positive">@android:string/ok</string>
 
 </resources>

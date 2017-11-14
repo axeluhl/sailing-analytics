@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -96,9 +98,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private ImageView mListButton;
     private HeaderLayout mHeader;
     private StateChangeListener mStateChangeListener;
-
-    private boolean mRefreshAuto = false;
-    private boolean mRefreshManual = false;
 
     public static PenaltyFragment newInstance() {
         Bundle args = new Bundle();
@@ -299,7 +298,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
                 mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK)); // TODO handle merge state
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
             }
         }
     }
@@ -333,7 +332,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 break;
             }
         }
-        if (!mRefreshAuto && dirty) {
+        if (dirty) {
             sendUnconfirmed();
         }
 
@@ -351,13 +350,11 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     private void confirmData() {
-        mRefreshManual = true;
         sendUnconfirmed();
         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
         initLocalData();
         loadCompetitors();
-        mRefreshManual = false;
     }
 
     private String[] getAllMaxPointsReasons() {
@@ -492,6 +489,111 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         setPublishButton();
     }
 
+    private void mergeData(CompetitorResults results) {
+        Map<Serializable, String> changedCompetitor = new HashMap<>();
+        for (CompetitorResult result : results) {
+            CompetitorResultEditableImpl item = null;
+            CompetitorResult draft = null;
+            for (CompetitorResultEditableImpl edited : mCompetitorResults) {
+                if (result.getCompetitorId().equals(edited.getCompetitorId())) {
+                    item = edited;
+                    break;
+                }
+            }
+            for (CompetitorResult saved : mDraftData) {
+                if (result.getCompetitorId().equals(saved.getCompetitorId())) {
+                    draft = saved;
+                    break;
+                }
+            }
+            if (item != null && draft != null) { // result is in list
+                if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) { // max point reasons differs
+                    if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
+                        setMergeState(item, MergeState.WARNING);
+                    } else {
+                        setMergeState(item, MergeState.ERROR);
+                    }
+                    item.setMaxPointsReason(result.getMaxPointsReason());
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+                if (item.getScore() != null) {
+                    if (item.getScore().equals(result.getScore())) { // score differs
+                        if (item.getScore().equals(draft.getScore())) {
+                            setMergeState(item, MergeState.WARNING);
+                        } else {
+                            setMergeState(item, MergeState.ERROR);
+                        }
+                        item.setScore(result.getScore());
+                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    }
+                } else if (result.getScore() != null) {
+                    setMergeState(item, MergeState.WARNING);
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+                if (item.getComment() != null) {
+                    if (item.getComment().equals(result.getComment())) { // comment differs
+                        if (item.getComment().equals(draft.getComment())) {
+                            setMergeState(item, MergeState.WARNING);
+                        } else {
+                            setMergeState(item, MergeState.ERROR);
+                        }
+                        item.setDirty(true);
+                        item.setComment(item.getComment() + " ## " + result.getComment());
+                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    }
+                } else if (result.getComment() != null) {
+                    setMergeState(item, MergeState.WARNING);
+                    item.setComment(result.getComment());
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+                if (!item.getMergeState().equals(result.getMergeState()) && item.getMergeState().equals(draft.getMergeState())) {
+                    setMergeState(item, result.getMergeState());
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+            } else { // unknown result, so it will be added
+                mCompetitorResults.add(new CompetitorResultEditableImpl(result));
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+        if (changedCompetitor.size() > 0) { // show message to user
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.refresh_title);
+            StringBuilder string = new StringBuilder(1024);
+            for (String competitor : changedCompetitor.values()) {
+                string.append(competitor);
+                string.append("\n");
+            }
+            builder.setMessage(getString(R.string.refresh_message, string.toString()));
+            builder.setPositiveButton(R.string.refresh_positive, null);
+            builder.show();
+        }
+    }
+
+    private void setMergeState(CompetitorResultEditableImpl item, MergeState newState) {
+        switch (item.getMergeState()) {
+            case ERROR:
+                if (newState != MergeState.ERROR) {
+                    break;
+                }
+                item.setDirty(true);
+                item.setMergeState(newState);
+                break;
+
+            case WARNING:
+                if (newState != MergeState.WARNING && newState != MergeState.ERROR) {
+                    break;
+                }
+                item.setDirty(true);
+                item.setMergeState(newState);
+                break;
+
+            case OK:
+                item.setDirty(true);
+                item.setMergeState(newState);
+                break;
+        }
+    }
+
     private void setPublishButton() {
         Set<Serializable> changed = new HashSet<>();
         boolean isChecked = false;
@@ -532,9 +634,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 context = actionBar.getThemedContext();
             }
         }
+        competitor.setMergeState(MergeState.OK);
         CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, competitor.getCompetitorId(), competitor
             .getCompetitorDisplayName(), competitor.getOneBasedRank(), competitor.getMaxPointsReason(), competitor.getScore(), competitor
-            .getFinishingTime(), competitor.getComment(), MergeState.OK); // TODO handle merge state
+            .getFinishingTime(), competitor.getComment(), competitor.getMergeState());
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition() +
@@ -558,13 +661,17 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     competitor.setScore(item.getScore());
                     competitor.setDirty(true);
                 }
-                if (competitor.isDirty()) {
-                    mAdapter.notifyDataSetChanged();
-                }
+                mAdapter.notifyDataSetChanged();
                 setPublishButton();
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
         if (AppUtils.with(getActivity()).isTablet()) {
@@ -590,7 +697,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
             if (!found && item.isDirty()) {
                 result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK)); // TODO handle merge state
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
             }
         }
 
@@ -603,7 +710,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
             if (!found) {
                 result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK)); // TODO handle merge state
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
             }
         }
 
@@ -638,30 +745,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
             super.onFinishingPositioningsChanged(state);
 
-            askForRefresh();
-        }
-
-        private void askForRefresh() {
             PenaltyFragment fragment = mReference.get();
             if (fragment != null) {
-                if (!fragment.mRefreshManual) {
-                    Context context = fragment.getActivity();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-                    builder.setTitle(context.getString(R.string.refresh_title));
-                    builder.setMessage(context.getString(R.string.refresh_message));
-                    builder.setPositiveButton(context.getString(R.string.refresh_positive), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            PenaltyFragment frag = mReference.get();
-                            if (frag != null) {
-                                frag.mRefreshAuto = true;
-                                frag.replaceFragment(PenaltyFragment.newInstance(), R.id.race_content);
-                            }
-                        }
-                    });
-                    builder.setCancelable(false);
-                    builder.show();
-                }
+                fragment.mergeData(state.getFinishPositioningList());
             }
         }
     }
