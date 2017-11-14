@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.gwt.common.client.datetime.DateTimeInput.Accuracy;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 public class EventEditDialog extends EventDialog {
@@ -22,8 +22,8 @@ public class EventEditDialog extends EventDialog {
         descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         venueEntryField = createTextBox(event.venue.getName());
         venueEntryField.setVisibleLength(35);
-        startDateBox = createDateTimeBox(event.startDate, HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
-        endDateBox = createDateTimeBox(event.endDate, HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
+        startDateBox = createDateTimeBox(event.startDate, Accuracy.MINUTES);
+        endDateBox = createDateTimeBox(event.endDate, Accuracy.MINUTES);
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(event.isPublic);
         baseURLEntryField = createTextBox(event.getBaseURL());

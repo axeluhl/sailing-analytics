@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.sap.sailing.gwt.common.client.datetime.DateTimeInput.Accuracy;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -32,9 +32,9 @@ public class EventCreateDialog extends EventDialog {
         venueEntryField.setVisibleLength(35);
         venueEntryField.ensureDebugId("VenueTextBox");
         final Date now = new Date();
-        startDateBox = createDateTimeBox(now, HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
+        startDateBox = createDateTimeBox(now, Accuracy.MINUTES);
         startDateBox.ensureDebugId("StartDateTimeBox");
-        endDateBox = createDateTimeBox(now, HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
+        endDateBox = createDateTimeBox(now, Accuracy.MINUTES);
         endDateBox.ensureDebugId("EndDateTimeBox");
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);

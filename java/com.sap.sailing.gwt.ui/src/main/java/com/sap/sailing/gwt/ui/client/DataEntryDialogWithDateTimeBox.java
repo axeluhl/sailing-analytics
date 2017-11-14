@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
+import com.sap.sailing.gwt.common.client.datetime.DateAndTimeInput;
+import com.sap.sailing.gwt.common.client.datetime.DateTimeInput.Accuracy;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox.Format;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -34,6 +36,16 @@ public abstract class DataEntryDialogWithDateTimeBox<T> extends DataEntryDialog<
         result.addValueChangeHandler(event -> validateAndUpdate());
         DialogUtils.linkEnterToButton(getOkButton(), result);
         DialogUtils.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+
+    protected DateAndTimeInput createDateTimeBox(Date initialValue, Accuracy accuracy) {
+        final DateAndTimeInput result = new DateAndTimeInput(accuracy);
+        result.setValue(initialValue);
+        result.addValueChangeHandler(event -> validateAndUpdate());
+        // TODO: Enable DateAndTimeInput for enter and escape linking
+        // DialogUtils.linkEnterToButton(getOkButton(), result);
+        // DialogUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
     }
 
