@@ -228,9 +228,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         // same maneuver
                         // FIXME penalty circles slow down the boat so much that time limit may get exceeded although
                         // distance limit is matched
-                        && currentFixAndCourseChange.getA().getTimePoint().asMillis()
-                                - group.get(group.size() - 1).getA().getTimePoint()
-                                        .asMillis() > getApproximateManeuverDurationInMilliseconds(competitor)
+                        && currentFixAndCourseChange.getA().getTimePoint().asMillis() - group.get(group.size() - 1)
+                                .getA().getTimePoint().asMillis() > getApproximateManeuverDuration(competitor)
+                                        .asMillis()
                         && currentFixAndCourseChange.getA().getPosition()
                                 .getDistance(group.get(group.size() - 1).getA().getPosition())
                                 .compareTo(threeHullLengths) > 0) {
@@ -294,14 +294,12 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             List<Pair<GPSFixMoving, CourseChange>> douglasPeuckerFixesGroup, NauticalSide maneuverDirection,
             TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> result = new ArrayList<>();
-        TimePoint earliestTimePointBeforeManeuver = Collections
-                .max(Arrays.asList(
-                        new MillisecondsTimePoint(douglasPeuckerFixesGroup.get(0).getA().getTimePoint().asMillis()
-                                - getApproximateManeuverDurationInMilliseconds(competitor) / 2),
-                        earliestManeuverStart));
+        TimePoint earliestTimePointBeforeManeuver = Collections.max(
+                Arrays.asList(new MillisecondsTimePoint(douglasPeuckerFixesGroup.get(0).getA().getTimePoint().asMillis()
+                        - getApproximateManeuverDuration(competitor).asMillis() / 2), earliestManeuverStart));
         TimePoint latestTimePointAfterManeuver = Collections.min(Arrays.asList(
                 new MillisecondsTimePoint(douglasPeuckerFixesGroup.get(douglasPeuckerFixesGroup.size() - 1).getA()
-                        .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds(competitor) / 2),
+                        .getTimePoint().asMillis() + getApproximateManeuverDuration(competitor).asMillis() / 2),
                 latestManeuverEnd));
 
         CurveDetailsWithBearingSteps maneuverMainCurveDetails = computeManeuverMainCurveDetails(competitor,
@@ -991,10 +989,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         return maneuverTimePoint;
     }
 
-    private long getApproximateManeuverDurationInMilliseconds(Competitor competitor) {
-        return getApproximateManeuverDuration(competitor).asMillis();
-    }
-
+    /**
+     * Gets the maximal duration of the maneuver main curve.
+     */
     protected Duration getApproximateManeuverDuration(Competitor competitor) {
         return competitor.getBoat().getBoatClass().getApproximateManeuverDuration();
     }
