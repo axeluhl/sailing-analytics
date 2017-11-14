@@ -26,7 +26,7 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
         center = new TabLayoutPanel(2.5, Unit.EM);
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 if (!hasRequiredRole(user) && hasRequiredRole(UserManagementEntryPoint.this.user)) {
                     Window.Location.reload(); // user signed out or lost required role; reload to take the user to the log-in screen
                 }

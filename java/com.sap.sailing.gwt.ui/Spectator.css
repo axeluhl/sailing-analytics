@@ -96,23 +96,6 @@ table {
 	margin: 0 12px 18px 12px;
 }
 
-.sapLogo {
-	float: left;
-	margin: 13px 0 0 12px;
-}
-
-.sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
-}
-
-.sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 15px 0 0 0;
-}
-
 .leaderboardLabel {
 	border-bottom: 2px solid #007dc0;
 	font-weight: bold;

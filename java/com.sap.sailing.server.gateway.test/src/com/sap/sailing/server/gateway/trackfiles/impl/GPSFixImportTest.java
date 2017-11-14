@@ -15,8 +15,8 @@ import java.util.Collection;
 import org.apache.commons.fileupload.FileItem;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
 import com.sap.sse.common.Util.Pair;

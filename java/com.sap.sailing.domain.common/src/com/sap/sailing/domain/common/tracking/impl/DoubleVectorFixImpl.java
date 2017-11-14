@@ -1,12 +1,16 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
 import java.util.Arrays;
+import java.util.BitSet;
 
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Implementation of {@link DoubleVectorFix}.
+ * Implementation of {@link DoubleVectorFix}. In order to save some space and reduce the number of object headers,
+ * instead of storing {@link Double} objects the structure internally uses an array of {@code double} values and
+ * additionally remembers in a {@link BitSet} which components are {@code null}. The {@link #get()} and {@link #get(int)}
+ * methods then translate back to a {@link Double} representation accordingly.
  */
 public class DoubleVectorFixImpl implements DoubleVectorFix {
 
@@ -14,10 +18,25 @@ public class DoubleVectorFixImpl implements DoubleVectorFix {
     
     private final double[] fixData;
     private final TimePoint timePoint;
+    
+    /**
+     * The constructor accepts a {@code Double[]} for the data components, allowing for {@code null}
+     * values to be used. To save space, internally a {@code double[]} is used to represent the data.
+     * In order to encode the {@code null} values, this bit set stores which array components had
+     * valid, non-{@code null} data.
+     */
+    private final BitSet validComponents;
 
-    public DoubleVectorFixImpl(TimePoint timePoint, double[] fixData) {
+    public DoubleVectorFixImpl(TimePoint timePoint, Double[] fixData) {
         this.timePoint = timePoint;
-        this.fixData = fixData;
+        this.fixData = new double[fixData.length];
+        this.validComponents = new BitSet(fixData.length);
+        for (int i=0; i<fixData.length; i++) {
+            if (fixData[i] != null) {
+                this.validComponents.set(i);
+                this.fixData[i] = fixData[i];
+            }
+        }
     }
 
     @Override
@@ -26,14 +45,22 @@ public class DoubleVectorFixImpl implements DoubleVectorFix {
     }
     
     @Override
-    public double get(int index) {
-        return fixData[index];
+    public Double get(int index) {
+        return index<fixData.length && validComponents.get(index) ? fixData[index] : null;
     }
 
     @Override
-    public double[] get() {
-        // TODO defensive copy?
-        return fixData;
+    public Double[] get() {
+        final Double[] result = new Double[fixData.length];
+        for (int i=0; i<fixData.length; i++) {
+            result[i] = validComponents.get(i) ? fixData[i] : null;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean hasValidData() {
+        return !validComponents.isEmpty();
     }
 
     @Override
@@ -42,6 +69,7 @@ public class DoubleVectorFixImpl implements DoubleVectorFix {
         int result = 1;
         result = prime * result + Arrays.hashCode(fixData);
         result = prime * result + ((timePoint == null) ? 0 : timePoint.hashCode());
+        result = prime * result + ((validComponents == null) ? 0 : validComponents.hashCode());
         return result;
     }
 
@@ -60,6 +88,11 @@ public class DoubleVectorFixImpl implements DoubleVectorFix {
             if (other.timePoint != null)
                 return false;
         } else if (!timePoint.equals(other.timePoint))
+            return false;
+        if (validComponents == null) {
+            if (other.validComponents != null)
+                return false;
+        } else if (!validComponents.equals(other.validComponents))
             return false;
         return true;
     }

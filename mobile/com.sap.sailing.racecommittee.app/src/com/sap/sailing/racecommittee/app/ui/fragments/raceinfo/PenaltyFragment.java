@@ -16,6 +16,7 @@ import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
@@ -283,7 +284,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
         initLocalData();
         loadCompetitors();
-
     }
 
     private void initLocalData() {
@@ -291,7 +291,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         if (getRaceState().getFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
                 mDraftData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
             }
         }
 
@@ -299,7 +299,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
                 mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK)); // TODO handle merge state
             }
         }
     }
@@ -419,7 +419,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
             name += " - " + item.getName();
             CompetitorResult result = new CompetitorResultImpl(item.getId(), name, 0, MaxPointsReason.NONE,
-                    /* score */ null, /* finishingTime */ null, /* comment */ null);
+                    /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK); // TODO handle merge state
             mCompetitorResults.add(new CompetitorResultEditableImpl(result));
         }
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position list
@@ -534,7 +534,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
         CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, competitor.getCompetitorId(), competitor
             .getCompetitorDisplayName(), competitor.getOneBasedRank(), competitor.getMaxPointsReason(), competitor.getScore(), competitor
-            .getFinishingTime(), competitor.getComment());
+            .getFinishingTime(), competitor.getComment(), MergeState.OK); // TODO handle merge state
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition() +
@@ -583,14 +583,14 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             for (CompetitorResult published : results) {
                 if (item.getCompetitorId().equals(published.getCompetitorId())) {
                     result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                        .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                        .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
                     found = true;
                     break;
                 }
             }
             if (!found && item.isDirty()) {
                 result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK)); // TODO handle merge state
             }
         }
 
@@ -603,7 +603,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
             if (!found) {
                 result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment()));
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK)); // TODO handle merge state
             }
         }
 

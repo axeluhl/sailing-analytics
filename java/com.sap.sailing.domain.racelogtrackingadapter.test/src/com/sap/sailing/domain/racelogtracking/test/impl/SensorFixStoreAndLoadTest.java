@@ -54,6 +54,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -75,7 +76,6 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.BravoDataFixMapper;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracker;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -542,7 +542,7 @@ public class SensorFixStoreAndLoadTest {
     }
 
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
-        double[] fixData = new double[BravoSensorDataMetadata.getTrackColumnCount()];
+        Double[] fixData = new Double[BravoSensorDataMetadata.getTrackColumnCount()];
         // fill the port/starboard columns as well because their minimum defines the true ride height
         fixData[BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex()] = rideHeight;
         fixData[BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex()] = rideHeight;
@@ -554,7 +554,7 @@ public class SensorFixStoreAndLoadTest {
     }
     
     private DoubleVectorFix createTestDoubleVectorFixWithTestValue(long timestamp, double testValue) {
-        double[] fixData = new double[TestFixImpl.COLUMNS.size()];
+        Double[] fixData = new Double[TestFixImpl.COLUMNS.size()];
         fixData[TestFixImpl.TEST_COLUMN_INDEX] = testValue;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
     }

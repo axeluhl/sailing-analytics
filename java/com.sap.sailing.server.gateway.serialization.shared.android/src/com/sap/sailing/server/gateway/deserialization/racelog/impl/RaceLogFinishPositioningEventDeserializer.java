@@ -7,6 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
@@ -54,8 +55,15 @@ public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRace
             final Long finishingTimePointAsMillis = (Long) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_FINISHING_TIME_POINT_AS_MILLIS);
             final TimePoint finishingTime = finishingTimePointAsMillis == null ? null : new MillisecondsTimePoint(finishingTimePointAsMillis);
             final String comment = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMMENT);
+            final String mergeStateAsString = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_MERGE_STATE);
+            final MergeState mergeState;
+            if (mergeStateAsString == null) {
+                mergeState = MergeState.OK;
+            } else {
+                mergeState = MergeState.valueOf(mergeStateAsString);
+            }
             CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
-                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank.intValue(), maxPointsReason, score, finishingTime, comment);
+                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank.intValue(), maxPointsReason, score, finishingTime, comment, mergeState);
             rankCounter++;
             positionedCompetitors.add(positionedCompetitor);
         }

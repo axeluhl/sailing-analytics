@@ -95,6 +95,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -149,7 +150,6 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -178,7 +178,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
-import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
@@ -3511,8 +3511,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private Iterable<WindTrackerFactory> getWindTrackerFactories() {
         final Set<WindTrackerFactory> result;
-        if (bundleContext == null) {
-            result = Collections.singleton((WindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
+        if (bundleContext == null) { // the non-OSGi case
+            result = Collections.singleton((WindTrackerFactory) ExpeditionTrackerFactory.getInstance());
         } else {
             ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
                     bundleContext, WindTrackerFactory.class, null);
