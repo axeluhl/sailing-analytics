@@ -3,7 +3,13 @@ package com.sap.see.pairinglist.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.Test;
 
@@ -142,5 +148,40 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
             System.out.println(Arrays.toString(row));
         }
         System.out.println(testTemplate.getQuality());
+    }
+    
+    /**
+     * This test checks if the flights are divided up correctly(e.g. multiple competitors, absenced competitors)
+     */
+    @Test
+    public void checkFlights() {
+        final int flights = 15;
+        final int groups = 3;
+        final int competitors = 18;
+        PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
+        ArrayList<Integer> availableCompetitors = new ArrayList<>();
+        
+        int[][] copy = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors)).getPairingListTemplate();
+        
+        for(int i = 0; i < flights; i++) {
+            
+            IntStream.range(1, competitors+1).forEach(competitor -> {
+                availableCompetitors.add(competitor);
+            });
+            
+            for(int j = 0; j < groups; j++) {
+                for(int k = 0; k < competitors/groups; k++) {
+                    if(availableCompetitors.contains(copy[i*groups+j][k])) {
+                        availableCompetitors.remove(new Integer(copy[i*groups+j][k]));
+                    }
+                }
+            }
+            
+            if(availableCompetitors.isEmpty()) {
+                continue;
+            } else {
+                Assert.fail("The competitors are not divided up correctly!");
+            }
+        }
     }
 }
