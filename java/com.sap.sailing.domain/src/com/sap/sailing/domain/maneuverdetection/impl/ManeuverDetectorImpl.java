@@ -48,9 +48,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class ManeuverDetectorImpl implements ManeuverDetector {
 
-    static final double MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 2;
-
     private static final Logger logger = Logger.getLogger(ManeuverDetectorImpl.class.getName());
+
+    /**
+     * Used in maneuver detection algorithm to approximate the start and end time of maneuver performance. It defines
+     * the maximal absolute course change velocity in degrees per second that shall be regarded as a stable course.
+     */
+    private static final double MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 2;
 
     /**
      * Used in maneuver detection algorithm to approximate the start and end time of maneuver main curve performance. It

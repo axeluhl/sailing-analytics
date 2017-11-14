@@ -11,7 +11,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Determines maneuvers within a tracked race.
+ * Determines maneuvers performed within a tracked race.
  * 
  * @author Vladislav Chumak (D069712)
  *
