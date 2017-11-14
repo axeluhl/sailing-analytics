@@ -72,6 +72,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -303,8 +304,7 @@ public class TrackingListFragment extends BaseFragment
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
                 mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item
-                    .getMergeState()));
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
             }
         }
     }
@@ -515,16 +515,13 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private void deleteCompetitorsFromFinishedList(Collection<Competitor> validCompetitors) {
-        List<Integer> positions = new ArrayList<>();
         List<CompetitorResultWithIdImpl> toBeDeleted = new ArrayList<>();
         for (CompetitorResultWithIdImpl item : mFinishedData) {
             if (!validCompetitors.contains(getCompetitorStore().getExistingCompetitorById(item.getCompetitorId()))) {
-                positions.add(mFinishedData.indexOf(item));
                 toBeDeleted.add(item);
                 continue;
             }
             if (item.getOneBasedRank() == 0 && item.getMaxPointsReason() == MaxPointsReason.NONE) {
-                positions.add(mFinishedData.indexOf(item));
                 toBeDeleted.add(item);
             }
         }
@@ -725,7 +722,10 @@ public class TrackingListFragment extends BaseFragment
         AlertDialog dialog = builder.create();
         dialog.show();
         if (AppUtils.with(getActivity()).isTablet()) {
-            dialog.getWindow().setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+            Window window = dialog.getWindow();
+            if (window != null) {
+                window.setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
         }
     }
 
@@ -768,8 +768,8 @@ public class TrackingListFragment extends BaseFragment
     protected void setMaxPointsReasonForItem(CompetitorResultWithIdImpl item, CharSequence maxPointsReasonName) {
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
         CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item
-            .getCompetitorDisplayName(), item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item
-            .getComment(), item.getMergeState());
+            .getCompetitorDisplayName(), item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item.getComment(), item
+            .getMergeState());
         updateItem(item, newItem);
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
