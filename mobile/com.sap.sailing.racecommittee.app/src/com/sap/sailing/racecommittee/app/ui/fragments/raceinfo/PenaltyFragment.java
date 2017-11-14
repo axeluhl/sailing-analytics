@@ -506,8 +506,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     break;
                 }
             }
-            if (item != null && draft != null) { // result is in list
-                if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) { // max point reasons differs
+            if (item != null && item.isDirty() && draft != null) { // result is in list and dirty
+                // check max point reason
+                if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
                     if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
                         setMergeState(item, MergeState.WARNING);
                     } else {
@@ -516,8 +517,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     item.setMaxPointsReason(result.getMaxPointsReason());
                     changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                 }
+
+                // check score
                 if (item.getScore() != null) {
-                    if (item.getScore().equals(result.getScore())) { // score differs
+                    if (!item.getScore().equals(result.getScore())) {
                         if (item.getScore().equals(draft.getScore())) {
                             setMergeState(item, MergeState.WARNING);
                         } else {
@@ -526,12 +529,15 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                         item.setScore(result.getScore());
                         changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                     }
-                } else if (result.getScore() != null) {
-                    setMergeState(item, MergeState.WARNING);
+                } else if (result.getScore() != null && draft.getScore() != null) {
+                    setMergeState(item, MergeState.ERROR);
+                    item.setScore(result.getScore());
                     changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                 }
+
+                // check score
                 if (item.getComment() != null) {
-                    if (item.getComment().equals(result.getComment())) { // comment differs
+                    if (!item.getComment().equals(result.getComment())) {
                         if (item.getComment().equals(draft.getComment())) {
                             setMergeState(item, MergeState.WARNING);
                         } else {
@@ -541,11 +547,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                         item.setComment(item.getComment() + " ## " + result.getComment());
                         changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                     }
-                } else if (result.getComment() != null) {
-                    setMergeState(item, MergeState.WARNING);
+                } else if (result.getComment() != null && draft.getComment() == null) {
+                    setMergeState(item, MergeState.ERROR);
                     item.setComment(result.getComment());
                     changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                 }
+
+                // check merge state
                 if (!item.getMergeState().equals(result.getMergeState()) && item.getMergeState().equals(draft.getMergeState())) {
                     setMergeState(item, result.getMergeState());
                     changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());

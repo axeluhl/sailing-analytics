@@ -1,11 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
@@ -110,9 +113,6 @@ public class TrackingListFragment extends BaseFragment
     private View mTools;
 
     private StateChangeListener mStateChangeListener;
-
-    private boolean mRefreshAuto = false;
-    private boolean mRefreshManual = false;
 
     public TrackingListFragment() {
         mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
@@ -267,14 +267,12 @@ public class TrackingListFragment extends BaseFragment
                 mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mRefreshManual = true;
                         sendUnconfirmed();
                         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
                         initLocalData();
                         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                        mRefreshManual = false;
                     }
                 });
             }
@@ -305,7 +303,8 @@ public class TrackingListFragment extends BaseFragment
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
                 mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState())); // TODO handle merge state
+                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item
+                    .getMergeState())); // TODO handle merge state
             }
         }
     }
@@ -343,7 +342,7 @@ public class TrackingListFragment extends BaseFragment
             getRaceState().removeChangedListener(mStateChangeListener);
         }
 
-        if (!mRefreshAuto && isDirty()) {
+        if (isDirty()) {
             sendUnconfirmed();
         }
 
@@ -755,7 +754,8 @@ public class TrackingListFragment extends BaseFragment
     protected void setMaxPointsReasonForItem(CompetitorResultWithIdImpl item, CharSequence maxPointsReasonName) {
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
         CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item
-            .getCompetitorDisplayName(), item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK); // TODO handle merge state
+            .getCompetitorDisplayName(), item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item
+            .getComment(), MergeState.OK); // TODO handle merge state
         updateItem(item, newItem);
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
@@ -778,7 +778,8 @@ public class TrackingListFragment extends BaseFragment
             for (CompetitorResult newItem : mFinishedData) {
                 if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
                     CompetitorResult temp = new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem
-                        .getOneBasedRank(), newItem.getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment(), MergeState.OK);
+                        .getOneBasedRank(), newItem.getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem
+                        .getComment(), MergeState.OK);
                     if (!oldItem.equals(temp)) {
                         result.add(temp);
                     }
@@ -788,7 +789,8 @@ public class TrackingListFragment extends BaseFragment
             }
             if (!found) {
                 result.add(new CompetitorResultImpl(oldItem.getCompetitorId(), oldItem.getCompetitorDisplayName(), 0, oldItem
-                    .getMaxPointsReason(), oldItem.getScore(), oldItem.getFinishingTime(), oldItem.getComment(), MergeState.OK)); // TODO handle merge state
+                    .getMaxPointsReason(), oldItem.getScore(), oldItem.getFinishingTime(), oldItem
+                    .getComment(), MergeState.OK)); // TODO handle merge state
             }
         }
 
@@ -803,7 +805,8 @@ public class TrackingListFragment extends BaseFragment
             }
             if (!found) {
                 result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(), newItem.getOneBasedRank(), newItem
-                    .getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem.getComment(), MergeState.OK)); // TODO handle merge state
+                    .getMaxPointsReason(), newItem.getScore(), newItem.getFinishingTime(), newItem
+                    .getComment(), MergeState.OK)); // TODO handle merge state
             }
         }
 
@@ -895,6 +898,152 @@ public class TrackingListFragment extends BaseFragment
         }
     }
 
+    private void mergeData(CompetitorResults results) {
+        Map<Serializable, String> changedCompetitor = new HashMap<>();
+        for (CompetitorResult result : results) {
+            CompetitorResultWithIdImpl item = null;
+            CompetitorResult draft = null;
+            CompetitorResultWithIdImpl newItem;
+            MergeState state;
+            for (CompetitorResultWithIdImpl edited : mFinishedData) {
+                if (result.getCompetitorId().equals(edited.getCompetitorId())) {
+                    item = edited;
+                    break;
+                }
+            }
+            for (CompetitorResult saved : mDraftData) {
+                if (result.getCompetitorId().equals(saved.getCompetitorId())) {
+                    draft = saved;
+                    break;
+                }
+            }
+            if (item != null && draft != null) { // result is in list
+                // check one based rank
+                if (item.getOneBasedRank() != result.getOneBasedRank()) {
+                    if (item.getOneBasedRank() == draft.getOneBasedRank()) {
+                        state = MergeState.WARNING;
+                    } else {
+                        state = MergeState.ERROR;
+                    }
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), result
+                        .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), state);
+                    updateItem(item, newItem);
+                    item = newItem;
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+
+                // check max point reasons
+                if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
+                    if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
+                        state = MergeState.WARNING;
+                    } else {
+                        state = MergeState.ERROR;
+                    }
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                        .getOneBasedRank(), result.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), state);
+                    updateItem(item, newItem);
+                    item = newItem;
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+
+                // check score
+                if (item.getScore() != null) {
+                    if (!item.getScore().equals(result.getScore())) {
+                        if (item.getScore().equals(draft.getScore())) {
+                            state = MergeState.WARNING;
+                        } else {
+                            state = MergeState.ERROR;
+                        }
+                        newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                            .getOneBasedRank(), item.getMaxPointsReason(), result.getScore(), item.getFinishingTime(), item.getComment(), state);
+                        updateItem(item, newItem);
+                        item = newItem;
+                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    }
+                } else if (result.getScore() != null && draft.getScore() != null) {
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                        .getOneBasedRank(), item.getMaxPointsReason(), result.getScore(), item.getFinishingTime(), item
+                        .getComment(), MergeState.ERROR);
+                    updateItem(item, newItem);
+                    item = newItem;
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+
+                // check finishing time
+                if (item.getFinishingTime() != null) {
+                    if (!item.getFinishingTime().equals(result.getFinishingTime())) {
+                        if (item.getFinishingTime().equals(draft.getFinishingTime())) {
+                            state = MergeState.WARNING;
+                        } else {
+                            state = MergeState.ERROR;
+                        }
+                        newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                            .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), result.getFinishingTime(), item.getComment(), state);
+                        updateItem(item, newItem);
+                        item = newItem;
+                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    }
+                } else if (result.getFinishingTime() != null && draft.getFinishingTime() != null) {
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                        .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), result.getFinishingTime(), item
+                        .getComment(), MergeState.ERROR);
+                    updateItem(item, newItem);
+                    item = newItem;
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+
+                // check comment
+                if (item.getComment() != null) {
+                    if (!item.getComment().equals(result.getComment())) {
+                        if (item.getComment().equals(draft.getComment())) {
+                            state = MergeState.WARNING;
+                        } else {
+                            state = MergeState.ERROR;
+                        }
+                        newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                            .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
+                            item.getComment() + " ## " + result.getComment(), state);
+                        updateItem(item, newItem);
+                        item = newItem;
+                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    }
+                } else if (result.getComment() != null && draft.getComment() == null) {
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                        .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), result
+                        .getComment(), MergeState.ERROR);
+                    updateItem(item, newItem);
+                    item = newItem;
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+
+                // check merge state
+                if (!item.getMergeState().equals(result.getMergeState()) && item.getMergeState().equals(draft.getMergeState())) {
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                        .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), result
+                        .getMergeState());
+                    updateItem(item, newItem);
+                    item = newItem;
+                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                }
+            } else { // unknown result, so it will be added
+                mFinishedData.add(new CompetitorResultWithIdImpl(mFinishedData.size(), result));
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+        if (changedCompetitor.size() > 0) { // show message to user
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.refresh_title);
+            StringBuilder string = new StringBuilder(1024);
+            for (String competitor : changedCompetitor.values()) {
+                string.append(competitor);
+                string.append("\n");
+            }
+            builder.setMessage(getString(R.string.refresh_message, string.toString()));
+            builder.setPositiveButton(R.string.refresh_positive, null);
+            builder.show();
+        }
+    }
+
     private static class StateChangeListener extends BaseRaceStateChangedListener {
 
         private WeakReference<TrackingListFragment> mReference;
@@ -907,31 +1056,11 @@ public class TrackingListFragment extends BaseFragment
         public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
             super.onFinishingPositioningsChanged(state);
 
-            askForRefresh();
-        }
-
-        private void askForRefresh() {
             TrackingListFragment fragment = mReference.get();
             if (fragment != null) {
-                if (!fragment.mRefreshManual) {
-                    Context context = fragment.getActivity();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-                    builder.setTitle(context.getString(R.string.refresh_title));
-                    builder.setMessage(context.getString(R.string.refresh_message));
-                    builder.setPositiveButton(context.getString(R.string.refresh_positive), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            TrackingListFragment frag = mReference.get();
-                            if (frag != null) {
-                                frag.mRefreshAuto = true;
-                                frag.replaceFragment(TrackingListFragment.newInstance(frag.getRecentArguments(), 1), R.id.race_content);
-                            }
-                        }
-                    });
-                    builder.setCancelable(false);
-                    builder.show();
-                }
+                fragment.mergeData(state.getFinishPositioningList());
             }
         }
+
     }
 }

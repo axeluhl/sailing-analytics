@@ -96,6 +96,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
             default:
                 mergeIcon = null;
+                break;
         }
         holder.mItemMergeState.setImageDrawable(mergeIcon);
     }
