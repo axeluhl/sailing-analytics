@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.common.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sse.gwt.common.CommonIcons;
 import com.sap.sse.gwt.common.CommonSharedResources;
 
-public interface SharedResources extends ClientBundle, CommonSharedResources {
+public interface SharedResources extends ClientBundle, CommonSharedResources, CommonIcons {
     public static final SharedResources INSTANCE = GWT.create(SharedResources.class);
 
     @Source("main.gss")

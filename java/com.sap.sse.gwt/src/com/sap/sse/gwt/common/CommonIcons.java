@@ -17,4 +17,8 @@ public interface CommonIcons extends ClientBundle {
     @Source("google.svg")
     @MimeType("image/svg+xml")
     DataResource google();
+    
+    @Source("search-icon.svg")
+    @MimeType("image/svg+xml")
+    DataResource search();
 }
