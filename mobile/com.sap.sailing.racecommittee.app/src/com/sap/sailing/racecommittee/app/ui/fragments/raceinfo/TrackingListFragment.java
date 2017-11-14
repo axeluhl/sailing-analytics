@@ -304,7 +304,7 @@ public class TrackingListFragment extends BaseFragment
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
                 mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
                     .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item
-                    .getMergeState())); // TODO handle merge state
+                    .getMergeState()));
             }
         }
     }
@@ -578,7 +578,7 @@ public class TrackingListFragment extends BaseFragment
             }
         }
         mFinishedData.add(pos, new CompetitorResultWithIdImpl(mId, competitor.getId(), name, greatestOneBasedRankSoFar + 1, MaxPointsReason.NONE,
-                    /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK)); // TODO handle merge state
+                    /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         mId++;
         mFinishedAdapter.notifyItemInserted(pos);
         if (mDots.size() > 0) {
@@ -660,7 +660,7 @@ public class TrackingListFragment extends BaseFragment
             .getCompetitorId(), competitorToReplaceWithAdjustedPosition
             .getCompetitorDisplayName(), newOneBasedRank, competitorToReplaceWithAdjustedPosition
             .getMaxPointsReason(), competitorToReplaceWithAdjustedPosition.getScore(), competitorToReplaceWithAdjustedPosition
-            .getFinishingTime(), competitorToReplaceWithAdjustedPosition.getComment(), MergeState.OK); // TODO handle merge state
+            .getFinishingTime(), competitorToReplaceWithAdjustedPosition.getComment(), MergeState.OK);
     }
 
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
@@ -769,7 +769,7 @@ public class TrackingListFragment extends BaseFragment
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
         CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item
             .getCompetitorDisplayName(), item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item
-            .getComment(), MergeState.OK); // TODO handle merge state
+            .getComment(), item.getMergeState());
         updateItem(item, newItem);
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
@@ -778,7 +778,7 @@ public class TrackingListFragment extends BaseFragment
         CompetitorResults result = new CompetitorResultsImpl();
         for (CompetitorResultWithIdImpl item : mFinishedData) {
             result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), MergeState.OK)); // TODO handle merge state
+                .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
         }
         return result;
     }
