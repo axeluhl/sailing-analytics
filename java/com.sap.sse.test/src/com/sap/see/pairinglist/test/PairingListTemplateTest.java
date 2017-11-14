@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 
 import org.junit.Test;
 
+import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
@@ -21,11 +22,18 @@ import junit.framework.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl{
 
+    PairingListTemplateFactoryImpl factory;
+    
     @Test
     public void testPairingListCreationForValidValues() {
-        this.createPairingListTemplate(15, 3, 18);
-
-        int[][] plTemplate = this.getPairingListTemplate();
+        final int flights = 15;
+        final int groups = 3;
+        final int competitors = 18;
+        
+        factory = new PairingListTemplateFactoryImpl();
+        
+        int[][] plTemplate = factory.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors)).
+                getPairingListTemplate();
 
         Assert.assertNotNull(plTemplate);
         for(int[] i:plTemplate){
@@ -74,10 +82,14 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
 
     @Test 
     public void testTeamAssociationCreation() {
-        this.createPairingListTemplate(15, 3, 18);
+        final int flights = 15;
+        final int groups = 3;
+        final int competitors = 18;
         
-        int[][] plTemplate = this.getPairingListTemplate();
-        int[][] associations = new int[18][18];
+        factory = new PairingListTemplateFactoryImpl();
+        
+        int[][] plTemplate = factory.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors)).getPairingListTemplate();
+        int[][] associations = new int[competitors][competitors];
 
         this.getAssociationsFromPairingList(plTemplate, associations);
 
@@ -86,6 +98,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 if ((x == y) && (associations[x][y] != -1)) {
                     Assert.fail("The diagonal of association matrix has to be -1.");
                 }
+                // + check if comps are right
             }
         }
     }
@@ -124,6 +137,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
         }
     }
+    
     @Test
     public void testAssignmentQuality(){
         this.createPairingListTemplate(15, 3, 18);
@@ -136,52 +150,5 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
             Assert.fail("Quality of Boat Assignments is worse than usual!");
         }
     }
-    
-    @Test
-    public void testGeneratePairingListTemplate() {
-        PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
-        PairingListTemplate testTemplate = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
-        //PairingListTemplate testTemplate = generatePairingList(new PairingFrameProviderTest(45, 6, 18));
-        //PairingListTemplate testTemplate = generatePairingList(new PairingFrameProviderTest(10, 3, 30));
-        assertNotNull(testTemplate);
-        for(int[] row : testTemplate.getPairingListTemplate()) {
-            System.out.println(Arrays.toString(row));
-        }
-        System.out.println(testTemplate.getQuality());
-    }
-    
-    /**
-     * This test checks if the flights are divided up correctly(e.g. multiple competitors, absenced competitors)
-     */
-    @Test
-    public void checkFlights() {
-        final int flights = 15;
-        final int groups = 3;
-        final int competitors = 18;
-        PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
-        ArrayList<Integer> availableCompetitors = new ArrayList<>();
-        
-        int[][] copy = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors)).getPairingListTemplate();
-        
-        for(int i = 0; i < flights; i++) {
-            
-            IntStream.range(1, competitors+1).forEach(competitor -> {
-                availableCompetitors.add(competitor);
-            });
-            
-            for(int j = 0; j < groups; j++) {
-                for(int k = 0; k < competitors/groups; k++) {
-                    if(availableCompetitors.contains(copy[i*groups+j][k])) {
-                        availableCompetitors.remove(new Integer(copy[i*groups+j][k]));
-                    }
-                }
-            }
-            
-            if(availableCompetitors.isEmpty()) {
-                continue;
-            } else {
-                Assert.fail("The competitors are not divided up correctly!");
-            }
-        }
-    }
+   
 }
