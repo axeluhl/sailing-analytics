@@ -108,6 +108,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         
         bestPLT=this.improveAssignment(bestPLT, flights, groups, competitors);
+        bestPLT=this.improveAssignmentChanges(bestPLT, flights, competitors);
         this.standardDev = bestDev;
         this.pairingListTemplate=bestPLT;
         //executorService.shutdown();
@@ -426,52 +427,52 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return bestPLT;
     }
-//    private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
-//        int boatChanges[] = new int[competitors - 1];
-//
-//        for (int i = 1; i < flights; i++) {
-//            int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
-//
-//            int[] groupNext = new int[pairingList[0].length];
-//            int bestMatchesIndex = -1;
-//            int bestMatch = 0;
-//            for (int j = 0; j < pairingList.length / flights; j++) {
-//                System.arraycopy(pairingList[i * pairingList.length / flights + j], 0, groupNext, 0, groupNext.length);
-//                int currentMatch = this.getMatches(groupPrev, groupNext);
-//                if (currentMatch > bestMatch) {
-//                    bestMatch = currentMatch;
-//                    bestMatchesIndex = j;
-//                }
-//            }
-//
-//            if (bestMatchesIndex > 0) {
-//                int[] temp = pairingList[i * pairingList.length / flights];
-//                //System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
-//
-//                System.arraycopy(pairingList[i * pairingList.length / flights], 0,
-//                        pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, groupNext.length);
-//                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, temp.length);
-//            }
-//
-//            boatChanges[i - 1] = groupNext.length - bestMatch;
-//        }
-//
-//        //System.out.println(Arrays.toString(boatChanges));
-//
-//        return pairingList;
-//    }
-//
-//    private int getMatches(int[] arr1, int[] arr2) {
-//        int matches = 0;
-//
-//        for (int value: arr1) {
-//            if (this.contains(arr2, value)) {
-//                matches++;
-//            }
-//        }
-//
-//        return matches;
-//    }
+    private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
+        int boatChanges[] = new int[flights-1];
+
+        for (int i = 1; i < flights; i++) {
+            int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
+
+            int[] groupNext = new int[pairingList[0].length];
+            int bestMatchesIndex = -1;
+            int bestMatch = 0;
+            for (int j = 0; j < pairingList.length / flights; j++) {
+                System.arraycopy(pairingList[i * pairingList.length / flights + j], 0, groupNext, 0, groupNext.length);
+                int currentMatch = this.getMatches(groupPrev, groupNext);
+                if (currentMatch > bestMatch) {
+                    bestMatch = currentMatch;
+                    bestMatchesIndex = j;
+                }
+            }
+
+            if (bestMatchesIndex > 0) {
+                int[] temp = new int[pairingList[0].length];
+                System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
+
+                System.arraycopy(pairingList[i * pairingList.length / flights+ bestMatchesIndex], 0,
+                        pairingList[i * pairingList.length / flights ], 0, groupNext.length);
+                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, temp.length);
+            }
+
+            boatChanges[i - 1] = groupNext.length - bestMatch;
+        }
+
+//        System.out.println(Arrays.toString(boatChanges));
+
+        return pairingList;
+    }
+
+    private int getMatches(int[] arr1, int[] arr2) {
+        int matches = 0;
+
+        for (int value: arr1) {
+            if (this.contains(arr2, value)) {
+                matches++;
+            }
+        }
+
+        return matches;
+    }
     
     /**
      * Returns an index that has the greatest difference to neededAssignments

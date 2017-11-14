@@ -87,7 +87,9 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 if ((x == y) && (associations[x][y] != -1)) {
                     Assert.fail("The diagonal of association matrix has to be -1.");
                 }
-                // + check if comps are right
+                if(associations[x][y]>flights&&(associations[x][y]<-1)){
+                    Assert.fail("Calculation of assosciation matrix failed!");
+                }
             }
         }
     }
