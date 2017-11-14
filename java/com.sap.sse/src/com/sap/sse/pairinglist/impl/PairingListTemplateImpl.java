@@ -89,6 +89,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         int[] seeds = this.generateSeeds(flights, competitors);
         int[][] bestPLT = new int[flights*groups][competitors/groups];
         double bestDev = Double.POSITIVE_INFINITY;
+        if(this.checkValues(flights,groups,competitors)){
         this.createConstantFlights(flights, groups, competitors, new int[competitors][competitors],
                 new int[flights*groups][competitors/groups], seeds);
         
@@ -111,8 +112,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         this.pairingListTemplate=bestPLT;
         //executorService.shutdown();
         futures.clear();
+        }else System.out.println("Given Parameters can not be converted into a Pairinglisttemplate!");
     }
     
+    private boolean checkValues(int flights, int groups, int competitors) {
+        if(flights>0&&(groups>1)&&(competitors>1)&&(competitors>groups)&&(competitors%groups==0))return true;
+        return false;
+    }
+
     /**
      * Creates seeds for constant flights.
      * 
