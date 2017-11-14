@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageParser;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
-import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.udpconnector.UDPReceiver;
 
 /**
@@ -110,6 +109,7 @@ public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, Expedi
         mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLCTR_PP, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE);
         mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TG_HEEL, ExpeditionExtendedSensorDataMetadata.TARGET_HEEL);
         mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_LOAD, ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD);
+        mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_FORESTAY_PRES, ExpeditionExtendedSensorDataMetadata.FORESTAY_PRESSURE);
         mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_DFLECTR_MM, ExpeditionExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS);
         mapExpeditionMessageFieldIdToMetadata.put(ExpeditionMessage.ID_TARG_BSP_P, ExpeditionExtendedSensorDataMetadata.TARGET_BOATSPEED_P);
         

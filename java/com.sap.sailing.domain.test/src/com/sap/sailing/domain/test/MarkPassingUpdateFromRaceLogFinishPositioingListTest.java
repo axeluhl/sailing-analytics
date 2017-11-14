@@ -24,6 +24,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -153,7 +154,7 @@ public class MarkPassingUpdateFromRaceLogFinishPositioingListTest extends Abstra
         int rank = 1;
         for (Pair<Competitor, TimePoint> finishingTime : finishingTimes) {
             results.add(new CompetitorResultImpl(finishingTime.getA().getId(), finishingTime.getA().getName(), rank++, /* maxPointsReason */
-                    null, /* score */null, finishingTime.getB(), /* comment */null));
+                    null, /* score */null, finishingTime.getB(), /* comment */null, MergeState.OK));
         }
         return results;
     }

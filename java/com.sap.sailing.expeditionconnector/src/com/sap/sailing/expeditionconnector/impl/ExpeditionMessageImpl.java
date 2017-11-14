@@ -1,5 +1,6 @@
 package com.sap.sailing.expeditionconnector.impl;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -65,9 +66,23 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         this.originalMessage = originalMessage;
         this.createdAtMillis = System.currentTimeMillis();
         if (hasValue(ID_GPS_TIME)) {
+            final double gpsTimeValue = getValue(ID_GPS_TIME);
+            final long referenceTime;
+            if (gpsTimeValue <= 1.0) { // "Phoenix" law: if between 0 and 1 then it's likely a day-relative time point
+                // so add the millis of today midnight UTC
+                Calendar todayMidnightUTC = new GregorianCalendar();
+                todayMidnightUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+                todayMidnightUTC.set(Calendar.HOUR_OF_DAY, 0);
+                todayMidnightUTC.set(Calendar.MINUTE, 0);
+                todayMidnightUTC.set(Calendar.SECOND, 0);
+                todayMidnightUTC.set(Calendar.MILLISECOND, 0);
+                referenceTime = todayMidnightUTC.getTimeInMillis();
+            } else {
+                referenceTime = cal.getTimeInMillis();
+            }
             timePoint = new MillisecondsTimePoint((long)
-                    (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
-                    cal.getTimeInMillis());
+                    (gpsTimeValue*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
+                    referenceTime);
         } else if (defaultTimePoint == null) {
             timePoint = new MillisecondsTimePoint(createdAtMillis);
         } else {

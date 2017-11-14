@@ -1,5 +1,7 @@
 package com.sap.sailing.expeditionconnector.persistence;
 
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceIdentifier;
+
 /**
  * A device identifier used to identify an installation of the regatta tool "Expedition"
  * regarding its basic GPS information.
