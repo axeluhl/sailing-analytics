@@ -433,7 +433,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     DataImportProgress getImportOperationProgress(UUID id);
 
-    Iterable<CompetitorDTO> getCompetitors();
+    Iterable<CompetitorDTO> getCompetitors(boolean onlyCompetitorsWithBoat);
     
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 

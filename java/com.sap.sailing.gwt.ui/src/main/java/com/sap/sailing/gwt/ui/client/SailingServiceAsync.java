@@ -589,7 +589,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
 
-    void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+    void getCompetitors(boolean onlyCompetitorsWithBoat, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
     void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 

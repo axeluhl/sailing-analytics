@@ -50,9 +50,10 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  */
 public class CompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
+    private final boolean showOnlyCompetitorsWithBoat;
     
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
+            boolean multiSelection, boolean enablePager, boolean showOnlyCompetitorsWithBoat) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
@@ -64,6 +65,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         return t.getIdAsString().hashCode();
                     }
                 });
+        this.showOnlyCompetitorsWithBoat = showOnlyCompetitorsWithBoat;
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
         
         // competitors table
@@ -370,7 +372,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         if (leaderboardName != null) {
             sailingService.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
-            sailingService.getCompetitors(myCallback);
+            sailingService.getCompetitors(showOnlyCompetitorsWithBoat, myCallback);
         }
     }
 

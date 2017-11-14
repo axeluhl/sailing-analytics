@@ -222,7 +222,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                 };
                 // trigger both calls, allowing for parallel execution, synchronizing with the parallel execution holder above:
                 sailingService.getCompetitorDescriptors(competitorProviderName, eventName, regattaName, new MarkedAsyncCallback<>(getCompetitorDescriptorsCallback));
-                sailingService.getCompetitors(new MarkedAsyncCallback<>(getCompetitorsCallback));
+                sailingService.getCompetitors(false, new MarkedAsyncCallback<>(getCompetitorsCallback));
             }
         }
     }

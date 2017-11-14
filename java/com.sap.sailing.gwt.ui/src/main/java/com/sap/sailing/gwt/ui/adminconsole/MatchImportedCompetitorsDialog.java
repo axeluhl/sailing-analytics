@@ -91,7 +91,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     protected Widget getAdditionalWidget() {
         existingCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages,
                 errorReporter, /* multiSelection */
-                false, /* enablePager */true);
+                false, /* enablePager */true, /* showOnlyCompetitorsWithBoat */ false);
         final CompetitorsToImportToExistingLinking linker = new CompetitorsToImportToExistingLinking() {
             @Override
             public void unlinkCompetitor(CompetitorDescriptor competitor) {
