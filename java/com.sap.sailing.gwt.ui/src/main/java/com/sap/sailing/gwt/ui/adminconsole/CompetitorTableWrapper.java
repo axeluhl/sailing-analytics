@@ -434,10 +434,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
                         getFilterField().remove(originalCompetitor);
                         if (editedCompetitorIndex >= 0){
-                            getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                            getFilterField().add(editedCompetitorIndex, updatedCompetitor);
                         } else {
                             //in case competitor was not present --> not edit, but create
-                            getDataProvider().getList().add(updatedCompetitor);
+                            getFilterField().add(updatedCompetitor);
                         }
                         getDataProvider().refresh();
                     }  
@@ -468,10 +468,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
                         getFilterField().remove(originalCompetitor);
                         if (editedCompetitorIndex >= 0){
-                            getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                            getFilterField().add(editedCompetitorIndex, updatedCompetitor);
                         } else {
                             //in case competitor was not present --> not edit, but create
-                            getDataProvider().getList().add(updatedCompetitor);
+                            getFilterField().add(updatedCompetitor);
                         }
                         getDataProvider().refresh();
                     }  
