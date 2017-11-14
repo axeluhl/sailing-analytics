@@ -116,7 +116,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
     private boolean checkValues(int flights, int groups, int competitors) {
-        if(flights>0&&(groups>1)&&(competitors>1)&&(competitors>groups)&&(competitors%groups==0))return true;
+        if(flights>0&&(groups>1)&&(competitors>1)&&(competitors>=groups)&&(competitors%groups==0))return true;
         return false;
     }
 
