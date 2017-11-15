@@ -9,6 +9,8 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.impl.RGBColor;
 
 /**
  * An edit for a competitor with a boat
@@ -33,8 +35,19 @@ public class CompetitorWithBoatEditDialog extends AbstractCompetitorWithBoatDial
     @Override
     protected BoatDTO getBoat() {
         BoatDTO result = null;
+        Color boatColor;
+        if (boatDisplayColorTextBox.getText() == null || boatDisplayColorTextBox.getText().isEmpty()) {
+            boatColor = null;
+        } else {
+            try {
+                boatColor = new RGBColor(boatDisplayColorTextBox.getText());
+            } catch (IllegalArgumentException iae) {
+                boatColor = new InvalidColor(iae);
+            }
+        }
+
         BoatClassDTO boatClass = new BoatClassDTO(boatClassNameTextBox.getValue(), Distance.NULL, Distance.NULL);
-        result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getName(), boatClass, sailIdTextBox.getText());
+        result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getName(), boatClass, sailIdTextBox.getText(), boatColor);
         return result;
     }
     
@@ -48,10 +61,10 @@ public class CompetitorWithBoatEditDialog extends AbstractCompetitorWithBoatDial
         grid.setWidget(0, 1, boatNameTextBox);
         grid.setWidget(1, 0, new Label(getStringMessages().sailNumber()));
         grid.setWidget(1, 1, sailIdTextBox);
-        grid.setWidget(2, 0, new Label(getStringMessages().color()));
-        grid.setWidget(2, 1, boatDisplayColorTextBox);
-        grid.setWidget(3, 0, new Label(getStringMessages().boatClass()));
-        grid.setWidget(3, 1, boatClassNameTextBox);
+        grid.setWidget(2, 0, new Label(getStringMessages().boatClass()));
+        grid.setWidget(2, 1, boatClassNameTextBox);
+        grid.setWidget(3, 0, new Label(getStringMessages().color()));
+        grid.setWidget(3, 1, boatDisplayColorTextBox);
         result.add(grid);
         return result;
     }

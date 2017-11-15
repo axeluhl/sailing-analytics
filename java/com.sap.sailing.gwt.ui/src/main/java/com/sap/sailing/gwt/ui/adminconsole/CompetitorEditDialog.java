@@ -144,7 +144,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
      * @author Axel Uhl (D043530)
      *
      */
-    private class InvalidColor implements Color {
+    protected class InvalidColor implements Color {
         private static final long serialVersionUID = 4012986110898149543L;
         private final Exception exception;
         
