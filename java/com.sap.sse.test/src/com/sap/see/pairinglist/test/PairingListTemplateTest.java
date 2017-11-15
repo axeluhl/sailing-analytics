@@ -180,7 +180,12 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
                 {15,5,10,11,1,6},
                 {4,12,8,9,18,13}
                                  };
-        System.out.println(calcStandardDev(getAssociationsFromPairingList(givenPairingList, new int[18][18])));
+        Assert.assertEquals(0.5998846486579744, calcStandardDev(getAssociationsFromPairingList(givenPairingList, new int[18][18])), 0.0);
+        int[][] testPairingList = {
+                {1,2,3,4,5},
+                {6,7,8,9,10}
+        };
+       Assert.assertEquals(0.4967673,(calcStandardDev(getAssociationsFromPairingList(testPairingList, new int[10][10]))),0.01);
         }
     }
     
