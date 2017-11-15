@@ -18,27 +18,39 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     private final Random random = new Random();
     private final int[][] pairingListTemplate;
     private final double standardDev;
-    private final ExecutorService executorService = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-    ArrayList<Future<int[][]>> futures = new ArrayList<Future<int[][]>>();
+    private final ExecutorService executorService = 
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     
-    //TODO: final
-    private int maxConstantFlights;
-    private final int ITERATIONS = 100000;
+    private final int maxConstantFlights;
+    private final int iterations;
 
-    //TODO: redundant constructors
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
-        pairingListTemplate = new int[pairingFrameProvider.getGroupsCount()][pairingFrameProvider.getCompetitorsCount()/pairingFrameProvider.getGroupsCount()];
-        this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
+        // setting iterations to default of 100.000
+        this(pairingFrameProvider, 100000);
     }
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations) {
-        pairingListTemplate = new int[pairingFrameProvider.getGroupsCount()][pairingFrameProvider.getCompetitorsCount()/pairingFrameProvider.getGroupsCount()];
+        this.iterations = iterations;
+        this.maxConstantFlights = (int) (pairingFrameProvider.getFlightsCount() * 0.9);
+        
+        if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), 
+                pairingFrameProvider.getCompetitorsCount())) {
+            
+            this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), 
+                    pairingFrameProvider.getCompetitorsCount());
+            this.standardDev = this.calcStandardDev(getAssociationsFromPairingList(this.pairingListTemplate, 
+                    new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()]));
+        } else {
+            throw new IllegalArgumentException("Wrong arguments for creating a pairing list template: count of flights "
+                    + "has to be greater than 0; count of groups has to be greater than 1; count of competitors has to "
+                    + "be greater than 1; count of competitors has to be greater than count of groups; count of "
+                    + "competitors has to be divisible by count of groups");
+        }
     }
-
 
     @Override
     public double getQuality() {
-        return standardDev;
+        return this.standardDev;
     }
 
     @Override
@@ -79,42 +91,41 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param groupCount count of groups per flight
      * @param competitors count of total competitors
      */
-    protected void createPairingListTemplate(int flightCount, int groupCount, int competitors) {
-        //TODO: futures local
-        maxConstantFlights = (int) (flightCount * 0.9);
+    protected int[][] createPairingListTemplate(int flightCount, int groupCount, int competitors) {
         int[] seeds = this.generateSeeds(flightCount, competitors);
         int[][] bestPLT = new int[flightCount * groupCount][competitors / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
-        //TODO: check in constructor, IllegalArgumentException
-        if (this.checkValues(flightCount, groupCount, competitors)) {
-            this.createConstantFlights(flightCount, groupCount, competitors, new int[competitors][competitors],
-                    new int[flightCount * groupCount][competitors / groupCount], seeds);
 
-            for (Future<int[][]> f : futures) {
-                try {
-                    int[][] currentPLT = f.get();
-                    double currentStandardDev = calcStandardDev(
-                            getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]));
+        ArrayList<Future<int[][]>> futures = this.createConstantFlights(flightCount, groupCount, competitors, new int[competitors][competitors],
+                new int[flightCount * groupCount][competitors / groupCount], seeds, new ArrayList<>());
 
-                    if (currentStandardDev < bestDev) {
-                        bestPLT = currentPLT;
-                        bestDev = currentStandardDev;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        for (Future<int[][]> f : futures) {
+            try {
+                int[][] currentPLT = f.get();
+                double currentStandardDev = calcStandardDev(
+                        getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]));
+
+                if (currentStandardDev < bestDev) {
+                    bestPLT = currentPLT;
+                    bestDev = currentStandardDev;
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            bestPLT = this.improveAssignment(bestPLT, flightCount, groupCount, competitors);
-            bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitors);
-            this.standardDev = bestDev;
-            this.pairingListTemplate = bestPLT;
-            futures.clear();
         }
+
+        bestPLT = this.improveAssignment(bestPLT, flightCount, groupCount, competitors);
+        bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitors);
+        
+        futures.clear();
+        
+        return bestPLT;
     }
     
     private boolean checkValues(int flights, int groups, int competitors) {
-        if(flights>0&&(groups>1)&&(competitors>1)&&(competitors>=groups)&&(competitors%groups==0))return true;
+        if((flights > 0) && (groups>1) && (competitors>1) && (competitors>=groups) && (competitors%groups==0)) {
+            return true;
+        }
         return false;
     }
 
@@ -127,8 +138,8 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param competitors count of competitors
      * @return int array of random competitors
      */
-     private int[] generateSeeds(int flights, int competitors) {
-        int[] seeds=new int[(int)(Math.log(ITERATIONS)/Math.log(flights)*0.5)];
+    private int[] generateSeeds(int flights, int competitors) {
+        int[] seeds=new int[(int)(Math.log(iterations)/Math.log(flights)*0.5)];
         for(int x=0;x<seeds.length;x++){
             int random=this.randomBW(1, competitors);
             while(this.contains(seeds, random)) {
@@ -138,6 +149,42 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return seeds;
     }
+    
+    //TODO: rename
+    class Task implements Callable<int[][]> {
+        int flights,groups,competitors, seedLength;
+        int[][] plt,associations;
+        //TODO document array copies
+        /**
+         * This task is created every time a constant is generated. It generates a specific number of PairingListTemplates,which is based on the constant flights 
+         * which are given to the task and returns its best. The number of generated PairingListTamplates depends on the number of constant flights and the number of seeds.
+         * @param flights count of flights
+         * @param groups count of groups
+         * @param competitors count of competitors
+         * @param constantPLT constant generated flights on which the tasks is based on  
+         * @param associations associations created from constantPLT
+         */
+        Task(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations, int seedLength){ 
+            this.flights = flights;
+            this.groups = groups;
+            this.competitors = competitors;
+            this.seedLength = seedLength;
+            this.plt = new int[flights*groups][competitors/groups];
+            this.associations = new int[competitors][competitors];
+            for(int i=0;i<constantPLT.length;i++) {
+                System.arraycopy(constantPLT[i], 0, this.plt[i], 0, competitors/groups);
+            }
+            for(int i=0;i<associations.length;i++) {
+                System.arraycopy(associations[i], 0, this.associations[i], 0, competitors);
+            }
+        }
+        
+        @Override
+        public int[][] call() {
+            return create(flights, groups, competitors, (int)(iterations/Math.pow(seedLength, maxConstantFlights)), 
+                    plt, associations);          
+        }
+    } 
     
     /**
      * Creates constant flights. 
@@ -150,56 +197,38 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param associations
      * @param currentPLT
      * @param seeds
+     * @return 
      */
-    private void createConstantFlights(int flights, int groups, int competitors, int[][] associations,
-            int[][]currentPLT, int[] seeds) {
+    private ArrayList<Future<int[][]>> createConstantFlights(int flights, int groups, int competitors, int[][] associations,
+            int[][]currentPLT, int[] seeds, ArrayList<Future<int[][]>> futures) {         
         //TODO: change depth of groups
         int fleet=Integer.MAX_VALUE;
         for(int z=0;z<currentPLT.length;z++){
             if(z<this.maxConstantFlights*groups){
                 if(currentPLT[z][0]==0){
                     fleet=z;
+                    //calculate Flights for current recurrence level
+                    for(int x=0;x<seeds.length;x++){
+                        int[][] temp=this.createFlight(flights, groups, competitors, associations, seeds[x]);
+                        //TODO: change arraycopy + refactor fleet
+                        for (int m = 0; m < groups; m++) { 
+                            System.arraycopy(temp[m], 0, currentPLT[fleet + m], 0, competitors / groups);
+                        }
+                        //TODO: calculation incremental
+                        associations=this.getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]);
+                        this.createConstantFlights(flights, groups, competitors, associations, currentPLT, seeds, futures);
+                    }
+                    //reset last recurrence step
+                    for(int i=fleet;i<fleet+groups;i++){
+                        Arrays.fill(currentPLT[i], 0);
+                    }
+                    associations=getAssociationsFromPairingList(currentPLT, associations);
+                    
                     break;
                 }
             }else{
-                //Task start
-                //TODO: rename
-                //TODO inner class
-                class Task implements Callable<int[][]> {
-                    int flights,groups,competitors;
-                    int[][] plt,associations;
-                    //TODO document array copies
-                    /**
-                     * This task is created every time a constant is generated. It generates a specific number of PairingListTemplates,which is based on the constant flights 
-                     * which are given to the task and returns its best. The number of generated PairingListTamplates depends on the number of constant flights and the number of seeds.
-                     * @param flights count of flights
-                     * @param groups count of groups
-                     * @param competitors count of competitors
-                     * @param constantPLT constant generated flights on which the tasks is based on  
-                     * @param associations associations created from constantPLT
-                     */
-                    Task(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations){ 
-                        this.flights=flights;
-                        this.groups=groups;
-                        this.competitors=competitors;
-                        plt=new int[flights*groups][competitors/groups];
-                        this.associations=new int[competitors][competitors];
-                        for(int i=0;i<constantPLT.length;i++) {
-                            System.arraycopy(constantPLT[i], 0, plt[i], 0, competitors/groups);
-                        }
-                        for(int i=0;i<associations.length;i++) {
-                            System.arraycopy(associations[i], 0, this.associations[i], 0, competitors);
-                        }
-                    }
-                    
-                    @Override
-                    public int[][] call() {
-                        return create(flights, groups, competitors, (int)(ITERATIONS/Math.pow(seeds.length, maxConstantFlights)), 
-                                plt, associations);          
-                    }
-                }
-                
-                Future<int[][]> future= executorService.submit((new Task(flights,groups,competitors,currentPLT,associations)));
+                //Task start                
+                Future<int[][]> future= executorService.submit((new Task(flights,groups,competitors,currentPLT,associations, seeds.length)));
                 futures.add(future);
                 //reset last recurrence step
                 for(int i=maxConstantFlights*groups-1;i>=maxConstantFlights*groups-groups;i--){
@@ -207,26 +236,10 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 }
                 //TODO reverse method
                 associations=getAssociationsFromPairingList(currentPLT, associations);
-                //TODO remove return
-                return;
+                break;
             }
         }
-        //calculate Flights for current recurrence level
-        for(int x=0;x<seeds.length;x++){
-            int[][] temp=this.createFlight(flights, groups, competitors, associations, seeds[x]);
-            //TODO: change arraycopy + refactor fleet
-            for (int m = 0; m < groups; m++) { 
-                System.arraycopy(temp[m], 0, currentPLT[fleet + m], 0, competitors / groups);
-            }
-            //TODO: calculation incremental
-            associations=this.getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]);
-            this.createConstantFlights(flights, groups, competitors, associations, currentPLT,seeds);
-        }
-        //reset last recurrence step
-        for(int i=fleet;i<fleet+groups;i++){
-            Arrays.fill(currentPLT[i], 0);
-        }
-        associations=getAssociationsFromPairingList(currentPLT, associations);
+        return futures;
     }
     
     /**
