@@ -888,7 +888,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 }
             } else {
                 // Check whether the course change is performed in the target direction of maneuver. If the direction
-                // sign does not match, or the course change is nearly zero => cut the bearing step from the left
+                // sign does not match, or the course change is nearly zero => cut the bearing step from the left;
+                // in other words, let the maneuver begin where the first direction change in the right direction occurs
+                // that exceeds the threshold.
                 if (refinedTimePointBeforeManeuver == null &&
                         entry.getCourseChangeInDegrees() * totalCourseChangeSignum >= ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
                     refinedTimePointBeforeManeuver = timePoint;
@@ -903,7 +905,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (refinedSpeedWithBearingAfterManeuver == null) {
             // Can only occur, when after maneuver time point different direction compared to the analyzed maneuver is
             // sailed. Thus, the resulting time point until the cut operation should be performed is the maneuver time
-            // point itself.
+            // point itself. Looping is necessary to find the right speed at / around the maneuver time point.
             for (SpeedWithBearingStep entry : bearingStepsToAnalyze) {
                 if (!entry.getTimePoint().before(maneuverTimePoint)) {
                     refinedTimePointAfterManeuver = entry.getTimePoint();
@@ -919,7 +921,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Gets a new list with bearing steps which are lying between provided time range (inclusive the boundaries).
+     * Gets a new list with bearing steps which are lying between provided time range (including the boundaries).
      */
     public List<SpeedWithBearingStep> getSpeedWithBearingStepsWithinTimeRange(
             Iterable<SpeedWithBearingStep> bearingStepsToAnalyze, TimePoint timePointBefore, TimePoint timePointAfter) {
