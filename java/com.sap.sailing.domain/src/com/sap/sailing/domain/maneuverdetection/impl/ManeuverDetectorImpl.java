@@ -116,10 +116,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 Bearing courseChangeOnOriginalFixes = getCourseChange(competitor, previous.getTimePoint(),
                         next.getTimePoint());
                 // check for the case where the course change between the approximation fixes may have been >180deg by
-                // comparing the direction
-                // of the course change on the approximation points with the direction of the course change during the
-                // same time range on the
-                // original fixes (see also bug 2009):
+                // comparing the direction of the course change on the approximation points with the direction of the
+                // course change during the same time range on the original fixes (see also bug 2009):
                 if (Math.abs(courseChangeOnOriginalFixes.getDegrees()) > 180
                         && Math.signum(courseChange.getCourseChangeInDegrees()) != Math
                                 .signum(courseChangeOnOriginalFixes.getDegrees())) {
