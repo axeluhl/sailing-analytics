@@ -86,12 +86,24 @@ public class CurveEnteringAndExitingComputationTest {
         assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
 
+        steps = constructStepsWithBearings(359.9985, 359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3, 9, 10);
+        mainCurve = maneuverDetector
+                .computeEnteringAndExitingDetailsOfManeuverMainCurve(constructTimePoint(9), steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(7), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
+
         // however, when the small changes aggregate to a total change exceeding the threshold, they all belong to the maneuver
         steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006, 10.0007, 10.0008, 10.0009, 10.001);
         mainCurve = maneuverDetector
                 .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(14), mainCurve.getTimePointAfter());
+
+        steps = constructStepsWithBearings(359.9979, 359.9980, 359.9981, 359.9982, 359.9983, 359.9984, 359.9985, 359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3, 9, 10);
+        mainCurve = maneuverDetector
+                .computeEnteringAndExitingDetailsOfManeuverMainCurve(constructTimePoint(15), steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(18), mainCurve.getTimePointAfter());
     }
 
     @Test
@@ -224,8 +236,8 @@ public class CurveEnteringAndExitingComputationTest {
         return new SpeedWithBearingStepImpl(timePoint, speedWithBearing, courseChangeInDegrees);
     }
 
-    private TimePoint constructTimePoint(double secondsBeforeRefenceTimePoint) {
-        return referenceTimePoint.plus((long) (secondsBeforeRefenceTimePoint * 1000));
+    private TimePoint constructTimePoint(double secondsAfterRefenceTimePoint) {
+        return referenceTimePoint.plus((long) (secondsAfterRefenceTimePoint * 1000));
     }
 
 }
