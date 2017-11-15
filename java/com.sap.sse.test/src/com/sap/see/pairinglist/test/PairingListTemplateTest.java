@@ -61,7 +61,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
                 .getPairingListTemplate();
         int[][] associations = new int[competitors][competitors];
 
-        this.getAssociationsFromPairingList(plTemplate, associations);
+        this.incrementAssociations(plTemplate, associations);
 
         for (int x = 0; x < associations.length; x++) {
             for (int y = 0; y < associations[0].length; y++) {
@@ -103,7 +103,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         int[][] associations = new int[18][18];
         int[][] flight = this.createFlight(15, 3, 18, associations, 5);
         
-        associations = this.getAssociationsFromPairingList(flight, associations);
+        associations = this.incrementAssociations(flight, associations);
         associations = this.decrementAssociations(flight, associations);
         
         for (int[] key: associations) {
@@ -130,10 +130,10 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
                 { 18, 9, 17, 5, 3, 15 }, { 12, 7, 1, 13, 16, 6 }, { 10, 14, 2, 8, 11, 4 }, { 7, 14, 2, 17, 3, 16 },
                 { 15, 5, 10, 11, 1, 6 }, { 4, 12, 8, 9, 18, 13 } };
         Assert.assertEquals(0.5998846486579744,
-                calcStandardDev(getAssociationsFromPairingList(givenPairingList, new int[18][18])), 0.0);
+                calcStandardDev(incrementAssociations(givenPairingList, new int[18][18])), 0.0);
         int[][] testPairingList = { { 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10 } };
         Assert.assertEquals(0.4967673,
-                (calcStandardDev(getAssociationsFromPairingList(testPairingList, new int[10][10]))), 0.01);
+                (calcStandardDev(incrementAssociations(testPairingList, new int[10][10]))), 0.01);
     }
     }
     

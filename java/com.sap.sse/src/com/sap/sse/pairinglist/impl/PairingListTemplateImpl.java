@@ -38,7 +38,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
             this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
                     pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
-            this.standardDev = this.calcStandardDev(getAssociationsFromPairingList(this.pairingListTemplate,
+            this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
                     new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()]));
         } else {
             throw new IllegalArgumentException("Wrong arguments for creating a pairing list template: count of flights "
@@ -127,7 +127,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             try {
                 int[][] currentPLT = f.get();
                 double currentStandardDev = calcStandardDev(
-                        getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]));
+                        incrementAssociations(currentPLT, new int[competitors][competitors]));
 
                 if (currentStandardDev < bestDev) {
                     bestPLT = currentPLT;
@@ -240,7 +240,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         for (int m = 0; m < groups; m++) {
                             System.arraycopy(temp[m], 0, currentPLT[level + m], 0, competitors / groups);
                         }
-                        associations = this.getAssociationsFromPairingList(temp, associations);
+                        associations = this.incrementAssociations(temp, associations);
                         this.createConstantFlights(flights, groups, competitors, associations, currentPLT, seeds,
                                 futures);
                         associations = this.decrementAssociations(temp, associations);
@@ -267,7 +267,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     System.arraycopy(currentPLT[i], 0, temp[i - maxConstantFlights * groups + groups], 0, competitors / groups);
                     Arrays.fill(currentPLT[i], 0);
                 }
-                //associations = decrementAssociations(temp, associations);
                 break;
             }
         }
@@ -381,7 +380,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 int[][] flightColumn = this.createFlight(flights, groups, competitors, currentAssociations,
                         this.getRandomIntegerBetween(1, competitors));
 
-                currentAssociations = this.getAssociationsFromPairingList(flightColumn, currentAssociations);
+                currentAssociations = this.incrementAssociations(flightColumn, currentAssociations);
                 for (int m = 0; m < groups; m++) {
                     System.arraycopy(flightColumn[m], 0, currentPLT[(flightIndex * groups) + m], 0,
                             competitors / groups);
@@ -645,7 +644,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return int arryay of associations
      */
 
-    public int[][] getAssociationsFromPairingList(int[][] pairingList, int[][] associations) {
+    public int[][] incrementAssociations(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
                 for (int j = 0; j < pairingList[0].length; j++) {
