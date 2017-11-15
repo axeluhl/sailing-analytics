@@ -108,9 +108,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 // traveling on great circle segments from one approximation point to the next
                 speedWithBearingOnApproximationFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
                 // compute course change on "approximation track"
-                // FIXME bug 2009: when a maneuver (particularly a penalty circle) is executed at high turn rates,
-                // approximations may lead to turns >180deg, hence inferred to turn the wrong way; need to loop across
-                // the non-approximated fixes here!
                 CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent
                         .getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
                 Bearing courseChangeOnOriginalFixes = getCourseChange(competitor, previous.getTimePoint(),
@@ -232,7 +229,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         && currentFixAndCourseChange.getA().getPosition()
                                 .getDistance(group.get(group.size() - 1).getA().getPosition())
                                 .compareTo(threeHullLengths) > 0) {
-                    // if next is more than approximate maneuver duration later or further apart than three hull lengths,
+                    // if next is more than approximate maneuver duration later and further apart than three hull
+                    // lengths,
                     // turn the current group into a maneuver and add to result
                     Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, group,
                             totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD,
@@ -260,7 +258,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * <ol>
      * <li>Main curve of maneuver within the time range of douglas peucker fixes +-
      * ({@link BoatClass#getApproximateManeuverDuration() maneuver duration}{@code  / 2}) is determined. As main curve
-     * is defined the section of maneuver with the highest course change towards the provided
+     * is defined the section of maneuver with the highest absolute course change towards the provided
      * {@code maneuverDirection}.</li>
      * <li>Maneuver start and end with stable speed and course are determined by analysis of speed before and after the
      * main curve</li>
@@ -518,10 +516,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Computes the details of the main curve of maneuver such as maneuver entering and exiting time point with speed
-     * and bearing, time point of maneuver climax, total course change, and relevant maneuver bearing steps. The
-     * maneuver section with the highest (starboard maneuvers)/lowest (port side maneuvers) sum of differences between
-     * bearing steps is defined as the main curve section.
+     * Computes details of the main curve of maneuver, such as maneuver entering and exiting time point with speed and
+     * bearing, time point of maneuver climax, total course change, and relevant maneuver bearing steps. The maneuver
+     * section with the highest (starboard maneuvers)/lowest (port side maneuvers) sum of differences between bearing
+     * steps is defined as main curve section.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -567,10 +565,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * point of the maneuver, the speed maximum is determined throughout forward in time iteration of speed steps
      * starting from time point of main curve beginning. From the determined speed maximum, the iteration continues
      * until the point, when the bearing changes occur only with a maximum of
-     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
-     * stable course. The exiting time point of maneuver is approximated analogously by speed maximum determination
-     * throughout backward in time iteration of speed steps starting from time of main curve end, followed by a search
-     * of stable course.
+     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is
+     * regarded as a stable course. The exiting time point of maneuver is approximated analogously by speed maximum
+     * determination throughout backward in time iteration of speed steps starting from time of main curve end, followed
+     * by a search of stable course.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -611,8 +609,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * determined, the course changes get analyzed starting from {@code t'} until {@code (t -}
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration}{@code )} in order to
      * locate the point where the bearing starts to change with a rate of maximal
-     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
-     * stable course.
+     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is
+     * regarded as a stable course.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -673,8 +671,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * determined, the course changes get analyzed starting from {@code t'} until {@code (t +}
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code * 3)} in order
      * to locate the point where the bearing starts to change with a rate of maximal
-     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
-     * stable course.
+     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is
+     * regarded as a stable course.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -882,7 +880,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             if (timePoint.after(maneuverTimePoint)) {
                 // Check whether the totalCourseChange gets better with the added course change of current bearing
                 // step, considering the target sign of the course change
-                if (entry.getCourseChangeInDegrees() * totalCourseChangeSignum >= ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
+                if (entry.getCourseChangeInDegrees()
+                        * totalCourseChangeSignum >= ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
                     refinedTimePointAfterManeuver = timePoint;
                     refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
                 }
@@ -891,15 +890,16 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 // sign does not match, or the course change is nearly zero => cut the bearing step from the left;
                 // in other words, let the maneuver begin where the first direction change in the right direction occurs
                 // that exceeds the threshold.
-                if (refinedTimePointBeforeManeuver == null &&
-                        entry.getCourseChangeInDegrees() * totalCourseChangeSignum >= ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
+                if (refinedTimePointBeforeManeuver == null && entry.getCourseChangeInDegrees()
+                        * totalCourseChangeSignum >= ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
                     refinedTimePointBeforeManeuver = timePoint;
                     refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
                 }
             }
         }
         if (refinedTimePointBeforeManeuver == null) {
-            // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() == 0
+            // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() ==
+            // 0
             throw new IllegalArgumentException("bearingStepsToAnalyze must not be empty");
         }
         if (refinedSpeedWithBearingAfterManeuver == null) {

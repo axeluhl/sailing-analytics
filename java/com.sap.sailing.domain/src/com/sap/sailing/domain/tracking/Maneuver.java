@@ -16,11 +16,11 @@ import com.sap.sse.datamining.annotations.Statistic;
  * TWA. This section is defined as maneuver curve and its time range is represented by {@code timePointBefore} and
  * {@code timePointAfter}. The target speeds and bearings are represented by {@code speedWithBearingBefore} and
  * {@code speedWithBearingAfter}.</li>
- * <li>The second section is called the main curve and is defined as the section within the maneuver curve, where
- * highest course change has been performed. This means that the main curve is a subset of the maneuver curve which is
+ * <li>The second section is called main curve and is defined as the section within the maneuver curve, where highest
+ * course change has been performed. This means that the main curve is a subset of the maneuver curve which is
  * represented by {@code timePointBeforeMainCurve} and {@code timePointAfterMainCurve}.</li>
  * </ol>
- * The maneuver curve is a expansion of the main curve. The expansion relates speed maxima location before and after
+ * The maneuver curve is an expansion of the main curve. The expansion relates speed maxima location before and after
  * main curve. In contrast to maneuver curve, the main curve computation does not take speed into account and is based
  * only on gradual analysis of bearings within the maneuver progress. The main curve is supposed to deliver information
  * about the acceleration during continues turning in the direction of maneuver which can be used for boat class
@@ -61,7 +61,8 @@ public interface Maneuver extends GPSFix {
 
     /**
      * Gets the time point of the corresponding maneuver. The time point refers to a position within the main curve of
-     * maneuver with the highest course change recorded toward the direction of maneuver.
+     * maneuver with the highest turning rate recorded toward the direction of maneuver. This position is called
+     * maneuver climax.
      * 
      * @return The maneuver time point with the highest course change
      */
