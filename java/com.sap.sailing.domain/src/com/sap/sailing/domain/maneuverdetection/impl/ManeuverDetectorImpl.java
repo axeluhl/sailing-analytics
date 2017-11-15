@@ -232,7 +232,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         && currentFixAndCourseChange.getA().getPosition()
                                 .getDistance(group.get(group.size() - 1).getA().getPosition())
                                 .compareTo(threeHullLengths) > 0) {
-                    // if next is more then approximate maneuver duration later or further apart than two hull lengths,
+                    // if next is more than approximate maneuver duration later or further apart than two hull lengths,
                     // turn the current group into a maneuver and add to result
                     Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, group,
                             totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD,
