@@ -64,10 +64,10 @@ public class PairingListTemplateFactoryTest {
 //        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
 //        PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(45, 6, 18));
         PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(8, 3, 30));
+
 //        assertNotNull(example1);
 //        assertNotNull(example2);
         assertNotNull(example3);
-        
         /*
         for(int[] row : example1.getPairingListTemplate()) {
             System.out.println(Arrays.toString(row));
