@@ -3,8 +3,6 @@ package com.sap.see.pairinglist.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -23,7 +21,23 @@ public class PairingListTemplateFactoryTest {
     public void testSetup() {
         factoryImpl = new PairingListTemplateFactoryImpl();
     }
-    
+
+    @Test
+    public void testPairingListCreationForValidValues() {
+        final int flights = 15;
+        final int groups = 3;
+        final int competitors = 18;
+        
+        int[][] plTemplate = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors)).
+                getPairingListTemplate();
+
+        Assert.assertNotNull(plTemplate);
+        for(int[] i:plTemplate){
+            for (int z: i){
+                if(z<=0) Assert.fail("Values of Pairing List Template must not be 0!");
+            }
+        }
+    }
     /**
      * Checks if the Factory returns the same PairingListTemplate if one exists
      */
@@ -59,6 +73,19 @@ public class PairingListTemplateFactoryTest {
         }
         System.out.println(example1.getQuality());
         */
+    }
+    
+    @Test
+    public void qualityCheck(){
+        PairingListTemplate template = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
+        if(template.getQuality()>=0.7) {
+            Assert.fail("Quality of Pairinglist is worse than usual!");
+        }
+        
+        PairingListTemplate template2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30));
+        if(template2.getQuality()>=1.2) {
+            Assert.fail("Quality of Pairinglist is worse than usual!");
+        }
     }
     
     /**
