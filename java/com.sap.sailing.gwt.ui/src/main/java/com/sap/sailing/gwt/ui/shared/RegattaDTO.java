@@ -36,7 +36,7 @@ public class RegattaDTO extends NamedDTO {
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
-    public boolean canBoatsOfCompetitorsChangePerRace = true;
+    public boolean canBoatsOfCompetitorsChangePerRace = false;
     public RankingMetrics rankingMetricType;
     public Double buoyZoneRadiusInHullLengths;
     
