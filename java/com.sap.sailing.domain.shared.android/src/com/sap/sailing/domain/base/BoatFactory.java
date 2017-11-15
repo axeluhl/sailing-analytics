@@ -24,8 +24,4 @@ public interface BoatFactory {
     boolean isBoatToUpdateDuringGetOrCreate(Boat result);
 
     Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color);
-
-    Boat getOrCreateBoat(Competitor competitor, String name, BoatClass boatClass, String sailId, Color color);
-    
-    Boat getOrCreateBoat(LeaderboardGroupBase leaderboardGroup, String name, BoatClass boatClass, String sailId, Color color);
 }

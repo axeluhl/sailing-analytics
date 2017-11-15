@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
-import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
@@ -492,16 +491,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             boatNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
-    }
-
-    @Override
-    public Boat getOrCreateBoat(LeaderboardGroupBase leaderboardGroup, String name, BoatClass boatClass, String sailId, Color color) {
-        return getOrCreateBoat(leaderboardGroup.getId(), name, boatClass, sailId, color);
-    }
-    
-    @Override
-    public Boat getOrCreateBoat(Competitor competitor, String name, BoatClass boatClass, String sailId, Color color) {
-        return getOrCreateBoat(competitor.getId(), name, boatClass, sailId, color);
     }
     
     private void boatNoLongerToUpdateDuringGetOrCreate(Boat boat) {

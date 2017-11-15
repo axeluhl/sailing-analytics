@@ -391,16 +391,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Boat getOrCreateBoat(Competitor competitor, String name, BoatClass boatClass, String sailId, Color color) {
-        return getCompetitorStore().getOrCreateBoat(competitor, name, boatClass, sailId, color);
-    }
-    
-    @Override
-    public Boat getOrCreateBoat(LeaderboardGroupBase leaderboardGroup, String name, BoatClass boatClass, String sailId, Color color) {
-        return getCompetitorStore().getOrCreateBoat(leaderboardGroup, name, boatClass, sailId, color);
-    }
-
-    @Override
     public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(List<String> clientIdentifiers) {
         DeviceConfigurationMatcher probe = createMatcher(clientIdentifiers);
         DeviceConfigurationMatcher matcher = configurationMatcherCache.get(probe.getMatcherIdentifier());
