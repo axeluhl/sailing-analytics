@@ -951,19 +951,19 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     /**
      * Computes the maneuver time point as the time point along between maneuver start and end where the competitor's
-     * track has greatest change in course.
+     * track has greatest angular velocity.
      * 
      * @param maneuverBearingSteps
      *            The bearing steps to analyze
      * @param maneuverDirection
      *            The target direction of the maneuver. It defines the sign of the course changes to consider.
-     * @return The time point where the greatest course change in the provided {@code maneuverDirection} has been
-     *         performed
+     * @return The time point where the greatest angular velocity in the provided {@code maneuverDirection} has been
+     *         achieved
      */
     private TimePoint computeManeuverTimePoint(Iterable<SpeedWithBearingStep> maneuverBearingSteps,
             NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
-        double maxAngleSpeedInDegreesPerMillisecond = 0;
+        double maxAbsoluteAngularVelocityInDegreesPerMillisecond = 0;
         TimePoint maneuverTimePoint = null;
         TimePoint lastTimePoint = null;
         for (SpeedWithBearingStep entry : maneuverBearingSteps) {
@@ -971,10 +971,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             if (lastTimePoint != null) {
                 double courseChangeAngleInDegrees = entry.getCourseChangeInDegrees();
                 if (Math.signum(courseChangeAngleInDegrees) == totalCourseChangeSignum) {
-                    double angleSpeedInDegreesPerMillisecond = Math.abs(
+                    double absoluteAngularVelocityInDegreesPerMillisecond = Math.abs(
                             courseChangeAngleInDegrees / (double) (timePoint.asMillis() - lastTimePoint.asMillis()));
-                    if (angleSpeedInDegreesPerMillisecond > maxAngleSpeedInDegreesPerMillisecond) {
-                        maxAngleSpeedInDegreesPerMillisecond = angleSpeedInDegreesPerMillisecond;
+                    if (absoluteAngularVelocityInDegreesPerMillisecond > maxAbsoluteAngularVelocityInDegreesPerMillisecond) {
+                        maxAbsoluteAngularVelocityInDegreesPerMillisecond = absoluteAngularVelocityInDegreesPerMillisecond;
                         maneuverTimePoint = lastTimePoint;
                     }
                 }
