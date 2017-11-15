@@ -23,7 +23,23 @@ public class PairingListTemplateFactoryTest {
     public void testSetup() {
         factoryImpl = new PairingListTemplateFactoryImpl();
     }
-    
+
+    @Test
+    public void testPairingListCreationForValidValues() {
+        final int flights = 15;
+        final int groups = 3;
+        final int competitors = 18;
+        
+        int[][] plTemplate = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors)).
+                getPairingListTemplate();
+
+        Assert.assertNotNull(plTemplate);
+        for(int[] i:plTemplate){
+            for (int z: i){
+                if(z<=0) Assert.fail("Values of Pairing List Template must not be 0!");
+            }
+        }
+    }
     /**
      * Checks if the Factory returns the same PairingListTemplate if one exists
      */
