@@ -897,8 +897,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             }
         }
         if (refinedTimePointBeforeManeuver == null) {
-            // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() ==
-            // 0
+            // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() == 0
             throw new IllegalArgumentException("bearingStepsToAnalyze must not be empty");
         }
         if (refinedSpeedWithBearingAfterManeuver == null) {

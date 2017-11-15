@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -45,14 +46,14 @@ public class CurveEnteringAndExitingComputationTest {
         Iterable<SpeedWithBearingStep> steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
         CurveEnteringAndExitingDetails mainCurve = maneuverDetector
                 .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
 
         // Test that outer bearing steps with opposite direction to the target course get cut off.
         steps = constructStepsWithBearings(0, 359, 3, 9, 10, 9);
         mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
                 NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(2), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
 
         // Test that outer bearing steps with major direction to the target course do not get cut off due to short
@@ -60,50 +61,56 @@ public class CurveEnteringAndExitingComputationTest {
         steps = constructStepsWithBearings(0, 10, 5, 15, 10, 20);
         mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
                 NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
 
         // Test that the maneuvers duration gets zero, if the maneuver direction does not match the target direction and
         // the code inside does not crash.
         steps = constructStepsWithBearings(0, 359, 358, 357, 356, 355);
-        mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
-                NauticalSide.STARBOARD);
-        assertEquals(maneuverTimePoint, mainCurve.getTimePointBefore());
-        assertEquals(maneuverTimePoint, mainCurve.getTimePointAfter());
+        try {
+            mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
+                    NauticalSide.STARBOARD);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
 
         // Test that the maneuvers duration gets zero, if the boat is not turning at all and
         // the code inside does not crash.
         steps = constructStepsWithBearings(0, 0, 0, 0, 0, 0);
-        mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
-                NauticalSide.STARBOARD);
-        assertEquals(maneuverTimePoint, mainCurve.getTimePointBefore());
-        assertEquals(maneuverTimePoint, mainCurve.getTimePointAfter());
+        try {
+            mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
+                    NauticalSide.STARBOARD);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
 
         // test that when there are only small direction changes at the end they are cut off
         steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006, 10.0007, 10.0008, 10.0009);
         mainCurve = maneuverDetector
                 .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
 
         steps = constructStepsWithBearings(359.9985, 359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3, 9, 10);
         mainCurve = maneuverDetector
                 .computeEnteringAndExitingDetailsOfManeuverMainCurve(constructTimePoint(9), steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(7), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(8), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
 
-        // however, when the small changes aggregate to a total change exceeding the threshold, they all belong to the maneuver
+        // even when the small changes aggregate to a total change exceeding the threshold, they all do not belong to the maneuver
         steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006, 10.0007, 10.0008, 10.0009, 10.001);
         mainCurve = maneuverDetector
                 .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
-        assertEquals(constructTimePoint(14), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
 
         steps = constructStepsWithBearings(359.9979, 359.9980, 359.9981, 359.9982, 359.9983, 359.9984, 359.9985, 359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3, 9, 10);
         mainCurve = maneuverDetector
                 .computeEnteringAndExitingDetailsOfManeuverMainCurve(constructTimePoint(15), steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
-        assertEquals(constructTimePoint(18), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(14), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(17), mainCurve.getTimePointAfter());
     }
 
     @Test
