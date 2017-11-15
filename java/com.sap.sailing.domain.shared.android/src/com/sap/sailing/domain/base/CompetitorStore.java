@@ -58,6 +58,9 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      */
     void allowCompetitorResetToDefaults(Competitor competitor);
 
+    /** Removes all competitors and boats from the store */
+    void clear();
+
     int getCompetitorsCount();
 
     /**

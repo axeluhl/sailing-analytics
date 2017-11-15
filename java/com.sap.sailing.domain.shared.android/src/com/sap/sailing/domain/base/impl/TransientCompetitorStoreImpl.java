@@ -84,7 +84,13 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
         boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
     }
-    
+
+    @Override
+    public void clear() {
+        clearCompetitors();
+        clearBoats();
+    }
+
     @Override
     public void addCompetitorUpdateListener(CompetitorUpdateListener listener) {
         competitorUpdateListeners.add(listener);
