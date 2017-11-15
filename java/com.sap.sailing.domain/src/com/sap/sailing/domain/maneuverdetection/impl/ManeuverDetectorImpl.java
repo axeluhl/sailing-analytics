@@ -871,8 +871,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             TimePoint maneuverTimePoint, Iterable<SpeedWithBearingStep> bearingStepsToAnalyze,
             NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
-        double maxCourseChangeInDegrees = 0;
-        double currentCourseChangeInDegrees = 0;
         // Refine the time point before and after maneuver by checking whether the total course changed before maneuver
         // time point may be increased or kept unchanged if we cut off bearing steps one by one from the left and right.
         TimePoint refinedTimePointBeforeManeuver = null;
@@ -880,24 +878,19 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         TimePoint refinedTimePointAfterManeuver = null;
         SpeedWithBearing refinedSpeedWithBearingAfterManeuver = null;
         for (SpeedWithBearingStep entry : bearingStepsToAnalyze) {
-            currentCourseChangeInDegrees += entry.getCourseChangeInDegrees();
             TimePoint timePoint = entry.getTimePoint();
             if (timePoint.after(maneuverTimePoint)) {
                 // Check whether the totalCourseChange gets better with the added course change of current bearing
                 // step, considering the target sign of the course change
-                if (maxCourseChangeInDegrees
-                        * totalCourseChangeSignum <= currentCourseChangeInDegrees * totalCourseChangeSignum
-                                - ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
-                    maxCourseChangeInDegrees = currentCourseChangeInDegrees;
+                if (entry.getCourseChangeInDegrees() * totalCourseChangeSignum >= ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
                     refinedTimePointAfterManeuver = timePoint;
                     refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
                 }
             } else {
                 // Check whether the course change is performed in the target direction of maneuver. If the direction
                 // sign does not match, or the course change is nearly zero => cut the bearing step from the left
-                if (ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS >= currentCourseChangeInDegrees
-                        * totalCourseChangeSignum) {
-                    currentCourseChangeInDegrees = 0;
+                if (refinedTimePointBeforeManeuver == null &&
+                        entry.getCourseChangeInDegrees() * totalCourseChangeSignum >= ABS_COURSE_CHANGE_IN_DEGREES_TO_IGNORE_BETWEEN_BEARING_STEPS) {
                     refinedTimePointBeforeManeuver = timePoint;
                     refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
                 }
