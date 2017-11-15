@@ -9,10 +9,9 @@ public interface PairingListTemplateFactory {
      * Returns new pairing list template if there is no existing pairing list template with 
      * the same parameters.
      * 
-     * @param pairingFrameProvider
+     * @param pairingFrameProvider 
      * @return PairingListTemplate Object
      */
-    
     PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider);
    
 }

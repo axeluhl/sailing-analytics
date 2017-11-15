@@ -25,5 +25,6 @@ public interface PairingListTemplate {
      */
     double getQuality();
 
+    //TODO: Javadoc
     int[][] getPairingListTemplate();               
 }

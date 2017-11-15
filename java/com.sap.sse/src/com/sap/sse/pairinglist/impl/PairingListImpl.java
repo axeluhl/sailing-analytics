@@ -9,8 +9,8 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 
 public class PairingListImpl<Flight, Group, Competitor> implements PairingList<Flight, Group, Competitor>  {
-    private PairingListTemplate pairingListTemplate;
-    private CompetitionFormat<Flight, Group, Competitor> competitionFormat;
+    private final PairingListTemplate pairingListTemplate;
+    private final CompetitionFormat<Flight, Group, Competitor> competitionFormat;
     
     /**
      * @param pList: pairing list with specific information of flights, groups and competitors
@@ -29,6 +29,7 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         final int[] competitorIndicesInRace = new int[competitionFormat.getCompetitorsCount() / competitionFormat.getGroupsCount()];
         System.arraycopy(competitorIndices[flightIndex], groupIndex * competitorIndicesInRace.length,
                 competitorIndicesInRace, 0, competitorIndicesInRace.length);
+        //TODO: change arraycopy to loop
         final List<Competitor> result = new ArrayList<>();
         for (final int competitorIndexInRace : competitorIndicesInRace) {
             result.add(Util.get(competitionFormat.getCompetitors(), competitorIndexInRace));

@@ -3,6 +3,8 @@ package com.sap.see.pairinglist.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -31,12 +33,11 @@ public class PairingListTemplateFactoryTest {
         final int groups = 3;
         final int competitors = 18;
         
-        PairingFrameProviderTest frameProviderTest = new PairingFrameProviderTest(flights, groups, competitors);
-        PairingListTemplate list1 = factoryImpl.getOrCreatePairingListTemplate(frameProviderTest);
-        PairingListTemplate list2 = factoryImpl.getOrCreatePairingListTemplate(frameProviderTest);
-        if(list1!=list2) {
-            Assert.fail("getOrCreatePairingListTemplate is not returning an already existing PairingListTemplate!");
-        }
+        PairingFrameProviderTest frameProviderTest1 = new PairingFrameProviderTest(flights, groups, competitors);
+        PairingFrameProviderTest frameProviderTest2 = new PairingFrameProviderTest(flights, groups, competitors);
+        PairingListTemplate list1 = factoryImpl.getOrCreatePairingListTemplate(frameProviderTest1);
+        PairingListTemplate list2 = factoryImpl.getOrCreatePairingListTemplate(frameProviderTest2);     
+        Assert.assertSame(list1,list2);
     }
     
     /**
