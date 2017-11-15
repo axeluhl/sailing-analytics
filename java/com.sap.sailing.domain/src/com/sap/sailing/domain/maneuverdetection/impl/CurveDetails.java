@@ -11,7 +11,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-class CurveDetails extends CurveEnterindAndExitingDetails {
+class CurveDetails extends CurveEnteringAndExitingDetails {
     private final TimePoint timePoint;
     private final double totalChangeInDegrees;
 

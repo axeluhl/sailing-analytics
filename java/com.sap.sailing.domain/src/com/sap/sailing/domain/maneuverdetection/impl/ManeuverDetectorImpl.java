@@ -541,7 +541,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         Iterable<SpeedWithBearingStep> stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
                 timePointAfterManeuver, intervalBetweenSteps);
         TimePoint maneuverTimePoint = computeManeuverTimePoint(stepsToAnalyze, maneuverDirection);
-        CurveEnterindAndExitingDetails maneuverMainCurveEnteringAndExitingDetails = computeEnteringAndExitingDetailsOfManeuverMainCurve(
+        CurveEnteringAndExitingDetails maneuverMainCurveEnteringAndExitingDetails = computeEnteringAndExitingDetailsOfManeuverMainCurve(
                 maneuverTimePoint, stepsToAnalyze, maneuverDirection);
         List<SpeedWithBearingStep> maneuverMainCurveSpeedWithBearingSteps = getSpeedWithBearingStepsWithinTimeRange(
                 stepsToAnalyze, maneuverMainCurveEnteringAndExitingDetails.getTimePointBefore(),
@@ -867,7 +867,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The nautical direction of the maneuver
      * @return The computed entering and exiting time point with its speeds with bearings for the main curve
      */
-    public CurveEnterindAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(
+    public CurveEnteringAndExitingDetails computeEnteringAndExitingDetailsOfManeuverMainCurve(
             TimePoint maneuverTimePoint, Iterable<SpeedWithBearingStep> bearingStepsToAnalyze,
             NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
@@ -920,7 +920,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 }
             }
         }
-        CurveEnterindAndExitingDetails maneuverEnteringAndExitingDetails = new CurveEnterindAndExitingDetails(
+        CurveEnteringAndExitingDetails maneuverEnteringAndExitingDetails = new CurveEnteringAndExitingDetails(
                 refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, refinedSpeedWithBearingBeforeManeuver,
                 refinedSpeedWithBearingAfterManeuver);
         return maneuverEnteringAndExitingDetails;

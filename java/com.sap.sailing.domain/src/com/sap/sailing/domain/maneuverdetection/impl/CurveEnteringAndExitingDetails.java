@@ -9,13 +9,13 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class CurveEnterindAndExitingDetails {
+public class CurveEnteringAndExitingDetails {
     private final TimePoint timePointBefore;
     private final TimePoint timePointAfter;
     private final SpeedWithBearing speedWithBearingBefore;
     private final SpeedWithBearing speedWithBearingAfter;
 
-    public CurveEnterindAndExitingDetails(TimePoint timePointBefore, TimePoint timePointAfter,
+    public CurveEnteringAndExitingDetails(TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter) {
         this.timePointBefore = timePointBefore;
         this.timePointAfter = timePointAfter;
