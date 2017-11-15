@@ -992,7 +992,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     /**
      * Gets the maximal duration of the maneuver main curve.
      */
-    protected Duration getApproximateManeuverDuration(Competitor competitor) {
+    private Duration getApproximateManeuverDuration(Competitor competitor) {
         return competitor.getBoat().getBoatClass().getApproximateManeuverDuration();
     }
 
