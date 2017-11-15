@@ -758,6 +758,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         // TODO clear user store? See bug 2430.
         this.competitorStore.clearCompetitors();
+        this.competitorStore.clearBoats();
         this.windStore.clear();
         getRaceLogStore().clear();
         getRegattaLogStore().clear();
