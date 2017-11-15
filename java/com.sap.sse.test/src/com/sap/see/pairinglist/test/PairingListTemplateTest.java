@@ -1,9 +1,12 @@
 package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals;
+
 import org.junit.Test;
+
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
+
 import junit.framework.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl {
@@ -92,6 +95,23 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         double average = sum / tests;
         if (average > 8000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
+        }
+    }
+    
+    @Test
+    public void testIncrementAndDecrementAssociations() {
+        int[][] associations = new int[18][18];
+        int[][] flight = this.createFlight(15, 3, 18, associations, 5);
+        
+        associations = this.getAssociationsFromPairingList(flight, associations);
+        associations = this.decrementAssociations(flight, associations);
+        
+        for (int[] key: associations) {
+            for (int value: key) {
+                if (value > 0) {
+                    Assert.fail("Associations array should only have values 0 and -1!");
+                }
+            }
         }
     }
     

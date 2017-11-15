@@ -234,36 +234,40 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 if (currentPLT[z][0] == 0) {
                     level = z;
                     // calculate Flights for current recurrence level
-                    for (int x = 0; x < seeds.length; x++) {
-                        int[][] temp = this.createFlight(flights, groups, competitors, associations, seeds[x]);
+                    for (int seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
+                        int[][] temp = this.createFlight(flights, groups, competitors, associations, seeds[seedIndex]);
                         // TODO: change arraycopy + refactor fleet
                         for (int m = 0; m < groups; m++) {
                             System.arraycopy(temp[m], 0, currentPLT[level + m], 0, competitors / groups);
                         }
-                        // TODO: calculation incremental
-                        associations = this.getAssociationsFromPairingList(currentPLT,
-                                new int[competitors][competitors]);
+                        associations = this.getAssociationsFromPairingList(temp, associations);
                         this.createConstantFlights(flights, groups, competitors, associations, currentPLT, seeds,
                                 futures);
+                        associations = this.decrementAssociations(temp, associations);
                     }
+                    int[][] temp = new int[groups][competitors / groups];
+                    
                     // reset last recurrence step
                     for (int i = level; i < level + groups; i++) {
+                        System.arraycopy(currentPLT[i], 0, temp[i - level], 0, competitors / groups);
                         Arrays.fill(currentPLT[i], 0);
                     }
-                    associations = getAssociationsFromPairingList(currentPLT, associations);
-
+                    
                     break;
                 }
             } else {
                 // Task start
                 Future<int[][]> future = executorService.submit((new Task(flights, groups, competitors, currentPLT, associations, seeds.length)));
                 futures.add(future);
+                
+                int[][] temp = new int[groups][competitors / groups];
+                
                 // reset last recurrence step
                 for (int i = maxConstantFlights * groups - 1; i >= maxConstantFlights * groups - groups; i--) {
+                    System.arraycopy(currentPLT[i], 0, temp[i - maxConstantFlights * groups + groups], 0, competitors / groups);
                     Arrays.fill(currentPLT[i], 0);
                 }
-                // TODO reverse method
-                associations = getAssociationsFromPairingList(currentPLT, associations);
+                //associations = decrementAssociations(temp, associations);
                 break;
             }
         }
@@ -651,13 +655,33 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         }
                     } else {
                         if (group[i] > 0 && group[j] > 0) {
-                            associations[group[i] - 1][group[j] - 1] = associations[group[i] - 1][group[j] - 1] + 1;
+                            associations[group[i] - 1][group[j] - 1] += 1;
                         }
                     }
                 }
             }
         }
 
+        return associations;
+    }
+    
+    public int[][] decrementAssociations(int[][] pairingList, int[][] associations) {
+        for (int[] group: pairingList) {
+            for (int i = 0; i < group.length; i++) {
+                for (int j = 0; j < group.length; j++) {
+                    if (group[i] == group[j]) {
+                        if (group[i] > 0 && group[j] > 0) {
+                            associations[group[i] - 1][group[j] - 1] = -1;
+                        }
+                    } else {
+                        if (group[i] > 0 && group[j] > 0) {
+                            associations[group[i] - 1][group[j] - 1] -= 1;
+                        }
+                    }
+                }
+            }
+        }
+        
         return associations;
     }
 

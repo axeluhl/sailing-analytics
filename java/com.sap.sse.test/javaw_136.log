@@ -1,0 +1,9 @@
+---
+VM version: Oct  9 2017 15:07:17 - 81_REL - optU - windows amd64 - 6 - bas2:294982 (mixed mode)
+
+Time:2017-11-1515:39:52
+Pid: 136
+Hostname: WDFN34222622A
+current dir: C:\Users\D070307\.git\.projects\git\java\com.sap.sse.test
+---
+   :    [1464]  15:39:52 ***ERROR (:0): Java assert: "Quality of Pairinglist is worse than usual!0.7004145529212449" in junit.framework.Assert.fail(Assert.java:47)

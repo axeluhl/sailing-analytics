@@ -1,0 +1,9 @@
+---
+VM version: Oct  9 2017 15:07:17 - 81_REL - optU - windows amd64 - 6 - bas2:294982 (mixed mode)
+
+Time:2017-11-1515:05:35
+Pid: 14232
+Hostname: WDFN34222622A
+current dir: C:\Users\D070307\.git\.projects\git\java\com.sap.sse.test
+---
+   :    [11828] 15:05:35 ***ERROR (:0): StackOverflowError
