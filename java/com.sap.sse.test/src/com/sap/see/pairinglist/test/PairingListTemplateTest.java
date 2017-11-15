@@ -1,13 +1,8 @@
 package com.sap.see.pairinglist.test;
 
-import static org.junit.Assert.assertArrayEquals;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
+import static org.junit.Assert.assertArrayEquals; 
 import org.junit.Test;
 
-import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 
@@ -86,19 +81,6 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
     }
 
     @Test
-    public void qualityCheck(){
-        this.createPairingListTemplate(15, 3, 18);
-        if(getQuality()>=0.7) {
-            Assert.fail("Quality of Pairinglist is worse than usual!");
-        }
-        
-        this.createPairingListTemplate(10, 3, 30);
-        if(getQuality()>=1.2) {
-            Assert.fail("Quality of Pairinglist is worse than usual!");
-        }
-    }
-
-    @Test
     public void testAverageTimeForSingleCase(){
         final int tests = 5;
         long[] a=new long[tests]; 
@@ -120,17 +102,6 @@ public class PairingListTemplateTest extends PairingListTemplateImpl{
         }
     }
     
-    @Test
-    public void testAssignmentQuality(){
-        this.createPairingListTemplate(15, 3, 18);
-        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6]))>=1.5) {
-            Assert.fail("Quality of Boat Assignments is worse than usual!");
-        }
-        this.createPairingListTemplate(10, 3, 30);
-        if(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[30][10]))>=0.6) {
-            Assert.fail("Quality of Boat Assignments is worse than usual!");
-        }
-    }
     @Test
     public void testStandardDevCalc(){
         int[][] givenPairingList={
