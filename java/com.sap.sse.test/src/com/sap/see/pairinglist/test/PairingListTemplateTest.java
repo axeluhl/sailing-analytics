@@ -2,6 +2,9 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.sap.sse.pairinglist.PairingFrameProvider;
@@ -12,7 +15,8 @@ import junit.framework.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl{
 
-    public PairingListTemplateTest() {  
+
+    public PairingListTemplateTest() {
         super(new PairingFrameProviderTest(15, 3, 18));
     }
 
