@@ -115,7 +115,13 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         Assert.assertEquals(0.4967673,
                 (calcStandardDev(getAssociationsFromPairingList(testPairingList, new int[10][10]))), 0.01);
     }
+    
+    @Test
+    public void assignmentTest() {
+        this.createPairingListTemplate(15, 3, 18);
+        System.out.println(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6])));
     }
+}
     
    
 
