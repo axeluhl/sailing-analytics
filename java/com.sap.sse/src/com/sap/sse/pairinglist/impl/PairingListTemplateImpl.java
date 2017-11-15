@@ -13,14 +13,14 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.util.ThreadPoolUtil;
 
-public class PairingListTemplateImpl implements PairingListTemplate{
+public class PairingListTemplateImpl implements PairingListTemplate {
 
     private final Random random = new Random();
     private final int[][] pairingListTemplate;
     private final double standardDev;
-    private final ExecutorService executorService = 
-            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-    
+    private final ExecutorService executorService = ThreadPoolUtil.INSTANCE
+            .getDefaultBackgroundTaskThreadPoolExecutor();
+
     private final int maxConstantFlights;
     private final int iterations;
 
@@ -32,13 +32,13 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations) {
         this.iterations = iterations;
         this.maxConstantFlights = (int) (pairingFrameProvider.getFlightsCount() * 0.9);
-        
-        if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), 
+
+        if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
                 pairingFrameProvider.getCompetitorsCount())) {
-            
-            this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(), 
-                    pairingFrameProvider.getCompetitorsCount());
-            this.standardDev = this.calcStandardDev(getAssociationsFromPairingList(this.pairingListTemplate, 
+
+            this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
+                    pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
+            this.standardDev = this.calcStandardDev(getAssociationsFromPairingList(this.pairingListTemplate,
                     new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()]));
         } else {
             throw new IllegalArgumentException("Wrong arguments for creating a pairing list template: count of flights "
@@ -60,11 +60,11 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
 
     @Override
-    public int[][] getPairingListTemplate(){
+    public int[][] getPairingListTemplate() {
         return pairingListTemplate;
     }
-    
-    //TODO Javadoc bearbeiten!
+
+    // TODO Javadoc bearbeiten!
     /**
      * Creates a pairing list template.
      * 
@@ -72,32 +72,37 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * The generation of pairing list templates follow two general steps:
      * </p>
      * <p>
-     *     1. Because of the huge amount of generated pairing lists, we first try to create
-     *        some constant flights which the other flights are based on. The constant flights
-     *        are generated in a recursive way, which can be imagined as a tree structure.
-     *        The nodes are represented by a competitor number, that is used as seed to generate
-     *        a flight (generation of seeds: generateSeeds()). Each level in our recursive method 
-     *        equates to a new constant flight. By reaching a leave of the tree, we start a task 
-     *        that contains step 2. At the end of this algorithm there are 
-     *        <code>Math.pow(seeds, maxConstantFlights)</code> tasks.</p><p>
-     *     2. Every single task fills the pairing list by generating the rest of the flights. From 
-     *        now on, every seed is a randomized competitor. The tasks perform <code>iterations/tasks</code>
-     *        iterations. Every task returns its best result in a <code>Future<int[][]></code>. In the end
-     *        we compare all futures and return the best result, after improving the boat assignments. </p>
-     *        
+     * 1. Because of the huge amount of generated pairing lists, we first try to create some constant flights which the
+     * other flights are based on. The constant flights are generated in a recursive way, which can be imagined as a
+     * tree structure. The nodes are represented by a competitor number, that is used as seed to generate a flight
+     * (generation of seeds: generateSeeds()). Each level in our recursive method equates to a new constant flight. By
+     * reaching a leave of the tree, we start a task that contains step 2. At the end of this algorithm there are
+     * <code>Math.pow(seeds, maxConstantFlights)</code> tasks.
+     * </p>
+     * <p>
+     * 2. Every single task fills the pairing list by generating the rest of the flights. From now on, every seed is a
+     * randomized competitor. The tasks perform <code>iterations/tasks</code> iterations. Every task returns its best
+     * result in a <code>Future<int[][]></code>. In the end we compare all futures and return the best result, after
+     * improving the boat assignments.
      * </p>
      * 
-     * @param flightCount count of flights
-     * @param groupCount count of groups per flight
-     * @param competitors count of total competitors
+     * </p>
+     * 
+     * @param flightCount
+     *            count of flights
+     * @param groupCount
+     *            count of groups per flight
+     * @param competitors
+     *            count of total competitors
      */
     protected int[][] createPairingListTemplate(int flightCount, int groupCount, int competitors) {
         int[] seeds = this.generateSeeds(flightCount, competitors);
         int[][] bestPLT = new int[flightCount * groupCount][competitors / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
 
-        ArrayList<Future<int[][]>> futures = this.createConstantFlights(flightCount, groupCount, competitors, new int[competitors][competitors],
-                new int[flightCount * groupCount][competitors / groupCount], seeds, new ArrayList<>());
+        ArrayList<Future<int[][]>> futures = this.createConstantFlights(flightCount, groupCount, competitors,
+                new int[competitors][competitors], new int[flightCount * groupCount][competitors / groupCount], seeds,
+                new ArrayList<>());
 
         for (Future<int[][]> f : futures) {
             try {
@@ -116,14 +121,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 
         bestPLT = this.improveAssignment(bestPLT, flightCount, groupCount, competitors);
         bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitors);
-        
+
         futures.clear();
-        
+
         return bestPLT;
     }
     
     private boolean checkValues(int flights, int groups, int competitors) {
-        if((flights > 0) && (groups>1) && (competitors>1) && (competitors>=groups) && (competitors%groups==0)) {
+        if ((flights > 0) && (groups > 1) && (competitors > 1) && (competitors >= groups) && (competitors % groups == 0)) {
             return true;
         }
         return false;
@@ -134,22 +139,24 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * 
      * No duplicates allowed.
      * 
-     * @param flights count of flights
-     * @param competitors count of competitors
+     * @param flights
+     *            count of flights
+     * @param competitors
+     *            count of competitors
      * @return int array of random competitors
      */
     private int[] generateSeeds(int flights, int competitors) {
-        int[] seeds=new int[(int)(Math.log(iterations)/Math.log(flights)*0.5)];
-        for(int x=0;x<seeds.length;x++){
-            int random=this.randomBW(1, competitors);
-            while(this.contains(seeds, random)) {
-                random=this.randomBW(1, competitors);
+        int[] seeds = new int[(int) (Math.log(iterations) / Math.log(flights) * 0.5)];
+        for (int x = 0; x < seeds.length; x++) {
+            int random = this.getRandomIntegerBetween(1, competitors);
+            while (this.contains(seeds, random)) {
+                random = this.getRandomIntegerBetween(1, competitors);
             }
-            seeds[x]=random;
+            seeds[x] = random;
         }
         return seeds;
     }
-    
+
     //TODO: rename
     class Task implements Callable<int[][]> {
         int flights,groups,competitors, seedLength;
@@ -164,25 +171,25 @@ public class PairingListTemplateImpl implements PairingListTemplate{
          * @param constantPLT constant generated flights on which the tasks is based on  
          * @param associations associations created from constantPLT
          */
-        Task(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations, int seedLength){ 
+        Task(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations, int seedLength) {
             this.flights = flights;
             this.groups = groups;
             this.competitors = competitors;
             this.seedLength = seedLength;
-            this.plt = new int[flights*groups][competitors/groups];
+            this.plt = new int[flights * groups][competitors / groups];
             this.associations = new int[competitors][competitors];
-            for(int i=0;i<constantPLT.length;i++) {
-                System.arraycopy(constantPLT[i], 0, this.plt[i], 0, competitors/groups);
+            for (int i = 0; i < constantPLT.length; i++) {
+                System.arraycopy(constantPLT[i], 0, this.plt[i], 0, competitors / groups);
             }
-            for(int i=0;i<associations.length;i++) {
+            for (int i = 0; i < associations.length; i++) {
                 System.arraycopy(associations[i], 0, this.associations[i], 0, competitors);
             }
         }
-        
+
         @Override
         public int[][] call() {
-            return create(flights, groups, competitors, (int)(iterations/Math.pow(seedLength, maxConstantFlights)), 
-                    plt, associations);          
+            return create(flights, groups, competitors, (int) (iterations / Math.pow(seedLength, maxConstantFlights)),
+                    plt, associations);
         }
     } 
     
@@ -201,41 +208,44 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      */
     private ArrayList<Future<int[][]>> createConstantFlights(int flights, int groups, int competitors, int[][] associations,
             int[][]currentPLT, int[] seeds, ArrayList<Future<int[][]>> futures) {         
-        //TODO: change depth of groups
-        int fleet=Integer.MAX_VALUE;
-        for(int z=0;z<currentPLT.length;z++){
-            if(z<this.maxConstantFlights*groups){
-                if(currentPLT[z][0]==0){
-                    fleet=z;
-                    //calculate Flights for current recurrence level
-                    for(int x=0;x<seeds.length;x++){
-                        int[][] temp=this.createFlight(flights, groups, competitors, associations, seeds[x]);
-                        //TODO: change arraycopy + refactor fleet
-                        for (int m = 0; m < groups; m++) { 
+        // TODO: change depth of groups
+        int fleet = Integer.MAX_VALUE;
+        for (int z = 0; z < currentPLT.length; z++) {
+            if (z < this.maxConstantFlights * groups) {
+                if (currentPLT[z][0] == 0) {
+                    fleet = z;
+                    // calculate Flights for current recurrence level
+                    for (int x = 0; x < seeds.length; x++) {
+                        int[][] temp = this.createFlight(flights, groups, competitors, associations, seeds[x]);
+                        // TODO: change arraycopy + refactor fleet
+                        for (int m = 0; m < groups; m++) {
                             System.arraycopy(temp[m], 0, currentPLT[fleet + m], 0, competitors / groups);
                         }
-                        //TODO: calculation incremental
-                        associations=this.getAssociationsFromPairingList(currentPLT, new int[competitors][competitors]);
-                        this.createConstantFlights(flights, groups, competitors, associations, currentPLT, seeds, futures);
+                        // TODO: calculation incremental
+                        associations = this.getAssociationsFromPairingList(currentPLT,
+                                new int[competitors][competitors]);
+                        this.createConstantFlights(flights, groups, competitors, associations, currentPLT, seeds,
+                                futures);
                     }
-                    //reset last recurrence step
-                    for(int i=fleet;i<fleet+groups;i++){
+                    // reset last recurrence step
+                    for (int i = fleet; i < fleet + groups; i++) {
                         Arrays.fill(currentPLT[i], 0);
                     }
-                    associations=getAssociationsFromPairingList(currentPLT, associations);
-                    
+                    associations = getAssociationsFromPairingList(currentPLT, associations);
+
                     break;
                 }
-            }else{
-                //Task start                
-                Future<int[][]> future= executorService.submit((new Task(flights,groups,competitors,currentPLT,associations, seeds.length)));
+            } else {
+                // Task start
+                Future<int[][]> future = executorService
+                        .submit((new Task(flights, groups, competitors, currentPLT, associations, seeds.length)));
                 futures.add(future);
-                //reset last recurrence step
-                for(int i=maxConstantFlights*groups-1;i>=maxConstantFlights*groups-groups;i--){
+                // reset last recurrence step
+                for (int i = maxConstantFlights * groups - 1; i >= maxConstantFlights * groups - groups; i--) {
                     Arrays.fill(currentPLT[i], 0);
                 }
-                //TODO reverse method
-                associations=getAssociationsFromPairingList(currentPLT, associations);
+                // TODO reverse method
+                associations = getAssociationsFromPairingList(currentPLT, associations);
                 break;
             }
         }
@@ -254,21 +264,21 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * 
      * @return generated flight as <code>int[groups][competitors / groups]</code> array
      */
-    
-    protected int[][] createFlight(int flights, int groups, int competitors, int[][] currentAssociations,int seed){
+    protected int[][] createFlight(int flights, int groups, int competitors, int[][] currentAssociations, int seed) {
         int[][] flightColumn = new int[groups][competitors / groups];
-        int[][][] associationRow=new int[groups][(competitors / groups) - 1][competitors];
+        int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
         int[] associationHigh = new int[groups - 1];
         flightColumn[0][0] = seed;
         for (int assignmentIndex = 1; assignmentIndex <= (competitors / groups) - 1; assignmentIndex++) {
             int associationSum = Integer.MAX_VALUE;
             associationHigh[0] = flights + 1;
-            associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, assignmentIndex,0);
+            associationRow = copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn,
+                    assignmentIndex, 0);
 
             for (int competitorIndex = 1; competitorIndex <= competitors; competitorIndex++) {
-                if ((sumOf3rdDimension(associationRow, 0, competitorIndex - 1) <= associationSum) &&
-                        !contains(flightColumn, competitorIndex) &&
-                        findMaxValue(associationRow, 0, competitorIndex - 1) <= associationHigh[0]) {
+                if ((sumOf3rdDimension(associationRow, 0, competitorIndex - 1) <= associationSum)
+                        && !contains(flightColumn, competitorIndex)
+                        && findMaxValue(associationRow, 0, competitorIndex - 1) <= associationHigh[0]) {
                     flightColumn[0][assignmentIndex] = competitorIndex;
                     associationSum = sumOf3rdDimension(associationRow, 0, competitorIndex - 1);
                     associationHigh[0] = findMaxValue(associationRow, 0, competitorIndex - 1);
@@ -282,16 +292,17 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                     break;
                 }
             }
-            
+
             for (int assignmentIndex = 1; assignmentIndex < (competitors / groups); assignmentIndex++) {
                 int associationSum = Integer.MAX_VALUE;
                 associationHigh[groupIndex] = flights + 1;
-                associationRow=copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn, assignmentIndex,groupIndex);
+                associationRow = copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn,
+                        assignmentIndex, groupIndex);
 
                 for (int competitorIndex = 1; competitorIndex <= competitors; competitorIndex++) {
-                    if ((sumOf3rdDimension(associationRow, groupIndex, competitorIndex - 1) <= associationSum) &&
-                            !contains(flightColumn, competitorIndex) &&
-                            findMaxValue(associationRow, groupIndex, competitorIndex - 1) <= associationHigh[groupIndex]) {
+                    if ((sumOf3rdDimension(associationRow, groupIndex, competitorIndex - 1) <= associationSum)
+                            && !contains(flightColumn, competitorIndex) && findMaxValue(associationRow, groupIndex,
+                                    competitorIndex - 1) <= associationHigh[groupIndex]) {
                         flightColumn[groupIndex][assignmentIndex] = competitorIndex;
                         associationSum = sumOf3rdDimension(associationRow, groupIndex, competitorIndex - 1);
                         associationHigh[groupIndex] = findMaxValue(associationRow, groupIndex, competitorIndex - 1);
@@ -300,7 +311,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
                 }
             }
         }
-        //last Flight
+        // last Flight
         for (int assignmentIndex = 0; assignmentIndex < (competitors / groups); assignmentIndex++) {
             for (int z = 1; z <= competitors; z++) {
                 if (!contains(flightColumn, z)) {
@@ -325,17 +336,17 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      *                      against another competitor. 
      * @return best complete pairing list out of given iterations
      */
-    protected int[][] create(int flights, int groups, int competitors, int iterationCount,
-            int[][] constantPLT, int[][] associations) {
+    protected int[][] create(int flights, int groups, int competitors, int iterationCount, int[][] constantPLT,
+            int[][] associations) {
 
-        int[][] bestPLT = new int[groups*flights][competitors / groups];
-        for (int m = 0; m < maxConstantFlights*groups; m++) {
+        int[][] bestPLT = new int[groups * flights][competitors / groups];
+        for (int m = 0; m < maxConstantFlights * groups; m++) {
             System.arraycopy(constantPLT[m], 0, bestPLT[m], 0, constantPLT[0].length);
         }
 
         int[][] currentAssociations = new int[competitors][competitors];
         double bestDev = Double.POSITIVE_INFINITY;
-        //TODO identify equal prefixes
+        // TODO identify equal prefixes
         for (int iteration = 0; iteration < iterationCount; iteration++) {
             for (int m = 0; m < associations.length; m++) {
                 System.arraycopy(associations[m], 0, currentAssociations[m], 0, associations[0].length);
@@ -343,19 +354,22 @@ public class PairingListTemplateImpl implements PairingListTemplate{
             int[][] currentPLT = new int[groups * flights][competitors / groups];
 
             for (int flightIndex = maxConstantFlights; flightIndex < flights; flightIndex++) {
-                //TODO: change competitor number
-                int[][] flightColumn = this.createFlight(flights, groups, competitors, currentAssociations, this.randomBW(1, competitors));
+                // TODO: change competitor number
+                int[][] flightColumn = this.createFlight(flights, groups, competitors, currentAssociations,
+                        this.getRandomIntegerBetween(1, competitors));
                 currentAssociations = this.getAssociationsFromPairingList(flightColumn, currentAssociations);
                 for (int m = 0; m < groups; m++) {
-                    System.arraycopy(flightColumn[m], 0, currentPLT[(flightIndex * groups) + m], 0, competitors / groups);
+                    System.arraycopy(flightColumn[m], 0, currentPLT[(flightIndex * groups) + m], 0,
+                            competitors / groups);
                 }
-
             }
             for (int j = 0; j < currentAssociations.length; j++) {
                 currentAssociations[j][j] = -1;
             }
             if (this.calcStandardDev(currentAssociations) < bestDev) {
-                for(int z=maxConstantFlights*groups;z<flights*groups;z++)  bestPLT[z] = currentPLT[z];
+                for (int z = maxConstantFlights * groups; z < flights * groups; z++) {
+                    bestPLT[z] = currentPLT[z];
+                }
                 bestDev = this.calcStandardDev(currentAssociations);
             }
         }
@@ -363,14 +377,15 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
     
     /**
-     * Returns a matrix that describes how often the competitors competed on a boat.
-     * The matrix has the following dimension: <code>assignmentAssociations[competitors][boats]</code>.
+     * Returns a matrix that describes how often the competitors competed on a boat. The matrix has the following
+     * dimension: <code>assignmentAssociations[competitors][boats]</code>.
      * 
-     * @param pairingList current pairing list from which the associations will be created
-     * @param associations int array on which the assignment will be written
+     * @param pairingList
+     *            current pairing list from which the associations will be created
+     * @param associations
+     *            int array on which the assignment will be written
      * @return matrix that represents the assignment associations
      */
-
     protected int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
@@ -392,50 +407,55 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param competitors count of competitors
      * @return improved pairing list template
      */
-    
-    protected int[][] improveAssignment(int[][] pairinglist,int flights, int groups, int competitors){
-        int[][] assignments= this.getAssignmentAssociations(pairinglist, new int[competitors][competitors/groups]);
-        double neededAssigments= flights/(competitors/groups);
-        double bestDev=Double.POSITIVE_INFINITY;
-        int[][] bestPLT=new int[flights*groups][competitors/groups];
-        for(int iteration=0;iteration<10;iteration++){
-            for(int zGroup=0;zGroup<assignments.length;zGroup++){
-                int[][] groupAssignments=new int[competitors/groups][competitors/groups];
-                for(int zPlace=0;zPlace<(competitors/groups);zPlace++){
-                    System.arraycopy(assignments[pairinglist[zGroup][zPlace]-1], 0, groupAssignments[zPlace], 0, (competitors/groups));
+    protected int[][] improveAssignment(int[][] pairinglist, int flights, int groups, int competitors) {
+        int[][] assignments = this.getAssignmentAssociations(pairinglist, new int[competitors][competitors / groups]);
+        double neededAssigments = flights / (competitors / groups);
+        double bestDev = Double.POSITIVE_INFINITY;
+        int[][] bestPLT = new int[flights * groups][competitors / groups];
+        for (int iteration = 0; iteration < 10; iteration++) {
+            for (int zGroup = 0; zGroup < assignments.length; zGroup++) {
+                int[][] groupAssignments = new int[competitors / groups][competitors / groups];
+                for (int zPlace = 0; zPlace < (competitors / groups); zPlace++) {
+                    System.arraycopy(assignments[pairinglist[zGroup][zPlace] - 1], 0, groupAssignments[zPlace], 0,
+                            (competitors / groups));
                 }
-                for(int zPlace=0;zPlace<competitors*50;zPlace++){
-                    int[] position=this.findWorstValuePosition(groupAssignments,(int)neededAssigments);
-                    if(groupAssignments[position[0]][position[1]]>neededAssigments-1&&groupAssignments[position[0]][position[1]]<neededAssigments+1){
+                for (int zPlace = 0; zPlace < competitors * 50; zPlace++) {
+                    int[] position = this.findWorstValuePosition(groupAssignments, (int) neededAssigments);
+                    if (groupAssignments[position[0]][position[1]] > neededAssigments - 1
+                            && groupAssignments[position[0]][position[1]] < neededAssigments + 1) {
                         break;
-                    }else if(groupAssignments[position[0]][position[1]]<neededAssigments){
-                        int temp=0;
-                        temp=pairinglist[zGroup][position[1]];
-                        pairinglist[zGroup][position[1]]=pairinglist[zGroup][position[0]];
-                        pairinglist[zGroup][position[0]]=temp;
-                        assignments=this.getAssignmentAssociations(pairinglist, new int[competitors][competitors/groups]);
-                        for(int x=0;x<(competitors/groups);x++){
-                            System.arraycopy(assignments[pairinglist[zGroup][x]-1], 0, groupAssignments[x], 0, (competitors/groups));
+                    } else if (groupAssignments[position[0]][position[1]] < neededAssigments) {
+                        int temp = 0;
+                        temp = pairinglist[zGroup][position[1]];
+                        pairinglist[zGroup][position[1]] = pairinglist[zGroup][position[0]];
+                        pairinglist[zGroup][position[0]] = temp;
+                        assignments = this.getAssignmentAssociations(pairinglist,
+                                new int[competitors][competitors / groups]);
+                        for (int x = 0; x < (competitors / groups); x++) {
+                            System.arraycopy(assignments[pairinglist[zGroup][x] - 1], 0, groupAssignments[x], 0,
+                                    (competitors / groups));
                         }
-                    }else{
-                        if(position[0]==position[1]){
-                            int temp=0;
-                            temp=pairinglist[zGroup][this.findMinValuePosition(groupAssignments[position[0]])];
-                            pairinglist[zGroup][this.findMinValuePosition(groupAssignments[position[0]])]=pairinglist[zGroup][position[0]];
-                            pairinglist[zGroup][position[0]]=temp;
-                            assignments=this.getAssignmentAssociations(pairinglist, new int[competitors][competitors/groups]);
-                            for(int x=0;x<(competitors/groups);x++){
-                                System.arraycopy(assignments[pairinglist[zGroup][x]-1], 0, groupAssignments[x], 0, (competitors/groups));
+                    } else {
+                        if (position[0] == position[1]) {
+                            int temp = 0;
+                            temp = pairinglist[zGroup][this.findMinValuePosition(groupAssignments[position[0]])];
+                            pairinglist[zGroup][this.findMinValuePosition(
+                                    groupAssignments[position[0]])] = pairinglist[zGroup][position[0]];
+                            pairinglist[zGroup][position[0]] = temp;
+                            assignments = this.getAssignmentAssociations(pairinglist,
+                                    new int[competitors][competitors / groups]);
+                            for (int x = 0; x < (competitors / groups); x++) {
+                                System.arraycopy(assignments[pairinglist[zGroup][x] - 1], 0, groupAssignments[x], 0,
+                                        (competitors / groups));
                             }
-                        }else{
-                            groupAssignments[position[0]][position[1]]=-1;
+                        } else {
+                            groupAssignments[position[0]][position[1]] = -1;
                         }
                     }
                 }
-                if(this.calcStandardDev(pairinglist)<bestDev){
-                    bestDev=this.calcStandardDev(pairinglist);
-                    bestPLT=pairinglist;
-
+                if (this.calcStandardDev(pairinglist) < bestDev) {
+                    bestDev = this.calcStandardDev(pairinglist);
+                    bestPLT = pairinglist;
                 }
             }
         }
@@ -495,17 +515,16 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param neededAssigments reference value
      * @return int array with 2 indices that represent row and column of the worst value
      */
-
     private int[] findWorstValuePosition(int[][] groupAssignments, int neededAssigments) {
-        int[] worstValuePos=new int[2];
-        int worstValue=0;
-        for(int i=0;i<groupAssignments.length;i++){
-            for(int z=0;z<groupAssignments[0].length;z++){
-                if(groupAssignments[i][z]>=0){
-                    if(Math.abs(groupAssignments[i][z]-neededAssigments)>worstValue){
-                        worstValuePos[0]=i;
-                        worstValuePos[1]=z;
-                        worstValue=Math.abs(groupAssignments[i][z]-neededAssigments);
+        int[] worstValuePos = new int[2];
+        int worstValue = 0;
+        for (int i = 0; i < groupAssignments.length; i++) {
+            for (int z = 0; z < groupAssignments[0].length; z++) {
+                if (groupAssignments[i][z] >= 0) {
+                    if (Math.abs(groupAssignments[i][z] - neededAssigments) > worstValue) {
+                        worstValuePos[0] = i;
+                        worstValuePos[1] = z;
+                        worstValue = Math.abs(groupAssignments[i][z] - neededAssigments);
                     }
                 }
             }
@@ -514,16 +533,17 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     }
 
     public int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
-            int[][] flightColumn, int zGroups,int fleet) {
-        System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1] -1], 0, associationRow[fleet][zGroups -1], 0, competitors);
+            int[][] flightColumn, int zGroups, int fleet) {
+        System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1] - 1], 0, associationRow[fleet][zGroups - 1], 
+                0, competitors);
         return associationRow;
     }
-    
 
     private boolean contains(int[][] arr, int value) {
         for (int i = 0; i < arr.length; i++) {
             for (int z = 0; z < arr[0].length; z++) {
-                if (arr[i][z] == value) return true;
+                if (arr[i][z] == value)
+                    return true;
             }
         }
         return false;
@@ -543,7 +563,6 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param depth 3rd dimension of array
      * @return sum
      */
-    
     private int sumOf3rdDimension(int[][][] arr, int row, int depth) {
         int sum = 0;
         for (int z = 0; z < arr[0].length; z++) {
@@ -553,14 +572,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
         }
         return sum;
     }
-    
-    private int findMinValuePosition(int[] arr){
-        int temp=Integer.MAX_VALUE;
-        int position=-1;
+
+    private int findMinValuePosition(int[] arr) {
+        int temp = Integer.MAX_VALUE;
+        int position = -1;
         for (int z = 0; z < arr.length; z++) {
-            if (arr[z]< temp){
-                position=z ;
-                temp=arr[z];
+            if (arr[z] < temp) {
+                position = z;
+                temp = arr[z];
             }
         }
         return position;
@@ -569,7 +588,9 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     private int findMaxValue(int[][][] associationRow, int i, int comp) {
         int temp = 0;
         for (int z = 0; z < associationRow[0].length; z++) {
-            if (associationRow[i][z][comp] > temp) temp = associationRow[i][z][comp];
+            if (associationRow[i][z][comp] > temp) {
+                temp = associationRow[i][z][comp];
+            }
         }
         return temp;
     }
@@ -581,40 +602,36 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param max
      * @return a random number
      */
-    //TODO: rename
-    private int randomBW(int min,int max){
-        return random.nextInt(max-min)+min;
+    private int getRandomIntegerBetween(int min, int max) {
+        return random.nextInt(max - min) + min;
     }
 
     /**
-     * Creates a matrix that describes how often the team competes against each other.
-     * Its dimensions are <code>associations[competitors][competitors]</code>, e.g.:
+     * Creates a matrix that describes how often the team competes against each other. Its dimensions are
+     * <code>associations[competitors][competitors]</code>, e.g.:
      * 
-     *   1 2 3 4
-     * 1 \ 2 3 1
-     * 2 2 \ 1 3
-     * 3 3 1 \ 2
-     * 4 1 3 2 \
+     * 1 2 3 4 1 \ 2 3 1 2 2 \ 1 3 3 3 1 \ 2 4 1 3 2 \
      * 
      * In this example, team 2 competed 3 times against team 4.
      * 
-     * @param pairingList current pairing list template
-     * @param associations int array in which the association will be written
+     * @param pairingList
+     *            current pairing list template
+     * @param associations
+     *            int array in which the association will be written
      * @return int arryay of associations
      */
-    
+
     public int[][] getAssociationsFromPairingList(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
                 for (int j = 0; j < pairingList[0].length; j++) {
                     if (group[i] == group[j]) {
-                        if(group[i]>0 && group[j]>0){
-                        associations[group[i] - 1][group[j] - 1] = -1;
+                        if (group[i] > 0 && group[j] > 0) {
+                            associations[group[i] - 1][group[j] - 1] = -1;
                         }
                     } else {
-                        if(group[i]>0 && group[j]>0){
-                        associations[group[i] - 1][group[j] - 1] =
-                                associations[group[i] - 1][group[j] - 1] + 1;
+                        if (group[i] > 0 && group[j] > 0) {
+                            associations[group[i] - 1][group[j] - 1] = associations[group[i] - 1][group[j] - 1] + 1;
                         }
                     }
                 }
@@ -634,15 +651,14 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      *                      about how often the teams play against each other
      * @return standardDev returns how much the association values deviate from each other
      */
-
     protected double calcStandardDev(int[][] associations) {
 
         double standardDev = 0;
 
         int k = associations[0][0],     // first value of association array
-                n = 0,                      // count of elements in association array
-                exp = 0,                    //
-                exp2 = 0;                   //
+            n = 0,                      // count of elements in association array
+            exp = 0,                    //
+            exp2 = 0;                   //
 
         for (int i = 0; i < associations.length; i++) {
             for (int j = 0; j < associations[0].length; j++) {

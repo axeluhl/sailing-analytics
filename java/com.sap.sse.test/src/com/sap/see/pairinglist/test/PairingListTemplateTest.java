@@ -2,9 +2,6 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
