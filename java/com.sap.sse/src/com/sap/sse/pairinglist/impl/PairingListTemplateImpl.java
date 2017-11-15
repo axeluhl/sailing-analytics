@@ -141,9 +141,9 @@ public class PairingListTemplateImpl implements PairingListTemplate{
     private int[] generateSeeds(int flights, int competitors) {
         int[] seeds=new int[(int)(Math.log(iterations)/Math.log(flights)*0.5)];
         for(int x=0;x<seeds.length;x++){
-            int random=this.randomBW(1, competitors);
+            int random=this.randomIntegerBetween(1, competitors);
             while(this.contains(seeds, random)) {
-                random=this.randomBW(1, competitors);
+                random=this.randomIntegerBetween(1, competitors);
             }
             seeds[x]=random;
         }
@@ -344,7 +344,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
 
             for (int flightIndex = maxConstantFlights; flightIndex < flights; flightIndex++) {
                 //TODO: change competitor number
-                int[][] flightColumn = this.createFlight(flights, groups, competitors, currentAssociations, this.randomBW(1, competitors));
+                int[][] flightColumn = this.createFlight(flights, groups, competitors, currentAssociations, this.randomIntegerBetween(1, competitors));
                 currentAssociations = this.getAssociationsFromPairingList(flightColumn, currentAssociations);
                 for (int m = 0; m < groups; m++) {
                     System.arraycopy(flightColumn[m], 0, currentPLT[(flightIndex * groups) + m], 0, competitors / groups);
@@ -581,8 +581,7 @@ public class PairingListTemplateImpl implements PairingListTemplate{
      * @param max
      * @return a random number
      */
-    //TODO: rename
-    private int randomBW(int min,int max){
+    private int randomIntegerBetween(int min,int max){
         return random.nextInt(max-min)+min;
     }
 
