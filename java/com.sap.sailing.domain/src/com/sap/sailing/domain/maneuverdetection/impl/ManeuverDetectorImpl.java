@@ -54,7 +54,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * Used in maneuver detection algorithm to approximate the start and end time of maneuver performance. It defines
      * the maximal absolute course change velocity in degrees per second that shall be regarded as a stable course.
      */
-    private static final double MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 2;
+    private static final double MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 2;
 
     /**
      * Used in maneuver detection algorithm to approximate the start and end time of maneuver main curve performance. It
@@ -567,7 +567,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * point of the maneuver, the speed maximum is determined throughout forward in time iteration of speed steps
      * starting from time point of main curve beginning. From the determined speed maximum, the iteration continues
      * until the point, when the bearing changes occur only with a maximum of
-     * {@value #MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
+     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
      * stable course. The exiting time point of maneuver is approximated analogously by speed maximum determination
      * throughout backward in time iteration of speed steps starting from time of main curve end, followed by a search
      * of stable course.
@@ -611,7 +611,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * determined, the course changes get analyzed starting from {@code t'} until {@code (t -}
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration}{@code )} in order to
      * locate the point where the bearing starts to change with a rate of maximal
-     * {@value #MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
+     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
      * stable course.
      * 
      * @param competitor
@@ -651,7 +651,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
                 stableBearingAnalysisUntil);
         maneuverStart = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze, true,
-                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+                MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         return maneuverStart != null
                 ? new CurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
                         maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
@@ -673,7 +673,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * determined, the course changes get analyzed starting from {@code t'} until {@code (t +}
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() approx. maneuver duration} {@code * 3)} in order
      * to locate the point where the bearing starts to change with a rate of maximal
-     * {@value #MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
+     * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is regarded as a
      * stable course.
      * 
      * @param competitor
@@ -712,7 +712,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, stableBearingAnalysisFrom,
                 latestTimePointForSpeedTrendAnalysis);
         maneuverEnd = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze, false,
-                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+                MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         return maneuverEnd != null
                 ? new CurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
                         maneuverEnd.getSpeedWithBearingAtExtensionTimePoint(),
