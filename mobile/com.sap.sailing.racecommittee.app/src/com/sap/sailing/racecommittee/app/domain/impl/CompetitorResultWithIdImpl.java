@@ -14,13 +14,14 @@ public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
 
     public CompetitorResultWithIdImpl(long id, CompetitorResult result) {
         this(id, result.getCompetitorId(), result.getCompetitorDisplayName(), result.getOneBasedRank(),
-                result.getMaxPointsReason(), result.getScore(), result.getFinishingTime(), result.getComment());
+                result.getMaxPointsReason(), result.getScore(), result.getFinishingTime(), result.getComment(),
+                result.getMergeState());
     }
 
     public CompetitorResultWithIdImpl(long id, Serializable competitorId, String competitorDisplayName,
                                       int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
-                                      TimePoint finishingTime, String comment) {
-        super(competitorId, competitorDisplayName, oneBasedRank, maxPointsReason, score, finishingTime, comment);
+            TimePoint finishingTime, String comment, MergeState mergeState) {
+        super(competitorId, competitorDisplayName, oneBasedRank, maxPointsReason, score, finishingTime, comment, mergeState);
         mId = id;
     }
 

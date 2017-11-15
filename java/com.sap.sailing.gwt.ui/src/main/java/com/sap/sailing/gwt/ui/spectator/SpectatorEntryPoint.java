@@ -73,9 +73,8 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
                 feedbackPanel.getElement().getStyle().setProperty("clear", "right");
                 feedbackPanel.addStyleName("feedbackPanel");
                 Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                        "<img class=\"linkNoBorder\" src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());// TODO set image
+                        "<img src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());// TODO set image
                 feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
-                feedbackLink.addStyleName("feedbackLink");
                 feedbackPanel.add(feedbackLink);
                 groupAndFeedbackPanel.add(feedbackPanel);
             }
