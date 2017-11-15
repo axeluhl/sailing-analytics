@@ -1,9 +1,0 @@
----
-VM version: Oct  9 2017 15:07:17 - 81_REL - optU - windows amd64 - 6 - bas2:294982 (mixed mode)
-
-Time:2017-11-1315:09:38
-Pid: 15328
-Hostname: WDFN34222676A
-current dir: C:\Users\d070264\eclipse_workspace\git\java\com.sap.sse.test
----
-   :    [14884] 15:09:38 ***ERROR (:0): OutOfMemoryError: Could not allocate 8589934608 bytes (array length 2147483647)
