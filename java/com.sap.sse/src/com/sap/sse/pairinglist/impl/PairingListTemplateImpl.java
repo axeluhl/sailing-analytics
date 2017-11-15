@@ -372,9 +372,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             int[][] currentPLT = new int[groups * flights][competitors / groups];
 
             for (int flightIndex = maxConstantFlights; flightIndex < flights; flightIndex++) {
+
                 // TODO: change competitor number
                 int[][] flightColumn = this.createFlight(flights, groups, competitors, currentAssociations,
                         this.getRandomIntegerBetween(1, competitors));
+
                 currentAssociations = this.getAssociationsFromPairingList(flightColumn, currentAssociations);
                 for (int m = 0; m < groups; m++) {
                     System.arraycopy(flightColumn[m], 0, currentPLT[(flightIndex * groups) + m], 0,
