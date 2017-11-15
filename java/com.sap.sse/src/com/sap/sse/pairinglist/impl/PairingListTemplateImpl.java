@@ -64,28 +64,47 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return pairingListTemplate;
     }
 
-    // TODO Javadoc bearbeiten!
     /**
      * Creates a pairing list template.
      * 
-     * <p>
-     * The generation of pairing list templates follow two general steps:
-     * </p>
-     * <p>
-     * 1. Because of the huge amount of generated pairing lists, we first try to create some constant flights which the
-     * other flights are based on. The constant flights are generated in a recursive way, which can be imagined as a
-     * tree structure. The nodes are represented by a competitor number, that is used as seed to generate a flight
-     * (generation of seeds: generateSeeds()). Each level in our recursive method equates to a new constant flight. By
-     * reaching a leave of the tree, we start a task that contains step 2. At the end of this algorithm there are
-     * <code>Math.pow(seeds, maxConstantFlights)</code> tasks.
-     * </p>
-     * <p>
-     * 2. Every single task fills the pairing list by generating the rest of the flights. From now on, every seed is a
-     * randomized competitor. The tasks perform <code>iterations/tasks</code> iterations. Every task returns its best
-     * result in a <code>Future<int[][]></code>. In the end we compare all futures and return the best result, after
-     * improving the boat assignments.
-     * </p>
-     * 
+     * <p>The generation of pairing list templates follow two general steps:</p>
+     * <ol>
+     *          <li>
+     *                  The <b>general algorithm</b> of creating a pairing list works as follows: <br \>
+     *                  The decision, who to put into pairing list template, is taken by looking at our <b>associations</b> 
+     *                  (The association matrix describes how often the competitors encounter each other). The algorithm 
+     *                  of creating a single group follows the following steps:
+     *                  <ol>
+     *                          <li>First of all, we generate a random seed, which affects the following generation. The 
+     *                              seed describes a competitor number. By setting the first competitor in the first group 
+     *                              of a flight, we can now go on and select the rest of competitor to put in the pairing 
+     *                              list. </li>
+     *                          <li>When filling up a single group of a flight, we iterate over all competitors and check 
+     *                              whether the competitor is already set in this group. Elsewise, we go on finding the 
+     *                              smallest sum of encounters with the remaining competitors in association matrix and 
+     *                              the smallest maximum of encounters. By checking these condition, in the end we will 
+     *                              get a well distributed pairing list template. </li>
+     *                  </ol>
+     *                  This is how the algorithm will be applied to the groups: In the first group the random seed will
+     *                  be set to the first assignment. The other assignment are generated the way describes above. The 
+     *                  remaining groups unless the last one will be filled up the way the algorithm follows. In the last
+     *                  group, we just place the remaining competitors that are not listed in the other groups.
+     *          </li>
+     *          <li>
+     *                  Unfortunately, there is no systematic way of generating a well distributed pairing list. Since
+     *                  we use a random generated seed, this algorithm is not deterministic and it works like the trial and 
+     *                  error principle: We commit a count of iterations to the algorithm to create as much pairing list 
+     *                  templates as committed and return the best (see JavaDoc of getQuality()).<br \>
+     *                  Since we want to improve the performance of this algorithm, we started to work with <b>concurrency</b>.
+     *                  We first create a <b>prefix</b>. The length of the prefix depends on the count of flights. The random 
+     *                  seeds of this prefix are just of a small set of all competitors (the number of seeds depends on 
+     *                  the iterations and the count of flights). So we have <code>Math.pow(seeds, prefixLength)</code>
+     *                  possible combinations. For each combination, we create a task that will be put in a 
+     *                  <code>ExecuterService</code> handling all tasks. Each task creates the <b>suffix</b> by using
+     *                  random seeds from all competitors now again. Each task has now <code>iterations/tasksCount</code>
+     *                  iterations to generate.<br />
+     *          </li>
+     * </ol>
      * </p>
      * 
      * @param flightCount
@@ -204,22 +223,22 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @param associations
      * @param currentPLT
      * @param seeds
-     * @return 
+     * @return <code>ArrayList</code> of <code>Futures</code> in which the result of a single task saved
      */
     private ArrayList<Future<int[][]>> createConstantFlights(int flights, int groups, int competitors, int[][] associations,
             int[][]currentPLT, int[] seeds, ArrayList<Future<int[][]>> futures) {         
         // TODO: change depth of groups
-        int fleet = Integer.MAX_VALUE;
+        int level = Integer.MAX_VALUE;
         for (int z = 0; z < currentPLT.length; z++) {
             if (z < this.maxConstantFlights * groups) {
                 if (currentPLT[z][0] == 0) {
-                    fleet = z;
+                    level = z;
                     // calculate Flights for current recurrence level
                     for (int x = 0; x < seeds.length; x++) {
                         int[][] temp = this.createFlight(flights, groups, competitors, associations, seeds[x]);
                         // TODO: change arraycopy + refactor fleet
                         for (int m = 0; m < groups; m++) {
-                            System.arraycopy(temp[m], 0, currentPLT[fleet + m], 0, competitors / groups);
+                            System.arraycopy(temp[m], 0, currentPLT[level + m], 0, competitors / groups);
                         }
                         // TODO: calculation incremental
                         associations = this.getAssociationsFromPairingList(currentPLT,
@@ -228,7 +247,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                                 futures);
                     }
                     // reset last recurrence step
-                    for (int i = fleet; i < fleet + groups; i++) {
+                    for (int i = level; i < level + groups; i++) {
                         Arrays.fill(currentPLT[i], 0);
                     }
                     associations = getAssociationsFromPairingList(currentPLT, associations);
@@ -237,8 +256,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 }
             } else {
                 // Task start
-                Future<int[][]> future = executorService
-                        .submit((new Task(flights, groups, competitors, currentPLT, associations, seeds.length)));
+                Future<int[][]> future = executorService.submit((new Task(flights, groups, competitors, currentPLT, associations, seeds.length)));
                 futures.add(future);
                 // reset last recurrence step
                 for (int i = maxConstantFlights * groups - 1; i >= maxConstantFlights * groups - groups; i--) {
@@ -255,27 +273,27 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     /**
      * Generates a single flight, that depends on a specific seed. 
      * 
-     * @param flights count of flights
-     * @param groups count of groups in flight
-     * @param competitors count of competitors
+     * @param flightCount count of flights
+     * @param groupCount count of groups in flight
+     * @param competitorCount count of competitors
      * @param currentAssociations current matrix that describes how often a competitor competed
      *                             against another competitor. 
      * @param seed generation bases on this competitor number.
      * 
      * @return generated flight as <code>int[groups][competitors / groups]</code> array
      */
-    protected int[][] createFlight(int flights, int groups, int competitors, int[][] currentAssociations, int seed) {
-        int[][] flightColumn = new int[groups][competitors / groups];
-        int[][][] associationRow = new int[groups][(competitors / groups) - 1][competitors];
-        int[] associationHigh = new int[groups - 1];
+    protected int[][] createFlight(int flightCount, int groupCount, int competitorCount, int[][] currentAssociations, int seed) {
+        int[][] flightColumn = new int[groupCount][competitorCount / groupCount];
+        int[][][] associationRow = new int[groupCount][(competitorCount / groupCount) - 1][competitorCount];
+        int[] associationHigh = new int[groupCount - 1];
         flightColumn[0][0] = seed;
-        for (int assignmentIndex = 1; assignmentIndex <= (competitors / groups) - 1; assignmentIndex++) {
+        for (int assignmentIndex = 1; assignmentIndex <= (competitorCount / groupCount) - 1; assignmentIndex++) {
             int associationSum = Integer.MAX_VALUE;
-            associationHigh[0] = flights + 1;
-            associationRow = copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn,
+            associationHigh[0] = flightCount + 1;
+            associationRow = copyInto3rdDimension(competitorCount, currentAssociations, associationRow, flightColumn,
                     assignmentIndex, 0);
 
-            for (int competitorIndex = 1; competitorIndex <= competitors; competitorIndex++) {
+            for (int competitorIndex = 1; competitorIndex <= competitorCount; competitorIndex++) {
                 if ((sumOf3rdDimension(associationRow, 0, competitorIndex - 1) <= associationSum)
                         && !contains(flightColumn, competitorIndex)
                         && findMaxValue(associationRow, 0, competitorIndex - 1) <= associationHigh[0]) {
@@ -285,21 +303,21 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 }
             }
         }
-        for (int groupIndex = 1; groupIndex < groups - 1; groupIndex++) {
-            for (int aux = 0; aux < competitors; aux++) {
+        for (int groupIndex = 1; groupIndex < groupCount - 1; groupIndex++) {
+            for (int aux = 0; aux < competitorCount; aux++) {
                 if (!contains(flightColumn, aux)) {
                     flightColumn[groupIndex][0] = aux;
                     break;
                 }
             }
 
-            for (int assignmentIndex = 1; assignmentIndex < (competitors / groups); assignmentIndex++) {
+            for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
                 int associationSum = Integer.MAX_VALUE;
-                associationHigh[groupIndex] = flights + 1;
-                associationRow = copyInto3rdDimension(competitors, currentAssociations, associationRow, flightColumn,
+                associationHigh[groupIndex] = flightCount + 1;
+                associationRow = copyInto3rdDimension(competitorCount, currentAssociations, associationRow, flightColumn,
                         assignmentIndex, groupIndex);
 
-                for (int competitorIndex = 1; competitorIndex <= competitors; competitorIndex++) {
+                for (int competitorIndex = 1; competitorIndex <= competitorCount; competitorIndex++) {
                     if ((sumOf3rdDimension(associationRow, groupIndex, competitorIndex - 1) <= associationSum)
                             && !contains(flightColumn, competitorIndex) && findMaxValue(associationRow, groupIndex,
                                     competitorIndex - 1) <= associationHigh[groupIndex]) {
@@ -312,10 +330,10 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
         }
         // last Flight
-        for (int assignmentIndex = 0; assignmentIndex < (competitors / groups); assignmentIndex++) {
-            for (int z = 1; z <= competitors; z++) {
+        for (int assignmentIndex = 0; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
+            for (int z = 1; z <= competitorCount; z++) {
                 if (!contains(flightColumn, z)) {
-                    flightColumn[groups - 1][assignmentIndex] = z;
+                    flightColumn[groupCount - 1][assignmentIndex] = z;
                     break;
                 }
             }
