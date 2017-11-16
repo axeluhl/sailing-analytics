@@ -124,8 +124,8 @@ public class SensorFixStoreAndLoadTest {
     protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null,
             null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat(comp, "Boat1", boatClass, "GER 1", null);
-    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "Boat2", boatClass, "GER 2", null);
+    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat("Boat1", "Boat1", boatClass, "GER 1", null);
+    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("Boat2", "Boat2", boatClass, "GER 2", null);
     private final Competitor compNotPartOfRace = DomainFactory.INSTANCE.getOrCreateCompetitor("comp3", "comp3", null, null, null, null,
             null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");

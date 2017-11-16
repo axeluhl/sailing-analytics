@@ -79,7 +79,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new PersonImpl("Tina Lutz", masterDomainFactory.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", masterDomainFactory.getOrCreateNationality("NED"), null, null)),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        Boat boat = masterDomainFactory.getCompetitorStore().getOrCreateBoat(competitor, "boat123",
+        Boat boat = masterDomainFactory.getCompetitorStore().getOrCreateBoat("boat123", "boat123",
                 masterDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61", null);
         Map<Competitor, Boat> competitorAndBoats = new HashMap<>();
         competitorAndBoats.put(competitor, boat);

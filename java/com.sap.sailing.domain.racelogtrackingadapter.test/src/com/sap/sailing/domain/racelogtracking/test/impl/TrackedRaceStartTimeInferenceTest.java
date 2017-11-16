@@ -64,7 +64,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -141,7 +141,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -183,7 +183,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -228,7 +228,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -342,7 +342,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);

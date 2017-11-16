@@ -115,7 +115,7 @@ public class WindByRaceLogTest {
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null)}),
                 new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        Boat boat = masterDomainFactory.getOrCreateBoat(competitor, "GER 61", boatClass, "GER 61", null);
+        Boat boat = masterDomainFactory.getOrCreateBoat("boat", "GER 61", boatClass, "GER 61", null);
         return new CompetitorAndBoatImpl(competitor, boat);
     }
     
