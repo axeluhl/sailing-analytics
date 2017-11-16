@@ -85,6 +85,14 @@ public class CurveEnteringAndExitingComputationTest {
         } catch (IllegalArgumentException e) {
             // expected
         }
+        
+        steps = constructStepsWithBearings(0, 1, 0, 2, 1, 2, 6, 12, 16, 17, 16, 18, 17, 18);
+        mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
+                NauticalSide.STARBOARD);
+        System.out.println(mainCurve.getTimePointBefore());
+        System.out.println(mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(2), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
 
         // test that when there are only small direction changes at the end they are cut off
         steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006, 10.0007, 10.0008, 10.0009);
