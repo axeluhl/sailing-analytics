@@ -104,6 +104,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -4834,11 +4835,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<CompetitorDTO> getCompetitors(boolean onlyCompetitorsWithBoat) {
+        Iterable<CompetitorDTO> result;
+        CompetitorStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
         if (onlyCompetitorsWithBoat) {
-            return convertToCompetitorDTOs(getService().getBaseDomainFactory().getCompetitorStore().getCompetitors());
+            result = convertToCompetitorDTOs(competitorStore.getCompetitorsWithBoat());
         } else {
-            return convertToCompetitorDTOs(getService().getBaseDomainFactory().getCompetitorStore().getCompetitorsWithBoat());
+            result = convertToCompetitorDTOs(competitorStore.getCompetitors());
         }
+        return result;
     }
 
     @Override
