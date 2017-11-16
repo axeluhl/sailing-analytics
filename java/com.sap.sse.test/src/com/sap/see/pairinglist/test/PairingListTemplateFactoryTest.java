@@ -3,6 +3,7 @@ package com.sap.see.pairinglist.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -27,14 +28,17 @@ public class PairingListTemplateFactoryTest {
         final int flights = 15;
         final int groups = 3;
         final int competitors = 18;
-        
-        int[][] plTemplate = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors)).
-                getPairingListTemplate();
+
+        int[][] plTemplate = factoryImpl
+                .getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors))
+                .getPairingListTemplate();
 
         Assert.assertNotNull(plTemplate);
-        for(int[] i:plTemplate){
-            for (int z: i){
-                if(z<=0) Assert.fail("Values of Pairing List Template must not be 0!");
+        for (int[] group : plTemplate) {
+            for (int competitorNumber : group) {
+                if (competitorNumber < 0 && competitorNumber <= competitors) {
+                    Assert.fail("Values of Pairing List Template must not be smaller 0!");
+                }
             }
         }
     }
