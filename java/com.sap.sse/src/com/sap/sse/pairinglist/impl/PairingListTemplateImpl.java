@@ -55,9 +55,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     @Override
     public double getQuality() {
-        System.out.println(Arrays.deepToString(this.pairingListTemplate));
-        System.out.println(this.standardDev);
-        System.out.println(Arrays.deepToString(this.incrementAssociations(this.pairingListTemplate, new int[30][30])));
         return this.standardDev;
     }
 
