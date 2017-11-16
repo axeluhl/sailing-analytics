@@ -3,7 +3,6 @@ package com.sap.see.pairinglist.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -61,13 +60,13 @@ public class PairingListTemplateFactoryTest {
     @Test
     public void testGeneration() {
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
-//        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
-//        PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(45, 6, 18));
-        PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(8, 3, 30));
-
-//        assertNotNull(example1);
-//        assertNotNull(example2);
+        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
+        PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(45, 6, 18));
+        PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30));
+        assertNotNull(example1);
+        assertNotNull(example2);
         assertNotNull(example3);
+        
         /*
         for(int[] row : example1.getPairingListTemplate()) {
             System.out.println(Arrays.toString(row));
@@ -122,18 +121,6 @@ public class PairingListTemplateFactoryTest {
             } else {
                 Assert.fail("The competitors are not divided up correctly!");
             }
-        }
-    }
-    
-    @Test
-    public void testArrayCopy() {
-        int[] test1 = {1,2,3,4,5};
-        int[] test2 = new int[test1.length];
-        for(int i = test1.length; i>0; i--) {
-            test2[i-1] = test1[i-1];
-        }
-        if(!Arrays.toString(test1).equals(Arrays.toString(test2))) {
-            Assert.fail();
         }
     }
 }

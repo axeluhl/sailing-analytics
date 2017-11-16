@@ -126,7 +126,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         ArrayList<Future<int[][]>> futures = this.createConstantFlights(flightCount, groupCount, competitors,
                 new int[competitors][competitors], new int[flightCount * groupCount][competitors / groupCount], seeds,
-                new ArrayList<>());
+                new ArrayList<>(), 0);
 
         for (Future<int[][]> f : futures) {
             try {
@@ -181,10 +181,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return seeds;
     }
 
-    //TODO: rename
-    class Task implements Callable<int[][]> {
-        int flights,groups,competitors, seedLength;
-        int[][] plt,associations;
+    class SuffixCreationTask implements Callable<int[][]> {
+        int flights, groups, competitors, seedLength;
+        int[][] plt, associations;
         //TODO document array copies
         /**
          * This task is created every time a constant is generated. It generates a specific number of PairingListTemplates,which is based on the constant flights 
@@ -195,7 +194,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
          * @param constantPLT constant generated flights on which the tasks is based on  
          * @param associations associations created from constantPLT
          */
-        Task(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations, int seedLength) {
+        SuffixCreationTask(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations, int seedLength) {
             this.flights = flights;
             this.groups = groups;
             this.competitors = competitors;
@@ -228,51 +227,46 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @param associations
      * @param currentPLT
      * @param seeds
-     * @return <code>ArrayList</code> of <code>Futures</code> in which the result of a single task saved
+     * @return <code>ArrayList</code> of <code>Futures</code> in which the result of a single task is saved
      */
     private ArrayList<Future<int[][]>> createConstantFlights(int flights, int groups, int competitors, int[][] associations,
-            int[][]currentPLT, int[] seeds, ArrayList<Future<int[][]>> futures) {         
-        // TODO: change depth of groups
-        int level = Integer.MAX_VALUE;
-        for (int z = 0; z < currentPLT.length; z++) {
-            if (z < this.maxConstantFlights * groups) {
-                if (currentPLT[z][0] == 0) {
-                    level = z;
-                    // calculate Flights for current recurrence level
-                    for (int seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
-                        int[][] temp = this.createFlight(flights, groups, competitors, associations, seeds[seedIndex]);
-                        // TODO: change arraycopy + refactor fleet
-                        for (int m = 0; m < groups; m++) {
-                            System.arraycopy(temp[m], 0, currentPLT[level + m], 0, competitors / groups);
-                        }
-                        associations = this.incrementAssociations(temp, associations);
-                        this.createConstantFlights(flights, groups, competitors, associations, currentPLT, seeds,
-                                futures);
-                        associations = this.decrementAssociations(temp, associations);
+            int[][]currentPLT, int[] seeds, ArrayList<Future<int[][]>> futures, int level) {         
+
+        if (level < this.maxConstantFlights) {
+            if (currentPLT[level * groups][0] == 0) {
+                // calculate Flights for current recurrence level
+                for (int seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
+                    int[][] temp = this.createFlight(flights, groups, competitors, associations, seeds[seedIndex]);
+                    // TODO: change arraycopy + refactor fleet
+                    for (int m = 0; m < groups; m++) {
+                        System.arraycopy(temp[m], 0, currentPLT[level * groups + m], 0, competitors / groups);
                     }
-                    int[][] temp = new int[groups][competitors / groups];
-                    
-                    // reset last recurrence step
-                    for (int i = level; i < level + groups; i++) {
-                        System.arraycopy(currentPLT[i], 0, temp[i - level], 0, competitors / groups);
-                        Arrays.fill(currentPLT[i], 0);
-                    }
-                    
-                    break;
+                    level++;
+                    associations = this.incrementAssociations(temp, associations);
+                    this.createConstantFlights(flights, groups, competitors, associations, currentPLT, seeds,
+                            futures, level);
+                    level--;
+                    associations = this.decrementAssociations(temp, associations);
                 }
-            } else {
-                // Task start
-                Future<int[][]> future = executorService.submit((new Task(flights, groups, competitors, currentPLT, associations, seeds.length)));
-                futures.add(future);
-                
                 int[][] temp = new int[groups][competitors / groups];
                 
                 // reset last recurrence step
-                for (int i = maxConstantFlights * groups - 1; i >= maxConstantFlights * groups - groups; i--) {
-                    System.arraycopy(currentPLT[i], 0, temp[i - maxConstantFlights * groups + groups], 0, competitors / groups);
+                for (int i = level * groups; i < level * groups + groups; i++) {
+                    System.arraycopy(currentPLT[i], 0, temp[i - level * groups], 0, competitors / groups);
                     Arrays.fill(currentPLT[i], 0);
                 }
-                break;
+            }
+        } else {
+            // Task start
+            Future<int[][]> future = executorService.submit((new SuffixCreationTask(flights, groups, competitors, currentPLT, associations, seeds.length)));
+            futures.add(future);
+            
+            int[][] temp = new int[groups][competitors / groups];
+            
+            // reset last recurrence step
+            for (int i = maxConstantFlights * groups - 1; i >= maxConstantFlights * groups - groups; i--) {
+                System.arraycopy(currentPLT[i], 0, temp[i - maxConstantFlights * groups + groups], 0, competitors / groups);
+                Arrays.fill(currentPLT[i], 0);
             }
         }
         return futures;
