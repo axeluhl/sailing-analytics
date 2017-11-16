@@ -185,17 +185,4 @@ public class ManeuverWithContext implements HasManeuverContext {
         return trackedRace.getTrack(competitor);
     }
 
-    @Override
-    public Double getAbsCourseChangeAtManeuverTimePointInDegreesPerSecond() {
-        GPSFixTrack<Competitor,GPSFixMoving> gpsFixTrack = getGPSFixTrack();
-        TimePoint fromTimePoint = getTimePoint();
-        TimePoint toTimePoint = getTimePoint().plus(gpsFixTrack.getAverageIntervalBetweenRawFixes());
-        SpeedWithBearing fromBearing = gpsFixTrack.getEstimatedSpeed(fromTimePoint);
-        SpeedWithBearing toBearing = gpsFixTrack.getEstimatedSpeed(toTimePoint);
-        if(fromBearing != null && toBearing != null) {
-            return fromBearing.getBearing().getDifferenceTo(toBearing.getBearing()).abs().getDegrees() / fromTimePoint.until(toTimePoint).asSeconds();
-        }
-        return null;
-    }
-
 }

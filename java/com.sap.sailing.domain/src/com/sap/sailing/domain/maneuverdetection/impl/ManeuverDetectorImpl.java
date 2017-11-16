@@ -342,7 +342,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
                     maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(),
                     maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
-                    maneuverMainCurveDetails.getTotalCourseChangeInDegrees(), waypointPassed,
+                    maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
+                    maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), waypointPassed,
                     sideToWhichWaypointWasPassed));
         } else {
             markPassingTimePoint = null;
@@ -408,7 +409,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         refinedPenaltyDetails.getTotalCourseChangeInDegrees(),
                         refinedPenaltyMainCurveDetails.getTimePointBefore(),
                         refinedPenaltyMainCurveDetails.getTimePointAfter(),
-                        refinedPenaltyMainCurveDetails.getTotalCourseChangeInDegrees());
+                        refinedPenaltyMainCurveDetails.getTotalCourseChangeInDegrees(),
+                        refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 result.add(maneuver);
                 // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes
                 // remain
@@ -456,7 +458,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
                         maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(),
                         maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
-                        maneuverMainCurveDetails.getTotalCourseChangeInDegrees());
+                        maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
+                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 result.add(maneuver);
             }
         }

@@ -139,4 +139,12 @@ public interface Maneuver extends GPSFix {
     @Statistic(messageKey = "DirectionChangeWithinMainCurve", resultDecimals = 2, ordinal = 3)
     double getDirectionChangeWithinMainCurveInDegrees();
 
+    /**
+     * The maximal angular velocity recorded within the main which was recorded at {@link #getTimePoint()}.
+     * 
+     * @return The maximal angular velocity in degrees per second
+     */
+    @Statistic(messageKey = "MaxAngularVelocityInDegreesPerSecond", resultDecimals = 4, ordinal = 4)
+    double getMaxAngularVelocityInDegreesPerSecond();
+
 }

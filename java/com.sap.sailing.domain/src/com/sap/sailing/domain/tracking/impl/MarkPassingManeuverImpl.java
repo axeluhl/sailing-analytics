@@ -19,10 +19,10 @@ public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassing
             TimePoint timePoint, TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
             double directionChangeInDegrees, TimePoint timePointBeforeMainCurve, TimePoint timePointAfterMainCurve,
-            double directionChangeWithinMainCurveInDegrees, Waypoint waypointPassed, NauticalSide side) {
+            double directionChangeWithinMainCurveInDegrees, double maxAngularVelocityInDegreesPerSecond, Waypoint waypointPassed, NauticalSide side) {
         super(type, newTack, position, maneuverLoss, timePoint, timePointBefore, timePointAfter, speedWithBearingBefore,
                 speedWithBearingAfter, directionChangeInDegrees, timePointBeforeMainCurve, timePointAfterMainCurve,
-                directionChangeWithinMainCurveInDegrees);
+                directionChangeWithinMainCurveInDegrees, maxAngularVelocityInDegreesPerSecond);
         this.waypointPassed = waypointPassed;
         this.side = side;
     }
