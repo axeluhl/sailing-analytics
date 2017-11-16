@@ -46,12 +46,18 @@ public class CurveEnteringAndExitingComputationTest {
         CurveDetails mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(2), mainCurve.getTimePoint());
+        assertEquals(12, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
         // Test that outer bearing steps with opposite direction to the target course get cut off.
         steps = constructStepsWithBearings(0, 359, 3, 9, 10, 9);
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(2), mainCurve.getTimePoint());
+        assertEquals(11, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
         // Test that outer bearing steps with major direction to the target course do not get cut off due to short
         // deviations from target course within the main curve
@@ -59,6 +65,9 @@ public class CurveEnteringAndExitingComputationTest {
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(0), mainCurve.getTimePoint());
+        assertEquals(20, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(10.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
         // Test that the returned maneuver main curve is null, if the maneuver direction does not match the target
         // direction and
@@ -80,6 +89,29 @@ public class CurveEnteringAndExitingComputationTest {
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(2), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(6), mainCurve.getTimePoint());
+        assertEquals(18, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
+
+        // Test that the time point with the highest turn rate in the wrong direction gets cut off and is not picked as
+        // maximal angular velocity.
+        steps = constructStepsWithBearings(0, 340, 0, 2, 1, 2, 6, 12, 16, 17, 16, 18, 17, 18);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(1), mainCurve.getTimePoint());
+        assertEquals(38, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(20.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
+
+        // Test that the time point with the highest turn rate gets cut off and is not picked as
+        // maximal angular velocity, because it its position is before the actual main curve.
+        steps = constructStepsWithBearings(0, 340, 350, 345, 340, 335, 340, 345, 350, 359);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(5), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(9), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(8), mainCurve.getTimePoint());
+        assertEquals(24, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(9.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
         // test that when there are only small direction changes at the end they are cut off
         steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006,
