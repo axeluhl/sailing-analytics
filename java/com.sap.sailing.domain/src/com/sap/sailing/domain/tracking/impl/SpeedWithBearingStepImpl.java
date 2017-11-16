@@ -16,6 +16,7 @@ public class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
     private final TimePoint timePoint;
     private final SpeedWithBearing speedWithBearing;
     private final double courseChangeInDegrees;
+    private final double angularVelocityInDegreesPerSecond;
 
     /**
      * Constructs a speed with bearing step with details about speed, bearing and course change related to the previous
@@ -29,10 +30,11 @@ public class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
      *            Course change in degrees compared to the previous step. Zero, if this is a first step.
      */
     public SpeedWithBearingStepImpl(TimePoint timePoint, SpeedWithBearing speedWithBearing,
-            double courseChangeInDegrees) {
+            double courseChangeInDegrees, double angularVelocityInDegreesPerSecond) {
         this.timePoint = timePoint;
         this.speedWithBearing = speedWithBearing;
         this.courseChangeInDegrees = courseChangeInDegrees;
+        this.angularVelocityInDegreesPerSecond = angularVelocityInDegreesPerSecond;
     }
 
     @Override
@@ -53,6 +55,12 @@ public class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
     @Override
     public String toString() {
         return "Speed: " + speedWithBearing.getKnots() + " kts, course change: " + courseChangeInDegrees
-                + "°, bearing: " + speedWithBearing.getBearing().getDegrees() + "°";
+                + "°, angular velocity: " + angularVelocityInDegreesPerSecond + "°/s, bearing: "
+                + speedWithBearing.getBearing().getDegrees() + "°";
+    }
+
+    @Override
+    public double getAngularVelocityInDegreesPerSecond() {
+        return angularVelocityInDegreesPerSecond;
     }
 }

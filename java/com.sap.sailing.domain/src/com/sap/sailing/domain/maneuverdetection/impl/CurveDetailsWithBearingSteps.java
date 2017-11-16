@@ -15,9 +15,10 @@ class CurveDetailsWithBearingSteps extends CurveDetails {
 
     public CurveDetailsWithBearingSteps(TimePoint timepointBefore, TimePoint timepointAfter, TimePoint timepoint,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double totalCourseChangeInDegrees, SpeedWithBearingStepsIterable speedWithBearingSteps) {
+            double totalCourseChangeInDegrees, double maxAngularVelocityInDegreesPerSecond,
+            SpeedWithBearingStepsIterable speedWithBearingSteps) {
         super(timepointBefore, timepointAfter, timepoint, speedWithBearingBefore, speedWithBearingAfter,
-                totalCourseChangeInDegrees);
+                totalCourseChangeInDegrees, maxAngularVelocityInDegreesPerSecond);
         this.speedWithBearingSteps = speedWithBearingSteps;
     }
 
