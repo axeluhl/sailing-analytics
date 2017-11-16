@@ -201,6 +201,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             this.seedLength = seedLength;
             this.plt = new int[flights * groups][competitors / groups];
             this.associations = new int[competitors][competitors];
+            
+            //
             for (int i = 0; i < constantPLT.length; i++) {
                 System.arraycopy(constantPLT[i], 0, this.plt[i], 0, competitors / groups);
             }
