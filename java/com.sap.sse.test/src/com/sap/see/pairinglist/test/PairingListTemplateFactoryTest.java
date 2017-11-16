@@ -3,7 +3,6 @@ package com.sap.see.pairinglist.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.junit.Before;

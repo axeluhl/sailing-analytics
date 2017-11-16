@@ -61,7 +61,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
                 .getPairingListTemplate();
         int[][] associations = new int[competitors][competitors];
 
-        this.incrementAssociations(plTemplate, associations);
+        associations = this.incrementAssociations(plTemplate, associations);
 
         for (int x = 0; x < associations.length; x++) {
             for (int y = 0; y < associations[0].length; y++) {

@@ -55,6 +55,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     @Override
     public double getQuality() {
+        System.out.println(Arrays.deepToString(this.pairingListTemplate));
+        System.out.println(this.standardDev);
+        System.out.println(Arrays.deepToString(this.incrementAssociations(this.pairingListTemplate, new int[30][30])));
         return this.standardDev;
     }
 
@@ -172,9 +175,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private int[] generateSeeds(int flights, int competitors) {
         int[] seeds=new int[seedsCount];
         for(int x=0;x<seeds.length;x++){
-            int random=this.getRandomIntegerBetween(1, competitors);
+            int random=this.getRandomIntegerBetween(0, competitors - 1);
             while(this.contains(seeds, random)) {
-                random=this.getRandomIntegerBetween(1, competitors);
+                random=this.getRandomIntegerBetween(0, competitors - 1);
             }
             seeds[x] = random;
         }
@@ -286,10 +289,17 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      */
     protected int[][] createFlight(int flightCount, int groupCount, int competitorCount, int[][] currentAssociations, int seed) {
         int[][] flightColumn = new int[groupCount][competitorCount / groupCount];
+        
+        // filling the array with -1, because our competitor number starts at 0. So if we later ask, whether the 
+        // competitor number 0 is already in our actual flight, it would say, that it is so. By filling up the array
+        // with -2, we can avoid this.
+        for (int[] group : flightColumn) {
+            Arrays.fill(group, -1);
+        }
         int[][][] associationRow = new int[groupCount][(competitorCount / groupCount) - 1][competitorCount];
         int[] associationHigh = new int[groupCount - 1];
         flightColumn[0][0] = seed;
-        for (int assignmentIndex = 1; assignmentIndex <= (competitorCount / groupCount) - 1; assignmentIndex++) {
+        for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
             int associationSum = Integer.MAX_VALUE;
             associationHigh[0] = flightCount + 1;
             associationRow = copyInto3rdDimension(competitorCount, currentAssociations, associationRow, flightColumn,
@@ -367,7 +377,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         for (int[] row : seeds) {
             do {
                 for (int i = 0; i < seeds[0].length; i++) {
-                    row[i] = this.getRandomIntegerBetween(1, competitorCount);
+                    row[i] = this.getRandomIntegerBetween(0, competitorCount - 1);
                 }
             } while (!this.containsRow(seeds, row));
         }
@@ -566,7 +576,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     public int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
             int[][] flightColumn, int zGroups, int fleet) {
-        System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1] - 1], 0, associationRow[fleet][zGroups - 1], 
+        System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1]], 0, associationRow[fleet][zGroups - 1], 
                 0, competitors);
         return associationRow;
     }
@@ -658,13 +668,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             for (int i = 0; i < pairingList[0].length; i++) {
                 for (int j = 0; j < pairingList[0].length; j++) {
                     if (group[i] == group[j]) {
-                        if (group[i] >= 0 && group[j] >= 0) {
-                            associations[group[i]][group[j]] = -1;
-                        }
+                        associations[group[i]][group[j]] = -1;
                     } else {
-                        if (group[i] >= 0 && group[j] >= 0) {
-                            associations[group[i]][group[j]] += 1;
-                        }
+                        associations[group[i]][group[j]] += 1;
                     }
                 }
             }
@@ -678,13 +684,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             for (int i = 0; i < group.length; i++) {
                 for (int j = 0; j < group.length; j++) {
                     if (group[i] == group[j]) {
-                        if (group[i] >= 0 && group[j] >= 0) {
-                            associations[group[i]][group[j]] = -1;
-                        }
+                        associations[group[i]][group[j]] = -1;
                     } else {
-                        if (group[i] >= 0 && group[j] >= 0) {
-                            associations[group[i]][group[j]] -= 1;
-                        }
+                        associations[group[i]][group[j]] -= 1;
                     }
                 }
             }
