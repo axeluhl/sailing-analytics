@@ -107,7 +107,7 @@ public class PairingListTemplateFactoryTest {
         
         for(int i = 0; i < flights; i++) {
             
-            IntStream.range(1, competitors+1).forEach(competitor -> {
+            IntStream.range(0, competitors).forEach(competitor -> {
                 availableCompetitors.add(competitor);
             });
             
