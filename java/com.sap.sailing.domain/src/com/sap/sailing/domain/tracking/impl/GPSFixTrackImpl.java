@@ -36,9 +36,10 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
-import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -1121,7 +1122,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     }
     
     @Override
-    public List<SpeedWithBearingStep> getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
+    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
         if (intervalBetweenBearingSteps.asMillis() <= 0) {
             throw new IllegalArgumentException("intervalBetweenBearingSteps must be a positive duration but was "+intervalBetweenBearingSteps);
         }
@@ -1168,6 +1169,6 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         } finally {
             unlockAfterRead();
         }
-        return relevantBearings;
+        return new SpeedWithBearingStepsIterable(relevantBearings);
     }
 }

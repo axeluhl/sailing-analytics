@@ -184,6 +184,6 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      *            Time distance between bearing steps
      * @return The list of bearings between the provided time range
      */
-    Iterable<SpeedWithBearingStep> getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps);
+    SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps);
 
 }

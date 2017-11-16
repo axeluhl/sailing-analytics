@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
-import java.util.List;
-
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -13,11 +11,11 @@ import com.sap.sse.common.TimePoint;
  *
  */
 class CurveDetailsWithBearingSteps extends CurveDetails {
-    private final List<SpeedWithBearingStep> speedWithBearingSteps;
+    private final SpeedWithBearingStepsIterable speedWithBearingSteps;
 
     public CurveDetailsWithBearingSteps(TimePoint timepointBefore, TimePoint timepointAfter, TimePoint timepoint,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double totalCourseChangeInDegrees, List<SpeedWithBearingStep> speedWithBearingSteps) {
+            double totalCourseChangeInDegrees, SpeedWithBearingStepsIterable speedWithBearingSteps) {
         super(timepointBefore, timepointAfter, timepoint, speedWithBearingBefore, speedWithBearingAfter,
                 totalCourseChangeInDegrees);
         this.speedWithBearingSteps = speedWithBearingSteps;
@@ -28,7 +26,7 @@ class CurveDetailsWithBearingSteps extends CurveDetails {
      * 
      * @return The bearing steps of the curve
      */
-    public List<SpeedWithBearingStep> getSpeedWithBearingSteps() {
+    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps() {
         return speedWithBearingSteps;
     }
 }

@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -43,7 +44,7 @@ public class CurveEnteringAndExitingComputationTest {
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
         // Test that bearing steps with continuous course change into the target direction wraps the whole time range of
         // analyzed steps.
-        Iterable<SpeedWithBearingStep> steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
+        SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
         CurveEnteringAndExitingDetails mainCurve = maneuverDetector
                 .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
@@ -126,7 +127,7 @@ public class CurveEnteringAndExitingComputationTest {
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
         // Test with time forward call that speed steps with continuous speed increase wraps the whole time range of
         // analyzed steps.
-        Iterable<SpeedWithBearingStep> steps = constructStepsWithSpeeds(0, 1, 3, 9, 10, 12);
+        SpeedWithBearingStepsIterable steps = constructStepsWithSpeeds(0, 1, 3, 9, 10, 12);
         CurveBoundaryExtension extension = maneuverDetector.findSpeedMaximum(steps, false, null);
         assertEquals(constructTimePoint(5), extension.getExtensionTimePoint());
         assertEquals(5, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
@@ -186,7 +187,7 @@ public class CurveEnteringAndExitingComputationTest {
     public void testStableBearingSearch() {
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
         //Test time forward
-        Iterable<SpeedWithBearingStep> steps = constructStepsWithBearings(0, 2, 5, 4, 10, 12);
+        SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 2, 5, 4, 10, 12);
         CurveBoundaryExtension extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false, MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(2), extension.getExtensionTimePoint());
         assertEquals(5, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
@@ -217,7 +218,7 @@ public class CurveEnteringAndExitingComputationTest {
 
     }
 
-    private Iterable<SpeedWithBearingStep> constructStepsWithBearings(double... bearingsInDegrees) {
+    private SpeedWithBearingStepsIterable constructStepsWithBearings(double... bearingsInDegrees) {
         List<SpeedWithBearingStep> steps = new ArrayList<>(bearingsInDegrees.length);
         SpeedWithBearingStep previousStep = null;
         for (int i = 0; i < bearingsInDegrees.length; i++) {
@@ -226,10 +227,10 @@ public class CurveEnteringAndExitingComputationTest {
             previousStep = step;
 
         }
-        return steps;
+        return new SpeedWithBearingStepsIterable(steps);
     }
 
-    private Iterable<SpeedWithBearingStep> constructStepsWithSpeeds(double... speedsInKnots) {
+    private SpeedWithBearingStepsIterable constructStepsWithSpeeds(double... speedsInKnots) {
         List<SpeedWithBearingStep> steps = new ArrayList<>(speedsInKnots.length);
         SpeedWithBearingStep previousStep = null;
         for (int i = 0; i < speedsInKnots.length; i++) {
@@ -238,7 +239,7 @@ public class CurveEnteringAndExitingComputationTest {
             previousStep = step;
 
         }
-        return steps;
+        return new SpeedWithBearingStepsIterable(steps);
     }
 
     private SpeedWithBearingStep constructStep(double secondsAfterRefenceTimePoint, double speedInKnots,

@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -72,7 +73,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor
             stepMillis = 1;
         }
 
-        final Iterable<SpeedWithBearingStep> maneuverBearingSteps = trackedRace.getTrack(competitor).getSpeedWithBearingSteps(
+        final SpeedWithBearingStepsIterable maneuverBearingSteps = trackedRace.getTrack(competitor).getSpeedWithBearingSteps(
                 timePointBeforeForAnalysis, timePointAfterForAnalysis, new MillisecondsDurationImpl(stepMillis));
 
         NauticalSide maneuverDirection = directionChangeInDegreesForAnalysis < 0 ? NauticalSide.PORT
