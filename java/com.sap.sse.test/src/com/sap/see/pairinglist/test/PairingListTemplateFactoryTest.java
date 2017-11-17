@@ -3,6 +3,7 @@ package com.sap.see.pairinglist.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -77,15 +78,20 @@ public class PairingListTemplateFactoryTest {
         System.out.println(example1.getQuality());
         */
     }
+   
     
     @Test
     public void qualityCheck(){
         PairingListTemplate template = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
+        System.out.println(Arrays.deepToString(template.getPairingListTemplate()));
+        System.out.println(template.getQuality());
         if(template.getQuality()>=0.7) {
             Assert.fail("Quality of Pairinglist is worse than usual!");
         }
         
         PairingListTemplate template2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30));
+        System.out.println(Arrays.deepToString(template2.getPairingListTemplate()));
+        System.out.println(template2.getQuality());
         if(template2.getQuality()>=1.2) {
             Assert.fail("Quality of Pairinglist is worse than usual!");
         }
