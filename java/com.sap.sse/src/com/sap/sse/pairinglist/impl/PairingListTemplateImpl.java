@@ -380,7 +380,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 }
             } while (!this.containsRow(seeds, row));
         }
-        // TODO identify equal prefixes
+        // TODO change method to incremental calculation
         for (int[] row : seeds) {
             for (int m = 0; m < associations.length; m++) {
                 System.arraycopy(associations[m], 0, currentAssociations[m], 0, associations[0].length);
