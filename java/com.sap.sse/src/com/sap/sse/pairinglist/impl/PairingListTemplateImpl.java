@@ -184,7 +184,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     class SuffixCreationTask implements Callable<int[][]> {
         int flights, groups, competitors, seedLength;
         int[][] plt, associations;
-        //TODO document array copies
         /**
          * This task is created every time a constant is generated. It generates a specific number of PairingListTemplates,which is based on the constant flights 
          * which are given to the task and returns its best. The number of generated PairingListTamplates depends on the number of constant flights and the number of seeds.
@@ -202,7 +201,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             this.plt = new int[flights * groups][competitors / groups];
             this.associations = new int[competitors][competitors];
             
-            //
+            // we use here System.arraycopy, because else, we would work on the reference of constantPLT. Besides we 
+            // want to avoid changing the reference. 
             for (int i = 0; i < constantPLT.length; i++) {
                 System.arraycopy(constantPLT[i], 0, this.plt[i], 0, competitors / groups);
             }
@@ -220,7 +220,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     
     /**
      * Creates constant flights. 
-     * 
+     *
      * Recursive method, called in createPairingListTemplate(). Method is described in its javadoc.
      * 
      * @param flights count of flights

@@ -90,8 +90,9 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         }
 
         long sum = 0;
-        for (int i = 0; i < tests; i++)
+        for (int i = 0; i < tests; i++) {
             sum += a[i];
+        }
         double average = sum / tests;
         if (average > 8000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
