@@ -127,7 +127,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         assertEquals(shortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
         // change competitor
         windowForEdit.switchToWindow();
-        dialog = competitorEntry.clickEditWithBoatButton();
+        dialog = competitorEntry.clickEditButton();
         final String changedName = "" + System.currentTimeMillis();
         dialog.setNameTextBox(changedName);
         final String changedShortName = "" + System.currentTimeMillis();
