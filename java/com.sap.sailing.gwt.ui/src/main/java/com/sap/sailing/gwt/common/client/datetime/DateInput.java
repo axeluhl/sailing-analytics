@@ -6,17 +6,18 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class DateInput extends AbstractInput {
 
-    static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd");
-
     public DateInput() {
-        super(DateTimeInputType.TIME.isSupported() ? NativeDateTimeInput.date(DATE_FORMAT) : new CustomDateBox());
+        super(DateTimeInputType.TIME.isSupported() ? NativeDateTimeInput.date() : new CustomDateBox());
     }
 
     private static class CustomDateBox extends DateBox {
 
+        private final DateTimeFormat viewFormat = DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM);
+
         private CustomDateBox() {
-            setFormat(new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM)));
+            setFormat(new DefaultFormat(viewFormat));
             addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
+            getElement().setAttribute("placeholder", viewFormat.getPattern());
         }
 
     }

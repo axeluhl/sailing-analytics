@@ -16,8 +16,8 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
 
     private static final String ATTR_TYPE = "type", ATTR_STEP = "step";
 
-    static DateTimeInput date(DateTimeFormat dateFormat) {
-        return new NativeDateTimeInput(DateTimeInputType.DATE, "", dateFormat);
+    static DateTimeInput date() {
+        return new NativeDateTimeInput(DateTimeInputType.DATE, "", Accuracy.getDateFormat());
     }
 
     static DateTimeInput time(Accuracy accuracy) {

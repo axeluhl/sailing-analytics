@@ -29,7 +29,7 @@ public class DateAndTimeInput extends AbstractInput {
             add(this.timeInput = new TimeInput(accuracy));
             dateInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
             timeInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
-            this.dateFormat = DateInput.DATE_FORMAT;
+            this.dateFormat = Accuracy.getDateFormat();
             this.timeFormat = accuracy.getTimeFormat();
             this.datetimeFormat = accuracy.getDatetimeFormat();
         }

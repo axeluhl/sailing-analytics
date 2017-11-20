@@ -12,6 +12,8 @@ public interface DateTimeInput extends IsWidget, HasValue<Date> {
     public enum Accuracy {
         MINUTES(60, "yyyy-MM-dd'T'HH:mm", "HH:mm"), SECONDS(1, "yyyy-MM-dd'T'HH:mm:ss", "HH:mm:ss");
 
+        private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd");
+
         private final String step;
         private final DateTimeFormat datetimeFormat, timeFormat;
 
@@ -19,6 +21,10 @@ public interface DateTimeInput extends IsWidget, HasValue<Date> {
             this.step = String.valueOf(step);
             this.datetimeFormat = DateTimeFormat.getFormat(datetimeFormat);
             this.timeFormat = DateTimeFormat.getFormat(timeFormat);
+        }
+
+        public static DateTimeFormat getDateFormat() {
+            return DATE_FORMAT;
         }
 
         public String getStep() {
