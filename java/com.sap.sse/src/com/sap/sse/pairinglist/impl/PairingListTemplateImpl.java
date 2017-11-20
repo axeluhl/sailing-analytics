@@ -22,7 +22,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             .getDefaultBackgroundTaskThreadPoolExecutor();
 
     private final int maxConstantFlights;
-    private final int seedsCount;
+    private final int prefixSeedCount;
+    private final int suffixSeedCount;
+    private final int MAX_TASKS = 1024;
     private final int iterations;
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
@@ -32,21 +34,24 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations) {
         this.iterations = iterations;
-
+        
         if (0.9 * pairingFrameProvider.getFlightsCount() > 10) {
             this.maxConstantFlights = 10;
-            this.seedsCount = 2;
+            this.prefixSeedCount = 2;
         } else if (pairingFrameProvider.getFlightsCount() > 4) {
             this.maxConstantFlights = (int) ((pairingFrameProvider.getFlightsCount()) * 0.5);
-            this.seedsCount = (int) (Math.pow(512, (1.0 / maxConstantFlights)));
+            this.prefixSeedCount = (int) (Math.pow(this.MAX_TASKS, (1.0 / maxConstantFlights)));
         } else {
             maxConstantFlights = 0;
-            seedsCount = 0;
+            prefixSeedCount = 0;
         }
         
+        this.suffixSeedCount =  (int) Math.pow((iterations / this.MAX_TASKS),
+                1.0 / (pairingFrameProvider.getFlightsCount() - this.maxConstantFlights));
+        
         if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
-
                 pairingFrameProvider.getCompetitorsCount())) {
+            
             if (maxConstantFlights > 0) {
                 this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
                         pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
@@ -182,7 +187,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return int array of random competitors
      */
     private int[] generateSeeds(int flights, int competitors) {
-        return this.generateSeeds(flights, competitors, this.seedsCount);
+        return this.generateSeeds(flights, competitors, this.prefixSeedCount);
     }
     
     private int[] generateSeeds(int flights, int competitors, int count) {
@@ -248,9 +253,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         @Override
         public int[][] call() {
             return createSuffix(flights, groups, competitors, plt, associations, 
-                    generateSeeds(flights, competitors,
-                            ((int) Math.pow((iterations /tasks ),
-                                    1.0 / (flights - maxConstantFlights)))), maxConstantFlights);
+                    generateSeeds(flights, competitors, suffixSeedCount), maxConstantFlights);
         }
     } 
     
@@ -432,9 +435,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 
                 level++;
                 associations = this.incrementAssociations(flight, associations);
-                
+                int[] nextSeeds;
+                if (Math.pow((this.iterations / MAX_TASKS), 1.0 - (flightCount - level)) > 2&& suffixSeedCount<2) {
+                    nextSeeds = generateSeeds(flightCount, competitorCount, 2);
+                } else {
+                    nextSeeds = this.generateSeeds(flightCount, competitorCount, this.suffixSeedCount);
+                }
                 int[][] suffix = this.createSuffix(flightCount, groupCount, competitorCount, currentPLT, associations, 
-                        this.generateSeeds(flightCount, competitorCount), level);
+                        nextSeeds, level);
                 double currentDev = this.calcStandardDev(this.incrementAssociations(suffix, 
                                         new int[competitorCount][competitorCount]));
                 
