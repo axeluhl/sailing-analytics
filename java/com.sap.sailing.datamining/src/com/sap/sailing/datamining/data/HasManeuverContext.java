@@ -18,7 +18,7 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Dimension(messageKey = "ToSide", ordinal = 16)
     NauticalSide getToSide();
-    
+
     @Dimension(messageKey = "TackBeforeManeuver")
     Tack getTackBeforeManeuver();
 
@@ -30,7 +30,7 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "AbsTWAAtManeuverClimax", ordinal = 7)
     Double getAbsTWAAtManeuverClimax();
-    
+
     @Statistic(messageKey = "ManeuverEnteringAbsTWA", ordinal = 5)
     Double getEnteringAbsTWA();
 
@@ -51,9 +51,6 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "ManeuverExitingSpeedInKnots", ordinal = 18, resultDecimals = 2)
     Double getManeuverExitingSpeed();
-    
-    @Statistic(messageKey = "AbsCourseChangeAtManeuverTimePointInDegreesPerSecond", ordinal = 21, resultDecimals = 2)
-    Double getAbsCourseChangeAtManeuverTimePointInDegreesPerSecond();
 
     TimePoint getTimePointBeforeForAnalysis();
 

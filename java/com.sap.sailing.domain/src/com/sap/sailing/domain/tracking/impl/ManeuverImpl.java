@@ -28,11 +28,12 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private final TimePoint timePointBeforeMainCurve;
     private final TimePoint timePointAfterMainCurve;
     private final double directionChangeWithinMainCurveInDegrees;
+    private final double maxAngularVelocityInDegreesPerSecond;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             TimePoint timePointBefore, TimePoint timePointAfter, SpeedWithBearing speedWithBearingBefore,
             SpeedWithBearing speedWithBearingAfter, double directionChangeInDegrees, TimePoint timePointBeforeMainCurve,
-            TimePoint timePointAfterMainCurve, double directionChangeWithinMainCurveInDegrees) {
+            TimePoint timePointAfterMainCurve, double directionChangeWithinMainCurveInDegrees, double maxAngularVelocityInDegreesPerSecond) {
         super();
         this.type = type;
         this.newTack = newTack;
@@ -47,6 +48,7 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
         this.timePointBeforeMainCurve = timePointBeforeMainCurve;
         this.timePointAfterMainCurve = timePointAfterMainCurve;
         this.directionChangeWithinMainCurveInDegrees = directionChangeWithinMainCurveInDegrees;
+        this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
     }
 
     @Override
@@ -121,6 +123,11 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     @Override
     public double getDirectionChangeWithinMainCurveInDegrees() {
         return directionChangeWithinMainCurveInDegrees;
+    }
+    
+    @Override
+    public double getMaxAngularVelocityInDegreesPerSecond() {
+        return maxAngularVelocityInDegreesPerSecond;
     }
 
 }

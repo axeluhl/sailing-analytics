@@ -36,9 +36,10 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
-import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -1121,12 +1122,13 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     }
     
     @Override
-    public List<SpeedWithBearingStep> getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
+    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
         if (intervalBetweenBearingSteps.asMillis() <= 0) {
             throw new IllegalArgumentException("intervalBetweenBearingSteps must be a positive duration but was "+intervalBetweenBearingSteps);
         }
         List<SpeedWithBearingStep> relevantBearings = new ArrayList<>();
         Bearing lastBearing = null;
+        TimePoint lastTimePoint = null;
         double lastCourseChangeAngleInDegrees = 0;
         lockForRead();
         try {
@@ -1144,6 +1146,8 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                      */
                     double courseChangeAngleInDegrees = lastBearing == null ? 0
                             : lastBearing.getDifferenceTo(bearing).getDegrees();
+                    
+                    double angularVelocityInDegreesPerSecond = lastTimePoint == null ? 0 : Math.abs(courseChangeAngleInDegrees / lastTimePoint.until(timePoint).asSeconds());
                     /*
                      * In extreme cases, the getDifferenceTo() might compute a bearing in a wrong maneuver direction due
                      * to fast turn and/or inaccurate GPS during penalty circles. We need to ensure that our
@@ -1157,10 +1161,11 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                             && Math.abs(courseChangeAngleInDegrees - lastCourseChangeAngleInDegrees) >= 180) {
                         courseChangeAngleInDegrees += courseChangeAngleInDegrees < 0 ? 360 : -360;
                     }
-                    relevantBearings.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees));
+                    relevantBearings.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees, angularVelocityInDegreesPerSecond));
                     lastBearing = bearing;
                     lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
                 }
+                lastTimePoint = timePoint;
                 if (!timePoint.before(toTimePoint)) {
                     break;
                 }
@@ -1168,6 +1173,6 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         } finally {
             unlockAfterRead();
         }
-        return relevantBearings;
+        return new SpeedWithBearingStepsIterable(relevantBearings);
     }
 }

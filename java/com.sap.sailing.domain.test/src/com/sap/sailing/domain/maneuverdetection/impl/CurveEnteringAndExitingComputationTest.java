@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -17,6 +16,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -31,7 +31,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class CurveEnteringAndExitingComputationTest {
 
     private static final double maxDeltaForDouble = 0.000000000001;
-    
+
     private static final double MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 1;
 
     private final TimePoint referenceTimePoint = new MillisecondsTimePoint(
@@ -39,78 +39,111 @@ public class CurveEnteringAndExitingComputationTest {
 
     @Test
     public void testMainCurveSearch() {
-        TimePoint maneuverTimePoint = constructTimePoint(2);
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
         // Test that bearing steps with continuous course change into the target direction wraps the whole time range of
         // analyzed steps.
-        Iterable<SpeedWithBearingStep> steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
-        CurveEnteringAndExitingDetails mainCurve = maneuverDetector
-                .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
+        CurveDetails mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(2), mainCurve.getTimePoint());
+        assertEquals(12, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
         // Test that outer bearing steps with opposite direction to the target course get cut off.
         steps = constructStepsWithBearings(0, 359, 3, 9, 10, 9);
-        mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
-                NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(2), mainCurve.getTimePointBefore());
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(2), mainCurve.getTimePoint());
+        assertEquals(11, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
         // Test that outer bearing steps with major direction to the target course do not get cut off due to short
         // deviations from target course within the main curve
         steps = constructStepsWithBearings(0, 10, 5, 15, 10, 20);
-        mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
-                NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(0), mainCurve.getTimePoint());
+        assertEquals(20, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(10.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
-        // Test that the maneuvers duration gets zero, if the maneuver direction does not match the target direction and
+        // Test that the returned maneuver main curve is null, if the maneuver direction does not match the target
+        // direction and
         // the code inside does not crash.
         steps = constructStepsWithBearings(0, 359, 358, 357, 356, 355);
-        try {
-            mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
-                    NauticalSide.STARBOARD);
-            fail("Expected IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(null, mainCurve);
 
-        // Test that the maneuvers duration gets zero, if the boat is not turning at all and
+        // Test that the returned maneuver main curve is null, if the boat is not turning at all and
         // the code inside does not crash.
         steps = constructStepsWithBearings(0, 0, 0, 0, 0, 0);
-        try {
-            mainCurve = maneuverDetector.computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps,
-                    NauticalSide.STARBOARD);
-            fail("Expected IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(null, mainCurve);
+
+        // Test that the outer bearing steps with unstable course changes without contribution to the maximal total
+        // course change get cut off and the inner bearing steps which do contribute to
+        // the maximal course change are kept.
+        steps = constructStepsWithBearings(0, 1, 0, 2, 1, 2, 6, 12, 16, 17, 16, 18, 17, 18);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(2), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(6), mainCurve.getTimePoint());
+        assertEquals(18, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
+
+        // Test that the time point with the highest turn rate in the wrong direction gets cut off and is not picked as
+        // maximal angular velocity.
+        steps = constructStepsWithBearings(0, 340, 0, 2, 1, 2, 6, 12, 16, 17, 16, 18, 17, 18);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(1), mainCurve.getTimePoint());
+        assertEquals(38, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(20.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
+
+        // Test that the time point with the highest turn rate gets cut off and is not picked as
+        // maximal angular velocity, because it its position is before the actual main curve.
+        steps = constructStepsWithBearings(0, 340, 350, 345, 340, 335, 340, 345, 350, 359);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(5), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(9), mainCurve.getTimePointAfter());
+        assertEquals(constructTimePoint(8), mainCurve.getTimePoint());
+        assertEquals(24, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
+        assertEquals(9.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
         // test that when there are only small direction changes at the end they are cut off
-        steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006, 10.0007, 10.0008, 10.0009);
-        mainCurve = maneuverDetector
-                .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006,
+                10.0007, 10.0008, 10.0009);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
 
-        steps = constructStepsWithBearings(359.9985, 359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3, 9, 10);
-        mainCurve = maneuverDetector
-                .computeEnteringAndExitingDetailsOfManeuverMainCurve(constructTimePoint(9), steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(8), mainCurve.getTimePointBefore());
+        steps = constructStepsWithBearings(359.9985, 359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3,
+                9, 10);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(7), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
 
-        // even when the small changes aggregate to a total change exceeding the threshold, they all do not belong to the maneuver
-        steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006, 10.0007, 10.0008, 10.0009, 10.001);
-        mainCurve = maneuverDetector
-                .computeEnteringAndExitingDetailsOfManeuverMainCurve(maneuverTimePoint, steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        // even when the small changes aggregate to a total change exceeding the threshold, they all do not belong to
+        // the maneuver
+        steps = constructStepsWithBearings(0, 1, 3, 9, 10, 10.0001, 10.0002, 10.0003, 10.0004, 10.0005, 10.0006,
+                10.0007, 10.0008, 10.0009, 10.001);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
 
-        steps = constructStepsWithBearings(359.9979, 359.9980, 359.9981, 359.9982, 359.9983, 359.9984, 359.9985, 359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3, 9, 10);
-        mainCurve = maneuverDetector
-                .computeEnteringAndExitingDetailsOfManeuverMainCurve(constructTimePoint(15), steps, NauticalSide.STARBOARD);
-        assertEquals(constructTimePoint(14), mainCurve.getTimePointBefore());
+        steps = constructStepsWithBearings(359.9979, 359.9980, 359.9981, 359.9982, 359.9983, 359.9984, 359.9985,
+                359.9986, 359.9987, 359.9988, 359.9989, 359.9989, 359.999, 0, 1, 3, 9, 10);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(13), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(17), mainCurve.getTimePointAfter());
+
+        steps = constructStepsWithBearings(358, 358.0001, 359.9979, 359.9980, 0, 1, 3, 9, 9, 0001, 11, 11.0001);
+        mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
+        assertEquals(constructTimePoint(10), mainCurve.getTimePointAfter());
     }
 
     @Test
@@ -118,7 +151,7 @@ public class CurveEnteringAndExitingComputationTest {
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
         // Test with time forward call that speed steps with continuous speed increase wraps the whole time range of
         // analyzed steps.
-        Iterable<SpeedWithBearingStep> steps = constructStepsWithSpeeds(0, 1, 3, 9, 10, 12);
+        SpeedWithBearingStepsIterable steps = constructStepsWithSpeeds(0, 1, 3, 9, 10, 12);
         CurveBoundaryExtension extension = maneuverDetector.findSpeedMaximum(steps, false, null);
         assertEquals(constructTimePoint(5), extension.getExtensionTimePoint());
         assertEquals(5, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
@@ -173,43 +206,52 @@ public class CurveEnteringAndExitingComputationTest {
         assertEquals(4, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
 
     }
-    
+
     @Test
     public void testStableBearingSearch() {
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
-        //Test time forward
-        Iterable<SpeedWithBearingStep> steps = constructStepsWithBearings(0, 2, 5, 4, 10, 12);
-        CurveBoundaryExtension extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false, MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        // Test time forward
+        SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 2, 5, 4, 10, 12);
+        CurveBoundaryExtension extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false,
+                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(2), extension.getExtensionTimePoint());
         assertEquals(5, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
-        //Test time backward
+        // Test time backward
         steps = constructStepsWithBearings(12, 10, 4, 5, 2, 0);
-        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, true, MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, true,
+                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(3), extension.getExtensionTimePoint());
         assertEquals(-5, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
-        //Test time forward with a list which contains only unstable bearings such that it delivers last time point
-        steps = maneuverDetector.getSpeedWithBearingStepsWithinTimeRange(steps, constructTimePoint(0), constructTimePoint(2));
-        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false, MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        // Test time forward with a list which contains only unstable bearings such that it delivers last time point
+        steps = maneuverDetector.getSpeedWithBearingStepsWithinTimeRange(steps, constructTimePoint(0),
+                constructTimePoint(2));
+        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false,
+                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(2), extension.getExtensionTimePoint());
         assertEquals(-8, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
-        //Test time backward with a list which contains only unstable bearings such that it delivers first time point
-        steps = maneuverDetector.getSpeedWithBearingStepsWithinTimeRange(steps, constructTimePoint(0), constructTimePoint(2));
-        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, true, MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        // Test time backward with a list which contains only unstable bearings such that it delivers first time point
+        steps = maneuverDetector.getSpeedWithBearingStepsWithinTimeRange(steps, constructTimePoint(0),
+                constructTimePoint(2));
+        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, true,
+                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(0), extension.getExtensionTimePoint());
         assertEquals(-8, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
-        //Test time forward with a list which contains only one element
-        steps = maneuverDetector.getSpeedWithBearingStepsWithinTimeRange(steps, constructTimePoint(0), constructTimePoint(0));
-        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false, MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        // Test time forward with a list which contains only one element
+        steps = maneuverDetector.getSpeedWithBearingStepsWithinTimeRange(steps, constructTimePoint(0),
+                constructTimePoint(0));
+        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false,
+                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(0), extension.getExtensionTimePoint());
         assertEquals(0, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
-        //Test time backward with a list which contains only one element
-        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, true, MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        // Test time backward with a list which contains only one element
+        extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, true,
+                MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(0), extension.getExtensionTimePoint());
         assertEquals(0, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
 
     }
 
-    private Iterable<SpeedWithBearingStep> constructStepsWithBearings(double... bearingsInDegrees) {
+    private SpeedWithBearingStepsIterable constructStepsWithBearings(double... bearingsInDegrees) {
         List<SpeedWithBearingStep> steps = new ArrayList<>(bearingsInDegrees.length);
         SpeedWithBearingStep previousStep = null;
         for (int i = 0; i < bearingsInDegrees.length; i++) {
@@ -218,10 +260,10 @@ public class CurveEnteringAndExitingComputationTest {
             previousStep = step;
 
         }
-        return steps;
+        return new SpeedWithBearingStepsIterable(steps);
     }
 
-    private Iterable<SpeedWithBearingStep> constructStepsWithSpeeds(double... speedsInKnots) {
+    private SpeedWithBearingStepsIterable constructStepsWithSpeeds(double... speedsInKnots) {
         List<SpeedWithBearingStep> steps = new ArrayList<>(speedsInKnots.length);
         SpeedWithBearingStep previousStep = null;
         for (int i = 0; i < speedsInKnots.length; i++) {
@@ -230,7 +272,7 @@ public class CurveEnteringAndExitingComputationTest {
             previousStep = step;
 
         }
-        return steps;
+        return new SpeedWithBearingStepsIterable(steps);
     }
 
     private SpeedWithBearingStep constructStep(double secondsAfterRefenceTimePoint, double speedInKnots,
@@ -240,7 +282,10 @@ public class CurveEnteringAndExitingComputationTest {
         TimePoint timePoint = constructTimePoint(secondsAfterRefenceTimePoint);
         double courseChangeInDegrees = previousStep == null ? 0.0
                 : previousStep.getSpeedWithBearing().getBearing().getDifferenceTo(bearing).getDegrees();
-        return new SpeedWithBearingStepImpl(timePoint, speedWithBearing, courseChangeInDegrees);
+        double angularVelocityInDegreesPerSecond = previousStep == null ? 0
+                : Math.abs(courseChangeInDegrees / previousStep.getTimePoint().until(timePoint).asSeconds());
+        return new SpeedWithBearingStepImpl(timePoint, speedWithBearing, courseChangeInDegrees,
+                angularVelocityInDegreesPerSecond);
     }
 
     private TimePoint constructTimePoint(double secondsAfterRefenceTimePoint) {
