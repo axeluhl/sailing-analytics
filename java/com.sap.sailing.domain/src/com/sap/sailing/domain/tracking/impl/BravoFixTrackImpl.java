@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
@@ -36,6 +37,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private final TimeRangeCache<Duration> foilingTimeCache;
     
     private final TimeRangeCache<Distance> foilingDistanceCache;
+    
+    private final TimeRangeCache<Distance> averageRideHeightCache;
 
     /**
      * @param trackedItem
@@ -44,10 +47,42 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      *            the name of the track by which it can be obtained from the {@link TrackedRace}.
      */
     public BravoFixTrackImpl(ItemType trackedItem, String trackName, boolean hasExtendedFixes) {
+        this(trackedItem, trackName, hasExtendedFixes, /* listen to GPS track for distance cache invalidation */ null);
+    }
+    
+    /**
+     * @param gpsTrack
+     *            if not {@code null}, this track will listen on that track for changes in order to invalidate this
+     *            track's caches; for example, if a GPS fix is added, this track may need to invalidate its
+     *            {@link #foilingDistanceCache} accordingly because the distance traveled between the fixes may have
+     *            changed.
+     */
+    public BravoFixTrackImpl(ItemType trackedItem, String trackName, boolean hasExtendedFixes, GPSFixTrack<ItemType, GPSFixMoving> gpsTrack) {
         super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
         this.hasExtendedFixes = hasExtendedFixes;
         this.foilingTimeCache = new TimeRangeCache<>("foilingTimeCache for "+trackedItem);
         this.foilingDistanceCache = new TimeRangeCache<>("foilingDistanceCache for "+trackedItem);
+        this.averageRideHeightCache = new TimeRangeCache<>("averageRideHeightCache for "+trackedItem);
+        if (gpsTrack != null) {
+            gpsTrack.addListener(new GPSTrackListener<ItemType, GPSFixMoving>() {
+                private static final long serialVersionUID = 6395529765232404414L;
+                @Override
+                public boolean isTransient() {
+                    return true;
+                }
+
+                @Override
+                public void gpsFixReceived(GPSFixMoving fix, ItemType item, boolean firstFixInTrack) {
+                    assert item == getTrackedItem();
+                    foilingDistanceCache.invalidateAllAtOrLaterThan(fix.getTimePoint());
+                }
+
+                @Override
+                public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
+                        long newMillisecondsOverWhichToAverage) {
+                }
+            });
+        }
     }
 
     @Override
@@ -74,29 +109,43 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         return rideHeight != null && rideHeight.compareTo(BravoFix.MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
     }
 
+    
+    @Override
+    public boolean add(BravoFix fix, boolean replace) {
+        final boolean added = super.add(fix, replace);
+        if (added) {
+            final TimePoint fixTimePoint = fix.getTimePoint();
+            averageRideHeightCache.invalidateAllAtOrLaterThan(fixTimePoint);
+            foilingDistanceCache.invalidateAllAtOrLaterThan(fixTimePoint);
+            foilingTimeCache.invalidateAllAtOrLaterThan(fixTimePoint);
+        }
+        return added;
+    }
+
     @Override
     public Distance getAverageRideHeight(TimePoint from, TimePoint to) {
-        final Distance result;
-        lockForRead();
-        try {
-            Distance sum = Distance.NULL;
-            int count = 0;
-            for (final BravoFix fix : getFixes(from, true, to, true)) {
-                final Distance rideHeight = fix.getRideHeight();
-                if (rideHeight != null) {
-                    sum = sum.add(rideHeight);
-                    count++;
+        return getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, averageRideHeightCache,
+                /* valueCalculator */ new Track.TimeRangeValueCalculator<Distance>() {
+            @Override
+            public Distance calculate(TimePoint from, TimePoint to) {
+                Distance result;
+                Distance sum = Distance.NULL;
+                int count = 0;
+                for (final BravoFix fix : getFixes(from, true, to, true)) {
+                    final Distance rideHeight = fix.getRideHeight();
+                    if (rideHeight != null) {
+                        sum = sum.add(rideHeight);
+                        count++;
+                    }
                 }
+                if (count > 0) {
+                    result = sum.scale(1./count);
+                } else {
+                    result = null;
+                }
+                return result;
             }
-            if (count > 0) {
-                result = sum.scale(1./count);
-            } else {
-                result = null;
-            }
-        } finally {
-            unlockAfterRead();
-        }
-        return result;
+        });
     }
     
     private boolean isFoiling(BravoFix fix) {
