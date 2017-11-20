@@ -4,9 +4,12 @@ import java.util.Date;
 
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
 
 public class DateInput extends Composite implements DateTimeInput {
 
@@ -19,6 +22,7 @@ public class DateInput extends Composite implements DateTimeInput {
             this.delegate = input;
         } else {
             final DateBox input = new DateBox();
+            input.setFormat(new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM)));
             initWidget(input);
             this.delegate = input;
         }
