@@ -51,7 +51,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.impl.DistanceCache;
+import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl;
@@ -442,7 +442,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledBackwardsQuery() {
         final Set<com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Distance>> cacheEntries = new HashSet<>();
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<Distance>("test-DistanceCache") {
             @Override
             public void cache(TimePoint from, TimePoint to, Distance distance) {
                 super.cache(from, to, distance);
@@ -453,7 +453,7 @@ public class TrackTest {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };
@@ -779,7 +779,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledOnSmoothenedTrackThenAddingOutlier() {
         final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<Distance>("test-DistanceCache") {
             @Override
             public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
                 super.invalidateAllAtOrLaterThan(timePoint);
@@ -789,7 +789,7 @@ public class TrackTest {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };
@@ -955,11 +955,11 @@ public class TrackTest {
         final Duration raceDuration = Duration.ONE_HOUR.times(48);
         final Speed speed = new KnotSpeedImpl(12);
         final Distance distancePerSample = speed.travel(fixTime, fixTime.plus(samplingInterval));
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache");
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<>("test-DistanceCache");
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };
@@ -980,13 +980,13 @@ public class TrackTest {
                 queryTime = queryTime.plus(queryInterval);
             }
         }
-        assertTrue(distanceCache.size() <= DistanceCache.MAX_SIZE);
+        assertTrue(distanceCache.size() <= TimeRangeCache.MAX_SIZE);
     }
     
     @Test
     public void testDistanceCacheAccessForPartialStrip() {
         final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<Distance>("test-DistanceCache") {
             @Override
             public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
                 super.invalidateAllAtOrLaterThan(timePoint);
@@ -996,7 +996,7 @@ public class TrackTest {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };

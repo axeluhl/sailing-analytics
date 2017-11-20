@@ -116,7 +116,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
      * Once the {@link #getDistanceTraveled(TimePoint, TimePoint)} has computed its value, it adds the result to the
      * cache.
      */
-    private transient DistanceCache distanceCache;
+    private transient TimeRangeCache<Distance> distanceCache;
     
     private transient MaxSpeedCache<ItemType, FixType> maxSpeedCache;
     
@@ -155,7 +155,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new TrackListenerCollection<ItemType, FixType, GPSTrackListener<ItemType,FixType>>();
-        this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
+        this.distanceCache = new TimeRangeCache<>(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = createMaxSpeedCache();
         this.validityCachingSuspended = false;
         this.losslessCompaction = losslessCompaction;
@@ -190,7 +190,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        distanceCache = new DistanceCache(getTrackedItem().toString());
+        distanceCache = new TimeRangeCache<>(getTrackedItem().toString());
         maxSpeedCache = createMaxSpeedCache();
     }
     
@@ -1065,7 +1065,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         }
     }
 
-    protected DistanceCache getDistanceCache() {
+    protected TimeRangeCache<Distance> getDistanceCache() {
         return distanceCache;
     }
 
