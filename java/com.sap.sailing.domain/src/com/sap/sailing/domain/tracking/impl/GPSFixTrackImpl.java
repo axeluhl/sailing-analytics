@@ -518,7 +518,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
             lockForRead();
             try {
                 Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache()
-                        .getEarliestFromAndDistanceAtOrAfterFrom(from, to);
+                        .getEarliestFromAndResultAtOrAfterFrom(from, to);
                 if (bestCacheEntry != null) {
                     perfectCacheHit = true; // potentially a cache hit; but if it doesn't span the full interval, it's not perfect; see below
                     // compute the missing stretches between best cache entry's "from" and our "from" and the cache

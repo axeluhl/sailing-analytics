@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -29,7 +28,7 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * 
  * <b>Invalidation</b>: When a new fix is added to the track, all cache entries for fixes at or later than the new fix's
  * time point are removed from this cache. Additionally, the fix insertion may have an impact on the
- * {@link #getEarliestFromAndDistanceAtOrAfterFrom(TimePoint, TimePoint) previous fix's} validity (track smoothing) and
+ * {@link #getEarliestFromAndResultAtOrAfterFrom(TimePoint, TimePoint) previous fix's} validity (track smoothing) and
  * therefore on its selection for result aggregation. Therefore, if fix addition turned the previous fix invalid, the
  * cache entries for the time points at or after the previous fix also need to be removed.
  * <p>
@@ -45,34 +44,35 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * <p>
  * 
  * If a cache entry for <code>to</code> is not found, the latest cache entry before it is looked up. If one is found,
- * the distance between the <code>to</code> time point requested and the <code>to</code> time point found in the cache
- * is computed by iterating the smoothened fixes for this interval. If none is found, the distance is computed by
- * iterating backwards all the way to <code>from</code>.
+ * the result for the time range between the <code>to</code> time point requested and the <code>to</code> time point
+ * found in the cache is computed by iterating the smoothened fixes for this interval. If none is found, the result is
+ * computed by iterating backwards all the way to <code>from</code>.
  * <p>
  * 
- * Once the {@link #getDistanceTraveled(TimePoint, TimePoint)} has computed its value, it adds the result to the cache.
+ * Once the calculating method has computed its value, it should {@link #cache(TimePoint, TimePoint, Object) add} the
+ * result to the cache.
  * 
  * @author Axel Uhl (D043530)
  */
 public class TimeRangeCache<T> {
     public static final int MAX_SIZE = 100;
     
-    private final NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>> distanceCache;
+    private final NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>> timeRangeCache;
     
     /**
      * The cache is to have limited size. Eviction shall happen based on a least-recently-used strategy. Usage is
-     * defined as having been returned by {@link #getEarliestFromAndDistanceAtOrAfterFrom(TimePoint, TimePoint)} or
-     * having been added by {@link #cache(TimePoint, TimePoint, Distance)}.
+     * defined as having been returned by {@link #getEarliestFromAndResultAtOrAfterFrom(TimePoint, TimePoint)} or
+     * having been added by {@link #cache(TimePoint, TimePoint, Object)}.
      * <p>
      * 
      * When an eldest entry is asked to be expunged from this map and the map has more than {@link #MAX_SIZE} elements,
-     * the expunging will be admitted, and the entry is removed from the {@link #distanceCache} core structure. Reading
+     * the expunging will be admitted, and the entry is removed from the {@link #timeRangeCache} core structure. Reading
      * and writing this structure must happen under the {@link #lock write lock} because also reading the linked hash
      * map that counts access as "use" has a modifying effect on its internal structures.
      * <p>
      * 
      * The key pairs are from/to pairs. Note that this is in some sense "the opposite direction" compared to the
-     * alignment of the {@link #distanceCache} structure which has as its outer keys the "to" time point.<p>
+     * alignment of the {@link #timeRangeCache} structure which has as its outer keys the "to" time point.<p>
      * 
      * Read access is to be <code>synchronized<code> using this field's mutex; write access only happens under the
      * {@link #lock write lock} and therefore will have no contenders.
@@ -89,8 +89,8 @@ public class TimeRangeCache<T> {
     };
 
     public TimeRangeCache(String nameForLockLogging) {
-        lock = new NamedReentrantReadWriteLock("lock for DistanceCache for "+nameForLockLogging, /* fair */ true);
-        this.distanceCache = new ArrayListNavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>>(timePointInPairComparator);
+        lock = new NamedReentrantReadWriteLock("lock for TimeRangeCache for "+nameForLockLogging, /* fair */ true);
+        this.timeRangeCache = new ArrayListNavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>>(timePointInPairComparator);
         this.lruCache = new LinkedHashMap<Util.Pair<TimePoint, TimePoint>, Void>(/* initial capacity */ 10, /* load factor */ 0.75f,
                 /* access-based ordering */ true) {
             private static final long serialVersionUID = -6568235517111733193L;
@@ -112,13 +112,13 @@ public class TimeRangeCache<T> {
     
     private void removeCacheEntry(TimePoint from, TimePoint to) {
         assert lock.getWriteHoldCount() == 1; // we can be sure we are alone here; this only happens when adding a new entry, holding the write lock
-        Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> entryForTo = distanceCache.floor(createDummy(to));
+        Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> entryForTo = timeRangeCache.floor(createDummy(to));
         if (entryForTo.getA().equals(to)) {
             Pair<TimePoint, T> entryForFrom = entryForTo.getB().ceiling(new Util.Pair<TimePoint, T>(from, null));
             if (entryForFrom.getA().equals(from)) {
                 entryForTo.getB().remove(entryForFrom);
                 if (entryForTo.getB().isEmpty()) {
-                    distanceCache.remove(entryForTo);
+                    timeRangeCache.remove(entryForTo);
                 }
             }
         }
@@ -126,15 +126,15 @@ public class TimeRangeCache<T> {
     
     /**
      * Looks up the entry closest to but no later than <code>to</code>. If not found, <code>null</code> is returned. If
-     * found, the earliest pair of from/distance that is at or after <code>from</code> will be returned, together with
+     * found, the earliest pair of from/result that is at or after <code>from</code> will be returned, together with
      * the <code>to</code> value of the entry. If there is no entry that is at or after <code>from</code>,
      * <code>null</code> is returned.
      */
-    public Util.Pair<TimePoint, Util.Pair<TimePoint, T>> getEarliestFromAndDistanceAtOrAfterFrom(TimePoint from, TimePoint to) {
+    public Util.Pair<TimePoint, Util.Pair<TimePoint, T>> getEarliestFromAndResultAtOrAfterFrom(TimePoint from, TimePoint to) {
         LockUtil.lockForRead(lock);
         try {
             Util.Pair<TimePoint, Util.Pair<TimePoint, T>> result = null;
-            Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> entryForTo = distanceCache.floor(createDummy(to));
+            Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> entryForTo = timeRangeCache.floor(createDummy(to));
             if (entryForTo != null) {
                 final Util.Pair<TimePoint, T> fromCeiling = entryForTo.getB().ceiling(new Util.Pair<TimePoint, T>(from, null));
                 if (fromCeiling != null) {
@@ -160,12 +160,12 @@ public class TimeRangeCache<T> {
         LockUtil.lockForWrite(lock);
         try {
             Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> dummy = createDummy(timePoint);
-            NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>> toRemove = distanceCache.tailSet(dummy, /* inclusive */ true);
+            NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>> toRemove = timeRangeCache.tailSet(dummy, /* inclusive */ true);
             for (Iterator<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>> i=toRemove.iterator(); i.hasNext(); ) {
                 Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> entryToRemove = i.next();
                 assert entryToRemove.getA().compareTo(timePoint) >= 0;
-                for (Pair<TimePoint, T> fromAndDistance : entryToRemove.getB()) {
-                    lruCache.remove(new Util.Pair<>(fromAndDistance.getA(), entryToRemove.getA()));
+                for (Pair<TimePoint, T> fromAndResult : entryToRemove.getB()) {
+                    lruCache.remove(new Util.Pair<>(fromAndResult.getA(), entryToRemove.getA()));
                 }
                 i.remove();
             }
@@ -177,14 +177,14 @@ public class TimeRangeCache<T> {
     private NavigableSet<Util.Pair<TimePoint, T>> getEntryForTo(TimePoint to) {
         NavigableSet<Util.Pair<TimePoint, T>> result = null;
         Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> dummyForTo = createDummy(to);
-        Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> entryForTo = distanceCache.floor(dummyForTo);
+        Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> entryForTo = timeRangeCache.floor(dummyForTo);
         if (entryForTo != null && entryForTo.getA().equals(to)) {
             result = entryForTo.getB();
         }
         return result;
     }
     
-    public void cache(TimePoint from, TimePoint to, T distance) {
+    public void cache(TimePoint from, TimePoint to, T result) {
         LockUtil.lockForWrite(lock);
         try {
             NavigableSet<Util.Pair<TimePoint, T>> entryForTo = getEntryForTo(to);
@@ -192,9 +192,9 @@ public class TimeRangeCache<T> {
                 entryForTo = new ArrayListNavigableSet<Util.Pair<TimePoint, T>>(timePointInPairComparator);
                 Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>> pairForTo = new Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, T>>>(
                         to, entryForTo);
-                distanceCache.add(pairForTo);
+                timeRangeCache.add(pairForTo);
             }
-            entryForTo.add(new Util.Pair<TimePoint, T>(from, distance));
+            entryForTo.add(new Util.Pair<TimePoint, T>(from, result));
             lruCache.put(new Util.Pair<TimePoint, TimePoint>(from, to), null);
         } finally {
             LockUtil.unlockAfterWrite(lock);
@@ -211,7 +211,7 @@ public class TimeRangeCache<T> {
     public void clear() {
         LockUtil.lockForWrite(lock);
         try {
-            distanceCache.clear();
+            timeRangeCache.clear();
             lruCache.clear();
         } finally {
             LockUtil.unlockAfterWrite(lock);
