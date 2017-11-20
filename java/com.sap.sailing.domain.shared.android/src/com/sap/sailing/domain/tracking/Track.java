@@ -48,7 +48,9 @@ public interface Track<FixType extends Timed> extends Serializable {
     
     static interface TimeRangeValueCalculator<T> {
         /**
-         * Calculates a value for fixes across a time range
+         * Calculates a value for fixes across a time range. When the method is called,
+         * a read lock will previously have been {@link Track#lockForRead obtained} before,
+         * so an implementing class does not need to worry about acquiring the lock.
          */
         T calculate(TimePoint from, TimePoint to);
     }

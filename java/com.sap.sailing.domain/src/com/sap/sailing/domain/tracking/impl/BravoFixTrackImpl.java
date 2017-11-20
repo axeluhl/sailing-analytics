@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -31,6 +32,10 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private static final long serialVersionUID = 460944392510182976L;
     
     private final boolean hasExtendedFixes;
+    
+    private final TimeRangeCache<Duration> foilingTimeCache;
+    
+    private final TimeRangeCache<Distance> foilingDistanceCache;
 
     /**
      * @param trackedItem
@@ -41,6 +46,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     public BravoFixTrackImpl(ItemType trackedItem, String trackName, boolean hasExtendedFixes) {
         super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
         this.hasExtendedFixes = hasExtendedFixes;
+        this.foilingTimeCache = new TimeRangeCache<>("foilingTimeCache for "+trackedItem);
+        this.foilingDistanceCache = new TimeRangeCache<>("foilingDistanceCache for "+trackedItem);
     }
 
     @Override
@@ -98,44 +105,46 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Duration getTimeSpentFoiling(TimePoint from, TimePoint to) {
-        Duration result = Duration.NULL;
-        lockForRead();
-        try {
-            TimePoint last = from;
-            boolean isFoiling = false;
-            for (final BravoFix fix : getFixes(from, true, to, true)) {
-                final boolean fixFoils = isFoiling(fix);
-                if (isFoiling && fixFoils) {
-                    result = result.plus(last.until(fix.getTimePoint()));
+        return getValueSum(from, to, /* nullElement */ Duration.NULL, Duration::plus, foilingTimeCache,
+                /* valueCalculator */ new Track.TimeRangeValueCalculator<Duration>() {
+            @Override
+            public Duration calculate(TimePoint from, TimePoint to) {
+                Duration result = Duration.NULL;
+                TimePoint last = from;
+                boolean isFoiling = false;
+                for (final BravoFix fix : getFixes(from, true, to, true)) {
+                    final boolean fixFoils = isFoiling(fix);
+                    if (isFoiling && fixFoils) {
+                        result = result.plus(last.until(fix.getTimePoint()));
+                    }
+                    last = fix.getTimePoint();
+                    isFoiling = fixFoils;
                 }
-                last = fix.getTimePoint();
-                isFoiling = fixFoils;
+                return result;
             }
-        } finally {
-            unlockAfterRead();
-        }
-        return result;
+        });
     }
 
     @Override
     public Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint from, TimePoint to) {
-        Distance result = Distance.NULL;
-        lockForRead();
-        try {
-            TimePoint last = from;
-            boolean isFoiling = false;
-            for (final BravoFix fix : getFixes(from, true, to, true)) {
-                final boolean fixFoils = isFoiling(fix);
-                if (isFoiling && fixFoils) {
-                    result = result.add(gpsFixTrack.getDistanceTraveled(last, fix.getTimePoint()));
+        return getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, foilingDistanceCache,
+                /* valueCalculator */ new Track.TimeRangeValueCalculator<Distance>() {
+            @Override
+            public Distance calculate(TimePoint from, TimePoint to) {
+                Distance result = Distance.NULL;
+                TimePoint last = from;
+                boolean isFoiling = false;
+                for (final BravoFix fix : getFixes(from, true, to, true)) {
+                    final boolean fixFoils = isFoiling(fix);
+                    if (isFoiling && fixFoils) {
+                        result = result.add(gpsFixTrack.getDistanceTraveled(last, fix.getTimePoint()));
+                    }
+                    last = fix.getTimePoint();
+                    isFoiling = fixFoils;
                 }
-                last = fix.getTimePoint();
-                isFoiling = fixFoils;
+                return result;
             }
-        } finally {
-            unlockAfterRead();
-        }
-        return result;
+        });
     }
 
     @Override
