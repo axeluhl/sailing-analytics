@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -642,8 +643,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         row.totalTimeSailedReachingInSeconds = totalTimeSailedReaching==null?null:totalTimeSailedReaching.asSeconds();
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         row.totalTimeSailedInSeconds = totalTimeSailed==null?null:totalTimeSailed.asSeconds();
-        final Distance totalDistanceTraveledInMeters = this.getTotalDistanceTraveled(competitor, timePoint);
-        row.totalDistanceTraveledInMeters = totalDistanceTraveledInMeters==null?null:totalDistanceTraveledInMeters.getMeters();
+        final Distance totalDistanceTraveled = this.getTotalDistanceTraveled(competitor, timePoint);
+        row.totalDistanceTraveledInMeters = totalDistanceTraveled==null?null:totalDistanceTraveled.getMeters();
+        final Distance totalDistanceFoiled = this.getTotalDistanceFoiled(competitor, timePoint);
+        row.totalDistanceFoiledInMeters = totalDistanceFoiled==null?null:totalDistanceFoiled.getMeters();
+        final Duration totalDurationFoiled = this.getTotalDurationFoiled(competitor, timePoint);
+        row.totalDurationFoiledInSeconds = totalDurationFoiled==null?null:totalDurationFoiled.asSeconds();
     }
 
     private LeaderboardDTOCache getLeaderboardDTOCache() {
@@ -1088,18 +1093,37 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     @Override
     public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
-        Distance result = null;
+        return getTotals(competitor, timePoint, Distance::add, TrackedRace::getDistanceTraveled);
+    }
+    
+    @Override
+    public Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return getTotals(competitor, timePoint, Distance::add, TrackedRace::getDistanceFoiled);
+    }
+    
+    @Override
+    public Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return getTotals(competitor, timePoint, Duration::plus, TrackedRace::getDurationFoiled);
+    }
+    
+    @FunctionalInterface
+    private static interface ValueFromRaceGetter<T> {
+        T get(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint);
+    }
+    
+    private <T> T getTotals(Competitor competitor, TimePoint timePoint, BiFunction<T, T, T> adder, ValueFromRaceGetter<T> valueGetter) {
+        T result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             TimePoint startOfRace;
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor) &&
                     (startOfRace=trackedRace.getStartOfRace()) != null &&
                     !startOfRace.after(timePoint)) {
-                Distance distanceSailedInRace = trackedRace.getDistanceTraveled(competitor, timePoint);
+                T distanceSailedInRace = valueGetter.get(trackedRace, competitor, timePoint);
                 if (distanceSailedInRace != null) {
                     if (result == null) {
                         result = distanceSailedInRace;
                     } else {
-                        result = result.add(distanceSailedInRace);
+                        result = adder.apply(result, distanceSailedInRace);
                     }
                 } else {
                     // if competitor has not finished one single race in the whole

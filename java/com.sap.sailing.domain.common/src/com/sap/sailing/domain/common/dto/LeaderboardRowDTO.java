@@ -26,6 +26,8 @@ public class LeaderboardRowDTO implements Serializable {
     public Double totalTimeSailedUpwindInSeconds;
     public Double totalTimeSailedReachingInSeconds;
     public Double totalDistanceTraveledInMeters;
+    public Double totalDurationFoiledInSeconds;
+    public Double totalDistanceFoiledInMeters;
     
     @Override
     public int hashCode() {
@@ -38,6 +40,10 @@ public class LeaderboardRowDTO implements Serializable {
                 + ((maximumSpeedOverGroundInKnots == null) ? 0 : maximumSpeedOverGroundInKnots.hashCode());
         result = prime * result
                 + ((totalDistanceTraveledInMeters == null) ? 0 : totalDistanceTraveledInMeters.hashCode());
+        result = prime * result
+                + ((totalDurationFoiledInSeconds == null) ? 0 : totalDurationFoiledInSeconds.hashCode());
+        result = prime * result
+                + ((totalDistanceFoiledInMeters == null) ? 0 : totalDistanceFoiledInMeters.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
         result = prime * result
                 + ((totalTimeSailedDownwindInSeconds == null) ? 0 : totalTimeSailedDownwindInSeconds.hashCode());
@@ -86,6 +92,16 @@ public class LeaderboardRowDTO implements Serializable {
             if (other.totalDistanceTraveledInMeters != null)
                 return false;
         } else if (!totalDistanceTraveledInMeters.equals(other.totalDistanceTraveledInMeters))
+            return false;
+        if (totalDurationFoiledInSeconds == null) {
+            if (other.totalDurationFoiledInSeconds != null)
+                return false;
+        } else if (!totalDurationFoiledInSeconds.equals(other.totalDurationFoiledInSeconds))
+            return false;
+        if (totalDistanceFoiledInMeters == null) {
+            if (other.totalDistanceFoiledInMeters != null)
+                return false;
+        } else if (!totalDistanceFoiledInMeters.equals(other.totalDistanceFoiledInMeters))
             return false;
         if (netPoints == null) {
             if (other.netPoints != null)

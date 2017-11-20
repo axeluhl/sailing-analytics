@@ -42,7 +42,7 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageRideHeightInMeters();
         case CURRENT_DISTANCE_FOILED_IN_METERS:
             return stringMessages.currentDistanceFoiledInMeters();
-        case CURRENT_DURATION_FOILED:
+        case CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiled();
         case CURRENT_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
@@ -50,7 +50,7 @@ public class DetailTypeFormatter {
             return stringMessages.currentPitchInDegree();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMeters();
-        case RACE_CURRENT_DURATION_FOILED:
+        case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiled();
         case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
             return stringMessages.currentDistanceFoiledInMeters();
@@ -306,8 +306,8 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
         case TIME_TRAVELED:
-        case CURRENT_DURATION_FOILED:
-        case RACE_CURRENT_DURATION_FOILED:
+        case CURRENT_DURATION_FOILED_IN_SECONDS:
+        case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.hhmmssUnit();
 
         // Cases for detail types without unit, so that an empty string is returned.
@@ -399,11 +399,11 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageRideHeightInMetersTooltip();
         case CURRENT_DISTANCE_FOILED_IN_METERS:
             return stringMessages.currentDistanceFoiledInMetersTooltip();
-        case CURRENT_DURATION_FOILED:
+        case CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiledTooltip();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMetersTooltip();
-        case RACE_CURRENT_DURATION_FOILED:
+        case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiledTooltip();
         case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
             return stringMessages.currentDistanceFoiledInMetersTooltip();

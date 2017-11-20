@@ -481,6 +481,26 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         leaderboard
      */
     Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Computes the distance the <code>competitor</code> has been foiling in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled any distance in any tracked race in this
+     *         leaderboard
+     */
+    Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * Computes the duration the <code>competitor</code> has foiled in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled at any time in any tracked race in this
+     *         leaderboard
+     */
+    Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint);
     
     /**
      * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded

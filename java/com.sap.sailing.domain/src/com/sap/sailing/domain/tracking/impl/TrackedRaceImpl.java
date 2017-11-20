@@ -1211,6 +1211,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return getDistanceTraveled(competitor, timePoint, /* consider gate start */ false);
     }
     
+    // TODO bug 3762: add getDistanceFoiled and getDurationFoiled as a factored copy of getDistanceTraveled, using the BravoFixTrack logic
+    
     private Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint, boolean considerGateStart) {
         final Distance result;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
