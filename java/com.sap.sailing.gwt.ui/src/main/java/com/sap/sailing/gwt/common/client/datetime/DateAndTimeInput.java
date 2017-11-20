@@ -8,35 +8,16 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 
-public class DateAndTimeInput extends Composite implements DateTimeInput {
-
-    private final DateTimeInput delegate;
+public class DateAndTimeInput extends AbstractInput {
 
     public DateAndTimeInput(Accuracy accuracy) {
-        this.delegate = DateTimeInputType.DATETIME_LOCAL.isSupported() ? NativeDateTimeInput.datetimeLocale(accuracy)
-                : new DateAndTimePanel(accuracy);
-        initWidget(delegate.asWidget());
+        super(DateTimeInputType.DATETIME_LOCAL.isSupported() ? NativeDateTimeInput.datetimeLocale(accuracy)
+                : new DateAndTimePanel(accuracy));
     }
 
-    @Override
-    public Date getValue() {
-        return delegate.getValue();
-    }
-
-    @Override
-    public void setValue(Date value) {
-        this.delegate.setValue(value);
-    }
-
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Date> handler) {
-        return delegate.addValueChangeHandler(handler);
-    }
-
-    private class DateAndTimePanel extends FlowPanel implements DateTimeInput {
+    private static class DateAndTimePanel extends FlowPanel implements DateTimeInput {
         private final DateInput dateInput;
         private final TimeInput timeInput;
 

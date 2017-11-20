@@ -1,0 +1,35 @@
+package com.sap.sailing.gwt.common.client.datetime;
+
+import java.util.Date;
+
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.IsWidget;
+
+abstract class AbstractInput extends Composite implements DateTimeInput {
+
+    private HasValue<Date> delegate;
+
+    protected <T extends HasValue<Date> & IsWidget> AbstractInput(T delegate) {
+        this.delegate = delegate;
+        initWidget(delegate.asWidget());
+    }
+
+    @Override
+    public final Date getValue() {
+        return delegate.getValue();
+    }
+
+    @Override
+    public final void setValue(Date value) {
+        this.delegate.setValue(value);
+    }
+
+    @Override
+    public final HandlerRegistration addValueChangeHandler(ValueChangeHandler<Date> handler) {
+        return delegate.addValueChangeHandler(handler);
+    }
+
+}
