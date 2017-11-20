@@ -8,7 +8,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableDistance;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
@@ -53,13 +52,13 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     @Override
     public Bearing getHeel(TimePoint timePoint) {
         return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getHeel,
-                ScalableBearing::new);
+                NaivelyScalableBearing::new);
     }
 
     @Override
     public Bearing getPitch(TimePoint timePoint) {
         return getValueFromExtendedFixSkippingNullValues(timePoint, BravoFix::getPitch,
-                ScalableBearing::new);
+                NaivelyScalableBearing::new);
     }
     
     @Override

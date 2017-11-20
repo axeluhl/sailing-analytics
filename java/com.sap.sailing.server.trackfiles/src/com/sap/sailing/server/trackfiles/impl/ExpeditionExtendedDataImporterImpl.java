@@ -39,7 +39,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Importer for CSV data files from Bravo units used by the SAP Extreme Sailing Team.
+ * Importer for CSV data files from Expedition log files, as used, e.g., by Team Phoenix.
  */
 public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixImporter implements DoubleVectorFixImporter {
     public static final String EXPEDITION_EXTENDED_TYPE = "EXPEDITION_EXTENDED";

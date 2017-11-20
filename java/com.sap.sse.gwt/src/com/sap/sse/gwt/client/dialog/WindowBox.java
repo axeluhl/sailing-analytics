@@ -160,13 +160,9 @@ public class WindowBox extends DialogBox {
     public WindowBox(String title, String titleTooltip, Widget content, PopoutHandler popoutHandler) {
         super(false, false);
         WindowBoxResources.INSTANCE.windowBoxCss().ensureInjected();
-
         this.popoutHandler = popoutHandler;
-
         this.setStyleName("gwt-extras-WindowBox", true);
-
         this.container = new FlowPanel();
-
         this.close = new Anchor();
         this.close.setStyleName("gwt-extras-dialog-close");
         this.close.addClickHandler(new ClickHandler() {
@@ -174,7 +170,6 @@ public class WindowBox extends DialogBox {
                 onCloseClick(event);
             }
         });
-
         this.minimize = new Anchor();
         this.minimize.setStyleName("gwt-extras-dialog-minimize");
         this.minimize.addClickHandler(new ClickHandler() {
@@ -182,7 +177,6 @@ public class WindowBox extends DialogBox {
                 onPopoutClick(event);
             }
         });
-
         Grid ctrlGrid = null;
         if (popoutHandler != null) {
             ctrlGrid = new Grid(1, 2);
@@ -192,16 +186,13 @@ public class WindowBox extends DialogBox {
             ctrlGrid = new Grid(1, 1);
             ctrlGrid.setWidget(0, 0, this.close);
         }
-
         this.controlsPanel = new FlowPanel();
         this.controlsPanel.setStyleName("gwt-extras-dialog-controls");
         this.controlsPanel.add(ctrlGrid);
         this.dragMode = -1;
-        
         setTitle(titleTooltip);
         setText(title);
         setWidget(content);
-
     }
 
     /**
@@ -226,13 +217,12 @@ public class WindowBox extends DialogBox {
      */
     protected void updateCursor(int dragMode) {
         updateCursor(dragMode, this.getElement());
-
         com.google.gwt.dom.client.Element top = this.getCellElement(0, 1);
         updateCursor(dragMode, top);
-
         top = Element.as(top.getFirstChild());
-        if (top != null)
+        if (top != null) {
             updateCursor(dragMode, top);
+        }
     }
 
     /*
@@ -242,7 +232,6 @@ public class WindowBox extends DialogBox {
      */
     @Override
     public void onBrowserEvent(Event event) {
-
         // If we're not yet dragging, only trigger mouse events if the event occurs
         // in the caption wrapper
         switch (event.getTypeInt()) {
@@ -251,7 +240,6 @@ public class WindowBox extends DialogBox {
         case Event.ONMOUSEMOVE:
         case Event.ONMOUSEOVER:
         case Event.ONMOUSEOUT:
-
             if (this.dragMode >= 0 || calcDragMode(event.getClientX(), event.getClientY()) >= 0) {
                 // paste'n'copy from Widget.onBrowserEvent
                 switch (DOM.eventGetType(event)) {
@@ -270,10 +258,10 @@ public class WindowBox extends DialogBox {
                 DomEvent.fireNativeEvent(event, this, this.getElement());
                 return;
             }
-            if (this.dragMode < 0)
+            if (this.dragMode < 0) {
                 this.updateCursor(this.dragMode);
+            }
         }
-
         super.onBrowserEvent(event);
     }
 
@@ -309,30 +297,24 @@ public class WindowBox extends DialogBox {
      *         information)
      */
     protected int calcDragMode(int clientX, int clientY) {
-
         int tolerance = 5;
-
         com.google.gwt.dom.client.Element resize = this.getCellElement(2, 2).getParentElement();
         int xr = this.getRelX(resize, clientX);
         int yr = this.getRelY(resize, clientY);
-
         int w = resize.getClientWidth();
         int h = resize.getClientHeight();
-
-        if ((xr >= 0 && xr <= w && yr >= -tolerance && yr <= h) || (yr >= 0 && yr <= h && xr >= -tolerance && xr <= w))
+        if ((xr >= 0 && xr <= w && yr >= -tolerance && yr <= h) || (yr >= 0 && yr <= h && xr >= -tolerance && xr <= w)) {
             return 8;
-
+        }
         resize = this.getCellElement(2, 0).getParentElement();
         xr = this.getRelX(resize, clientX);
         yr = this.getRelY(resize, clientY);
-
         w = resize.getClientWidth();
         h = resize.getClientHeight();
-
         if ((xr >= 0 && xr <= w && yr >= -tolerance && yr <= h)
-                || (yr >= 0 && yr <= h && xr >= 0 && xr <= w + tolerance))
+                || (yr >= 0 && yr <= h && xr >= 0 && xr <= w + tolerance)) {
             return 6;
-
+        }
         /*
          * resize = this.getCellElement(0, 2).getParentElement(); xr = this.getRelX(resize, clientX); yr =
          * this.getRelY(resize, clientY);
@@ -385,9 +367,9 @@ public class WindowBox extends DialogBox {
         w = resize.getClientWidth();
         h = resize.getClientHeight();
 
-        if (xr >= 0 && xr <= w)
+        if (xr >= 0 && xr <= w) {
             return 5;
-
+        }
         return -1;
     }
 
@@ -401,13 +383,10 @@ public class WindowBox extends DialogBox {
     protected void dragResizeWidget(PopupPanel panel, int dx, int dy) {
         int x = this.getPopupLeft();
         int y = this.getPopupTop();
-
         Widget widget = panel.getWidget();
-
         // left + right
         if ((this.dragMode % 3) != 1) {
             int w = widget.getOffsetWidth();
-
             // left edge -> move left
             if ((this.dragMode % 3) == 0) {
                 x += dx;
@@ -415,16 +394,12 @@ public class WindowBox extends DialogBox {
             } else {
                 w += dx;
             }
-
             w = w < this.minWidth ? this.minWidth : w;
-
             widget.setWidth(w + "px");
         }
-
         // up + down
         if ((this.dragMode / 3) != 1) {
             int h = widget.getOffsetHeight();
-
             // up = dy is negative
             if ((this.dragMode / 3) == 0) {
                 y += dy;
@@ -432,14 +407,12 @@ public class WindowBox extends DialogBox {
             } else {
                 h += dy;
             }
-
             h = h < this.minHeight ? this.minHeight : h;
-
             widget.setHeight(h + "px");
         }
-
-        if (this.dragMode / 3 == 0 || this.dragMode % 3 == 0)
+        if (this.dragMode / 3 == 0 || this.dragMode % 3 == 0) {
             panel.setPopupPosition(x, y);
+        }
     }
 
     /*
@@ -449,20 +422,13 @@ public class WindowBox extends DialogBox {
      */
     @Override
     protected void beginDragging(MouseDownEvent event) {
-        int dm = -1;
-
-            dm = this.calcDragMode(event.getClientX(), event.getClientY());
-
+        int dm = this.calcDragMode(event.getClientX(), event.getClientY());
         if (dm >= 0) {
             this.dragMode = dm;
-
             DOM.setCapture(getElement());
-
             this.dragX = event.getClientX();
             this.dragY = event.getClientY();
-
             updateCursor(dm, RootPanel.get().getElement());
-
         } else {
             super.beginDragging(event);
         }
@@ -477,18 +443,15 @@ public class WindowBox extends DialogBox {
     protected void continueDragging(MouseMoveEvent event) {
         if (this.dragMode >= 0) {
             this.updateCursor(this.dragMode);
-
             int dx = event.getClientX() - this.dragX;
             int dy = event.getClientY() - this.dragY;
-
             this.dragX = event.getClientX();
             this.dragY = event.getClientY();
-
             dragResizeWidget(this, dx, dy);
         } else {
             // this updates the cursor when dragging is NOT activated
-                int dm = calcDragMode(event.getClientX(), event.getClientY());
-                this.updateCursor(dm);
+            int dm = calcDragMode(event.getClientX(), event.getClientY());
+            this.updateCursor(dm);
             super.continueDragging(event);
         }
     }
@@ -501,16 +464,14 @@ public class WindowBox extends DialogBox {
      */
     @Override
     protected void onPreviewNativeEvent(NativePreviewEvent event) {
-            // We need to preventDefault() on mouseDown events (outside of the
-            // DialogBox content) to keep text from being selected when it
-            // is dragged.
-            NativeEvent nativeEvent = event.getNativeEvent();
-
-            if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN)
-                    && calcDragMode(nativeEvent.getClientX(), nativeEvent.getClientY()) >= 0) {
-                nativeEvent.preventDefault();
-            }
-
+        // We need to preventDefault() on mouseDown events (outside of the
+        // DialogBox content) to keep text from being selected when it
+        // is dragged.
+        NativeEvent nativeEvent = event.getNativeEvent();
+        if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN)
+                && calcDragMode(nativeEvent.getClientX(), nativeEvent.getClientY()) >= 0) {
+            nativeEvent.preventDefault();
+        }
         super.onPreviewNativeEvent(event);
     }
 
@@ -523,10 +484,8 @@ public class WindowBox extends DialogBox {
     protected void endDragging(MouseUpEvent event) {
         if (this.dragMode >= 0) {
             DOM.releaseCapture(getElement());
-
             this.dragX = event.getClientX() - this.dragX;
             this.dragY = event.getClientY() - this.dragY;
-
             this.dragMode = -1;
             this.updateCursor(this.dragMode);
             RootPanel.get().getElement().getStyle().setCursor(Cursor.AUTO);
@@ -552,7 +511,6 @@ public class WindowBox extends DialogBox {
             this.container.remove(1);
         }
         this.container.add(widget);
-
         // add the new widget
         // this.content.add(widget);
     }
@@ -564,10 +522,11 @@ public class WindowBox extends DialogBox {
      */
     @Override
     public Widget getWidget() {
-        if (this.container.getWidgetCount() > 1)
+        if (this.container.getWidgetCount() > 1) {
             return this.container.getWidget(1);
-        else
+        } else {
             return null;
+        }
     }
 
     /*
