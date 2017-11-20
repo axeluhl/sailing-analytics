@@ -36,6 +36,7 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
         this.input = Document.get().createElement(InputElement.TAG).cast();
         this.input.setAttribute(ATTR_TYPE, inputType.getType());
         this.input.setAttribute(ATTR_STEP, step);
+        this.input.addClassName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
         this.format = format;
         setElement(input);
         sinkEvents(Event.ONCHANGE | Event.ONBLUR | Event.ONKEYUP);

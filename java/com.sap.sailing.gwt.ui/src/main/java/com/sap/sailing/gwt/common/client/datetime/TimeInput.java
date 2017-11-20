@@ -21,6 +21,7 @@ public class TimeInput extends AbstractInput {
 
         private TimeBox(TimeConverter converter) {
             super(Document.get().createElement(InputElement.TAG), converter, converter);
+            addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
         }
 
     }

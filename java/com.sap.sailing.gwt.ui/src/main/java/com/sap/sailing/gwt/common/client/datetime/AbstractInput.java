@@ -13,6 +13,7 @@ abstract class AbstractInput extends Composite implements DateTimeInput {
     private HasValue<Date> delegate;
 
     protected <T extends HasValue<Date> & IsWidget> AbstractInput(T delegate) {
+        DateTimeInputResources.INSTANCE.css().ensureInjected();
         this.delegate = delegate;
         initWidget(delegate.asWidget());
     }

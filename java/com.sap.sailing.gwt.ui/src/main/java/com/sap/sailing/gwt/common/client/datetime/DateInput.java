@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.common.client.datetime;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.google.gwt.user.datepicker.client.DatePicker;
 
 public class DateInput extends AbstractInput {
 
@@ -14,7 +13,8 @@ public class DateInput extends AbstractInput {
     private static class CustomDateBox extends DateBox {
 
         private CustomDateBox() {
-            super(new DatePicker(), null, new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM)));
+            setFormat(new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM)));
+            addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
         }
 
     }
