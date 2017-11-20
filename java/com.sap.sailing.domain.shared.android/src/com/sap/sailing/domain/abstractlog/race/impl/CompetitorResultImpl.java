@@ -76,7 +76,7 @@ public class CompetitorResultImpl implements CompetitorResult {
 
     @Override
     public MergeState getMergeState() {
-        return mergeState;
+        return mergeState == null ? MergeState.OK : mergeState; // default in case of having de-serialized an old version
     }
 
     @Override

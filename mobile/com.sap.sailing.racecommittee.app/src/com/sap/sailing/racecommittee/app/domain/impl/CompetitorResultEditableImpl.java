@@ -112,7 +112,7 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
     }
     
     public MergeState getMergeState() {
-        return mMergeState;
+        return mMergeState == null ? MergeState.OK : mMergeState; // default for having de-serialized an old version
     }
 
     public void setMergeState(MergeState mergeState) {
