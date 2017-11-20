@@ -178,18 +178,12 @@ public class SensorFixStoreAndLoadTest {
     public void testLoadAlreadyAddedFixes() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -197,18 +191,12 @@ public class SensorFixStoreAndLoadTest {
     public void testAddFixesWhileTracking() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         addBravoFixes();
-
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -216,18 +204,12 @@ public class SensorFixStoreAndLoadTest {
     public void testNoFixesAreLoadedIfNoStoredFixIsInTimeRange() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(AFTER_LAST_FIX), new MillisecondsTimePoint(END_OF_TRACKING)));
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -235,18 +217,12 @@ public class SensorFixStoreAndLoadTest {
     public void testFixesNotInMappedTimeRangeAreIgnoredWhileTracking() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(AFTER_LAST_FIX), new MillisecondsTimePoint(END_OF_TRACKING)));
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         addBravoFixes();
-
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -254,18 +230,12 @@ public class SensorFixStoreAndLoadTest {
     public void testCompetitorWithoutMappingHasNoTrack() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         assertNull(trackedRace.getSensorTrack(comp2, BravoFixTrack.TRACK_NAME));
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -275,19 +245,13 @@ public class SensorFixStoreAndLoadTest {
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp2,
                 device, new MillisecondsTimePoint(MID_OF_TRACKING + 1), new MillisecondsTimePoint(END_OF_TRACKING)));
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp2, BravoFixTrack.TRACK_NAME), 1);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -297,18 +261,12 @@ public class SensorFixStoreAndLoadTest {
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(MID_OF_TRACKING + 1), new MillisecondsTimePoint(END_OF_TRACKING)));
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -319,18 +277,12 @@ public class SensorFixStoreAndLoadTest {
                 new MillisecondsTimePoint(MID_OF_TRACKING));
         regattaLog.add(mappingEvent);
         regattaLog.add(new RegattaLogRevokeEventImpl(author, mappingEvent, "Test purposes"));
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         addBravoFixes();
-
         trackedRace.waitForLoadingToFinish();
-
         assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
@@ -342,23 +294,16 @@ public class SensorFixStoreAndLoadTest {
                 new MillisecondsTimePoint(END_OF_TRACKING));
         regattaLog.add(mappingEvent);
         regattaLog.add(new RegattaLogRevokeEventImpl(author, mappingEvent, "Test purposes"));
-        
         // non-revoked mapping timestamp 100-200
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
-        
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-        
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        
         addBravoFixes();
-        
         trackedRace.waitForLoadingToFinish();
-        
         // Only Fixes from 100 to 200 may be included
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
-        
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -371,25 +316,16 @@ public class SensorFixStoreAndLoadTest {
         RegattaLogCloseOpenEndedDeviceMappingEventImpl closeEvent = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(
                 new MillisecondsTimePoint(4), author, mappingEventId, new MillisecondsTimePoint(MID_OF_TRACKING));
         regattaLog.add(closeEvent);
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
-
         testNumberOfRawFixes(bravoFixTrack, 2);
-
         regattaLog.add(new RegattaLogRevokeEventImpl(author, closeEvent, "Test purposes"));
-
         trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(bravoFixTrack, 3);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -414,20 +350,14 @@ public class SensorFixStoreAndLoadTest {
                 deviceTest, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
-        
         addTestFixes();
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME), 1);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
@@ -437,21 +367,14 @@ public class SensorFixStoreAndLoadTest {
                 deviceTest, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
-        
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         addTestFixes();
         addBravoFixes();
-        
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME), 1);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
@@ -461,18 +384,12 @@ public class SensorFixStoreAndLoadTest {
                 deviceTest, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
-        
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         addTestFixes();
         addBravoFixes();
-        
         trackedRace.waitForLoadingToFinish();
-
         BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
         assertEquals(FIX_RIDE_HEIGHT,
                 bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getRideHeight());
@@ -480,11 +397,9 @@ public class SensorFixStoreAndLoadTest {
                 bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP2)).getRideHeight());
         assertEquals(FIX_RIDE_HEIGHT3,
                 bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP3)).getRideHeight());
-        
         TestFixTrackImpl<Competitor> testFixTrack = trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME);
         assertEquals(FIX_TEST_VALUE,
                 testFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getTestValue());
-
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
 
@@ -501,7 +416,6 @@ public class SensorFixStoreAndLoadTest {
     }
 
     private FixLoaderAndTracker createFixLoaderAndTracker() {
-        
         return new FixLoaderAndTracker(trackedRace, store, new SensorFixMapperFactory() {
             private TestDataFixMapper testDataFixMapper = new TestDataFixMapper();
             private BravoDataFixMapper bravoDataFixMapper = new BravoDataFixMapper();
@@ -747,6 +661,11 @@ public class SensorFixStoreAndLoadTest {
         // only the initial 3 fixes are available
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
+        // TODO add GPS fixes so that a foiled distance can be calculated
+        final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
+        final Distance foilingDistance = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), new MillisecondsTimePoint(FIX_TIMESTAMP),
+                new MillisecondsTimePoint(FIX_TIMESTAMP3));
+        assertEquals()
     }
     
     @Test
