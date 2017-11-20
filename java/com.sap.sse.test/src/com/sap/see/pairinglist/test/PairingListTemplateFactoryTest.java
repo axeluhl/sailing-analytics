@@ -1,6 +1,6 @@
 package com.sap.see.pairinglist.test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull; 
 
 import java.util.ArrayList;
 import java.util.stream.IntStream;
