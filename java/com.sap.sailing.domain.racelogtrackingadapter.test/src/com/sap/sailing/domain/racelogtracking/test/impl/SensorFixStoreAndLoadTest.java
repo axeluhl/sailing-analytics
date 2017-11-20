@@ -81,6 +81,7 @@ import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracke
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -92,6 +93,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.SensorFixTrackImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util.Pair;
@@ -662,10 +664,28 @@ public class SensorFixStoreAndLoadTest {
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
         // TODO add GPS fixes so that a foiled distance can be calculated
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(comp);
+        final DegreePosition pos1 = new DegreePosition(0, 0);
+        final DegreeBearingImpl course = new DegreeBearingImpl(0);
+        final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(10, course);
+        final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(FIX_TIMESTAMP);
+        final MillisecondsTimePoint timePoint2 = new MillisecondsTimePoint(FIX_TIMESTAMP2);
+        final MillisecondsTimePoint timePoint3 = new MillisecondsTimePoint(FIX_TIMESTAMP3);
+        final GPSFixMoving fix1 = new GPSFixMovingImpl(pos1, timePoint, speed);
+        final GPSFixMoving fix2 = new GPSFixMovingImpl(
+                pos1.translateGreatCircle(course, speed.travel(timePoint.until(timePoint2))),
+                timePoint2, speed);
+        final GPSFixMoving fix3 = new GPSFixMovingImpl(
+                pos1.translateGreatCircle(course, speed.travel(timePoint2.until(timePoint3))),
+                timePoint3, speed);
+        gpsFixTrack.add(fix1);
+        gpsFixTrack.add(fix2);
+        gpsFixTrack.add(fix3);
         final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
-        final Distance foilingDistance = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), new MillisecondsTimePoint(FIX_TIMESTAMP),
-                new MillisecondsTimePoint(FIX_TIMESTAMP3));
-        assertEquals()
+        final Distance foilingDistance = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), timePoint, timePoint3);
+        assertEquals(gpsFixTrack.getDistanceTraveled(timePoint, timePoint3).getMeters(), foilingDistance.getMeters(), 0.001);
+        final Duration foilingDuration = bravoFixTrack.getTimeSpentFoiling(timePoint, timePoint3);
+        assertEquals(timePoint.until(timePoint3).asMillis(), foilingDuration.asMillis());
     }
     
     @Test
