@@ -179,18 +179,21 @@ public class LeaderboardEntryDTO implements Serializable {
     public Duration getDurationFoiled() {
         final Duration result;
         if (legDetails != null) {
-            double acc = 0;
+            Double acc = null;
             for (LegEntryDTO legDetail : legDetails) {
                 if (legDetail != null) {
                     if (legDetail.currentDurationFoiledInSeconds != null) {
+                        if (acc == null) {
+                            acc = 0.0;
+                        }
                         acc += legDetail.currentDurationFoiledInSeconds;
                     } else {
-                        acc = 0;
+                        acc = null;
                         break;
                     }
                 }
             }
-            result = new MillisecondsDurationImpl((long) (acc*1000.));
+            result = acc == null ? null : new MillisecondsDurationImpl((long) (acc*1000.));
         } else {
             result = null;
         }
