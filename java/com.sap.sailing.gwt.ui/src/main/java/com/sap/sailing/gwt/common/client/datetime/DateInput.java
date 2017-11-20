@@ -6,8 +6,10 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class DateInput extends AbstractInput {
 
+    static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd");
+
     public DateInput() {
-        super(DateTimeInputType.TIME.isSupported() ? NativeDateTimeInput.date() : new CustomDateBox());
+        super(DateTimeInputType.TIME.isSupported() ? NativeDateTimeInput.date(DATE_FORMAT) : new CustomDateBox());
     }
 
     private static class CustomDateBox extends DateBox {

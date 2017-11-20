@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.common.client.datetime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -28,7 +29,7 @@ public class DateAndTimeInput extends AbstractInput {
             add(this.timeInput = new TimeInput(accuracy));
             dateInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
             timeInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
-            this.dateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
+            this.dateFormat = DateInput.DATE_FORMAT;
             this.timeFormat = accuracy.getTimeFormat();
             this.datetimeFormat = accuracy.getDatetimeFormat();
         }
