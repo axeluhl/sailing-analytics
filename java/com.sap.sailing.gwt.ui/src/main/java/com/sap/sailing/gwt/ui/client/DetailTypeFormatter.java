@@ -40,6 +40,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentSpeedOverGroundInKnots();
         case CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMeters();
+        case CURRENT_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.currentDistanceFoiledInMeters();
+        case CURRENT_DURATION_FOILED:
+            return stringMessages.currentDurationFoiled();
         case CURRENT_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
         case CURRENT_PITCH_IN_DEGREES:
@@ -242,6 +246,7 @@ public class DetailTypeFormatter {
         case CURRENT_RIDE_HEIGHT_IN_METERS:
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
         case CURRENT_DEPTH_IN_METERS:
+        case CURRENT_DISTANCE_FOILED_IN_METERS:
             return stringMessages.metersUnit();
 
         case CURRENT_DEFLECTOR_IN_MILLIMETERS:
@@ -296,6 +301,7 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
         case TIME_TRAVELED:
+        case CURRENT_DURATION_FOILED:
             return stringMessages.hhmmssUnit();
 
         // Cases for detail types without unit, so that an empty string is returned.
@@ -385,6 +391,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
         case CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMetersTooltip();
+        case CURRENT_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.currentDistanceFoiledInMetersTooltip();
+        case CURRENT_DURATION_FOILED:
+            return stringMessages.currentDurationFoiledTooltip();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMetersTooltip();
         case CURRENT_PORT_DAGGERBOARD_RAKE:

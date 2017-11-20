@@ -96,7 +96,7 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Distance getDistanceSpentFoiling() {
         return getSomethingForLegTrackingInterval((start, end) -> {
             BravoFixTrack<Competitor> bravoFixTrack = getTrackedLegContext().getTrackedLeg().getTrackedRace().getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            return bravoFixTrack == null ? Distance.NULL : bravoFixTrack.getDistanceSpentFoiling(getTrackedLegContext().getTrackedLeg().getTrackedRace().getTrack(getCompetitor()), start, end);
+            return bravoFixTrack == null ? Distance.NULL : bravoFixTrack.getDistanceSpentFoiling(start, end);
         });
     }
 

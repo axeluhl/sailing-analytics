@@ -821,6 +821,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.currentHeelInDegrees = heel == null ? null : heel.getDegrees();
             Bearing pitch = trackedLeg.getPitch(timePoint);
             result.currentPitchInDegrees = pitch == null ? null : pitch.getDegrees();
+            
+            Distance distanceFoiled = trackedLeg.getDistanceFoiled(timePoint);
+            result.currentDistanceFoiledInMeters = distanceFoiled == null ? null : distanceFoiled.getMeters();
+            Duration durationFoiled = trackedLeg.getDurationFoiled(timePoint);
+            result.currentDurationFoiledInSeconds = durationFoiled == null ? null : durationFoiled.asSeconds();
+
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();

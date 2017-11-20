@@ -682,7 +682,7 @@ public class SensorFixStoreAndLoadTest {
         gpsFixTrack.add(fix2);
         gpsFixTrack.add(fix3);
         final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
-        final Distance foilingDistance = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), timePoint, timePoint3);
+        final Distance foilingDistance = bravoFixTrack.getDistanceSpentFoiling(timePoint, timePoint3);
         final Distance distanceTraveled = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
         assertEquals(distanceTraveled.getMeters(), foilingDistance.getMeters(), 0.001);
         final Duration foilingDuration = bravoFixTrack.getTimeSpentFoiling(timePoint, timePoint3);
@@ -696,7 +696,7 @@ public class SensorFixStoreAndLoadTest {
         gpsFixTrack.add(fixBetween2And3);
         final Distance distanceTraveledDifferently = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
         assertTrue(distanceTraveledDifferently.compareTo(distanceTraveled) > 0);
-        final Distance foilingDistanceDifferent = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), timePoint, timePoint3);
+        final Distance foilingDistanceDifferent = bravoFixTrack.getDistanceSpentFoiling(timePoint, timePoint3);
         assertEquals(distanceTraveledDifferently.getMeters(), foilingDistanceDifferent.getMeters(), 0.001);
         
         // now overwrite fix3 by a new one with increased speed, therefore extended distance:
@@ -707,7 +707,7 @@ public class SensorFixStoreAndLoadTest {
         gpsFixTrack.add(fix3Faster, /* replace */ true);
         final Distance distanceTraveledFaster = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
         assertTrue(distanceTraveledFaster.compareTo(distanceTraveled) > 0);
-        final Distance foilingDistanceFaster = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), timePoint, timePoint3);
+        final Distance foilingDistanceFaster = bravoFixTrack.getDistanceSpentFoiling(timePoint, timePoint3);
         assertEquals(distanceTraveledFaster.getMeters(), foilingDistanceFaster.getMeters(), 0.001);
     }
     

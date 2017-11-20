@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.function.Function;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
@@ -215,7 +214,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint from, TimePoint to) {
+    public Distance getDistanceSpentFoiling(TimePoint from, TimePoint to) {
+        assert gpsTrack != null;
         return getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, foilingDistanceCache,
                 /* valueCalculator */ new Track.TimeRangeValueCalculator<Distance>() {
             @Override
@@ -226,7 +226,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                 for (final BravoFix fix : getFixes(from, true, to, true)) {
                     final boolean fixFoils = isFoiling(fix);
                     if (isFoiling && fixFoils) {
-                        result = result.add(gpsFixTrack.getDistanceTraveled(last, fix.getTimePoint()));
+                        result = result.add(gpsTrack.getDistanceTraveled(last, fix.getTimePoint()));
                     }
                     last = fix.getTimePoint();
                     isFoiling = fixFoils;

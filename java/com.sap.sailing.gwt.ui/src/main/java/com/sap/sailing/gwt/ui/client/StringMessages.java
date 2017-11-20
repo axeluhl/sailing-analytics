@@ -1972,4 +1972,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentDriftInDegreesTooltip();
     String currentDepthInMetersTooltip();
     String tonsUnit();
+    String currentDistanceFoiledInMeters();
+    String currentDurationFoiled();
+    String currentDistanceFoiledInMetersTooltip();
+    String currentDurationFoiledTooltip();
 }
