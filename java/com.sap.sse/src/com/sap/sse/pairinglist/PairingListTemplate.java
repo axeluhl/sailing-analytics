@@ -30,7 +30,8 @@ public interface PairingListTemplate {
      * in their columns. Competitors starts counting at zero. When calling this method the pairing list template is 
      * already generated.
      * 
-     * @return two dimensional int array with flights*groups rows and competitors/groups columns
+     * @return two dimensional int array:<br>
+     * <code>PairingListTemplate[flights*groups][competitors/groups]</code>
      */
     int[][] getPairingListTemplate();
 }
