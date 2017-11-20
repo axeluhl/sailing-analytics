@@ -24,8 +24,7 @@ public class TimeInput extends Composite implements DateTimeInput {
             initWidget(input);
             this.delegate = input;
         } else {
-            final TimeConverter conv = new TimeConverter(accuracy);
-            final ValueBox<Date> input = ValueBox.wrap(Document.get().createElement(InputElement.TAG), conv, conv);
+            final ValueBox<Date> input = new TimeBox(new TimeConverter(accuracy));
             initWidget(input);
             this.delegate = input;
         }
@@ -46,17 +45,25 @@ public class TimeInput extends Composite implements DateTimeInput {
         return delegate.addValueChangeHandler(handler);
     }
 
-    private class TimeConverter extends AbstractRenderer<Date> implements Parser<Date> {
+    private class TimeBox extends ValueBox<Date> {
 
-        private final DateTimeFormat dateTimeFormat;
+        private TimeBox(TimeConverter converter) {
+            super(Document.get().createElement(InputElement.TAG), converter, converter);
+        }
+
+    }
+
+    private static class TimeConverter extends AbstractRenderer<Date> implements Parser<Date> {
+
+        private final DateTimeFormat timeFormat;
 
         private TimeConverter(Accuracy accuracy) {
-            this.dateTimeFormat = DateTimeFormat.getFormat(accuracy.getTimeFormat());
+            this.timeFormat = DateTimeFormat.getFormat(accuracy.getTimeFormat());
         }
 
         @Override
         public String render(Date object) {
-            return dateTimeFormat.format(object);
+            return timeFormat.format(object);
         }
 
         @Override
@@ -66,7 +73,7 @@ public class TimeInput extends Composite implements DateTimeInput {
             }
 
             try {
-                return dateTimeFormat.parse(text.toString());
+                return timeFormat.parse(text.toString());
             } catch (IllegalArgumentException e) {
                 throw new ParseException(e.getMessage(), 0);
             }
