@@ -254,6 +254,7 @@ public class DetailTypeFormatter {
         case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
         case CURRENT_DEPTH_IN_METERS:
         case CURRENT_DISTANCE_FOILED_IN_METERS:
+        case TOTAL_DISTANCE_FOILED_IN_METERS:
             return stringMessages.metersUnit();
 
         case CURRENT_DEFLECTOR_IN_MILLIMETERS:
@@ -310,6 +311,7 @@ public class DetailTypeFormatter {
         case TIME_TRAVELED:
         case CURRENT_DURATION_FOILED_IN_SECONDS:
         case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
+        case TOTAL_DURATION_FOILED_IN_SECONDS:
             return stringMessages.hhmmssUnit();
 
         // Cases for detail types without unit, so that an empty string is returned.

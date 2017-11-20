@@ -1139,6 +1139,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
         return new DetailType[] { DetailType.REGATTA_RANK, DetailType.TOTAL_DISTANCE_TRAVELED,
                 DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
+                DetailType.TOTAL_DURATION_FOILED_IN_SECONDS, DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
                 DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, DetailType.TIME_ON_TIME_FACTOR,
                 DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE };
     }
@@ -2147,7 +2148,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
         result.put(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS, new TotalTimeColumn(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
                 new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS, new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
+        result.put(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS, new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
                 new TotalDistanceFoiledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.TIME_ON_TIME_FACTOR, new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
                 new TimeOnTimeFactorColumn(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
