@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.common.client.datetime;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -50,7 +52,12 @@ public class DateAndTimeInput extends Composite implements DateTimeInput {
 
         @Override
         public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Date> handler) {
-            return addHandler(handler, ValueChangeEvent.getType());
+            final ValueChangeHandler<Date> internalHandler = event -> ValueChangeEvent.fire(this, getValue());
+            final List<HandlerRegistration> handlerRegistrations = new ArrayList<>(3);
+            handlerRegistrations.add(dateInput.addValueChangeHandler(internalHandler));
+            handlerRegistrations.add(timeInput.addValueChangeHandler(internalHandler));
+            handlerRegistrations.add(addHandler(handler, ValueChangeEvent.getType()));
+            return () -> handlerRegistrations.forEach(HandlerRegistration::removeHandler);
         }
 
         @Override
