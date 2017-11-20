@@ -18,13 +18,19 @@ public interface PairingListTemplate {
             CompetitionFormat<Flight, Group, Competitor> competitionFormat);
     
     /**
-     * Returns the quality of a pairing list template.
+     * The value corresponds to the quality of a pairing list template. The quality is calculated by the 
+     * standard deviation of values in association matrix. 
      * 
-     * @return quality of pairing list template, stated as the standard deviation,
-     *         which is calculated by team association.
+     * @return double, stated as the standard deviation.
      */
     double getQuality();
 
-    //TODO: Javadoc
-    int[][] getPairingListTemplate();               
+    /**
+     * Every row of this array represents a single group of a flight with competitors per group (competitors/groups) 
+     * in their columns. Competitors starts counting at zero. When calling this method the pairing list template is 
+     * already generated.
+     * 
+     * @return two dimensional int array with flights*groups rows and competitors/groups columns
+     */
+    int[][] getPairingListTemplate();
 }
