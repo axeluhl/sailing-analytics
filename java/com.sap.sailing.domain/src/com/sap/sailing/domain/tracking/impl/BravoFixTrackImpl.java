@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.function.Function;
 
@@ -34,11 +36,36 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     
     private final boolean hasExtendedFixes;
     
-    private final TimeRangeCache<Duration> foilingTimeCache;
+    private transient TimeRangeCache<Duration> foilingTimeCache;
     
-    private final TimeRangeCache<Distance> foilingDistanceCache;
+    private transient TimeRangeCache<Distance> foilingDistanceCache;
     
-    private final TimeRangeCache<Distance> averageRideHeightCache;
+    private transient TimeRangeCache<Distance> averageRideHeightCache;
+    
+    /**
+     * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
+     * the object after de-serialization, so the cache invalidation listener can be re-established.
+     */
+    private GPSFixTrack<ItemType, GPSFixMoving> gpsTrack;
+    
+    private class CacheInvalidationGpsTrackListener implements GPSTrackListener<ItemType, GPSFixMoving> {
+        private static final long serialVersionUID = 6395529765232404414L;
+        @Override
+        public boolean isTransient() {
+            return true;
+        }
+
+        @Override
+        public void gpsFixReceived(GPSFixMoving fix, ItemType item, boolean firstFixInTrack) {
+            assert item == getTrackedItem();
+            foilingDistanceCache.invalidateAllAtOrLaterThan(fix.getTimePoint());
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
+                long newMillisecondsOverWhichToAverage) {
+        }
+    }
 
     /**
      * @param trackedItem
@@ -60,28 +87,41 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     public BravoFixTrackImpl(ItemType trackedItem, String trackName, boolean hasExtendedFixes, GPSFixTrack<ItemType, GPSFixMoving> gpsTrack) {
         super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
         this.hasExtendedFixes = hasExtendedFixes;
-        this.foilingTimeCache = new TimeRangeCache<>("foilingTimeCache for "+trackedItem);
-        this.foilingDistanceCache = new TimeRangeCache<>("foilingDistanceCache for "+trackedItem);
-        this.averageRideHeightCache = new TimeRangeCache<>("averageRideHeightCache for "+trackedItem);
+        this.foilingTimeCache = createFoilingTimeCache(trackedItem);
+        this.foilingDistanceCache = createFoilingDistanceCache(trackedItem);
+        this.averageRideHeightCache = createAverageRideHeightCache(trackedItem);
+        this.gpsTrack = gpsTrack;
         if (gpsTrack != null) {
-            gpsTrack.addListener(new GPSTrackListener<ItemType, GPSFixMoving>() {
-                private static final long serialVersionUID = 6395529765232404414L;
-                @Override
-                public boolean isTransient() {
-                    return true;
-                }
+            gpsTrack.addListener(new CacheInvalidationGpsTrackListener());
+        }
+    }
 
-                @Override
-                public void gpsFixReceived(GPSFixMoving fix, ItemType item, boolean firstFixInTrack) {
-                    assert item == getTrackedItem();
-                    foilingDistanceCache.invalidateAllAtOrLaterThan(fix.getTimePoint());
-                }
+    private TimeRangeCache<Distance> createAverageRideHeightCache(ItemType trackedItem) {
+        return createTimeRangeCache(trackedItem, "averageRideHeightCache");
+    }
 
-                @Override
-                public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
-                        long newMillisecondsOverWhichToAverage) {
-                }
-            });
+    private <T> TimeRangeCache<T> createTimeRangeCache(ItemType trackedItem, final String cacheName) {
+        return new TimeRangeCache<>(cacheName+" for "+trackedItem);
+    }
+
+    private TimeRangeCache<Distance> createFoilingDistanceCache(ItemType trackedItem) {
+        return createTimeRangeCache(trackedItem, "foilingDistanceCache");
+    }
+
+    private TimeRangeCache<Duration> createFoilingTimeCache(ItemType trackedItem) {
+        return createTimeRangeCache(trackedItem, "foilingTimeCache");
+    }
+    
+    /**
+     * After reading this object from an {@link ObjectInputStream}, initialize the caches properly.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        this.foilingTimeCache = createFoilingTimeCache(getTrackedItem());
+        this.foilingDistanceCache = createFoilingDistanceCache(getTrackedItem());
+        this.averageRideHeightCache = createAverageRideHeightCache(getTrackedItem());
+        if (gpsTrack != null) {
+            gpsTrack.addListener(new CacheInvalidationGpsTrackListener());
         }
     }
 
