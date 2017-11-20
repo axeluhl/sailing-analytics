@@ -16,7 +16,7 @@ public class DateAndTimeInput extends Composite implements DateTimeInput {
     private final DateTimeInput delegate;
 
     public DateAndTimeInput(Accuracy accuracy) {
-        this.delegate = DateTimeInputType.DATETIME_LOCAL.isSupported() ? new NativeDatetimeLocalInput(accuracy)
+        this.delegate = DateTimeInputType.DATETIME_LOCAL.isSupported() ? NativeDateTimeInput.datetimeLocale(accuracy)
                 : new DateAndTimePanel(accuracy);
         initWidget(delegate.asWidget());
     }

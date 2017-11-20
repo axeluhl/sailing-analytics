@@ -17,8 +17,8 @@ public class DateInput extends Composite implements DateTimeInput {
 
     public DateInput() {
         if (DateTimeInputType.TIME.isSupported()) {
-            final NativeDateInput input = new NativeDateInput();
-            initWidget(input);
+            final DateTimeInput input = NativeDateTimeInput.date();
+            initWidget(input.asWidget());
             this.delegate = input;
         } else {
             final DateBox input = new DateBox();

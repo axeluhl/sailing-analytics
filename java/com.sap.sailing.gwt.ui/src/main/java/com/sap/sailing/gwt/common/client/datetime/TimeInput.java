@@ -20,8 +20,8 @@ public class TimeInput extends Composite implements DateTimeInput {
 
     public TimeInput(Accuracy accuracy) {
         if (DateTimeInputType.TIME.isSupported()) {
-            final NativeTimeInput input = new NativeTimeInput(accuracy);
-            initWidget(input);
+            final DateTimeInput input = NativeDateTimeInput.time(accuracy);
+            initWidget(input.asWidget());
             this.delegate = input;
         } else {
             final ValueBox<Date> input = new TimeBox(new TimeConverter(accuracy));
