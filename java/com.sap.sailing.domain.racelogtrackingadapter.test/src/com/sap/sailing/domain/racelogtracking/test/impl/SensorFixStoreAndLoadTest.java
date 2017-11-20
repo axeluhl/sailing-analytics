@@ -665,7 +665,6 @@ public class SensorFixStoreAndLoadTest {
         // only the initial 3 fixes are available
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        // TODO add GPS fixes so that a foiled distance can be calculated
         final DynamicGPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(comp);
         final DegreePosition pos1 = new DegreePosition(0, 0);
         final DegreeBearingImpl course = new DegreeBearingImpl(0);
