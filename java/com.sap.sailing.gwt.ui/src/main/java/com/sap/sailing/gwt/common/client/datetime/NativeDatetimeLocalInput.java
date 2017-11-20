@@ -21,7 +21,7 @@ class NativeDatetimeLocalInput extends Widget implements DateTimeInput {
         this.input = Document.get().createElement(InputElement.TAG).cast();
         this.input.setAttribute(ATTR_TYPE, DateTimeInputType.DATETIME_LOCAL.getType());
         this.input.setAttribute(ATTR_STEP, accuracy.getStep());
-        this.format = DateTimeFormat.getFormat(accuracy.getDatetimeFormat());
+        this.format = accuracy.getDatetimeFormat();
         setElement(input);
     }
 

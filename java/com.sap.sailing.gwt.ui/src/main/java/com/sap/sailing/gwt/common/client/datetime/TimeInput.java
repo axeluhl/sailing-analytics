@@ -58,7 +58,7 @@ public class TimeInput extends Composite implements DateTimeInput {
         private final DateTimeFormat timeFormat;
 
         private TimeConverter(Accuracy accuracy) {
-            this.timeFormat = DateTimeFormat.getFormat(accuracy.getTimeFormat());
+            this.timeFormat = accuracy.getTimeFormat();
         }
 
         @Override

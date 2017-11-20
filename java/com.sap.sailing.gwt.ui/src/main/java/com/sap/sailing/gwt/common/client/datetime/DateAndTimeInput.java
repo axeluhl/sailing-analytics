@@ -46,8 +46,8 @@ public class DateAndTimeInput extends Composite implements DateTimeInput {
             add(this.dateInput = new DateInput());
             add(this.timeInput = new TimeInput(accuracy));
             this.dateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
-            this.timeFormat = DateTimeFormat.getFormat(accuracy.getTimeFormat());
-            this.datetimeFormat = DateTimeFormat.getFormat(accuracy.getDatetimeFormat());
+            this.timeFormat = accuracy.getTimeFormat();
+            this.datetimeFormat = accuracy.getDatetimeFormat();
         }
 
         @Override
