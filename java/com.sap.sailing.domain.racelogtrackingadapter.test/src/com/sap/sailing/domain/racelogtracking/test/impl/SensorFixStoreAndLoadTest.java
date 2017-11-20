@@ -56,6 +56,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -683,9 +684,20 @@ public class SensorFixStoreAndLoadTest {
         gpsFixTrack.add(fix3);
         final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
         final Distance foilingDistance = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), timePoint, timePoint3);
-        assertEquals(gpsFixTrack.getDistanceTraveled(timePoint, timePoint3).getMeters(), foilingDistance.getMeters(), 0.001);
+        final Distance distanceTraveled = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
+        assertEquals(distanceTraveled.getMeters(), foilingDistance.getMeters(), 0.001);
         final Duration foilingDuration = bravoFixTrack.getTimeSpentFoiling(timePoint, timePoint3);
         assertEquals(timePoint.until(timePoint3).asMillis(), foilingDuration.asMillis());
+        // now overwrite fix3 by a new one with increased speed, therefore extended distance:
+        final SpeedWithBearing doubledSpeed = speed.add(speed);
+        final GPSFixMoving fix3Faster = new GPSFixMovingImpl(
+                pos1.translateGreatCircle(course, doubledSpeed.travel(timePoint2.until(timePoint3))),
+                timePoint3, doubledSpeed);
+        gpsFixTrack.add(fix3Faster, /* replace */ true);
+        final Distance distanceTraveledFaster = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
+        assertTrue(distanceTraveledFaster.compareTo(distanceTraveled) > 0);
+        final Distance foilingDistanceFaster = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), timePoint, timePoint3);
+        assertEquals(distanceTraveledFaster.getMeters(), foilingDistanceFaster.getMeters(), 0.001);
     }
     
     @Test
