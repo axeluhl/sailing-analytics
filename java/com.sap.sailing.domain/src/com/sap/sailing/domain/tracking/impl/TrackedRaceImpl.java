@@ -1211,10 +1211,51 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return getDistanceTraveled(competitor, timePoint, /* consider gate start */ false);
     }
     
-    // TODO bug 3762: add getDistanceFoiled and getDurationFoiled as a factored copy of getDistanceTraveled, using the BravoFixTrack logic
-    
     private Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint, boolean considerGateStart) {
-        final Distance result;
+        return getValueFromStartToTimePointOrEnd(competitor, timePoint, 
+                (from, to)->{
+                    final Distance result;
+                    final Distance preResult = getTrack(competitor).getDistanceTraveled(from, to);
+                    if (considerGateStart && preResult != null) {
+                        result = preResult.add(getAdditionalGateStartDistance(competitor, timePoint));
+                    } else {
+                        result = preResult;
+                    }
+                    return result;
+                });
+    }
+    
+    @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(competitor, timePoint, BravoFixTrack::getDistanceSpentFoiling);
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(competitor, timePoint, BravoFixTrack::getTimeSpentFoiling);
+    }
+    
+    @FunctionalInterface
+    private static interface BravoFromToValueCalculator<T> {
+        T getValue(BravoFixTrack<Competitor> bravoFixTrack, TimePoint from, TimePoint to);
+    }
+
+    private <T> T getBravoValue(Competitor competitor, TimePoint timePoint, BravoFromToValueCalculator<T> bravoValueCalculator) {
+        return getValueFromStartToTimePointOrEnd(competitor, timePoint, 
+                (from, to)->{
+                    final T result;
+                    final BravoFixTrack<Competitor> bravoFixTrack = getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                    if (bravoFixTrack != null) {
+                        result = bravoValueCalculator.getValue(bravoFixTrack, from, to);
+                    } else {
+                        result = null;
+                    }
+                    return result;
+                });
+    }
+
+    private <T> T getValueFromStartToTimePointOrEnd(Competitor competitor, TimePoint timePoint, Track.TimeRangeValueCalculator<T> valueCalculator) {
+        final T result;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         try {
             lockForRead(markPassings);
@@ -1241,12 +1282,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 if (end == null) {
                     result = null;
                 } else {
-                    final Distance preResult = getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
-                    if (considerGateStart && preResult != null) {
-                        result = preResult.add(getAdditionalGateStartDistance(competitor, timePoint));
-                    } else {
-                        result = preResult;
-                    }
+                    result = valueCalculator.calculate(markPassings.first().getTimePoint(), end);
                 }
             }
             return result;

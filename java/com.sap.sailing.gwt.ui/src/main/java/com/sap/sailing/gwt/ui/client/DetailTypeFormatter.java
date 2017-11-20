@@ -166,6 +166,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalTimeSailedInSeconds();
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
             return stringMessages.totalAverageSpeedOverGround();
+        case TOTAL_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.totalDurationFoiledInSeconds();
+        case TOTAL_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.totalDistanceFoiledInMeters();
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
             return stringMessages.averageManeuverLossInMeters();
         case AVERAGE_TACK_LOSS_IN_METERS:
@@ -196,8 +200,6 @@ public class DetailTypeFormatter {
             return stringMessages.beatAngle();
         case COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegrees();
-        default:
-            break;
         }
         return null;
     }
@@ -503,6 +505,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalDistanceTraveledTooltip();
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
             return stringMessages.totalAverageSpeedOverGroundTooltip();
+        case TOTAL_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.totalDurationFoiledInSecondsTooltip();
+        case TOTAL_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.totalDistanceFoiledInMetersTooltip();
         case TIME_ON_TIME_FACTOR:
             return stringMessages.timeOnTimeFactorTooltip();
         case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
