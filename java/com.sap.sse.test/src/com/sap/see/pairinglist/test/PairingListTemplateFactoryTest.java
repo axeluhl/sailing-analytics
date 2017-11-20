@@ -65,7 +65,7 @@ public class PairingListTemplateFactoryTest {
     public void testGeneration() {
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
         PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
-        PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(45, 6, 18));
+        PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(100, 6, 18));
         PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30));
         assertNotNull(example1);
         assertNotNull(example2);

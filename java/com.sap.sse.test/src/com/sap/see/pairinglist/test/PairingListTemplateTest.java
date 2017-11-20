@@ -80,13 +80,13 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
 
     @Test
     public void testAverageTimeForSingleCase() {
-        final int tests = 5;
+        final int tests = 15;
         long[] a = new long[tests];
 
         for (int i = 0; i < tests; i++) {
             long time = System.currentTimeMillis();
 
-            this.createPairingListTemplate(15, 3, 18);
+            this.createPairingListTemplate(10, 3, 30);
 
             time = System.currentTimeMillis() - time;
             a[i] = time;
@@ -97,6 +97,8 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
             sum += a[i];
         }
         double average = sum / tests;
+        
+        System.out.println("Average Time: " + (average / 1000) + "s");
         if (average > 8000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
         }
