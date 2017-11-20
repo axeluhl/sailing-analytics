@@ -56,6 +56,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -672,13 +673,12 @@ public class SensorFixStoreAndLoadTest {
         final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(FIX_TIMESTAMP);
         final MillisecondsTimePoint timePoint2 = new MillisecondsTimePoint(FIX_TIMESTAMP2);
         final MillisecondsTimePoint timePoint3 = new MillisecondsTimePoint(FIX_TIMESTAMP3);
+        final TimePoint timePointBetween2And3 = new MillisecondsTimePoint((FIX_TIMESTAMP2+FIX_TIMESTAMP3)/2);
         final GPSFixMoving fix1 = new GPSFixMovingImpl(pos1, timePoint, speed);
-        final GPSFixMoving fix2 = new GPSFixMovingImpl(
-                pos1.translateGreatCircle(course, speed.travel(timePoint.until(timePoint2))),
-                timePoint2, speed);
-        final GPSFixMoving fix3 = new GPSFixMovingImpl(
-                pos1.translateGreatCircle(course, speed.travel(timePoint2.until(timePoint3))),
-                timePoint3, speed);
+        final Position pos2 = pos1.translateGreatCircle(course, speed.travel(timePoint.until(timePoint2)));
+        final GPSFixMoving fix2 = new GPSFixMovingImpl(pos2, timePoint2, speed);
+        final Position pos3 = pos2.translateGreatCircle(course, speed.travel(timePoint2.until(timePoint3)));
+        final GPSFixMoving fix3 = new GPSFixMovingImpl(pos3, timePoint3, speed);
         gpsFixTrack.add(fix1);
         gpsFixTrack.add(fix2);
         gpsFixTrack.add(fix3);
@@ -688,10 +688,22 @@ public class SensorFixStoreAndLoadTest {
         assertEquals(distanceTraveled.getMeters(), foilingDistance.getMeters(), 0.001);
         final Duration foilingDuration = bravoFixTrack.getTimeSpentFoiling(timePoint, timePoint3);
         assertEquals(timePoint.until(timePoint3).asMillis(), foilingDuration.asMillis());
+        
+        // now insert a GPS fix which leads to an extended distance traveled as it is not exactly on the previous track
+        final DegreeBearingImpl temporaryCourse = new DegreeBearingImpl(90);
+        final GPSFixMoving fixBetween2And3 = new GPSFixMovingImpl(
+                pos2.translateGreatCircle(temporaryCourse, speed.add(new KnotSpeedWithBearingImpl(5, temporaryCourse)).travel(timePoint2.until(timePointBetween2And3))),
+                timePointBetween2And3, speed);
+        gpsFixTrack.add(fixBetween2And3);
+        final Distance distanceTraveledDifferently = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
+        assertTrue(distanceTraveledDifferently.compareTo(distanceTraveled) > 0);
+        final Distance foilingDistanceDifferent = bravoFixTrack.getDistanceSpentFoiling(trackedRace.getTrack(comp), timePoint, timePoint3);
+        assertEquals(distanceTraveledDifferently.getMeters(), foilingDistanceDifferent.getMeters(), 0.001);
+        
         // now overwrite fix3 by a new one with increased speed, therefore extended distance:
         final SpeedWithBearing doubledSpeed = speed.add(speed);
         final GPSFixMoving fix3Faster = new GPSFixMovingImpl(
-                pos1.translateGreatCircle(course, doubledSpeed.travel(timePoint2.until(timePoint3))),
+                pos2.translateGreatCircle(course, doubledSpeed.travel(timePoint2.until(timePoint3))),
                 timePoint3, doubledSpeed);
         gpsFixTrack.add(fix3Faster, /* replace */ true);
         final Distance distanceTraveledFaster = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
