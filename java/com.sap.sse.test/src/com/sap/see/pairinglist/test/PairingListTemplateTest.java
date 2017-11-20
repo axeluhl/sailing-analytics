@@ -2,6 +2,8 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
@@ -15,6 +17,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
     
     public PairingListTemplateTest() {
         super(new PairingFrameProviderTest(15, 3, 18));
+        System.out.println(Arrays.deepToString(this.getPairingListTemplate()));
     }
 
     @Test
@@ -90,8 +93,9 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         }
 
         long sum = 0;
-        for (int i = 0; i < tests; i++)
+        for (int i = 0; i < tests; i++) {
             sum += a[i];
+        }
         double average = sum / tests;
         if (average > 8000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
@@ -99,9 +103,24 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
     }
     
     @Test
+    public void testAverageQualityForSingleCase() {
+        final int count = 20;
+        double[] results = new double[20];
+        for (int i = 0; i < count; i++) {
+            int[][] template = this.createPairingListTemplate(15, 3, 18);
+            results[i] = calcStandardDev(incrementAssociations(template, new int[18][18]));
+        }
+        double sum = 0;
+        for (double quality: results) {
+            sum += quality;
+        }
+        System.out.println(sum / count);
+    }
+    
+    @Test
     public void testIncrementAndDecrementAssociations() {
         int[][] associations = new int[18][18];
-        int[][] flight = this.createFlight(15, 3, 18, associations, 5);
+        int[][] flight = this.createFlight(3, 18, associations, 5);
         
         associations = this.incrementAssociations(flight, associations);
         associations = this.decrementAssociations(flight, associations);
