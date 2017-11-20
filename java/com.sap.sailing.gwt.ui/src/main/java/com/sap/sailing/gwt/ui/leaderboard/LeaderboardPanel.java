@@ -1118,6 +1118,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 DetailType.RACE_CALCULATED_TIME_TRAVELED,
                 DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
+                DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS, DetailType.RACE_CURRENT_DURATION_FOILED,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
@@ -1205,6 +1206,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             result.put(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                     new RideHeightColumn(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                             new RaceCurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
+                            new RaceDistanceFoiledInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_DURATION_FOILED,
+                    new TotalTimeColumn(DetailType.RACE_CURRENT_DURATION_FOILED,
+                            new RaceDurationFoiledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
@@ -1347,7 +1356,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                final Distance distanceTraveledInMeters = row.getDistanceTraveledInMeters(getRaceColumnName());
+                final Distance distanceTraveledInMeters = row.getDistanceTraveled(getRaceColumnName());
                 final Duration time = row.getTimeSailed(getRaceColumnName());
                 final Double result;
                 if (distanceTraveledInMeters != null && time != null) {
@@ -1537,8 +1546,34 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                Distance distanceForRaceColumn = row.getDistanceTraveledInMeters(getRaceColumnName());
+                Distance distanceForRaceColumn = row.getDistanceTraveled(getRaceColumnName());
                 return distanceForRaceColumn == null ? null : distanceForRaceColumn.getMeters();
+            }
+        }
+
+        /**
+         * Accumulates the distance foiled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceFoiledInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Distance distanceForRaceColumn = row.getDistanceFoiled(getRaceColumnName());
+                return distanceForRaceColumn == null ? null : distanceForRaceColumn.getMeters();
+            }
+        }
+
+        /**
+         * Accumulates the duration foiled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDurationFoiledInSeconds implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Duration durationForRaceColumn = row.getDurationFoiled(getRaceColumnName());
+                return durationForRaceColumn == null ? null : durationForRaceColumn.asSeconds();
             }
         }
 

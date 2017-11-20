@@ -120,11 +120,11 @@ public class LeaderboardRowDTO implements Serializable {
         return true;
     }
     
-    public Distance getDistanceTraveledInMeters(String raceColumnName) {
+    public Distance getDistanceTraveled(String raceColumnName) {
         final Distance result;
         LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
         if (fieldsForRace != null) {
-            result = fieldsForRace.getDistanceTraveledInMeters();
+            result = fieldsForRace.getDistanceTraveled();
         } else {
             result = null;
         }
@@ -135,7 +135,29 @@ public class LeaderboardRowDTO implements Serializable {
         final Duration result;
         LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
         if (fieldsForRace != null) {
-            result = fieldsForRace.getTimeSailedInMillis();
+            result = fieldsForRace.getTimeSailed();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Distance getDistanceFoiled(String raceColumnName) {
+        final Distance result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getDistanceFoiled();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Duration getDurationFoiled(String raceColumnName) {
+        final Duration result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getDurationFoiled();
         } else {
             result = null;
         }
