@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
@@ -251,19 +253,54 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<>();
-        for (Fleet fleet : getFleets()) {
-            Util.addAll(getAllCompetitors(fleet), result);
-        }
-        return result;
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
 
     @Override
-    public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
-        Set<Competitor> result = new HashSet<>();
-        Util.addAll(getAllCompetitorsAndTheirBoats(fleet).keySet(), result);
-        return result;
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        Set<Competitor> competitors = new HashSet<>();
+        Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();
+        for (Fleet fleet : getFleets()) {
+            final Pair<RaceDefinition, Iterable<Competitor>> allCompetitorsWithRaceDefinitionsConsidered = getAllCompetitorsWithRaceDefinitionsConsidered(fleet);
+            Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getB(), competitors);
+            if (allCompetitorsWithRaceDefinitionsConsidered.getA() != null) {
+                raceDefinitionsConsidered.add(allCompetitorsWithRaceDefinitionsConsidered.getA());
+            }
+        }
+        return new Pair<>(raceDefinitionsConsidered, competitors);
     }
+
+    /**
+     * Same as {@link #getAllCompetitors(Fleet)}, but also returns the {@link RaceDefinition} as the first
+     * component of a pair if it contributed its {@link RaceDefinition#getCompetitors()}. If the resulting
+     * iterable of competitors did not consider a {@link RaceDefinition}'s competitor set, {@code null}
+     * is returned as the first component of the pair.
+     */
+    private Pair<RaceDefinition, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered(final Fleet fleet) {
+        final Iterable<Competitor> competitors;
+        final RaceDefinition raceDefinition;
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        if (trackedRace != null) {
+            raceDefinition = trackedRace.getRace();
+            competitors = raceDefinition.getCompetitors();
+        } else {
+            raceDefinition = null;
+            // if no tracked race is found, use competitors from race/regatta log depending on whether
+            // the mapping event is present or not; this assumes that if a tracked
+            // race exists, its competitors set takes precedence over what's in the race log. Usually,
+            // the tracked race will have the same competitors as those in the race log, or more because
+            // those from the regatta log are added to the tracked race as well.
+            Map<Competitor, Boat> viaRaceLog = new RegisteredCompetitorsAndBoatsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
+            competitors = viaRaceLog.keySet();
+        }
+        return new Pair<>(raceDefinition, competitors);
+    }
+    
+    @Override
+    public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
+        return getAllCompetitorsWithRaceDefinitionsConsidered(fleet).getB();
+    }
+
     
     @Override
     public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats() {

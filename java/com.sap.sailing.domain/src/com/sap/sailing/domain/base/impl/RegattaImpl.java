@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -55,7 +54,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.AbstractLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -78,6 +77,7 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.NamedImpl;
 
@@ -158,7 +158,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     private boolean useStartTimeInference;
 
-    private transient CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike competitorsProvider;
+    private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
 
     private AbstractLogEventAuthor regattaLogEventAuthorForRegatta = new LogEventAuthorImpl(
             AbstractLeaderboardImpl.class.getName(), 0);
@@ -418,30 +418,62 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         if (competitorsProvider == null) {
-            competitorsProvider = new CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike(this);
+            competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
         return competitorsProvider;
     }
 
     @Override
-    public Map<Competitor, Boat> getAllCompetitorsAndBoats() {
-        return getOrCreateCompetitorsProvider().getAllCompetitorsAndBoats();
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        if (competitorsProvider == null) {
+            competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
+        }
+        final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsWithRaceDefinitionsConsidered = competitorsProvider.getAllCompetitorsWithRaceDefinitionsConsidered();
+        Set<Competitor> newResult = null;
+        Set<RaceDefinition> newRaceDefinitions = null;
+        final Iterable<RaceDefinition> racesConsideredSoFar = allCompetitorsWithRaceDefinitionsConsidered.getA();
+        for (final RaceDefinition race : getAllRaces()) {
+            if (!Util.contains(racesConsideredSoFar, race)) {
+                if (newResult == null) {
+                    newRaceDefinitions = new HashSet<>();
+                    Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getA(), newRaceDefinitions);
+                    newResult = new HashSet<>();
+                    Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getB(), newResult);
+                }
+                Util.addAll(race.getCompetitors(), newResult);
+                newRaceDefinitions.add(race);
+            }
+        }
+        return newResult == null ? allCompetitorsWithRaceDefinitionsConsidered : new Pair<>(newRaceDefinitions, newResult);
     }
 
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        return getOrCreateCompetitorsProvider().getAllCompetitors();
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
 
     @Override
     public Iterable<Boat> getAllBoats() {
         Set<Boat> result = new HashSet<Boat>();
-        Collection<Boat> allBoatsOfAllRaces = getOrCreateCompetitorsProvider().getAllCompetitorsAndBoats().values();
-        for (Boat boat: allBoatsOfAllRaces) {
-            result.add(boat);
+        
+        boolean hasRaceColumns = false;
+        for (RaceColumn rc : getRaceColumns()) {
+            hasRaceColumns = true;
+            for (final Fleet fleet : rc.getFleets()) {
+                RaceDefinition raceDefinition = rc.getRaceDefinition(fleet);
+                Util.addAll(raceDefinition.getBoats(), result);
+            }
         }
+        final RegattaLog regattaLog = getRegattaLog();
+        if (!hasRaceColumns) {
+            // If no race exists, the regatta log-provided competitor registrations will not have
+            // been considered yet; add them:
+            final Map<Competitor, Boat> regattaLogProvidedCompetitorsAndBoats = new CompetitorsAndBoatsInLogAnalyzer<>(regattaLog).analyze();
+            Util.addAll(regattaLogProvidedCompetitorsAndBoats.values(), result);
+        }
+
         return result;
     }
 

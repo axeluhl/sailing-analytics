@@ -15,6 +15,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegister
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -37,7 +38,7 @@ public class CompetitorDeregistrationTest extends AbstractRegattaLogTrackingTest
                 Collections.singleton(competitor2), author);
         final Set<RegattaLogEvent> events = deregistrator.analyze();
         deregistrator.deregister(events);
-        final Set<CompetitorWithBoat> competitors = new CompetitorsInLogAnalyzer<>(log).analyze();
+        final Set<Competitor> competitors = new CompetitorsInLogAnalyzer<>(log).analyze();
         assertEquals(1, competitors.size());
         assertSame(competitor, competitors.iterator().next());
     }

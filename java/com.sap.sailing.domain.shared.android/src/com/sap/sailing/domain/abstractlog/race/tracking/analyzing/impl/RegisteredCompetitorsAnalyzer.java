@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.Competitor;
 
 /**
  * Used to find competitors of a race based on {@link RaceLog} and {@link RegattaLog} contents. Checks whether the
@@ -20,7 +20,7 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
  * @author Jan Bross (D056848)
  *
  */
-public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<CompetitorWithBoat>> {
+public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Competitor>> {
     private RegattaLog regattaLog;
 
     public RegisteredCompetitorsAnalyzer(RaceLog raceLog, RegattaLog regattaLog) {
@@ -29,8 +29,8 @@ public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Competito
     }
 
     @Override
-    protected Set<CompetitorWithBoat> performAnalysis() {
-        final Set<CompetitorWithBoat> result;
+    protected Set<Competitor> performAnalysis() {
+        final Set<Competitor> result;
         if (new RaceLogUsesOwnCompetitorsAnalyzer(getLog()).analyze()) {
             // get Events from RaceLog
             result = new CompetitorsInLogAnalyzer<>(getLog()).analyze();

@@ -422,7 +422,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorId))
                         .type(MediaType.TEXT_PLAIN).build();
             }
-            Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getAllCompetitorsAndBoats().keySet();
+            Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getAllCompetitors();
             if (!registered.contains(mappedToCompetitor)) {
                 logger.warning("Competitor found but not registered on a race of " + leaderboardName);
                 return Response.status(Status.BAD_REQUEST)

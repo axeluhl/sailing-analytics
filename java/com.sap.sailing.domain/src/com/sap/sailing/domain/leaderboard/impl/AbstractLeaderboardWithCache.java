@@ -1127,6 +1127,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
+    }
+    
+    @Override
     public void destroy() {
         for (CacheInvalidationListener cacheInvalidationListener : cacheInvalidationListeners) {
             cacheInvalidationListener.removeFromTrackedRace();

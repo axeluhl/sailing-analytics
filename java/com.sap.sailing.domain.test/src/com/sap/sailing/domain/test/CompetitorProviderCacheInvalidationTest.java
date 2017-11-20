@@ -37,7 +37,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.leaderboard.impl.CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
@@ -59,8 +59,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *
  */
 public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboardTest {
-    private CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike competitorProviderFlexibleLeaderboard;
-    private CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike competitorProviderRegattaLeaderboard;
+    private CompetitorProviderFromRaceColumnsAndRegattaLike competitorProviderFlexibleLeaderboard;
+    private CompetitorProviderFromRaceColumnsAndRegattaLike competitorProviderRegattaLeaderboard;
     private FlexibleLeaderboardImpl flexibleLeaderboard;
     private RegattaLeaderboardImpl regattaLeaderboard;
     private RegattaImpl regatta;
@@ -75,7 +75,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
                 "Test Course Area", UUID.randomUUID());
         flexibleLeaderboard = new FlexibleLeaderboardImpl("Test Flexible Leaderboard",
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), courseArea);
-        competitorProviderFlexibleLeaderboard = new CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike(flexibleLeaderboard);
+        competitorProviderFlexibleLeaderboard = new CompetitorProviderFromRaceColumnsAndRegattaLike(flexibleLeaderboard);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, "Test Regatta", new BoatClassImpl("49er", BoatClassMasterdata._49ER),
                 /* canBoatsOfCompetitorsChangePerRace */ true,  /* startDate */ null, /* endDate */null,
@@ -92,7 +92,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
                 boats.put(c, createBoat("" + l + "/" + i));
             }
         }
-        competitorProviderRegattaLeaderboard = new CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike(regattaLeaderboard);
+        competitorProviderRegattaLeaderboard = new CompetitorProviderFromRaceColumnsAndRegattaLike(regattaLeaderboard);
     }
     
     /**

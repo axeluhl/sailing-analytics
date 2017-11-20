@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -181,7 +182,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     }
 
     // --------------------- Delegate Pattern Implementation ----------------------
-    public CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         return getFullLeaderboard().getOrCreateCompetitorsProvider();
     }
 
@@ -221,8 +222,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getAllCompetitors();
     }
 
-    public Map<Competitor, Boat> getAllCompetitorsAndBoats() {
-        return getFullLeaderboard().getAllCompetitorsAndBoats();
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return getFullLeaderboard().getAllCompetitorsWithRaceDefinitionsConsidered();
     }
 
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {

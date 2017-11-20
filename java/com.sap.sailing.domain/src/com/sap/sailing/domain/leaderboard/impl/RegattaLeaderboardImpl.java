@@ -3,12 +3,15 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
@@ -19,6 +22,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A leaderboard that is based on the definition of a {@link Regatta} with its {@link Series} and {@link Fleet}. The regatta
@@ -102,6 +106,17 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         }
     }
     
+    /**
+     * Delegates to {@link Regatta#getAllCompetitors()} which is expected to deliver all competitors from this
+     * leaderboard's regatta which includes those belonging to {@link RaceDefinition races}
+     * {@link Regatta#getAllRaces() belonging to the regatta} as well as competitors listed on the regatta's
+     * {@link RegattaLog}.
+     */
+    @Override
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return regatta.getAllCompetitorsWithRaceDefinitionsConsidered();
+    }
+    
     @Override
     public IsRegattaLike getRegattaLike() {
         return regatta;
@@ -118,7 +133,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     }
 
     @Override
-    public CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         return getRegatta().getOrCreateCompetitorsProvider();
     }
 }

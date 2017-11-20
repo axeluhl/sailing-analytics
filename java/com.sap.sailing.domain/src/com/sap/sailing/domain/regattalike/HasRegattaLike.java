@@ -45,27 +45,21 @@ public interface HasRegattaLike {
     void deregisterBoats(Iterable<Boat> boat);
 
     /**
-     * Shortcut method to get only the competitors
-     * @see #getAllCompetitorsAndBoats()
+     * Determines the combined set of all competitors from all race columns that this object's {@link IsRegattaLike}
+     * has, as well as those coming from registrations on the {@link #getRegattaLike()}'s
+     * {@link IsRegattaLike#getRegattaLog() regatta log}.
+     * 
+     * @see #getRegattaLike()
+     * @see IsRegattaLike#getRaceColumnByName(String)
+     * @see RaceColumn#getAllCompetitors()
      */
-//    Set<Competitor> getAllCompetitors();
+    Iterable<Competitor> getAllCompetitors();
 
     /**
      * Determines the competitors and boats registered in the regatta log. Note that this is not necessarily the complete set of
      * competitors and boats participating in this "regatta." For that, use {@link #getAllCompetitorsAndBoats()}.
      */
     Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog();
-
-    /**
-     * Determines the combined set of all competitors and boats from all race columns that this object's {@link IsRegattaLike}
-     * has, as well as those coming from registrations on the {@link #getRegattaLike()}'s
-     * {@link IsRegattaLike#getRegattaLog() regatta log}.
-     * 
-     * @see #getRegattaLike()
-     * @see IsRegattaLike#getRaceColumnByName(String)
-     * @see RaceColumn#getAllCompetitorsAndBoats()
-     */
-    Map<Competitor, Boat> getAllCompetitorsAndBoats();
     
     void registerCompetitorAndBoat(Competitor competitor, Boat boat);
     void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats);

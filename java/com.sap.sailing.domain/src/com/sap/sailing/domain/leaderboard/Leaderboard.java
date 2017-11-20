@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Distance;
@@ -98,6 +99,13 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return all competitors in this leaderboard, including the suppressed ones.
      */
     Iterable<Competitor> getAllCompetitors();
+
+    /**
+     * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element in a pair
+     * which {@link RaceDefinition}s were used in order to fetch their {@link RaceDefinition#getCompetitors()} to
+     * assemble the results.
+     */
+    Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
 
     /**
      * Retrieves all competitors expected to race in the fleet and column specified.
@@ -190,7 +198,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
-     * When computing the net points sum after all columns up to and including the race column that is the key of the resulting
+     * When computing the ne
+     * t points sum after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
      * 
