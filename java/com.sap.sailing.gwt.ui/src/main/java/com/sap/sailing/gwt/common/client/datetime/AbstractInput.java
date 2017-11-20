@@ -29,6 +29,11 @@ abstract class AbstractInput extends Composite implements DateTimeInput {
     }
 
     @Override
+    public void setValue(Date value, boolean fireEvents) {
+        this.delegate.setValue(value, fireEvents);
+    }
+
+    @Override
     public final HandlerRegistration addValueChangeHandler(ValueChangeHandler<Date> handler) {
         return delegate.addValueChangeHandler(handler);
     }
