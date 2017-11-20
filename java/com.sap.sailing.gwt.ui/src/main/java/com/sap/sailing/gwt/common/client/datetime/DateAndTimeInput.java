@@ -46,10 +46,14 @@ public class DateAndTimeInput extends AbstractInput {
 
         @Override
         public Date getValue() {
-            final String dateString = dateFormat.format(dateInput.getValue());
-            final String timeString = timeFormat.format(timeInput.getValue());
-            final String dateAndTimeString = dateString + "T" + timeString;
-            return datetimeFormat.parse(dateAndTimeString);
+            final Date dateValue = dateInput.getValue(), timeValue = timeInput.getValue();
+            if (Objects.nonNull(dateValue) && Objects.nonNull(timeValue)) {
+                final String dateString = dateFormat.format(dateInput.getValue());
+                final String timeString = timeFormat.format(timeInput.getValue());
+                final String dateAndTimeString = dateString + "T" + timeString;
+                return datetimeFormat.parse(dateAndTimeString);
+            }
+            return null;
         }
 
         @Override
