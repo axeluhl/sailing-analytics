@@ -8,7 +8,7 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
-import com.sap.sailing.selenium.pages.gwt.BetterDateTimeBoxPO;
+import com.sap.sailing.selenium.pages.gwt.DateAndTimeInputPO;
 import com.sap.sailing.selenium.pages.gwt.ListBoxPO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
@@ -56,8 +56,8 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
     public void setValues(String name, String boatClass, Date startDate, Date endDate) {
         this.setRegattaName(name);
         this.setBoatClass(boatClass);
-        BetterDateTimeBoxPO.create(driver, startDateTimeBox).setDate(startDate, false);
-        BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(endDate, false);
+        DateAndTimeInputPO.create(driver, startDateTimeBox).setValue(startDate, false);
+        DateAndTimeInputPO.create(driver, endDateTimeBox).setValue(endDate, false);
     }
     
     // TODO: Scoring System, Event and Course Area
