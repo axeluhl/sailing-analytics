@@ -6,13 +6,13 @@
             padding: 0 1em !important;
             max-width: 80em;
         }
-        h2, .container > div, p > span:first-child {
+        .container > h2, .container > div, .container > p > span:first-child {
             text-transform: uppercase;
         }
-        .container > div, p > span:first-child {
+        .container > div, .container > p > span:first-child {
             text-decoration: underline;
         }
-        p > span:first-child:after {
+        .container > p > span:first-child:after {
             content: ":"
         }
     </ui:style>
