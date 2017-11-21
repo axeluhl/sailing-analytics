@@ -29,9 +29,20 @@
   background-color: #1faada;
 }
 .eventheader_sharing_itemfacebook {
+  position: relative;
   background-color: #3b5998;
+}
+.eventheader_sharing_itemfacebook:after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
   background-image: resourceUrl("facebook");
-  background-size: 10px auto;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .eventheader_sharing_itemfacebook:hover,
 .eventheader_sharing_itemfacebook:focus {
