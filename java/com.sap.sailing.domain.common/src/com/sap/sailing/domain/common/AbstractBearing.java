@@ -40,6 +40,17 @@ public abstract class AbstractBearing implements Bearing {
         }
         return new DegreeBearingImpl(diff);
     }
+    
+    @Override
+    public Bearing getDifferenceTo(Bearing b, Bearing lastDifference) {
+        double courseChangeAngleInDegrees = getDifferenceTo(b).getDegrees();
+        double lastCourseChangeAngleInDegrees = lastDifference.getDegrees();
+        if (Math.abs(Math.signum(courseChangeAngleInDegrees) - Math.signum(lastCourseChangeAngleInDegrees)) == 2
+                && Math.abs(courseChangeAngleInDegrees - lastCourseChangeAngleInDegrees) >= 180) {
+            courseChangeAngleInDegrees += courseChangeAngleInDegrees < 0 ? 360 : -360;
+        }
+        return new DegreeBearingImpl(courseChangeAngleInDegrees);
+    }
 
     @Override
     public Bearing middle(Bearing other) {

@@ -155,25 +155,14 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * <code>endExclusive</code> or any later fix has been reached and sums up the direction change as a "bearing." A
      * negative sign means a direction change to port, a positive sign means a direction change to starboard.
      */
-    private Bearing getCourseChange(Competitor competitor, TimePoint startExclusive, TimePoint endExclusive) {
-        Bearing directionChangeInDegrees = new DegreeBearingImpl(0);
+    private Bearing getCourseChange(Competitor competitor, TimePoint startInclusive, TimePoint endInclusive) {
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        track.lockForRead();
-        try {
-            GPSFixMoving previous = null;
-            GPSFixMoving fix = null;
-            for (Iterator<GPSFixMoving> i = track.getFixesIterator(startExclusive, /* inclusive */ false); i.hasNext()
-                    && (previous == null || !previous.getTimePoint().after(endExclusive)); previous = fix) {
-                fix = i.next();
-                if (previous != null) {
-                    directionChangeInDegrees = new DegreeBearingImpl(directionChangeInDegrees.getDegrees() + previous
-                            .getSpeed().getBearing().getDifferenceTo(fix.getSpeed().getBearing()).getDegrees());
-                }
-            }
-        } finally {
-            track.unlockAfterRead();
+        SpeedWithBearingStepsIterable speedWithBearingSteps = track.getSpeedWithBearingSteps(startInclusive, endInclusive, track.getAverageIntervalBetweenRawFixes());
+        double totalCourseChangeInDegrees = 0;
+        for (SpeedWithBearingStep step : speedWithBearingSteps) {
+            totalCourseChangeInDegrees += step.getCourseChangeInDegrees();
         }
-        return directionChangeInDegrees;
+        return new DegreeBearingImpl(totalCourseChangeInDegrees);
     }
 
     /**
@@ -390,15 +379,29 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
                 }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
+                CurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
+                        competitor, maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
+                        maneuverDirection);
+                
+                CurveDetails refinedPenaltyDetails;
+                if (refinedPenaltyMainCurveDetails == null) {
+                    // This should really not happen!
+                    logger.warning(
+                            "Maneuver detection has failed to process penalty circle maneuver correctly, because refinedPenaltyMainCurveDetails computation returned null. Race-Id: "
+                                    + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
+                                    + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
+                    // Use already detected maneuver main curve as fallback data to prevent Nullpointer
+                    refinedPenaltyMainCurveDetails = maneuverMainCurveDetails;
+                    refinedPenaltyDetails = maneuverDetails;
+                    firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
+                } else {
+                    refinedPenaltyDetails = computeManeuverDetails(competitor, refinedPenaltyMainCurveDetails,
+                            maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
+                }
                 if (legBeforeManeuver != null) {
                     maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
                             maneuverDetails.getTimePoint(), firstPenaltyCircleCompletedAt);
                 }
-                CurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
-                        competitor, maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
-                        maneuverDirection);
-                CurveDetails refinedPenaltyDetails = computeManeuverDetails(competitor, refinedPenaltyMainCurveDetails,
-                        maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
                 Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimePoint(),
                         /* extrapolate */ false);
                 final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
