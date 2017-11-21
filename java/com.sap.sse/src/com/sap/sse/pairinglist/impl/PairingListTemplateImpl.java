@@ -192,6 +192,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     
     private int[] generateSeeds(int flights, int competitors, int count) {
         int[] seeds=new int[count];
+        Arrays.fill(seeds, 0);
         for(int x=0;x<seeds.length;x++){
             int random=this.getRandomIntegerBetween(0, competitors - 1);
             while(this.contains(seeds, random)) {
@@ -686,7 +687,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return a random number
      */
     private int getRandomIntegerBetween(int min, int max) {
-        return random.nextInt(max - min) + min;
+        return random.nextInt(max +1);
     }
 
     /**
