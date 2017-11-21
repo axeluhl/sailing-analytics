@@ -42,24 +42,17 @@ public class RaceColumnReloadTest {
 
     private static final String LEADERBOARDNAME = "TESTBOARD";
 
-    private RacingEventService racingEventServiceServer;
-    private Peer<RacingEventServiceOperation<?>, RacingEventService> server;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
+    private Peer<RacingEventServiceOperation<?>, RacingEventService> server;
+    private RacingEventService racingEventServiceServer;
     private RaceColumn raceColumn;
-
     private RaceLog raceLog;
-
     private RaceLogWindFixEventImpl testWindEvent1;
-
     private Fleet fleet;
-
     private MongoObjectFactoryImpl objectFactory;
-
     private RaceLogIdentifier raceLogIdentifier;
-
     private RaceLogWindFixEventImpl testWindEvent2;
-
     private MongoRaceLogStoreVisitor mongoStorer;
 
     @Before
@@ -86,12 +79,12 @@ public class RaceColumnReloadTest {
 
         raceLogIdentifier = raceColumn.getRaceLogIdentifier(fleet);
 
-        mongoStorer = new MongoRaceLogStoreVisitor(raceLogIdentifier,objectFactory);
-        
+        mongoStorer = new MongoRaceLogStoreVisitor(raceLogIdentifier, objectFactory);
+
         TimePoint t1 = MillisecondsTimePoint.now();
         Wind wind1 = new WindImpl(/* position */ null, t1, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70)));
         testWindEvent1 = new RaceLogWindFixEventImpl(t1, author, 0, wind1, false);
-        
+
         TimePoint t2 = MillisecondsTimePoint.now().plus(1000);
         Wind wind2 = new WindImpl(/* position */ null, t1, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70)));
         testWindEvent2 = new RaceLogWindFixEventImpl(t2, author, 0, wind2, false);
@@ -126,7 +119,7 @@ public class RaceColumnReloadTest {
         raceColumn.reloadRaceLog(fleet);
         Assert.assertEquals(1, seenWindEvents.get());
     }
-    
+
     @Test
     public void testAddedWindAndReloadAndAddAnotherAndReloadAgain() throws InterruptedException {
         AtomicInteger seenWindEvents = new AtomicInteger(0);
@@ -171,10 +164,10 @@ public class RaceColumnReloadTest {
         });
         raceLog.add(testWindEvent1);
         Assert.assertEquals(1, seenWindEvents.get());
-        
+
         mongoStorer.visit(testWindEvent2);
         Assert.assertEquals(1, seenWindEvents.get());
-        
+
         raceColumn.reloadRaceLog(fleet);
         Assert.assertEquals(2, seenWindEvents.get());
     }
