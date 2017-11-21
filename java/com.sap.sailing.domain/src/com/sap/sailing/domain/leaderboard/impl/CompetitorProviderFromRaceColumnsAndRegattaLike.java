@@ -181,9 +181,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         if (allCompetitorsCache == null) {
             final Set<Competitor> result = new HashSet<>();
             final Set<RaceDefinition> raceDefinitions = new HashSet<>();
-            boolean hasRaceColumns = false;
             for (RaceColumn rc : provider.getRaceColumns()) {
-                hasRaceColumns = true;
                 final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsInRaceColumnWithRaceDefinitionsConsidered = rc.getAllCompetitorsWithRaceDefinitionsConsidered();
                 Util.addAll(allCompetitorsInRaceColumnWithRaceDefinitionsConsidered.getB(), result);
                 Util.addAll(allCompetitorsInRaceColumnWithRaceDefinitionsConsidered.getA(), raceDefinitions);
@@ -192,12 +190,10 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                 }
             }
             final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
-            if (!hasRaceColumns) {
-                // If no race exists, the regatta log-provided competitor registrations will not have
-                // been considered yet; add them:
-                final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
-                result.addAll(regattaLogProvidedCompetitors);
-            }
+            // If no race exists, the regatta log-provided competitor registrations will not have
+            // been considered yet; add them:
+            final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
+            result.addAll(regattaLogProvidedCompetitors);
             // else, don't add regatta log competitors because they have been added in each column already.
             // The competitors are collected from the races. Those, however, will be the regatta log
             // competitors if the race does not define its own.
