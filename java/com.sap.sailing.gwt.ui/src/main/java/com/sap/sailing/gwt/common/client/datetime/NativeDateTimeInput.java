@@ -44,6 +44,7 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
 
     @Override
     public final void onBrowserEvent(Event event) {
+        // TODO: Cache latest value to avoid multiple ValueChangeEvents
         final int type = event.getTypeInt();
         if (type == Event.ONCHANGE || type == Event.ONBLUR || type == Event.ONKEYUP) {
             ValueChangeEvent.fire(this, getValue());
