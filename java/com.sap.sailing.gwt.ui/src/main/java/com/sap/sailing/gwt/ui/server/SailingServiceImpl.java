@@ -2901,6 +2901,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (trackedLeg != null) {
                     Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
                     result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
+                } else {
+                    // check if wind information is available; if so, compute a VMG only based on wind data:
+                    
                 }
                 break;
             case DISTANCE_TRAVELED:

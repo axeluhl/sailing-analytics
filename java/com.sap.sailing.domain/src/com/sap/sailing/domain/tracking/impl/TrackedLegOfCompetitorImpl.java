@@ -268,11 +268,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     /**
      * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
-     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
-     * the leg's direction.
-     * @param windPositionMode see {@link #getWind(Position, TimePoint, Set)}
+     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto the
+     * leg's direction.
      * 
-     * @throws NoWindException in case the wind direction is not known
+     * @param windPositionMode
+     *            see {@link #getWind(Position, TimePoint, Set)}
+     * 
+     * @throws NoWindException
+     *             in case the wind direction is not known
      */
     private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, final TimePoint at, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) {
