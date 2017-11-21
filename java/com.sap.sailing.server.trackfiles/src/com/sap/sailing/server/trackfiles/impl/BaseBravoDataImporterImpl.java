@@ -173,6 +173,6 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
     }
 
     private int getTrackColumnCount() {
-        return columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.size();
+        return Collections.max(columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.values())+1;
     }
 }
