@@ -707,4 +707,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 	public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
 		return null;
 	}
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
 }
