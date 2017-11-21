@@ -52,14 +52,14 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @param files
      *            the file items together with the names of the importer to use for importing the respective file's
-     *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for
-     *            all importers found registered in the OSGi registry. The first matching importer is used for the
-     *            file. The importer is selected on a per-file basis.
+     *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
+     *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
+     *            importer is selected on a per-file basis.
      * 
      * @throws IOException
      */
-    private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files)
-            throws IOException {
+    private Iterable<TrackFileImportDeviceIdentifier> importFiles(boolean enableDownsampler,
+            Iterable<Pair<String, FileItem>> files) throws IOException {
         final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
@@ -102,7 +102,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                                 }
                             }
                         }
-                    }, fi.getName(), requestedImporterName, /* downsample */ true);
+                    }, fi.getName(), requestedImporterName, enableDownsampler);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
                 } catch (FormatNotSupportedException e) {
                     logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
@@ -119,10 +119,14 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         String importerName = null;
-        searchForPreferredImporter: for (FileItem fi : fileItems) {
-            if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
-                importerName = fi.getString();
-                break searchForPreferredImporter;
+        boolean enableDownsampler = false;
+        for (FileItem fi : fileItems) {
+            if (fi.isFormField()) {
+                if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
+                    importerName = fi.getString();
+                } else if ("downsample".equalsIgnoreCase(fi.getFieldName())) {
+                    enableDownsampler = "on".equalsIgnoreCase(fi.getString());
+                }
             }
         }
         if (importerName == null) {
@@ -134,7 +138,8 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                 filesAndImporterNames.add(new Pair<>(importerName, fi));
             }
         }
-        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(filesAndImporterNames);
+        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(enableDownsampler,
+                filesAndImporterNames);
         resp.setContentType("text/html");
         for (TrackFileImportDeviceIdentifier mapping : mappingList) {
             String stringRep = mapping.getId().toString();
