@@ -638,7 +638,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                             @Override
                             public void onSuccess(Pair<Boolean, Boolean> result) {
                                 if (!result.getA() || !result.getB()) {
-                                    Window.alert(stringMessages.failedToSetNewStartTime());
+                                    Window.alert(stringMessages.failedToSetNewFinishingAndFinishTime());
                                 }
                             }
                         });

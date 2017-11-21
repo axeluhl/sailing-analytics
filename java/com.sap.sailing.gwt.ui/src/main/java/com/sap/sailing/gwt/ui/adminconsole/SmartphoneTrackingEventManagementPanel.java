@@ -773,7 +773,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             @Override
                             public void onSuccess(Pair<Boolean, Boolean> result) {
                                 if (!result.getA() || !result.getB()) {
-                                    Window.alert(stringMessages.failedToSetNewStartTime());
+                                    Window.alert(stringMessages.failedToSetNewFinishingAndFinishTime());
                                 } else {
                                     trackedRacesListComposite.regattaRefresher.fillRegattas();
                                 }

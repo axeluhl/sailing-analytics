@@ -1053,6 +1053,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveLeaderboard(String name);
     String metaLeaderboardCannotBeChanged();
     String failedToSetNewStartTime();
+    String failedToSetNewFinishingAndFinishTime();
     String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
     String igtimiWindImport();
     String seeIgtimiTabForAccountSettings();
