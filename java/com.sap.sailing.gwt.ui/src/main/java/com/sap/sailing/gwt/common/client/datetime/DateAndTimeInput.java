@@ -47,7 +47,7 @@ public class DateAndTimeInput extends AbstractInput {
         @Override
         public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Date> handler) {
             final ValueChangeHandler<Date> internalHandler = event -> ValueChangeEvent.fire(this, getValue());
-            final List<HandlerRegistration> handlerRegistrations = new ArrayList<>(3);
+            final List<HandlerRegistration> handlerRegistrations = new ArrayList<>();
             handlerRegistrations.add(dateInput.addValueChangeHandler(internalHandler));
             handlerRegistrations.add(timeInput.addValueChangeHandler(internalHandler));
             handlerRegistrations.add(addHandler(handler, ValueChangeEvent.getType()));

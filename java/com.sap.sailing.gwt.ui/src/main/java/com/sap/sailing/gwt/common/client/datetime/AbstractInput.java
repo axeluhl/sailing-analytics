@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  */
 abstract class AbstractInput extends Composite implements DateTimeInput {
 
-    private HasValue<Date> delegate;
+    private final HasValue<Date> delegate;
 
     /**
      * Creates a new {@link AbstractInput} instance passing method calls to the provided delegate.
