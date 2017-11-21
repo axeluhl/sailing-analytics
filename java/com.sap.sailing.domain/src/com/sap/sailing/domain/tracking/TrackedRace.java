@@ -612,7 +612,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
             boolean notifyAboutGPSFixesAlreadyLoaded);
 
     void removeListener(RaceChangeListener listener);
-
+    
     /**
      * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
      * or if the competitor has not finished one of the legs in the race.
@@ -623,6 +623,18 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * See {@link TrackedLegOfCompetitor#getDistanceTraveledConsideringGateStart(TimePoint)}
      */
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
+     */
+    Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
+     */
+    Duration getDurationFoiled(Competitor competitor, TimePoint timePoint);
 
     /**
      * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}

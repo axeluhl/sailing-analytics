@@ -711,7 +711,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Distance getRideHeight(TimePoint at) {
         final Distance result;
         if (hasStartedLeg(at)) {
-            TimePoint timePoint =hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
             BravoFixTrack<Competitor> track = getTrackedRace()
                     .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
             result = track == null ? null : track.getRideHeight(timePoint);
@@ -721,6 +721,37 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return result;
     }
     
+    @Override
+    public Distance getDistanceFoiled(TimePoint at) {
+        final Distance result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null
+                    : track.getDistanceSpentFoiling(getMarkPassingForLegStart().getTimePoint(),
+                            timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration getDurationFoiled(TimePoint at) {
+        final Duration result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null
+                    : track.getTimeSpentFoiling(getMarkPassingForLegStart().getTimePoint(), timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     @Override
     public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) {
         return getEstimatedTimeToNextMark(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
