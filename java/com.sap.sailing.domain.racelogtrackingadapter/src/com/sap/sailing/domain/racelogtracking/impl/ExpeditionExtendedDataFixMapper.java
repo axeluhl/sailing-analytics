@@ -25,7 +25,8 @@ public class ExpeditionExtendedDataFixMapper implements SensorFixMapper<BravoFix
     @Override
     public DynamicSensorFixTrack<Competitor, BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
         return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, 
-                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ true));
+                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ true,
+                        race.getTrack(key)));
     }
     
     @Override

@@ -29,6 +29,12 @@
             background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
             background-position: right center;
             background-repeat: no-repeat;
+            /* Fix for old firefox versions to make the native arrow disappear: */
+            text-overflow: "";
+            text-indent: 0.01px;
+        }
+        .languageSelection::-ms-expand {
+            display: none;
         }
     </ui:style>
     <g:FlowPanel tag="span">
