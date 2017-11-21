@@ -157,7 +157,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     private Bearing getCourseChange(Competitor competitor, TimePoint startInclusive, TimePoint endInclusive) {
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        SpeedWithBearingStepsIterable speedWithBearingSteps = track.getSpeedWithBearingSteps(startInclusive, endInclusive, track.getAverageIntervalBetweenRawFixes());
+        SpeedWithBearingStepsIterable speedWithBearingSteps = track.getSpeedWithBearingSteps(startInclusive,
+                endInclusive, track.getAverageIntervalBetweenRawFixes());
         double totalCourseChangeInDegrees = 0;
         for (SpeedWithBearingStep step : speedWithBearingSteps) {
             totalCourseChangeInDegrees += step.getCourseChangeInDegrees();
@@ -167,7 +168,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     /**
      * Groups the {@link CourseChange} sequence into groups where the times of the fixes at which the course changes
-     * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds or
+     * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds and
      * where the distances of those course changes are less than three hull lengths apart. For those, a single
      * {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the direction changes of
      * the individual {@link CourseChange} objects. This can result in direction changes of more than 180 degrees in one
@@ -211,8 +212,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         // TODO use different maneuver times for upwind / reaching / downwind / cross-leg (mark passing)
                         // group contains complete maneuver if the next fix is too late or too far away to belong to the
                         // same maneuver
-                        // FIXME penalty circles slow down the boat so much that time limit may get exceeded although
-                        // distance limit is matched
                         && currentFixAndCourseChange.getA().getTimePoint().asMillis() - group.get(group.size() - 1)
                                 .getA().getTimePoint().asMillis() > getApproximateManeuverDuration(competitor)
                                         .asMillis()
@@ -242,15 +241,15 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     /**
      * Creates maneuvers from the provided {@code group} of douglas peucker fixes considering the provided time range
-     * limit. Due to recursive calls and total course change >= 1 degrees requirement this method might return zero or
-     * more maneuvers. The maneuvers are determined by the following work-flow:
+     * limit. This method might return zero or more maneuvers. The maneuvers are determined by the following work-flow:
      * <ol>
      * <li>Main curve of maneuver within the time range of douglas peucker fixes +-
-     * ({@link BoatClass#getApproximateManeuverDuration() maneuver duration}{@code  / 2}) is determined. As main curve
-     * is defined the section of maneuver with the highest absolute course change towards the provided
-     * {@code maneuverDirection}.</li>
-     * <li>Maneuver start and end with stable speed and course are determined by analysis of speed before and after the
-     * main curve</li>
+     * ({@link BoatClass#getApproximateManeuverDuration() maneuver duration}{@code  / 2}) is determined. The main curve
+     * is defined as the section of maneuver with the highest absolute course change towards the provided
+     * {@code maneuverDirection} ({@link Maneuver more info}).</li>
+     * <li>Maneuver start and end with stable speed and course are determined by analysis of speed maxima starting
+     * before and after the main curve, followed by extension to the points with stable course
+     * ({@link #computeManeuverDetails(Competitor, CurveDetailsWithBearingSteps, TimePoint, TimePoint) more info})</li>
      * <li>The maneuver type is determined considering the maneuver's main curve, marks and wind direction</li>
      * </ol>
      * 
@@ -274,6 +273,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @throws NoWindException
      *             When no wind information during maneuver performance is available
      * @see #groupChangesInSameDirectionIntoManeuvers(Competitor, List, boolean, TimePoint, TimePoint)
+     * @see #computeManeuverDetails(Competitor, CurveDetailsWithBearingSteps, TimePoint, TimePoint)
      */
     private Iterable<Maneuver> createManeuverFromGroupOfCourseChanges(Competitor competitor,
             List<Pair<GPSFixMoving, CourseChange>> douglasPeuckerFixesGroup, NauticalSide maneuverDirection,
@@ -382,7 +382,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 CurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
                         competitor, maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
                         maneuverDirection);
-                
+
                 CurveDetails refinedPenaltyDetails;
                 if (refinedPenaltyMainCurveDetails == null) {
                     // This should really not happen!
@@ -523,10 +523,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Computes details of the main curve of maneuver, such as maneuver entering and exiting time point with speed and
-     * bearing, time point of maneuver climax, total course change, and relevant maneuver bearing steps. The maneuver
-     * section with the highest (starboard maneuvers)/lowest (port side maneuvers) sum of differences between bearing
-     * steps is defined as main curve section.
+     * Computes details of the {@link Maneuver main curve of maneuver}, such as maneuver entering and exiting time point
+     * with speed and bearing, time point with the highest turning rate (maneuver climax), total course change, and
+     * speed with bearing steps of main curve. The maneuver section with the highest sum of absolute course change
+     * angles between bearing steps is defined as the main curve section ({@link Maneuver more info})s.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -535,7 +535,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The time range which will be gradually decreased in order to locate the section with the highest
      *            course change towards the target course change direction
      * @param maneuverDirection
-     *            The target course change direction of the main curve to determine
+     *            The target course change direction for the main curve to determine
      * @return The details of the maneuver main curve
      */
     private CurveDetailsWithBearingSteps computeManeuverMainCurveDetails(Competitor competitor,
@@ -563,18 +563,18 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     /**
      * Computes the details of maneuver such as maneuver entering and exiting time point with speed and bearing, time
-     * point of maneuver climax and total course change. The provided details of maneuver main curve are used as minimal
-     * maneuver section which gets expanded by analyzing the speed and bearing trend regarding stability before and
-     * after the main curve of maneuver. The goal is to determine the maneuver entering and exiting time points such
-     * that the speed and course values ideally represent stable segments leading into and out of the maneuver. It is
-     * assumed that before maneuver the speed starts to slow down. Thus, in order to approximate the beginning time
-     * point of the maneuver, the speed maximum is determined throughout forward in time iteration of speed steps
-     * starting from time point of main curve beginning. From the determined speed maximum, the iteration continues
-     * until the point, when the bearing changes occur only with a maximum of
+     * point with the highest turning rate (maneuver climax) and total course change. The provided details of maneuver
+     * main curve are used as minimal maneuver section which gets expanded by analyzing the speed and bearing trend
+     * regarding stability before and after the main curve of maneuver. The goal is to determine the maneuver entering
+     * and exiting time points such that the speed and course values ideally represent stable segments leading into and
+     * out of the maneuver. It is assumed that before maneuver the speed starts to slow down. Thus, in order to
+     * approximate the beginning time point of the maneuver, the speed maximum is determined throughout forward in time
+     * iteration of speed steps starting from time point of main curve beginning. From the determined speed maximum, the
+     * iteration continues until the point, when the bearing changes occur only with a maximum of
      * {@value #MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS} degrees per second, which is
      * regarded as a stable course. The exiting time point of maneuver is approximated analogously by speed maximum
      * determination throughout backward in time iteration of speed steps starting from time of main curve end, followed
-     * by a search of stable course.
+     * by a search for a point with stable course.
      * 
      * @param competitor
      *            The competitor whose maneuvers are being determined
@@ -858,9 +858,12 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Computes entering and exiting time point with speed and bearing for the main curve of maneuver. The strategy here
-     * is to cut away bearing steps from the left and right in order to reach a maximal course change corresponding to
-     * the target maneuver direction.
+     * Computes maneuver main curve details, such as entering and exiting time point with speed and bearing, time point
+     * with the highest turning rate (maneuver climax) and total course change. The strategy here is to cut away bearing
+     * steps from the left and right in order to reach a maximal course change corresponding to the target maneuver
+     * direction. Furthermore, the main curve boundaries get additionally shortened if the angular velocity of the
+     * corresponding steps appears lower than
+     * {@value #MIN_ANGULAR_VELOCITY_FOR_MAIN_CURVE_BOUNDARIES_IN_DEGREES_PER_SECOND} degrees per second.
      * 
      * @param maneuverTimePoint
      *            The computed time point of maneuver
@@ -868,7 +871,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The bearing steps contained within maneuver
      * @param maneuverDirection
      *            The nautical direction of the maneuver
-     * @return The computed entering and exiting time point with its speeds with bearings for the main curve
+     * @return The computed entering and exiting time point with its speeds with bearings, time point of maneuver climax
+     *         and total course change for the main curve
      */
     public CurveDetails computeManeuverMainCurve(SpeedWithBearingStepsIterable bearingStepsToAnalyze,
             NauticalSide maneuverDirection) {
@@ -965,7 +969,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Gets the maximal duration of the maneuver main curve.
+     * Gets the approximated duration of the maneuver main curve considering the boat class of the competitor.
      */
     private Duration getApproximateManeuverDuration(Competitor competitor) {
         return competitor.getBoat().getBoatClass().getApproximateManeuverDuration();

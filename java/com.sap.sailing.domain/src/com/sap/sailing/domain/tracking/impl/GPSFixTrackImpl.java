@@ -1127,7 +1127,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         if (intervalBetweenBearingSteps.asMillis() <= 0) {
             throw new IllegalArgumentException("intervalBetweenBearingSteps must be a positive duration but was "+intervalBetweenBearingSteps);
         }
-        List<SpeedWithBearingStep> relevantBearings = new ArrayList<>();
+        List<SpeedWithBearingStep> speedWithBearingSteps = new ArrayList<>();
         Bearing lastCourse = null;
         TimePoint lastTimePoint = null;
         double lastCourseChangeAngleInDegrees = 0;
@@ -1153,7 +1153,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                     double angularVelocityInDegreesPerSecond = lastTimePoint == null ? 0
                             : Math.abs(courseChangeAngleInDegrees / lastTimePoint.until(timePoint).asSeconds());
                     
-                    relevantBearings.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees, angularVelocityInDegreesPerSecond));
+                    speedWithBearingSteps.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed, courseChangeAngleInDegrees, angularVelocityInDegreesPerSecond));
                     lastCourse = course;
                     lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
                 }
@@ -1165,6 +1165,6 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         } finally {
             unlockAfterRead();
         }
-        return new SpeedWithBearingStepsIterable(relevantBearings);
+        return new SpeedWithBearingStepsIterable(speedWithBearingSteps);
     }
 }

@@ -14,21 +14,22 @@ import com.sap.sse.datamining.annotations.Statistic;
  * <ol>
  * <li>The first section starts from sailing a stable speed at TWA and ends at getting back to a stable speed and target
  * TWA. This section is defined as maneuver curve and its time range is represented by {@code timePointBefore} and
- * {@code timePointAfter}. The target speeds and bearings are represented by {@code speedWithBearingBefore} and
+ * {@code timePointAfter}. The target speeds and courses are represented by {@code speedWithBearingBefore} and
  * {@code speedWithBearingAfter}.</li>
  * <li>The second section is called main curve and is defined as the section within the maneuver curve, where highest
  * course change has been performed. This means that the main curve is a subset of the maneuver curve which is
  * represented by {@code timePointBeforeMainCurve} and {@code timePointAfterMainCurve}.</li>
  * </ol>
- * The maneuver curve is an expansion of the main curve. The expansion relates speed maxima location before and after
- * main curve. In contrast to maneuver curve, the main curve computation does not take speed into account and is based
- * only on gradual analysis of bearings within the maneuver progress. The main curve is supposed to deliver information
- * about the acceleration during continues turning in the direction of maneuver which can be used for boat class
- * oriented investigations. On the other side, the maneuver curve describes the period where enters from a period of
- * stable TWA and speed in a section of changes and adjustments in order to perform the maneuver. Based on the maneuver
- * curve, the maneuver loss is computed which is regarded as an important measurement feature in order to compare
- * performances of competing racers. In contrast to main curve, the maneuver curve reveals strategic decision making of
- * individual sailors to master a maneuver with minimal maneuver loss.
+ * The maneuver curve is an expansion of the main curve. The expansion relates the points with stable course and speed
+ * before and after main curve. In contrast to maneuver curve, the main curve computation does not take speed into
+ * account and is based only on gradual analysis of course changes within the maneuver progress. The main curve is
+ * supposed to deliver information about the acceleration during continuous turning in the direction of maneuver which
+ * can be used for boat class oriented investigations. On the other side, the maneuver curve describes a section where
+ * the boat starts loosing speed and course stability due to maneuvering preparations, followed by maneuver performance,
+ * acceleration and realignment to the target course on new tack. Based on the maneuver curve, the maneuver loss is
+ * computed which is regarded as an important measurement feature in order to compare performances of competing racers.
+ * In contrast to main curve, the maneuver curve reveals strategic decision making of individual sailors to master a
+ * maneuver with minimal maneuver loss.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -60,9 +61,9 @@ public interface Maneuver extends GPSFix {
     Distance getManeuverLoss();
 
     /**
-     * Gets the time point of the corresponding maneuver. The time point refers to a position within the main curve of
-     * maneuver with the highest turning rate recorded toward the direction of maneuver. This position is called
-     * maneuver climax.
+     * Gets the time point of the corresponding maneuver. The time point refers to a point within the main curve of
+     * maneuver with the highest turning rate recorded toward the direction of maneuver. This point is called maneuver
+     * climax.
      * 
      * @return The maneuver time point with the highest course change
      */
@@ -140,9 +141,10 @@ public interface Maneuver extends GPSFix {
     double getDirectionChangeWithinMainCurveInDegrees();
 
     /**
-     * The maximal angular velocity recorded within the main which was recorded at {@link #getTimePoint()}.
+     * The maximal angular velocity recorded within the main curve at maneuver climax.
      * 
      * @return The maximal angular velocity in degrees per second
+     * @see #getTimePoint()
      */
     @Statistic(messageKey = "MaxAngularVelocityInDegreesPerSecond", resultDecimals = 4, ordinal = 4)
     double getMaxAngularVelocityInDegreesPerSecond();
