@@ -37,11 +37,18 @@ public class DateAndTimeInput extends AbstractInput {
         private DateAndTimePanel(Accuracy accuracy) {
             add(this.dateInput = new DateInput());
             add(this.timeInput = new TimeInput(accuracy));
-            dateInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
-            timeInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
+            this.dateInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
+            this.timeInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());
             this.dateFormat = Accuracy.getDateFormat();
             this.timeFormat = accuracy.getTimeFormat();
             this.datetimeFormat = accuracy.getDatetimeFormat();
+        }
+
+        @Override
+        protected void onEnsureDebugId(String baseId) {
+            super.onEnsureDebugId(baseId);
+            this.dateInput.ensureDebugId("dateInput");
+            this.timeInput.ensureDebugId("timeInput");
         }
 
         @Override

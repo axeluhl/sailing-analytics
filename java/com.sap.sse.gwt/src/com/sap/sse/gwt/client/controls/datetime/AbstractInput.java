@@ -29,6 +29,11 @@ abstract class AbstractInput extends Composite implements DateTimeInput {
     }
 
     @Override
+    protected final void onEnsureDebugId(String baseId) {
+        getWidget().ensureDebugId(baseId);
+    }
+
+    @Override
     public final Date getValue() {
         return delegate.getValue();
     }
