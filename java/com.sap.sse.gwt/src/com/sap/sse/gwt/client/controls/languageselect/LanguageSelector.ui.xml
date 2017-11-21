@@ -30,6 +30,9 @@
             background-position: right center;
             background-repeat: no-repeat;
         }
+        .languageSelection::-ms-expand {
+            display: none;
+        }
     </ui:style>
     <g:FlowPanel tag="span">
         <g:InlineLabel ui:field="labelUi" addStyleNames="{style.label}"/>
