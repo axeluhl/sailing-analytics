@@ -36,7 +36,7 @@ public class TimeInput extends AbstractInput {
         private final DateTimeFormat viewFormat;
 
         private TimeConverter(Accuracy accuracy) {
-            this.viewFormat = accuracy == Accuracy.SECONDS ? VIEW_FORMAT_SHORT : VIEW_FORMAT_MEDIUM;
+            this.viewFormat = accuracy == Accuracy.SECONDS ? VIEW_FORMAT_MEDIUM : VIEW_FORMAT_SHORT;
         }
 
         @Override
