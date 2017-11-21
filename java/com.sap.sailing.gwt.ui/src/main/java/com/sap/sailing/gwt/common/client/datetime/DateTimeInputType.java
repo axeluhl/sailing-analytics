@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.common.client.datetime;
 
-import com.google.gwt.core.shared.GWT;
-
 /**
  * Enumeration of date and/or time related input {@link #getType() types} whose {@link #isSupported() support} in the
  * currently used browser was checked at runtime.
@@ -16,7 +14,6 @@ public enum DateTimeInputType {
     private DateTimeInputType(String type) {
         this.type = type;
         this.supported = checkSupport(type);
-        GWT.log("Input type support: " + type + " -> " + supported);
     }
 
     /**
