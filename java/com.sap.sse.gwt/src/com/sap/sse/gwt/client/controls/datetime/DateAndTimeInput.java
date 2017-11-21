@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.datetime;
+package com.sap.sse.gwt.client.controls.datetime;
 
 import java.util.ArrayList;
 import java.util.Date;

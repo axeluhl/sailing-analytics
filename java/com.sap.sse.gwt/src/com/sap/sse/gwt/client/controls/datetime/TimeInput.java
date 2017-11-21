@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.datetime;
+package com.sap.sse.gwt.client.controls.datetime;
 
 import java.text.ParseException;
 import java.util.Date;

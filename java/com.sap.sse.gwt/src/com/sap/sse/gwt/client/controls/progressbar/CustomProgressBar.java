@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.progressbar;
+package com.sap.sse.gwt.client.controls.progressbar;
 
 import java.util.Objects;
 

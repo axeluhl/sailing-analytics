@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.common.client.datetime.DateAndTimeInput;
-import com.sap.sailing.gwt.common.client.datetime.DateTimeInput.Accuracy;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox.Format;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
 

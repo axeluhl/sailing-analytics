@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.datetime;
+package com.sap.sse.gwt.client.controls.datetime;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.datetime;
+package com.sap.sse.gwt.client.controls.datetime;
 
 /**
  * Enumeration of date and/or time related input {@link #getType() types} whose {@link #isSupported() support} in the
