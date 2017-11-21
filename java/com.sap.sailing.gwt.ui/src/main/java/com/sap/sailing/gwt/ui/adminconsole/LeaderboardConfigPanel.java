@@ -475,7 +475,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     refreshRaceLog(object.getA(), object.getB(), true);
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
                     setStartTime(object.getA(), object.getB());
-                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SET_ENDTIME.equals(value)) {
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME.equals(value)) {
                     setEndTime(object.getA(), object.getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(object.getA(), object.getB());
