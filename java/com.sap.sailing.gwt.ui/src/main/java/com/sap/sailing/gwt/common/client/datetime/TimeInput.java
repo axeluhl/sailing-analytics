@@ -11,8 +11,19 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.user.client.ui.ValueBox;
 
+/**
+ * Extension of {@link AbstractInput} for time inputs, providing a native input field of type "time", if supported.
+ * Otherwise a {@link ValueBox} for {@link Date dates} is used as fallback widget using a
+ * {@link PredefinedFormat#TIME_SHORT short} or a {@link PredefinedFormat#TIME_MEDIUM medium} time format.
+ */
 public class TimeInput extends AbstractInput {
 
+    /**
+     * Created a new {@link TimeInput} instance which the provided {@link Accuracy accuracy}.
+     * 
+     * @param accuracy
+     *            {@link Accuracy} for the new input
+     */
     public TimeInput(Accuracy accuracy) {
         super(DateTimeInputType.TIME.isSupported() ? NativeDateTimeInput.time(accuracy)
                 : new TimeBox(new TimeConverter(accuracy)));

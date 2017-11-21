@@ -8,10 +8,20 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
+/**
+ * Abstract implementation for classes wrapping date and/or time inputs providing a fallback widget if the respective
+ * native input type is not supported.
+ */
 abstract class AbstractInput extends Composite implements DateTimeInput {
 
     private HasValue<Date> delegate;
 
+    /**
+     * Creates a new {@link AbstractInput} instance passing method calls to the provided delegate.
+     * 
+     * @param delegate
+     *            the native or fallback input for the respective input type
+     */
     protected <T extends HasValue<Date> & IsWidget> AbstractInput(T delegate) {
         DateTimeInputResources.INSTANCE.css().ensureInjected();
         this.delegate = delegate;

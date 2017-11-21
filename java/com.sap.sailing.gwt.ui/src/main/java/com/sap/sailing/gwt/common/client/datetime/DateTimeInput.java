@@ -7,15 +7,24 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
+/**
+ * Interface for date and/or time related input widgets holding a {@link Date date} value.
+ * 
+ * @see com.google.gwt.user.client.ui.IsWidget
+ * @see com.google.gwt.user.client.ui.HasValue
+ */
 public interface DateTimeInput extends IsWidget, HasValue<Date> {
 
+    /**
+     * Enumeration describing the accuracy of an input field of type "datetime-local" or "time".
+     */
     public enum Accuracy {
         MINUTES(60, "yyyy-MM-dd'T'HH:mm", "HH:mm"), SECONDS(1, "yyyy-MM-dd'T'HH:mm:ss", "HH:mm:ss");
 
         private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd");
 
-        private final String step;
         private final DateTimeFormat datetimeFormat, timeFormat;
+        private final String step;
 
         private Accuracy(int step, String datetimeFormat, String timeFormat) {
             this.step = String.valueOf(step);
@@ -23,20 +32,32 @@ public interface DateTimeInput extends IsWidget, HasValue<Date> {
             this.timeFormat = DateTimeFormat.getFormat(timeFormat);
         }
 
+        /**
+         * @return the {@link DateTimeFormat} for date inputs (always the same)
+         */
         public static DateTimeFormat getDateFormat() {
             return DATE_FORMAT;
         }
 
-        public String getStep() {
-            return step;
+        /**
+         * @return the {@link DateTimeFormat} for time inputs
+         */
+        public DateTimeFormat getTimeFormat() {
+            return timeFormat;
         }
 
+        /**
+         * @return the {@link DateTimeFormat} for date and time inputs
+         */
         public DateTimeFormat getDatetimeFormat() {
             return datetimeFormat;
         }
 
-        public DateTimeFormat getTimeFormat() {
-            return timeFormat;
+        /**
+         * @return the "step" attribute value to set on input fields of type "datetime-local" or "time"
+         */
+        public String getStep() {
+            return step;
         }
     }
 

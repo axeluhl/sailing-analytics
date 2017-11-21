@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.common.client.datetime;
 
 /**
  * Enumeration of date and/or time related input {@link #getType() types} whose {@link #isSupported() support} in the
- * currently used browser was checked at runtime.
+ * currently used browser will be checked at runtime.
  */
 public enum DateTimeInputType {
     

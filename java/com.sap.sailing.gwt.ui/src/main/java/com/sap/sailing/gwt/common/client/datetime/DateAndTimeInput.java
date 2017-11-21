@@ -11,8 +11,18 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
 
+/**
+ * Extension of {@link AbstractInput} for date and time inputs, providing a native input field of type "datetime-local",
+ * if supported. Otherwise a panel containing a {@link DateInput} and a {@link TimeInput} is used as fallback widget.
+ */
 public class DateAndTimeInput extends AbstractInput {
 
+    /**
+     * Created a new {@link DateAndTimeInput} instance which the provided {@link Accuracy accuracy}.
+     * 
+     * @param accuracy
+     *            {@link Accuracy} for the new input
+     */
     public DateAndTimeInput(Accuracy accuracy) {
         super(DateTimeInputType.DATETIME_LOCAL.isSupported() ? NativeDateTimeInput.datetimeLocale(accuracy)
                 : new DateAndTimePanel(accuracy));
@@ -24,7 +34,7 @@ public class DateAndTimeInput extends AbstractInput {
 
         private final DateTimeFormat dateFormat, timeFormat, datetimeFormat;
 
-        public DateAndTimePanel(Accuracy accuracy) {
+        private DateAndTimePanel(Accuracy accuracy) {
             add(this.dateInput = new DateInput());
             add(this.timeInput = new TimeInput(accuracy));
             dateInput.addStyleName(DateTimeInputResources.INSTANCE.css().dateTimeInput());

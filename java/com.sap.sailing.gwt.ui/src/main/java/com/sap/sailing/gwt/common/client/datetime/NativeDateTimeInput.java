@@ -12,18 +12,43 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Factory class to create native input field of type "{@link #datetimeLocale(Accuracy) datetime-local}",
+ * "{@link #date() date}" or "{@link #time(Accuracy) time}".
+ */
 class NativeDateTimeInput extends Widget implements DateTimeInput {
 
     private static final String ATTR_TYPE = "type", ATTR_STEP = "step";
 
+    /**
+     * Creates a native input field of type "date".
+     * 
+     * @return the newly created instance as {@link DateTimeInput} abstraction
+     */
     static DateTimeInput date() {
         return new NativeDateTimeInput(DateTimeInputType.DATE, "", Accuracy.getDateFormat());
     }
 
+    /**
+     * Creates a native input field of type "time" which the provided {@link Accuracy accuracy}.
+     * 
+     * @param accuracy
+     *            {@link Accuracy} for the new native input field
+     * 
+     * @return the newly created instance as {@link DateTimeInput} abstraction
+     */
     static DateTimeInput time(Accuracy accuracy) {
         return new NativeDateTimeInput(DateTimeInputType.TIME, accuracy.getStep(), accuracy.getTimeFormat());
     }
 
+    /**
+     * Creates a native input field of type "datetime-local" which the provided {@link Accuracy accuracy}.
+     * 
+     * @param accuracy
+     *            {@link Accuracy} for the new native input field
+     * 
+     * @return the newly created instance as {@link DateTimeInput} abstraction
+     */
     static DateTimeInput datetimeLocale(Accuracy accuracy) {
         return new NativeDateTimeInput(DateTimeInputType.DATETIME_LOCAL, accuracy.getStep(),
                 accuracy.getDatetimeFormat());
