@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -25,11 +26,12 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceLogSetTrackingTimesDTO> {
@@ -49,7 +51,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
     private Label currentEndLabel;
     private TimePointSpecificationFoundInLog currentEnd;
 
-    private HTML5DateTimeBox startTimeBox;
+    private DateAndTimeInput startTimeBox;
     /**
      * Decides whether the start time value shall be set; if checked, even an empty value (translated
      * to {@code null} will be stored as an event with the author's priority in the log; if unchecked,
@@ -58,7 +60,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
      * make the revoke succeed.
      */
     private CheckBox startTimeSetCheckbox;
-    private HTML5DateTimeBox endTimeBox;
+    private DateAndTimeInput endTimeBox;
     /**
      * Decides whether the end time value shall be set; if checked, even an empty value (translated
      * to {@code null} will be stored as an event with the author's priority in the log; if unchecked,
@@ -110,7 +112,8 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
                 });
     }
     
-    private void updateDateTimeLabelAndTimeBoxFromDate(final TimePointSpecificationFoundInLog timePoint, final Label label, final HTML5DateTimeBox dateTimeBox, CheckBox setCheckBox) {
+    private void updateDateTimeLabelAndTimeBoxFromDate(final TimePointSpecificationFoundInLog timePoint,
+            final Label label, final HasValue<Date> dateTimeBox, CheckBox setCheckBox) {
         if (timePoint == null) {
             label.setText(stringMessages.notAvailable());
             dateTimeBox.setValue(null);
@@ -142,7 +145,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
             }
         });
 
-        startTimeBox = createDateTimeBox(null, HTML5DateTimeBox.Format.YEAR_TO_SECOND);
+        startTimeBox = createDateTimeBox(null, Accuracy.SECONDS);
         startTimeBox.addValueChangeHandler(e->startTimeSetCheckbox.setValue(true)); // when the start time is manipulated, assume the user wants to really set it
         content.setWidget(0, 0, createLabel(stringMessages.startOfTracking()));
         content.setWidget(0, 1, startTimeBox);
@@ -150,7 +153,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
         content.setWidget(0, 2, startTimeSetCheckbox);
         content.setWidget(0, 3, startNow);
 
-        endTimeBox = createDateTimeBox(null, HTML5DateTimeBox.Format.YEAR_TO_SECOND);
+        endTimeBox = createDateTimeBox(null, Accuracy.SECONDS);
         endTimeBox.addValueChangeHandler(e->endTimeSetCheckbox.setValue(true)); // when the end time is manipulated, assume the user wants to really set it
         content.setWidget(1, 0, createLabel(stringMessages.endOfTracking()));
         content.setWidget(1, 1, endTimeBox);

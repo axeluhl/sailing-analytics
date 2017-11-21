@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -34,8 +35,10 @@ public class EventCreateDialog extends EventDialog {
         final Date now = new Date();
         startDateBox = createDateTimeBox(now, Accuracy.MINUTES);
         startDateBox.ensureDebugId("StartDateTimeBox");
+        startDateBox.addValueChangeHandler(e -> GWT.log("Start date: " + e.getValue()));
         endDateBox = createDateTimeBox(now, Accuracy.MINUTES);
         endDateBox.ensureDebugId("EndDateTimeBox");
+        endDateBox.addValueChangeHandler(e -> GWT.log("End date  : " + e.getValue()));
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);
         isPublicCheckBox.ensureDebugId("IsPublicCheckBox");

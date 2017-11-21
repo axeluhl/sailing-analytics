@@ -7,16 +7,16 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.client.controls.datetime.DateInput;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PositionEntryDialog extends DataEntryDialog<Pair<Position, TimePoint>> {
     private final DoubleBox lat;
     private final DoubleBox lng;
-    private final HTML5DateTimeBox timePointBox;
+    private final DateInput timePointBox;
     private final StringMessages stringMessages;
     
     private static final double ERROR_VAL = Double.MIN_VALUE;
@@ -44,7 +44,7 @@ public class PositionEntryDialog extends DataEntryDialog<Pair<Position, TimePoin
         this.stringMessages = stringMessages;
         lat = createDoubleBox(10);
         lng = createDoubleBox(10);
-        timePointBox = new HTML5DateTimeBox(HTML5DateTimeBox.Format.YEAR_TO_DAY);
+        timePointBox = new DateInput();
     }
 
     @Override

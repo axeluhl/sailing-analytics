@@ -2,12 +2,10 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
-import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox.Format;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.dialog.DialogUtils;
 
 public abstract class DataEntryDialogWithDateTimeBox<T> extends DataEntryDialog<T> {
 
@@ -22,25 +20,38 @@ public abstract class DataEntryDialogWithDateTimeBox<T> extends DataEntryDialog<
     }
     
     /**
-     * Creates a new {@link HTML5DateTimeBox} instance, where the requested {@link Format format} will be honored by the
-     * underlying implementation, if the native components can support it.
+     * Creates a new {@link DateAndTimeInput} instance using the provided {@link Accuracy accuracy} and initial
+     * {@link Date date value}.
      * 
      * @param initialValue
-     *            the initial {@link Date value} to set to the created {@link HTML5DateTimeBox}
-     * @param format
-     *            the {@link Format format} to set to the created {@link HTML5DateTimeBox}
+     *            the {@link Date date value} to show by default
+     * @param accuracy
+     *            the {@link Accuracy accuracy} of the input
+     * @return the newly created {@link DateAndTimeInput} instance
+     * 
+     * @see DateAndTimeInput#DateAndTimeInput(Accuracy)
      */
-    protected HTML5DateTimeBox createDateTimeBox(Date initialValue, Format format) {
-        final HTML5DateTimeBox result = new HTML5DateTimeBox(format);
+    protected DateAndTimeInput createDateTimeBox(Date initialValue, Accuracy accuracy) {
+        final DateAndTimeInput result = new DateAndTimeInput(accuracy);
         result.setValue(initialValue);
         result.addValueChangeHandler(event -> validateAndUpdate());
-        DialogUtils.linkEnterToButton(getOkButton(), result);
-        DialogUtils.linkEscapeToButton(getCancelButton(), result);
+        // TODO: Enable DateAndTimeInput for enter and escape linking
+        // DialogUtils.linkEnterToButton(getOkButton(), result);
+        // DialogUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
     }
 
-    protected DateAndTimeInput createDateTimeBox(Date initialValue, Accuracy accuracy) {
-        final DateAndTimeInput result = new DateAndTimeInput(accuracy);
+    /**
+     * Creates a new {@link DateInput} instance using the provided initial {@link Date date value}.
+     * 
+     * @param initialValue
+     *            the {@link Date date value} to show by default
+     * @return the newly created {@link DateAndTimeInput} instance
+     * 
+     * @see DateAndTimeInput#DateAndTimeInput(Accuracy)
+     */
+    protected DateInput createDateBox(Date initialValue) {
+        final DateInput result = new DateInput();
         result.setValue(initialValue);
         result.addValueChangeHandler(event -> validateAndUpdate());
         // TODO: Enable DateAndTimeInput for enter and escape linking
