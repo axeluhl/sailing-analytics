@@ -115,7 +115,7 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
         content.setWidget(2, 0, createLabel(stringMessages.authorName()));
         content.setWidget(2, 1, authorNameBox);
         content.setWidget(3, 0, createLabel(stringMessages.authorPriority()));
-        authorPriorityBox = createIntegerBox(5, 1);
+        authorPriorityBox = createIntegerBox(4, 2);
         authorPriorityBox.ensureDebugId("AuthorPriorityIntegerBox");
         content.setWidget(3, 1, authorPriorityBox);
 
