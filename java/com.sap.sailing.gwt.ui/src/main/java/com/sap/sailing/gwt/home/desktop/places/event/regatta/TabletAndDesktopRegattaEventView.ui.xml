@@ -10,10 +10,10 @@
 				<dp:eventheader.EventHeader ui:field="eventHeader" />
 			</c:header>
  			<c:tabcontent title="{i18n.overview}">
- 				<e:overviewtab.RegattaOverviewTabView />
+ 				<e:overviewtab.RegattaOverviewTabView ui:field="regattaOverviewTabUi" />
  			</c:tabcontent>
 			<c:tabcontent title="{i18n.races}">
-				<e:racestab.RegattaRacesTabView />
+				<e:racestab.RegattaRacesTabView ui:field="racesTabUi" />
 			</c:tabcontent>
 			<c:tabcontent title="{i18n.leaderboard}">
 				<e:leaderboardtab.RegattaLeaderboardTabView />
