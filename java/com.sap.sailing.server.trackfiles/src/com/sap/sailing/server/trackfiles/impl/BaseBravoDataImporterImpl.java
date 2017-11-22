@@ -69,7 +69,7 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
         try {
             LOG.fine("Import CSV from " + filename);
             final InputStreamReader isr;
-            if (sourceName.endsWith("gz")) {
+            if (filename.endsWith(".gz")) {
                 LOG.fine("Using gzip stream reader " + filename);
                 isr = new InputStreamReader(new GZIPInputStream(inputStream));
             } else {
