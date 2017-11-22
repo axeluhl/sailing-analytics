@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.shared.resources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sse.gwt.common.CommonIcons;
 
@@ -11,15 +12,19 @@ public interface SharedHomeResources extends CommonIcons {
     public static final SharedHomeResources INSTANCE = GWT.create(SharedHomeResources.class);
     
     @Source("default_event_logo.jpg")
+    @ImageOptions(preventInlining = true)
     ImageResource defaultEventLogoImage();
     
     @Source("default_event_photo.jpg")
+    @ImageOptions(preventInlining = true)
     ImageResource defaultEventPhotoImage();
     
     @Source("default_stage_event_teaser.jpg")
+    @ImageOptions(preventInlining = true)
     ImageResource defaultStageEventTeaserImage();
     
     @Source("default_video_preview.jpg")
+    @ImageOptions(preventInlining = true)
     ImageResource defaultVideoPreviewImage();
     
     @Source("arrow-down-grey.png")
