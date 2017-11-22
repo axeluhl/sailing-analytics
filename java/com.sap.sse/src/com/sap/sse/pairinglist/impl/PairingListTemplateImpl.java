@@ -52,13 +52,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
                 pairingFrameProvider.getCompetitorsCount())) {
             
-            if (maxConstantFlights > 0) {
+            if (true) {
                 this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
                         pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
-            } else {
-                pairingListTemplate = this.createPairingListTemplateWithoutPrefix(
-                        pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
-                        pairingFrameProvider.getCompetitorsCount());
             }
             this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
                     new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()]));
@@ -137,14 +133,24 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *            count of total competitors
      */
     protected int[][] createPairingListTemplate(int flightCount, int groupCount, int competitors) {
-        int[] seeds = this.generateSeeds(flightCount, competitors);
         int[][] bestPLT = new int[flightCount * groupCount][competitors / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
-
-        ArrayList<Future<int[][]>> futures = this.createPrefix(flightCount, groupCount, competitors,
-                new int[competitors][competitors], new int[flightCount * groupCount][competitors / groupCount], seeds,
-                new ArrayList<>(), 0);
-
+        
+//        int equals=3;
+//        int[][] allSeeds=new int[iterations][flightCount];
+//        for(int i=0;i<iterations;i++){
+//            allSeeds[i]=this.generateSeeds(flightCount, competitors,flightCount);
+//        }
+//        allSeeds=radixSort(allSeeds, competitors);
+//        ArrayList<int[][]> parts=this.divideSeeds(equals,allSeeds);
+          ArrayList<int[][]>parts=new ArrayList<>();
+          int[][] temp={{8,16,10,1,16,10,12,17,17,12,12,12,2,7,5}};
+          parts.add(temp);
+        ArrayList<Future<int[][]>> futures = new ArrayList<>();
+        for (int[][] is : parts) {
+            Future<int[][]> future = executorService.submit((new SuffixCreationTask(flightCount, groupCount, competitors,is,0)));
+            futures.add(future);
+        }
         for (Future<int[][]> f : futures) {
             try {
                 int[][] currentPLT = f.get();
@@ -160,14 +166,62 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
         }
 
-        bestPLT = this.improveAssignment(bestPLT, flightCount, groupCount, competitors);
-        bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitors);
-
+        //bestPLT = this.improveAssignment(bestPLT, flightCount, groupCount, competitors);
+        //bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitors);
+        System.out.println(Arrays.toString(getSeeds(bestPLT)));
         futures.clear();
 
         return bestPLT;
     }
     
+    private int[] getSeeds(int[][] bestPLT) {
+        int[] seeds = new int[18];
+        for (int i = 0; i < bestPLT.length; i += 3) {
+            seeds[i / 3] = bestPLT[i][0];
+        }
+        return seeds;
+    }
+
+    private ArrayList<int[][]> divideSeeds(int i,int[][] allSeeds) {
+        int cut=0;
+        ArrayList<int[][]> output=new ArrayList<>();
+        for(int z=1;z<allSeeds.length;z++){
+            int[] temp1=Arrays.copyOfRange(allSeeds[z-1], 0, i);
+            int[] temp2=Arrays.copyOfRange(allSeeds[z], 0, i);
+            if(Arrays.equals(temp1, temp2)){
+                continue;
+            }else{
+                output.add(Arrays.copyOfRange(allSeeds, cut, z+1));
+                cut=z+1;
+            }
+        }
+        return output;
+    }
+
+    protected int[][] radixSort(int[][] allSeeds,int competitorCount) {
+        int m=allSeeds[0].length;
+        for(int i=m-1;i>-1;i--){
+            allSeeds=this.countSort(allSeeds,i,competitorCount);
+        }
+        return allSeeds;
+    }
+
+    private int[][] countSort(int[][] allSeeds, int i,int competitorCount) {
+        int[][] output=new int[allSeeds.length][allSeeds[0].length];
+        int[] count=new int[competitorCount];
+        for (int[] j : allSeeds) {
+            count[j[i]]++;
+        }
+        for(int z=1;z<count.length;z++){
+           count[z]+=count[z-1];
+        }
+        for(int z=allSeeds.length-1;z>=0;z--){
+            output[count[allSeeds[z][i]]-1]=allSeeds[z];
+            count[allSeeds[z][i]]--;
+        }
+        return output;
+    }
+
     private boolean checkValues(int flights, int groups, int competitors) {
         if ((flights > 0) && (groups > 1) && (competitors > 1) && (competitors >= groups) && (competitors % groups == 0)) {
             return true;
@@ -195,17 +249,17 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         Arrays.fill(seeds, 0);
         for(int x=0;x<seeds.length;x++){
             int random=this.getRandomIntegerBetween(0, competitors - 1);
-            while(this.contains(seeds, random)) {
-                random=this.getRandomIntegerBetween(0, competitors - 1);
-            }
+//            while(this.contains(seeds, random)) {
+//                random=this.getRandomIntegerBetween(0, competitors - 1);
+//            }
             seeds[x] = random;
         }
         return seeds;
     }
 
     class SuffixCreationTask implements Callable<int[][]> {
-        int flights, groups, competitors, seedLength,tasks;
-        int[][] plt, associations;
+        int flights, groups, competitors, equals;
+        int[][] seeds;
         /**
          * This task is created every time a constant is generated. It generates a specific number of PairingListTemplates,which is based on the constant flights 
          * which are given to the task and returns its best. The number of generated PairingListTamplates depends on the number of constant flights and the number of seeds.
@@ -215,74 +269,21 @@ public class PairingListTemplateImpl implements PairingListTemplate {
          * @param constantPLT constant generated flights on which the tasks is based on  
          * @param associations associations created from constantPLT
          */
-        SuffixCreationTask(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations, int seedLength) {
+        SuffixCreationTask(int flights, int groups, int competitors,int[][] seeds,int equals) {
             this.flights = flights;
             this.groups = groups;
             this.competitors = competitors;
-            this.seedLength = seedLength;
-            this.plt = new int[flights * groups][competitors / groups];
-            this.associations = new int[competitors][competitors];
-            this.tasks=(int)Math.pow(seedLength, maxConstantFlights);
-            // we use here System.arraycopy, because else, we would work on the reference of constantPLT. Besides we 
-            // want to avoid changing the reference. 
-            for (int i = 0; i < constantPLT.length; i++) {
-                System.arraycopy(constantPLT[i], 0, this.plt[i], 0, competitors / groups);
-            }
-            for (int i = 0; i < associations.length; i++) {
-                System.arraycopy(associations[i], 0, this.associations[i], 0, competitors);
-            }
-        }
-        
-        SuffixCreationTask(int flights, int groups, int competitors, int[][] constantPLT, int[][] associations, int seedLength,int tasks) {
-            this.flights = flights;
-            this.groups = groups;
-            this.competitors = competitors;
-            this.seedLength = seedLength;
-            this.plt = new int[flights * groups][competitors / groups];
-            this.associations = new int[competitors][competitors];
-            this.tasks=(tasks);
-            // we use here System.arraycopy, because else, we would work on the reference of constantPLT. Besides we 
-            // want to avoid changing the reference. 
-            for (int i = 0; i < constantPLT.length; i++) {
-                System.arraycopy(constantPLT[i], 0, this.plt[i], 0, competitors / groups);
-            }
-            for (int i = 0; i < associations.length; i++) {
-                System.arraycopy(associations[i], 0, this.associations[i], 0, competitors);
-            }
+            this.seeds=seeds;
+            this.equals=equals;
         }
 
         @Override
         public int[][] call() {
-            return createSuffix(flights, groups, competitors, plt, associations, 
-                    generateSeeds(flights, competitors, suffixSeedCount), maxConstantFlights);
+            return createSuffix(flights, groups, competitors,seeds,equals);
         }
     } 
     
-    private int[][] createPairingListTemplateWithoutPrefix(int flightsCount, int groupsCount,int competitorsCount){
-        double bestDev=Double.POSITIVE_INFINITY;
-        int[][] bestPLT=new int[flightsCount*groupsCount][competitorsCount/groupsCount];
-        ArrayList<Future<int[][]>> futures=new ArrayList<>();
-        for(int i=0;i<1024;i++){
-        futures.add(executorService.submit(new SuffixCreationTask(flightsCount, groupsCount, competitorsCount,
-                new int[flightsCount * groupsCount][competitorsCount / groupsCount],
-                new int[competitorsCount][competitorsCount],flightsCount,1024)));
-        }
-        for (Future<int[][]> f : futures) {
-            try {
-                int[][] currentPLT = f.get();
-                double currentStandardDev = calcStandardDev(
-                        incrementAssociations(currentPLT, new int[competitorsCount][competitorsCount]));
-
-                if (currentStandardDev < bestDev) {
-                    bestPLT = currentPLT;
-                    bestDev = currentStandardDev;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return bestPLT;
-    }
+ 
     /**
      * Creates constant flights. 
      *
@@ -296,41 +297,41 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @param seeds
      * @return <code>ArrayList</code> of <code>Futures</code> in which the result of a single task is saved
      */
-    private ArrayList<Future<int[][]>> createPrefix(int flights, int groups, int competitors, int[][] associations,
-            int[][]currentPLT, int[] seeds, ArrayList<Future<int[][]>> futures, int level) {         
-
-        if (level < this.maxConstantFlights) {
-                // calculate Flights for current recurrence level
-                for (int seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
-                    int[][] temp = this.createFlight(groups, competitors, associations, seeds[seedIndex]);
-                    for (int m = 0; m < groups; m++) {
-                        System.arraycopy(temp[m], 0, currentPLT[level * groups + m], 0, competitors / groups);
-                    }
-                    level++;
-                    associations = this.incrementAssociations(temp, associations);
-                    this.createPrefix(flights, groups, competitors, associations, currentPLT, this.generateSeeds(flights, competitors),
-                            futures, level);
-                    level--;
-                    associations = this.decrementAssociations(temp, associations);
-                }
-                
-                // reset last recurrence step
-                for (int i = level * groups; i < level * groups + groups; i++) {
-                    Arrays.fill(currentPLT[i], 0);
-                }
-            
-        } else {
-            // Task start
-            Future<int[][]> future = executorService.submit((new SuffixCreationTask(flights, groups, competitors, currentPLT, associations, seeds.length)));
-            futures.add(future);
-            
-            // reset last recurrence step
-            for (int i = maxConstantFlights * groups - 1; i >= maxConstantFlights * groups - groups; i--) {
-                Arrays.fill(currentPLT[i], 0);
-            }
-        }
-        return futures;
-    }
+//    private ArrayList<Future<int[][]>> createPrefix(int flights, int groups, int competitors, int[][] associations,
+//            int[][]currentPLT, int[] seeds, ArrayList<Future<int[][]>> futures, int level) {         
+//
+//        if (level < this.maxConstantFlights) {
+//                // calculate Flights for current recurrence level
+//                for (int seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
+//                    int[][] temp = this.createFlight(groups, competitors, associations, seeds[seedIndex]);
+//                    for (int m = 0; m < groups; m++) {
+//                        System.arraycopy(temp[m], 0, currentPLT[level * groups + m], 0, competitors / groups);
+//                    }
+//                    level++;
+//                    associations = this.incrementAssociations(temp, associations);
+//                    this.createPrefix(flights, groups, competitors, associations, currentPLT, this.generateSeeds(flights, competitors),
+//                            futures, level);
+//                    level--;
+//                    associations = this.decrementAssociations(temp, associations);
+//                }
+//                
+//                // reset last recurrence step
+//                for (int i = level * groups; i < level * groups + groups; i++) {
+//                    Arrays.fill(currentPLT[i], 0);
+//                }
+//            
+//        } else {
+//            // Task start
+//            Future<int[][]> future = executorService.submit((new SuffixCreationTask(flights, groups, competitors, currentPLT, associations, seeds.length)));
+//            futures.add(future);
+//            
+//            // reset last recurrence step
+//            for (int i = maxConstantFlights * groups - 1; i >= maxConstantFlights * groups - groups; i--) {
+//                Arrays.fill(currentPLT[i], 0);
+//            }
+//        }
+//        return futures;
+//    }
     
     /**
      * Generates a single flight, that depends on a specific seed. 
@@ -422,42 +423,38 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *                      against another competitor. 
      * @return best complete pairing list out of given iterations
      */
-    protected int[][] createSuffix(int flightCount, int groupCount, int competitorCount, 
-            int[][] currentPLT, int[][] associations, int[] seeds, int level) {
-        
-        if (level < flightCount) {
-            double bestDev = Double.POSITIVE_INFINITY;
-            
-            for (int seed : seeds) {
-                int[][] flight = this.createFlight(groupCount, competitorCount, associations, seed);
-                for (int m = 0; m < groupCount; m++) {
-                    System.arraycopy(flight[m], 0, currentPLT[level * groupCount + m], 0, competitorCount / groupCount);
+    protected int[][] createSuffix(int flightCount, int groupCount, int competitorCount, int[][] seeds,int i) {
+        int[][] bestPLT=new int[flightCount*groupCount][competitorCount/groupCount];
+        double bestDev= Double.POSITIVE_INFINITY;
+        int[][] bestAssociations=new int[competitorCount][competitorCount];
+        for (int x=0;x<seeds[0].length;x++) {
+            int[][] flightColumn=this.createFlight(groupCount, competitorCount, bestAssociations, seeds[seeds.length-1][x]);
+            for (int z=0;z<flightColumn.length;z++) {
+                System.arraycopy(flightColumn[z], 0, bestPLT[x*groupCount+z], 0, flightColumn[0].length);
+            }
+            this.incrementAssociations(flightColumn, bestAssociations);
+        }
+        bestDev=calcStandardDev(bestAssociations);
+        for(int z=seeds.length-2;z>=0;z--){
+            int[][] currentPLT=new int[flightCount*groupCount][competitorCount/groupCount];
+            for(int j=0;j<i;j++){
+                currentPLT[j]=bestPLT[j];
+            }
+            int[][] currentAssociations=new int[competitorCount][competitorCount];
+            for (int x=i;x<seeds[0].length;x++) {
+                int[][] flightColumn=this.createFlight(groupCount, competitorCount, currentAssociations, seeds[z][x]);
+                for (int y=0;y<flightColumn.length;y++) {
+                    System.arraycopy(flightColumn[y], 0, currentPLT[x*groupCount+y], 0, flightColumn.length);
                 }
-                
-                level++;
-                associations = this.incrementAssociations(flight, associations);
-                int[] nextSeeds;
-                if (Math.pow((this.iterations / MAX_TASKS), 1.0 - (flightCount - level)) > 2&& suffixSeedCount<2) {
-                    nextSeeds = generateSeeds(flightCount, competitorCount, 2);
-                } else {
-                    nextSeeds = this.generateSeeds(flightCount, competitorCount, this.suffixSeedCount);
-                }
-                int[][] suffix = this.createSuffix(flightCount, groupCount, competitorCount, currentPLT, associations, 
-                        nextSeeds, level);
-                double currentDev = this.calcStandardDev(this.incrementAssociations(suffix, 
-                                        new int[competitorCount][competitorCount]));
-                
-                if (currentDev < bestDev) {
-                    currentPLT = suffix;
-                    bestDev = currentDev;
-                }
-                
-                level--;
-                associations = this.decrementAssociations(flight, associations);
+                this.incrementAssociations(flightColumn, currentAssociations);
+            }
+            if(bestDev>calcStandardDev(currentAssociations)){
+                bestPLT=currentPLT;
+                bestDev=calcStandardDev(currentAssociations);
+                bestAssociations=currentAssociations;
             }
         }
-        
-        return currentPLT;
+        return bestPLT;
     }
 
     /**

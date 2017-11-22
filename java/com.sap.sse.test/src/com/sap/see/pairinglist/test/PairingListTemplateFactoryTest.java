@@ -70,7 +70,7 @@ public class PairingListTemplateFactoryTest {
         assertNotNull(example1);
         assertNotNull(example2);
         assertNotNull(example3);
-        
+        System.out.println(example2.getQuality());
         /*
         for(int[] row : example1.getPairingListTemplate()) {
             System.out.println(Arrays.toString(row));

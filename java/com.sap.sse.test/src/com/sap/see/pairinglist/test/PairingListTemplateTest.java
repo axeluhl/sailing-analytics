@@ -18,6 +18,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
     public PairingListTemplateTest() {
         super(new PairingFrameProviderTest(15, 3, 18));
         System.out.println(Arrays.deepToString(this.getPairingListTemplate()));
+        System.out.println(getQuality());
     }
 
     @Test
@@ -111,12 +112,13 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         for (int i = 0; i < count; i++) {
             int[][] template = this.createPairingListTemplate(15, 3, 18);
             results[i] = calcStandardDev(incrementAssociations(template, new int[18][18]));
+            System.out.println(results[i]);
         }
         double sum = 0;
         for (double quality: results) {
             sum += quality;
         }
-        System.out.println(sum / count);
+        System.out.println("Average Quality:"+sum / count);
     }
     
     @Test
@@ -162,7 +164,19 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         this.createPairingListTemplate(15, 3, 18);
         System.out.println(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6])));
     }
-}
+    @Test
+    public void testSort(){
+        int[][] allSeeds={
+                {0,0,0,0,7,5},
+                {17,12,14,16,3,4},
+                {0,0,0,0,0,0},
+                {3,4,5,6,7,8},
+                {3,4,5,6,7,9}
+                        };
+        System.out.println(Arrays.deepToString(radixSort(allSeeds, 18)));
+        }
+    }
+
     
    
 
