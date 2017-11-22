@@ -173,6 +173,7 @@ public class RaceColumnReloadTest {
 
         raceColumn.reloadRaceLog(defaultFleet);
         Assert.assertEquals(2, seenWindEvents.get());
+        Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
     }
     
     
@@ -210,6 +211,7 @@ public class RaceColumnReloadTest {
 
         raceColumn.reloadRaceLog(defaultFleet);
         Assert.assertEquals(2, seenWindEvents.get());
+        Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
     }
 
     @Test
