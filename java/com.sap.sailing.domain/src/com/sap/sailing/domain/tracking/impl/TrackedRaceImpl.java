@@ -4269,7 +4269,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     SpeedWithBearing projectOnto(SpeedWithBearing speed, Bearing projectToBearing) {
         final SpeedWithBearing result;
-        if (speed.getBearing() != null && projectToBearing != null) {
+        if (speed != null && speed.getBearing() != null && projectToBearing != null) {
             double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
             if (cos < 0) {
                 projectToBearing = projectToBearing.reverse();
