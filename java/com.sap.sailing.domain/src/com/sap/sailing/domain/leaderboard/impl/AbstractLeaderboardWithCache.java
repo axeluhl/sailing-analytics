@@ -869,7 +869,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             if (trackedLeg.hasFinishedLeg(timePoint)) {
                 velocityMadeGood = trackedLeg.getAverageVelocityMadeGood(timePoint);
             } else {
-                velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
+                velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
             }
             result.velocityMadeGoodInKnots = velocityMadeGood == null ? null : velocityMadeGood.getKnots();
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE);

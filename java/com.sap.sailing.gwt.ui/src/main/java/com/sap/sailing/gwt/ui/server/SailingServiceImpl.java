@@ -2897,10 +2897,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
+                final Speed velocityMadeGood;
                 if (trackedLeg != null) {
-                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
-                    result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
+                    velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
+                } else {
+                    // check if wind information is available; if so, compute a VMG only based on wind data:
+                    velocityMadeGood = trackedRace.getVelocityMadeGood(competitor, timePoint, cache);
                 }
+                result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
                 break;
             case DISTANCE_TRAVELED:
                 if (trackedLeg != null) {
