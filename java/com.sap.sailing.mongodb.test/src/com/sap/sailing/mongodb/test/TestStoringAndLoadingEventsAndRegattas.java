@@ -427,12 +427,14 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Competitor competitor2 = AbstractLeaderboardTest.createCompetitor("Humba2");
         Boat boat1= AbstractLeaderboardTest.createBoat("Humba1 Boot");
         Boat boat2 = AbstractLeaderboardTest.createBoat("Humba2 Boot");
-        res.getCompetitorStore().addCompetitors(Arrays.asList(competitor1, competitor2));
-        res.getCompetitorStore().addBoats(Arrays.asList(boat1, boat2));
+        res.getCompetitorStore().addNewCompetitors(Arrays.asList(competitor1, competitor2));
+        res.getCompetitorStore().addNewBoats(Arrays.asList(boat1, boat2));
         regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1, boat1));
         regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2, boat2));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitor1));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitor2));
+        assertTrue(Util.contains(regatta.getAllBoats(), boat1));
+        assertTrue(Util.contains(regatta.getAllBoats(), boat2));
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         RegattaLeaderboard fullLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), null, new int[] { 3, 5 });
         // use the set-up and add a regatta leaderboard with eliminations that wraps the regatta leaderboard

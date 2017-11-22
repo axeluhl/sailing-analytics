@@ -17,6 +17,10 @@
         <item name="android:windowNoTitle">false</item>
     </style>
 
+    <style name="AppTheme.PickerDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/dialog_color_button</item>
+    </style>
+
     <style name="AlertDialogHeader">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>﻿
         <item name="android:textColor">@color/dialog_color_header</item>

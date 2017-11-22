@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -427,13 +428,21 @@ public class PolarDataMiner {
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName()));
             for (final Competitor competitor : race.getRace().getCompetitors()) {
                 final GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
+                // it is necessary to release the track's lock before calling processElement
+                // because processElement will transitively cause obtaining the course lock,
+                // and other methods will first obtain the course and then the track lock, leading
+                // to a deadlock. See also bug 4297.
+                final List<GPSFixMoving> fixes = new ArrayList<>();
                 track.lockForRead();
                 try {
                     for (final GPSFixMoving fix : track.getFixes()) {
-                        preFilteringProcessor.processElement(new GPSFixMovingWithOriginInfo(fix, race, competitor));
+                        fixes.add(fix);
                     }
                 } finally {
                     track.unlockAfterRead();
+                }
+                for (final GPSFixMoving fix : fixes) {
+                    preFilteringProcessor.processElement(new GPSFixMovingWithOriginInfo(fix, race, competitor));
                 }
             }
             logger.info("Finished injecting fixes for race "

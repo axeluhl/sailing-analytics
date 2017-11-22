@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Float;
@@ -258,5 +260,15 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
             result = raceDetailCheckboxes.values().iterator().next();
         }
         return result;
+    }
+    
+    protected List<DetailType> getSelected(Map<DetailType, CheckBox> checkBoxes) {
+        List<DetailType> selectedDetails = new ArrayList<DetailType>();
+        for (Map.Entry<DetailType, CheckBox> entry : checkBoxes.entrySet()) {
+            if (entry.getValue().getValue()) {
+                selectedDetails.add(entry.getKey());
+            }
+        }
+        return selectedDetails;
     }
 }

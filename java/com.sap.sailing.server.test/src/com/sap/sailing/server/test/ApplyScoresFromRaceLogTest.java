@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
@@ -99,7 +100,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
             scores.put(c, score);
             mprs.put(c, mpr);
             results.add(new CompetitorResultImpl(c.getId(), c.getName(),
-                    oneBasedRank++, mpr, score, /* finishingTime */ null, /* comment */ null));
+                    oneBasedRank++, mpr, score, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         }
         final RaceLog f1RaceLog = f1Column.getRaceLog(f1Column.getFleets().iterator().next());
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Axel", 0);
@@ -228,6 +229,6 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
 
     private void setResultForCompetitor(final Competitor competitor, int oneBasedRank,
             final CompetitorResults results, MaxPointsReason maxPointsReason, Double explicitScore) {
-        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null));
+        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null, MergeState.OK));
     }
 }

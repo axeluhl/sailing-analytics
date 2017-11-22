@@ -32,6 +32,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixM
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
@@ -120,7 +121,6 @@ public class Activator implements BundleActivator {
                 trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
 
-
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
@@ -136,10 +136,11 @@ public class Activator implements BundleActivator {
         context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, racingEventService.getId().toString());
-        context.registerService(Replicable.class.getName(), racingEventService, replicableServiceProperties);
-        context.registerService(RacingEventService.class.getName(), racingEventService, null);
+        context.registerService(Replicable.class, racingEventService, replicableServiceProperties);
+        context.registerService(RacingEventService.class, racingEventService, null);
         context.registerService(RaceLogResolver.class, racingEventService, null);
-        context.registerService(ClearStateTestSupport.class.getName(), racingEventService, null);
+        context.registerService(ClearStateTestSupport.class, racingEventService, null);
+        context.registerService(SensorFixStoreSupplier.class, racingEventService, null);
         Dictionary<String, String> properties = new Hashtable<String, String>();
         final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
@@ -196,7 +197,7 @@ public class Activator implements BundleActivator {
             racingEventService.stopTrackingWind(windTracker.getA(), windTracker.getB());
         }
         for (Regatta regatta : racingEventService.getAllRegattas()) {
-            racingEventService.stopTracking(regatta);
+            racingEventService.stopTracking(regatta, /* willBeRemoved */ true);
         }
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();

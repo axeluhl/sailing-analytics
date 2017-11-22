@@ -39,7 +39,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -1232,7 +1231,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        public Header<SafeHtml> getHeader() {
+        public SortableExpandableColumnHeader getHeader() {
             SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
                     /* title */race.getRaceColumnName(),
                     /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this,
@@ -2440,11 +2439,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
                             try {
                                 final boolean wasEmptyRaceColumnSelection = Util.isEmpty(raceColumnSelection.getSelectedRaceColumns());
                                 updateLeaderboard(result);
-                                // reapply, as columns might have changed
+                                LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
+                                // reapply, when this is the first time we received the race columns or if columns have changed
                                 if (wasEmptyRaceColumnSelection || !potentiallyChangedSettings.equals(currentSettings)) {
                                     updateSettings(potentiallyChangedSettings);
                                 }

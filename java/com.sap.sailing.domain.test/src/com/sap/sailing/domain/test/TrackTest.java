@@ -304,7 +304,7 @@ public class TrackTest {
         // The following getMaximumSpeedOverGround call will trigger a computeMaxSpeed(...) and a cache(...) call
         new Thread(()->
             assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
-                getB().getKnots(), 0.001)).start(); // produces a cache entry that ends
+                getB().getKnots(), 0.01)).start(); // produces a cache entry that ends
         // now don't release the cacheBarrier as yet but add more fixes
         new Thread(() -> {
             GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000),

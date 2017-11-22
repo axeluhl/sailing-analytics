@@ -45,12 +45,14 @@ import com.sap.sse.util.ClonerImpl;
 
 /**
  * Tests the compressing / de-compressing functionality of {@link LeaderboardDTO} and {@link IncrementalLeaderboardDTO}.
- * See also bug 1417.<p>
+ * See also bug 1417.
+ * <p>
  * 
  * The data of a meaningful and non-trivial {@link LeaderboardDTO} is obtained by using an instrumented version of
  * <code>SailingServiceImpl.getLeaderboardByName(...)</code> which serializes the leaderboard at the end of the method
- * to a file used by this test. The leaderboard that this test wants to use is that of the 505 Worlds 2013, obtained
- * for an expanded Race R9 at time 2013-05-03T17:21:40Z.  
+ * to a file used by this test. The leaderboard that this test wants to use is that of the 505 Worlds 2013, obtained for
+ * an expanded Race R9 at time 2013-05-03T19:17:09Z after the last competitor tracked has finished the last leg. The
+ * total distance traveled in meters has to be expanded for this test to work.
  * 
  * @author Axel Uhl (d043530)
  *

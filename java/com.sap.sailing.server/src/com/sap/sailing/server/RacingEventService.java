@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -69,7 +70,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.statistics.Statistics;
@@ -83,11 +84,13 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
@@ -125,7 +128,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
         LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
-        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver {
+        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver,
+        SensorFixStoreSupplier {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -166,8 +170,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
      * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
      * were made that ensured they were tracking.
+     * @param willBeRemoved TODO
      */
-    void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
 
     /**
      * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}
@@ -396,7 +401,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
-     * @param baseURL TODO
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
@@ -564,8 +568,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
-    
-    SensorFixStore getSensorFixStore();
     
     RaceTracker getRaceTrackerById(Object id);
     
@@ -743,4 +745,40 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a DetailedRaceInfo object or null if the race could not be resolved
      */
     DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
+
+    /**
+     * Provides number and {@link AnniversaryType type} information for the next anniversary race.
+     * 
+     * @return a {@link Pair} containing the next anniversary number and {@link AnniversaryType type}, or
+     *         <code>null</code> if next anniversary can't be determined
+     */
+    Pair<Integer, AnniversaryType> getNextAnniversary();
+
+    /**
+     * @return the amount of races that are tracked have a startTime and are either remotely or locally resolvable, or <code>null</code> if next anniversary can't be determined
+     */
+    int getCurrentRaceCount();
+
+    /**
+     * Provides a {@link Map} of all known anniversaries, keyed by the number of the anniversary race.
+     * 
+     * @return the {@link Map} of known anniversaries (key = anniversary number / value = {@link Pair} containing
+     *         {@link DetailedRaceInfo race} and {@link AnniversaryType type} information)
+     */
+    Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries();
+
+    /**
+     * Provides the number, {@link DetailedRaceInfo race} and {@link AnniversaryType type} information for the latest
+     * anniversary race.
+     * 
+     * @return {@link Triple} containing the last anniversary number, {@link DetailedRaceInfo race} and
+     *         {@link AnniversaryType type}, or <code>null</code> if there's no anniversary so far
+     */
+    Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
+    
+    /**
+     * Returns the {@link AnniversaryRaceDeterminator} used by this service. This is needed for replication for
+     * anniversary races only.
+     */
+    AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.persistence;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
@@ -12,6 +13,7 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -25,6 +27,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -203,4 +206,9 @@ public interface DomainObjectFactory {
 
     RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(DBObject dbLeaderboard,
             String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry);
+
+    /**
+     * Loads all stored anniversary races.
+     */
+    Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
 }

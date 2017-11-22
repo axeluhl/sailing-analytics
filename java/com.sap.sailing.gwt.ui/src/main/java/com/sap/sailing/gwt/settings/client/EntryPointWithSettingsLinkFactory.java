@@ -23,14 +23,18 @@ import com.sap.sse.gwt.settings.AbstractEntryPointWithSettingsLinkFactory;
  */
 public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSettingsLinkFactory {
 
+    private static final String LEADERBOARD_EDITING_PATH = "/gwt/LeaderboardEditing.html";
+    private static final String RACE_BOARD_PATH = "/gwt/RaceBoard.html";
+    private static final String REGATTA_OVERVIEW_PATH = "/gwt/RegattaOverview.html";
+
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings) {
-        return createRegattaOverviewLink(regattaOverviewSettings, new RegattaRaceStatesSettings());
+        return createRegattaOverviewLink(regattaOverviewSettings, new RegattaRaceStatesSettings(), true);
     }
 
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings,
-            RegattaRaceStatesSettings regattaRaceStatesSettings) {
-        return new LinkWithSettingsGenerator<>("/gwt/RegattaOverview.html", regattaOverviewSettings,
-                new IgnoreLocalSettings(true)).createUrl(regattaRaceStatesSettings);
+            RegattaRaceStatesSettings regattaRaceStatesSettings, boolean ignoreLocalSettings) {
+        return new LinkWithSettingsGenerator<>(REGATTA_OVERVIEW_PATH, regattaOverviewSettings,
+                new IgnoreLocalSettings(ignoreLocalSettings)).createUrl(regattaRaceStatesSettings);
     }
     
     public static String createLeaderboardLink(LeaderboardContextDefinition contextDefinition, LeaderboardPerspectiveOwnSettings perspectiveOwnSettings) {
@@ -44,13 +48,17 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
 
     public static String createRaceBoardLink(RaceboardContextDefinition ctx,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
-        return new LinkWithSettingsGenerator<>("/gwt/RaceBoard.html", ctx).createUrl(settings);
+        return new LinkWithSettingsGenerator<>(RACE_BOARD_PATH, ctx).createUrl(settings);
+    }
+    
+    public static String createRaceBoardLink(String baseUrl, RaceboardContextDefinition ctx,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
+        return new LinkWithSettingsGenerator<>(baseUrl, RACE_BOARD_PATH, ctx).createUrl(settings);
     }
     
     public static String createLeaderboardEditingLink(String leaderboardName) {
         final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                "/gwt/LeaderboardEditing.html",
-                new LeaderboardEditContextDefinition(leaderboardName));
+                LEADERBOARD_EDITING_PATH, new LeaderboardEditContextDefinition(leaderboardName));
         return linkWithSettingsGenerator.createUrl();
     }
 

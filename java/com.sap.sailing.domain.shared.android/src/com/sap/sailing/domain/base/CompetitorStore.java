@@ -23,6 +23,7 @@ import com.sap.sse.common.Util.Pair;
 public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     public interface CompetitorUpdateListener {
         void competitorUpdated(Competitor competitor);
+        void competitorCreated(Competitor competitor);
     }
 
     public interface BoatUpdateListener {
@@ -92,7 +93,7 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
 
-    void addCompetitors(Iterable<Competitor> competitors);
+    void addNewCompetitors(Iterable<Competitor> competitors);
 
     CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor competitor);
 
@@ -177,7 +178,7 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      */
     Boat updateBoat(String idAsString, String newName, Color newColor, String newSailId);
 
-    void addBoats(Iterable<Boat> boats);
+    void addNewBoats(Iterable<Boat> boats);
 
     BoatDTO convertToBoatDTO(Boat boat);
     

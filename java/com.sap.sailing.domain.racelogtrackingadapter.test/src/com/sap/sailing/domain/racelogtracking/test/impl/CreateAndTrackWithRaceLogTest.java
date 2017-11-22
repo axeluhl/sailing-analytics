@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -51,7 +52,6 @@ import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RaceLogFixTrackerManager;
@@ -215,7 +215,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(false);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
     }
     
@@ -296,7 +296,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
     }
 }

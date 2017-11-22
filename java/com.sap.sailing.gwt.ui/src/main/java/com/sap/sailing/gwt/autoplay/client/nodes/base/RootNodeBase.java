@@ -66,12 +66,20 @@ public abstract class RootNodeBase extends BaseCompositeNode {
             public void onSuccess(final EventDTO event) {
                 if (firstTimeEventLoaded) {
                     AutoPlayHeaderEvent hE = new AutoPlayHeaderEvent(event.getName(), "");
-                    hE.setHeaderLogoUrl(event.getLogoImage().getSourceRef());
+                    if(event.getLogoImage()!=null){
+                        hE.setHeaderLogoUrl(event.getLogoImage().getSourceRef());
+                    }
                     cf.getEventBus().fireEvent(hE);
                     firstTimeEventLoaded = false;
                 }
                 cf.getAutoPlayCtx().updateEvent(event);
-                _doCheck();
+                if (event.isFinished() || event.isRunning()) {
+                    _doCheck();
+                } else {
+                    setCurrentState(false, null, RootNodeState.PRE_EVENT, currentState);
+                    // faster update if event not yet started!
+                    checkTimer.schedule(1000);
+                }
             }
 
             @Override
@@ -82,7 +90,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     }
 
     private void _doCheck() {
-
         final RegattaAndRaceIdentifier currentPreLiveRace = cf.getAutoPlayCtx().getPreLiveRace();
         final RegattaAndRaceIdentifier currentLiveRace = cf.getAutoPlayCtx().getLiveRace();
 
@@ -101,8 +108,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                             log("No live race found, " + (!comingFromLiveRace ? "not " : "") + "coming from live race");
 
                             setCurrentState(false, null,
-                                    comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
-                                    currentState);
+                                    comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE, currentState);
 
                         } else {
 
@@ -110,18 +116,18 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
 
                             boolean isPreLiveRace = timeToRaceStartInMs > LIVE_SWITCH_DELAY;
-                            // exit 
+                            // exit
                             if (currentLiveRace != null && !loadedLiveRace.equals(currentLiveRace)) {
                                 log("Received different live race, hard switching to AFTER_LIVE race");
-                                setCurrentState(isPreLiveRace, loadedLiveRace, RootNodeState.AFTER_LIVE , currentState);
+                                setCurrentState(isPreLiveRace, loadedLiveRace, RootNodeState.AFTER_LIVE, currentState);
                             } else {
-                                
 
-                            log("New " + (isPreLiveRace?"live ":"pre live")
-                                    + " race found: " + loadedLiveRace + " starting in " + (timeToRaceStartInMs/1000) + "s");
-                                                        
-                                setCurrentState(isPreLiveRace, loadedLiveRace, isPreLiveRace? RootNodeState.PRE_RACE: RootNodeState.LIVE, currentState);
-                            
+                                log("New " + (isPreLiveRace ? "live " : "pre live") + " race found: " + loadedLiveRace
+                                        + " starting in " + (timeToRaceStartInMs / 1000) + "s");
+
+                                setCurrentState(isPreLiveRace, loadedLiveRace,
+                                        isPreLiveRace ? RootNodeState.PRE_RACE : RootNodeState.LIVE, currentState);
+
                             }
                         }
                     }
@@ -136,8 +142,8 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 });
     }
 
-    private final void setCurrentState(boolean isPreLiveRace, RegattaAndRaceIdentifier liveRace,
-            RootNodeState goingTo, RootNodeState comingFrom) {
+    private final void setCurrentState(boolean isPreLiveRace, RegattaAndRaceIdentifier liveRace, RootNodeState goingTo,
+            RootNodeState comingFrom) {
         if (goingTo != comingFrom) {
             log("RootNodeBase transition " + comingFrom + " -> " + goingTo);
             RegattaAndRaceIdentifier candidatePreLiveRace = isPreLiveRace ? liveRace : null;

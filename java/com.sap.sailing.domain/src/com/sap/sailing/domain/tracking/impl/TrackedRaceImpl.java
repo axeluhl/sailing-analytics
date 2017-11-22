@@ -1744,20 +1744,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
-
-    @Override
-    public boolean hasGPSData() {
-        boolean result = false;
-        if (!tracks.values().isEmpty()) {
-            for (GPSFixTrack<Competitor, GPSFixMoving> gpsTrack : tracks.values()) {
-                if (!gpsTrack.isEmpty()) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
     
     /**
      * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time
@@ -3379,7 +3365,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING && oldStatus != TrackedRaceStatusEnum.LOADING) {
             suspendAllCachesNotUpdatingWhileLoading();
-        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
     }
@@ -4107,6 +4093,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             LockUtil.unlockAfterRead(sensorTracksLock);
         }
     }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return LockUtil.<Iterable<TrackT>>executeWithReadLockAndResult(sensorTracksLock, () -> {
+            final Set<TrackT> result = new HashSet<>();
+            for (Competitor competitor : tracks.keySet()) {
+                final Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+                final TrackT track = getTrackInternal(key);
+                if (track != null) {
+                    result.add(track);
+                }
+            }
+            return result;
+        });
+    }
 
     protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
@@ -4192,5 +4194,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return new HashSet<>(attachedRaceLogs.values());
+    }
+    
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        Speed result = null;
+        Duration totalTimeSailedInRace = Duration.NULL;
+        Distance totalDistanceSailedInRace = Distance.NULL;
+        for (TrackedLeg legGeneral : getTrackedLegs()) {
+            TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
+            if (leg != null && leg.hasStartedLeg(timePoint)) {
+                totalDistanceSailedInRace = totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
+                totalTimeSailedInRace = totalTimeSailedInRace.plus(leg.getTime(timePoint));
+            }
+        }
+        if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
+            result = totalDistanceSailedInRace.inTime(totalTimeSailedInRace);
+        }
+        return result;
     }
 }

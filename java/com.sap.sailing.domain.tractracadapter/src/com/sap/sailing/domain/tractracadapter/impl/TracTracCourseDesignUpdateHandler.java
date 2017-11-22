@@ -65,8 +65,7 @@ public class TracTracCourseDesignUpdateHandler extends UpdateHandler implements 
         logger.info("Payload is " + payload);
         HttpURLConnection connection = (HttpURLConnection) currentCourseDesignURL.openConnection();
         try {
-            setConnectionProperties(connection, payload);
-            sendWithPayload(connection, payload);
+            setConnectionPropertiesAndSendWithPayload(connection, payload);
             try {
                 checkAndLogUpdateResponse(connection);
             } catch (ParseException e) {

@@ -2,7 +2,6 @@ package com.sap.sailing.server.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,11 +63,11 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         } else {
             Collection<Boat> allBoats = loadFrom.loadAllBoats();
             for (Boat boat: allBoats) {
-                addBoatToTransientStore(boat.getId(), boat);
+                super.addNewBoat(boat);
             }
             Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
             for (Competitor competitor : allCompetitors) {
-                addCompetitorToTransientStore(competitor.getId(), competitor);
+                super.addNewCompetitor(competitor);
             }
         }
     }
@@ -119,7 +118,8 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         ois.defaultReadObject();
         storeTo = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
     }
-/**
+
+    /**
     @Override
     public Pair<Competitor, Boat> migrateCompetitorToHaveASeparateBoat(Serializable boatId, CompetitorWithBoat competitorWithBoat) {
         Boat existingBoat = competitorWithBoat.getBoat();
@@ -132,14 +132,11 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         return new Pair<>(newCompetitor, newBoat);
     }
 */
-    private void addCompetitorToTransientStore(Serializable id, Competitor competitor) {
-        super.addNewCompetitor(id, competitor);
-    }
 
     @Override
-    protected void addNewCompetitor(Serializable id, Competitor competitor) {
+    protected void addNewCompetitor(Competitor competitor) {
         storeTo.storeCompetitor(competitor);
-        super.addNewCompetitor(id, competitor);
+        super.addNewCompetitor(competitor);
     }
 
     @Override
@@ -165,9 +162,9 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     }
     
     @Override
-    public void addCompetitors(Iterable<Competitor> competitors) {
+    public void addNewCompetitors(Iterable<Competitor> competitors) {
         storeTo.storeCompetitors(competitors);
-        super.addCompetitors(competitors);
+        super.addNewCompetitors(competitors);
     }
 
     @Override
@@ -180,14 +177,10 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         return result;
     }
     
-    private void addBoatToTransientStore(Serializable id, Boat boat) {
-        super.addNewBoat(id, boat);
-    }
-
     @Override
-    protected void addNewBoat(Serializable id, Boat boat) {
+    protected void addNewBoat(Boat boat) {
         storeTo.storeBoat(boat);
-        super.addNewBoat(id, boat);
+        super.addNewBoat(boat);
     }
 
     @Override
@@ -210,8 +203,8 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     }
     
     @Override
-    public void addBoats(Iterable<Boat> boats) {
+    public void addNewBoats(Iterable<Boat> boats) {
         storeTo.storeBoats(boats);
-        super.addBoats(boats);
+        super.addNewBoats(boats);
     }
 }

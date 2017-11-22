@@ -319,6 +319,15 @@ public class Util {
         }
         return set;
     }
+    
+    public static interface Mapper<S, T> { T map(S s); }
+    public static <S, T> Iterable<T> map(Iterable<S> iterable, Mapper<S, T> mapper) {
+        List<T> result = new ArrayList<>();
+        for (final S s : iterable) {
+            result.add(mapper.map(s));
+        }
+        return result;
+    }
 
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method
@@ -338,6 +347,26 @@ public class Util {
             }
             return false;
         }
+    }
+
+    /**
+     * Checks whether for all elements from {@code what} the method {@link #contains(Iterable, Object)}
+     * returns {@code true}. In case {@code what} is empty or {@code null}, {@code true} is returned if and only
+     * if {@code ts} is not {@code null}.
+     */
+    public static <T> boolean containsAll(Iterable<T> ts, Iterable<T> what) {
+        if (ts == null) {
+            return false;
+        }
+        if (what == null) {
+            return true;
+        }
+        for (final T w : what) {
+            if (!contains(ts, w)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static <T> boolean isEmpty(Iterable<T> ts) {

@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
@@ -658,8 +659,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
 
-    void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
      *         so
@@ -861,4 +860,17 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors,
             AsyncCallback<Void> callback);
+    
+    /**
+     * Used to determine for a Chart the available Detailtypes. This is for example used, to only show the RideHeight as
+     * an option for charts, if it actually recorded for the race.
+     */
+    void determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
+            AsyncCallback<List<DetailType>> callback);
+
+    void getExpeditionDeviceConfigurations(AsyncCallback<List<ExpeditionDeviceConfiguration>> callback);
+
+    void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
+
+    void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
 }

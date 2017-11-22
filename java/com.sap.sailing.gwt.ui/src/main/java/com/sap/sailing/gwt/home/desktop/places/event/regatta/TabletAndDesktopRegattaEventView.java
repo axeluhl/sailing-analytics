@@ -14,11 +14,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
@@ -53,7 +53,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         eventHeader = new EventHeader(currentPresenter);
         initWidget(uiBinder.createAndBindUi(this));
         
-        if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
+        if(currentPresenter.getEventDTO().getType() == EventType.SERIES) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
             Anchor seriesAnchor = new Anchor(i18n.overallLeaderboardSelection());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());

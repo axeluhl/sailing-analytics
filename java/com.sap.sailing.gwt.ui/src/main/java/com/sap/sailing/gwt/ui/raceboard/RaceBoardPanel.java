@@ -112,8 +112,7 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class RaceBoardPanel
         extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveOwnSettings>
-        implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize
-{
+        implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final UUID eventId;
@@ -311,7 +310,6 @@ public class RaceBoardPanel
                 }
             }
         }
-
         racetimePanel = new RaceTimePanel(this, componentContext, raceTimePanelLifecycle, userService, timer,
                 timeRangeWithZoomModel,
                 stringMessages, raceTimesInfoProvider, getPerspectiveSettings().isCanReplayDuringLiveRaces(),
@@ -320,19 +318,15 @@ public class RaceBoardPanel
         racetimePanel.updateSettings(raceTimePanelSettings);
         timeRangeWithZoomModel.addTimeZoomChangeListener(racetimePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(racetimePanel);
-
         this.timePanelWrapper = createTimePanelLayoutWrapper();
-  
         boolean advanceTimePanelEnabled = true;
         if (advanceTimePanelEnabled) {
             manageTimePanelToggleButton(advanceTimePanelEnabled);
         }
-
         dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addSouth(timePanelWrapper, TIMEPANEL_COLLAPSED_HEIGHT);
         dockPanel.add(mainPanel);
         dockPanel.addStyleName("dockLayoutPanel");
-
         initWidget(dockPanel);
     }
     
@@ -350,18 +344,14 @@ public class RaceBoardPanel
             String leaderboardGroupName, UUID event,
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
             UserService userService, boolean showChartMarkEditMediaButtonsAndVideo) {
-
         MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
         MediaPlayerSettings mediaPlayerSettings = settings
                 .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
-
         WindChartLifecycle windChartLifecycle = getPerspectiveLifecycle().getWindChartLifecycle();
         WindChartSettings windChartSettings = settings.findSettingsByComponentId(windChartLifecycle.getComponentId());
-
         MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
         MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settings
                 .findSettingsByComponentId(multiCompetitorRaceChartLifecycle.getComponentId());
-
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         List<Component<?>> componentsForSideBySideViewer = new ArrayList<Component<?>>();
@@ -430,9 +420,10 @@ public class RaceBoardPanel
     
     private void setupUserManagementControlPanel(UserService userService) {
         mainCss.ensureInjected();
-        FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        new GenericAuthentication(userService, userManagementMenuView, display, 
+        final FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
+        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, userManagementMenuView, display, 
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
+        new RaceBoardLoginHintPopup(genericAuthentication.getAuthenticationManager());
     }
 
     @SuppressWarnings("unused")
@@ -461,7 +452,7 @@ public class RaceBoardPanel
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle());
-}
+    }
 
     private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {
         component.setVisible(visible);      

@@ -33,5 +33,4 @@ public class HttpUrlConnectionHelper {
         }
         return connection;
     }
-
 }

@@ -31,7 +31,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -147,12 +146,11 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
 
     @Override
     public SingleRaceLeaderboardSettings getSettings() {
-        SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(selectedManeuverDetails,
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(selectedManeuverDetails,
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, timer.getRefreshInterval(),
                 isShowAddedScores(),
                 isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorShortName(),
-                isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality,showRaceRankColumn);
-        SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
+                isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality, showRaceRankColumn);
         return leaderboardSettings;
     }
 

@@ -9,7 +9,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
 public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     private static final long serialVersionUID = -3445146715292390755L;
@@ -69,7 +68,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         newSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(this.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         newSettings.isShowCompetitorNationality.setValue(this.isShowCompetitorNationality());
         newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
-        SettingsDefaultValuesUtils.keepDefaults(this, newSettings);
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);
         return newSettings;
     }

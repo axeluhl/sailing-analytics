@@ -588,7 +588,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(leaderboard.name,
                 leaderboard.getDisplayName());
         final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                EntryPointLinkFactory.LEADERBOARD_PATH, leaderboardContextSettings);
+                EntryPointLinkFactory.LEADERBOARD_PATH, lifeCycle::createDefaultSettings, leaderboardContextSettings);
         SettingsDialogForLinkSharing<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> dialog = new SettingsDialogForLinkSharing<>(
                 linkWithSettingsGenerator, lifeCycle, stringMessages);
         dialog.ensureDebugId("LeaderboardPageUrlConfigurationDialog");

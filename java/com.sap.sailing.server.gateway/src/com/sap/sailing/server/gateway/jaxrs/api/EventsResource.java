@@ -26,6 +26,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -96,7 +97,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
-    private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     private final boolean enforceSecurityChecks;
     
@@ -160,6 +161,83 @@ public class EventsResource extends AbstractSailingServerResource {
                 jsonResponse.put("leaderboard", eventAndLeaderboardGroupAndLeaderboard.getC().getName());
             }
             response = ok(jsonResponse.toJSONString(), MediaType.APPLICATION_JSON);
+        }
+        return response;
+    }
+    
+    @PUT
+    @Path("/{eventId}/update")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response updateEvent(
+            @Context UriInfo uriInfo,
+            @PathParam("eventId") String eventId,
+            @FormParam("eventName") String eventNameParam,
+            @FormParam("eventdescription") String eventDescriptionParam,
+            @FormParam("startdate") String startDateParam,
+            @FormParam("startdateasmillis") Long startDateAsMillis,
+            @FormParam("enddate") String endDateParam,
+            @FormParam("enddateasmillis") Long endDateAsMillis,
+            @FormParam("venuename") String venueNameParam, // takes precedence over lat/lng used for reverse geo-coding
+            @FormParam("venuelat") String venueLat,
+            @FormParam("venuelng") String venueLng,
+            @FormParam("ispublic") String isPublicParam,
+            @FormParam("officialwebsiteurl") String officialWebsiteURLParam,
+            @FormParam("baseurl") String baseURLParam,
+            @FormParam("leaderboardgroupids") List<String> leaderboardGroupIdsListParam,
+            @FormParam("createleaderboardgroup") String createLeaderboardGroupParam,
+            @FormParam("createregatta") String createRegattaParam,
+            @FormParam("boatclassname") String boatClassNameParam,
+            @FormParam("numberofraces") String numberOfRacesParam) throws ParseException, NotFoundException,
+            NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
+        if (enforceSecurityChecks) {
+            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
+        }
+        final Response response;
+        UUID id;
+        try {
+            id = toUUID(eventId);
+        } catch (IllegalArgumentException e) {
+            return getBadEventErrorResponse(eventId);
+        }
+        Event event = getService().getEvent(id);
+        if (event == null) {
+            response = getBadEventErrorResponse(eventId);
+        } else {
+            final String eventName, eventDescription, venueName;
+            final TimePoint startDate, endDate;
+            final URL officialWebsiteURL, baseURL;
+            final boolean isPublic;
+            final Iterable<UUID> leaderboardGroupIds;
+            eventName = eventNameParam != null ? eventNameParam : event.getName();
+            eventDescription = eventDescriptionParam != null ? eventDescriptionParam : event.getDescription();
+            if (startDateParam != null || startDateAsMillis != null) {
+                startDate = parseTimePoint(startDateParam, startDateAsMillis, null);
+            } else {
+                startDate = event.getStartDate();
+            }
+            if (endDateParam != null || endDateAsMillis != null) {
+                endDate = parseTimePoint(endDateParam, endDateAsMillis, null);
+            } else {
+                endDate = event.getEndDate();
+            }
+            venueName = venueNameParam != null ? venueNameParam : (venueLat != null && venueLng != null) ? getDefaultVenueName(venueLat, venueLng) : event.getVenue().getName();
+            isPublic = isPublicParam != null ? Boolean.valueOf(isPublicParam) : event.isPublic();
+            if (leaderboardGroupIdsListParam.isEmpty()) {
+                // nothing has been provided, not even an empty value; leave unchanged:
+                leaderboardGroupIds = Util.map(event.getLeaderboardGroups(), lg->lg.getId());
+            } else if (leaderboardGroupIdsListParam.size() == 1 && leaderboardGroupIdsListParam.get(0).isEmpty()) {
+                // one empty occurrence of the sort "leaderboardgroupids=" means clear the value
+                leaderboardGroupIds = Collections.emptyList();
+            } else {
+                leaderboardGroupIds = toUUIDList(leaderboardGroupIdsListParam);
+            }
+            officialWebsiteURL = officialWebsiteURLParam != null ? new URL(officialWebsiteURLParam) : event.getOfficialWebsiteURL();
+            baseURL = baseURLParam != null ? new URL(baseURLParam) : event.getBaseURL();
+            getService().updateEvent(id, eventName, eventDescription, startDate, endDate, venueName, isPublic,
+                    leaderboardGroupIds, officialWebsiteURL, baseURL, event.getSailorsInfoWebsiteURLs(),
+                    event.getImages(), event.getVideos());
+            response = Response.ok().build();
         }
         return response;
     }
@@ -337,10 +415,14 @@ public class EventsResource extends AbstractSailingServerResource {
                     /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
                     numberOfRacesParam);
             if (leaderboardGroup != null) {
-                getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(), leaderboardGroup.getDescription(),
-                        leaderboardGroup.getDisplayName(), Collections.singletonList(leaderboard.getName()),
-                        leaderboardGroup.getOverallLeaderboard() == null ? null : ((ThresholdBasedResultDiscardingRule) leaderboardGroup.getOverallLeaderboard().getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
-                        leaderboardGroup.getOverallLeaderboard() == null ? null : leaderboardGroup.getOverallLeaderboard().getScoringScheme().getType()));
+                getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
+                        leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
+                        Collections.singletonList(leaderboard.getName()),
+                        leaderboardGroup.getOverallLeaderboard() == null ? null
+                                : ((ThresholdBasedResultDiscardingRule) leaderboardGroup.getOverallLeaderboard()
+                                        .getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
+                        leaderboardGroup.getOverallLeaderboard() == null ? null
+                                : leaderboardGroup.getOverallLeaderboard().getScoringScheme().getType()));
             }
         } else {
             leaderboard = null;

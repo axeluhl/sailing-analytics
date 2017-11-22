@@ -25,35 +25,35 @@ public class LearningBatchProcessorTest {
         MyCallback delegate = new MyCallback();
         LearningBatchProcessor processor = new LearningBatchProcessor(5, 10, delegate, device);
         int currentSecondAsMillis = 1 * 1000;
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 100, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 300, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 550, new double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 100, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 300, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 550, new Double[] { 0d, 0d, 0d, 0d }));
         Assert.assertEquals("Batch not full", 0, delegate.batchesDelivered);
 
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 900, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 999, new double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 900, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 999, new Double[] { 0d, 0d, 0d, 0d }));
         Assert.assertEquals("Batch not full, should be learing", 0, delegate.batchesDelivered);
 
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 130, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 200, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 560, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 600, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 130, new double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 130, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 200, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 560, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 600, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 130, new Double[] { 0d, 0d, 0d, 0d }));
         Assert.assertEquals("Batches after learning", 2, delegate.batchesDelivered);
         Assert.assertEquals("Last batch after learning", 5, delegate.lastBatchSize);
 
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 200, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 560, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 561, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 562, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 563, new double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 200, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 560, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 561, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 562, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 563, new Double[] { 0d, 0d, 0d, 0d }));
         Assert.assertEquals("Next batch received", 3, delegate.batchesDelivered);
         Assert.assertEquals("First batch after learning", 5, delegate.lastBatchSize);
 
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 564, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 600, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 700, new double[] { 0d, 0d, 0d, 0d }));
-        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 800, new double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 564, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 600, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 700, new Double[] { 0d, 0d, 0d, 0d }));
+        processor.accept(new DoubleVectorFixData(currentSecondAsMillis + 800, new Double[] { 0d, 0d, 0d, 0d }));
 
         Assert.assertEquals("Still on same batch", 3, delegate.batchesDelivered);
         processor.finish();

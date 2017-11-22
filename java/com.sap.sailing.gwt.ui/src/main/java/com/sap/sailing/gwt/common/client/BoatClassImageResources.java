@@ -311,5 +311,11 @@ public interface BoatClassImageResources extends ClientBundle {
     ImageResource WetaIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TOM_28_MAX.png")
-    ImageResource Tom28MaxIcon();    
+    ImageResource Tom28MaxIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TP52.png")
+    ImageResource TP52Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RUNNING.png")
+    ImageResource RunningIcon();        
 }

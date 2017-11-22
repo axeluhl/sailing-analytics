@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import org.junit.Test;
 
@@ -150,4 +151,23 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertEquals(competitorName, replicatedCompetitor.getName());
         assertEquals(competitorShortName, replicatedCompetitor.getShortName());
    }
+    
+    @Test
+    public void testCompetitorCreationReplication() throws InterruptedException, URISyntaxException {
+        final String competitorName = "Der mit dem Kiel zieht";
+        final String shortCcompetitorName = "Kiel";
+        URI flagImageURI = new URI("http://www.sapsailing.com");
+        
+                Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
+                123, competitorName, shortCcompetitorName, Color.RED, "someone@nowhere.de", flagImageURI,
+                new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
+                /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
+                        new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Thread.sleep(1000);
+        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getCompetitors().spliterator(), /* parallel */ false).anyMatch(
+                c->
+                    c.getId().equals(competitor.getId())));
+    }
 }

@@ -285,12 +285,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final Map<WindSource, WindSensorOverlay> windSensorOverlays;
 
     /**
-     * Map overlays with html5 canvas used to display course marks including buoy zones
+     * Map from the {@link MarkDTO#getIdAsString() mark's ID converted to a string} to the corresponding overlays with
+     * html5 canvas used to display course marks including buoy zones
      */
     private final Map<String, CourseMarkOverlay> courseMarkOverlays;
     
     private final Map<String, HandlerRegistration> courseMarkClickHandlers;
 
+    /**
+     * Maps from the {@link MarkDTO#getIdAsString() mark's ID converted to a string} to the corresponding {@link MarkDTO}
+     */
     private final Map<String, MarkDTO> markDTOs;
 
     /**
@@ -1194,15 +1198,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     if (endWaypointForCurrentLegNumber != null && Util.contains(endWaypointForCurrentLegNumber.controlPoint.getMarks(), markDTO)) {
                         isSelected = true;
                     }
-                    CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.getName());
+                    CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.getIdAsString());
                     if (courseMarkOverlay == null) {
                         courseMarkOverlay = new CourseMarkOverlay(map, RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, markDTO, coordinateSystem, courseDTO);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
                         courseMarkOverlay.setSelected(isSelected);
-                        courseMarkOverlays.put(markDTO.getName(), courseMarkOverlay);
-                        markDTOs.put(markDTO.getName(), markDTO);
-                        registerCourseMarkInfoWindowClickHandler(markDTO.getName());
+                        courseMarkOverlays.put(markDTO.getIdAsString(), courseMarkOverlay);
+                        markDTOs.put(markDTO.getIdAsString(), markDTO);
+                        registerCourseMarkInfoWindowClickHandler(markDTO.getIdAsString());
                         courseMarkOverlay.addToMap();
                     } else {
                         courseMarkOverlay.setMarkPosition(markDTO.position, transitionTimeInMillis);
@@ -1211,13 +1215,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         courseMarkOverlay.setSelected(isSelected);
                         courseMarkOverlay.setCourse(courseDTO);
                         courseMarkOverlay.draw();
-                        toRemoveCourseMarks.remove(markDTO.getName());
+                        toRemoveCourseMarks.remove(markDTO.getIdAsString());
                     }
                 }
             }
-            for (String toRemoveMarkName : toRemoveCourseMarks.keySet()) {
-                CourseMarkOverlay removedOverlay = courseMarkOverlays.remove(toRemoveMarkName);
-                if(removedOverlay != null) {
+            for (String toRemoveMarkIdAsString : toRemoveCourseMarks.keySet()) {
+                CourseMarkOverlay removedOverlay = courseMarkOverlays.remove(toRemoveMarkIdAsString);
+                if (removedOverlay != null) {
                     removedOverlay.removeFromMap();
                 }
             }
@@ -2034,15 +2038,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
     
-    private void registerCourseMarkInfoWindowClickHandler(final String markDTOName) {
-        final CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTOName);
-        courseMarkClickHandlers.put(markDTOName, 
-                courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTOs.get(markDTOName), courseMarkOverlay)));
+    private void registerCourseMarkInfoWindowClickHandler(final String markDTOIdAsString) {
+        final CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTOIdAsString);
+        courseMarkClickHandlers.put(markDTOIdAsString, 
+                courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTOs.get(markDTOIdAsString), courseMarkOverlay)));
     }
     
     public void registerAllCourseMarkInfoWindowClickHandlers() {
-        for (String markDTOName : markDTOs.keySet()) {
-            registerCourseMarkInfoWindowClickHandler(markDTOName);
+        for (String markDTOIdAsString : markDTOs.keySet()) {
+            registerCourseMarkInfoWindowClickHandler(markDTOIdAsString);
         }
     }
     

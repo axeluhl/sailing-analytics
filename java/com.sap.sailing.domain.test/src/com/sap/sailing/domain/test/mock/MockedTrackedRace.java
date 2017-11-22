@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -490,10 +489,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void removeListener(RegattaLikeListener listener) {
-                    }
-
-                    @Override
-                    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
                     }
 
                     @Override
@@ -1188,6 +1183,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
+        return null;
+    }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
         return null;
     }
 }

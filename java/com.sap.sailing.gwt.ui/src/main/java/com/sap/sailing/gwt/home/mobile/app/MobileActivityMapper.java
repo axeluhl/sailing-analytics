@@ -7,6 +7,7 @@ import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
+import com.sap.sailing.gwt.home.mobile.places.morelogininformation.MoreLoginInformationActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.SeriesActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
@@ -23,6 +24,7 @@ import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.imprint.ImprintActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
+import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
@@ -76,14 +78,14 @@ public class MobileActivityMapper implements ActivityMapper {
             return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
-        } else if (place instanceof AuthenticationPlace) {
-            return new AuthenticationActivityProxy((AuthenticationPlace) place, clientFactory);
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else if (place instanceof PasswordResetPlace) {
             return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else if (place instanceof ImprintPlace) {
             return new ImprintActivityProxy((ImprintPlace) place);
+        } else if (place instanceof MoreLoginInformationPlace) {
+            return new MoreLoginInformationActivityProxy((MoreLoginInformationPlace) place, clientFactory);
         } else {
             return null;
         }

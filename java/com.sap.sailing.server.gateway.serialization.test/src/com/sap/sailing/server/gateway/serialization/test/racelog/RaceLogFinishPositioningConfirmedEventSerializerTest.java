@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
@@ -67,7 +68,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEvent() throws JsonDeserializationException {
         positioningList.add(new CompetitorResultImpl(UUID.randomUUID(), "SAP Extreme", /* rank */ 1,
-                MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
+                MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer

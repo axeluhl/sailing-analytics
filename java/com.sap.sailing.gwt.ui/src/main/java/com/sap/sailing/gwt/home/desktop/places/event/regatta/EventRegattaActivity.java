@@ -5,10 +5,10 @@ import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
@@ -62,7 +62,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         List<NavigationItem> navigationItems = new ArrayList<>();
         navigationItems.add(new NavigationItem(i18n.home(), getHomeNavigation()));
         navigationItems.add(new NavigationItem(i18n.events(), getEventsNavigation()));
-        if(getEventDTO().getType() == EventType.SERIES_EVENT) {
+        if(getEventDTO().getType() == EventType.SERIES) {
             navigationItems.add(new NavigationItem(getEventDTO().getSeriesName(), getCurrentEventSeriesNavigation()));
         }
         navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getCurrentEventNavigation()));
@@ -83,13 +83,13 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public boolean needsSelectionInHeader() {
         EventViewDTO event = eventDTO;
-        return (event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.MULTI_REGATTA);
+        return (event.getType() == EventType.SERIES || event.getType() == EventType.MULTI_REGATTA);
     }
     
     @Override
     public void forPlaceSelection(PlaceCallback callback) {
         EventViewDTO event = eventDTO;
-        if (event.getType() == EventType.SERIES_EVENT) {
+        if (event.getType() == EventType.SERIES) {
             for(EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeriesSorted()) {
                 if(seriesEvent.getState() != EventState.PLANNED) {
                     AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));

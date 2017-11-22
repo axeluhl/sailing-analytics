@@ -43,8 +43,8 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
  *
  */
 public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDisplay {
-    private CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
-    private CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
+    private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
+    private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
     private final ErrorReporter errorReporter;
     private Button registerBtn;
     private Button unregisterBtn;

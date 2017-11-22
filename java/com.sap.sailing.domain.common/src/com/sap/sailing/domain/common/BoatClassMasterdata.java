@@ -112,6 +112,7 @@ public enum BoatClassMasterdata {
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
     TOM_28_MAX ("Tom 28 MAX", true, 8.48, 2.48, BoatHullType.MONOHULL, true, "Tom 28"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
+    TP52 ("TP52", true, 15.85, 4.35, BoatHullType.MONOHULL, true, "TP 52", "Transpac 52", "Transpac52"),
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),
     VO60 ("VO60", true, 19.5, 5.25, BoatHullType.MONOHULL, true, "Volvo Ocean 60", "VolvoOcean60", "W60", "Whitbread60", "Whitbread 60"),
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
@@ -124,7 +125,10 @@ public enum BoatClassMasterdata {
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int."),
     
     // Performance Handicap Racing Fleet (PHRF) is a handicap system used for racing in North America
-    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true);
+    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+
+    // a 'boat class' to track runners at runnng events 
+    RUNNING ("Runner", true, 1.0, 1.0, BoatHullType.NO_HULL, false, "Running");
 
     private final String displayName;
     private final String[] alternativeNames;

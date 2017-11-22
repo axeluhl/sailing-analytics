@@ -105,7 +105,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         Competitor result = new CompetitorImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
-        addNewCompetitor(id, result);
+        addNewCompetitor(result);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
@@ -119,8 +119,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 competitorWithBoat.getColor(), competitorWithBoat.getEmail(), competitorWithBoat.getFlagImage(), (DynamicTeam) competitorWithBoat.getTeam(),
                 competitorWithBoat.getTimeOnTimeFactor(), competitorWithBoat.getTimeOnDistanceAllowancePerNauticalMile(), competitorWithBoat.getSearchTag());
         Boat newBoat = getOrCreateBoat(boatId, existingBoat.getName(), existingBoat.getBoatClass(), existingBoat.getSailID(), existingBoat.getColor());
-        addNewCompetitor(newCompetitor.getId(), newCompetitor);
-        addNewBoat(newBoat.getId(), newBoat);
+        addNewCompetitor(newCompetitor);
+        addNewBoat(newBoat);
         return new Pair<>(newCompetitor, newBoat);
     }
 
@@ -129,13 +129,18 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      * {@link #getExistingCompetitorById(Serializable)}. Subclasses may override in case they need to take additional
      * measures such as durably storing the competitor. Overriding implementations must call this implementation.
      */
-    protected void addNewCompetitor(Serializable id, Competitor competitor) {
+    protected void addNewCompetitor(Competitor competitor) {
         LockUtil.lockForWrite(lock);
         try {
-            competitorCache.put(id, competitor);
-            competitorsByIdAsString.put(id.toString(), competitor);
+            competitorCache.put(competitor.getId(), competitor);
+            competitorsByIdAsString.put(competitor.getId().toString(), competitor);
         } finally {
             LockUtil.unlockAfterWrite(lock);
+        }
+        synchronized (competitorUpdateListeners) {
+            for (final CompetitorUpdateListener listener : competitorUpdateListeners) {
+                listener.competitorCreated(competitor);
+            }
         }
     }
     
@@ -362,28 +367,22 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public void addCompetitors(Iterable<Competitor> competitors) {
-        LockUtil.lockForWrite(lock);
-        try {
-            for (Competitor competitor: competitors) {
-                competitorCache.put(competitor.getId(), competitor);
-                competitorsByIdAsString.put(competitor.getId().toString(), competitor);
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(lock);
+    public void addNewCompetitors(Iterable<Competitor> competitors) {
+        for (Competitor competitor: competitors) {
+            addNewCompetitor(competitor);
         }
     }
 
     private CompetitorWithBoat createCompetitorWithBoat(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
-        CompetitorWithBoat result = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
+        CompetitorWithBoat competitor = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
-        addNewCompetitor(id, result);
-        addNewBoat(boat.getId(), boat);
+        addNewCompetitor(competitor);
+        addNewBoat(boat);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
-        return result;
+        return competitor ;
     }
 
     @Override
@@ -456,12 +455,12 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     private Boat createBoat(Serializable id, String name, BoatClass boatClass, String sailID, Color color) {
-        Boat result = new BoatImpl(id, name, boatClass, sailID, color);
-        addNewBoat(result.getId(), result);
+        Boat boat = new BoatImpl(id, name, boatClass, sailID, color);
+        addNewBoat(boat);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created boat "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
-        return result;
+        return boat;
     }
 
     /**
@@ -469,11 +468,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      * {@link #getExistingBoatById(Serializable)}. Subclasses may override in case they need to take additional
      * measures such as durably storing the boat. Overriding implementations must call this implementation.
      */
-    protected void addNewBoat(Serializable id, Boat boat) {
+    protected void addNewBoat(Boat boat) {
         LockUtil.lockForWrite(lock);
         try {
-            boatCache.put(id, boat);
-            boatsByIdAsString.put(id.toString(), boat);
+            boatCache.put(boat.getId(), boat);
+            boatsByIdAsString.put(boat.getId().toString(), boat);
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
@@ -656,7 +655,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public void addBoats(Iterable<Boat> boats) {
+    public void addNewBoats(Iterable<Boat> boats) {
         LockUtil.lockForWrite(lock);
         try {
             for (Boat boat: boats) {

@@ -12,7 +12,7 @@
 <h2>URL: /api/v1/leaderboards/{name}/stoptracking?race_column={name}&amp;fleet={name}</h2>
 
 <b>Description:</b>
-<p>Stops tracking the race identified by the race_column and fleet parameters.
+<p>Stops tracking the race(s) identified by the race_column and fleet parameters.
 </p>
 <br/>
 <table>
@@ -26,21 +26,28 @@
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
-		<td>race_column, fleet</td>
+		<td>None</td>
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>None</td>
+		<td>race_column: if provided, restricts stopping to races in this race column; otherwise, races from all race columns will stop tracking
+		                 if the fleet parameter matches; see below<p>
+		    fleet: if provided, stopping is restricted to races in this fleet only; otherwise, races from all fleets are stopped<p></td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
 		<td>POST</td>
 	</tr>
 	<tr>
-		<td>Example:</td>
+		<td>Example 1:</td>
 		<td>curl -X POST -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://127.0.0.1:8888/sailingserver/api/v1/leaderboards/Smartphone%20Tracking%20Test%2022.06/stoptracking?race_column=K1&fleet=Blue"<br>
-		delivers the regatta and race name of the race whose tracking got stopped:<pre>
-		{"regatta":"Smartphone Tracking Test 22.06","race":"Smartphone Tracking Test 22.06 K1 Blue"}
+		delivers an array with the regatta and race names of the races whose tracking got stopped:<pre>
+		[{"regatta":"Smartphone Tracking Test 22.06","race":"Smartphone Tracking Test 22.06 K1 Blue"}]
+		</pre></td>
+		<td>Example 2:</td>
+		<td>curl -X POST -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://127.0.0.1:8888/sailingserver/api/v1/leaderboards/Smartphone%20Tracking%20Test%2022.06/stoptracking?race_column=K1"<br>
+		delivers an array with the regatta and race names of the races whose tracking got stopped:<pre>
+		[{"regatta":"Smartphone Tracking Test 22.06","race":"Smartphone Tracking Test 22.06 K1 Blue"}, {"regatta":"Smartphone Tracking Test 22.06","race":"Smartphone Tracking Test 22.06 K1 Yellow"}]
 		</pre></td>
 	</tr>
 </table>

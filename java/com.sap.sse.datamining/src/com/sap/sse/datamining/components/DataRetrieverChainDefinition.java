@@ -58,17 +58,28 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
 
     /**
      * Sets the first {@link Processor} in the chain.<br />
-     * The given processor should extend {@link AbstractRetrievalProcessor} and needs a constructor
-     * with the exact parameter list {@link ExecutorService}, {@link Collection}, <code>settings</code>, <code>int</code>.
+     * The given processor should extend {@link AbstractRetrievalProcessor} and needs a constructor with the exact
+     * parameter list {@link ExecutorService}, {@link Collection}, <code>settings</code>, <code>int</code>.
      * 
-     * @param retrieverType The type of the first processor in the chain
-     * @param retrievedDataType The <code>ResultType</code> of the <code>retrieverType</code>
-     * @param settingsType The type of the settings of the processor
-     * @param defaultSettings The default settings for the first processor in the chain
-     * @param retrievedDataTypeMessageKey The message key to describe the <code>retrieverType</code>
-     * @throws UnsupportedOperationException If the chain has already been started
-     * @throws IllegalArgumentException If the given <code>retrieverType</code> has no usable constructor
-     * @throws NullPointerException If the given <code>defaultSettings</code> are <code>null</code>
+     * @param retrieverType
+     *            The type of the first processor in the chain
+     * @param retrievedDataType
+     *            The <code>ResultType</code> of the <code>retrieverType</code>
+     * @param settingsType
+     *            The type of the settings of the processor; if not {@code null}, the {@code lastRetrieverType} must
+     *            offer a constructor with the following signature: {@code lastRetrieverType(}{@link ExecutorService},
+     *            {@link Collection}, {@code settingsType, int)}, otherwise a setting-less constructor will be used,
+     *            with signature {@code lastRetrieverType(}{@link ExecutorService}, {@link Collection}, {@code int)}
+     * @param defaultSettings
+     *            The default settings for the first processor in the chain
+     * @param retrievedDataTypeMessageKey
+     *            The message key to describe the <code>retrieverType</code>
+     * @throws UnsupportedOperationException
+     *             If the chain has already been started
+     * @throws IllegalArgumentException
+     *             If the given <code>retrieverType</code> has no usable constructor
+     * @throws NullPointerException
+     *             If the given <code>defaultSettings</code> are <code>null</code>
      */
     public <ResultType, SettingsType extends SerializableSettings> void startWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
             Class<ResultType> retrievedDataType, Class<SettingsType> settingsType, SettingsType defaultSettings, String retrievedDataTypeMessageKey);
@@ -143,23 +154,38 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
                      Class<DataType> retrievedDataType, String retrievedDataTypeMessageKey);
 
     /**
-     * Sets the last {@link Processor} in the chain. {@link #startWith(Class, Class, String)} has to be called once before you
-     * can use this method. Otherwise an exception will be thrown.<br />
+     * Sets the last {@link Processor} in the chain. {@link #startWith(Class, Class, String)} has to be called once
+     * before you can use this method. Otherwise an exception will be thrown.<br />
      * <b>Calling this method completes the chain and no other modifications will be possible!</b><br />
-     * The given processor should extend {@link AbstractRetrievalProcessor} and needs a constructor
-     * with the exact parameter list {@link ExecutorService}, {@link Collection}, <code>settings</code>, <code>int</code>.
+     * The given processor should extend {@link AbstractRetrievalProcessor} and needs a constructor with the exact
+     * parameter list {@link ExecutorService}, {@link Collection}, <code>settings</code>, <code>int</code>.
      * 
-     * @param lastAddedRetrieverType The processor that has been added before the <code>lastRetrieverType</code>
-     * @param lastRetrieverType The last processor in the chain
-     * @param retrievedDataType The <code>ResultType</code> of the <code>lastRetrieverType</code>
-     * @param settingsType The type of the settings of the processor
-     * @param defaultSettings The default settings for the last processor in the chain
-     * @param retrievedDataTypeMessageKey The message key to describe the <code>lastRetrieverType</code>
-     * @throws UnsupportedOperationException If the chain hasn't been started yet
-     * @throws UnsupportedOperationException If the chain is already complete
-     * @throws IllegalArgumentException If the given <code>lastAddedRetrieverType</code>  isn't correct
-     * @throws IllegalArgumentException If the given <code>retrieverType</code> has no usable constructor
-     * @throws NullPointerException If the given <code>defaultSettings</code> are <code>null</code>
+     * @param lastAddedRetrieverType
+     *            The processor that has been added before the <code>lastRetrieverType</code>
+     * @param lastRetrieverType
+     *            The last processor in the chain
+     * @param retrievedDataType
+     *            The <code>ResultType</code> of the <code>lastRetrieverType</code>
+     * @param settingsType
+     *            The type of the settings of the processor; if not {@code null}, the {@code lastRetrieverType} must
+     *            offer a constructor with the following signature: {@code lastRetrieverType(}{@link ExecutorService}, {@link Collection},
+     *            {@code settingsType, int)}, otherwise a setting-less constructor will be used, with signature
+     *            {@code lastRetrieverType(}{@link ExecutorService}, {@link Collection},
+     *            {@code int)}
+     * @param defaultSettings
+     *            The default settings for the last processor in the chain
+     * @param retrievedDataTypeMessageKey
+     *            The message key to describe the <code>lastRetrieverType</code>
+     * @throws UnsupportedOperationException
+     *             If the chain hasn't been started yet
+     * @throws UnsupportedOperationException
+     *             If the chain is already complete
+     * @throws IllegalArgumentException
+     *             If the given <code>lastAddedRetrieverType</code> isn't correct
+     * @throws IllegalArgumentException
+     *             If the given <code>retrieverType</code> has no usable constructor
+     * @throws NullPointerException
+     *             If the given <code>defaultSettings</code> are <code>null</code>
      */
     public <NextInputType, PreviousInputType, PreviousResultType extends NextInputType, SettingsType extends SerializableSettings> void
            endWith(Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
