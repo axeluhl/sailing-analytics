@@ -28,6 +28,7 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
 
     public interface BoatUpdateListener {
         void boatUpdated(Boat boat);
+        void boatCreated(Boat boat);
     }
 
     /**

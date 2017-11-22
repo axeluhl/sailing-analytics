@@ -66,6 +66,7 @@ import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorStore.BoatUpdateListener;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
@@ -201,6 +202,7 @@ import com.sap.sailing.server.operationaltransformation.AddMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.CreateBoat;
 import com.sap.sailing.server.operationaltransformation.CreateCompetitor;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImportProgress;
@@ -222,6 +224,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
+import com.sap.sailing.server.operationaltransformation.UpdateBoat;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateEndOfTracking;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
@@ -699,6 +702,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         competitor.getTeam()==null?null:competitor.getTeam().getNationality(),
                         competitor.getTimeOnTimeFactor(),
                         competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+            }
+        });
+        this.competitorStore.addBoatUpdateListener(new BoatUpdateListener() {
+            @Override
+            public void boatUpdated(Boat boat) {
+                replicate(new UpdateBoat(boat.getId().toString(), boat.getName(), boat.getColor(), boat.getSailID()));
+            }
+            @Override
+            public void boatCreated(Boat boat) {
+                replicate(new CreateBoat(boat.getId(), boat.getName(), 
+                        boat.getBoatClass()==null?null:boat.getBoatClass().getName(), 
+                        boat.getSailID(), boat.getColor()));
             }
         });
         this.dataImportLock = new DataImportLockWithProgress();

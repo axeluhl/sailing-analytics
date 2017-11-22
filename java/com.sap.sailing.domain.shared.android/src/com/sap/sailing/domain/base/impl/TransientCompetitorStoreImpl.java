@@ -476,6 +476,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
+        synchronized (boatUpdateListeners) {
+            for (final BoatUpdateListener listener : boatUpdateListeners) {
+                listener.boatCreated(boat);
+            }
+        }
     }
 
     @Override
