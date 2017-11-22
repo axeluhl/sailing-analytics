@@ -45,8 +45,6 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -59,14 +57,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.operationaltransformation.Peer;
 
 import junit.framework.Assert;
 
 public class RaceColumnReloadTest {
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
-    private Peer<RacingEventServiceOperation<?>, RacingEventService> server;
     private RaceColumn raceColumn;
     private RaceLog raceLog;
     private RaceLogWindFixEventImpl testWindEvent1;
