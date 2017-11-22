@@ -2,8 +2,8 @@
  * styles for search result page
  */
 .paging {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
   margin-top: 1.875em;
 }
 .paging_perpage {
@@ -41,7 +41,7 @@
   height: 0;
   overflow: hidden;
   border: 0;
-  background-image: url("images/home/paging-icons.png");
+  background-image: resourceUrl("paging");
   background-repeat: no-repeat;
   background-position: left center;
   background-size: cover;
@@ -51,8 +51,8 @@
   background-position: -2.5em center;
 }
 .dropdown {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
   width: 18.75em;
   display: inline-block;
 }
@@ -114,8 +114,8 @@
   font-size: 1em;
 }
 .searchresult {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
 }
 .searchresult_form {
   display: block;
@@ -130,7 +130,7 @@
 .searchresult_form_input {
   display: block;
   padding: 0.625em 0 0.5625em 2.5em;
-  background-image: url("images/home/search-icon-grey.png");
+  background-image: resourceUrl("search");
   background-repeat: no-repeat;
   background-color: #f6f9fc;
   background-position: 0.625em center;
@@ -139,8 +139,8 @@
   float: left;
 }
 .searchresult_form_button {
-  font-size: 16px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
   width: 10%;
   float: right;
   text-transform: uppercase;

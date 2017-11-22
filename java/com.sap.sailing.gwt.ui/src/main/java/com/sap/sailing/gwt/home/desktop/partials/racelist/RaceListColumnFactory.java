@@ -19,7 +19,6 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
@@ -36,6 +35,7 @@ import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.Loca
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadCell;
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadController;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -57,8 +57,8 @@ public class RaceListColumnFactory {
         @Template("<div>{3}</div><div class=\"{0}\"><div style=\"{2}\" class=\"{1}\"></div></div>")
         SafeHtml viewStateRunning(String styleNamesBar, String styleNamesProgress, SafeStyles width, String text);
 
-        @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
-        SafeHtml windDirection(SafeStyles rotation);
+        @Template("<img style=\"{0}\" src=\"{1}\"/>")
+        SafeHtml windDirection(SafeStyles rotation, SafeUri imageUrl);
 
         @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:18px;height:12px;background-image:url({2})'></div><span class=\"{0}\">{3}</span><div class=\"{1}\" title=\"{4}\">{4}</div>")
         SafeHtml winner(String styleNamesSailId, String styleNamesText, String flagImageURL, String sailId, String name);
@@ -275,7 +275,7 @@ public class RaceListColumnFactory {
                     safeStyles.trustedNameAndValue("-webkit-transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
                     safeStyles.trustedNameAndValue("transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
                     safeStyles.width(2.75, Unit.EM).height(2.75, Unit.EM);
-                    sb.append(TEMPLATE.windDirection(safeStyles.toSafeStyles()));
+                    sb.append(TEMPLATE.windDirection(safeStyles.toSafeStyles(), RaceListResources.INSTANCE.compass().getSafeUri()));
                 }
             }
         };
@@ -573,9 +573,9 @@ public class RaceListColumnFactory {
     }
     
     private static abstract class DataCountColumn<T extends RaceListRaceDTO> extends SortableRaceListColumn<T, Number> {
-        private static final SafeUri ICON_WIND = UriUtils.fromTrustedString("images/home/icon-wind.png"); 
-        private static final SafeUri ICON_VIDEO = UriUtils.fromTrustedString("images/home/icon-video.png"); 
-        private static final SafeUri ICON_AUDIO = UriUtils.fromTrustedString("images/home/icon-audio.png"); 
+        private static final SafeUri ICON_WIND = SharedDesktopResources.INSTANCE.wind().getSafeUri(); 
+        private static final SafeUri ICON_VIDEO = SharedDesktopResources.INSTANCE.video().getSafeUri(); 
+        private static final SafeUri ICON_AUDIO = SharedDesktopResources.INSTANCE.audio().getSafeUri(); 
         
         private DataCountColumn(final SafeUri imageUri, RaceListColumnComparator<T, ?> comparator) {
             super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Number>() {

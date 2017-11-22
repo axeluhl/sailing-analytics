@@ -1,6 +1,6 @@
 .media {
- font-size: 15px;
- font-size: 1rem;
+ /* @alternate */ font-size: 15px;
+ /* @alternate */ font-size: 1rem;
 }
 
 .media_swipecontainer {
@@ -37,7 +37,7 @@
  transform: translate(0, -50%);
  width: 60px;
  height: 60px;
-  background-image: url("images/home/media-controls__arrows.png");
+  background-image: resourceUrl("mediaControlsArrows");
 }
 
 .media_slideshow_controlsprev {
@@ -59,7 +59,7 @@
 }
 
 .media_slideshow_controlsfullsize {
-  background-image: url("images/home/media-controls__fullsize.png");
+  background-image: resourceUrl("mediaControlsFullsize");
  right: 0;
  bottom: 0;
  width: 40px;
@@ -76,8 +76,8 @@
 }
 
 .videopreview {
- font-size: 15px;
- font-size: 1rem;
+ /* @alternate */ font-size: 15px;
+ /* @alternate */ font-size: 1rem;
  margin-bottom: 2.666666666666667em;
 }
 
@@ -93,7 +93,7 @@
  transform: translate(-50%, 0);
  width: 69px;
  height: 69px;
-  background: url("images/home/video__preview--play.png");
+  background: resourceUrl("videoPreviewPlay");
  -webkit-background-size: contain;
  -moz-background-size: contain;
  background-size: contain;
