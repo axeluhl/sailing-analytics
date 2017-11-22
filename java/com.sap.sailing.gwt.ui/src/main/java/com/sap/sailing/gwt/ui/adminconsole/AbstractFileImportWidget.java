@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -35,6 +36,8 @@ public abstract class AbstractFileImportWidget extends Composite {
     @UiField FileUpload fileUploadUi;
     @UiField ListBox preferredImporterUi;
     @UiField Button importButtonUi;
+    @UiField
+    CheckBox downsampleUi;
     @UiField Image loadingImageUi;
     @UiField FormPanel formPanelUi;
     private final TrackFileImportDeviceIdentifierTableWrapper table;
@@ -72,6 +75,10 @@ public abstract class AbstractFileImportWidget extends Composite {
         formPanelUi.submit();
     }
 
+    protected void setDownsampleOptionVisible(boolean visible) {
+        downsampleUi.setVisible(visible);
+    }
+    
     @UiHandler("formPanelUi")
     void onFileImportComplete(SubmitCompleteEvent event) {
         if (shouldClearListOnNewUploadComplete) {

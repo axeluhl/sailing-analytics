@@ -1148,4 +1148,13 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
     }
 
+    @Override
+    public boolean hasScores(Competitor competitor, TimePoint timePoint) {
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            if (getTotalPoints(competitor, raceColumn, timePoint) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
