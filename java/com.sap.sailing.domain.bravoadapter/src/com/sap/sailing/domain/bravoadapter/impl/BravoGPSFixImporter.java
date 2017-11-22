@@ -21,9 +21,9 @@ import com.sap.sailing.server.trackfiles.impl.BravoExtendedDataImporterImpl;
 
 public class BravoGPSFixImporter implements GPSFixImporter {
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, final String sourceName)
+    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, final String filename)
             throws FormatNotSupportedException, IOException {
-        TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
+        TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(filename, getType() + "@" + new Date());
         new BravoExtendedDataImporterImpl().importFixes(inputStream,
                 (Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier deviceIdentifier)->{
                     for (final DoubleVectorFix fix : fixes) {
@@ -35,7 +35,7 @@ public class BravoGPSFixImporter implements GPSFixImporter {
                                         new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.COG.getColumnIndex()))));
                         callback.addFix(gpsFix, device);
                     }
-                }, sourceName, sourceName, /* downsample */ false);
+                }, filename, /* sourceName */ getType(), /* downsample */ false);
     }
 
     @Override
