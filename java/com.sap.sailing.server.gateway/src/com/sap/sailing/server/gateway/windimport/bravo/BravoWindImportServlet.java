@@ -105,14 +105,14 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
                 }
             }
         } else {
-            final String sourceName;
+            final String actualFileName;
             if (filename.toLowerCase().endsWith(GZIP_SUFFIX)) {
                 inputStream = new GZIPInputStream(inputStream);
-                sourceName = filename.substring(0, filename.length()-GZIP_SUFFIX.length());
+                actualFileName = filename.substring(0, filename.length()-GZIP_SUFFIX.length());
             } else {
-                sourceName = filename;
+                actualFileName = filename;
             }
-            importer.importFixes(inputStream, callback, filename, sourceName, /* downsample */ false);
+            importer.importFixes(inputStream, callback, actualFileName, BRAVO_WIND_IMPORT, /* downsample */ false);
         }
         return result;
     }
