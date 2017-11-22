@@ -443,12 +443,12 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, SimpleCompetitorDTO> getWinnerColumn() {
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, SimpleCompetitorDTO> getWinnerColumn(FlagImageResolver flagImageResolver) {
         Cell<SimpleCompetitorDTO> cell = new AbstractCell<SimpleCompetitorDTO>() {
             @Override
             public void render(Context context, SimpleCompetitorDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    SafeUri flagImageUri = FlagImageResolver.getFlagImageUri(value.getFlagImageURL(),
+                    SafeUri flagImageUri = flagImageResolver.getFlagImageUri(value.getFlagImageURL(),
                             value.getTwoLetterIsoCountryCode());
                     String sailIdStyle = CSS.race_item_sailid();
                     String nameStyle = CSS.race_item_winner();
