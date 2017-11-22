@@ -354,6 +354,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.LineStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -5165,6 +5166,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 dto.racingProcedure);
         return new MillisecondsTimePoint(dto.startTime).equals(newStartTime);
     }
+    
+    @Override
+    public Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto) {
+        TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.finishingTime));
+        
+        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.finishTime));
+        
+        return new Pair<Boolean, Boolean>(new MillisecondsTimePoint(dto.finishingTime).equals(newFinsihingTime),
+                new MillisecondsTimePoint(dto.finishTime).equals(newEndTime));
+    }
 
     @Override
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException {
@@ -5241,6 +5256,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return null;
         }
         return new com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType>(result.getA() == null ? null : result.getA().asDate(), result.getB(), result.getC());
+    }
+    
+
+    @Override
+    public com.sap.sse.common.Util.Triple<Date, Date, Integer> getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName) {
+        com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> result = getService().getFinishingAndFinishTime(leaderboardName, raceColumnName, fleetName);
+        if (result == null) {
+            return null;
+        }
+        return new com.sap.sse.common.Util.Triple<>(result.getA() == null ? null : result.getA().asDate(),
+                result.getB() == null ? null : result.getB().asDate(), result.getC());
     }
 
     @Override
