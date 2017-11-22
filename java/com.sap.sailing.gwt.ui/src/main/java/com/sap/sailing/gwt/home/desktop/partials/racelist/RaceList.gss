@@ -72,11 +72,6 @@
   min-width: 13.333333333333334em;
   max-width: 16.666666666666668em;
 }
-img.race_item_flag {
-  vertical-align: middle;
-  height: 1em;
-  width: auto;
-}
 .race_item_position {
   margin-right: 0.333333333333333em;
 }

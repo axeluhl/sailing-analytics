@@ -60,8 +60,8 @@ public class RaceListColumnFactory {
         @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
         SafeHtml windDirection(SafeStyles rotation);
 
-        @Template("<img src=\"{3}\" class=\"{0}\" /><span class=\"{1}\">{4}</span><div class=\"{2}\" title=\"{5}\">{5}</div>")
-        SafeHtml winner(String styleNamesFlag, String styleNamesSailId, String styleNamesText, SafeUri flagImageURL, String sailId, String name);
+        @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:18px;height:12px;background-image:url({2})'></div><span class=\"{0}\">{3}</span><div class=\"{1}\" title=\"{4}\">{4}</div>")
+        SafeHtml winner(String styleNamesSailId, String styleNamesText, String flagImageURL, String sailId, String name);
         
         @Template("<img src=\"{1}\" class=\"{0}\" />")
         SafeHtml imageHeader(String styleNames, SafeUri imageURL);
@@ -448,9 +448,12 @@ public class RaceListColumnFactory {
             @Override
             public void render(Context context, SimpleCompetitorDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    SafeUri flagImageUri = FlagImageResolver.getFlagImageUri(value.getFlagImageURL(), value.getTwoLetterIsoCountryCode());
-                    String flagStyle = CSS.race_item_flag(), sailIdStyle = CSS.race_item_sailid(), nameStyle = CSS.race_item_winner();
-                    sb.append(TEMPLATE.winner(flagStyle, sailIdStyle, nameStyle, flagImageUri, value.getSailID(), value.getName()));
+                    SafeUri flagImageUri = FlagImageResolver.getFlagImageUri(value.getFlagImageURL(),
+                            value.getTwoLetterIsoCountryCode());
+                    String sailIdStyle = CSS.race_item_sailid();
+                    String nameStyle = CSS.race_item_winner();
+                    sb.append(TEMPLATE.winner( sailIdStyle, nameStyle, flagImageUri.asString(),
+                            value.getSailID(), value.getName()));
                 }
             }
         };
