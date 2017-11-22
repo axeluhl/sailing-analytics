@@ -8,7 +8,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.desktop.HighChartInjector;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.app.WithHeader;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.AbstractMultiregattaEventPlace;
@@ -24,6 +23,8 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sse.gwt.resources.CommonControlsCSS;
+import com.sap.sse.gwt.resources.Highcharts;
 
 public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFactory> implements WithHeader {
 
@@ -41,20 +42,16 @@ public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFa
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                HighChartInjector.loadHighCharts(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        if (place instanceof AbstractEventRegattaPlace) {
-                            withFlagImageResolver(flagImageResolver -> new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
-                                    homePlacesNavigator, getNavigationPathDisplay(), flagImageResolver));
-                        }
-                        if (place instanceof AbstractMultiregattaEventPlace) {
-                            onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
-                                    clientFactory, homePlacesNavigator, getNavigationPathDisplay()));
-                        }
-                    }
-                });
+                CommonControlsCSS.ensureInjected();
+                Highcharts.ensureInjected();
+                if (place instanceof AbstractEventRegattaPlace) {
+                    withFlagImageResolver(flagImageResolver -> new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
+                            homePlacesNavigator, getNavigationPathDisplay(), flagImageResolver));
+                }
+                if (place instanceof AbstractMultiregattaEventPlace) {
+                    onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
+                            clientFactory, homePlacesNavigator, getNavigationPathDisplay()));
+                }
             }
             private void withFlagImageResolver(final Function<FlagImageResolver, Activity> activityFactory) {
                 final Consumer<Activity> onSuccess = super::onSuccess;

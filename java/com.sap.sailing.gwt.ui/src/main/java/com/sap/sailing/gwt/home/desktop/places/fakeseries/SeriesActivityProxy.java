@@ -10,7 +10,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.GetEventSeriesViewAction;
-import com.sap.sailing.gwt.home.desktop.HighChartInjector;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.app.WithHeader;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEventsPlace;
@@ -24,6 +23,8 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
+import com.sap.sse.gwt.resources.CommonControlsCSS;
+import com.sap.sse.gwt.resources.Highcharts;
 
 public class SeriesActivityProxy extends AbstractActivityProxy implements ProvidesNavigationPath, WithHeader {
 
@@ -66,14 +67,11 @@ public class SeriesActivityProxy extends AbstractActivityProxy implements Provid
                     place = getRealPlace(series);
                 }
                 place = verifyAndAdjustPlace();
-                HighChartInjector.loadHighCharts(new Runnable() {
-                    
-                    @Override
-                    public void run() {
-                        withFlagImageResolver(flagImageResolver -> new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
-                                homePlacesNavigator, navigationPathDisplay, flagImageResolver));
-                    }
-                });
+
+                CommonControlsCSS.ensureInjected();
+                Highcharts.ensureInjected();
+                withFlagImageResolver(flagImageResolver -> new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
+                        homePlacesNavigator, navigationPathDisplay, flagImageResolver));
             }
             private void withFlagImageResolver(final Function<FlagImageResolver, Activity> activityFactory) {
                 final Consumer<Activity> onSuccess = super::onSuccess;
