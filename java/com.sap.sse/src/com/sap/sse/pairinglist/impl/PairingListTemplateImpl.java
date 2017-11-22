@@ -136,16 +136,13 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         int[][] bestPLT = new int[flightCount * groupCount][competitors / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
         
-//        int equals=3;
-//        int[][] allSeeds=new int[iterations][flightCount];
-//        for(int i=0;i<iterations;i++){
-//            allSeeds[i]=this.generateSeeds(flightCount, competitors,flightCount);
-//        }
-//        allSeeds=radixSort(allSeeds, competitors);
-//        ArrayList<int[][]> parts=this.divideSeeds(equals,allSeeds);
-          ArrayList<int[][]>parts=new ArrayList<>();
-          int[][] temp={{8,16,10,1,16,10,12,17,17,12,12,12,2,7,5}};
-          parts.add(temp);
+        int equals=3;
+        int[][] allSeeds=new int[iterations][flightCount];
+        for(int i=0;i<iterations;i++){
+            allSeeds[i]=this.generateSeeds(flightCount, competitors,flightCount);
+        }
+        allSeeds=radixSort(allSeeds, competitors);
+        ArrayList<int[][]> parts=this.divideSeeds(equals,allSeeds);
         ArrayList<Future<int[][]>> futures = new ArrayList<>();
         for (int[][] is : parts) {
             Future<int[][]> future = executorService.submit((new SuffixCreationTask(flightCount, groupCount, competitors,is,0)));
@@ -444,7 +441,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             for (int x=i;x<seeds[0].length;x++) {
                 int[][] flightColumn=this.createFlight(groupCount, competitorCount, currentAssociations, seeds[z][x]);
                 for (int y=0;y<flightColumn.length;y++) {
-                    System.arraycopy(flightColumn[y], 0, currentPLT[x*groupCount+y], 0, flightColumn.length);
+                    System.arraycopy(flightColumn[y], 0, currentPLT[x*groupCount+y], 0, flightColumn[0].length);
                 }
                 this.incrementAssociations(flightColumn, currentAssociations);
             }
@@ -688,6 +685,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     /**
+     * get decleard field
+     * set accessable true
+     * 
      * Creates a matrix that describes how often the team competes against each other. Its dimensions are
      * <code>associations[competitors][competitors]</code>, e.g.:
      * 
