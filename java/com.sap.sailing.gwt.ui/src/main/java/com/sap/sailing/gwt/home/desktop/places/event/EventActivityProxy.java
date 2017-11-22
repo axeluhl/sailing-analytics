@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.event;
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
+import com.sap.sailing.gwt.home.desktop.HighChartInjector;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.app.WithHeader;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.AbstractMultiregattaEventPlace;
@@ -34,14 +35,20 @@ public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFa
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                if (place instanceof AbstractEventRegattaPlace) {
-                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
-                            homePlacesNavigator, getNavigationPathDisplay()));
-                }
-                if (place instanceof AbstractMultiregattaEventPlace) {
-                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
-                            clientFactory, homePlacesNavigator, getNavigationPathDisplay()));
-                }
+                HighChartInjector.loadHighCharts(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (place instanceof AbstractEventRegattaPlace) {
+                            onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
+                                    homePlacesNavigator, getNavigationPathDisplay()));
+                        }
+                        if (place instanceof AbstractMultiregattaEventPlace) {
+                            onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
+                                    clientFactory, homePlacesNavigator, getNavigationPathDisplay()));
+                        }
+                    }
+                });
             }
         });
     }

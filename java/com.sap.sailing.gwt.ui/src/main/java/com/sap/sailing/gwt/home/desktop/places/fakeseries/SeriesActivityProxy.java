@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.GetEventSeriesViewAction;
+import com.sap.sailing.gwt.home.desktop.HighChartInjector;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.app.WithHeader;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEventsPlace;
@@ -60,8 +61,14 @@ public class SeriesActivityProxy extends AbstractActivityProxy implements Provid
                     place = getRealPlace(series);
                 }
                 place = verifyAndAdjustPlace();
-                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
-                        homePlacesNavigator, navigationPathDisplay));
+                HighChartInjector.loadHighCharts(new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
+                                homePlacesNavigator, navigationPathDisplay));
+                    }
+                });
             }
         });
     }
