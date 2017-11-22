@@ -269,7 +269,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         competitor doesn't appear in any of the race column's attached tracked races. A 0.0 score is returned
      *         if the competitor's result for <code>race</code> is discarded.
      */
-    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's standings for
@@ -588,4 +588,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     BoatClass getBoatClass();
     
     LeaderboardType getLeaderboardType();
+
+    /**
+     * Tells if there is at least one non-{@code null} score for the given {@code competitor} in the
+     * leaderboard.
+     */
+    boolean hasScores(Competitor competitor, TimePoint timePoint);
 }
