@@ -2,6 +2,7 @@ package com.sap.sse.pairinglist.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;

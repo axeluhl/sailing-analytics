@@ -54,6 +54,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     private Set<RegattasDisplayer> regattasDisplayers;
     private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
+    private Set<PairingListDisplayer> pairingListDisplayers;
 
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     
@@ -91,7 +92,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
-
+        pairingListDisplayers = new HashSet<>();
+        
         final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, getStringMessages(), panel);
         eventManagementPanel.ensureDebugId("EventManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
@@ -148,7 +150,16 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         regattasDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
-
+        
+        /* PAIRING LISTS */
+        
+        /*
+        final PairingListPanel pairingListPanel = new PairingListPanel(sailingService, getStringMessages());
+        pairingListPanel.ensureDebugId("PairingListManagement");
+        panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<PairingListPanel>(pairingListPanel), 
+                getStringMessages().pairingLists(), Permission.MANAGE_PAIRING_LISTS);
+        pairingListDisplayers.add(pairingListPanel);
+        */
         /* RACES */
         
         final HorizontalTabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");
@@ -210,7 +221,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel),
                 getStringMessages().tracTracEvents(), Permission.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(tractracEventManagementPanel);
-
+        
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
                 sailingService, this, this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(swissTimingReplayConnectorPanel),

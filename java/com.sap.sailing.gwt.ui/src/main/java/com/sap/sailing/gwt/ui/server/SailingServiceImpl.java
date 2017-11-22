@@ -195,6 +195,7 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
@@ -486,6 +487,9 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.pairinglist.PairingFrameProvider;
+import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
@@ -6646,5 +6650,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return availableDetailsTypes;
+    }
+    
+    @Override
+    public PairingListDTO calculatePairingList(int flights, int groups, int competitors) {
+        PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
+        PairingListTemplate pairingListTemplate = factoryImpl.getOrCreatePairingListTemplate(
+                new PairingFrameProvider() {
+                    
+                    @Override
+                    public int getGroupsCount() {
+                        return flights;
+                    }
+                    
+                    @Override
+                    public int getFlightsCount() {
+                        return groups;
+                    }
+                    
+                    @Override
+                    public int getCompetitorsCount() {
+                        return competitors;
+                    }
+                });
+        
+        return new PairingListDTO(pairingListTemplate.getPairingListTemplate(), pairingListTemplate.getQuality());
     }
 }
