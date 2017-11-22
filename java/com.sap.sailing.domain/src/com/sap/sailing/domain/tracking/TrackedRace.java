@@ -46,6 +46,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -1033,4 +1034,42 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *            time point up and until to compute the speed
      */
     Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * Computes the competitor's speed projected onto the wind (if wind data is available and the competitor is not
+     * between start and finish (not racing) or not on a {@link LegType#REACHING reaching} leg; if outside a race and no
+     * wind information is available, {@code null} is returned. Otherwise, the speed at {@code timePoint} is projected
+     * onto the course. The wind direction at the {@link WindPositionMode#EXACT exact} competitor position at
+     * {@code timePoint} is used for the calculation.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint) {
+        return getVelocityMadeGood(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a {@link WindPositionMode}
+     * other than the default {@link WindPositionMode#EXACT}. If {@link WindPositionMode#LEG_MIDDLE} is used and the
+     * competitor is not currently sailing on a leg (hasn't started or has already finished), {@code null} is returned.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
+        return getVelocityMadeGood(competitor, timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
+     * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getVelocityMadeGood(competitor, timePoint, WindPositionMode.EXACT, cache);
+    }
+
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a
+     * {@link WindPositionMode} other than the default {@link WindPositionMode#EXACT} as well as a cache that can
+     * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing. If
+     * {@link WindPositionMode#LEG_MIDDLE} is used and the competitor is not currently sailing on a leg (hasn't started
+     * or has already finished), {@code null} is returned.
+     */
+    SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache);
 }
