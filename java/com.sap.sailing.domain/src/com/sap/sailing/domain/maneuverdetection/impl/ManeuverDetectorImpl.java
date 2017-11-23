@@ -576,28 +576,46 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private SpeedWithBearingStepsIterable getSpeedWithBearingSteps(Competitor competitor,
             TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver) {
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        long gpsIntervalMillis = track.getAverageIntervalBetweenRawFixes().asMillis();
+        Duration intervalBetweenSteps = getNormlizedIntervalForSpeedWithBearingSteps(
+                track.getAverageIntervalBetweenRawFixes());
+        SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
+                timePointAfterManeuver, intervalBetweenSteps);
+        return stepsToAnalyze;
+    }
+
+    /**
+     * Gets a normalized interval for retrieval of speed with bearing steps such that it appears as ((x * 1000) %
+     * normalizedIntervalMillis == 0 && normalizedIntervalMillis <= 1000 && normalizedIntervalMillis >= 100) with x
+     * element of any integer, to prevent cache misses by calls of getEstimatedSpeed() within
+     * track.getSpeedWithBearingSteps().
+     */
+    public Duration getNormlizedIntervalForSpeedWithBearingSteps(Duration approximatedInterval) {
+        long targetIntervalMillis = approximatedInterval.asMillis();
         Duration intervalBetweenSteps;
-        if (gpsIntervalMillis >= 1000 || gpsIntervalMillis <= 0) {
+        if (targetIntervalMillis >= 1000) {
             intervalBetweenSteps = Duration.ONE_SECOND;
         } else {
             // Derive the intervalBetweenSteps such that it appears as (1000 % intervalBetweenSteps == 0) to prevent
             // cache misses by calls of getEstimatedSpeed() within track.getSpeedWithBearingSteps
+            long[] possibleDivisors = { 2, 4, 5, 10 };
+            final long referenceValue = 1000;
             long possibleIntervalMillis;
             long lowerPossibleIntervalMillis;
-            for (possibleIntervalMillis = 1000, lowerPossibleIntervalMillis = possibleIntervalMillis
-                    / 2; gpsIntervalMillis < lowerPossibleIntervalMillis; possibleIntervalMillis = lowerPossibleIntervalMillis, lowerPossibleIntervalMillis /= 2)
+            int i;
+            for (i = 0, possibleIntervalMillis = referenceValue, lowerPossibleIntervalMillis = referenceValue
+                    / possibleDivisors[0]; targetIntervalMillis < lowerPossibleIntervalMillis
+                            && i < possibleDivisors.length
+                                    - 1; possibleIntervalMillis = lowerPossibleIntervalMillis, lowerPossibleIntervalMillis = referenceValue
+                                            / possibleDivisors[++i])
                 ;
-            if (possibleIntervalMillis - gpsIntervalMillis <= gpsIntervalMillis - lowerPossibleIntervalMillis
+            if (possibleIntervalMillis - targetIntervalMillis <= targetIntervalMillis - lowerPossibleIntervalMillis
                     || lowerPossibleIntervalMillis == 0) {
                 intervalBetweenSteps = new MillisecondsDurationImpl(possibleIntervalMillis);
             } else {
                 intervalBetweenSteps = new MillisecondsDurationImpl(lowerPossibleIntervalMillis);
             }
         }
-        SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
-                timePointAfterManeuver, intervalBetweenSteps);
-        return stepsToAnalyze;
+        return intervalBetweenSteps;
     }
 
     /**

@@ -18,7 +18,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -248,7 +250,29 @@ public class CurveEnteringAndExitingComputationTest {
                 MAX_ABS_COURSE_CHANGE_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         assertEquals(constructTimePoint(0), extension.getExtensionTimePoint());
         assertEquals(0, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
-
+    }
+    
+    @Test
+    public void testNormalizedIntervalComputation() {
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
+        Duration normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(1001));
+        assertEquals(normalizedInterval.asMillis(), 1000);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(1000));
+        assertEquals(normalizedInterval.asMillis(), 1000);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(0));
+        assertEquals(normalizedInterval.asMillis(), 100);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(-3));
+        assertEquals(normalizedInterval.asMillis(), 100);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(99));
+        assertEquals(normalizedInterval.asMillis(), 100);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(250));
+        assertEquals(normalizedInterval.asMillis(), 250);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(249));
+        assertEquals(normalizedInterval.asMillis(), 250);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(225));
+        assertEquals(normalizedInterval.asMillis(), 250);
+        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(224));
+        assertEquals(normalizedInterval.asMillis(), 200);
     }
 
     private SpeedWithBearingStepsIterable constructStepsWithBearings(double... bearingsInDegrees) {
