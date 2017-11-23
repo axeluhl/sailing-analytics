@@ -493,8 +493,12 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
                         valueFromEndOfCacheEntryToTo = getValueSumRecursively(bestCacheEntry.getA(), to,
                                 recursionDepth + 1, nullElement, adder, cache, valueCalculator);
                     }
-                    result = adder.add(adder.add(valueFromFromToBeginningOfCacheEntry, bestCacheEntry.getB().getB()), 
-                            valueFromEndOfCacheEntryToTo);
+                    if (valueFromEndOfCacheEntryToTo == null || bestCacheEntry.getB().getB() == null) {
+                        result = null;
+                    } else {
+                        result = adder.add(adder.add(valueFromFromToBeginningOfCacheEntry, bestCacheEntry.getB().getB()), 
+                                valueFromEndOfCacheEntryToTo);
+                    }
                 } else {
                     if (from.compareTo(to) < 0) {
                         result = valueCalculator.calculate(from, to);
