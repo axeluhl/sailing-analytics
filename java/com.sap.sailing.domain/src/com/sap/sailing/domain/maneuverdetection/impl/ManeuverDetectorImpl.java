@@ -111,18 +111,21 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 // compute course change on "approximation track"
                 CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent
                         .getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
-                
+
                 // check for the case where the course change between the approximation fixes may have been >180deg by
                 // comparing the direction of the course change on the approximation points with the direction of the
                 // course change during the same time range on the original fixes (see also bug 2009):
                 TimePoint fromTimePointForOriginalFixesCourseChangeInvestigation = previous.getTimePoint();
-                Duration durationFromPreviousToCurrent = fromTimePointForOriginalFixesCourseChangeInvestigation.until(current.getTimePoint());
-                Duration maxDurationForOriginalFixesCourseChangeInvestigation = getApproximateManeuverDuration(competitor).divide(2.0);
-                if(durationFromPreviousToCurrent.compareTo(maxDurationForOriginalFixesCourseChangeInvestigation) > 0) {
-                    fromTimePointForOriginalFixesCourseChangeInvestigation = current.getTimePoint().minus(maxDurationForOriginalFixesCourseChangeInvestigation);
+                Duration durationFromPreviousToCurrent = fromTimePointForOriginalFixesCourseChangeInvestigation
+                        .until(current.getTimePoint());
+                Duration maxDurationForOriginalFixesCourseChangeInvestigation = getApproximateManeuverDuration(
+                        competitor).divide(2.0);
+                if (durationFromPreviousToCurrent.compareTo(maxDurationForOriginalFixesCourseChangeInvestigation) > 0) {
+                    fromTimePointForOriginalFixesCourseChangeInvestigation = current.getTimePoint()
+                            .minus(maxDurationForOriginalFixesCourseChangeInvestigation);
                 }
-                Bearing courseChangeOnOriginalFixes = getCourseChange(competitor, fromTimePointForOriginalFixesCourseChangeInvestigation,
-                        next.getTimePoint());
+                Bearing courseChangeOnOriginalFixes = getCourseChange(competitor,
+                        fromTimePointForOriginalFixesCourseChangeInvestigation, next.getTimePoint());
                 if (Math.abs(courseChangeOnOriginalFixes.getDegrees()) > 180
                         && Math.signum(courseChange.getCourseChangeInDegrees()) != Math
                                 .signum(courseChangeOnOriginalFixes.getDegrees())) {
@@ -163,9 +166,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * negative sign means a direction change to port, a positive sign means a direction change to starboard.
      */
     private Bearing getCourseChange(Competitor competitor, TimePoint startInclusive, TimePoint endInclusive) {
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        SpeedWithBearingStepsIterable speedWithBearingSteps = track.getSpeedWithBearingSteps(startInclusive,
-                endInclusive, track.getAverageIntervalBetweenRawFixes());
+        SpeedWithBearingStepsIterable speedWithBearingSteps = getSpeedWithBearingSteps(competitor, startInclusive,
+                endInclusive);
         double totalCourseChangeInDegrees = 0;
         for (SpeedWithBearingStep step : speedWithBearingSteps) {
             totalCourseChangeInDegrees += step.getCourseChangeInDegrees();
@@ -547,11 +549,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     private CurveDetailsWithBearingSteps computeManeuverMainCurveDetails(Competitor competitor,
             TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        Duration gpsInterval = track.getAverageIntervalBetweenRawFixes();
-        Duration intervalBetweenSteps = gpsInterval.asMillis() > 1000 ? Duration.ONE_SECOND : gpsInterval;
-        SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
-                timePointAfterManeuver, intervalBetweenSteps);
+        SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(competitor, timePointBeforeManeuver,
+                timePointAfterManeuver);
         CurveDetails maneuverMainCurveDetails = computeManeuverMainCurve(stepsToAnalyze, maneuverDirection);
         if (maneuverMainCurveDetails == null) {
             return null;
@@ -566,6 +565,16 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
                 maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
                 maneuverMainCurveSpeedWithBearingSteps);
+    }
+
+    private SpeedWithBearingStepsIterable getSpeedWithBearingSteps(Competitor competitor,
+            TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver) {
+        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        Duration gpsInterval = track.getAverageIntervalBetweenRawFixes();
+        Duration intervalBetweenSteps = gpsInterval.asMillis() > 1000 ? Duration.ONE_SECOND : gpsInterval;
+        SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
+                timePointAfterManeuver, intervalBetweenSteps);
+        return stepsToAnalyze;
     }
 
     /**
@@ -642,7 +651,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         Duration approximateManeuverDuration = getApproximateManeuverDuration(competitor);
         Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration.divide(8.0);
         Duration maxDurationForSpeedTrendAnalysis = approximateManeuverDuration;
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         TimePoint latestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimePointBefore();
         TimePoint earliestTimePointForSpeedTrendAnalysis = latestTimePointForSpeedTrendAnalysis
                 .minus(maxDurationForSpeedTrendAnalysis);
@@ -651,9 +659,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         }
         TimePoint timePointSinceGlobalMaximumSearch = latestTimePointForSpeedTrendAnalysis
                 .minus(minDurationForSpeedTrendAnalysis);
-        SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(
-                earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis,
-                track.getAverageIntervalBetweenRawFixes());
+        SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(competitor,
+                earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis);
         CurveBoundaryExtension maneuverStart = findSpeedMaximum(stepsToAnalyze, true,
                 timePointSinceGlobalMaximumSearch);
         TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
@@ -712,10 +719,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         }
         TimePoint timePointBeforeLocalMaximumSearch = earliestTimePointForSpeedTrendAnalysis
                 .plus(minDurationForSpeedTrendAnalysis);
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(
-                earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis,
-                track.getAverageIntervalBetweenRawFixes());
+        SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(competitor,
+                earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis);
         CurveBoundaryExtension maneuverEnd = findSpeedMaximum(stepsToAnalyze, false, timePointBeforeLocalMaximumSearch);
         TimePoint stableBearingAnalysisFrom = maneuverEnd == null ? maneuverMainCurveDetails.getTimePointAfter()
                 : maneuverEnd.getExtensionTimePoint();
