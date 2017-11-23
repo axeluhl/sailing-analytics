@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import com.gargoylesoftware.htmlunit.WebConsole.Logger;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -26,6 +27,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -227,6 +229,20 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                         removeRegatta(regatta);
                     }
+                } else if (RegattaConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST.equals(value)) {
+                    sailingService.calculatePairingList(regatta, new AsyncCallback<PairingListDTO>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // TODO Auto-generated method stub
+                            
+                        }
+
+                        @Override
+                        public void onSuccess(PairingListDTO result) {
+                            System.out.println(result.getQuality());
+                        }
+                    });
                 }
             }
         });

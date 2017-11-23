@@ -848,5 +848,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
             AsyncCallback<List<DetailType>> callback);
     
-    void calculatePairingList(int flights, int groups, int competitors, AsyncCallback<PairingListDTO> callback);
+    void calculatePairingList(RegattaDTO regatta, AsyncCallback<PairingListDTO> callback);
 }

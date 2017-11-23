@@ -104,6 +104,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             }
         }, getStringMessages().events(), Permission.MANAGE_EVENTS);
         leaderboardGroupsDisplayers.add(eventManagementPanel);
+        
+        /* REGATTAS */
 
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(
                 sailingService, this, getStringMessages(), this, eventManagementPanel);
@@ -151,15 +153,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
         
-        /* PAIRING LISTS */
-        
-        /*
-        final PairingListPanel pairingListPanel = new PairingListPanel(sailingService, getStringMessages());
-        pairingListPanel.ensureDebugId("PairingListManagement");
-        panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<PairingListPanel>(pairingListPanel), 
-                getStringMessages().pairingLists(), Permission.MANAGE_PAIRING_LISTS);
-        pairingListDisplayers.add(pairingListPanel);
-        */
         /* RACES */
         
         final HorizontalTabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");

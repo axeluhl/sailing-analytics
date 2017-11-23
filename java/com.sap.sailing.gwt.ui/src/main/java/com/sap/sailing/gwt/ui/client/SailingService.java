@@ -684,7 +684,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     List<DetailType> determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
     
-    PairingListDTO calculatePairingList(int flights, int groups, int competitors);
+    PairingListDTO calculatePairingList(RegattaDTO regattaDTO);
     
     
 }

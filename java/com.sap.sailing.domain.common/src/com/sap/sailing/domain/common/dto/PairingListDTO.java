@@ -3,8 +3,10 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 
 public class PairingListDTO implements Serializable {
-    private final int[][] pairingListTemplate;
-    private final double quality;
+    private int[][] pairingListTemplate;
+    private double quality;
+    
+    public PairingListDTO() { }
     
     public PairingListDTO(int[][] pairingListTemplate, double quality) {
         this.quality = quality;
