@@ -126,8 +126,11 @@ public class UserDTO implements IsSerializable {
     }
     
     public boolean hasPermission(WildcardPermission permission, AccessControlListDTO acl, OwnerDTO owner) {
-        return PermissionChecker.isPermitted(permission, name, new ArrayList<UserGroup>(acl.getUserGroupPermissionMap().keySet()), 
-                permissions, roles, rolePermissionModelDTO, owner, acl);
+        ArrayList<UserGroup> userGroups = new ArrayList<>();
+        if (acl != null) {
+            userGroups = new ArrayList<>(acl.getUserGroupPermissionMap().keySet());
+        }
+        return PermissionChecker.isPermitted(permission, name, userGroups, permissions, roles, rolePermissionModelDTO, owner, acl);
     }
 
     public List<AccountDTO> getAccounts() {

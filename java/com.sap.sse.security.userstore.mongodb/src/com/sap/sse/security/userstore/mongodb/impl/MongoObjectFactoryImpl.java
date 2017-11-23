@@ -1,8 +1,10 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import com.mongodb.BasicDBList;
@@ -45,7 +47,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.AccessControlList.ID.name(), acl.getId().toString());
         dbACL.put(FieldNames.AccessControlList.ID.name(), acl.getId().toString());
         dbACL.put(FieldNames.AccessControlList.DISPLAY_NAME.name(), acl.getDisplayName());
-        dbACL.put(FieldNames.AccessControlList.PERMISSION_MAP.name(), acl.getPermissionMap());
+        Map<String, Set<String>> permissionMap = new HashMap<>();
+        for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
+            permissionMap.put(entry.getKey().toString(), entry.getValue());
+        }
+        dbACL.put(FieldNames.AccessControlList.PERMISSION_MAP.name(), permissionMap);
         aclCollection.update(query, dbACL, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
     
