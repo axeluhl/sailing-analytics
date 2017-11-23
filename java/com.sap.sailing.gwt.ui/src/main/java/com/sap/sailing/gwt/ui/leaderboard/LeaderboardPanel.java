@@ -860,106 +860,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     /**
-     * Shows the country flag and sail number, if present
-     * @author Axel Uhl (d043530)
-     * 
-     */
-    private class SailIdWithFlagColumn<T> extends CompetitorInfoWithFlagColumn<T> {
-        private final BoatFetcher<T> boatFetcher;
-
-        protected SailIdWithFlagColumn(CompetitorFetcher<T> competitorFetcher, BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {
-            super(competitorFetcher, style);
-            this.boatFetcher = boatFetcher;
-        }
-
-        @Override
-        public void render(Context context, T object, SafeHtmlBuilder sb) {
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            BoatDTO boat = boatFetcher.getBoat(object);
-            boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
-            super.render(context, object, sb);
-            if (boat != null && boat.getSailId() != null) {
-                sb.appendEscaped(boat.getSailId());
-            }
-            if (boatColorShown) {
-                sb.appendHtmlConstant("</div>");
-            }
-        }
-
-        @Override
-        public InvertibleComparator<T> getComparator() {
-            return new InvertibleComparatorAdapter<T>() {
-                @Override
-                public int compare(T o1, T o2) {
-                    return boatFetcher.getBoat(o1).getSailId() == null
-                            ? boatFetcher.getBoat(o2).getSailId() == null ? 0 : -1
-                            : boatFetcher.getBoat(o2).getSailId() == null ? 1
-                                    : Collator.getInstance().compare(boatFetcher.getBoat(o1).getSailId(),
-                                            boatFetcher.getBoat(o2).getSailId());
-                }
-            };
-        }
-        
-        @Override
-        public String getValue(T object) {
-            BoatDTO boat = boatFetcher.getBoat(object);
-            return boat != null ? boat.getSailId() : null;
-        }
-    }
-
-    /**
-     * Shows the country flag and competitor short name, if present
-     * @author Axel Uhl (d043530)
-     * 
-     */
-    private class CompetitorShortNameWithFlagColumn<T> extends CompetitorInfoWithFlagColumn<T> {
-
-        protected CompetitorShortNameWithFlagColumn(CompetitorFetcher<T> competitorFetcher, LeaderBoardStyle style) {
-            super(competitorFetcher, style);
-        }
-
-        @Override
-        public void render(Context context, T object, SafeHtmlBuilder sb) {
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
-            super.render(context, object, sb);
-            if (competitor.getShortName() != null) {
-                sb.appendEscaped(competitor.getShortName());
-            }
-            if (boatColorShown) {
-                sb.appendHtmlConstant("</div>");
-            }
-        }
-
-        @Override
-        public InvertibleComparator<T> getComparator() {
-            return new InvertibleComparatorAdapter<T>() {
-                @Override
-                public int compare(T o1, T o2) {
-                    return competitorFetcher.getCompetitor(o1).getShortName() == null
-                            ? competitorFetcher.getCompetitor(o2).getShortName() == null ? 0 : -1
-                            : competitorFetcher.getCompetitor(o2).getShortName() == null ? 1
-                                    : Collator.getInstance().compare(competitorFetcher.getCompetitor(o1).getShortName(),
-                                            competitorFetcher.getCompetitor(o2).getShortName());
-                }
-            };
-        }
-
-        @Override
-        public String getValue(T object) {
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            return competitor != null ? competitor.getShortName() : null;
-        }
-    }
-
-    /**
-     * Base class for a competitor info and a flag
+     * Shows the country flag and a competitor short info (short name or sailId), if present
      * @author Axel Uhl (d043530)
      */
-    private abstract class CompetitorInfoWithFlagColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
-        protected final CompetitorFetcher<T> competitorFetcher;
+    private class CompetitorInfoWithFlagColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
+        private final CompetitorFetcher<T> competitorFetcher;
 
-        protected CompetitorInfoWithFlagColumn(CompetitorFetcher<T> competitorFetcher, LeaderBoardStyle style) {
+        protected CompetitorInfoWithFlagColumn(CompetitorFetcher<T> competitorFetcher,LeaderBoardStyle style) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.competitorFetcher = competitorFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
@@ -968,9 +875,23 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
+        public InvertibleComparator<T> getComparator() {
+            return new InvertibleComparatorAdapter<T>() {
+                @Override
+                public int compare(T o1, T o2) {
+                    return competitorFetcher.getCompetitor(o1).getShortInfo() == null
+                            ? competitorFetcher.getCompetitor(o2).getShortInfo() == null ? 0 : -1
+                            : competitorFetcher.getCompetitor(o2).getShortInfo() == null ? 1
+                                    : Collator.getInstance().compare(competitorFetcher.getCompetitor(o1).getShortInfo(),
+                                            competitorFetcher.getCompetitor(o2).getShortInfo());
+                }
+            };
+        }
+
+        @Override
         public SafeHtmlHeader getHeader() {
             return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.competitor()),
-                    stringMessages.sailIdColumnTooltip());
+                    stringMessages.shortName());
         }
 
         @Override
@@ -978,6 +899,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
+            boolean boatColorShown = renderBoatColorIfNecessary(competitorFetcher.getCompetitor(object),sb);
            
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
@@ -995,6 +917,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 style.renderFlagImage(flagImageURL,sb,competitor);
                 sb.appendHtmlConstant("&nbsp;");
             }
+            sb.appendEscaped(competitor.getShortInfo());
+            if (boatColorShown) {
+                sb.appendHtmlConstant("</div>");
+            }
+        }
+
+        @Override
+        public String getValue(T object) {
+            return competitorFetcher.getCompetitor(object).getShortInfo();
         }
     }
 
@@ -3104,12 +3035,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         if (isShowCompetitorShortName()) {
             CompetitorInfoWithFlagColumn<LeaderboardRowDTO> competitorInfoWithFlagColumn;
             CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
-            if (canShowCompetitorBoatInfo()) {
-                BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> row.boat;
-                competitorInfoWithFlagColumn = new SailIdWithFlagColumn<LeaderboardRowDTO>(competitorFetcher, boatFetcher, style);
-            } else {
-                competitorInfoWithFlagColumn = new CompetitorShortNameWithFlagColumn<LeaderboardRowDTO>(competitorFetcher, style); 
-            }
+                competitorInfoWithFlagColumn = new CompetitorInfoWithFlagColumn<LeaderboardRowDTO>(competitorFetcher, style);
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable()
                             .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorInfoWithFlagColumn)) {

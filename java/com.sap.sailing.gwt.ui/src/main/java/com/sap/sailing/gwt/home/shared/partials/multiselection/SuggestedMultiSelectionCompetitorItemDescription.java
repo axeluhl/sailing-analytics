@@ -25,7 +25,7 @@ class SuggestedMultiSelectionCompetitorItemDescription extends Widget {
         setElement(uiBinder.createAndBindUi(this));
         flagImageUi.getStyle().setBackgroundImage("url('" + FlagImageResolver.getFlagImageUri(
                 competitor.getFlagImageURL(), competitor.getTwoLetterIsoCountryCode()).asString() + "')");
-        sailIdUi.setInnerText(competitor.getSailID());
+        sailIdUi.setInnerText(competitor.getShortInfo());
         nameUi.setInnerText(competitor.getName());
     }
     

@@ -450,7 +450,7 @@ public class RaceListColumnFactory {
                 if (value != null) {
                     SafeUri flagImageUri = FlagImageResolver.getFlagImageUri(value.getFlagImageURL(), value.getTwoLetterIsoCountryCode());
                     String flagStyle = CSS.race_item_flag(), sailIdStyle = CSS.race_item_sailid(), nameStyle = CSS.race_item_winner();
-                    sb.append(TEMPLATE.winner(flagStyle, sailIdStyle, nameStyle, flagImageUri, value.getSailID(), value.getName()));
+                    sb.append(TEMPLATE.winner(flagStyle, sailIdStyle, nameStyle, flagImageUri, value.getShortInfo(), value.getName()));
                 }
             }
         };

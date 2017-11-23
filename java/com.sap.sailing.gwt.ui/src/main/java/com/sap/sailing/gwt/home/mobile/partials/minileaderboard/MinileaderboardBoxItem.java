@@ -28,7 +28,7 @@ public class MinileaderboardBoxItem extends Widget {
     public MinileaderboardBoxItem(MiniLeaderboardItemDTO entry, boolean showRaceCount) {
         setElement(uiBinder.createAndBindUi(this));
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
-        competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getSailID()));
+        competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getShortInfo()));
         competitorRankUi.setInnerText(String.valueOf(entry.getRank()) + ".");
         competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getNetPoints()));
         if (showRaceCount) {

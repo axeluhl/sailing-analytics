@@ -15,7 +15,7 @@ public abstract class AbstractStatisticsBoxPresenter {
 
     public void addCompetitorItem(String iconUrl, String name, SimpleCompetitorDTO competitor) {
         if (competitor != null) {
-            addItem(iconUrl, name, competitor.getSailID() != null ? competitor.getSailID() : competitor.getName());
+            addItem(iconUrl, name, competitor.getShortInfo() != null ? competitor.getShortInfo() : competitor.getName());
         }
     }
     

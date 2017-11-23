@@ -15,7 +15,7 @@ public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, 
 
     private static final long serialVersionUID = -5743976446085202047L;
     
-    private String sailID;
+    private String shortInfo;
     private String twoLetterIsoCountryCode;
     private String flagImageURL;
 
@@ -23,40 +23,39 @@ public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, 
     }
     
     @GwtIncompatible
-    public <C extends Competitor> SimpleCompetitorDTO(C competitor) {
+    public SimpleCompetitorDTO(Competitor competitor) {
         super(competitor.getName());
         final Nationality nationality = competitor.getTeam().getNationality();
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
         this.twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
         this.flagImageURL = competitor.getFlagImage() == null ? null : competitor.getFlagImage().toString();
-        if (competitor instanceof CompetitorWithBoat) {
-            this.sailID = ((CompetitorWithBoat) competitor).getBoat().getSailID();
-        } else {
-            this.sailID = null;
+        this.shortInfo = competitor.getShortName();
+        if (shortInfo == null && competitor instanceof CompetitorWithBoat) {
+            this.shortInfo = ((CompetitorWithBoat) competitor).getBoat().getSailID();
         }
     }
 
     @GwtIncompatible
     public SimpleCompetitorDTO(CompetitorDTO competitor) {
         super(competitor.getName());
-        this.sailID = competitor.getSailID();
+        this.shortInfo = competitor.getShortInfo();
         this.twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
         this.flagImageURL = competitor.getFlagImageURL();
     }
 
-    public SimpleCompetitorDTO(String name, String sailID, String twoLetterIsoCountryCode, String flagImageURL) {
+    public SimpleCompetitorDTO(String name, String shortInfo, String twoLetterIsoCountryCode, String flagImageURL) {
         super(name);
-        this.sailID = sailID;
+        this.shortInfo = shortInfo;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.flagImageURL = flagImageURL;
     }
 
-    public String getSailID() {
-        return sailID;
+    public String getShortInfo() {
+        return shortInfo;
     }
 
-    public void setSailID(String sailID) {
-        this.sailID = sailID;
+    public void setShortInfo(String shortInfo) {
+        this.shortInfo = shortInfo;
     }
 
     public String getTwoLetterIsoCountryCode() {
@@ -79,7 +78,7 @@ public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, 
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
+        result = prime * result + ((shortInfo == null) ? 0 : shortInfo.hashCode());
         return result;
     }
 
@@ -92,18 +91,18 @@ public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, 
         if (getClass() != obj.getClass())
             return false;
         SimpleCompetitorDTO other = (SimpleCompetitorDTO) obj;
-        if (sailID == null) {
-            if (other.sailID != null)
+        if (shortInfo == null) {
+            if (other.shortInfo != null)
                 return false;
-        } else if (!sailID.equals(other.sailID))
+        } else if (!shortInfo.equals(other.shortInfo))
             return false;
         return true;
     }
     
     @Override
     public int compareTo(SimpleCompetitorDTO obj) {
-        int compareSailIds = this.sailID.compareTo(obj.sailID);
-        return compareSailIds == 0 ? this.getName().compareTo(obj.getName()): compareSailIds;
+        int compareShortInfos = this.shortInfo.compareTo(obj.shortInfo);
+        return compareShortInfos == 0 ? this.getName().compareTo(obj.getName()): compareShortInfos;
     }
     
 }
