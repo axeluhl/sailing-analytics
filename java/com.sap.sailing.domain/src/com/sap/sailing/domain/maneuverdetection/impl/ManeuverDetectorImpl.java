@@ -604,19 +604,19 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             intervalBetweenSteps = Duration.ONE_SECOND;
         } else {
             long[] possibleDivisors = { 2, 4, 5, 10 };
-            final long referenceValue = 1000;
-            long possibleIntervalMillis;
+            final long referenceIntervalValue = 1000;
+            long upperPossibleIntervalMillis;
             long lowerPossibleIntervalMillis;
             int i;
-            for (i = 0, possibleIntervalMillis = referenceValue, lowerPossibleIntervalMillis = referenceValue
+            for (i = 0, upperPossibleIntervalMillis = referenceIntervalValue, lowerPossibleIntervalMillis = referenceIntervalValue
                     / possibleDivisors[0]; targetIntervalMillis < lowerPossibleIntervalMillis
                             && i < possibleDivisors.length
-                                    - 1; possibleIntervalMillis = lowerPossibleIntervalMillis, lowerPossibleIntervalMillis = referenceValue
+                                    - 1; upperPossibleIntervalMillis = lowerPossibleIntervalMillis, lowerPossibleIntervalMillis = referenceIntervalValue
                                             / possibleDivisors[++i])
                 ;
-            if (possibleIntervalMillis - targetIntervalMillis <= targetIntervalMillis - lowerPossibleIntervalMillis
+            if (upperPossibleIntervalMillis - targetIntervalMillis <= targetIntervalMillis - lowerPossibleIntervalMillis
                     || lowerPossibleIntervalMillis == 0) {
-                intervalBetweenSteps = new MillisecondsDurationImpl(possibleIntervalMillis);
+                intervalBetweenSteps = new MillisecondsDurationImpl(upperPossibleIntervalMillis);
             } else {
                 intervalBetweenSteps = new MillisecondsDurationImpl(lowerPossibleIntervalMillis);
             }
