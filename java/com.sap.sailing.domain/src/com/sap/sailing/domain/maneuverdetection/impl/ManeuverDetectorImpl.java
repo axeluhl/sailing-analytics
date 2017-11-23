@@ -584,10 +584,18 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Gets a normalized interval for retrieval of speed with bearing steps such that it appears as ((x * 1000) %
-     * normalizedIntervalMillis == 0 && normalizedIntervalMillis <= 1000 && normalizedIntervalMillis >= 100) with x
-     * element of any integer, to prevent cache misses by calls of getEstimatedSpeed() within
-     * track.getSpeedWithBearingSteps().
+     * Gets a normalized interval for retrieval of speed with bearing steps such that it appears as:
+     * <p>
+     * {@code ((x * 1000) %
+     * normalizedIntervalMillis == 0 && normalizedIntervalMillis <= 1000 && normalizedIntervalMillis >= 100) with
+     * {@code x} element of any integer
+     * </p>
+     * The purpose is to prevent cache misses in getEstimatedSpeed() within track.getSpeedWithBearingSteps() calls, as
+     * well as to apply minimum and maximum limits to the interval. The maximal interval limit of {@code 1 second}
+     * prevents the maneuver detection from too coarse-grained step analysis which otherwise could result in inaccurate
+     * and too wide/short predicted maneuver boundaries. The minimal interval limit of {@code 100 milliseconds} prevents
+     * maneuver detection from too fine-grained step computation in order to not waist CPU-resources by assuming that
+     * within 100 milliseconds time range no relevant data for maneuver detection can be derived.
      */
     public Duration getNormlizedIntervalForSpeedWithBearingSteps(Duration approximatedInterval) {
         long targetIntervalMillis = approximatedInterval.asMillis();
