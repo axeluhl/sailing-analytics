@@ -567,6 +567,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuverMainCurveSpeedWithBearingSteps);
     }
 
+    /**
+     * Gets a new list with bearing steps which are lying between provided time range (including the boundaries). To get
+     * the steps, performance costy call to {@link GPSFixTrack#getSpeedWithBearingSteps(TimePoint, TimePoint, Duration)}
+     * is made.
+     */
     private SpeedWithBearingStepsIterable getSpeedWithBearingSteps(Competitor competitor,
             TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver) {
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
@@ -958,7 +963,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     /**
-     * Gets a new list with bearing steps which are lying between provided time range (including the boundaries).
+     * Gets a new list with bearing steps which are lying between provided time range (including the boundaries). To get
+     * the steps, only the provided {@code bearingStepsToAnalyze} is processed and filtered accordingly. No calls to
+     * {@link GPSFixTrack#getSpeedWithBearingSteps(TimePoint, TimePoint, Duration)} are made.
      */
     public SpeedWithBearingStepsIterable getSpeedWithBearingStepsWithinTimeRange(
             SpeedWithBearingStepsIterable bearingStepsToAnalyze, TimePoint timePointBefore, TimePoint timePointAfter) {
