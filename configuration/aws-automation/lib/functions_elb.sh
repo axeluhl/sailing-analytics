@@ -65,6 +65,8 @@ function create_load_balancer_http(){
 # -----------------------------------------------------------
 # Create load balancer with HTTPS rule
 # @param $1  load_balancer_name
+# @param $2  certificate arn
+# @param $2  security group ids
 # @return    json result
 # -----------------------------------------------------------
 function create_load_balancer_https(){

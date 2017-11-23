@@ -91,27 +91,21 @@ function wait_for_create_event_resource(){
 }
 
 # -----------------------------------------------------------
-# Patch 001-events.conf
+# Patch 001-events.conf with ssl macros
 # @param $1  dns name
 # @param $2  event id
 # @param $3  ssh user
 # @param $4  public dns name
+# @param $5  use ssl
 # -----------------------------------------------------------
 function configure_apache(){
 	wait_for_ssh_connection "$3" "$4"
 	local content=$(ssh_wrapper "$3"@"$4" "cat /etc/httpd/conf.d/001-events.conf")
-	patched_content=$(append_event_entry "$patched_content" "$1" "$2")
+	ssl=""
+	if [ "$5" -eq "ssl"]; then
+		ssl="-SSL"
+	fi
+	patched_content=$(echo -e "Use Event$ssl $1 \"$2\" 127.0.0.1 8888\n$patched_content")
 	echo "$patched_content" | ssh_wrapper $3@$4 "cat > /etc/httpd/conf.d/001-events.conf"
-
 	#ssh_wraper $3@$4 "/etc/init.d/httpd reload"
-}
-
-# -----------------------------------------------------------
-# Append Use Event-SSL entry to string
-# @param $1  content
-# @param $2  dns name
-# @param $2  event id
-# -----------------------------------------------------------
-function append_event_entry(){
-	echo -e "$1\nUse Event-SSL $2 \"$3\" 127.0.0.1 8888"
 }

@@ -21,7 +21,7 @@ hosted_zone_id=Z1R8UBAEXAMPLE
 
 instance_security_group_ids=sg-871732ee
 image_id=ami-39f3e25d
-certificate_arn='arn:aws:iam::123456789012:server-certificate/my-server-cert'
+certificate_arn='arn:aws:acm:eu-west-2:017363970217:certificate/d2ae17b0-75ed-4b56-ac12-a80f9e5c493d'
 elb_security_group_ids=sg-871732ee
 mongodb_host=35.176.143.232
 mongodb_port=27017

@@ -61,5 +61,5 @@ function instance_execute() {
 	# @param $2  event id
 	# @param $3  ssh user
 	# @param $4  public dns name
-	configure_apache "$public_dns_name" "$event_id" "$ssh_user" "$public_dns_name"
+	configure_apache "$public_dns_name" "$event_id" "$ssh_user" "$public_dns_name" "ssl"
 }

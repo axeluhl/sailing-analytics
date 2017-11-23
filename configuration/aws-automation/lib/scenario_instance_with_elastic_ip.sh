@@ -27,9 +27,13 @@ function instance_with_elastic_ip_require(){
 }
 
 function instance_with_elastic_ip_execute() {
-	# Execute scenario "instance"
-	instance_start
 
+	#instance_start
+
+	instance_id='i-04b445f89f6f7d257'
+	instance_name='Test'
+	public_dns_name='ec2-35-177-107-67.eu-west-2.compute.amazonaws.com'
+	event_id="123"
 	header "Elastic ip creation"
 
 	local elastic_ip=$(allocate_address)
@@ -37,7 +41,7 @@ function instance_with_elastic_ip_execute() {
 
 	header "Apache configuration"
 
-	configure_apache "$elastic_ip" "$event_id" "$ssh_user" "$elastic_ip"
+	configure_apache "$elastic_ip" "$event_id" "$ssh_user" "$elastic_ip" ""
 
 	echo "Finished."
 }
