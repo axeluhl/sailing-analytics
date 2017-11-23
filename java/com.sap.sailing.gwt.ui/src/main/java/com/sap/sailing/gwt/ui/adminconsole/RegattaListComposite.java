@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import com.gargoylesoftware.htmlunit.WebConsole.Logger;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;

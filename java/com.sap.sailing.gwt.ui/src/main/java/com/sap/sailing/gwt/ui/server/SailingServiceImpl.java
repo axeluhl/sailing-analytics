@@ -56,9 +56,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.github.gwtbootstrap.timepicker.client.ui.base.HasTemplate.Template;
 import com.google.gwt.thirdparty.guava.common.collect.Iterables;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
