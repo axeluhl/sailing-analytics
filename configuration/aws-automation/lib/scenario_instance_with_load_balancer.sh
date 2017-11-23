@@ -45,10 +45,6 @@ function instance_with_load_balancer_execute() {
 	local json_added_instance_response=$(add_instance_to_elb "$load_balancer_name" "$instance_id")
 	local added_instance_id=$(echo "$json_added_instance_response" | get_attribute '.Instances[0].InstanceId')
 
-	header "Route53 record creation"
-
-	route53_change_resource_record "$load_balancer_name" 60 "$load_balancer_dns_name"
-
 	header "Apache configuration"
 
 	configure_apache "$load_balancer_dns_name" "$event_id" "$ssh_user" "$public_dns_name"

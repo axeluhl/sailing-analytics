@@ -60,35 +60,35 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 function mainScript() {
 echo -n
 
+if $tail; then
+  check_if_tmux_is_used
+fi
+
 if $instance_with_load_balancer; then
-	if $tail; then
-		check_if_tmux_is_used
-	fi
 	instance_with_load_balancer_start
   confirm_reset_panes
 	safeExit
 fi
 
 if $instance; then
-	if $tail; then
-		check_if_tmux_is_used
-	fi
 	instance_start
   confirm_reset_panes
 	safeExit
 fi
 
 if $instance_with_elastic_ip; then
-	if $tail; then
-		check_if_tmux_is_used
-	fi
 	instance_with_elastic_ip_start
   confirm_reset_panes
 	safeExit
 fi
 
+if $instance_with_alb; then
+	instance_with_alb_start
+  confirm_reset_panes
+	safeExit
+fi
+
 if $tail ; then
-	check_if_tmux_is_used
 	tail_start
   confirm_reset_panes
 	safeExit
@@ -120,6 +120,7 @@ usage() {
   ${bold}Scenarios:${reset}
   --instance                    Create instance
   --instance-with-load-balancer Create instance with elastic load balancer
+  --instance-with-alb           Create instance within application load balancer
   --instance-with-elastic-ip    Create instance with elastic elastic ip.
   --tail                        Tail logs from instance using tmux
 
@@ -206,6 +207,7 @@ unset options
 
 # Set default value of variable without parameter value to false
 instance_with_load_balancer=false
+instance_with_alb=false
 instance_with_elastic_ip=false
 instance=false
 tail=false
@@ -229,6 +231,7 @@ while [[ $1 = -?* ]]; do
   -f|--force) force=true ;;
 	-d|--debug) debug=true ;;
 	--instance-with-load-balancer) instance_with_load_balancer=true ;;
+  --instance-with-alb) instance_with_alb=true ;;
   --instance) instance=true ;;
 	--instance-with-elastic-ip) instance_with_elastic_ip=true ;;
 	--tail) tail=true ;;

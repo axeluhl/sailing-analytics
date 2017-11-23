@@ -3,9 +3,9 @@
 # Set variables here
 # ------------------------------------------------------
 
-# Script does not automatically source region specific variables
-# This functionality will be added in the future
 # Please comment out the variables of the region you are not using
+
+# Default region unspecific variables
 
 default_region=eu-west-2
 default_key_name=leonradeck-keypair
@@ -25,6 +25,7 @@ certificate_arn='arn:aws:iam::123456789012:server-certificate/my-server-cert'
 elb_security_group_ids=sg-871732ee
 mongodb_host=35.176.143.232
 mongodb_port=27017
+listener_arn='arn:aws:elasticloadbalancing:eu-west-2:017363970217:listener/app/DummyALB/da70f61a914fc50a/22ab628fba30d0e7'
 
 # Variables for region "eu-west-1" (Ireland)
 

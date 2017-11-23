@@ -11,6 +11,15 @@ function query_public_dns_name(){
 }
 
 # -----------------------------------------------------------
+# Query for default vpc id
+# @return    default vpc id
+# -----------------------------------------------------------
+function get_default_vpc_id(){
+	local_echo "Querying for the default vpc id..."
+	aws_wrapper ec2 describe-vpcs --query 'Vpcs[?IsDefault==`true`].VpcId' --output text
+}
+
+# -----------------------------------------------------------
 # Allocates an elastic ip address
 # @return  elastic ip
 # -----------------------------------------------------------
@@ -53,14 +62,10 @@ function wait_instance_exists(){
 # -----------------------------------------------------------
 function wait_for_ssh_connection(){
 	echo -n "Connecting to $1@$2..."
-	local status=
-	while [[ $status != ok ]]
-	do
-		echo -n "."
-		status=$(ssh_wrapper -o BatchMode=yes $1@$2 echo "ok" 2>&1 || true)
-		sleep $ssh_retry_interval
+	while ! ssh_wrapper -q $1@$2 true 1>&2; do
+  	echo -n .
+		sleep 2
 	done
-	echo ""
 	success "SSH Connection \"$1@$2\" is established."
 }
 
@@ -94,7 +99,7 @@ function run_instance(){
 function write_user_data_to_file(){
 	local MONGODB_HOST="$mongodb_host"
 	local MONGODB_PORT="$mongodb_port"
-	local MONGODB_NAME="$(lower_trim $instance_name)"
+	local MONGODB_NAME="$(lower_trim $instance_name | only_letters_and_numbers)"
 	local REPLICATION_CHANNEL="$MONGODB_NAME"
 	local SERVER_NAME="$MONGODB_NAME"
 	local USE_ENVIRONMENT="live-server"

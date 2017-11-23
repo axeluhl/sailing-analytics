@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # NOT TESTED
+
 # -----------------------------------------------------------
 # Create CNAME record for the hosted zone to forward to a load balancer
 # @param $1  subdomain name

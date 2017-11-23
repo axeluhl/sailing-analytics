@@ -43,7 +43,7 @@ function get_access_token(){
 # -----------------------------------------------------------
 function create_event(){
 	local_echo "Creating event with name $3..."
-  curl_wrapper -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "eventname=$3" --data "venuename=Default" --data "createregatta=false" | get_attribute '.eventid'
+  curl_wrapper -X POST -H "Authorization: Bearer $1" "http://$2:8888/sailingserver/api/v1/events/createEvent" --data "eventName=$3" --data "venuename=Default" --data "createregatta=false" | get_attribute '.eventid'
 }
 
 # -----------------------------------------------------------
@@ -100,14 +100,10 @@ function wait_for_create_event_resource(){
 function configure_apache(){
 	wait_for_ssh_connection "$3" "$4"
 	local content=$(ssh_wrapper "$3"@"$4" "cat /etc/httpd/conf.d/001-events.conf")
-	local patched_content=$(comment_plain_ssl_entry "$content")
 	patched_content=$(append_event_entry "$patched_content" "$1" "$2")
 	echo "$patched_content" | ssh_wrapper $3@$4 "cat > /etc/httpd/conf.d/001-events.conf"
-	#local result=$(ssh_wraper $3@$4 "/etc/init.d/httpd reload")
-}
 
-function comment_plain_ssl_entry(){
-	echo "$1" | sed -e '/Use Plain-SSL/ s/^#*/#/'
+	#ssh_wraper $3@$4 "/etc/init.d/httpd reload"
 }
 
 # -----------------------------------------------------------
@@ -117,5 +113,5 @@ function comment_plain_ssl_entry(){
 # @param $2  event id
 # -----------------------------------------------------------
 function append_event_entry(){
-	echo -e "$1\nUse Event $2 \"$3\" 127.0.0.1 8888"
+	echo -e "$1\nUse Event-SSL $2 \"$3\" 127.0.0.1 8888"
 }
