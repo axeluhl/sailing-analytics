@@ -29,7 +29,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Duration;
@@ -67,7 +66,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return trackedLeg.getLeg();
     }
     
-    private TrackedRace getTrackedRace() {
+    private TrackedRaceImpl getTrackedRace() {
         return getTrackedLeg().getTrackedRace();
     }
 
@@ -267,29 +266,28 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     /**
      * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
-     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
-     * the leg's direction.
-     * @param windPositionMode see {@link #getWind(Position, TimePoint, Set)}
+     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto the
+     * leg's direction.
      * 
-     * @throws NoWindException in case the wind direction is not known
+     * @param speed
+     *            if {@code null} then {@code null} will be returned
+     * @param windPositionMode
+     *            see {@link #getWind(Position, TimePoint, Set)}
+     * 
+     * @throws NoWindException
+     *             in case the wind direction is not known
      */
     private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, final TimePoint at, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) {
-        SpeedWithBearing result = null;
+        final SpeedWithBearing result;
         if (speed != null) {
             Bearing projectToBearing;
             try {
                 if (cache.getLegType(getTrackedLeg(), at) != LegType.REACHING) {
-                    final Wind wind;
-                    if (windPositionMode == WindPositionMode.EXACT) {
-                        wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
-                    } else {
-                        wind = getTrackedRace().getWind(
-                                getTrackedLeg().getEffectiveWindPosition(
-                                        () -> getTrackedRace().getTrack(getCompetitor())
-                                                .getEstimatedPosition(at, false), at, windPositionMode), at);
-                    }
+                    final Wind wind = getTrackedRace().getWind(windPositionMode, getTrackedLeg(), getCompetitor(), at, cache);
                     if (wind == null) {
+                        // This is not really likely to happen because wind==null would have let the call
+                        // to cache.getLegType(...) fail with a NoWindException
                         throw new NoWindException("Need at least wind direction to determine windward speed");
                     }
                     projectToBearing = wind.getBearing();
@@ -306,7 +304,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     projectToBearing = projectToBearing.reverse();
                 }
                 result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
+            } else {
+                result = null;
             }
+        } else {
+            result = null;
         }
         return result;
     }
@@ -651,7 +653,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    public SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         if (hasStartedLeg(at)) {
             TimePoint timePoint;
             if (hasFinishedLeg(at)) {
@@ -715,7 +717,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Distance getRideHeight(TimePoint at) {
         final Distance result;
         if (hasStartedLeg(at)) {
-            TimePoint timePoint =hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
             BravoFixTrack<Competitor> track = getTrackedRace()
                     .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
             result = track == null ? null : track.getRideHeight(timePoint);
@@ -725,6 +727,37 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return result;
     }
     
+    @Override
+    public Distance getDistanceFoiled(TimePoint at) {
+        final Distance result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null
+                    : track.getDistanceSpentFoiling(getMarkPassingForLegStart().getTimePoint(),
+                            timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration getDurationFoiled(TimePoint at) {
+        final Duration result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null
+                    : track.getTimeSpentFoiling(getMarkPassingForLegStart().getTimePoint(), timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     @Override
     public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) {
         return getEstimatedTimeToNextMark(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));

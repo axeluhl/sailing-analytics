@@ -280,7 +280,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getMaxPointsReason(competitor, race, timePoint);
     }
 
-    public Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
+    public Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         return getFullLeaderboard().getNetPoints(competitor, race, timePoint);
     }
 

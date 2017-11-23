@@ -15,6 +15,7 @@ public class SensorDataImportWidget extends AbstractFileImportWidget implements 
         super("/sailingserver/sensordata/import", stringMessages, table, sailingService, errorReporter);
         setMultipleFileUploadEnabled(true);
         setShouldClearListOnNewUploadComplete(false);
+        setDownsampleOptionVisible(true);
     }
 
     @Override
