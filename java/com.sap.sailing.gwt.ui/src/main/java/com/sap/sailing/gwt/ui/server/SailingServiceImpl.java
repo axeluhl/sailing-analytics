@@ -56,7 +56,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.thirdparty.guava.common.collect.Iterables;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -196,7 +195,7 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.PairingListDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
@@ -488,9 +487,6 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.pairinglist.PairingFrameProvider;
-import com.sap.sse.pairinglist.PairingListTemplate;
-import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
@@ -6654,30 +6650,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public PairingListDTO calculatePairingList(RegattaDTO regattaDTO) {
-        int flightsCount = regattaDTO.races.size();
-        int competitorsCount = Iterables.size(regattaDTO.races.get(0).getCompetitors());
-        int groupsCount = 3;
+    public PairingListTemplateDTO calculatePairingList(RegattaIdentifier regattaIdentifier) {
         
-        PairingListTemplateFactoryImpl factory = new PairingListTemplateFactoryImpl();
-        PairingListTemplate template = factory.getOrCreatePairingListTemplate(new PairingFrameProvider() {
-            
-            @Override
-            public int getGroupsCount() {
-                return groupsCount;
-            }
-            
-            @Override
-            public int getFlightsCount() {
-                return flightsCount;
-            }
-            
-            @Override
-            public int getCompetitorsCount() {
-                return competitorsCount;
-            }
-        });
-        
-        return new PairingListDTO(template.getPairingListTemplate(), template.getQuality());
+        return new PairingListTemplateDTO(null, 0.0);
     }
 }

@@ -2,14 +2,14 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-public class PairingListDTO implements Serializable {
-    private final static long serialVersionUID = 7165851765154315798L;
+public class PairingListTemplateDTO implements Serializable {
+    private static final long serialVersionUID = 7155851765154315798L;
     private int[][] pairingListTemplate;
     private double quality;
     
-    public PairingListDTO() { }
+    public PairingListTemplateDTO() { }
     
-    public PairingListDTO(int[][] pairingListTemplate, double quality) {
+    public PairingListTemplateDTO(int[][] pairingListTemplate, double quality) {
         this.quality = quality;
         this.pairingListTemplate = pairingListTemplate;
     }

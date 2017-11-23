@@ -24,9 +24,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.dto.PairingListDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -229,19 +230,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                         removeRegatta(regatta);
                     }
                 } else if (RegattaConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST.equals(value)) {
-                    sailingService.calculatePairingList(regatta, new AsyncCallback<PairingListDTO>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // TODO Auto-generated method stub
-                            
-                        }
-
-                        @Override
-                        public void onSuccess(PairingListDTO result) {
-                            System.out.println(result.getQuality());
-                        }
-                    });
+                    createPairingListTemplate(regatta);
                 }
             }
         });
@@ -285,6 +274,40 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 openEditRegattaDialog(toBeEdited, existingRegattas, Collections.unmodifiableList(events));
             }
         }));
+    }
+    
+    private void createPairingListTemplate(final RegattaDTO regatta) {
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
+        PairingListCreationSetupDialog dialog = new PairingListCreationSetupDialog(regattaIdentifier, this.stringMessages, new DialogCallback<RegattaDTO>() {
+
+            @Override
+            public void ok(RegattaDTO editedObject) {
+                openPairingListCreationDialog(regattaIdentifier);
+            }
+
+            @Override
+            public void cancel() {
+                
+            }
+        });
+        dialog.show();
+    }
+    
+    private void openPairingListCreationDialog(RegattaIdentifier regattaIdentifier) {
+        PairingListCreationDialog dialog = new PairingListCreationDialog(regattaIdentifier, stringMessages, new DialogCallback<RegattaDTO>() {
+
+            @Override
+            public void ok(RegattaDTO editedObject) {
+                
+            }
+
+            @Override
+            public void cancel() {
+                // TODO Auto-generated method stub
+                
+            }
+        });
+        dialog.show();
     }
 
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,

@@ -30,7 +30,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.PairingListDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -848,5 +848,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
             AsyncCallback<List<DetailType>> callback);
     
-    void calculatePairingList(RegattaDTO regatta, AsyncCallback<PairingListDTO> callback);
+    void calculatePairingList(RegattaIdentifier regattaIdentifier, AsyncCallback<PairingListTemplateDTO> callback);
 }
