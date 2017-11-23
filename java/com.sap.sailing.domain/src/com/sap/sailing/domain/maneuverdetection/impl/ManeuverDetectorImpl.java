@@ -603,8 +603,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (targetIntervalMillis >= 1000) {
             intervalBetweenSteps = Duration.ONE_SECOND;
         } else {
-            // Derive the intervalBetweenSteps such that it appears as (1000 % intervalBetweenSteps == 0) to prevent
-            // cache misses by calls of getEstimatedSpeed() within track.getSpeedWithBearingSteps
             long[] possibleDivisors = { 2, 4, 5, 10 };
             final long referenceValue = 1000;
             long possibleIntervalMillis;
