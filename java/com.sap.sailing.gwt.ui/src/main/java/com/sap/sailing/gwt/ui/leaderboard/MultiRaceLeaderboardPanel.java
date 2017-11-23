@@ -89,7 +89,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
                 raceColumnSelection.getNumberOfLastRaceColumnsToShow(), timer.getRefreshInterval(),
                 raceColumnSelection.getType(), isShowAddedScores(),
                 isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorShortName(),
-                isShowCompetitorFullName(), isShowCompetitorFullName(), isShowCompetitorNationality);
+                isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality);
         return leaderboardSettings;
     }
 

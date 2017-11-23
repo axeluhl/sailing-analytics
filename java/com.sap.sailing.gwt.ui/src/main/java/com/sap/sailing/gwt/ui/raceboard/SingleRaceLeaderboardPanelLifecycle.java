@@ -37,7 +37,8 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 /*
                  * don't showCompetitorFullNameColumn in case screen is so small that we don't even display the
                  * leaderboard initially
-                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false, false, false);
+                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, 
+                 /* showCompetitorBoatInfoColumn */ true, false, false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
         
         return settings;
