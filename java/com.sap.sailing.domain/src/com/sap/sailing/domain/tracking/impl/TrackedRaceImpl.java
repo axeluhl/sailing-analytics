@@ -1212,7 +1212,50 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     private Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint, boolean considerGateStart) {
-        final Distance result;
+        return getValueFromStartToTimePointOrEnd(competitor, timePoint, 
+                (from, to)->{
+                    final Distance result;
+                    final Distance preResult = getTrack(competitor).getDistanceTraveled(from, to);
+                    if (considerGateStart && preResult != null) {
+                        result = preResult.add(getAdditionalGateStartDistance(competitor, timePoint));
+                    } else {
+                        result = preResult;
+                    }
+                    return result;
+                });
+    }
+    
+    @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(competitor, timePoint, BravoFixTrack::getDistanceSpentFoiling);
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(competitor, timePoint, BravoFixTrack::getTimeSpentFoiling);
+    }
+    
+    @FunctionalInterface
+    private static interface BravoFromToValueCalculator<T> {
+        T getValue(BravoFixTrack<Competitor> bravoFixTrack, TimePoint from, TimePoint to);
+    }
+
+    private <T> T getBravoValue(Competitor competitor, TimePoint timePoint, BravoFromToValueCalculator<T> bravoValueCalculator) {
+        return getValueFromStartToTimePointOrEnd(competitor, timePoint, 
+                (from, to)->{
+                    final T result;
+                    final BravoFixTrack<Competitor> bravoFixTrack = getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                    if (bravoFixTrack != null) {
+                        result = bravoValueCalculator.getValue(bravoFixTrack, from, to);
+                    } else {
+                        result = null;
+                    }
+                    return result;
+                });
+    }
+
+    private <T> T getValueFromStartToTimePointOrEnd(Competitor competitor, TimePoint timePoint, Track.TimeRangeValueCalculator<T> valueCalculator) {
+        final T result;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         try {
             lockForRead(markPassings);
@@ -1239,12 +1282,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 if (end == null) {
                     result = null;
                 } else {
-                    final Distance preResult = getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
-                    if (considerGateStart && preResult != null) {
-                        result = preResult.add(getAdditionalGateStartDistance(competitor, timePoint));
-                    } else {
-                        result = preResult;
-                    }
+                    result = valueCalculator.calculate(markPassings.first().getTimePoint(), end);
                 }
             }
             return result;
@@ -3570,12 +3608,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
+        final Speed result;
         if (getStartOfRace() == null) {
-            return null;
+            result = null;
+        } else {
+            TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
+            result = getTrack(competitor).getEstimatedSpeed(beforeStart);
         }
-
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
-        return getTrack(competitor).getEstimatedSpeed(beforeStart);
+        return result;
     }
 
     @Override
@@ -4206,5 +4246,59 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = totalDistanceSailedInRace.inTime(totalTimeSailedInRace);
         }
         return result;
+    }
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
+        final SpeedWithBearing result;
+        if (trackedLeg != null) {
+            result = trackedLeg.getVelocityMadeGood(timePoint, windPositionMode, cache);
+        } else {
+            // check if wind information is available; if so, compute a VMG only based on wind data:
+            if (windPositionMode == WindPositionMode.LEG_MIDDLE) {
+                result = null;
+            } else {
+                final Wind wind = getWind(windPositionMode, /* trackedLeg */ null, competitor, timePoint, cache);
+                result = projectOnto(getTrack(competitor).getEstimatedSpeed(timePoint), wind.getBearing());
+            }
+        }
+        return result;
+    }
+    
+    SpeedWithBearing projectOnto(SpeedWithBearing speed, Bearing projectToBearing) {
+        final SpeedWithBearing result;
+        if (speed != null && speed.getBearing() != null && projectToBearing != null) {
+            double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
+            if (cos < 0) {
+                projectToBearing = projectToBearing.reverse();
+            }
+            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    /**
+     * @param trackedLeg
+     *            The caller is expected to obtain the {@link #getTrackedLeg(Competitor, TimePoint) tracked leg} the
+     *            {@code competitor} is sailing in at time point {@code at}. If {@code null}, any
+     *            non-{@link WindPositionMode#EXACT exact} wind position mode will use {@code null} for the wind
+     *            position, defaulting to the "COMBINED" wind source at the middle of the course. In particular, it then
+     *            obviously makes no real sense to request {@link WindPositionMode#LEG_MIDDLE} because no leg is known.
+     */
+    Wind getWind(WindPositionMode windPositionMode, TrackedLegImpl trackedLeg, Competitor competitor, TimePoint at, WindLegTypeAndLegBearingCache cache) {
+        final Wind wind;
+        if (windPositionMode == WindPositionMode.EXACT) {
+            wind = cache.getWind(this, competitor, at);
+        } else {
+            wind = getWind(trackedLeg == null ? null : 
+                    trackedLeg.getEffectiveWindPosition(
+                            () -> getTrack(competitor)
+                                    .getEstimatedPosition(at, false), at, windPositionMode), at);
+        }
+        return wind;
     }
 }

@@ -66,4 +66,5 @@ Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,
  com.sap.sailing.server.gateway.jaxrs,
- com.sap.sailing.server.gateway.jaxrs.spi
+ com.sap.sailing.server.gateway.jaxrs.spi,
+ com.sap.sailing.server.gateway.windimport.bravo

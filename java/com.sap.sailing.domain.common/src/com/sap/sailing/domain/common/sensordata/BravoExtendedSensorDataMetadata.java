@@ -42,6 +42,10 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     TARGET_HEEL(null, /* expectedInLogfile */ false), //
     DEFLECTOR_MILLIMETERS(null, /* expectedInLogfile */ false), //
     TARGET_BOATSPEED_P(null, /* expectedInLogfile */ false), //
+    LAT("Lat", /* expectedInLogfile */ true), //
+    LON("Lon", /* expectedInLogfile */ true), //
+    COG("COG", /* expectedInLogfile */ true), //
+    SOG("SOG", /* expectedInLogfile */ true), //
     ;
 
     private final String columnName;

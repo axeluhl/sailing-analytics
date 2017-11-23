@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
@@ -31,6 +32,29 @@ import com.sap.sse.common.scalablevalue.ScalableValue;
  * @author Axel Uhl (d043530)
  */
 public interface Track<FixType extends Timed> extends Serializable {
+    /**
+     * An adding function to be used together with {@link Track#getValueSum(TimePoint, TimePoint, Object, Adder, TimeRangeCache, TimeRangeValueCalculator)}.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     * @param <T>
+     */
+    static interface Adder<T> {
+        /**
+         * Adds two elements of type {@code T}. Neither argument must be {@code null}.
+         */
+        T add(T t1, T t2);
+    }
+    
+    static interface TimeRangeValueCalculator<T> {
+        /**
+         * Calculates a value for fixes across a time range. When the method is called,
+         * a read lock will previously have been {@link Track#lockForRead obtained} before,
+         * so an implementing class does not need to worry about acquiring the lock.
+         */
+        T calculate(TimePoint from, TimePoint to);
+    }
+    
     /**
      * Locks this track for reading by the calling thread. If the thread already holds the lock for this track,
      * the hold count will be incremented. Make sure to call {@link #unlockAfterRead()} in a <code>finally</code>
@@ -209,6 +233,8 @@ public interface Track<FixType extends Timed> extends Serializable {
      */
     Duration getAverageIntervalBetweenRawFixes();
     
+    <T> T getValueSum(TimePoint from, TimePoint to, T nullElement, Adder<T> adder, TimeRangeCache<T> cache, TimeRangeValueCalculator<T> valueCalculator);
+    
     /**
      * @return the number of raw fixes contained in the Track.
      */
@@ -218,4 +244,5 @@ public interface Track<FixType extends Timed> extends Serializable {
      * Tells whether the collection of {@link #getRawFixes() raw fixes} (no outliers removed) is empty
      */
     boolean isEmpty();
+
 }

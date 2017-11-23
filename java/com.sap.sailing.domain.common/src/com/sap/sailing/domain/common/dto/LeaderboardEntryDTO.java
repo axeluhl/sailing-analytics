@@ -138,7 +138,7 @@ public class LeaderboardEntryDTO implements Serializable {
         return totalPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
     }
     
-    public Duration getTimeSailedInMillis() {
+    public Duration getTimeSailed() {
         final Duration result;
         if (legDetails != null) {
             long timeInMilliseconds = 0;
@@ -159,7 +159,7 @@ public class LeaderboardEntryDTO implements Serializable {
         return result;
     }
     
-    public Distance getDistanceTraveledInMeters() {
+    public Distance getDistanceTraveled() {
         Distance result = null;
         if (legDetails != null) {
             for (LegEntryDTO legDetail : legDetails) {
@@ -169,6 +169,47 @@ public class LeaderboardEntryDTO implements Serializable {
                             result = Distance.NULL;
                         }
                         result = result.add(new MeterDistance(legDetail.distanceTraveledInMeters));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
+    public Duration getDurationFoiled() {
+        final Duration result;
+        if (legDetails != null) {
+            Double acc = null;
+            for (LegEntryDTO legDetail : legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.currentDurationFoiledInSeconds != null) {
+                        if (acc == null) {
+                            acc = 0.0;
+                        }
+                        acc += legDetail.currentDurationFoiledInSeconds;
+                    } else {
+                        acc = null;
+                        break;
+                    }
+                }
+            }
+            result = acc == null ? null : new MillisecondsDurationImpl((long) (acc*1000.));
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Distance getDistanceFoiled() {
+        Distance result = null;
+        if (legDetails != null) {
+            for (LegEntryDTO legDetail : legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.currentDistanceFoiledInMeters != null) {
+                        if (result == null) {
+                            result = Distance.NULL;
+                        }
+                        result = result.add(new MeterDistance(legDetail.currentDistanceFoiledInMeters));
                     }
                 }
             }
