@@ -43,7 +43,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         // raceDetails.add(DetailType.RACE_RANK);
 
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(null, null, raceDetails, overallDetails,
-                null, null, null, RaceColumnSelectionStrategies.EXPLICIT,true, false,
+                null, null, null, RaceColumnSelectionStrategies.EXPLICIT,true, 
                 true,
                 false, true);
 

@@ -94,7 +94,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
         RegattaAndRaceIdentifier liveRace = getSlideCtx().getPreLiveRace();
 
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null,
-                false, false, true, false, false, false);
+                false, false, false, false, false);
 
         GWT.log("event " + getSlideCtx().getEvent());
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
