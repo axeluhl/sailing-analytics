@@ -43,7 +43,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         
         if (selectedLeaderboardProvider.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {
-            result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionEditCompetitorToBoatAssignments(), makeImagePrototype(resources.competitorsIcon())));
+            result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionEditCompetitorToBoatAssignments(), makeImagePrototype(resources.sailboatIcon())));
         }
         
         return result;
