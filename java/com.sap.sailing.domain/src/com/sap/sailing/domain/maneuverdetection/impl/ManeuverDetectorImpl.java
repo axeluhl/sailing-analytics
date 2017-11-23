@@ -40,6 +40,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -575,8 +576,25 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private SpeedWithBearingStepsIterable getSpeedWithBearingSteps(Competitor competitor,
             TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver) {
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        Duration gpsInterval = track.getAverageIntervalBetweenRawFixes();
-        Duration intervalBetweenSteps = gpsInterval.asMillis() > 1000 ? Duration.ONE_SECOND : gpsInterval;
+        long gpsIntervalMillis = track.getAverageIntervalBetweenRawFixes().asMillis();
+        Duration intervalBetweenSteps;
+        if (gpsIntervalMillis >= 1000 || gpsIntervalMillis <= 0) {
+            intervalBetweenSteps = Duration.ONE_SECOND;
+        } else {
+            // Derive the intervalBetweenSteps such that it appears as (1000 % intervalBetweenSteps == 0) to prevent
+            // cache misses by calls of getEstimatedSpeed() within track.getSpeedWithBearingSteps
+            long possibleIntervalMillis;
+            long lowerPossibleIntervalMillis;
+            for (possibleIntervalMillis = 1000, lowerPossibleIntervalMillis = possibleIntervalMillis
+                    / 2; gpsIntervalMillis < lowerPossibleIntervalMillis; possibleIntervalMillis = lowerPossibleIntervalMillis, lowerPossibleIntervalMillis /= 2)
+                ;
+            if (possibleIntervalMillis - gpsIntervalMillis <= gpsIntervalMillis - lowerPossibleIntervalMillis
+                    || lowerPossibleIntervalMillis == 0) {
+                intervalBetweenSteps = new MillisecondsDurationImpl(possibleIntervalMillis);
+            } else {
+                intervalBetweenSteps = new MillisecondsDurationImpl(lowerPossibleIntervalMillis);
+            }
+        }
         SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
                 timePointAfterManeuver, intervalBetweenSteps);
         return stepsToAnalyze;
