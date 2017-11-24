@@ -1732,36 +1732,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    // private int computeNumberOfRacesCompleted(LeaderboardRowDTO object) {
-    // private final MaxPointsReason[] MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES = new MaxPointsReason[] {
-    // MaxPointsReason.DNS, MaxPointsReason.DNF, MaxPointsReason.DNC };
-    // int racesSailedInRow = 0;
-    // for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
-    // LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
-    // if (entryBefore.netPoints != null) {
-    // if (entryBefore.reasonForMaxPoints.equals(MaxPointsReason.NONE)
-    // || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
-    // entryBefore.reasonForMaxPoints)) {
-    // if (raceColumn instanceof MetaLeaderboardRaceColumnDTO) {
-    // MetaLeaderboardRaceColumnDTO metaRaceColumn = (MetaLeaderboardRaceColumnDTO) raceColumn;
-    // /**
-    // * Assumption here is, that no BasicRaceDto is set, if the race was not finished
-    // */
-    // for (BasicRaceDTO actualRace : metaRaceColumn.getRaceList()) {
-    // if (actualRace.endOfRace != null) {
-    // GWT.debugger();
-    // racesSailedInRow++;
-    // }
-    // }
-    // } else {
-    // racesSailedInRow++;
-    // }
-    // }
-    // }
-    // }
-    // return racesSailedInRow;
-    // }
-
     /**
      * Displays the net points totals for a competitor for the entire leaderboard.
      * 
@@ -2105,11 +2075,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                         new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE,
                         RACE_COLUMN_STYLE, this));
-
         result.put(DetailType.TOTAL_SCORED_RACE_COUNT,
                 new TotalRaceColumn(DetailType.TOTAL_SCORED_RACE_COUNT,
                         new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        
         result.put(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
                         new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
