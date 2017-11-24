@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.shared;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,6 +27,11 @@ public class RolePermissionModelDTO implements RolePermissionModel, IsSerializab
     @Override
     public Iterable<WildcardPermission> getPermissions(UUID id) {
         return roles.get(id).getPermissions();
+    }
+    
+    @Override
+    public Iterable<Role> getRoles() {
+        return new ArrayList<Role>(roles.values());
     }
     
     // TODO as default implementation in interface

@@ -37,6 +37,7 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.ShiroPermissionBuilderImpl;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
@@ -47,6 +48,8 @@ import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Permission.DefaultModes;
+import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroup;
@@ -60,6 +63,7 @@ import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.OwnerDTO;
+import com.sap.sse.security.ui.shared.RoleDTO;
 import com.sap.sse.security.ui.shared.RolePermissionModelDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
@@ -412,7 +416,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setRolesForUser(String username, Iterable<UUID> roles) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(AdminRole.getInstance().getName())) {
+        if (true) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
@@ -474,6 +478,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
         }
     }
+    
+    private RoleDTO createRoleDTOFromRole(Role role) {
+        HashSet<String> stringPermissions = new HashSet<>();
+        for (com.sap.sse.security.shared.WildcardPermission wildcardPermission : role.getPermissions()) {
+            stringPermissions.add(wildcardPermission.toString());
+        }
+        return new RoleDTO((UUID) role.getId(), role.getName(), stringPermissions);
+    }
 
     private UserDTO createUserDTOFromUser(User user) {
         UserDTO userDTO;
@@ -491,9 +503,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
+        HashMap<UUID, Role> roleMap = new HashMap<>();
+        for (Role role : aclStore.getRoles()) {
+            roleMap.put((UUID) role.getId(), createRoleDTOFromRole(role));
+        }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), new RolePermissionModelDTO(new HashMap<>()), user.getPermissions());
+                accountDTOs, user.getRoles(), new RolePermissionModelDTO(roleMap), user.getPermissions());
         return userDTO;
     }
 

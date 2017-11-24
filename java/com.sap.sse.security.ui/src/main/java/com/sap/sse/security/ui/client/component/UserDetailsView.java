@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -81,8 +82,14 @@ public class UserDetailsView extends FlowPanel {
         rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                final Iterable<String> newRoleList = event.getValue();
+                final ArrayList<UUID> newRoleList = new ArrayList<>();
                 final UserDTO selectedUser = UserDetailsView.this.user;
+                for (String roleName : event.getValue()) {
+                    UUID id = selectedUser.getRoleIdByName(roleName);
+                    if (id != null) {
+                        newRoleList.add(id);
+                    }    
+                }
                 userManagementService.setRolesForUser(selectedUser.getName(), newRoleList, new MarkedAsyncCallback<SuccessInfo>(
                         new AsyncCallback<SuccessInfo>() {
                             @Override

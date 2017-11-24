@@ -3909,7 +3909,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
         AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
-        Owner ownership = getSecurityService().getOwnership(userGroup.getName());
+        Owner ownership = getSecurityService().getOwnership(userGroup.getId().toString());
         return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }

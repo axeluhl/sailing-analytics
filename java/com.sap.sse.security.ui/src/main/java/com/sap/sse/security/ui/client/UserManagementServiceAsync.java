@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
@@ -62,7 +63,7 @@ public interface UserManagementServiceAsync {
 
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
-    void setRolesForUser(String username, Iterable<String> roles, AsyncCallback<SuccessInfo> callback);
+    void setRolesForUser(String username, Iterable<UUID> roles, AsyncCallback<SuccessInfo> callback);
 
     void setPermissionsForUser(String username, Iterable<String> permissions, AsyncCallback<SuccessInfo> callback);
 

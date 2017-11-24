@@ -5,6 +5,7 @@ import java.util.UUID;
 public interface RolePermissionModel {
     String getName(UUID id);
     Iterable<WildcardPermission> getPermissions(UUID id);
+    Iterable<Role> getRoles();
     
     boolean implies(UUID id, WildcardPermission permission);
     boolean implies(UUID id, WildcardPermission permission, Owner ownership);

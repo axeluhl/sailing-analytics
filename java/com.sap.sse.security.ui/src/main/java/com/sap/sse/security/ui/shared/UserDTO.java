@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -65,6 +66,15 @@ public class UserDTO implements IsSerializable {
 
     public Iterable<UUID> getRoles() {
         return roles;
+    }
+    
+    public UUID getRoleIdByName(String name) {
+        for (Role role : rolePermissionModel.getRoles()) {
+            if (name.equals(role.getName())) {
+                return (UUID) role.getId();
+            }
+        }
+        return null;
     }
     
     public Iterable<String> getStringRoles() {

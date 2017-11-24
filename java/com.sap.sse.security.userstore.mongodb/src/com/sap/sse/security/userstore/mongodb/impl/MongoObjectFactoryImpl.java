@@ -96,7 +96,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         for (WildcardPermission permission : role.getPermissions()) {
             stringPermissions.add(permission.toString());
         }
-        dbRole.put(FieldNames.Role.PERMISSIONS.name(), role.getPermissions());
+        dbRole.put(FieldNames.Role.PERMISSIONS.name(), stringPermissions);
         roleCollection.update(query, dbRole, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 

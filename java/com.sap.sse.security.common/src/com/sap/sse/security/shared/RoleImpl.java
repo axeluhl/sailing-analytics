@@ -8,12 +8,12 @@ import java.util.UUID;
 public class RoleImpl implements Role {
     private static final long serialVersionUID = -402472324567793082L;
     
-    private final UUID id;
-    private final String name;
-    private final Set<WildcardPermission> permissions;
+    private UUID id;
+    private String name;
+    private Set<WildcardPermission> permissions;
 
-    public RoleImpl(UUID id, String displayName) {
-        this(id, displayName, new HashSet<WildcardPermission>());
+    public RoleImpl(UUID id, String name) {
+        this(id, name, new HashSet<WildcardPermission>());
     }
 
     public RoleImpl(UUID id, String name, Set<WildcardPermission> permissions) {
