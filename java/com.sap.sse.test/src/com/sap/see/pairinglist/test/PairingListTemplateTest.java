@@ -2,23 +2,16 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
-import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 
 import junit.framework.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl {
 
-    PairingListTemplateFactoryImpl factory;
-    
     public PairingListTemplateTest() {
         super(new PairingFrameProviderTest(15, 3, 18));
-        System.out.println(Arrays.deepToString(this.getPairingListTemplate()));
-        System.out.println(getQuality());
     }
 
     @Test
@@ -58,11 +51,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         final int groups = 3;
         final int competitors = 18;
 
-        factory = new PairingListTemplateFactoryImpl();
-
-        int[][] plTemplate = factory
-                .getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors))
-                .getPairingListTemplate();
+        int[][] plTemplate = this.createPairingListTemplate(flights, groups, competitors);
         int[][] associations = new int[competitors][competitors];
 
         associations = this.incrementAssociations(plTemplate, associations);
@@ -87,9 +76,10 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         for (int i = 0; i < tests; i++) {
             long time = System.currentTimeMillis();
 
-            this.createPairingListTemplate(10, 3, 30);
+            this.createPairingListTemplate(15, 3, 18);
 
             time = System.currentTimeMillis() - time;
+            System.out.println(time);
             a[i] = time;
         }
 
@@ -97,10 +87,10 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         for (int i = 0; i < tests; i++) {
             sum += a[i];
         }
-        double average = sum / tests;
+        double average = sum / tests+1;
         
         System.out.println("Average Time: " + (average / 1000) + "s");
-        if (average > 8000) {
+        if (average > 10000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
         }
     }
@@ -118,7 +108,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         for (double quality: results) {
             sum += quality;
         }
-        System.out.println("Average Quality:"+sum / count);
+        Assert.assertEquals(0.574, sum/count, 0.01);
     }
     
     @Test
@@ -173,7 +163,9 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
                 {3,4,5,6,7,8},
                 {3,4,5,6,7,9}
                         };
-        System.out.println(Arrays.deepToString(radixSort(allSeeds, 18)));
+        allSeeds=radixSort(allSeeds, 18);
+        int[][] expectedResult={{0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 7, 5}, {3, 4, 5, 6, 7, 8}, {3, 4, 5, 6, 7, 9}, {17, 12, 14, 16, 3, 4}};
+        assertArrayEquals(allSeeds, expectedResult);
         }
     }
 
