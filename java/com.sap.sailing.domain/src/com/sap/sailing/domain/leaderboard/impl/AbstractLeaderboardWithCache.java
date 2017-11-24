@@ -452,6 +452,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
             row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
             row.netPoints = this.getNetPoints(competitor, timePoint);
+            row.totalScoredRaces = 42;
             if (addOverallDetails) {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
@@ -525,6 +526,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
         entryDTO.totalPointsCorrected = entry.isTotalPointsCorrected();
         entryDTO.netPoints = entry.getNetPoints();
+        //FIDNEM
+//        entryDTO.racesCompleted = 42;
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace == null ? null : trackedRace.getTrack(competitor);

@@ -18,10 +18,10 @@ public class TotalRaceColumn extends FormattedDoubleDetailTypeColumn {
 
     @Override
     public String getStringValueToRender(LeaderboardRowDTO object) {
-        Double timeInSeconds = getDoubleValue(object);
-        if(timeInSeconds == null){
-            return "N/A";
+        Integer totalScoredRaces = object.totalScoredRaces;
+        if(totalScoredRaces == null){
+            return "";
         }
-        return String.valueOf(timeInSeconds.intValue());
+        return String.valueOf(totalScoredRaces);
     }
 }
