@@ -1029,8 +1029,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String overwriteRacingProceduresConfigurationHelpText();
     
     String setStartTime();
+    String finishTimeString();
+    String setFinishingAndFinishTime();
+    String finishTimeMustBeAtOrAfterFinishingTime();
     String currentPass();
     String setStartTimeDescription();
+    String setFinishingAndFinishTimeDescription();
     String setTrackingTimesDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
@@ -1056,6 +1060,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveLeaderboard(String name);
     String metaLeaderboardCannotBeChanged();
     String failedToSetNewStartTime();
+    String failedToSetNewFinishingAndFinishTime();
     String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
     String igtimiWindImport();
     String seeIgtimiTabForAccountSettings();
@@ -1945,6 +1950,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentStbdRudderRakeTooltip();
     String currentMastRotationInDegree();
     String currentMastRotationInDegreeTooltip();
+    String finishingTime();
     String boatNameMustNotBeEmpty();
     String errorUpdatingExpeditionDeviceConfiguration(String name, String message);
     String doYouReallyWantToRemoveExpeditionDeviceConfiguration(String name);
@@ -1984,4 +1990,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentDriftInDegreesTooltip();
     String currentDepthInMetersTooltip();
     String tonsUnit();
+    String currentDistanceFoiledInMeters();
+    String currentDurationFoiled();
+    String currentDistanceFoiledInMetersTooltip();
+    String currentDurationFoiledTooltip();
+    String totalDurationFoiledInSeconds();
+    String totalDistanceFoiledInMeters();
+    String totalDurationFoiledInSecondsTooltip();
+    String totalDistanceFoiledInMetersTooltip();
 }

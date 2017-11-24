@@ -426,13 +426,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         return getNetPoints(competitor, raceColumn, getRaceColumns(), timePoint);
     }
 
     @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn,
-            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
                 .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
         return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);

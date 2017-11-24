@@ -15,6 +15,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     public final static String ACTION_EDIT = "ACTION_EDIT";
     public final static String ACTION_REFRESH_RACELOG = "ACTION_REFRESH_RACE_LOG";
     public final static String ACTION_SET_STARTTIME = "ACTION_SET_STARTTIME";
+    public final static String ACTION_SET_FINISHING_AND_FINISH_TIME = "ACTION_SET_FINISHING_AND_FINISH_TIME";
     public final static String ACTION_SHOW_RACELOG = "ACTION_SHOW_RACELOG";
     public final static String ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS = "ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS";
     
@@ -40,6 +41,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
         }
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
+        result.add(new ImageSpec(ACTION_SET_FINISHING_AND_FINISH_TIME, stringMessages.setFinishingAndFinishTime(), makeImagePrototype(resources.blueSmall())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         
         if (selectedLeaderboardProvider.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {

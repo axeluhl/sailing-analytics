@@ -712,6 +712,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
             WindPositionMode windPositionMode) {
         return null;
@@ -1194,6 +1204,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
 }

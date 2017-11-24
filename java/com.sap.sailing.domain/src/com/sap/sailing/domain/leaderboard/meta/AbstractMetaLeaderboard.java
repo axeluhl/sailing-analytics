@@ -177,9 +177,16 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
 
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        final List<Competitor> competitorsFromBestToWorst = ((MetaLeaderboardColumn) race).getLeaderboard().getCompetitorsFromBestToWorst(timePoint);
-        Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
-        return competitorsFromBestToWorst.indexOf(competitor)+1;
+        final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
+        final int result;
+        if (leaderboard.hasScores(competitor, timePoint)) {
+            final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
+            Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
+            result = competitorsFromBestToWorst.indexOf(competitor)+1;
+        } else {
+            result = 0;
+        }
+        return result;
     }
 
     @Override

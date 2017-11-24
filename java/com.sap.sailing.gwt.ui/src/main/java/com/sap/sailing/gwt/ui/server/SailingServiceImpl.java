@@ -363,6 +363,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.LineStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -484,7 +485,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
@@ -2898,10 +2898,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
+                final Speed velocityMadeGood;
                 if (trackedLeg != null) {
-                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
-                    result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
+                    velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
+                } else {
+                    // check if wind information is available; if so, compute a VMG only based on wind data:
+                    velocityMadeGood = trackedRace.getVelocityMadeGood(competitor, timePoint, cache);
                 }
+                result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
                 break;
             case DISTANCE_TRAVELED:
                 if (trackedLeg != null) {
@@ -3097,7 +3101,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             final TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
-            final long adjustedStepSizeInMillis = (long) Math.max((double) stepSizeInMillis, startTime.until(endTime).divide(new MillisecondsDurationImpl(stepSizeInMillis)));
+            final long adjustedStepSizeInMillis = (long) Math.max((double) stepSizeInMillis, startTime.until(endTime).divide(SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY).asMillis());
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
             final int MAX_CACHE_SIZE = SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY;
             final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingCache> cachesByTimePoint = new ConcurrentHashMap<>();
@@ -5342,6 +5346,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 dto.racingProcedure);
         return new MillisecondsTimePoint(dto.startTime).equals(newStartTime);
     }
+    
+    @Override
+    public Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto) {
+        TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.finishingTime));
+        
+        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.finishTime));
+        
+        return new Pair<Boolean, Boolean>(new MillisecondsTimePoint(dto.finishingTime).equals(newFinsihingTime),
+                new MillisecondsTimePoint(dto.finishTime).equals(newEndTime));
+    }
 
     @Override
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException {
@@ -5418,6 +5436,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return null;
         }
         return new com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType>(result.getA() == null ? null : result.getA().asDate(), result.getB(), result.getC());
+    }
+    
+
+    @Override
+    public com.sap.sse.common.Util.Triple<Date, Date, Integer> getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName) {
+        com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> result = getService().getFinishingAndFinishTime(leaderboardName, raceColumnName, fleetName);
+        if (result == null) {
+            return null;
+        }
+        return new com.sap.sse.common.Util.Triple<>(result.getA() == null ? null : result.getA().asDate(),
+                result.getB() == null ? null : result.getB().asDate(), result.getC());
     }
 
     @Override
@@ -6876,6 +6905,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             if (hasBravoTrack) {
                 availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+                availableDetailsTypes.add(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
+                availableDetailsTypes.add(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
                 availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
                 availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
             }

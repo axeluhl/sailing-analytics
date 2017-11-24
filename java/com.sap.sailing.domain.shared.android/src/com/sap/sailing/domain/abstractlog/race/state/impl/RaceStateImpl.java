@@ -158,6 +158,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     public void forceNewDependentStartTime(TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentOnRace) {
         raceLog.add(new RaceLogDependentStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), dependentOnRace, startTimeDifference));
     }
+    
 
     @Override
     public void setFinishingTime(TimePoint timePoint) {
@@ -166,7 +167,10 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
 
     @Override
     public void setFinishedTime(TimePoint timePoint) {
-        raceLog.add(new RaceLogRaceStatusEventImpl(timePoint, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED));
+        raceLog.add(new RaceLogRaceStatusEventImpl(timePoint, author, raceLog.getCurrentPassId(),
+                RaceLogRaceStatus.FINISHED));
+        // ensure caches are synched
+        forceUpdate();
     }
 
     @Override

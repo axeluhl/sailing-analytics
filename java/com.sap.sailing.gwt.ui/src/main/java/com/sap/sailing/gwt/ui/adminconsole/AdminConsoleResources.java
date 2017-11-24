@@ -51,6 +51,10 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/clock.png")
     ImageResource clockIcon();
+    
+    // Smaller variant of RegattaRaceStatesFlagsResources.flagBlue to solve layouting issues
+    @Source("com/sap/sailing/gwt/ui/client/images/blue_small.png")
+    ImageResource blueSmall();
 
     @Source("com/sap/sailing/gwt/ui/client/images/flag_blue.png")
     ImageResource flagIcon();

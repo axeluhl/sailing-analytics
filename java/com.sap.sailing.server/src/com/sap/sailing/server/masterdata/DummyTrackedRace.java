@@ -60,6 +60,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -354,6 +355,16 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
         return null;
     }
 
@@ -689,6 +700,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
 }
