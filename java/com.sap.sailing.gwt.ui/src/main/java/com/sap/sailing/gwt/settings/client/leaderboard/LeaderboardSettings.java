@@ -46,17 +46,17 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     @Override
     protected void addChildSettings() {
         isShowCompetitorNationality = new BooleanSetting("showCompetitorNationality", this, false);
-        List<DetailType> maneuverDetails = new ArrayList<DetailType>();
+        List<DetailType> maneuverDetails = new ArrayList<>();
         maneuverDetails.add(DetailType.TACK);
         maneuverDetails.add(DetailType.JIBE);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
         maneuverDetailsToShow = new EnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOf);
-        List<DetailType> legDetails = new ArrayList<DetailType>();
+        List<DetailType> legDetails = new ArrayList<>();
         legDetails.add(DetailType.DISTANCE_TRAVELED);
         legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.RANK_GAIN);
         legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOf);
-        List<DetailType> raceDetails = new ArrayList<DetailType>();
+        List<DetailType> raceDetails = new ArrayList<>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
         raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOf);
         List<DetailType> overallDetails = new ArrayList<>();

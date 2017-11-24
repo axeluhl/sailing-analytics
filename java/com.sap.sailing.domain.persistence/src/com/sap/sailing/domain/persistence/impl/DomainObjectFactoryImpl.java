@@ -39,6 +39,7 @@ import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
@@ -169,8 +170,8 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -1601,8 +1602,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Long finishingTimePointAsMillis = (Long) dbObject.get(FieldNames.RACE_LOG_FINISHING_TIME_AS_MILLIS.name());
             final TimePoint finishingTime = finishingTimePointAsMillis == null ? null : new MillisecondsTimePoint(finishingTimePointAsMillis);
             final String comment = (String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name());
+            final String mergeStateAsString = (String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MERGE_STATE.name());
+            final MergeState mergeState;
+            if (mergeStateAsString == null) {
+                mergeState = MergeState.OK;
+            } else {
+                mergeState = MergeState.valueOf(mergeStateAsString);
+            }
             CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
-                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank, maxPointsReason, score, finishingTime, comment);
+                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank, maxPointsReason, score, finishingTime, comment, mergeState);
             positionedCompetitors.add(positionedCompetitor);
             rankCounter++;
         }

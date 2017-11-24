@@ -51,7 +51,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.impl.DistanceCache;
+import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl;
@@ -304,7 +304,7 @@ public class TrackTest {
         // The following getMaximumSpeedOverGround call will trigger a computeMaxSpeed(...) and a cache(...) call
         new Thread(()->
             assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
-                getB().getKnots(), 0.001)).start(); // produces a cache entry that ends
+                getB().getKnots(), 0.01)).start(); // produces a cache entry that ends
         // now don't release the cacheBarrier as yet but add more fixes
         new Thread(() -> {
             GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000),
@@ -442,7 +442,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledBackwardsQuery() {
         final Set<com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Distance>> cacheEntries = new HashSet<>();
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<Distance>("test-DistanceCache") {
             @Override
             public void cache(TimePoint from, TimePoint to, Distance distance) {
                 super.cache(from, to, distance);
@@ -453,7 +453,7 @@ public class TrackTest {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };
@@ -779,7 +779,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledOnSmoothenedTrackThenAddingOutlier() {
         final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<Distance>("test-DistanceCache") {
             @Override
             public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
                 super.invalidateAllAtOrLaterThan(timePoint);
@@ -789,7 +789,7 @@ public class TrackTest {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };
@@ -811,7 +811,7 @@ public class TrackTest {
         }
         invalidationCalls.clear();
         assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.02);
-        final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> fullIntervalCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start);
+        final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> fullIntervalCacheEntry = distanceCache.getEarliestFromAndResultAtOrAfterFrom(now,  start);
         assertNotNull(fullIntervalCacheEntry); // no more entry for "to"-value start in cache
         assertEquals(start, fullIntervalCacheEntry.getA());
         assertEquals(now, fullIntervalCacheEntry.getB().getA());
@@ -822,13 +822,13 @@ public class TrackTest {
         assertEquals(1, invalidationCalls.size());
         TimePoint timePointOfLastFixBeforeOutlier = track.getLastFixBefore(timePointForOutlier).getTimePoint();
         assertTrue(invalidationCalls.iterator().next().after(timePointOfLastFixBeforeOutlier)); // outlier doesn't turn its preceding element into an outlier
-        assertNull(distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start)); // no more entry for "to"-value start in cache
+        assertNull(distanceCache.getEarliestFromAndResultAtOrAfterFrom(now,  start)); // no more entry for "to"-value start in cache
         invalidationCalls.clear();
         final TimePoint timePointOfLastOriginalFix = track.getLastRawFix().getTimePoint();
         assertEquals(speed.getMetersPerSecond() * (steps - 1),
                 track.getDistanceTraveled(now, timePointOfLastOriginalFix).getMeters(), 0.02);
         final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> newFullIntervalCacheEntry = distanceCache
-                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+                .getEarliestFromAndResultAtOrAfterFrom(now, timePointOfLastOriginalFix);
         assertNotNull(newFullIntervalCacheEntry); // no more entry for "to"-value start in cache
         assertEquals(timePointOfLastOriginalFix, newFullIntervalCacheEntry.getA());
         assertEquals(now, newFullIntervalCacheEntry.getB().getA());
@@ -845,7 +845,7 @@ public class TrackTest {
         invalidationCalls.clear();
         // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
         final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
-                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+                .getEarliestFromAndResultAtOrAfterFrom(now, timePointOfLastOriginalFix);
         assertNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache because new temporary outlier lies in previously cached interval
         GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
         // ...which now is expected to be two fixes before lateOutlier because lateOutlier has previous fixes within the time range
@@ -870,7 +870,7 @@ public class TrackTest {
         assertTrue(timePointForLateOutlier.compareTo(fix.getTimePoint()) < 0);
         // expect the invalidation to have started at the fix before the outlier, leaving the previous result ending at the fix right before the outlier intact
         final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stillStillPresentFullIntervalCacheEntry = distanceCache
-                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+                .getEarliestFromAndResultAtOrAfterFrom(now, timePointOfLastOriginalFix);
         assertNull(stillStillPresentFullIntervalCacheEntry); // still nothing in the cache
         track.lockForRead();
         try {
@@ -955,11 +955,11 @@ public class TrackTest {
         final Duration raceDuration = Duration.ONE_HOUR.times(48);
         final Speed speed = new KnotSpeedImpl(12);
         final Distance distancePerSample = speed.travel(fixTime, fixTime.plus(samplingInterval));
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache");
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<>("test-DistanceCache");
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };
@@ -980,13 +980,13 @@ public class TrackTest {
                 queryTime = queryTime.plus(queryInterval);
             }
         }
-        assertTrue(distanceCache.size() <= DistanceCache.MAX_SIZE);
+        assertTrue(distanceCache.size() <= TimeRangeCache.MAX_SIZE);
     }
     
     @Test
     public void testDistanceCacheAccessForPartialStrip() {
         final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
-        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+        final TimeRangeCache<Distance> distanceCache = new TimeRangeCache<Distance>("test-DistanceCache") {
             @Override
             public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
                 super.invalidateAllAtOrLaterThan(timePoint);
@@ -996,7 +996,7 @@ public class TrackTest {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = -7277196393160609503L;
             @Override
-            protected DistanceCache getDistanceCache() {
+            protected TimeRangeCache<Distance> getDistanceCache() {
                 return distanceCache;
             }
         };
@@ -1024,11 +1024,11 @@ public class TrackTest {
         assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.02);
         assertTrue(invalidationCalls.isEmpty());
         // expect a cache entry exactly for the strip's boundaries
-        com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stripCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(stripFrom, stripTo);
+        com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stripCacheEntry = distanceCache.getEarliestFromAndResultAtOrAfterFrom(stripFrom, stripTo);
         assertEquals(stripTo, stripCacheEntry.getA());
         assertEquals(stripFrom, stripCacheEntry.getB().getA());
         // expect a cache entry exactly for the full boundaries
-        com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> fullCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now, start);
+        com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> fullCacheEntry = distanceCache.getEarliestFromAndResultAtOrAfterFrom(now, start);
         assertEquals(start, fullCacheEntry.getA());
         assertEquals(now, fullCacheEntry.getB().getA());
     }

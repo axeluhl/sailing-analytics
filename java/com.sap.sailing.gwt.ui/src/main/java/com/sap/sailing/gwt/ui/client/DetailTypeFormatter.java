@@ -40,12 +40,20 @@ public class DetailTypeFormatter {
             return stringMessages.currentSpeedOverGroundInKnots();
         case CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMeters();
+        case CURRENT_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.currentDistanceFoiledInMeters();
+        case CURRENT_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.currentDurationFoiled();
         case CURRENT_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
         case CURRENT_PITCH_IN_DEGREES:
             return stringMessages.currentPitchInDegree();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMeters();
+        case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.currentDurationFoiled();
+        case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.currentDistanceFoiledInMeters();
         case CURRENT_PORT_DAGGERBOARD_RAKE:
             return stringMessages.currentPortDaggerboardRake();
         case CURRENT_STBD_DAGGERBOARD_RAKE:
@@ -158,6 +166,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalTimeSailedInSeconds();
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
             return stringMessages.totalAverageSpeedOverGround();
+        case TOTAL_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.totalDurationFoiledInSeconds();
+        case TOTAL_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.totalDistanceFoiledInMeters();
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
             return stringMessages.averageManeuverLossInMeters();
         case AVERAGE_TACK_LOSS_IN_METERS:
@@ -188,8 +200,6 @@ public class DetailTypeFormatter {
             return stringMessages.beatAngle();
         case COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegrees();
-        default:
-            break;
         }
         return null;
     }
@@ -241,7 +251,10 @@ public class DetailTypeFormatter {
         case DISTANCE_TO_START_LINE:
         case CURRENT_RIDE_HEIGHT_IN_METERS:
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
         case CURRENT_DEPTH_IN_METERS:
+        case CURRENT_DISTANCE_FOILED_IN_METERS:
+        case TOTAL_DISTANCE_FOILED_IN_METERS:
             return stringMessages.metersUnit();
 
         case CURRENT_DEFLECTOR_IN_MILLIMETERS:
@@ -296,6 +309,9 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
         case TIME_TRAVELED:
+        case CURRENT_DURATION_FOILED_IN_SECONDS:
+        case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
+        case TOTAL_DURATION_FOILED_IN_SECONDS:
             return stringMessages.hhmmssUnit();
 
         // Cases for detail types without unit, so that an empty string is returned.
@@ -385,8 +401,16 @@ public class DetailTypeFormatter {
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
         case CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMetersTooltip();
+        case CURRENT_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.currentDistanceFoiledInMetersTooltip();
+        case CURRENT_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.currentDurationFoiledTooltip();
         case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMetersTooltip();
+        case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.currentDurationFoiledTooltip();
+        case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.currentDistanceFoiledInMetersTooltip();
         case CURRENT_PORT_DAGGERBOARD_RAKE:
             return stringMessages.currentPortDaggerboardRakeTooltip();
         case CURRENT_STBD_DAGGERBOARD_RAKE:
@@ -483,6 +507,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalDistanceTraveledTooltip();
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
             return stringMessages.totalAverageSpeedOverGroundTooltip();
+        case TOTAL_DURATION_FOILED_IN_SECONDS:
+            return stringMessages.totalDurationFoiledInSecondsTooltip();
+        case TOTAL_DISTANCE_FOILED_IN_METERS:
+            return stringMessages.totalDistanceFoiledInMetersTooltip();
         case TIME_ON_TIME_FACTOR:
             return stringMessages.timeOnTimeFactorTooltip();
         case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:

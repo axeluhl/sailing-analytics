@@ -3,6 +3,7 @@ package com.sap.sse.gwt.client.controls.datetime;
 import java.util.Date;
 import java.util.Objects;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -82,6 +83,15 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
         try {
             return this.format.parse(input.getValue());
         } catch (IllegalArgumentException exc) {
+            if(format == Accuracy.SECONDS.getDatetimeFormat()){
+                try {
+                    GWT.log("Fallback parsing with minute only");
+                    //at least chrome omits the seconds if they are 00 in input field
+                    return Accuracy.MINUTES.getDatetimeFormat().parse(input.getValue());
+                } catch (IllegalArgumentException exc2) {
+                    return null;
+                }
+            }
             return null;
         }
     }

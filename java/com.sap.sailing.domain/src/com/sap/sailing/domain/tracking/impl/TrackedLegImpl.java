@@ -44,7 +44,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
@@ -98,7 +97,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public TrackedRace getTrackedRace() {
+    public TrackedRaceImpl getTrackedRace() {
         return trackedRace;
     }
 

@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -116,7 +117,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
      * Once the {@link #getDistanceTraveled(TimePoint, TimePoint)} has computed its value, it adds the result to the
      * cache.
      */
-    private transient DistanceCache distanceCache;
+    private transient TimeRangeCache<Distance> distanceCache;
     
     private transient MaxSpeedCache<ItemType, FixType> maxSpeedCache;
     
@@ -155,7 +156,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new TrackListenerCollection<ItemType, FixType, GPSTrackListener<ItemType,FixType>>();
-        this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
+        this.distanceCache = new TimeRangeCache<>(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = createMaxSpeedCache();
         this.validityCachingSuspended = false;
         this.losslessCompaction = losslessCompaction;
@@ -190,7 +191,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        distanceCache = new DistanceCache(getTrackedItem().toString());
+        distanceCache = new TimeRangeCache<>(getTrackedItem().toString());
         maxSpeedCache = createMaxSpeedCache();
     }
     
@@ -506,76 +507,33 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
 
     @Override
     public Distance getDistanceTraveled(TimePoint from, TimePoint to) {
-        return getDistanceTraveledRecursively(from, to, 0);
-    }
-    
-    private Distance getDistanceTraveledRecursively(TimePoint from, TimePoint to, int recursionDepth) {
-        Distance result;
-        if (!from.before(to)) {
-            result = Distance.NULL;
-        } else {
-            boolean perfectCacheHit = false;
-            lockForRead();
-            try {
-                Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache()
-                        .getEarliestFromAndDistanceAtOrAfterFrom(from, to);
-                if (bestCacheEntry != null) {
-                    perfectCacheHit = true; // potentially a cache hit; but if it doesn't span the full interval, it's not perfect; see below
-                    // compute the missing stretches between best cache entry's "from" and our "from" and the cache
-                    // entry's "to" and our "to"
-                    Distance distanceFromFromToBeginningOfCacheEntry = Distance.NULL;
-                    Distance distanceFromEndOfCacheEntryToTo = Distance.NULL;
-                    if (!bestCacheEntry.getB().getA().equals(from)) {
-                        assert bestCacheEntry.getB().getA().after(from);
-                        perfectCacheHit = false;
-                        distanceFromFromToBeginningOfCacheEntry = getDistanceTraveledRecursively(from, bestCacheEntry
-                                .getB().getA(), recursionDepth + 1);
-                    }
-                    if (!bestCacheEntry.getA().equals(to)) {
-                        assert bestCacheEntry.getA().before(to);
-                        perfectCacheHit = false;
-                        distanceFromEndOfCacheEntryToTo = getDistanceTraveledRecursively(bestCacheEntry.getA(), to,
-                                recursionDepth + 1);
-                    }
-                    result = distanceFromFromToBeginningOfCacheEntry.add(bestCacheEntry.getB().getB()).add(
-                            distanceFromEndOfCacheEntryToTo);
-                } else {
-                    double distanceInNauticalMiles = 0;
-                    if (from.compareTo(to) < 0) {
+        return getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, getDistanceCache(),
+                /* valueCalculator */ new Track.TimeRangeValueCalculator<Distance>() {
+                    @Override
+                    public Distance calculate(TimePoint from, TimePoint to) {
                         // getEstimatedPosition's current implementation returns a position equal to that of a fix at
                         // "from" if there is one with exactly that time stamp
+                        Distance distance = Distance.NULL;
                         Position fromPos = getEstimatedPosition(from, /* extrapolate */false);
-                        if (fromPos == null) {
-                            result = Distance.NULL;
-                        } else {
+                        if (fromPos != null) {
                             // TODO bug 4122: idea: use the subset to determine fromPos and toPos in one go, eliminating two expensive getEstimatedPosition calls
                             NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
                             /* fromInclusive */false, new DummyGPSFix(to),
                             /* toInclusive */false);
                             for (GPSFix fix : subset) {
-                                double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
-                                        fix.getPosition()).getNauticalMiles();
-                                distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                                Distance distanceBetweenAdjacentFixes = fromPos.getDistance(
+                                        fix.getPosition());
+                                distance = distance.add(distanceBetweenAdjacentFixes);
                                 fromPos = fix.getPosition();
                             }
                             Position toPos = getEstimatedPosition(to, false);
-                            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
-                            result = new NauticalMileDistance(distanceInNauticalMiles);
+                            distance = distance.add(fromPos.getDistance(toPos));
                         }
-                    } else {
-                        result = Distance.NULL;
+                        return distance;
                     }
-                }
-            } finally {
-                unlockAfterRead();
-            }
-            if (!perfectCacheHit && recursionDepth == 0) {
-                getDistanceCache().cache(from, to, result);
-            }
-        }
-        return result;
+                });
     }
-
+    
     @Override
     public Distance getRawDistanceTraveled(TimePoint from, TimePoint to) {
         lockForRead();
@@ -1065,7 +1023,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         }
     }
 
-    protected DistanceCache getDistanceCache() {
+    protected TimeRangeCache<Distance> getDistanceCache() {
         return distanceCache;
     }
 
