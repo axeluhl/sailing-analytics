@@ -2,21 +2,21 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 
 public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     
-    private final TextBox competitorCountTextBox;
+    private final IntegerBox competitorCountTextBox;
     
     public PairingListCreationSetupDialog(RegattaIdentifier regattaIdentifier, StringMessages stringMessages, 
-            DialogCallback<RegattaDTO> callback) {
+            DialogCallback<PairingListTemplateDTO> callback) {
         super(regattaIdentifier, stringMessages, callback);        // TODO initial value
-        this.competitorCountTextBox = createTextBox("0");
+        this.competitorCountTextBox = createIntegerBox(0, 2);
         this.ensureDebugId("CompetitorCountTextBox");
         
     }
@@ -39,7 +39,7 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     }
 
     @Override
-    protected RegattaDTO getResult() {
-        return null;
+    protected PairingListTemplateDTO getResult() {
+        return new PairingListTemplateDTO(this.competitorCountTextBox.getValue(), null, 0.0);
     }
 }

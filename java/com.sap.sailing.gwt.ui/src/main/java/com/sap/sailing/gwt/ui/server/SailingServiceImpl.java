@@ -487,6 +487,7 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
@@ -6650,8 +6651,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public PairingListTemplateDTO calculatePairingList(RegattaIdentifier regattaIdentifier) {
+    public PairingListTemplateDTO calculatePairingList(RegattaIdentifier regattaIdentifier, int competitorsCount) {
+        PairingListTemplate template = getService().createPairingListFromRegatta(regattaIdentifier, competitorsCount);
         
-        return new PairingListTemplateDTO(null, 0.0);
+        
+        
+        return new PairingListTemplateDTO(competitorsCount, template.getPairingListTemplate(), template.getQuality());
     }
 }

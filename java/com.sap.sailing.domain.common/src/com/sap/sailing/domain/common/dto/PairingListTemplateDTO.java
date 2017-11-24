@@ -6,10 +6,12 @@ public class PairingListTemplateDTO implements Serializable {
     private static final long serialVersionUID = 7155851765154315798L;
     private int[][] pairingListTemplate;
     private double quality;
+    private int competitorCount = 0;
     
     public PairingListTemplateDTO() { }
     
-    public PairingListTemplateDTO(int[][] pairingListTemplate, double quality) {
+    public PairingListTemplateDTO(int competitorCount, int[][] pairingListTemplate, double quality) {
+        this.competitorCount = competitorCount;
         this.quality = quality;
         this.pairingListTemplate = pairingListTemplate;
     }
@@ -20,5 +22,9 @@ public class PairingListTemplateDTO implements Serializable {
     
     public double getQuality() {
         return this.quality;
+    }
+    
+    public int getCompetitorCount() {
+        return this.competitorCount;
     }
 }

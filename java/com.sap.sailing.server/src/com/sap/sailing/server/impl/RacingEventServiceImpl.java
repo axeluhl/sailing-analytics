@@ -254,6 +254,9 @@ import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.pairinglist.PairingFrameProvider;
+import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -4091,5 +4094,41 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public AnniversaryRaceDeterminator getAnniversaryRaceDeterminator() {
         return anniversaryRaceDeterminator;
+    }
+    
+    @Override
+    public PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount) {
+        
+        Regatta regatta = getRegatta(regattaIdentifier);
+        
+        if (regatta != null) {
+             PairingListTemplateFactoryImpl factory = new PairingListTemplateFactoryImpl();
+             PairingListTemplate template = factory.getOrCreatePairingListTemplate(new PairingFrameProvider() {
+            
+                @Override
+                public int getGroupsCount() {
+                    for (Series series : regatta.getSeries()) {
+                        if (Util.size(series.getFleets()) > 1) {
+                            return Util.size(series.getFleets());
+                        }
+                    }
+                    return 1;
+                }
+                
+                @Override
+                public int getFlightsCount() {
+                    return Util.size(regatta.getRaceColumns());
+                }
+                
+                @Override
+                public int getCompetitorsCount() {
+                    return competitorsCount;
+                }
+            });
+            
+            return template;
+        } else {
+            return null;    
+        }
     }
 }

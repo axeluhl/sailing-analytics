@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
@@ -278,11 +277,25 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     
     private void createPairingListTemplate(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
-        PairingListCreationSetupDialog dialog = new PairingListCreationSetupDialog(regattaIdentifier, this.stringMessages, new DialogCallback<RegattaDTO>() {
+        PairingListCreationSetupDialog dialog = new PairingListCreationSetupDialog(regattaIdentifier, this.stringMessages, new DialogCallback<PairingListTemplateDTO>() {
 
             @Override
-            public void ok(RegattaDTO editedObject) {
-                openPairingListCreationDialog(regattaIdentifier);
+            public void ok(PairingListTemplateDTO editedObject) {
+                sailingService.calculatePairingList(regattaIdentifier, editedObject.getCompetitorCount(), new AsyncCallback<PairingListTemplateDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // TODO Auto-generated method stub
+                        System.out.println(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(PairingListTemplateDTO result) {
+                        System.out.println(result.getQuality());
+                        openPairingListCreationDialog(regattaIdentifier);
+                    }
+                    
+                });
             }
 
             @Override
@@ -294,10 +307,10 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
     
     private void openPairingListCreationDialog(RegattaIdentifier regattaIdentifier) {
-        PairingListCreationDialog dialog = new PairingListCreationDialog(regattaIdentifier, stringMessages, new DialogCallback<RegattaDTO>() {
+        PairingListCreationDialog dialog = new PairingListCreationDialog(regattaIdentifier, stringMessages, new DialogCallback<PairingListTemplateDTO>() {
 
             @Override
-            public void ok(RegattaDTO editedObject) {
+            public void ok(PairingListTemplateDTO editedObject) {
                 
             }
 

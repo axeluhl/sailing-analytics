@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
-public class AbstractPairingListParameterValidator implements Validator<RegattaDTO> {
+public class AbstractPairingListParameterValidator implements Validator<PairingListTemplateDTO> {
     protected final StringMessages stringMessages;
 
     public AbstractPairingListParameterValidator(StringMessages stringMessages) {
@@ -12,7 +12,7 @@ public class AbstractPairingListParameterValidator implements Validator<RegattaD
     } 
     
     @Override
-    public String getErrorMessage(RegattaDTO valueToValidate) {
+    public String getErrorMessage(PairingListTemplateDTO valueToValidate) {
         // TODO validate RegattaTDO
         return null;
     }
