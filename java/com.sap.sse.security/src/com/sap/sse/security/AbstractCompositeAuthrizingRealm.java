@@ -291,6 +291,16 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         }
     }
     
+    @Override
+    public Iterable<Role> getRoles() {
+        try {
+            return aclStore.get().getRoles();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     // TODO as default implementation in interface
     @Override
     public boolean implies(UUID id, WildcardPermission permission) {
