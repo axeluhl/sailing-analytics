@@ -480,6 +480,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
+    private final PairingListTemplateFactoryImpl pairingListTemplateFactory = new PairingListTemplateFactoryImpl(); 
+    
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -4099,25 +4101,28 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount) {
         
+        RegattaIdentifier identifier = regattaIdentifier;
+        
         Regatta regatta = getRegatta(regattaIdentifier);
         
         if (regatta != null) {
-             PairingListTemplateFactoryImpl factory = new PairingListTemplateFactoryImpl();
-             PairingListTemplate template = factory.getOrCreatePairingListTemplate(new PairingFrameProvider() {
+             PairingListTemplate template = pairingListTemplateFactory.getOrCreatePairingListTemplate(new PairingFrameProvider() {
             
                 @Override
                 public int getGroupsCount() {
-                    for (Series series : regatta.getSeries()) {
+                    /*for (Series series : regatta.getSeries()) {
                         if (Util.size(series.getFleets()) > 1) {
                             return Util.size(series.getFleets());
                         }
                     }
-                    return 1;
+                    return 1;*/
+                    return 3;
                 }
                 
                 @Override
                 public int getFlightsCount() {
-                    return Util.size(regatta.getRaceColumns());
+                    //return Util.size(regatta.getRaceColumns());
+                    return 15;
                 }
                 
                 @Override
