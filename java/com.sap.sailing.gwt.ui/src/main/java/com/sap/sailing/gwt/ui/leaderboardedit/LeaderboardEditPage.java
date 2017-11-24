@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
@@ -42,7 +41,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                     SAPHeaderWithAuthentication header = initHeader();
                     GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
                     AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-                    authorizedContentDecorator.setPermissionToCheck(Permission.MANAGE_LEADERBOARD_RESULTS, SailingPermissionsForRoleProvider.INSTANCE);
+                    authorizedContentDecorator.setPermissionToCheck(Permission.MANAGE_LEADERBOARD_RESULTS);
                     authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
                         @Override
                         public Widget get() {

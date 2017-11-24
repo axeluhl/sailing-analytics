@@ -129,7 +129,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private Role loadRole(DBObject roleDBObject) {
         final String id = (String) roleDBObject.get(FieldNames.Role.ID.name());
-        final String displayName = (String) roleDBObject.get(FieldNames.Role.DISPLAY_NAME.name());
+        final String displayName = (String) roleDBObject.get(FieldNames.Role.NAME.name());
         final Set<WildcardPermission> permissions = new HashSet<>();
         for (Object o : (BasicDBList) roleDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
             permissions.add(new WildcardPermission(o.toString(), true));
@@ -217,12 +217,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Boolean emailValidated = (Boolean) userDBObject.get(FieldNames.User.EMAIL_VALIDATED.name());
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
-        Set<String> roles = new HashSet<String>();
-        Set<String> permissions = new HashSet<String>();
+        Set<UUID> roles = new HashSet<>();
+        Set<String> permissions = new HashSet<>();
         BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLES.name());
         if (rolesO != null) {
             for (Object o : rolesO) {
-                roles.add((String) o);
+                roles.add(UUID.fromString((String) o));
             }
         }
         BasicDBList permissionsO = (BasicDBList) userDBObject.get(FieldNames.User.PERMISSIONS.name());
@@ -234,7 +234,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
         User result = new User(name, email, fullName, company, locale, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
-        for (String role : roles) {
+        for (UUID role : roles) {
             result.addRole(role);
         }
         for (String permission : permissions) {

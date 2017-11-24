@@ -1,11 +1,16 @@
 package com.sap.sse.security.shared;
 
+import java.util.UUID;
+
 public interface RolePermissionModel {
-    Iterable<String> getPermissions(String role);
+    String getName(UUID id);
+    Iterable<WildcardPermission> getPermissions(UUID id);
     
-    boolean implies(String role, WildcardPermission permission);
+    boolean implies(UUID id, WildcardPermission permission);
+    boolean implies(UUID id, WildcardPermission permission, Owner ownership);
     /**
-     * @param role Role of the for "role_title:tenant". The tenant is an optional
+     * @param id Id of role
+     * @param name Role name of the form "role_title:tenant". The tenant is an optional
      *          parameter. It restricts permissions with a * as the instance id
      *          to data objects where the tenant parameter equals the tenant owner
      *          of the data object. E.g.:
@@ -16,5 +21,5 @@ public interface RolePermissionModel {
      *          "tw2016-dyas" would have "tw2016" as the tenant owner)
      * @param ownership Ownership of the data object
      */
-    boolean implies(String role, WildcardPermission permission, Owner ownership);
+    boolean implies(UUID id, String name, WildcardPermission permission, Owner ownership);
 }

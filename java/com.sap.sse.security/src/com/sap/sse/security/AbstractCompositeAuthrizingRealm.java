@@ -3,6 +3,7 @@ package com.sap.sse.security;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -21,7 +22,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -30,7 +31,6 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
     private final Future<UserStore> userStore;
     private final Future<AccessControlStore> aclStore;
-    private PermissionsForRoleProvider permissionsForRoleProvider;
 
     /**
      * In a non-OSGi test environment, having Shiro instantiate this class with a default constructor makes it difficult
@@ -60,10 +60,6 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             userStore = null;
             aclStore = null;
         }
-    }
-    
-    public void setPermissionsForRoleProvider(PermissionsForRoleProvider permissionsForRoleProvider) {
-        this.permissionsForRoleProvider = permissionsForRoleProvider;
     }
 
     private Future<UserStore> createUserStoreFuture(BundleContext bundleContext) {
@@ -213,8 +209,8 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     public boolean hasRole(PrincipalCollection principal, String roleIdentifier) {
         String user = (String) principal.getPrimaryPrincipal();
         try {
-            for (String role : getUserStore().getRolesFromUser(user)) {
-                if (role.equals(roleIdentifier)) {
+            for (UUID role : getUserStore().getRolesFromUser(user)) {
+                if (role.equals(UUID.fromString(roleIdentifier))) {
                     return true;
                 }
             }
@@ -266,23 +262,58 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         return null; // As all the public methods of AuthorizingRealm are overridden to not use this, this should never be called.
     }
     
-    @Override
-    public Iterable<String> getPermissions(String role) {
-        return permissionsForRoleProvider.getPermissions(role, null);
+    private Role getRole(UUID id) {
+        try {
+            return aclStore.get().getRole(id);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @Override
-    public boolean implies(String role, WildcardPermission permission) { // TODO as default implementation in interface
-        return implies(role, permission, null);
+    public String getName(UUID id) {
+        Role role = getRole(id);
+        if (role != null) {
+            return role.getName();
+        } else {
+            return "";
+        }
     }
     
     @Override
-    public boolean implies(String role, WildcardPermission permission, Owner ownership) { // TODO as default implementation in interface
-        String[] parts = role.split(":");
+    public Iterable<WildcardPermission> getPermissions(UUID id) {
+        Role role = getRole(id);
+        if (role != null) {
+            return role.getPermissions();
+        } else {
+            return new ArrayList<>();
+        }
+    }
+    
+    // TODO as default implementation in interface
+    @Override
+    public boolean implies(UUID id, WildcardPermission permission) {
+        return implies(id, permission, null);
+    }
+    
+    @Override
+    public boolean implies(UUID id, WildcardPermission permission, Owner ownership) {
+        Role role = getRole(id);
+        if (role != null) {
+            return implies(id, role.getName(), permission, ownership);
+        } else {
+            return false;
+        }
+    }
+    
+    // TODO as default implementation in interface
+    @Override
+    public boolean implies(UUID id, String name, WildcardPermission permission, Owner ownership) {
+        String[] parts = name.split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
         if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
-            for (String rolePermissionString : getPermissions(role)) {
-                WildcardPermission rolePermission = new WildcardPermission(rolePermissionString, true);
+            for (WildcardPermission rolePermission : getPermissions(id)) {
                 if (rolePermission.implies(permission)) {
                     return true;
                 }

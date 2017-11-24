@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.shared.Permission;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -20,13 +19,11 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  *
  */
 public class AuthorizedContentDecorator extends Composite implements RequiresResize, NeedsAuthenticationContext {
-
     private final SimplePanel contentHolder = new SimplePanel();
     private Widget content;
     private WidgetFactory contentWidgetFactory;
     private final NotLoggedInView notLoggedInView;
     private String permissionToCheck;
-    private PermissionsForRoleProvider permissionsForRoleProvider;
 
     public AuthorizedContentDecorator(NotLoggedInPresenter presenter, NotLoggedInView notLoggedInView) {
         this.notLoggedInView = notLoggedInView;
@@ -117,13 +114,6 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     }
 
     /**
-     * @param permissionsForRoleProvider the PermissionsForRoleProvider used when checking the required permission of a user.
-     */
-    public void setPermissionsForRoleProvider(PermissionsForRoleProvider permissionsForRoleProvider) {
-        this.permissionsForRoleProvider = permissionsForRoleProvider;
-    }
-
-    /**
      * Setting a permission causes that the user not only needs to be logged in but also needs to have the given permission.
      * 
      * @param permissionToCheck the permission to check
@@ -139,17 +129,5 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
      */
     public void setPermissionToCheck(Permission permissionToCheck) {
         setPermissionToCheck(permissionToCheck.getStringPermission());
-    }
-
-    
-    /**
-     * Setting a permission causes that the user not only needs to be logged in but also needs to have the given permission.
-     * 
-     * @param permissionToCheck the permission to check
-     * @param permissionsForRoleProvider the PermissionsForRoleProvider used when checking the required permission of a user.
-     */
-    public void setPermissionToCheck(Permission permissionToCheck, PermissionsForRoleProvider permissionsForRoleProvider) {
-        setPermissionToCheck(permissionToCheck);
-        setPermissionsForRoleProvider(permissionsForRoleProvider);
     }
 }

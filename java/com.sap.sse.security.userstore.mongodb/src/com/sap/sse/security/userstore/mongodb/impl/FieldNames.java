@@ -17,7 +17,7 @@ public class FieldNames {
     
     public static enum Role {
         ID,
-        DISPLAY_NAME,
+        NAME,
         PERMISSIONS
     }
     

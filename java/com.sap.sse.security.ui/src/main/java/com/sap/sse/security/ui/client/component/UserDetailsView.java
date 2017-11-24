@@ -32,6 +32,7 @@ import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -75,7 +76,7 @@ public class UserDetailsView extends FlowPanel {
         for (Permission permission : additionalPermissions) {
             defaultPermissionNames.add(permission.getStringPermission());
         }
-        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultRoleNames,
+        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getStringRoles(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultRoleNames,
                 stringMessages.enterRoleName());
         rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
@@ -254,11 +255,11 @@ public class UserDetailsView extends FlowPanel {
                 }
                 accountPanels.add(accountPanelDecorator);
             }
-            rolesEditor.setValue(user.getRoles(), /* fireEvents */ false);
+            rolesEditor.setValue(user.getStringRoles(), /* fireEvents */ false);
             permissionsEditor.setValue(user.getStringPermissions(), /* fireEvents */ false);
             allPermissionsList.clear();
-            for (String permission : user.getAllPermissions(permissionForRoleProvider)) {
-                allPermissionsList.addItem(permission);
+            for (WildcardPermission permission : user.getAllPermissions(permissionForRoleProvider)) {
+                allPermissionsList.addItem(permission.toString());
             }
         }
     }

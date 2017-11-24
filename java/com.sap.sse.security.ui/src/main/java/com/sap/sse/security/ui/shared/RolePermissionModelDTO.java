@@ -1,38 +1,51 @@
 package com.sap.sse.security.ui.shared;
 
-import java.util.Set;
+import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class RolePermissionModelDTO implements RolePermissionModel, IsSerializable {
-    private Set<String> rules;
+    private Map<UUID, Role> roles;
     
     RolePermissionModelDTO() {} // for serialization only
     
-    public RolePermissionModelDTO(Set<String> rules) {
-        this.rules = rules;
+    public RolePermissionModelDTO(Map<UUID, Role> roles) {
+        this.roles = roles;
     }
     
     @Override
-    public Iterable<String> getPermissions(String role) {
-        return rules;
+    public String getName(UUID id) {
+        return roles.get(id).getName();
     }
     
     @Override
-    public boolean implies(String role, WildcardPermission permission) { // TODO as default implementation in interface
-        return implies(role, permission, null);
+    public Iterable<WildcardPermission> getPermissions(UUID id) {
+        return roles.get(id).getPermissions();
+    }
+    
+    // TODO as default implementation in interface
+    @Override
+    public boolean implies(UUID id, WildcardPermission permission) {
+        return implies(id, permission, null);
     }
     
     @Override
-    public boolean implies(String role, WildcardPermission permission, Owner ownership) { // TODO as default implementation in interface
-        String[] parts = role.split(":");
+    public boolean implies(UUID id, WildcardPermission permission, Owner ownership) {
+        return implies(id, roles.get(id).getName(), permission, ownership);
+    }
+    
+    // TODO as default implementation in interface
+    @Override
+    public boolean implies(UUID id, String name, WildcardPermission permission, Owner ownership) {
+        String[] parts = name.split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
         if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
-            for (String rolePermissionString : getPermissions(role)) {
-                WildcardPermission rolePermission = new WildcardPermission(rolePermissionString, true);
+            for (WildcardPermission rolePermission : getPermissions(id)) {
                 if (rolePermission.implies(permission)) {
                     return true;
                 }

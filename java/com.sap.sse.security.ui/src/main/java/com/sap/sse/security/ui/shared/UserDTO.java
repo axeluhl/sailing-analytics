@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
@@ -20,15 +21,15 @@ public class UserDTO implements IsSerializable {
     private String company;
     private String locale;
     private List<AccountDTO> accounts;
-    private Set<String> roles;
-    private RolePermissionModelDTO rolePermissionModelDTO;
+    private Set<UUID> roles;
+    private RolePermissionModelDTO rolePermissionModel;
     private Set<WildcardPermission> permissions;
     private boolean emailValidated;
 
     UserDTO() {} // for serialization only
 
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<String> roles, RolePermissionModelDTO rolePermissionModelDTO,
+            List<AccountDTO> accounts, Iterable<UUID> roles, RolePermissionModelDTO rolePermissionModelDTO,
             Iterable<String> stringPermissions) {
         this.name = name;
         this.email = email;
@@ -39,7 +40,7 @@ public class UserDTO implements IsSerializable {
         this.accounts = accounts;
         this.roles = new HashSet<>();
         Util.addAll(roles, this.roles);
-        this.rolePermissionModelDTO = rolePermissionModelDTO;
+        this.rolePermissionModel = rolePermissionModelDTO;
         this.permissions = new HashSet<>();
         for (String permission : stringPermissions) {
             this.permissions.add(new WildcardPermission(permission, true));
@@ -62,8 +63,16 @@ public class UserDTO implements IsSerializable {
         return locale;
     }
 
-    public Iterable<String> getRoles() {
+    public Iterable<UUID> getRoles() {
         return roles;
+    }
+    
+    public Iterable<String> getStringRoles() {
+        ArrayList<String> result = new ArrayList<>();
+        for (UUID id : roles) {
+            result.add(rolePermissionModel.getName(id));
+        }
+        return result;
     }
     
     public boolean hasRole(String role) {
@@ -102,12 +111,12 @@ public class UserDTO implements IsSerializable {
      * @return a set of permissions with no duplicates, all in the format parsable by
      *         {@link WildcardPermission#WildcardPermission(String)}
      */
-    public Iterable<String> getAllPermissions(PermissionsForRoleProvider permissionsForRoleProvider) {
-        Set<String> result = new LinkedHashSet<>();
-        Util.addAll(getStringPermissions(), result);
-        if (permissionsForRoleProvider != null) {
-            for (String role : getRoles()) {
-                Util.addAll(permissionsForRoleProvider.getPermissions(role, null), result);
+    public Iterable<WildcardPermission> getAllPermissions(PermissionsForRoleProvider permissionsForRoleProvider) {
+        Set<WildcardPermission> result = new LinkedHashSet<>();
+        Util.addAll(permissions, result);
+        if (rolePermissionModel != null) {
+            for (UUID role : getRoles()) {
+                Util.addAll(rolePermissionModel.getPermissions(role), result);
             }
         }
         return result;
@@ -130,7 +139,7 @@ public class UserDTO implements IsSerializable {
         if (acl != null) {
             userGroups = new ArrayList<>(acl.getUserGroupPermissionMap().keySet());
         }
-        return PermissionChecker.isPermitted(permission, name, userGroups, permissions, roles, rolePermissionModelDTO, owner, acl);
+        return PermissionChecker.isPermitted(permission, name, userGroups, permissions, roles, rolePermissionModel, owner, acl);
     }
 
     public List<AccountDTO> getAccounts() {

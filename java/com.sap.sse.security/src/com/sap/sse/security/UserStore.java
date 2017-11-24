@@ -55,11 +55,11 @@ public interface UserStore extends Named {
 
     void updateUser(User user);
 
-    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
+    Iterable<UUID> getRolesFromUser(String username) throws UserManagementException;
 
-    void addRoleForUser(String name, String role) throws UserManagementException;
+    void addRoleForUser(String name, UUID role) throws UserManagementException;
 
-    void removeRoleFromUser(String name, String role) throws UserManagementException;
+    void removeRoleFromUser(String name, UUID role) throws UserManagementException;
 
     Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
 

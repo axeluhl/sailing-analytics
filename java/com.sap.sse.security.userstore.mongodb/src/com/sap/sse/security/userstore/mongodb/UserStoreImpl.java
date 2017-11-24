@@ -249,7 +249,7 @@ public class UserStoreImpl implements UserStore {
     public String getAccessToken(String username) {
         // only the user or an administrator may request a user's access token
         final Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getDisplayName()) ||
+        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
             (principal != null && principal.toString().equals(username))) {
             return getPreference(username, ACCESS_TOKEN_KEY);
         } else {
@@ -260,7 +260,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void removeAccessToken(String username) {
         // only the user or an administrator may request a user's access token
-        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getDisplayName()) ||
+        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
             SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
             User user = users.get(username);
             if (user != null) {
@@ -508,7 +508,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<String> getRolesFromUser(String username) throws UserManagementException {
+    public Iterable<UUID> getRolesFromUser(String username) throws UserManagementException {
         if (users.get(username) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -516,7 +516,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void addRoleForUser(String name, String role) throws UserManagementException {
+    public void addRoleForUser(String name, UUID role) throws UserManagementException {
         final User user = users.get(name);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -528,7 +528,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void removeRoleFromUser(String name, String role) throws UserManagementException {
+    public void removeRoleFromUser(String name, UUID role) throws UserManagementException {
         if (users.get(name) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }

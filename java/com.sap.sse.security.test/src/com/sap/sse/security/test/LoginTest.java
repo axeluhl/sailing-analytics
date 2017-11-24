@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 import org.apache.shiro.SecurityUtils;
 import org.junit.Before;
@@ -69,9 +70,10 @@ public class LoginTest {
     @Test
     public void rolesTest() throws UserManagementException {
         store.createUser("me", "me@sap.com", "admin");
-        store.addRoleForUser("me", "testrole");
+        UUID testId = UUID.randomUUID();
+        store.addRoleForUser("me", testId);
         UserStoreImpl store2 = new UserStoreImpl();
-        assertTrue(Util.contains(store2.getUserByName("me").getRoles(), "testrole"));
+        assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testId));
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.mail.MailException;
@@ -71,7 +72,7 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo logout();
 
-    SuccessInfo setRolesForUser(String username, Iterable<String> roles);
+    SuccessInfo setRolesForUser(String username, Iterable<UUID> roles);
 
     SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions);
 

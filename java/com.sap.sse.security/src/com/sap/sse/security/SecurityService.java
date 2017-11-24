@@ -134,11 +134,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void deleteUser(String username) throws UserManagementException;
 
-    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
+    Iterable<UUID> getRolesFromUser(String username) throws UserManagementException;
 
-    void addRoleForUser(String username, String role);
+    void addRoleForUser(String username, UUID role);
 
-    void removeRoleFromUser(String username, String role);
+    void removeRoleFromUser(String username, UUID role);
 
     Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
     

@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
@@ -64,7 +65,7 @@ public class User implements NamedWithID {
     
     private boolean emailValidated;
 
-    private final Set<String> roles;
+    private final Set<UUID> roles;
     private final Set<String> permissions;
     private final Map<AccountType, Account> accounts;
 
@@ -136,19 +137,19 @@ public class User implements NamedWithID {
         return locale == null ? Locale.ENGLISH : locale;
     }
 
-    public Iterable<String> getRoles() {
+    public Iterable<UUID> getRoles() {
         return roles;
     }
 
-    public void addRole(String role) {
+    public void addRole(UUID role) {
         roles.add(role);
     }
 
-    public boolean hasRole(String role) {
+    public boolean hasRole(UUID role) {
         return roles.contains(role);
     }
     
-    public void removeRole(String role) {
+    public void removeRole(UUID role) {
         roles.remove(role);
     }
 

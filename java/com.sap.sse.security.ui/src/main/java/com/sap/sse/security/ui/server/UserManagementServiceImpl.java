@@ -332,7 +332,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN
-        if (subject.hasRole(AdminRole.getInstance().getDisplayName()) 
+        if (subject.hasRole(AdminRole.getInstance().getName()) 
             // someone knew a username and the correct password for that user
          || (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
             // someone provided the correct password reset secret for the correct username
@@ -355,7 +355,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
-        if (!subject.hasRole(AdminRole.getInstance().getDisplayName()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -410,23 +410,23 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public SuccessInfo setRolesForUser(String username, Iterable<String> roles) {
+    public SuccessInfo setRolesForUser(String username, Iterable<UUID> roles) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(AdminRole.getInstance().getDisplayName())) {
+        if (currentSubject.hasRole(AdminRole.getInstance().getName())) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
             }
-            Set<String> rolesToRemove = new HashSet<>();
+            Set<UUID> rolesToRemove = new HashSet<>();
             Util.addAll(u.getRoles(), rolesToRemove);
             Util.removeAll(roles, rolesToRemove);
-            for (String roleToRemove : rolesToRemove) {
+            for (UUID roleToRemove : rolesToRemove) {
                 getSecurityService().removeRoleFromUser(username, roleToRemove);
             }
-            Set<String> rolesToAdd = new HashSet<>();
+            Set<UUID> rolesToAdd = new HashSet<>();
             Util.addAll(roles, rolesToAdd);
             Util.removeAll(u.getRoles(), rolesToAdd);
-            for (String roleToAdd : rolesToAdd) {
+            for (UUID roleToAdd : rolesToAdd) {
                 getSecurityService().addRoleForUser(username, roleToAdd);
             }
             return new SuccessInfo(true, "Set roles " + roles + " for user " + username, /* redirectURL */null,
@@ -439,7 +439,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(AdminRole.getInstance().getDisplayName()) || currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
+        if (currentSubject.hasRole(AdminRole.getInstance().getName()) || currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
@@ -493,7 +493,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), new RolePermissionModelDTO(new HashSet<>()), user.getPermissions());
+                accountDTOs, user.getRoles(), new RolePermissionModelDTO(new HashMap<>()), user.getPermissions());
         return userDTO;
     }
 

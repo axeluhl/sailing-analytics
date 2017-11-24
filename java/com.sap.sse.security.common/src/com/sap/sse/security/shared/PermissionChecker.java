@@ -2,6 +2,7 @@ package com.sap.sse.security.shared;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * The {@link PermissionChecker} is an implementation of the permission 
@@ -31,7 +32,7 @@ public class PermissionChecker {
      *          The instance id can be omitted when a general permission for the data
      *          object type is asked after (e.g. "event:create").
      */
-    public static boolean isPermitted(WildcardPermission permission, String user, Iterable<UserGroup> tenants, Iterable<WildcardPermission> directPermissions, Iterable<String> roles, 
+    public static boolean isPermitted(WildcardPermission permission, String user, Iterable<UserGroup> tenants, Iterable<WildcardPermission> directPermissions, Iterable<UUID> roles, 
             RolePermissionModel rolePermissionModel, Owner ownership, AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
@@ -43,7 +44,7 @@ public class PermissionChecker {
         PermissionState result = PermissionState.NONE;
         
         // 1. check ownership
-        if (ownership != null && user.equals(ownership.getOwner())) { // TODO check for tenant ownership
+        if (ownership != null && user.equals(ownership.getOwner())) {
             result = PermissionState.GRANTED;
         }
         // 2. check ACL
@@ -61,7 +62,7 @@ public class PermissionChecker {
         }
         // 4. check role permissions
         if (result == PermissionState.NONE) {
-            for (String role : roles) {
+            for (UUID role : roles) {
                 if (rolePermissionModel.implies(role, permission, ownership)) {
                     result = PermissionState.GRANTED;
                     break;

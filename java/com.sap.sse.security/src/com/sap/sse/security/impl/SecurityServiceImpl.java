@@ -207,7 +207,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
                         /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
-                addRoleForUser("admin", AdminRole.getInstance().getDisplayName());
+                addRoleForUser("admin", (UUID) AdminRole.getInstance().getId());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
@@ -223,7 +223,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Set<String> adminPermissions = new HashSet<>();
             adminPermissions.add("*");
             AdminRole role = AdminRole.getInstance();
-            aclStore.createRole((UUID) role.getId(), role.getDisplayName(), role.getPermissions());
+            aclStore.createRole((UUID) role.getId(), role.getName(), role.getPermissions());
         }
     }
     
@@ -748,28 +748,28 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Iterable<String> getRolesFromUser(String name) throws UserManagementException {
+    public Iterable<UUID> getRolesFromUser(String name) throws UserManagementException {
         return userStore.getRolesFromUser(name);
     }
 
     @Override
-    public void addRoleForUser(String username, String role) {
+    public void addRoleForUser(String username, UUID role) {
         apply(s->s.internalAddRoleForUser(username, role));
     }
 
     @Override
-    public Void internalAddRoleForUser(String username, String role) throws UserManagementException {
+    public Void internalAddRoleForUser(String username, UUID role) throws UserManagementException {
         userStore.addRoleForUser(username, role);
         return null;
     }
 
     @Override
-    public void removeRoleFromUser(String username, String role) {
+    public void removeRoleFromUser(String username, UUID role) {
         apply(s->s.internalRemoveRoleFromUser(username, role));
     }
 
     @Override
-    public Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException {
+    public Void internalRemoveRoleFromUser(String username, UUID role) throws UserManagementException {
         userStore.removeRoleFromUser(username, role);
         return null;
     }
@@ -1127,7 +1127,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
         final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(AdminRole.getInstance().getDisplayName()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
                     : subject.getPrincipal().toString();
@@ -1228,7 +1228,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeAccessToken(String username) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(AdminRole.getInstance().getDisplayName()) || username.equals(subject.getPrincipal().toString())) {
+        if (subject.hasRole(AdminRole.getInstance().getName()) || username.equals(subject.getPrincipal().toString())) {
             apply(s -> s.internalRemoveAccessToken(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()

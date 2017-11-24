@@ -446,8 +446,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
     private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
         for (Permission requiredStringPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
             WildcardPermission requiredPermission = new WildcardPermission(requiredStringPermission.getStringPermission());
-            for (String userStringPermission : user.getAllPermissions(permissionsForRoleProvider)) {
-                WildcardPermission userPermission = new WildcardPermission(userStringPermission);
+            for (WildcardPermission userPermission : user.getAllPermissions(permissionsForRoleProvider)) {
                 if (requiredPermission.implies(userPermission) || userPermission.implies(requiredPermission)) {
                     return true;
                 }

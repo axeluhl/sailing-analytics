@@ -91,7 +91,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbRole = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Role.ID.name(), role.getId().toString());
         dbRole.put(FieldNames.Role.ID.name(), role.getId().toString());
-        dbRole.put(FieldNames.Role.DISPLAY_NAME.name(), role.getDisplayName());
+        dbRole.put(FieldNames.Role.NAME.name(), role.getName());
         HashSet<String> stringPermissions = new HashSet<>();
         for (WildcardPermission permission : role.getPermissions()) {
             stringPermissions.add(permission.toString());
@@ -161,7 +161,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.PASSWORD_RESET_SECRET.name(), user.getPasswordResetSecret());
         dbUser.put(FieldNames.User.VALIDATION_SECRET.name(), user.getValidationSecret());
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
-        dbUser.put(FieldNames.User.ROLES.name(), user.getRoles());
+        HashSet<String> roles = new HashSet<>();
+        for (UUID id : user.getRoles()) {
+            roles.add(id.toString());
+        }
+        dbUser.put(FieldNames.User.ROLES.name(), roles);
         dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }

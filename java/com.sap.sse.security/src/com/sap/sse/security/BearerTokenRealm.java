@@ -30,5 +30,4 @@ public class BearerTokenRealm extends AbstractCompositeAuthrizingRealm {
         SaltedAuthenticationInfo sai = new SimpleSaltedAuthenticationInfo(user.getName(), accessToken.getCredentials(), /* salt */ null);
         return sai;
     }
-
 }
