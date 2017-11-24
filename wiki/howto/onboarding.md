@@ -14,7 +14,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. Git for Windows v2.12.2), http://git-scm.com / https://git-for-windows.github.io/
 4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
-5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
+5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8 is the link.
 6. JDK 1.7 (Java SE 7), http://jdk7.java.net
 7. JDK 1.8 (Java SE 8), http://jdk8.java.net
 8. Maven 3.1.1 (or higher), http://maven.apache.org
