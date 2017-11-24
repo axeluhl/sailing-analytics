@@ -3,27 +3,28 @@ package com.sap.sse.pairinglist.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sse.pairinglist.AbstractPairingFrameProvider;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 
 public class PairingListTemplateFactoryImpl implements PairingListTemplateFactory {
-    private final Map<PairingFrameProvider, PairingListTemplate> pairingListTemplates;
+    private final Map<Integer, PairingListTemplate> pairingListTemplates;
 
     public PairingListTemplateFactoryImpl() {
         this(new HashMap<>());
     }
 
-    public PairingListTemplateFactoryImpl(Map<PairingFrameProvider, PairingListTemplate> existingPairingListTemplates) {
+    public PairingListTemplateFactoryImpl(Map<Integer, PairingListTemplate> existingPairingListTemplates) {
         this.pairingListTemplates = existingPairingListTemplates;
     }
 
     @Override
     public PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider) {
-        PairingListTemplate result = pairingListTemplates.get(pairingFrameProvider);
+        PairingListTemplate result = pairingListTemplates.get(pairingFrameProvider.getHashCode());
         if (result == null) {
             result = generatePairingList(pairingFrameProvider);
-            pairingListTemplates.put(pairingFrameProvider, result);
+            pairingListTemplates.put(pairingFrameProvider.getHashCode(), result);
         }
         return result;
     }
