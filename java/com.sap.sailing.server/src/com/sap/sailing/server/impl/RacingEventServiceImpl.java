@@ -4105,7 +4105,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         
         if (regatta != null) {
              PairingListTemplate template = pairingListTemplateFactory.getOrCreatePairingListTemplate(new PairingFrameProvider() {
-            
+
                 @Override
                 public int getGroupsCount() {
                     for (Series series : regatta.getSeries()) {
@@ -4126,7 +4126,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     return competitorsCount;
                 }
             });
-            
             return template;
         } else {
             return null;    
