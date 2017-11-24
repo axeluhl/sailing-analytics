@@ -862,7 +862,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * Used to determine for a Chart the available Detailtypes. This is for example used, to only show the RideHeight as
      * an option for charts, if it actually recorded for the race.
      */
-    void determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
+    void determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
             AsyncCallback<List<DetailType>> callback);
 
     void getExpeditionDeviceConfigurations(AsyncCallback<List<ExpeditionDeviceConfiguration>> callback);
