@@ -285,14 +285,12 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-                        System.out.println(caught.getMessage());
+                        
                     }
 
                     @Override
                     public void onSuccess(PairingListTemplateDTO result) {
-                        System.out.println(result.getQuality());
-                        openPairingListCreationDialog(regattaIdentifier);
+                        openPairingListCreationDialog(regattaIdentifier, result);
                     }
                     
                 });
@@ -306,8 +304,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         dialog.show();
     }
     
-    private void openPairingListCreationDialog(RegattaIdentifier regattaIdentifier) {
-        PairingListCreationDialog dialog = new PairingListCreationDialog(regattaIdentifier, stringMessages, new DialogCallback<PairingListTemplateDTO>() {
+    private void openPairingListCreationDialog(RegattaIdentifier regattaIdentifier, PairingListTemplateDTO template) {
+        PairingListCreationDialog dialog = new PairingListCreationDialog(regattaIdentifier, stringMessages, template,
+                new DialogCallback<PairingListTemplateDTO>() {
 
             @Override
             public void ok(PairingListTemplateDTO editedObject) {

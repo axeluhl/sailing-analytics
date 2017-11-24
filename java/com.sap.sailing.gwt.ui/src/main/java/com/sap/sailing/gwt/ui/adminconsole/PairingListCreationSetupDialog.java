@@ -15,7 +15,7 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     
     public PairingListCreationSetupDialog(RegattaIdentifier regattaIdentifier, StringMessages stringMessages, 
             DialogCallback<PairingListTemplateDTO> callback) {
-        super(regattaIdentifier, stringMessages, callback);        // TODO initial value
+        super(regattaIdentifier, stringMessages, null, callback);        // TODO initial value
         this.competitorCountTextBox = createIntegerBox(0, 2);
         this.ensureDebugId("CompetitorCountTextBox");
         
@@ -24,10 +24,6 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     @Override
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
-        Widget additionalWidget = super.getAdditionalWidget();
-        if (additionalWidget != null) {
-            panel.add(additionalWidget);
-        }
         
         Grid formGrid = new Grid(1, 2);
         panel.add(formGrid);
