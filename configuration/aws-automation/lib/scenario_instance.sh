@@ -30,7 +30,7 @@ function instance_execute() {
 
 	local json_instance=$(run_instance)
 	instance_id=$(echo "$json_instance" | get_attribute '.Instances[0].InstanceId')
-  private_ip=$(echo "$json_instance" | get_attribute '.Instances[0].PrivateIpAddress')
+  instance_private_ip=$(echo "$json_instance" | get_attribute '.Instances[0].PrivateIpAddress')
 
 	wait_instance_exists "$instance_id"
 
@@ -54,12 +54,4 @@ function instance_execute() {
 
 	change_admin_password "$access_token" "$public_dns_name" "$admin_username" "$new_admin_password"
 	create_new_user "$access_token" "$public_dns_name" "$user_username" "$user_password"
-
-	header "Apache configuration"
-	# Patch 001-events.conf
-	# @param $1  dns name
-	# @param $2  event id
-	# @param $3  ssh user
-	# @param $4  public dns name
-	configure_apache "$public_dns_name" "$event_id" "$ssh_user" "$public_dns_name" "ssl"
 }

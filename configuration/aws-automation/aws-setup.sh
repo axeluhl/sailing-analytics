@@ -64,26 +64,17 @@ if $tail; then
   check_if_tmux_is_used
 fi
 
-if $instance_with_load_balancer; then
-	instance_with_load_balancer_start
-  confirm_reset_panes
-	safeExit
-fi
-
 if $instance; then
 	instance_start
-  confirm_reset_panes
-	safeExit
-fi
-
-if $instance_with_elastic_ip; then
-	instance_with_elastic_ip_start
-  confirm_reset_panes
-	safeExit
-fi
-
-if $instance_with_alb; then
-	instance_with_alb_start
+  if $associate_clb; then
+  	associate_clb_start
+  fi
+  if $associate_elastic_ip; then
+  	associate_elastic_ip_start
+  fi
+  if $associate_alb; then
+  	associate_alb_start
+  fi
   confirm_reset_panes
 	safeExit
 fi
@@ -119,9 +110,13 @@ usage() {
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
-  --instance-with-load-balancer Create instance with elastic load balancer
-  --instance-with-alb           Create instance within application load balancer
-  --instance-with-elastic-ip    Create instance with elastic elastic ip.
+  --associate-alb               Add instance to existing application load balancer whos
+                                listener is defined in variables_aws.sh. automatically
+                                create necessary target group and host name rule.
+                                Currently *.dummy.sapsailing.com is used as hardcoded
+                                domain.
+  --associate-clb               Create classic load balancer and add instance to it.
+  --asslociate-elastic-ip       Create elastic ip and associate it with instance.
   --tail                        Tail logs from instance using tmux
 
   ${bold}Other:${reset}
@@ -132,15 +127,15 @@ usage() {
   Create instance:
   > ./aws-setup.sh --instance
 
-  Create standalone instance with load balancer:
-  > ./aws-setup.sh --instance-with-load-balancer
+  Associate application load balancer:
+  > ./aws-setup.sh --instance --associate-alb
 
-  Create standalone instance with load balancer while
+  Associate instance with classic load balancer while
   automatically tailing important log files (tmux required):
-  > ./aws-setup.sh --instance-with-load-balancer --tail
+  > ./aws-setup.sh --instance --associate-clb --tail
 
-  Create standalone instance with elastic ip:
-  > ./aws-setup.sh --instance-with-elastic-ip
+  Associate instance with elastic ip:
+  > ./aws-setup.sh --instance --associate-elastic-ip
 
   Tail logfiles of running instance with dns name:
   > ./aws-setup.sh --tail --public-dns-name ec2-x.compute.amazonaws.com
@@ -152,7 +147,7 @@ usage() {
   and instance short name:
   > ./aws-setup.sh --instance --instance-name Test --instance-short-name t --force
 
-  Create standalone instance with load balancer by
+  Associate instance with classic load balancer by
   passing all relevant parameters to script.
   Also use debug mode.
   > ./aws-setup.sh --region eu-west-2 --instance-type t2.medium
@@ -206,9 +201,9 @@ unset options
 [[ $# -eq 0 ]] && set -- "--help"
 
 # Set default value of variable without parameter value to false
-instance_with_load_balancer=false
-instance_with_alb=false
-instance_with_elastic_ip=false
+associate_clb=false
+associate_alb=false
+associate_elastic_ip=false
 instance=false
 tail=false
 
@@ -230,10 +225,10 @@ while [[ $1 = -?* ]]; do
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
   -f|--force) force=true ;;
 	-d|--debug) debug=true ;;
-	--instance-with-load-balancer) instance_with_load_balancer=true ;;
-  --instance-with-alb) instance_with_alb=true ;;
+	--associate-clb) associate_clb=true ;;
+  --associate-alb) associate_alb=true ;;
+  --associate-elastic-ip) associate_elastic_ip=true ;;
   --instance) instance=true ;;
-	--instance-with-elastic-ip) instance_with_elastic_ip=true ;;
 	--tail) tail=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;

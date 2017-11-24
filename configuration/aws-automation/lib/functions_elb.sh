@@ -34,6 +34,7 @@ function create_rule(){
 	local subdomain=$(echo "$2" | only_letters_and_numbers)
 	local priority=$(($(get_rule_with_highest_priority $1) + 1))
 	aws_wrapper elbv2 create-rule --listener-arn $1 --priority $priority --conditions Field=host-header,Values="$subdomain.dummy.sapsailing.com" --actions Type=forward,TargetGroupArn=$3
+	echo "$subdomain.dummy.sapsailing.com"
 }
 
 # -----------------------------------------------------------
@@ -42,7 +43,7 @@ function create_rule(){
 # @return    highest priority
 # -----------------------------------------------------------
 function get_rule_with_highest_priority(){
-	local max_priority=$(aws_wrapper elbv2 describe-rules --listener-arn $1 --query 'Rules[0].Priority' --output text)
+	local max_priority=$(aws_wrapper elbv2 describe-rules --listener-arn $1 --query "sort_by(Rules, &Priority)[*].{P: Priority} | [-2:-1]" --output text)
 	if is_number $max_priority; then
 		echo $max_priority
 	else
@@ -81,8 +82,9 @@ function create_load_balancer_https(){
 # @return    json result
 # -----------------------------------------------------------
 function configure_health_check_http(){
+	local load_balancer_name=$(echo "$1" | only_letters_and_numbers)
 	local_echo "Configuring load balancer health check..."
-	aws_wrapper elb configure-health-check --load-balancer-name "$1" --health-check Target=TCP:8888,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
+	aws_wrapper elb configure-health-check --load-balancer-name "$load_balancer_name" --health-check Target=TCP:8888,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
 }
 
 # NOT TESTED
@@ -93,7 +95,8 @@ function configure_health_check_http(){
 # -----------------------------------------------------------
 function configure_health_check_https(){
 	local_echo "Configuring load balancer health check..."
-	aws_wrapper elb configure-health-check --load-balancer-name "$1" --health-check Target=HTTPS:443/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
+	local load_balancer_name=$(echo "$1" | only_letters_and_numbers)
+	aws_wrapper elb configure-health-check --load-balancer-name "$load_balancer_name" --health-check Target=HTTPS:443/index.html,Interval=15,UnhealthyThreshold=2,HealthyThreshold=3,Timeout=5
 }
 
 # -----------------------------------------------------------
@@ -104,5 +107,6 @@ function configure_health_check_https(){
 # -----------------------------------------------------------
 function add_instance_to_elb(){
 	local_echo "Adding instance to elb..."
-	aws_wrapper elb register-instances-with-load-balancer --load-balancer-name $1 --instances $2
+	local load_balancer_name=$(echo "$1" | only_letters_and_numbers)
+	aws_wrapper elb register-instances-with-load-balancer --load-balancer-name $load_balancer_name --instances $2
 }

@@ -100,12 +100,17 @@ function wait_for_create_event_resource(){
 # -----------------------------------------------------------
 function configure_apache(){
 	wait_for_ssh_connection "$3" "$4"
-	local content=$(ssh_wrapper "$3"@"$4" "cat /etc/httpd/conf.d/001-events.conf")
-	ssl=""
-	if [ "$5" -eq "ssl"]; then
-		ssl="-SSL"
-	fi
-	patched_content=$(echo -e "Use Event$ssl $1 \"$2\" 127.0.0.1 8888\n$patched_content")
-	echo "$patched_content" | ssh_wrapper $3@$4 "cat > /etc/httpd/conf.d/001-events.conf"
+	wait_for_001_events_patch "$3" "$4"
+	local patched_content="Use Event-SSL $1 \"$2\" 127.0.0.1 8888"
+	ssh_wrapper $3 $4 echo "$patched_content" >> $events_conf
 	#ssh_wraper $3@$4 "/etc/init.d/httpd reload"
+}
+
+function wait_for_001_events_patch(){
+	echo -n "Waiting for 001-events.conf to be created..."
+	while [[ $(ssh_wrapper $1@$2 test -f $events_conf && echo "ok") != "ok" ]]; do
+		echo -n .
+		sleep 2
+	done
+	success "001-events.conf now exists. Appending macros to overwrite sailing script"
 }
