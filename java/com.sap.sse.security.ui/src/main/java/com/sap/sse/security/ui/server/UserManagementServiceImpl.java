@@ -37,18 +37,15 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.ShiroPermissionBuilderImpl;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Owner;
 import com.sap.sse.security.shared.Permission.DefaultModes;
-import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -334,11 +331,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
-        final Subject subject = SecurityUtils.getSubject();
+        // final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN
-        if (true 
+        // if (subject.hasRole(AdminRole.getInstance().getName()) ||
             // someone knew a username and the correct password for that user
-         || (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
+        if ((oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
             // someone provided the correct password reset secret for the correct username
          || (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
@@ -416,8 +413,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo setRolesForUser(String username, Iterable<UUID> roles) {
-        Subject currentSubject = SecurityUtils.getSubject();
-        //if (subject.hasRole(AdminRole.getInstance().getName()) {
+        // Subject currentSubject = SecurityUtils.getSubject();
+        // if (currentSubject.hasRole(AdminRole.getInstance().getName())) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
@@ -444,7 +441,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (true || currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
+        //if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) || 
+        if (currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
