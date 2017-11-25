@@ -1,7 +1,7 @@
-# Table of Contents
+**Table of Contents**
 
-* [[Introduction|#introduction]]
-* [[Access Control Concepts|#access-control-concepts]]
+* [[Introduction]]
+* [[Access Control Concepts]]
 
 # Introduction
 
