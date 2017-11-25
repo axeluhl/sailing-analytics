@@ -146,3 +146,48 @@ A “create_big_race” permission could be hardcoded that is checked when a use
 
 There are even more expressive access control systems than RBAC. They are called constraint based access control systems. They allow constraints to be expressed in a less black and white way, however are very complex. This concept is not supported by the permission concept proposed here, because use cases like the above are probably edge cases that will be hard coded.
 
+## Use Cases
+
+In the following example use cases are listed that describe how user actions will impact the ACLs of the data objects the user interacts with. It is to note that this list of use cases is no complete list of all use cases for the permission handling system. Listing all of them is outside the scope of this document.
+
+It is always assumed that the ID of the user is “user” and the ID of its tenant is “tenant”.
+
+1. Create Event (or any other data object)
+  a. User creates event
+  b. Event is owned by tenant that user is associated with in this session
+  c. Access control list is created for the event
+  d. Permissions as e.g. “view” are implicitly granted by the roles of the owning tenant
+2. Transfer ownership of event (or any other ownership transfer) (Already described in section “Ownership”)
+3. Link RegattaLeaderboard into LeaderboardGroup
+  a. If either the user, a role or a tenant the user is part of, has the permission to edit the LeaderboardGroup (LBG) and view the RegattaLeaderboard (RL), the user can link them. LBG ACL = {“user”:[“edit”]} | RL ACL = {“user”:[“view”]}
+  b. If the user has the “grantPermissions” permission, the “view” permission will automatically granted to all that can view the LeaderboardGroup.
+4. Unlink TrackedRace
+  a. If either the user, a role or a tenant, the user is part of, has the permission to edit the Leaderboard, the user can unlink them.
+5. Share TrackedRace
+  a. If either the user, a role or a tenant, the user is part of, has the permission to view the TrackedRace and the “grantPermissions” permission, the user can grant view permissions to anybody. ACL = {“user”:[“view, grantPermissions”]}
+  b. The user shares the TrackedRace with “user2”. ACL = {“user”:[“view, grantPermission”], “user2”:[“view”]}
+6. Create GPSFix
+  a. It would only be consistent to attach a ACL to each GPSFix, however it probably never happens that a GPSFix has other permissions than a whole track, thus I propose to leave GPSFixes without ACLs and only introduce access windows on the tracks that can have their own ACL.
+7. Masterdata import
+  a. This should import all permissions as they are. A masterdata import itself is no reason to change permissions, however only data objects that the user that is importing has a “view” permission for should be importable. If the importing user is the owner or a tenant owner of the imported data, he can also change the ownership.
+8. Share event with public
+  a. If either the user, a role or a tenant, the user is part of, has the permission to view the data object and the “grantPermissions” permission, the user can share the event with the public. ACL = {“user”:[“view, grantPermissions”]}
+  b. The user shares the data object. ACL = {“user”:[“view”], “*”:[“view”]}
+9. Revoke permissions
+  a. Simply revoke: If either the user is the owner of or the user is a tenant owner/admin of the data object, the user can revoke every permission to the data object from anybody. 
+  b. Overwrite with negative: the same rules apply as for revoking, however a permissions in the following form is inserted into the ACL. {“user”:[“!view”]}
+10. First boot of server
+  a. On first boot of the server, an admin user is created. The creator of the server will log in as that admin user and in most cases create a new tenant. Thereafter, the creator will create at least one new users, assign the admin role to that user and delete the default admin user.
+
+## Algorithm `bool hasPermission(WildcardPermission permission)` for Composite Realm
+
+The above describes the data model that is relevant to the composite realm that implements the hasPermission function. The “permission” parameter should be of the pattern “type:action:instance”. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
+
+1. Check if the user is the owner or tenant owner of the data object for which the permission is requested
+  a. If this is true return true
+2. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
+  a. If there is an entry, return true if granted and false if revoked, but take the most explicit entry and in doubt return false
+3. Check if the permission is directly assigned to the user
+  a. If this is true return true
+4. Check if a role grants the permission to the user
+  a. If this is true return true
