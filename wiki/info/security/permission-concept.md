@@ -2,8 +2,17 @@
 
 * [Introduction](#introduction)
 * [Access Control Concepts](#access-control-concepts)
+* [Initial Idea](#initial-idea)
+* [Ownership](#ownership)
+  * [Users or Tenants as Owners](#users-or-tenants-as-owners)
+  * [Subtenants](#subtenants)
+  * [Administration of Authorization](#administration-of-authorization)
+  * [Implementation of Ownership](#implementation-of-ownership)
+  * [Implementation of Sharing Data Objects with Public](#implementation-of-sharing-data-objects-with-public)
+* [Permissions in Frontend](#permissions-in-frontend)
+* [Permission Defaults](#permission-defaults)
 
-# Introduction
+## Introduction
 
 This document describes the permission concept developed for the SAP Sailing Analytics (in the following just Sailing Analytics). Currently a very rough permission system based on role based access control (RBAC) is used to e.g. restrict access to the administration console. The system is built on the Apache Shiro (in the following just Shiro) framework. This system currently does not support unified user management (in the sense of a central user management system that manages the users for all deployments of the Sailing Analytics) or dynamic access control for all aspects of the Sailing Analytics.
 
@@ -18,7 +27,7 @@ The following requirements result from the above described (the access control s
 * Communicate the permissions to the frontend (so only UI elements that support permitted actions are active)
 * Be reasonably complex and implementation intensive
 
-# Access Control Concepts
+## Access Control Concepts
 
 The two big concepts that play together in this permission concept are access control lists (ACLs) (also used e.g. in the Linux or Windows file system) and RBAC. Furthermore, there is the concept of attribute based access control (ABAC) that is not explored in this concept document.
 The concept of ACLs is based on the idea of assigning each data object that is access controlled an ACL. The ACL is a list of entries that assign a user or group of users to permissions. If e.g. read access is requested for a data object, its ACL is checked if the user or a group, the user belongs to, has an entry granting the read permission.
@@ -28,11 +37,11 @@ In the context of RBAC (Ferraiolo, Cugini, & Kuhn) mentions the concept of subje
 It is to note that simple RBAC models show no difference in their ability to express access control policies than ACLs. (Barkley, 1997) More complex RBAC models are more expressive than ACLs.
 In the course of this concept document there will be no difference in meaning between roles and groups. In the existing system they are named roles, thus the term roles will be used for both roles and groups.
 
-# Initial Idea
+## Initial Idea
 
 The inital idea for this document is based on the existing Shiro RBAC system that should handle global static roles and also supports directly granting permissions to a user. Furthermore, ACLs should be introduced. Those should solve the problem of “losing” implied permissions, because the access control lists are directly associated with the data object. The existing Shiro authorizing realm that checks for the roles and permissions directly assigned to a user would have to be extended by the ACL concept. This will form what we call a compound realm that if a permission is checked looks for the permission in the roles and permissions of the user and in the ACL of the data object. If either the roles and permissions or the ACL grants the permission the user is allowed access.
 
-# Ownership
+## Ownership
 
 It is common place in cloud applications where multiple groups of users that each belong to some kind of organization work in one system to summarize these groups of users as tenants. The tenants represent the organizations and---if a hierarchy is allowed---the sub-organizations working in the system. In the Sailing Analytics the organizations could be SAP in general (e.g. archive server), sailing clubs, events like the Travemünder Woche or in the future private users.
 
@@ -44,7 +53,7 @@ Tenants pose an UI problem, because it has to be clear to the user in which tena
 
 In some cases, it might be necessary to transfer the ownership to another tenant/user. Thus, the owner should not be final but changeable.
 
-## Users or Tenants as Owners
+### Users or Tenants as Owners
 
 A problem with the tenant approach is that users could have no permissions to e.g. remove data objects that they have just created on accident, because the remove permission is reserved to admins of the tenant which a user that has create permissions may not be.
 
@@ -58,7 +67,7 @@ Approach (1) solves the problem on hand, however these explicitly granted remove
 
 As the tenant is a data object itself, it also has an owner. The owning tenant of a tenant is the tenant itself.
 
-## Subtenants
+### Subtenants
 
 Subtenants could be a convenient way to restrict the permissions of certain users to only a part of a tenant’s domain. However, this introduces a hierarchy of tenants that brings with it its own challenges. Imagine there is a tenant “tw2017” and the 49er boat class races should not be manageable by the same race managers that can manage races of the other regattas. So “tw2017” would require a subtenant “other” and “49er” that encapsulate the 49er boat class and everything else from each other. Now if a permission is checked on an ACL, the ACL has to traverse the tenant hierarchy to find out if the user is part of a role for a parent tenant that grants the permission. However, the convenience of tenant hierarchies might be stronger than the traversal problem, because the hierarchy will probably never be deeper than one or two levels.
 
@@ -66,7 +75,7 @@ Another challenge with subtenants is how to communicate the concept to users. Wh
 
 An alternative strategy is just creating a completely new top level tenant for the 49er boat class races of “tw2017”. This would not introduce a hierarchy, but would require users that have roles for all boat classes to have their roles for both tenants instead of only the role for the parent tenant.
 
-## Administration of Authorization
+### Administration of Authorization
 
 This section will discuss how it is determined if a user can grant or revoke a permission. Therefore, we define two rules:
 
@@ -77,13 +86,35 @@ With these two facts in mind, data objects must have a single user as the owner.
 
 Another challenge after having a concept for ownership is the delegation of power. Not every user should be allowed to delegate his permissions to other users, thus there has to be a “grantPermission” permission that allows a user to delegate all his permissions to other users.
 
-## Implementation of Ownership
+### Implementation of Ownership
 
 Ownership is modeled as an explicit association between exactly one user and data objects and exactly one tenant and data objects. Owning a data object implies having all permissions on that object, as ownership is the regarded as the source of authority. In order to change ownership one has to be either owning user or tenant owner. If the user only changes the tenant owner he may remain owning user. If the user only changes the owning user he may remain owning tenant.
 
-## Implementation of sharing data objects with public
+### Implementation of Sharing Data Objects with Public
 
 In general, sharing a data object with the public should just be granting the “view” permission to everyone. This in return allows everybody that knows the link where one can view the data object to view it.
 This is separated from promoting this public data object (e.g. event) on the official SAP site. This would have to be a separate list which can be edited by e.g. media admins. This would however only link to the source, because otherwise all promoted material would have to be imported to the archive.
 
 The ACL will also be checked for permission requests by not authenticated users. This will only apply to ACL entries that are valid for all users.
+
+## Permissions in Frontend
+
+Currently the permissions of the roles are hard coded and can thus be easily imported in the frontend. Dynamic roles that can change on runtime would require passing the permissions implied by the roles to the frontend.
+
+(1) One option would be to resolve all permissions of a user before passing the set of permissions into the frontend. In a distributed system with multiple servers where a user could have permissions this is no viable solution.
+
+(2) ACLs could be delivered with the object itself. A permission on an object can then be checked in the frontend by asking the ACL delivered with the object. This would require adding a call to the permission system to every remote procedure call that returns an object.
+
+(3) A third but possibly resource hungry possibility would be to implement a service that can be called from the frontend to check single permissions. The service would implement some kind of hasPermission(permission) method. This could then be used from the frontend as well as the server code.
+
+As ACLs will probably remain small in general, we will implement the (2) second approach. Furthermore, the ACLs that are returned by the server will be reduced to the entries that are relevant for the current user.
+
+## Permission Defaults
+
+This section will discuss how to handle default permissions. Default permissions for data objects should not be implied by the context they are created in. Implying permissions could lead to unwanted permissions on data objects. There are two options for default permissions:
+
+1. Each type of object has its own mask of permissions it gets assigned. This has the advantage over pure roles that if one wants to change the norm only for one instance of an object one can. The masks could even be editable for each tenant so different defaults can be set. However, this also requires that the default ACL contents are conveyed to the user for checking and display.
+2. The creator can choose on creation which other permissions to grant.
+3. Have default permissions in roles so they do not have to be entered into each ACL, but have negative permissions to revoke defaults.
+
+The default permissions will be handled by approach 3. to keep the ACLs short and less redundant.
