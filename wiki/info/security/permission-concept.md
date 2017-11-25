@@ -156,31 +156,31 @@ In the following example use cases are listed that describe how user actions wil
 It is always assumed that the ID of the user is “user” and the ID of its tenant is “tenant”.
 
 1. Create Event (or any other data object)
-  1. User creates event
-  2. Event is owned by tenant that user is associated with in this session
-  3. Access control list is created for the event
-  4. Permissions as e.g. “view” are implicitly granted by the roles of the owning tenant
+  * User creates event
+  * Event is owned by tenant that user is associated with in this session
+  * Access control list is created for the event
+  * Permissions as e.g. “view” are implicitly granted by the roles of the owning tenant
 2. Transfer ownership of event (or any other ownership transfer) (Already described in section “Ownership”)
 3. Link RegattaLeaderboard into LeaderboardGroup
-  1. If either the user, a role or a tenant the user is part of, has the permission to edit the LeaderboardGroup (LBG) and view the RegattaLeaderboard (RL), the user can link them. LBG ACL = {“user”:[“edit”]} | RL ACL = {“user”:[“view”]}
-  2. If the user has the “grantPermissions” permission, the “view” permission will automatically granted to all that can view the LeaderboardGroup.
+  * If either the user, a role or a tenant the user is part of, has the permission to edit the LeaderboardGroup (LBG) and view the RegattaLeaderboard (RL), the user can link them. LBG ACL = {“user”:[“edit”]} | RL ACL = {“user”:[“view”]}
+  * If the user has the “grantPermissions” permission, the “view” permission will automatically granted to all that can view the LeaderboardGroup.
 4. Unlink TrackedRace
-  1. If either the user, a role or a tenant, the user is part of, has the permission to edit the Leaderboard, the user can unlink them.
+  * If either the user, a role or a tenant, the user is part of, has the permission to edit the Leaderboard, the user can unlink them.
 5. Share TrackedRace
-  1. If either the user, a role or a tenant, the user is part of, has the permission to view the TrackedRace and the “grantPermissions” permission, the user can grant view permissions to anybody. ACL = {“user”:[“view, grantPermissions”]}
-  2. The user shares the TrackedRace with “user2”. ACL = {“user”:[“view, grantPermission”], “user2”:[“view”]}
+  * If either the user, a role or a tenant, the user is part of, has the permission to view the TrackedRace and the “grantPermissions” permission, the user can grant view permissions to anybody. ACL = {“user”:[“view, grantPermissions”]}
+  * The user shares the TrackedRace with “user2”. ACL = {“user”:[“view, grantPermission”], “user2”:[“view”]}
 6. Create GPSFix
-  1. It would only be consistent to attach a ACL to each GPSFix, however it probably never happens that a GPSFix has other permissions than a whole track, thus I propose to leave GPSFixes without ACLs and only introduce access windows on the tracks that can have their own ACL.
+  * It would only be consistent to attach a ACL to each GPSFix, however it probably never happens that a GPSFix has other permissions than a whole track, thus I propose to leave GPSFixes without ACLs and only introduce access windows on the tracks that can have their own ACL.
 7. Masterdata import
-  1. This should import all permissions as they are. A masterdata import itself is no reason to change permissions, however only data objects that the user that is importing has a “view” permission for should be importable. If the importing user is the owner or a tenant owner of the imported data, he can also change the ownership.
+  * This should import all permissions as they are. A masterdata import itself is no reason to change permissions, however only data objects that the user that is importing has a “view” permission for should be importable. If the importing user is the owner or a tenant owner of the imported data, he can also change the ownership.
 8. Share event with public
-  1. If either the user, a role or a tenant, the user is part of, has the permission to view the data object and the “grantPermissions” permission, the user can share the event with the public. ACL = {“user”:[“view, grantPermissions”]}
-  2. The user shares the data object. ACL = {“user”:[“view”], “*”:[“view”]}
+  * If either the user, a role or a tenant, the user is part of, has the permission to view the data object and the “grantPermissions” permission, the user can share the event with the public. ACL = {“user”:[“view, grantPermissions”]}
+  * The user shares the data object. ACL = {“user”:[“view”], “*”:[“view”]}
 9. Revoke permissions
-  1. Simply revoke: If either the user is the owner of or the user is a tenant owner/admin of the data object, the user can revoke every permission to the data object from anybody. 
-  2. Overwrite with negative: the same rules apply as for revoking, however a permissions in the following form is inserted into the ACL. {“user”:[“!view”]}
+  * Simply revoke: If either the user is the owner of or the user is a tenant owner/admin of the data object, the user can revoke every permission to the data object from anybody. 
+  * Overwrite with negative: the same rules apply as for revoking, however a permissions in the following form is inserted into the ACL. {“user”:[“!view”]}
 10. First boot of server
-  1. On first boot of the server, an admin user is created. The creator of the server will log in as that admin user and in most cases create a new tenant. Thereafter, the creator will create at least one new users, assign the admin role to that user and delete the default admin user.
+  * On first boot of the server, an admin user is created. The creator of the server will log in as that admin user and in most cases create a new tenant. Thereafter, the creator will create at least one new users, assign the admin role to that user and delete the default admin user.
 
 ## Algorithm `bool hasPermission(WildcardPermission permission)` for Composite Realm
 
