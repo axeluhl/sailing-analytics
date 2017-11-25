@@ -11,6 +11,8 @@
   * [Implementation of Sharing Data Objects with Public](#implementation-of-sharing-data-objects-with-public)
 * [Permissions in Frontend](#permissions-in-frontend)
 * [Permission Defaults](#permission-defaults)
+* [Implementation of Roles](#implementation-of-roles)
+* [Constraints](#constraints)
 
 ## Introduction
 
@@ -101,11 +103,9 @@ The ACL will also be checked for permission requests by not authenticated users.
 
 Currently the permissions of the roles are hard coded and can thus be easily imported in the frontend. Dynamic roles that can change on runtime would require passing the permissions implied by the roles to the frontend.
 
-(1) One option would be to resolve all permissions of a user before passing the set of permissions into the frontend. In a distributed system with multiple servers where a user could have permissions this is no viable solution.
-
-(2) ACLs could be delivered with the object itself. A permission on an object can then be checked in the frontend by asking the ACL delivered with the object. This would require adding a call to the permission system to every remote procedure call that returns an object.
-
-(3) A third but possibly resource hungry possibility would be to implement a service that can be called from the frontend to check single permissions. The service would implement some kind of hasPermission(permission) method. This could then be used from the frontend as well as the server code.
+1. One option would be to resolve all permissions of a user before passing the set of permissions into the frontend. In a distributed system with multiple servers where a user could have permissions this is no viable solution.
+2. ACLs could be delivered with the object itself. A permission on an object can then be checked in the frontend by asking the ACL delivered with the object. This would require adding a call to the permission system to every remote procedure call that returns an object.
+3. A third but possibly resource hungry possibility would be to implement a service that can be called from the frontend to check single permissions. The service would implement some kind of hasPermission(permission) method. This could then be used from the frontend as well as the server code.
 
 As ACLs will probably remain small in general, we will implement the (2) second approach. Furthermore, the ACLs that are returned by the server will be reduced to the entries that are relevant for the current user.
 
@@ -118,3 +118,31 @@ This section will discuss how to handle default permissions. Default permissions
 3. Have default permissions in roles so they do not have to be entered into each ACL, but have negative permissions to revoke defaults.
 
 The default permissions will be handled by approach 3. to keep the ACLs short and less redundant.
+
+## Implementation of Roles
+
+There currently are only a few hardcoded global roles. These shall be usable in the future too and should be independent of the server or the tenant the person that has this role is working on. These include:
+
+1. Global Admin (Has permissions for everything)
+2. Create Tenant (Users that manage events and servers)
+3. Media Admin
+
+Furthermore, there would be a difference between global roles and roles used in ACLs. The most basic role used in ACLs is the tenant role that exists for every tenant. This role is only granted to a few people that have every right for every data object the tenant owns. The other roles in a tenant that are of the pattern “role:tenant” (where tenant is replaced by the tenants name) are custom to every tenant, but some examples are listed here:
+
+1. Tenant Owner “owner:tenant” (Can delete the tenant, additionally to everything the tenant admin can do)
+2. Tenant Admin “admin:tenant” (Has (almost) every permission in his tenant)
+3. Eventmanager “eventmanager:tenant”
+4. Racemanager “racemanager:tenant”
+5. Editor “editor:tenant”
+6. Resultservice “resultservice:tenant”
+
+## Constraints
+
+A problem that is not easily solved with either ACLs or RBAC is constraining accesses in a more complex way than checking for a permission. A use case that may be important in the future when clubs can use the Sailing Analytics on their own is as follows.
+
+Clubs may only be able to create races with e.g. < 60 boats, so club events cannot exceed the infrastructure provided to them. How could this be implemented with permission checking?
+
+A “create_big_race” permission could be hardcoded that is checked when a user tries to add more than 60 competitors to a race.
+
+There are even more expressive access control systems than RBAC. They are called constraint based access control systems. They allow constraints to be expressed in a less black and white way, however are very complex. This concept is not supported by the permission concept proposed here, because use cases like the above are probably edge cases that will be hard coded.
+
