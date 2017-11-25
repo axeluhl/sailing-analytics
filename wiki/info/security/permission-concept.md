@@ -13,6 +13,9 @@
 * [Permission Defaults](#permission-defaults)
 * [Implementation of Roles](#implementation-of-roles)
 * [Constraints](#constraints)
+* [Use Cases](#use cases)
+* [Algorithm for Composite Realm](#algorithm-bool-haspermission-wildcardpermission-permission-for-composite-realm)
+* [Migration](#migration)
 
 ## Introduction
 
@@ -184,10 +187,17 @@ It is always assumed that the ID of the user is “user” and the ID of its ten
 The above describes the data model that is relevant to the composite realm that implements the hasPermission function. The “permission” parameter should be of the pattern “type:action:instance”. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
 
 1. Check if the user is the owner or tenant owner of the data object for which the permission is requested
-  1. If this is true return true
+  * If this is true return true
 2. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
-  1. If there is an entry, return true if granted and false if revoked, but take the most explicit entry and in doubt return false
+  * If there is an entry, return true if granted and false if revoked, but take the most explicit entry and in doubt return false
 3. Check if the permission is directly assigned to the user
-  1. If this is true return true
+  * If this is true return true
 4. Check if a role grants the permission to the user
-  1. If this is true return true
+  * If this is true return true
+
+## Migration
+With such an extensive existing system as the Sailing Analytics Suite, migration is a big concern. The existing RBAC system is easily extended to support ACLs. However, implementing permission checking in the whole system will be a long process, because probably almost every service request will have to be edited.
+
+Another challenge besides the code changes is the data migration. For every existing data object an ACL has to be created and filled with the right permissions so the users do not notice a big change.
+
+Besides creating an ACL for every data objects that is access controlled, an owner has to be defined for each existing data object, so that in combination with the ACLs no user loses permissions they need to have. In order to do this, where will have to be a script that associates all data objects on a server with a tenant and a specific user as owner (e.g. on the archive all data objects are associated with the tenant “archive” and owned by the user “Axel”). Thereafter, the users on the server are assigned their respective role.
