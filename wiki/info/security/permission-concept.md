@@ -7,10 +7,11 @@ The concept developed in this document should focus on fine grained access contr
 A secure access control concept for the existing data model is not easily developed, because the data objects in the Sailing Analytics do not merely form static trees. Data objects can form graphs where there is no clear root for a given node. Furthermore the associations of data objects can change. These challenges have to be addressed by possible concepts by adapting them to this very specific domain.
 
 The following requirements result from the above described (the access control system has to…):
-  * Be expressive enough to support the complex associations of the Sailing Analytics
-  * Support multiple organizations (clubs, events and individuals) working in one system
-  * Communicate the permissions to the frontend (so only UI elements that support permitted actions are active)
-  * Be reasonably complex and implementation intensive
+
+* Be expressive enough to support the complex associations of the Sailing Analytics
+* Support multiple organizations (clubs, events and individuals) working in one system
+* Communicate the permissions to the frontend (so only UI elements that support permitted actions are active)
+* Be reasonably complex and implementation intensive
 
 # Access Control Concepts
 The two big concepts that play together in this permission concept are access control lists (ACLs) (also used e.g. in the Linux or Windows file system) and RBAC. Furthermore, there is the concept of attribute based access control (ABAC) that is not explored in this concept document.
