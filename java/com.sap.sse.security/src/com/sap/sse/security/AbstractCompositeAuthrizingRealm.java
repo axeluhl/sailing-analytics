@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.osgi.framework.BundleContext;
@@ -27,6 +28,15 @@ import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 
+/**
+ * This class implements a realm that combines Access Control Lists, Role Based Permission Modeling and
+ * Ownership for users as well as tenants.
+ * 
+ * This class overrides all the methods of {@link AuthorizingRealm} that call doGetAuthorizationInfo. Since
+ * this realm is highly dynamic, doGetAuthorizationInfo cannot be easily implemented and is thus never called.
+ * 
+ * @author Jonas Dann
+ */
 public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm implements RolePermissionModel {
     private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
     private final Future<UserStore> userStore;
@@ -184,10 +194,10 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
 
     @Override
-    public boolean isPermittedAll(PrincipalCollection principal, Collection<Permission> permissions) {
+    public boolean isPermittedAll(PrincipalCollection principals, Collection<Permission> permissions) {
         if (permissions != null && !permissions.isEmpty()) {
             for (Permission permission : permissions) {
-                if (!isPermitted(principal, permission)) {
+                if (!isPermitted(principals, permission)) {
                     return false;
                 }
             }
@@ -196,18 +206,25 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
 
     @Override
-    public void checkPermission(PrincipalCollection principal, Permission permission) throws AuthorizationException {
-        // TODO
+    public void checkPermission(PrincipalCollection principals, Permission permission) throws AuthorizationException {
+        if (!isPermitted(principals, permission)) {
+            String msg = "User is not permitted [" + permission + "]";
+            throw new UnauthorizedException(msg);
+        }
     }
 
     @Override
-    public void checkPermissions(PrincipalCollection principal, Collection<Permission> permissions) throws AuthorizationException {
-        // TODO
+    public void checkPermissions(PrincipalCollection principals, Collection<Permission> permissions) throws AuthorizationException {
+        if (permissions != null && !permissions.isEmpty()) {
+            for (Permission permission : permissions) {
+                checkPermission(principals, permission);
+            }
+        }
     }
     
     @Override
-    public boolean hasRole(PrincipalCollection principal, String roleIdentifier) {
-        String user = (String) principal.getPrimaryPrincipal();
+    public boolean hasRole(PrincipalCollection principals, String roleIdentifier) {
+        String user = (String) principals.getPrimaryPrincipal();
         try {
             for (UUID role : getUserStore().getRolesFromUser(user)) {
                 if (role.equals(UUID.fromString(roleIdentifier))) {
@@ -222,19 +239,19 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
 
     @Override
-    public boolean[] hasRoles(PrincipalCollection principal, List<String> roleIdentifiers) {
+    public boolean[] hasRoles(PrincipalCollection principals, List<String> roleIdentifiers) {
         boolean[] result = new boolean[roleIdentifiers.size()];
         for (int i = 0; i < roleIdentifiers.size(); i++) {
-            result[i] = hasRole(principal, roleIdentifiers.get(i));
+            result[i] = hasRole(principals, roleIdentifiers.get(i));
         }
         return result;
     }
     
     @Override
-    public boolean hasAllRoles(PrincipalCollection principal, Collection<String> roleIdentifiers) {
+    public boolean hasAllRoles(PrincipalCollection principals, Collection<String> roleIdentifiers) {
         if (roleIdentifiers != null && !roleIdentifiers.isEmpty()) {
             for (String role : roleIdentifiers) {
-                if (!hasRole(principal, role)) {
+                if (!hasRole(principals, role)) {
                     return false;
                 }
             }
@@ -243,32 +260,30 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
     
     @Override
-    public void checkRole(PrincipalCollection principal, String role) throws AuthorizationException {
-        // TODO
+    public void checkRole(PrincipalCollection principals, String role) throws AuthorizationException {
+        if (!hasRole(principals, role)) {
+            String msg = "User does not have role [" + role + "]";
+            throw new UnauthorizedException(msg);
+        }
     }
     
     @Override
-    public void checkRoles(PrincipalCollection principal, Collection<String> roles) throws AuthorizationException {
-        // TODO
-    }
-
-    @Override
-    public void checkRoles(PrincipalCollection principal, String... roles) throws AuthorizationException {
-        // TODO
+    public void checkRoles(PrincipalCollection principals, Collection<String> roles) throws AuthorizationException {
+        if (roles != null && !roles.isEmpty()) {
+            for (String role : roles) {
+                checkRole(principals, role);
+            }
+        }
     }
     
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        return null; // As all the public methods of AuthorizingRealm are overridden to not use this, this should never be called.
+        // As all the public methods of AuthorizingRealm are overridden to not use this, this should never be called.
+        throw new UnsupportedOperationException("Call to doGetAuthorizationInfo(PrincipalCollection principals. This should never happen!)");
     }
     
     private Role getRole(UUID id) {
-        try {
-            return aclStore.get().getRole(id);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return getAccessControlListStore().getRole(id);
     }
     
     @Override
@@ -293,12 +308,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     
     @Override
     public Iterable<Role> getRoles() {
-        try {
-            return aclStore.get().getRoles();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return getAccessControlListStore().getRoles();
     }
     
     // TODO as default implementation in interface
