@@ -114,7 +114,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private final ReplicatingCacheManager cacheManager;
     
     private UserStore userStore;
-    private AccessControlStore aclStore;
+    private AccessControlStore accessControlStore;
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
@@ -134,15 +134,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
     
-    public SecurityServiceImpl(UserStore userStore, AccessControlStore aclStore) {
-        this(null, userStore, aclStore);
+    public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
+        this(null, userStore, accessControlStore);
     }
 
     /**
      * @param mailProperties must not be <code>null</code>
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore aclStore) {
-        this(mailServiceTracker, userStore, aclStore, /* setAsActivatorTestSecurityService */ false);
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
+        this(mailServiceTracker, userStore, accessControlStore, /* setAsActivatorTestSecurityService */ false);
     }
     
     /**
@@ -154,7 +154,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      *            replication.
      * 
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore aclStore, boolean setAsActivatorSecurityService) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore, boolean setAsActivatorSecurityService) {
         logger.info("Initializing Security Service with user store " + userStore);
         if (setAsActivatorSecurityService) {
             Activator.setSecurityService(this);
@@ -163,7 +163,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.userStore = userStore;
-        this.aclStore = aclStore;
+        this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         // Create default users if no users exist yet.
         initEmptyStore();
@@ -217,13 +217,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     /**
      * Creates a default "admin" role with * permission if the ACL <code>store</code> is empty.
      */
-    private void initEmptyACLStore() {
-        if (Util.isEmpty(aclStore.getRoles())) {
+    private void initEmptyAcessControlStore() {
+        if (Util.isEmpty(accessControlStore.getRoles())) {
             logger.info("No roles found. Creating default role \"admin\" with permission \"*\"");
             Set<String> adminPermissions = new HashSet<>();
             adminPermissions.add("*");
             AdminRole role = AdminRole.getInstance();
-            aclStore.createRole((UUID) role.getId(), role.getName(), role.getPermissions());
+            accessControlStore.createRole((UUID) role.getId(), role.getName(), role.getPermissions());
         }
     }
     
@@ -291,17 +291,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Owner getOwnership(String idAsString) {
-        return aclStore.getOwnership(idAsString);
+        return accessControlStore.getOwnership(idAsString);
     }
 
     @Override
     public Iterable<AccessControlList> getAccessControlListList() {
-        return aclStore.getAccessControlLists();
+        return accessControlStore.getAccessControlLists();
     }
 
     @Override
     public AccessControlList getAccessControlList(String idAsString) {
-        return aclStore.getAccessControlList(idAsString);
+        return accessControlStore.getAccessControlList(idAsString);
     }
     
     @Override
@@ -317,7 +317,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalCreateAcl(String id, String displayName) {
-        aclStore.createAccessControlList(id, displayName);
+        accessControlStore.createAccessControlList(id, displayName);
         return null;
     }
 
@@ -326,12 +326,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             apply(s->s.internalAclPutPermissions(idAsString, (UUID) entry.getKey().getId(), entry.getValue()));
         }
-        return aclStore.getAccessControlList(idAsString);
+        return accessControlStore.getAccessControlList(idAsString);
     }
     
     @Override
     public Void internalAclPutPermissions(String id, UUID group, Set<String> permissions) {
-        aclStore.setAclPermissions(id, group, permissions);
+        accessControlStore.setAclPermissions(id, group, permissions);
         return null;
     }
 
@@ -341,12 +341,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList addToACL(String aclId, UUID group, String permission) {
         apply(s->s.internalAclAddPermission(aclId, group, permission));
-        return aclStore.getAccessControlList(aclId);
+        return accessControlStore.getAccessControlList(aclId);
     }
     
     @Override
     public Void internalAclAddPermission(String id, UUID group, String permission) {
-        aclStore.addAclPermission(id, group, permission);
+        accessControlStore.addAclPermission(id, group, permission);
         return null;
     }
 
@@ -356,12 +356,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList removeFromACL(String aclId, UUID group, String permission) {
         apply(s->s.internalAclRemovePermission(aclId, group, permission));
-        return aclStore.getAccessControlList(aclId);
+        return accessControlStore.getAccessControlList(aclId);
     }
     
     @Override 
     public Void internalAclRemovePermission(String id, UUID group, String permission) {
-        aclStore.removeAclPermission(id, group, permission);
+        accessControlStore.removeAclPermission(id, group, permission);
         return null;
     }
     
@@ -372,7 +372,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalDeleteAcl(String id) {
-        aclStore.removeAccessControlList(id);
+        accessControlStore.removeAccessControlList(id);
         return null;
     }
     
@@ -389,7 +389,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalCreateOwnership(String id, String owner, UUID tenantOwner, String displayName) {
-        aclStore.createOwnership(id, owner, tenantOwner, displayName);
+        accessControlStore.createOwnership(id, owner, tenantOwner, displayName);
         return null;
     }
     
@@ -400,7 +400,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalDeleteOwnership(String id) {
-        aclStore.removeOwnership(id);
+        accessControlStore.removeOwnership(id);
         return null;
     }
 
@@ -488,7 +488,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void deleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException {
-        for (Owner ownership : aclStore.getOwnerships()) {
+        for (Owner ownership : accessControlStore.getOwnerships()) {
             if (ownership.getTenantOwner().equals(id)) {
                 throw new TenantManagementException("The tenant still is tenant owner");
             }
@@ -1240,7 +1240,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         userStore.clear();
-        aclStore.clear();
+        accessControlStore.clear();
     }
 
     @Override
@@ -1270,12 +1270,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
-        if (aclStore != null) {
-            Thread.currentThread().setContextClassLoader(aclStore.getClass().getClassLoader());
+        if (accessControlStore != null) {
+            Thread.currentThread().setContextClassLoader(accessControlStore.getClass().getClassLoader());
         }
         try {
-            AccessControlStore newAclStore = (AccessControlStore) is.readObject();
-            aclStore.replaceContentsFrom(newAclStore);
+            AccessControlStore newAccessControlStore = (AccessControlStore) is.readObject();
+            accessControlStore.replaceContentsFrom(newAccessControlStore);
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
@@ -1285,7 +1285,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(cacheManager);
         objectOutputStream.writeObject(userStore);
-        objectOutputStream.writeObject(aclStore);
+        objectOutputStream.writeObject(accessControlStore);
     }
 
     @Override
@@ -1332,9 +1332,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void clearState() throws Exception {
         userStore.clear();
-        aclStore.clear();
+        accessControlStore.clear();
         initEmptyStore();
-        initEmptyACLStore();
+        initEmptyAcessControlStore();
         CacheManager cm = getSecurityManager().getCacheManager();
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();

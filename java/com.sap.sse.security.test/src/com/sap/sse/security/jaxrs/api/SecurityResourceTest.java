@@ -43,11 +43,11 @@ public class SecurityResourceTest {
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             final UserStoreImpl store = new UserStoreImpl();
-            final AccessControlStore aclStore = new AccessControlStoreImpl();
+            final AccessControlStore accessControlStore = new AccessControlStoreImpl();
             Activator.setTestUserStore(store);
             UsernamePasswordRealm.setTestUserStore(store);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
-                    store, aclStore, /* setAsActivatorSecurityService */ true);
+                    store, accessControlStore, /* setAsActivatorSecurityService */ true);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
             authenticatedAdmin = SecurityUtils.getSubject();
             authenticatedAdmin.login(new UsernamePasswordToken("admin", "admin"));

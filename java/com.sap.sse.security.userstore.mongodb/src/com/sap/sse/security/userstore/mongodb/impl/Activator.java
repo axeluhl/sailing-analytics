@@ -16,7 +16,7 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 public class Activator implements BundleActivator {
 
     private static BundleContext context;
-    private ServiceRegistration<?> aclStoreRegistration;
+    private ServiceRegistration<?> accessControlStoreRegistration;
     private ServiceRegistration<?> userStoreRegistration;
     private PreferenceConverterRegistrationManager preferenceConverterRegistrationManager;
 
@@ -32,9 +32,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         UserStoreImpl userStore = new UserStoreImpl();
-        AccessControlStoreImpl aclStore = new AccessControlStoreImpl();
-        aclStoreRegistration = context.registerService(AccessControlStore.class.getName(),
-                aclStore, null);
+        AccessControlStoreImpl accessControlStore = new AccessControlStoreImpl();
+        accessControlStoreRegistration = context.registerService(AccessControlStore.class.getName(),
+                accessControlStore, null);
         userStoreRegistration = context.registerService(UserStore.class.getName(),
                 userStore, null);
         preferenceConverterRegistrationManager = new PreferenceConverterRegistrationManager(bundleContext, userStore);
@@ -51,7 +51,7 @@ public class Activator implements BundleActivator {
      */
     public void stop(BundleContext bundleContext) throws Exception {
         preferenceConverterRegistrationManager.stop();
-        aclStoreRegistration.unregister();
+        accessControlStoreRegistration.unregister();
         userStoreRegistration.unregister();
         Activator.context = null;
     }

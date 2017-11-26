@@ -40,7 +40,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm implements RolePermissionModel {
     private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
     private final Future<UserStore> userStore;
-    private final Future<AccessControlStore> aclStore;
+    private final Future<AccessControlStore> accessControlStore;
 
     /**
      * In a non-OSGi test environment, having Shiro instantiate this class with a default constructor makes it difficult
@@ -49,14 +49,14 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
      * default constructor is invoked.
      */
     private static UserStore testUserStore;
-    private static AccessControlStore testAclStore;
+    private static AccessControlStore testAccessControlStore;
 
     public static void setTestUserStore(UserStore theTestUserStore) {
         testUserStore = theTestUserStore;
     }
     
-    public static void setTestAclStore(AccessControlStore theTestAclStore) {
-        testAclStore = theTestAclStore;
+    public static void setTestAccessControlStore(AccessControlStore theTestAccessControlStore) {
+        testAccessControlStore = theTestAccessControlStore;
     }
 
     public AbstractCompositeAuthrizingRealm() {
@@ -65,10 +65,10 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         BundleContext context = Activator.getContext();
         if (context != null) {
             userStore = createUserStoreFuture(context);
-            aclStore = createAclStoreFuture(context);
+            accessControlStore = createAccessControlStoreFuture(context);
         } else {
             userStore = null;
-            aclStore = null;
+            accessControlStore = null;
         }
     }
 
@@ -102,7 +102,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         return result;
     }
     
-    private Future<AccessControlStore> createAclStoreFuture(BundleContext bundleContext) {
+    private Future<AccessControlStore> createAccessControlStoreFuture(BundleContext bundleContext) {
         final ServiceTracker<AccessControlStore, AccessControlStore> tracker = new ServiceTracker<>(bundleContext, AccessControlStore.class, /* customizer */ null);
         tracker.open();
         final FutureTask<AccessControlStore> result = new FutureTask<>(new Callable<AccessControlStore>() {
@@ -110,9 +110,9 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             public AccessControlStore call() throws InterruptedException {
                 try {
                     logger.info("Waiting for AccessControlListStore service...");
-                    AccessControlStore aclStore = tracker.waitForService(0);
-                    logger.info("Obtained AccessControlListStore service "+aclStore);
-                    return aclStore;
+                    AccessControlStore accessControlStore = tracker.waitForService(0);
+                    logger.info("Obtained AccessControlListStore service "+accessControlStore);
+                    return accessControlStore;
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for AccessControlListStore service", e);
                     throw e;
@@ -149,11 +149,11 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     
     protected AccessControlStore getAccessControlListStore() {
         AccessControlStore result;
-        if (testAclStore != null) {
-            result = testAclStore;
+        if (testAccessControlStore != null) {
+            result = testAccessControlStore;
         } else {
             try {
-                result = aclStore.get();
+                result = accessControlStore.get();
             } catch (InterruptedException | ExecutionException e) {
                 result = null;
                 logger.log(Level.SEVERE, "Error retrieving access control list store", e);

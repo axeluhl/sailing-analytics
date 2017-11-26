@@ -28,7 +28,7 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
 public class LoginTest {
     private UserStoreImpl store;
-    private AccessControlStore aclStore;
+    private AccessControlStore accessControlStore;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
@@ -39,12 +39,12 @@ public class LoginTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
-        aclStore = new AccessControlStoreImpl(null, null);
+        accessControlStore = new AccessControlStoreImpl(null, null);
         
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        Activator.setSecurityService(new SecurityServiceImpl(store, aclStore));
+        Activator.setSecurityService(new SecurityServiceImpl(store, accessControlStore));
     }
 
     @Test

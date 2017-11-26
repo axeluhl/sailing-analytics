@@ -229,12 +229,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void replaceContentsFrom(AccessControlStore newAclStore) {
+    public void replaceContentsFrom(AccessControlStore newAccessControlStore) {
         clear();
-        for (AccessControlList acl : newAclStore.getAccessControlLists()) {
+        for (AccessControlList acl : newAccessControlStore.getAccessControlLists()) {
             accessControlLists.put(acl.getId().toString(), acl);
         }
-        for (Owner ownership : newAclStore.getOwnerships()) {
+        for (Owner ownership : newAccessControlStore.getOwnerships()) {
             ownershipList.put(ownership.getId().toString(), ownership);
         }
     }

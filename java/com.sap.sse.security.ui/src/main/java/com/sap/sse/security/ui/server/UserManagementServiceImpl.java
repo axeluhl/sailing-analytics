@@ -76,7 +76,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
     private final UserStore userStore;
-    private final AccessControlStore aclStore;
+    private final AccessControlStore accessControlStore;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
@@ -105,12 +105,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }.start();
         userStore = context.getService(context.getServiceReference(UserStore.class));
-        aclStore = context.getService(context.getServiceReference(AccessControlStore.class));
+        accessControlStore = context.getService(context.getServiceReference(AccessControlStore.class));
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
-        AccessControlList acl = aclStore.getAccessControlList(userGroup.getId().toString());
-        Owner ownership = aclStore.getOwnership(userGroup.getId().toString());
+        AccessControlList acl = accessControlStore.getAccessControlList(userGroup.getId().toString());
+        Owner ownership = accessControlStore.getOwnership(userGroup.getId().toString());
         return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
@@ -119,8 +119,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (tenant == null) {
             return null;
         } else {
-            AccessControlList acl = aclStore.getAccessControlList(tenant.getId().toString());
-            Owner ownership = aclStore.getOwnership(tenant.getId().toString());
+            AccessControlList acl = accessControlStore.getAccessControlList(tenant.getId().toString());
+            Owner ownership = accessControlStore.getOwnership(tenant.getId().toString());
             return new TenantDTO((UUID) tenant.getId(), tenant.getName(),
                     createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), tenant.getUsernames());
         }
@@ -503,7 +503,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         HashMap<UUID, Role> roleMap = new HashMap<>();
-        for (Role role : aclStore.getRoles()) {
+        for (Role role : accessControlStore.getRoles()) {
             roleMap.put((UUID) role.getId(), createRoleDTOFromRole(role));
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),

@@ -38,5 +38,5 @@ public interface AccessControlStore extends Named {
     AccessControlStore removeRole(UUID id);
     
     void clear();
-    void replaceContentsFrom(AccessControlStore newAclStore);
+    void replaceContentsFrom(AccessControlStore newAccessControlStore);
 }
