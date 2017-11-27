@@ -34,4 +34,15 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
     public void setBoat(DynamicBoat boat) {
         this.boat = boat;
     }
+
+    @Override
+    public String getShortInfo() {
+        String result = null;
+        if (getShortName() != null) {
+            result = getShortName(); 
+        } else if (boat != null) {
+            result = boat.getSailID() != null ? boat.getSailID() : getBoat().getName();
+        }
+        return result;
+    }
 }

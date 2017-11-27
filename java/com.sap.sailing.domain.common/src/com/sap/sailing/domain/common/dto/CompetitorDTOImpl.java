@@ -66,7 +66,7 @@ public class CompetitorDTOImpl extends CompetitorWithoutBoatDTOImpl implements C
         if (getShortName() != null) {
             result = getShortName(); 
         } else if (getBoat() != null) {
-            result = getBoat().getSailId();
+            result = getBoat().getSailId() != null ? getBoat().getSailId() : getBoat().getName();
         }
         return result;
     }
