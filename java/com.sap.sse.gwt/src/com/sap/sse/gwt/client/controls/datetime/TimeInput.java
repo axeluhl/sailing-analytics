@@ -52,6 +52,9 @@ public class TimeInput extends AbstractInput {
 
         @Override
         public String render(Date object) {
+            if(object == null){
+                return "";
+            }
             return viewFormat.format(object);
         }
 
