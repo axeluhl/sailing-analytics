@@ -712,7 +712,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         };
         boolean newShallAddOverallDetails = shallAddOverallDetails();
-        GWT.debugger();
         if (oldShallAddOverallDetails == newShallAddOverallDetails || oldShallAddOverallDetails
                 || getLeaderboard().hasOverallDetails()) {
             doWhenNecessaryDetailHasBeenLoaded.run();
