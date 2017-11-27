@@ -1,6 +1,6 @@
 This page has the purpose to prepare and track the progress of the bug2822 review
 (See https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2822)
-Bug 2822 changes the way competitors and boats are handled. Specificall the 1:1 containment between Competitor and Boat will be removed as part of the implementation.
+Bug 2822 changes the way competitors and boats are handled. Specifically the 1:1 containment between Competitor and Boat will be removed as part of the implementation.
 
 # End-To-End Test Scenarios
 
@@ -62,7 +62,7 @@ Import competitors from a Manage2Sail event and check if the competitors and boa
 
 # Code review parts
 
-## 1. CompetitorStore (CompetitorAndBoatStore) and BoatFactory 
+## 1. CompetitorStore (CompetitorAndBoatStore) and BoatFactory
 ## 2. Migration der 'COMPETITORS' collection -> 'COMPETITORS_WITH_BOAT_REFERENCES' und 'BOATS'
 ## 3. Neue RaceLog und RegattaLogEvents
 ## 4. Neues Attribut 'canBoatsChangePerRace' in Klasse Regatta
