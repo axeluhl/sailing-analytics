@@ -671,8 +671,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public void updateSettings(final LS newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
-
-
         if (newSettings.getOverallDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
@@ -697,17 +695,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
             }
         }
-        
         oldShallAddOverallDetails = applyDetailSettings(newSettings);
-
         addBusyTask();
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
             @Override
             public void run() {
                 try {
                     // avoid expansion during updateLeaderboard(...); will expand
-                    // later
-                    // if it was expanded before
+                    // later if it was expanded before
                     applyRaceSelection(newSettings);
                     updateLeaderboard(leaderboard);
                     postApplySettings(newSettings, columnsToExpandAgain);
@@ -715,8 +710,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     removeBusyTask();
                 }
             }
-
-            
         };
         if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails
                 || getLeaderboard().hasOverallDetails()) {
