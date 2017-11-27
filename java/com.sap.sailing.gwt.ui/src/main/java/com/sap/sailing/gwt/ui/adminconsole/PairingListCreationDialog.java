@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
@@ -60,7 +62,11 @@ public class PairingListCreationDialog extends AbstractPairingListCreationDialog
         
         Grid pairingListGrid = new Grid(this.template.getPairingListTemplate().length, 
                 this.template.getPairingListTemplate()[0].length);
-        pairingListTemplatePanel.add(pairingListGrid);
+        pairingListGrid.setCellSpacing(5);
+        
+        ScrollPanel scrollPanel = new ScrollPanel(pairingListGrid);
+        scrollPanel.setPixelSize((Window.getClientWidth()/4), (Window.getClientHeight()/3));
+        pairingListTemplatePanel.add(scrollPanel);
                 
         for (int groupIndex = 0; groupIndex < this.template.getPairingListTemplate().length; groupIndex++) {
             
