@@ -698,7 +698,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
         
-        oldShallAddOverallDetails = applyDetailSettings(newSettings);
+        applyDetailSettings(newSettings);
 
         addBusyTask();
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
@@ -718,7 +718,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
             
         };
-        if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails
+        boolean newShallAddOverallDetails = shallAddOverallDetails();
+        GWT.debugger();
+        if (oldShallAddOverallDetails == newShallAddOverallDetails || oldShallAddOverallDetails
                 || getLeaderboard().hasOverallDetails()) {
             doWhenNecessaryDetailHasBeenLoaded.run();
         } else { // meaning that now the details need to be loaded from the server
@@ -738,8 +740,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected abstract void applyRaceSelection(final LeaderboardSettings newSettings);
 
-    private boolean applyDetailSettings(final LeaderboardSettings newSettings) {
-        boolean oldShallAddOverallDetails = shallAddOverallDetails();
+    private void applyDetailSettings(final LeaderboardSettings newSettings) {
         if (newSettings.getOverallDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
@@ -767,7 +768,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
                     selectedRaceDetails);
         }
-        return oldShallAddOverallDetails;
     }
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
