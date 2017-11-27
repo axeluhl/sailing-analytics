@@ -254,6 +254,9 @@ import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.pairinglist.PairingFrameProvider;
+import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -477,6 +480,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
+    private final PairingListTemplateFactoryImpl pairingListTemplateFactory = new PairingListTemplateFactoryImpl(); 
+    
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -4091,5 +4096,42 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public AnniversaryRaceDeterminator getAnniversaryRaceDeterminator() {
         return anniversaryRaceDeterminator;
+    }
+    
+    @Override
+    public PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount,
+            int flightMultiplier) {
+
+        Regatta regatta = getRegatta(regattaIdentifier);
+
+        if (regatta != null) {
+            // TODO flightMultiplier (not implemented yet)
+            PairingListTemplate template = pairingListTemplateFactory
+                    .getOrCreatePairingListTemplate(new PairingFrameProvider() {
+
+                        @Override
+                        public int getGroupsCount() {
+                            for (Series series : regatta.getSeries()) {
+                                if (Util.size(series.getFleets()) > 1) {
+                                    return Util.size(series.getFleets());
+                                }
+                            }
+                            return 1;
+                        }
+
+                        @Override
+                        public int getFlightsCount() {
+                            return Util.size(regatta.getRaceColumns());
+                        }
+
+                        @Override
+                        public int getCompetitorsCount() {
+                            return competitorsCount;
+                        }
+                    });
+            return template;
+        } else {
+            return null;
+        }
     }
 }

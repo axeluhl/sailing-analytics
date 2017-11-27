@@ -105,6 +105,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         
         regattaManagementControlsPanel.add(removeRegattaButton);
         regattasContentPanel.add(regattaManagementControlsPanel);
+        
         regattaListComposite = new RegattaListComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();

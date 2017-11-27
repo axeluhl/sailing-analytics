@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -682,4 +683,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * an option for charts, if it actually recorded for the race.
      */
     List<DetailType> determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
+    
+    PairingListTemplateDTO calculatePairingList(RegattaIdentifier regattaIdentifier, int competitorsCount, int flightMultiplier);
+    
+    
 }

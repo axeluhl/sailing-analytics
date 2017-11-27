@@ -195,6 +195,7 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
@@ -486,6 +487,7 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
@@ -6646,5 +6648,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return availableDetailsTypes;
+    }
+    
+    @Override
+    public PairingListTemplateDTO calculatePairingList(RegattaIdentifier regattaIdentifier, int competitorsCount, int flightMultiplier) {
+        PairingListTemplate template = getService().createPairingListFromRegatta(regattaIdentifier, competitorsCount, flightMultiplier);
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        int flightCount = Util.size(regatta.getRaceColumns());
+        int groupCount = (int) (template.getPairingListTemplate().length / flightCount / flightCount);
+        return new PairingListTemplateDTO(flightCount, groupCount, 
+                competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality());
     }
 }

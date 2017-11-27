@@ -95,6 +95,7 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
 import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -779,4 +780,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * anniversary races only.
      */
     AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
+    
+    PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount,
+            int flightMultiplier);
 }
