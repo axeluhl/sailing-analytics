@@ -555,11 +555,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return matches;
     }
     
-    private int[][] multiplyFlights(int[][] bestPLT,int flightCount,int groupCount,int competitorCount) {
-        int[][] result=new int[(flightCount*groupCount)*flightMultiplier][competitorCount/groupCount];
-        for (int i=0;i<bestPLT.length;i++) {
-            for(int x=0;x<flightMultiplier;x++){
-                result[i*groupCount+x]=bestPLT[i];
+    private int[][] multiplyFlights(int[][] bestPLT, int flightCount, int groupCount, int competitorCount) {
+        int[][] result = new int[(flightCount * groupCount) * (flightMultiplier + 1)][competitorCount / groupCount];
+        for (int i = 0; i < bestPLT.length; i++) {
+            for (int x = 0; x <= flightMultiplier; x++) {
+                result[i * (flightMultiplier + 1) + x] = bestPLT[i];
             }
         }
         return result;

@@ -4128,7 +4128,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         public int getCompetitorsCount() {
                             return competitorsCount;
                         }
-                    });
+                    }, flightMultiplier);
             return template;
         } else {
             return null;

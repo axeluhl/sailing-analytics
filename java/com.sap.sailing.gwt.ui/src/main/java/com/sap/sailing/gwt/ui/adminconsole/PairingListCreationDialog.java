@@ -49,7 +49,7 @@ public class PairingListCreationDialog extends AbstractPairingListCreationDialog
         formGrid.setWidget(2, 0, new Label("Number of competitors:"));
         formGrid.setWidget(2, 1, new Label(String.valueOf(this.template.getCompetitorCount())));
         formGrid.setWidget(3, 0, new Label("Quality:"));
-        formGrid.setWidget(3, 1, new Label(String.valueOf(this.template.getQuality())));
+        formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
         
         panel.add(dataPanel);
         
