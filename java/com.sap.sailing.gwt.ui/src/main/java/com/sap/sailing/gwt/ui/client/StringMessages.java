@@ -979,6 +979,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterBoats();
     String editCompetitor();
     String pleaseEnterASailNumber();
+    String pleaseEnterASailNumberOrAName();
     String successfullyAllowedCompetitorReset(String names);
     String allowReload();
     String id();

@@ -28,7 +28,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     private final StringMessages stringMessages;
     
     /**
-     * The class creates the UI-dialog to type in the Data about a competitor.
+     * The class creates the UI-dialog to edit the data of a boat.
      * 
      * @param boatToEdit
      *            The 'boatToEdit' parameter contains the boat which should be changed or initialized.
@@ -40,15 +40,12 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                     @Override
                     public String getErrorMessage(BoatDTO valueToValidate) {
                         String result = null;
-                        if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
-                            result = stringMessages.pleaseEnterAName();
-                        } else if (valueToValidate.getSailId() == null || valueToValidate.getSailId().isEmpty()) {
-                            result = stringMessages.pleaseEnterASailNumber();
-                        } else if (valueToValidate.getColor() != null) {
-                            Color displayColor = valueToValidate.getColor();
-                            if (displayColor instanceof InvalidColor) {
-                                result = displayColor.getAsHtml();
-                            }
+                        boolean invalidSailId = valueToValidate.getSailId() == null || valueToValidate.getSailId().isEmpty(); 
+                        boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
+                        if (invalidSailId && invalidName) {
+                            result = stringMessages.pleaseEnterASailNumberOrAName();
+                        } else if (valueToValidate.getColor() != null && valueToValidate.getColor() instanceof InvalidColor) {
+                            result = valueToValidate.getColor().getAsHtml();
                         } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
                             result = stringMessages.pleaseEnterABoatClass();
                         }
