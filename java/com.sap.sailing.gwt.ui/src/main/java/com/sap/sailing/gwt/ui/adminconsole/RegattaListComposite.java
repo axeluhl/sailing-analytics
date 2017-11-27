@@ -277,7 +277,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     
     private void createPairingListTemplate(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
-        PairingListCreationSetupDialog dialog = new PairingListCreationSetupDialog(regattaIdentifier, this.stringMessages, 
+        PairingListCreationSetupDialog dialog = new PairingListCreationSetupDialog(regatta, this.stringMessages, 
                 new DialogCallback<PairingListTemplateDTO>() {
 
             @Override

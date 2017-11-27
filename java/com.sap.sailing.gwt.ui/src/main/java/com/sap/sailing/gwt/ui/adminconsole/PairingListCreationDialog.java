@@ -51,6 +51,8 @@ public class PairingListCreationDialog extends AbstractPairingListCreationDialog
         formGrid.setWidget(3, 0, new Label("Quality:"));
         formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
         
+        formGrid.setCellSpacing(10);
+        
         panel.add(dataPanel);
         
         /* PAIRING LIST TEMPLATE PANEL */

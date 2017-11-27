@@ -7,9 +7,11 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 
 public class PairingListCreationSetupDialog extends PairingListCreationDialog {
@@ -18,10 +20,15 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     private final IntegerBox flightMultiplierTextBox;
     
     private final CheckBox flightMultiplierCheckBox;
+    private final int groupCount;
     
-    public PairingListCreationSetupDialog(RegattaIdentifier regattaIdentifier, StringMessages stringMessages, 
+    public PairingListCreationSetupDialog(RegattaDTO regattaDTO, StringMessages stringMessages, 
             DialogCallback<PairingListTemplateDTO> callback) {
-        super(regattaIdentifier, stringMessages, null, callback);        // TODO initial value
+        
+        super(new RegattaName(regattaDTO.getName()), stringMessages, null, callback);     // TODO initial value
+        
+        this.groupCount = Util.size(regattaDTO.series.get(0).getFleets());
+        
         this.competitorCountTextBox = createIntegerBox(0, 2);
         this.flightMultiplierTextBox = createIntegerBox(0, 2);
         this.flightMultiplierTextBox.setEnabled(false);
@@ -57,6 +64,10 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
 
     @Override
     protected PairingListTemplateDTO getResult() {
-        return new PairingListTemplateDTO(this.competitorCountTextBox.getValue(), this.flightMultiplierTextBox.getValue());
+        PairingListTemplateDTO dto = new PairingListTemplateDTO(this.competitorCountTextBox.getValue(), 
+                this.flightMultiplierTextBox.getValue());
+        dto.setGroupCount(this.groupCount);
+        dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
+        return dto; 
     }
 }

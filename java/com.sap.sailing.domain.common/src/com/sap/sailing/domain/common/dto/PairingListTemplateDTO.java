@@ -34,6 +34,14 @@ public class PairingListTemplateDTO implements Serializable {
         this.pairingListTemplate = pairingListTemplate;
     }
     
+    public void setGroupCount(int groupCount) {
+        this.groupCount = groupCount;
+    }
+    
+    public void setFlightMultiplier(int flightMultiplier) {
+        this.flightMultiplier = flightMultiplier;
+    }
+    
     public int[][] getPairingListTemplate() {
         return this.pairingListTemplate;
     }

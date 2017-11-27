@@ -13,8 +13,15 @@ public class AbstractPairingListParameterValidator implements Validator<PairingL
     
     @Override
     public String getErrorMessage(PairingListTemplateDTO valueToValidate) {
-        // TODO validate RegattaTDO
-        return null;
+        String errorMessage = null;
+        
+        if (valueToValidate.getCompetitorCount() < valueToValidate.getGroupCount()) {
+            errorMessage = "Invalid competitor count";
+        } else if (valueToValidate.getFlightMultiplier() < 0) {
+            errorMessage = "Invalid flight multiplier";
+        }
+        
+        return errorMessage;
     }
 
 }
