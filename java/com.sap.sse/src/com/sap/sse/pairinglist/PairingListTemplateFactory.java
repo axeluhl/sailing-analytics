@@ -12,6 +12,6 @@ public interface PairingListTemplateFactory {
      * @param pairingFrameProvider 
      * @return PairingListTemplate Object
      */
-    PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider);
+    PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider,int flightMultiplier);
    
 }

@@ -7,22 +7,31 @@ import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 
 public class PairingListTemplateFactoryImpl implements PairingListTemplateFactory {
-    private final Map<PairingFrameProvider, PairingListTemplate> pairingListTemplates;
+    private final Map<PairingFrameProvider,Map<Integer,PairingListTemplate>> pairingListTemplates;
 
     public PairingListTemplateFactoryImpl() {
-        this(new HashMap<>());
+       this.pairingListTemplates=new HashMap<>();
     }
-
-    public PairingListTemplateFactoryImpl(Map<PairingFrameProvider, PairingListTemplate> existingPairingListTemplates) {
-        this.pairingListTemplates = existingPairingListTemplates;
-    }
-
+//    public PairingListTemplateFactoryImpl(Map<PairingFrameProvider, PairingListTemplate> existingPairingListTemplates) {
+//        this.pairingListTemplates = existingPairingListTemplates;
+//    }
+    
     @Override
-    public PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider) {
-        PairingListTemplate result = pairingListTemplates.get(pairingFrameProvider);
+    public PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider,int flightMultiplier) {
+        PairingListTemplate result;
+        try{
+            result = pairingListTemplates.get(pairingFrameProvider).get(flightMultiplier);
+        }catch(NullPointerException e){
+            result=null;
+        }
         if (result == null) {
-            result = generatePairingList(pairingFrameProvider);
-            pairingListTemplates.put(pairingFrameProvider, result);
+            result = generatePairingList(pairingFrameProvider,flightMultiplier);
+            if(pairingListTemplates.get(pairingFrameProvider)==null){
+                pairingListTemplates.put(pairingFrameProvider, new HashMap<>());
+                pairingListTemplates.get(pairingFrameProvider).put(flightMultiplier, result);
+            }else{
+                pairingListTemplates.get(pairingFrameProvider).put(flightMultiplier, result);
+            }
         }
         return result;
     }
@@ -31,7 +40,7 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
       * @param pairingFrameProvider
       * @return new PariningListTemplate object
       */
-    protected PairingListTemplate generatePairingList(PairingFrameProvider pairingFrameProvider) {
-        return new PairingListTemplateImpl(pairingFrameProvider);
+    protected PairingListTemplate generatePairingList(PairingFrameProvider pairingFrameProvider,int flightMultiplier) {
+        return new PairingListTemplateImpl(pairingFrameProvider,100000,flightMultiplier);
     }
 }

@@ -2,6 +2,8 @@ package com.sap.see.pairinglist.test;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
@@ -103,6 +105,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
             int[][] template = this.createPairingListTemplate(15, 3, 18);
             results[i] = calcStandardDev(incrementAssociations(template, new int[18][18]));
             System.out.println(results[i]);
+            System.out.println(Arrays.deepToString(template));
         }
         double sum = 0;
         for (double quality: results) {
