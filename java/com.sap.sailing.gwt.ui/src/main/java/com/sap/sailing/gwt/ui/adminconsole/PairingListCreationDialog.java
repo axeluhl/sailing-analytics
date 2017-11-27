@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
@@ -33,41 +32,49 @@ public class PairingListCreationDialog extends AbstractPairingListCreationDialog
 
     @Override
     protected Widget getAdditionalWidget() {
-        final VerticalPanel panel = new VerticalPanel();
+        HorizontalPanel panel = new HorizontalPanel();
         
-        Grid formGrid = new Grid(1, 2);
-        panel.add(formGrid);
+        /* DATA PANEL */
         
-        formGrid.setWidget(0, 0, new Label("Quality:"));
-        formGrid.setWidget(0, 1, new Label(String.valueOf(this.template.getQuality())));
+        CaptionPanel dataPanel = new CaptionPanel();
+        dataPanel.setCaptionText("Pairing List Data");
         
-        Grid pairingListGrid = new Grid(this.template.getPairingListTemplate().length + 1, 
-                this.template.getPairingListTemplate()[0].length + 1);
-        panel.add(pairingListGrid);
+        Grid formGrid = new Grid(4, 2);
+        dataPanel.add(formGrid);
         
-        /*for (int i = 1; i < this.template.getPairingListTemplate()[0].length + 1; i++) {
-            Label label = new Label(String.valueOf(i));
-            label.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
-            pairingListGrid.setWidget(0, i, label);
-
-        }*/
+        formGrid.setWidget(0, 0, new Label("Number of Flights:"));
+        formGrid.setWidget(0, 1, new Label(String.valueOf(this.template.getFlightCount())));
+        formGrid.setWidget(1, 0, new Label("Number of Groups:"));
+        formGrid.setWidget(1, 1, new Label(String.valueOf(this.template.getGroupCount())));
+        formGrid.setWidget(2, 0, new Label("Number of competitors:"));
+        formGrid.setWidget(2, 1, new Label(String.valueOf(this.template.getCompetitorCount())));
+        formGrid.setWidget(3, 0, new Label("Quality:"));
+        formGrid.setWidget(3, 1, new Label(String.valueOf(this.template.getQuality())));
         
+        panel.add(dataPanel);
+        
+        /* PAIRING LIST TEMPLATE PANEL */
+        
+        CaptionPanel pairingListTemplatePanel = new CaptionPanel();
+        pairingListTemplatePanel.setCaptionText("Pairing List Template");
+        
+        Grid pairingListGrid = new Grid(this.template.getPairingListTemplate().length, 
+                this.template.getPairingListTemplate()[0].length);
+        pairingListTemplatePanel.add(pairingListGrid);
+                
         for (int groupIndex = 0; groupIndex < this.template.getPairingListTemplate().length; groupIndex++) {
-            
-            /*Label label = new Label(String.valueOf(groupIndex));
-            label.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
-            pairingListGrid.setWidget(groupIndex, 0, label);*/
             
             for (int boatIndex = 0; boatIndex < this.template.getPairingListTemplate()[0].length; boatIndex++) {
                 pairingListGrid.setWidget(groupIndex, boatIndex, 
                         new Label(String.valueOf(this.template.getPairingListTemplate()[groupIndex][boatIndex])));
                 
                 pairingListGrid.getCellFormatter().setWidth(groupIndex, boatIndex, "50px");
-
             }
         }
         
-                
+        panel.add(pairingListTemplatePanel);
+
+        
         return panel;
     }
     

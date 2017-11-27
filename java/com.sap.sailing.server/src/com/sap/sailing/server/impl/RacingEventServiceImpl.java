@@ -4099,36 +4099,39 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount) {
-        
-        Regatta regatta = getRegatta(regattaIdentifier);
-        
-        if (regatta != null) {
-             PairingListTemplate template = pairingListTemplateFactory.getOrCreatePairingListTemplate(new PairingFrameProvider() {
+    public PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount,
+            int flightMultiplier) {
 
-                @Override
-                public int getGroupsCount() {
-                    for (Series series : regatta.getSeries()) {
-                        if (Util.size(series.getFleets()) > 1) {
-                            return Util.size(series.getFleets());
+        Regatta regatta = getRegatta(regattaIdentifier);
+
+        if (regatta != null) {
+            // TODO flightMultiplier (not implemented yet)
+            PairingListTemplate template = pairingListTemplateFactory
+                    .getOrCreatePairingListTemplate(new PairingFrameProvider() {
+
+                        @Override
+                        public int getGroupsCount() {
+                            for (Series series : regatta.getSeries()) {
+                                if (Util.size(series.getFleets()) > 1) {
+                                    return Util.size(series.getFleets());
+                                }
+                            }
+                            return 1;
                         }
-                    }
-                    return 1;
-                }
-                
-                @Override
-                public int getFlightsCount() {
-                    return Util.size(regatta.getRaceColumns());
-                }
-                
-                @Override
-                public int getCompetitorsCount() {
-                    return competitorsCount;
-                }
-            });
+
+                        @Override
+                        public int getFlightsCount() {
+                            return Util.size(regatta.getRaceColumns());
+                        }
+
+                        @Override
+                        public int getCompetitorsCount() {
+                            return competitorsCount;
+                        }
+                    });
             return template;
         } else {
-            return null;    
+            return null;
         }
     }
 }

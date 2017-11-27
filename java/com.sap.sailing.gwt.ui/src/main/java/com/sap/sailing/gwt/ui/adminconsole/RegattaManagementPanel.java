@@ -7,9 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.objectweb.asm.tree.LabelNode;
-
-import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
