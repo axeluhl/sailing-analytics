@@ -957,10 +957,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             BoatDTO boat = boatFetcher.getBoat(object);
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
-            if (boat.getName() != null) {
-                sb.appendEscaped(boat.getName());
-            } else if (boat.getSailId() != null) {
+            if (boat.getSailId() != null) {
                 sb.appendEscaped(boat.getSailId());
+            } else if (boat.getName() != null) {
+                sb.appendEscaped(boat.getName());
             }
             if (boatColorShown) {
                 sb.appendHtmlConstant("</div>");
