@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.gwt.ui.client.media.PauseEvent;
 import com.sap.sailing.gwt.ui.client.media.PlayEvent;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 /**
@@ -70,7 +71,7 @@ public class VideoPlayer extends Composite {
         if(!initialized) {
             initialize();
         }
-        videoJSPlayer.setVideo(video.getMimeType(), video.getSourceRef());
+        videoJSPlayer.setVideo(video.getMimeType(), video.getSourceRef(), video.hasTag(MediaTagConstants.PANORAMA));
     }
     
     public VideoElement getVideoElement() {

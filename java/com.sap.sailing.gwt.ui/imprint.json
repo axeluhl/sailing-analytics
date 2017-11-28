@@ -707,7 +707,7 @@
         },
         {
             "name": "video-js",
-            "version": "4.12.10",
+            "version": "5.20.3",
             "owner": "Brightcove, Inc.",
             "homepage": "https://github.com/videojs/video.js",
             "acknowledgements": [
@@ -717,7 +717,7 @@
         },
         {
             "name": "video-js-vimeo",
-            "version": "master-20140814",
+            "version": "2.0.0",
             "owner": "Benoit Tremblay",
             "homepage": "http://github.com/eXon/videojs-vimeo/",
             "acknowledgements": [
@@ -727,13 +727,33 @@
         },
         {
             "name": "video-js-youtube",
-            "version": "1.2.5",
+            "version": "2.0.8",
             "owner": "Benoit Tremblay",
             "homepage": "http://github.com/eXon/videojs-youtube/",
             "acknowledgements": [
                 "Copyright (c) 2015 Benoit Tremblay <trembl.ben@gmail.com>"
             ],
             "key": "MITL"
+        },
+        {
+            "name": "three.js",
+            "version": "76",
+            "owner": "\"Mr.doob\"",
+            "homepage": "https://threejs.org/",
+            "acknowledgements": [
+                "Copyright © 2010-2017 three.js authors"
+            ],
+            "key": "MIT"
+        },
+        {
+            "name": "video-js-panorma",
+            "version": "0.1.5",
+            "owner": "Wensheng Yan",
+            "homepage": "https://github.com/yanwsh/videojs-panorama/",
+            "acknowledgements": [
+                "Copyright 2016 yanwsh@gmail.com"
+            ],
+            "key": "Apache License 2.0"
         }
     ],
     "licenses": [

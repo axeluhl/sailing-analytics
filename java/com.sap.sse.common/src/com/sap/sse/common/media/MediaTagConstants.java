@@ -10,4 +10,8 @@ public interface MediaTagConstants {
     static final String LIVESTREAM = "Livestream";
     static final String FEATURED = "Featured";
     static final String BIGSCREEN = "BigScreen";
+    /**
+     * This tag indicates that a video should be played using 360° panorama plugin
+     */
+    static final String PANORAMA = "360";
 }

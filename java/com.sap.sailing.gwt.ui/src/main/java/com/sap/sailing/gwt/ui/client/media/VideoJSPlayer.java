@@ -10,6 +10,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
@@ -29,9 +30,7 @@ public class VideoJSPlayer extends Widget {
     private JavaScriptObject player;
     private boolean autoplay;
 
-    public VideoJSPlayer() {
-        this(true, false);
-    }
+    private Boolean panorama;
 
     public HandlerRegistration addPlayHandler(PlayEvent.Handler handler) {
         return addHandler(handler, PlayEvent.getType());
@@ -51,7 +50,11 @@ public class VideoJSPlayer extends Widget {
         videoElement.setAttribute("controls", "");
     }
 
-    public void setVideo(MimeType mimeType, String source) {
+    public void setVideo(MimeType mimeType, String source, boolean panorama) {
+        this.panorama = panorama;
+        if(isAttached()){
+            _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
+        }
         if (mimeType == null || mimeType.mediaType != MediaType.video) {
             return;
         }
@@ -71,15 +74,18 @@ public class VideoJSPlayer extends Widget {
         }
     }
     
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        if(panorama != null){
+                _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
+        }
+    }
+    
     public VideoElement getVideoElement() {
         return videoElement;
     }
     
-    @Override
-    protected void onLoad() {
-        _onLoad(autoplay);
-    }
-
     /**
      * Get the length in time of the video in seconds
      *
@@ -148,13 +154,13 @@ public class VideoJSPlayer extends Widget {
      *
      * @param uniqueId
      */
-    native void _onLoad(boolean autoplay) /*-{
+    native void _onLoad(boolean autoplay, boolean withPanorama, String messageThreeSixty) /*-{
         var that = this;
+        var elemid = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId;
+        
         var player = $wnd.videojs(
-            this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId,
+            elemid,
             {
-                "width" : "auto",
-                "height" : "auto",
                 "playsInline" : true,
                 "customControlsOnMobile" : true
             }).ready(function() {
@@ -170,6 +176,14 @@ public class VideoJSPlayer extends Widget {
                     this.play();
                 }
             });
+       if(withPanorama){     
+           player.panorama({
+              autoMobileOrientation: true,
+              clickAndDrag: true,
+              clickToToggle: false,
+              Notice: messageThreeSixty,
+            });
+        }
         this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
     }-*/;
     
