@@ -8,17 +8,38 @@ Bug 2822 changes the way competitors and boats are handled. Specifically the 1:1
 
 ### 1.1 Migrate the competitor collection
 
+Check:  
+
+- Existing COMPETITORS Collection is migrated to COMPETITORS_WITH_BOAT_REFERENCES and BOATS collection
+- attribute boat name is cleared in new created boat objects
+
 ### 1.2 Migrate the raceLog and regattaLog?
 
 ##  2. Managing boats
 
-### 2.1 Create boat
+Boats can be created now in different ways:
 
-### 2.2 Edit boat
+- as 'standalone' boats in the boats panel in the admin console (subsection of 'Tracked races')
+- together with a competitor when adding a competitor to a regatta where boats CAN'T change per race (e.g. SPT)
+- through a tracking connector which creates competitors and boats of a race (e.g. TracTrac tracking)
+- through a competitor import from an external competitor provider (e.g. Manage2Sail)
 
-### 2.3 Create competitor with boat (only possible in regattas with non changing boats)
+### 2.1 Boats panel
 
-### 2.4 Edit Competitor with boat (only possible in regattas with non changing boats)
+Check:
+
+- Create a new boat
+- Edit the created boat
+
+### 2.2 Smartphone tracking using a regatta where boats of competitors can change
+
+Check:
+
+- Create SPT regatta with flag  'boats of competitors can change per race' set to 'false'
+- Create a tracked race
+- Add a competitor with a boat for this race
+- Edit the boat
+
 
 ## 3. Tracking with TracTrac connector
 
