@@ -19,6 +19,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private final int[][] pairingListTemplate;
     private final double standardDev;
     private final int flightMultiplier;
+    private final int dummys;
     private final ExecutorService executorService = ThreadPoolUtil.INSTANCE
             .getDefaultBackgroundTaskThreadPoolExecutor();
     private final int iterations;
@@ -33,15 +34,20 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         this.flightMultiplier=flightMultiplier;
         if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
                 pairingFrameProvider.getCompetitorsCount())) {
+            if(pairingFrameProvider.getCompetitorsCount() % pairingFrameProvider.getGroupsCount()!=0){
+            this.dummys=pairingFrameProvider.getGroupsCount()-(pairingFrameProvider.getCompetitorsCount() % pairingFrameProvider.getGroupsCount());
+            }else{
+                dummys=0;
+            }
             this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
-                    pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount());
+                    pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount()+dummys);
             this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
-                    new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()]));
+                    new int[pairingFrameProvider.getCompetitorsCount()+dummys][pairingFrameProvider.getCompetitorsCount()+dummys]));
+            this.resetDummys(pairingListTemplate, pairingFrameProvider.getCompetitorsCount()+dummys);
         } else {
             throw new IllegalArgumentException("Wrong arguments for creating a pairing list template: count of flights "
                     + "has to be greater than 0; count of groups has to be greater than 1; count of competitors has to "
-                    + "be greater than 1; count of competitors has to be greater than count of groups; count of "
-                    + "competitors has to be divisible by count of groups");
+                    + "be greater than 1; count of competitors has to be greater than count of groups");
         }
     }
 
@@ -144,6 +150,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         if(flightMultiplier>0){
             bestPLT=this.multiplyFlights(bestPLT,flightCount,groupCount,competitorCount);
         }
+        
         futures.clear();
 
         return bestPLT;
@@ -200,7 +207,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     private boolean checkValues(int flights, int groups, int competitors) {
-        if ((flights > 0) && (groups > 1) && (competitors > 1) && (competitors >= groups) && (competitors % groups == 0)) {
+        if ((flights > 0) && (groups > 1) && (competitors > 1) && (competitors >= groups)) {
             return true;
         }
         return false;
@@ -711,5 +718,23 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / n);
 
         return standardDev;
+    }
+    private int[][] resetDummys(int[][] bestPLT,int competitorCount){
+        if(dummys>0){
+            int[] dummyCompetitors=new int[dummys];
+            for(int i=0;i<dummys;i++){
+                dummyCompetitors[i]=(competitorCount-1)-i;
+            }
+            for(int x=0;x<bestPLT.length;x++){
+                for(int y=0;y<bestPLT[0].length;y++){
+                    for (int i : dummyCompetitors) {
+                        if(bestPLT[x][y]==i){
+                            bestPLT[x][y]=-1;
+                        }
+                    }
+                }
+            }
+        }
+        return bestPLT;
     }
 }

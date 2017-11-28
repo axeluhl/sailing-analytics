@@ -65,6 +65,7 @@ public class PairingListTemplateFactoryTest {
     public void testGeneration() {
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
         PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18),0);
+        PairingListTemplate example6 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 14),0);
         PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(100, 6, 18),0);
         PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30),0);
         PairingListTemplate example4 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3);
@@ -74,8 +75,9 @@ public class PairingListTemplateFactoryTest {
         assertNotNull(example3);
         assertNotNull(example4);
         assertNotNull(example5);
+        assertNotNull(example6);
         assertArrayEquals(example4.getPairingListTemplate(), example5.getPairingListTemplate());
-        System.out.println(Arrays.deepToString(example5.getPairingListTemplate()));
+        System.out.println(Arrays.deepToString(example1.getPairingListTemplate()));
         System.out.println(example2.getQuality());
         /*
         for(int[] row : example1.getPairingListTemplate()) {

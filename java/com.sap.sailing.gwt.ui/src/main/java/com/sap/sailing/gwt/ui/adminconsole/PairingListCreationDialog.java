@@ -74,7 +74,7 @@ public class PairingListCreationDialog extends AbstractPairingListCreationDialog
             
             for (int boatIndex = 0; boatIndex < this.template.getPairingListTemplate()[0].length; boatIndex++) {
                 pairingListGrid.setWidget(groupIndex, boatIndex, 
-                        new Label(String.valueOf(this.template.getPairingListTemplate()[groupIndex][boatIndex])));
+                        new Label(String.valueOf(this.template.getPairingListTemplate()[groupIndex][boatIndex]+1)));
                 
                 pairingListGrid.getCellFormatter().setWidth(groupIndex, boatIndex, "50px");
             }
@@ -86,6 +86,9 @@ public class PairingListCreationDialog extends AbstractPairingListCreationDialog
         return panel;
     }
     
-    
+    @Override
+    protected PairingListTemplateDTO getResult() {
+        return this.template;
+    }
     
 }
