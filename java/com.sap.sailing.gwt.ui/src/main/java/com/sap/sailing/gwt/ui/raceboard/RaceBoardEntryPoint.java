@@ -106,7 +106,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
-                sailingService.determineDetailTypes(raceboardContextDefinition.getLeaderboardGroupName(),
+                sailingService.determineDetailTypesForCompetitorChart(raceboardContextDefinition.getLeaderboardGroupName(),
                         raceboardData.getRace().getRaceIdentifier(), new AsyncCallback<List<DetailType>>() {
 
                             @Override
