@@ -178,10 +178,11 @@ public class VideoJSPlayer extends Widget {
             });
        if(withPanorama){     
            player.panorama({
+              showNotice:true,
               autoMobileOrientation: true,
               clickAndDrag: true,
               clickToToggle: false,
-              Notice: messageThreeSixty,
+              NoticeMessage: messageThreeSixty,
             });
         }
         this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
