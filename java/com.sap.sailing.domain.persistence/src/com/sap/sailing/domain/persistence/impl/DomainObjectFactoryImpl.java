@@ -1043,7 +1043,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Event loadEvent(DBObject eventDBObject) {
         String name = (String) eventDBObject.get(FieldNames.EVENT_NAME.name());
         String description = (String) eventDBObject.get(FieldNames.EVENT_DESCRIPTION.name());
-        UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
+        UUID id = UUID.fromString((String) eventDBObject.get(FieldNames.EVENT_ID.name()));
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
