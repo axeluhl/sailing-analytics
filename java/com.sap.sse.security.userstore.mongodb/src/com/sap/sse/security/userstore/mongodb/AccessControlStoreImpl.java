@@ -214,6 +214,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public AccessControlStore removeRole(UUID id) {
         mongoObjectFactory.deleteRole(roleList.get(id));
+        roleList.remove(id);
         return this;
     }
 

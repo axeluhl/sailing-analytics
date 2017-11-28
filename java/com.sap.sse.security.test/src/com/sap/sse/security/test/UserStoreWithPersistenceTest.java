@@ -18,6 +18,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -32,6 +33,9 @@ public class UserStoreWithPersistenceTest {
     private final String email = "anonymous@sapsailing.com";
     private final String prefKey = "pk";
     private final String prefValue = "pv";
+    
+    private final UUID userGroupId = UUID.randomUUID();
+    private final String userGroupName = "usergroup";
 
     private UserStoreImpl store;
 
@@ -41,8 +45,9 @@ public class UserStoreWithPersistenceTest {
         final MongoDBService service = dbConfiguration.getService();
         DB db = service.getDB();
         db.getCollection(CollectionNames.USERS.name()).drop();
+        db.getCollection(CollectionNames.USER_GROUPS.name()).drop();
+        db.getCollection(CollectionNames.TENANTS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
-        db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         newStore();
     }
@@ -53,7 +58,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testCreateUser() throws UserManagementException {
-        store.createUser(username, email, UUID.randomUUID());
+        store.createUser(username, email, userGroupId);
         assertNotNull(store.getUserByName(username));
         assertNotNull(store.getUserByEmail(email));
 
@@ -64,7 +69,7 @@ public class UserStoreWithPersistenceTest {
     
     @Test
     public void testMasterdataIsSaved() throws UserManagementException {
-        UUID defaultTenant = UUID.randomUUID();
+        UUID defaultTenant = userGroupId;
         store.createUser(username, email, defaultTenant);
         store.updateUser(new User(username, email, fullName, company, Locale.GERMAN, false, null, null, defaultTenant, Collections.emptySet()));
         newStore();
@@ -81,7 +86,7 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUser() throws UserManagementException {
-        store.createUser(username, email, UUID.randomUUID());
+        store.createUser(username, email, userGroupId);
         store.deleteUser(username);
         assertNull(store.getUserByName(username));
         assertNull(store.getUserByEmail(email));
@@ -93,7 +98,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testSetPreferences() throws UserManagementException {
-        store.createUser(username, email, UUID.randomUUID());
+        store.createUser(username, email, userGroupId);
         store.setPreference(username, prefKey, prefValue);
         assertEquals(prefValue, store.getPreference(username, prefKey));
         newStore();
@@ -102,7 +107,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testUnsetPreferences() throws UserManagementException {
-        store.createUser(username, email, UUID.randomUUID());
+        store.createUser(username, email, userGroupId);
         store.setPreference(username, prefKey, prefValue);
         store.unsetPreference(username, prefKey);
         assertNull(store.getPreference(username, prefKey));
@@ -115,11 +120,61 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUserWithPreferences() throws UserManagementException {
-        store.createUser(username, email, UUID.randomUUID());
+        store.createUser(username, email, userGroupId);
         store.setPreference(username, prefKey, prefValue);
         store.deleteUser(username);
         assertNull(store.getPreference(username, prefKey));
         newStore();
         assertNull(store.getPreference(username, prefKey));
+    }
+    
+    @Test
+    public void testCreateUserGroup() throws UserGroupManagementException {
+        store.createUserGroup(userGroupId, userGroupName);
+        assertNotNull(store.getUserGroup(userGroupId));
+        assertNotNull(store.getUserGroupByName(userGroupName));
+
+        newStore();
+        assertNotNull(store.getUserGroup(userGroupId));
+        assertNotNull(store.getUserGroupByName(userGroupName));
+    }
+    
+    @Test
+    public void testDeleteUserGroup() throws UserGroupManagementException {
+        store.createUserGroup(userGroupId, userGroupName);
+        store.deleteUserGroup(userGroupId);
+        assertNull(store.getUserGroup(userGroupId));
+        assertNull(store.getUserGroupByName(userGroupName));
+
+        newStore();
+        assertNull(store.getUserGroup(userGroupId));
+        assertNull(store.getUserGroupByName(userGroupName));
+    }
+    
+    @Test
+    public void testCreateTenant() throws UserGroupManagementException {
+        store.createTenant(userGroupId, userGroupName);
+        assertNotNull(store.getTenant(userGroupId));
+        assertNotNull(store.getTenantByName(userGroupName));
+
+        newStore();
+        assertNotNull(store.getTenant(userGroupId));
+        assertNotNull(store.getTenantByName(userGroupName));
+    }
+    
+    @Test
+    public void testDeleteTenantWithUserGroup() throws UserGroupManagementException {
+        store.createTenant(userGroupId, userGroupName);
+        store.deleteTenantWithUserGroup(userGroupId);
+        assertNull(store.getTenant(userGroupId));
+        assertNull(store.getTenantByName(userGroupName));
+        assertNull(store.getUserGroup(userGroupId));
+        assertNull(store.getUserGroupByName(userGroupName));
+
+        newStore();
+        assertNull(store.getTenant(userGroupId));
+        assertNull(store.getTenantByName(userGroupName));
+        assertNull(store.getUserGroup(userGroupId));
+        assertNull(store.getUserGroupByName(userGroupName));
     }
 }

@@ -23,7 +23,6 @@ import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
@@ -44,8 +43,7 @@ public class SecurityResourceTest {
         try {
             final UserStoreImpl store = new UserStoreImpl();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl();
-            Activator.setTestUserStore(store);
-            UsernamePasswordRealm.setTestUserStore(store);
+            Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
                     store, accessControlStore, /* setAsActivatorSecurityService */ true);
             SecurityUtils.setSecurityManager(service.getSecurityManager());

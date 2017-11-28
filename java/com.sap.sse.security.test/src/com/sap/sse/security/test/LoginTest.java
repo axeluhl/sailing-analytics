@@ -18,7 +18,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
@@ -27,7 +26,7 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
 public class LoginTest {
-    private UserStoreImpl store;
+    private UserStoreImpl userStore;
     private AccessControlStore accessControlStore;
 
     @Before
@@ -38,13 +37,12 @@ public class LoginTest {
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        store = new UserStoreImpl();
+        userStore = new UserStoreImpl();
         accessControlStore = new AccessControlStoreImpl(null, null);
         
-        UsernamePasswordRealm.setTestUserStore(store);
-        Activator.setTestUserStore(store);
+        Activator.setTestStores(userStore, accessControlStore);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        Activator.setSecurityService(new SecurityServiceImpl(store, accessControlStore));
+        Activator.setSecurityService(new SecurityServiceImpl(userStore, accessControlStore));
     }
 
     @Test
@@ -54,32 +52,32 @@ public class LoginTest {
     
     @Test
     public void setPreferencesTest() {
-        store.setPreference("me", "key", "value");
+        userStore.setPreference("me", "key", "value");
         UserStoreImpl store2 = new UserStoreImpl();
         assertEquals("value", store2.getPreference("me", "key"));
     }
 
     @Test
     public void setAndUnsetPreferencesTest() {
-        store.setPreference("me", "key", "value");
-        store.unsetPreference("me", "key");
+        userStore.setPreference("me", "key", "value");
+        userStore.unsetPreference("me", "key");
         UserStoreImpl store2 = new UserStoreImpl();
         assertNull(store2.getPreference("me", "key"));
     }
 
     @Test
     public void rolesTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com", UUID.randomUUID());
+        userStore.createUser("me", "me@sap.com", UUID.randomUUID());
         UUID testId = UUID.randomUUID();
-        store.addRoleForUser("me", testId);
+        userStore.addRoleForUser("me", testId);
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testId));
     }
 
     @Test
     public void permissionsTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com", UUID.randomUUID());
-        store.addPermissionForUser("me", "a:b:c");
+        userStore.createUser("me", "me@sap.com", UUID.randomUUID());
+        userStore.addPermissionForUser("me", "a:b:c");
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(store2.getUserByName("me").hasPermission("a:b:c"));
     }

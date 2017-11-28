@@ -35,10 +35,12 @@ public class Activator implements BundleActivator {
      * invoked.
      */
     private static UserStore testUserStore;
+    private static AccessControlStore testAccessControlStore;
     
-    public static void setTestUserStore(UserStore theTestUserStore) {
+    public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
-        UsernamePasswordRealm.setTestUserStore(theTestUserStore);
+        testAccessControlStore = theTestAccessControlStore;
+        UsernamePasswordRealm.setTestStores(theTestUserStore, theTestAccessControlStore);
     }
     
     public static void setSecurityService(SecurityService securityService) {
@@ -61,8 +63,8 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
-        if (testUserStore != null) {
-            createAndRegisterSecurityService(bundleContext, testUserStore, null /* TODO what do I do here with the access control store?*/);
+        if (testUserStore != null && testAccessControlStore != null) {
+            createAndRegisterSecurityService(bundleContext, testUserStore, testAccessControlStore);
         } else {
             waitForUserStoreService(bundleContext);
         }

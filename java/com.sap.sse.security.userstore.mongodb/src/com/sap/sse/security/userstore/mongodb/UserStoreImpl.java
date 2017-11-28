@@ -385,7 +385,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public Tenant getTenantByName(String name) {
         UserGroup group = getUserGroupByName(name);
-        if (tenants.contains((UUID) group.getId())) {
+        if (group != null && tenants.contains((UUID) group.getId())) {
             return new Tenant(group);
         }
         return null;

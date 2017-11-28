@@ -51,11 +51,8 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     private static UserStore testUserStore;
     private static AccessControlStore testAccessControlStore;
 
-    public static void setTestUserStore(UserStore theTestUserStore) {
+    public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
-    }
-    
-    public static void setTestAccessControlStore(AccessControlStore theTestAccessControlStore) {
         testAccessControlStore = theTestAccessControlStore;
     }
 

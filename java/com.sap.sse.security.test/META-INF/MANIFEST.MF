@@ -11,4 +11,5 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.mongodb,
  com.sap.sse.mail
-Import-Package: org.apache.shiro.session.mgt
+Import-Package: com.sap.sse.security.shared,
+ org.apache.shiro.session.mgt
