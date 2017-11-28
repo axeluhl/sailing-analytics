@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * Manages a set of {@link Competitor}, {@link CompetitorWithBoat} and {@link Boat} objects. There may be a transient implementation based on a simple cache,
@@ -162,12 +161,12 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     void removeBoat(Boat boat);
 
     /**
-     * Migrates an existing competitor with contained boat to a competitor with a separate boat 
-     * @param boatId the id to be used for the boat creation
-     * @param competitorWithBoat the existing competitor with the contained boat
-     * @return the new created competitor and boat
+     * Migrates an existing competitor with contained boat to a competitor without a boat.
+     * The contained boat will be removed from the store
+     * @param competitorWithBoat the existing competitor with a contained boat
+     * @return the new created competitor without boat
      */
-    Pair<Competitor, Boat> migrateCompetitorToHaveASeparateBoat(Serializable boatId, CompetitorWithBoat competitorWithBoat);
+    Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat);
     
     /**
      * Updates the boat with {@link Boat#getId() ID} <code>id</code> by setting the name, sail ID, etc. to

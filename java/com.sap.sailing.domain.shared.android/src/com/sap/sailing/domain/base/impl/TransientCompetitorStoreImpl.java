@@ -31,7 +31,6 @@ import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTOImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -59,7 +58,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     private final Set<Boat> boatsToUpdateDuringGetOrCreate;
     
     private transient WeakHashMap<Boat, BoatDTO> weakBoatDTOCache;
-
+ 
+    
     private final NamedReentrantReadWriteLock lock;
 
     public TransientCompetitorStoreImpl() {
@@ -113,15 +113,16 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Pair<Competitor, Boat> migrateCompetitorToHaveASeparateBoat(Serializable boatId, CompetitorWithBoat competitorWithBoat) {
-        Boat existingBoat = competitorWithBoat.getBoat();
+    public Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
+        removeCompetitor(competitorWithBoat);
+        removeBoat(competitorWithBoat.getBoat());
+        
         Competitor newCompetitor = getOrCreateCompetitor(competitorWithBoat.getId(), competitorWithBoat.getName(), competitorWithBoat.getShortName(),
                 competitorWithBoat.getColor(), competitorWithBoat.getEmail(), competitorWithBoat.getFlagImage(), (DynamicTeam) competitorWithBoat.getTeam(),
                 competitorWithBoat.getTimeOnTimeFactor(), competitorWithBoat.getTimeOnDistanceAllowancePerNauticalMile(), competitorWithBoat.getSearchTag());
-        Boat newBoat = getOrCreateBoat(boatId, existingBoat.getName(), existingBoat.getBoatClass(), existingBoat.getSailID(), existingBoat.getColor());
+        
         addNewCompetitor(newCompetitor);
-        addNewBoat(newBoat);
-        return new Pair<>(newCompetitor, newBoat);
+        return newCompetitor;
     }
 
     /**

@@ -9,6 +9,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.BoatFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -16,39 +17,43 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
 
-public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
+public class LegacyBoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private final BoatClassJsonDeserializer boatClassDeserializer;
-    private final BoatFactory boatFactory;
 
-    public static BoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
-        return new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory));
+    public static LegacyBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+        return new LegacyBoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory));
     }
     
-    public BoatJsonDeserializer(BoatFactory boatFactory, BoatClassJsonDeserializer boatClassDeserializer) {
+    public LegacyBoatJsonDeserializer(BoatFactory boatFactory, BoatClassJsonDeserializer boatClassDeserializer) {
         super();
-        this.boatFactory = boatFactory;
         this.boatClassDeserializer = boatClassDeserializer;
     }
 
     public DynamicBoat deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable boatId = (Serializable) object.get(BoatJsonSerializer.FIELD_ID);
         try {
-            Class<?> idClass = Class.forName((String) object.get(BoatJsonSerializer.FIELD_ID_TYPE));
-            if (Number.class.isAssignableFrom(idClass)) {
-                Constructor<?> constructorFromString = idClass.getConstructor(String.class);
-                boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
-            } else if (UUID.class.isAssignableFrom(idClass)) {
-                boatId = Helpers.tryUuidConversion(boatId);
+            if (boatId == null) {
+                // no boatId - probably a legacy boat -> create an UUID
+                boatId = UUID.randomUUID();
+            } else {
+                Class<?> idClass = Class.forName((String) object.get(BoatJsonSerializer.FIELD_ID_TYPE));
+                if (Number.class.isAssignableFrom(idClass)) {
+                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                    boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    boatId = Helpers.tryUuidConversion(boatId);
+                }
             }
             String name = (String) object.get(BoatJsonSerializer.FIELD_NAME);
-            String  sailId =  (String) object.get(BoatJsonSerializer.FIELD_SAIL_ID);
+            final Object sailID = object.get(BoatJsonSerializer.FIELD_SAIL_ID);
+            String sailId = sailID == null ? null : sailID.toString();
             BoatClass boatClass = null;
             if (boatClassDeserializer != null) {
                 boatClass = boatClassDeserializer.deserialize(Helpers.getNestedObjectSafe(object, BoatJsonSerializer.FIELD_BOAT_CLASS));
             }
             String colorAsString = (String) object.get(BoatJsonSerializer.FIELD_COLOR);
             final Color color = colorAsString == null || colorAsString.isEmpty() ? null : new RGBColor(colorAsString);
-            DynamicBoat boat = (DynamicBoat) boatFactory.getOrCreateBoat(boatId, name, boatClass, sailId, color);
+            DynamicBoat boat = new BoatImpl(boatId, name, boatClass, sailId, color);
     
             return boat;
         } catch (Exception e) {

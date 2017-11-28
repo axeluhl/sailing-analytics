@@ -30,7 +30,7 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
 
     public static LegacyCompetitorWithContainedBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
         return new LegacyCompetitorWithContainedBoatJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
-                new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
+                new NationalityJsonDeserializer(baseDomainFactory))), new LegacyBoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }
 
     public LegacyCompetitorWithContainedBoatJsonDeserializer(CompetitorFactory competitorWithBoatFactory) {

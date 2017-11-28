@@ -86,7 +86,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
                 Boat containedBoat = competitorWithBoat.getBoat();
                 // Create a new random uuid for the boats to make sure the competitor uuid is not used  
                 UUID boatUUID = UUID.randomUUID();
-                DynamicBoat newBoat = new BoatImpl(boatUUID, containedBoat.getName(), containedBoat.getBoatClass(), containedBoat.getSailID());
+                DynamicBoat newBoat = new BoatImpl(boatUUID, null /* the old boat names were nonsense names */, containedBoat.getBoatClass(), containedBoat.getSailID());
                 newBoats.add(newBoat);
                 
                 CompetitorWithBoat newCompetitorWithBoat = new CompetitorWithBoatImpl((Competitor) competitorWithBoat, newBoat);
