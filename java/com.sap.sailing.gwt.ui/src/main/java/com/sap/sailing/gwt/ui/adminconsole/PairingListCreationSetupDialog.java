@@ -25,7 +25,7 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     public PairingListCreationSetupDialog(RegattaDTO regattaDTO, StringMessages stringMessages, 
             DialogCallback<PairingListTemplateDTO> callback) {
         
-        super(new RegattaName(regattaDTO.getName()), stringMessages, null, callback);     // TODO initial value
+        super(new RegattaName(regattaDTO.getName()), stringMessages, null, callback);
         
         this.groupCount = Util.size(regattaDTO.series.get(0).getFleets());
         
@@ -43,7 +43,6 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
         });
         
         this.flightMultiplierCheckBox.ensureDebugId("CompetitorCountTextBox");
-        
     }
     
     @Override
@@ -69,5 +68,12 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
         dto.setGroupCount(this.groupCount);
         dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
         return dto; 
+    }
+    
+    public void setDefaultCompetitorCount(int competitorCount) {
+        if (this.competitorCountTextBox.getValue() == 0) {
+            this.competitorCountTextBox.setValue(competitorCount);
+            this.validateAndUpdate();
+        }
     }
 }

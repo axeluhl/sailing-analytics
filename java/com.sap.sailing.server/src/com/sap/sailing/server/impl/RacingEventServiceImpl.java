@@ -4099,6 +4099,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
+    public Iterable<Competitor> getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier) {
+        Regatta regatta = getRegatta(regattaIdentifier);
+        return regatta.getAllCompetitors();
+    }
+    
+    @Override
     public PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount,
             int flightMultiplier) {
 

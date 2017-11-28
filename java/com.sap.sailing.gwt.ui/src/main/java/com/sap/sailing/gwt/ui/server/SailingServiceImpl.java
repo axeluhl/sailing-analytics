@@ -6651,6 +6651,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public Iterable<CompetitorDTO> getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier) {
+        return convertToCompetitorDTOs(getService().getCompetitorsFromRegatta(regattaIdentifier));
+    }
+    
+    @Override
     public PairingListTemplateDTO calculatePairingList(RegattaIdentifier regattaIdentifier, int competitorsCount, 
             int flightMultiplier) {
         PairingListTemplate template = getService().createPairingListFromRegatta(regattaIdentifier, competitorsCount, 

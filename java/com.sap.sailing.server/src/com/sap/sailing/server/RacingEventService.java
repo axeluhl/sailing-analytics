@@ -781,6 +781,22 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
     
+    /**
+     * Returns an <code>Iterable</code> of {@link Competitor}.
+     * 
+     * @param regattaIdentifier specifies Regatta of which the competitors are about to be fetched.
+     * @return <code>Iterable</code> of {@link Competitor}
+     */
+    Iterable<Competitor> getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier);
+    
+    /**
+     * Returns a calculated {@link PairingListTemplate}, specified by flights, groups and competitors.
+     *
+     * @param regattaIdentifier {@link RegattaIdentifier} that specifies the flights and groups
+     * @param competitorsCount count of competitor that is given by a dialog
+     * @param flightMultiplier
+     * @return calculated {@link PairingListTemplate}
+     */
     PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount,
             int flightMultiplier);
 }

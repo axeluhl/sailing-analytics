@@ -26,6 +26,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -304,6 +305,17 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
         dialog.show();
+        
+        sailingService.getCompetitorsFromRegatta(regattaIdentifier, new AsyncCallback<Iterable<CompetitorDTO>>() {
+
+            @Override
+            public void onFailure(Throwable caught) { }
+
+            @Override
+            public void onSuccess(Iterable<CompetitorDTO> result) {
+                dialog.setDefaultCompetitorCount(Util.size(result));
+            }
+        });
     }
     
     private void openPairingListCreationDialog(RegattaIdentifier regattaIdentifier, PairingListTemplateDTO template) {
