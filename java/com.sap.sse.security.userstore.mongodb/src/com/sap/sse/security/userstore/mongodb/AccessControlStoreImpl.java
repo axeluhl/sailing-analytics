@@ -63,14 +63,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
         return new ArrayList<>(accessControlLists.values());
     }
     
-    /**
-     * Gets the ACL by name and if it is not present loads it. However there should only be the need to load them when the user store is initialized
-     */
     @Override
     public AccessControlList getAccessControlList(String idAsString) {
-        AccessControlList acl = accessControlLists.get(idAsString);
-        accessControlLists.put(acl.getId().toString(), acl);
-        return acl;
+        return accessControlLists.get(idAsString);
     }
 
     @Override

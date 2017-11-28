@@ -23,6 +23,7 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.User;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
@@ -116,7 +117,7 @@ public class SecurityResource extends AbstractSecurityResource {
             getService().createSimpleUser(username, email, password, fullName, company, validationBaseURL);
             SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
             return respondWithAccessTokenForUser(username);
-        } catch (UserManagementException | MailException e) {
+        } catch (UserManagementException | MailException | UserGroupManagementException e) {
             return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
         }
     }

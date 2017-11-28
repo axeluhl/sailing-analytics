@@ -66,7 +66,6 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.common.WithID;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
@@ -93,6 +92,7 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroup;
@@ -205,10 +205,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (Util.isEmpty(userStore.getUsers())) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
+                User user = createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
                         /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
+                createOwnership("admin", "admin", user.getDefaultTenant(), "admin");
                 addRoleForUser("admin", (UUID) AdminRole.getInstance().getId());
-            } catch (UserManagementException | MailException e) {
+            } catch (UserManagementException | MailException | UserGroupManagementException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
             }
         }
@@ -295,29 +296,37 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    /**
+     * Returns a list of all existing access control lists. This is possibly not complete in the sense
+     * that there is a access control list for every access controlled data object.
+     */
     public Iterable<AccessControlList> getAccessControlListList() {
         return accessControlStore.getAccessControlLists();
     }
 
     @Override
     public AccessControlList getAccessControlList(String idAsString) {
-        return accessControlStore.getAccessControlList(idAsString);
+        AccessControlList acl = accessControlStore.getAccessControlList(idAsString);
+        if (acl == null) {
+            acl = accessControlStore.createAccessControlList(idAsString, "?");
+        }
+        return acl;
     }
     
     @Override
-    public SecurityService createAccessControlList(WithID id) {
-        return createAccessControlList(id, id.getId().toString());
+    public SecurityService createAccessControlList(String idAsString) {
+        return createAccessControlList(idAsString, "?");
     }
     
     @Override
-    public SecurityService createAccessControlList(WithID id, String displayName) {
-        apply(s->s.internalCreateAcl(id.getId().toString(), displayName));
+    public SecurityService createAccessControlList(String idAsString, String displayName) {
+        apply(s->s.internalCreateAcl(idAsString, displayName));
         return this;
     }
     
     @Override
-    public Void internalCreateAcl(String id, String displayName) {
-        accessControlStore.createAccessControlList(id, displayName);
+    public Void internalCreateAcl(String idAsString, String displayName) {
+        accessControlStore.createAccessControlList(idAsString, displayName);
         return null;
     }
 
@@ -330,8 +339,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Void internalAclPutPermissions(String id, UUID group, Set<String> permissions) {
-        accessControlStore.setAclPermissions(id, group, permissions);
+    public Void internalAclPutPermissions(String idAsString, UUID group, Set<String> permissions) {
+        accessControlStore.setAclPermissions(idAsString, group, permissions);
         return null;
     }
 
@@ -345,8 +354,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Void internalAclAddPermission(String id, UUID group, String permission) {
-        accessControlStore.addAclPermission(id, group, permission);
+    public Void internalAclAddPermission(String idAsString, UUID group, String permission) {
+        accessControlStore.addAclPermission(idAsString, group, permission);
         return null;
     }
 
@@ -360,8 +369,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override 
-    public Void internalAclRemovePermission(String id, UUID group, String permission) {
-        accessControlStore.removeAclPermission(id, group, permission);
+    public Void internalAclRemovePermission(String idAsString, UUID group, String permission) {
+        accessControlStore.removeAclPermission(idAsString, group, permission);
         return null;
     }
     
@@ -371,25 +380,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Void internalDeleteAcl(String id) {
-        accessControlStore.removeAccessControlList(id);
+    public Void internalDeleteAcl(String idAsString) {
+        accessControlStore.removeAccessControlList(idAsString);
         return null;
     }
     
     @Override
-    public SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner) {
-        return createOwnership(idAsString, owner, tenantOwner, idAsString.getId().toString());
+    public SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner) {
+        return createOwnership(idAsString, owner, tenantOwner, "?");
     }
     
     @Override
-    public SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner, String displayName) {
-        apply(s->s.internalCreateOwnership(idAsString.getId().toString(), owner, tenantOwner, displayName));
+    public SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
+        apply(s->s.internalCreateOwnership(idAsString, owner, tenantOwner, displayName));
         return this;
     }
     
     @Override
-    public Void internalCreateOwnership(String id, String owner, UUID tenantOwner, String displayName) {
-        accessControlStore.createOwnership(id, owner, tenantOwner, displayName);
+    public Void internalCreateOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
+        accessControlStore.createOwnership(idAsString, owner, tenantOwner, displayName);
         return null;
     }
     
@@ -399,8 +408,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Void internalDeleteOwnership(String id) {
-        accessControlStore.removeOwnership(id);
+    public Void internalDeleteOwnership(String idAsString) {
+        accessControlStore.removeOwnership(idAsString);
         return null;
     }
 
@@ -422,6 +431,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Iterable<Tenant> getTenantList() {
         return userStore.getTenants();
+    }
+    
+    @Override
+    public Tenant getTenant(UUID id) {
+        return userStore.getTenant(id);
     }
     
     @Override
@@ -565,7 +579,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, final String validationBaseURL) throws UserManagementException, MailException {
+            String company, final String validationBaseURL) throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException {
         if (userStore.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -574,11 +588,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
+        Tenant tenant = createTenant(UUID.randomUUID(), username + "-tenant");
+        accessControlStore.createOwnership(tenant.getId().toString(), username, (UUID) tenant.getId(), tenant.getName());
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final User result = userStore.createUser(username, email, "admin", upa); // TODO: get the principal as owner
+        final User result = userStore.createUser(username, email, (UUID) tenant.getId(), upa); // TODO: get the principal as owner
+        addUserToUserGroup((UUID) tenant.getId(), result.getName());
         result.setFullName(fullName);
         result.setCompany(company);
         final String emailValidationSecret = result.startEmailValidation();
@@ -746,6 +763,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     protected String hashPassword(String password, Object salt) {
         return new Sha256Hash(password, salt, 1024).toBase64();
     }
+    
+    @Override
+    public Iterable<Role> getRoles() {
+        return accessControlStore.getRoles();
+    }
 
     @Override
     public Iterable<UUID> getRolesFromUser(String name) throws UserManagementException {
@@ -838,11 +860,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public User createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException {
+    public User createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException, TenantManagementException, UserGroupManagementException {
         if (userStore.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        return userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), "admin", socialUserAccount); // TODO: get the principal as owner
+        Tenant tenant = createTenant(UUID.randomUUID(), name + "-tenant");
+        accessControlStore.createOwnership(tenant.getId().toString(), name, (UUID) tenant.getId(), tenant.getName());
+        User result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), (UUID) tenant.getId(), socialUserAccount);
+        addUserToUserGroup((UUID) tenant.getId(), result.getName());
+        return result;
     }
 
     @Override

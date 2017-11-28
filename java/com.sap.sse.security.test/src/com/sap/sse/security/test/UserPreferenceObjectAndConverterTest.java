@@ -2,6 +2,7 @@ package com.sap.sse.security.test;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -112,7 +113,7 @@ public class UserPreferenceObjectAndConverterTest {
      */
     @Test
     public void deleteUserWithPreferenceObjectTest() throws UserManagementException {
-        store.createUser(user1, email, "admin");
+        store.createUser(user1, email, UUID.randomUUID());
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreferenceObject(user1, prefKey1, pref1);
         store.deleteUser(user1);
@@ -121,7 +122,7 @@ public class UserPreferenceObjectAndConverterTest {
     
     @Test
     public void removeConverterTest() throws UserManagementException {
-        store.createUser(user1, email, "admin");
+        store.createUser(user1, email, UUID.randomUUID());
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreference(user1, prefKey1, serializedPref1);
         store.removePreferenceConverter(prefKey1);

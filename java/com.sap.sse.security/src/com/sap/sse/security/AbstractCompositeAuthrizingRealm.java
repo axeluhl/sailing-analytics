@@ -147,7 +147,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         return result;
     }
     
-    protected AccessControlStore getAccessControlListStore() {
+    protected AccessControlStore getAccessControlStore() {
         AccessControlStore result;
         if (testAccessControlStore != null) {
             result = testAccessControlStore;
@@ -176,8 +176,8 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
                     user, getUserStore().getUserGroups(), directPermissions, 
                     getUserStore().getRolesFromUser(user), this, 
-                    getAccessControlListStore().getOwnership(parts[2]), 
-                    getAccessControlListStore().getAccessControlList(parts[2]));
+                    getAccessControlStore().getOwnership(parts[2]), 
+                    getAccessControlStore().getAccessControlList(parts[2]));
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
             return false;
@@ -283,7 +283,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
     
     private Role getRole(UUID id) {
-        return getAccessControlListStore().getRole(id);
+        return getAccessControlStore().getRole(id);
     }
     
     @Override
@@ -308,7 +308,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     
     @Override
     public Iterable<Role> getRoles() {
-        return getAccessControlListStore().getRoles();
+        return getAccessControlStore().getRoles();
     }
     
     // TODO as default implementation in interface

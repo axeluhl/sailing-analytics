@@ -10,7 +10,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
-import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -33,7 +32,7 @@ public interface UserManagementService extends RemoteService {
     
     Collection<TenantDTO> getTenantList();
     
-    TenantDTO createTenant(String name, String tenantOwner) throws UserGroupManagementException, TenantManagementException;
+    TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException;
     
     UserGroupDTO addUserToTenant(String idAsString, String user) throws UnauthorizedException;
     

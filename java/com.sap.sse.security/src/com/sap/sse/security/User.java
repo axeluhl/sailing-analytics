@@ -67,19 +67,20 @@ public class User implements NamedWithID {
 
     private final Set<UUID> roles;
     private final Set<String> permissions;
+    private final UUID defaultTenant;
     private final Map<AccountType, Account> accounts;
 
-    public User(String name, String email, Account... accounts) {
-        this(name, email, Arrays.asList(accounts));
+    public User(String name, String email, UUID defaultTenant, Account... accounts) {
+        this(name, email, defaultTenant, Arrays.asList(accounts));
     }
 
-    public User(String name, String email, Collection<Account> accounts) {
+    public User(String name, String email, UUID defaultTenant, Collection<Account> accounts) {
         this(name, email, /* fullName */ null, /* company */ null, /* locale */ null, /* is email validated */ false,
-             /* password reset secret */ null, /* validation secret */ null, accounts);
+             /* password reset secret */ null, /* validation secret */ null, defaultTenant, accounts);
     }
 
     public User(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
-            String passwordResetSecret, String validationSecret, Collection<Account> accounts) {
+            String passwordResetSecret, String validationSecret, UUID defaultTenant, Collection<Account> accounts) {
         super();
         this.name = name;
         this.fullName = fullName;
@@ -91,6 +92,7 @@ public class User implements NamedWithID {
         this.passwordResetSecret = passwordResetSecret;
         this.validationSecret = validationSecret;
         this.emailValidated = emailValidated;
+        this.defaultTenant = defaultTenant;
         this.accounts = new HashMap<>();
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
@@ -167,6 +169,10 @@ public class User implements NamedWithID {
     
     public void removePermission(String permission) {
         permissions.remove(permission);
+    }
+    
+    public UUID getDefaultTenant() {
+        return defaultTenant;
     }
     
     public Account getAccount(AccountType type) {
@@ -261,8 +267,10 @@ public class User implements NamedWithID {
     @Override
     public String toString() {
         return "User [name=" + name + ", email=" + email + ", fullName=" + fullName + ", company=" + company
-                + ", locale=" + locale + (isEmailValidated() ? " (validated)" : ")") + ", roles="
-                + Arrays.toString(roles.toArray(new String[roles.size()])) + ", accounts="
+                + ", locale=" + locale + (isEmailValidated() ? " (validated)" : ")") + "permissions="
+                + Arrays.toString(permissions.toArray(new String[permissions.size()])) + ", roles="
+                + Arrays.toString(roles.toArray(new String[roles.size()])) + ", defaultTenant="
+                + defaultTenant + ", accounts="
                 + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
     }
 

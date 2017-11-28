@@ -21,6 +21,8 @@ import com.sap.sse.replication.testsupport.AbstractServerWithMultipleServicesRep
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -95,7 +97,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
      */
     @Test
     public void triggerEmailSendByAddingUserOnMaster()
-            throws UserManagementException, MailException, IllegalAccessException, InterruptedException {
+            throws UserManagementException, MailException, IllegalAccessException, InterruptedException, TenantManagementException, UserGroupManagementException {
         //TODO IllegalStateExceptions thrown, probably because the two replication services per instance share the
         //same message queue, but don't know about each other (unlike actual OSGi setup, where there is only
         //one replication service per instance that nows all Replicables)
@@ -129,7 +131,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     @Test
     @Ignore
     public void triggerEmailSendByAddingUserOnReplica()
-            throws UserManagementException, MailException, IllegalAccessException, InterruptedException {
+            throws UserManagementException, MailException, IllegalAccessException, InterruptedException, TenantManagementException, UserGroupManagementException {
         SecurityService replicaSecurityService = securitySetUp.getReplica();
 
         final String username = "Ernie";

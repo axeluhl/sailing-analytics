@@ -231,9 +231,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 permissions.add((String) o);
             }
         }
+        UUID defaultTenant = UUID.fromString((String) userDBObject.get(FieldNames.User.DEFAULT_TENANT.name()));
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        User result = new User(name, email, fullName, company, locale, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
+        User result = new User(name, email, fullName, company, locale, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, defaultTenant, accounts.values());
         for (UUID role : roles) {
             result.addRole(role);
         }

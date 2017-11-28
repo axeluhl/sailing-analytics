@@ -11,13 +11,13 @@ import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sse.common.WithID;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroup;
@@ -43,23 +43,23 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     AccessControlList getAccessControlList(String idAsString);
     
     /**
-     * @param id Has to be globally unique, will be stored as string
+     * @param idAsString Has to be globally unique
      */
-    SecurityService createAccessControlList(WithID id);
+    SecurityService createAccessControlList(String idAsString);
     
     /**
-     * @param id Has to be globally unique, will be stored as string
+     * @param id Has to be globally unique
      */
-    SecurityService createAccessControlList(WithID id, String displayName);
+    SecurityService createAccessControlList(String idAsString, String displayName);
     
     AccessControlList updateACL(String idAsString, Map<UserGroup, Set<String>> permissionMap);
     
-    /*
+    /**
      * @param name The name of the user group to add
      */
     AccessControlList addToACL(String idAsString, UUID group, String permission);
     
-    /*
+    /**
      * @param name The name of the user group to remove
      */
     AccessControlList removeFromACL(String idAsString, UUID group, String permission);
@@ -67,14 +67,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void deleteACL(String idAsString);
     
     /**
-     * @param idAsString Has to be globally unique, will be stored as string
+     * @param idAsString Has to be globally unique
      */
-    SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner);
+    SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner);
     
     /**
-     * @param idAsString Has to be globally unique, will be stored as string
+     * @param idAsString Has to be globally unique
      */
-    SecurityService createOwnership(WithID idAsString, String owner, UUID tenantOwner, String displayName);
+    SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
     
     void deleteOwnership(String idAsString);
     
@@ -85,6 +85,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getUserGroupByName(String name);
     
     Iterable<Tenant> getTenantList();
+    
+    Tenant getTenant(UUID id);
     
     Tenant getTenantByName(String name);
     
@@ -122,7 +124,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
+    User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
@@ -130,10 +132,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
-    User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
+    User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException, TenantManagementException, UserGroupManagementException;
 
     void deleteUser(String username) throws UserManagementException;
 
+    Iterable<Role> getRoles();
+    
     Iterable<UUID> getRolesFromUser(String username) throws UserManagementException;
 
     void addRoleForUser(String username, UUID role);

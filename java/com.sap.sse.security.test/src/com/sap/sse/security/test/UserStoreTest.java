@@ -3,6 +3,8 @@ package com.sap.sse.security.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,7 +22,7 @@ public class UserStoreTest {
     
     @Before
     public void setUp() throws UserManagementException {
-        userStore.createUser(username, email, "admin");
+        userStore.createUser(username, email, UUID.randomUUID());
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
     }

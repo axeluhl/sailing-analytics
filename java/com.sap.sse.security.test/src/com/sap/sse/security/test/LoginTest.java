@@ -69,7 +69,7 @@ public class LoginTest {
 
     @Test
     public void rolesTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com", "admin");
+        store.createUser("me", "me@sap.com", UUID.randomUUID());
         UUID testId = UUID.randomUUID();
         store.addRoleForUser("me", testId);
         UserStoreImpl store2 = new UserStoreImpl();
@@ -78,7 +78,7 @@ public class LoginTest {
 
     @Test
     public void permissionsTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com", "admin");
+        store.createUser("me", "me@sap.com", UUID.randomUUID());
         store.addPermissionForUser("me", "a:b:c");
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(store2.getUserByName("me").hasPermission("a:b:c"));

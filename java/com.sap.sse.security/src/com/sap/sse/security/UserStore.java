@@ -51,7 +51,7 @@ public interface UserStore extends Named {
     
     User getUserByAccessToken(String accessToken);
 
-    User createUser(String name, String email, String owner, Account... accounts) throws UserManagementException;
+    User createUser(String name, String email, UUID defaultTenant, Account... accounts) throws UserManagementException;
 
     void updateUser(User user);
 

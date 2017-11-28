@@ -25,12 +25,13 @@ public class UserDTO implements IsSerializable {
     private Set<UUID> roles;
     private RolePermissionModelDTO rolePermissionModel;
     private Set<WildcardPermission> permissions;
+    private TenantDTO defaultTenant;
     private boolean emailValidated;
 
     UserDTO() {} // for serialization only
 
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<UUID> roles, RolePermissionModelDTO rolePermissionModelDTO,
+            List<AccountDTO> accounts, Iterable<UUID> roles, RolePermissionModelDTO rolePermissionModelDTO, TenantDTO defaultTenant,
             Iterable<String> stringPermissions) {
         this.name = name;
         this.email = email;
@@ -42,6 +43,7 @@ public class UserDTO implements IsSerializable {
         this.roles = new HashSet<>();
         Util.addAll(roles, this.roles);
         this.rolePermissionModel = rolePermissionModelDTO;
+        this.defaultTenant = defaultTenant;
         this.permissions = new HashSet<>();
         for (String permission : stringPermissions) {
             this.permissions.add(new WildcardPermission(permission, true));
@@ -83,10 +85,6 @@ public class UserDTO implements IsSerializable {
             result.add(rolePermissionModel.getName(id));
         }
         return result;
-    }
-    
-    public boolean hasRole(String role) {
-        return roles.contains(role);
     }
     
     /**
@@ -150,6 +148,10 @@ public class UserDTO implements IsSerializable {
             userGroups = new ArrayList<>(acl.getUserGroupPermissionMap().keySet());
         }
         return PermissionChecker.isPermitted(permission, name, userGroups, permissions, roles, rolePermissionModel, owner, acl);
+    }
+    
+    public TenantDTO getDefaultTenant() {
+        return defaultTenant;
     }
 
     public List<AccountDTO> getAccounts() {

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.junit.Before;
@@ -183,7 +184,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException {
-        store.createUser(user1, mail, "admin");
+        store.createUser(user1, mail, UUID.randomUUID());
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -230,7 +231,7 @@ public class PreferenceObjectBasedNotificationSetTest {
      */
     @Test
     public void deleteUserWithMappingTest() throws UserManagementException {
-        store.createUser(user1, mail, "admin");
+        store.createUser(user1, mail, UUID.randomUUID());
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -242,7 +243,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void removePreferenceConverterTest() throws UserManagementException {
-        store.createUser(user1, mail, "admin");
+        store.createUser(user1, mail, UUID.randomUUID());
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -261,8 +262,9 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
-        store.createUser(username, email, "admin");
-        store.updateUser(new User(username, email, null, null, null, true, null, null, Collections.emptySet()));
+        UUID defaultTenant = UUID.randomUUID();
+        store.createUser(username, email, defaultTenant);
+        store.updateUser(new User(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet()));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {

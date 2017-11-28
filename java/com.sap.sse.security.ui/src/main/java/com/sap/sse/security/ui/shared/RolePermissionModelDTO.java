@@ -11,11 +11,11 @@ import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class RolePermissionModelDTO implements RolePermissionModel, IsSerializable {
-    private Map<UUID, Role> roles;
+    private Map<UUID, RoleDTO> roles;
     
     RolePermissionModelDTO() {} // for serialization only
     
-    public RolePermissionModelDTO(Map<UUID, Role> roles) {
+    public RolePermissionModelDTO(Map<UUID, RoleDTO> roles) {
         this.roles = roles;
     }
     

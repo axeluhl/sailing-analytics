@@ -3626,9 +3626,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                             officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
             createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-            Event event = getService().getEvent(eventUuid);
-            getSecurityService().createAccessControlList(event);
-            getSecurityService().createOwnership(event, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwnerName).getId());
+            getSecurityService().createAccessControlList(eventUuid.toString(), eventName);
+            getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwnerName).getId(), eventName);
             EventDTO result = getEventById(eventUuid, false);
             return result;
         }

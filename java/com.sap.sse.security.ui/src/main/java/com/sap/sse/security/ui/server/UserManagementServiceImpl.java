@@ -34,13 +34,11 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -76,8 +74,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
-    private final UserStore userStore;
-    private final AccessControlStore accessControlStore;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
@@ -105,13 +101,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecurityUtils.setSecurityManager(getSecurityService().getSecurityManager());
             }
         }.start();
-        userStore = context.getService(context.getServiceReference(UserStore.class));
-        accessControlStore = context.getService(context.getServiceReference(AccessControlStore.class));
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
-        AccessControlList acl = accessControlStore.getAccessControlList(userGroup.getId().toString());
-        Owner ownership = accessControlStore.getOwnership(userGroup.getId().toString());
+        AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
+        Owner ownership = getSecurityService().getOwnership(userGroup.getId().toString());
         return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
@@ -120,8 +114,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (tenant == null) {
             return null;
         } else {
-            AccessControlList acl = accessControlStore.getAccessControlList(tenant.getId().toString());
-            Owner ownership = accessControlStore.getOwnership(tenant.getId().toString());
+            AccessControlList acl = getSecurityService().getAccessControlList(tenant.getId().toString());
+            Owner ownership = getSecurityService().getOwnership(tenant.getId().toString());
             return new TenantDTO((UUID) tenant.getId(), tenant.getName(),
                     createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), tenant.getUsernames());
         }
@@ -130,7 +124,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
         Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
         for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
-            UserGroup group = userStore.getUserGroup(entry.getKey());
+            UserGroup group = getSecurityService().getUserGroup(entry.getKey());
             permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
                     entry.getValue());
         }
@@ -188,11 +182,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException, UserGroupManagementException {
+    public TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException {
         UUID id = UUID.randomUUID();
-        Tenant tenant = getSecurityService().createTenant(id, name);
-        getSecurityService().createAccessControlList(tenant, name)
-            .createOwnership(tenant, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId(), name);
+        Tenant tenant;
+        try {
+            tenant = getSecurityService().createTenant(id, name);
+        } catch (UserGroupManagementException e) {
+            throw new TenantManagementException(e.getMessage());
+        }
+        getSecurityService().createOwnership(id.toString(), (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId(), name);
         return createTenantDTOFromTenant(tenant);
     }
     
@@ -222,7 +220,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             getSecurityService().deleteACL(id.toString());
             getSecurityService().deleteOwnership(id.toString());
             return new SuccessInfo(true, "Deleted tenant: " + idAsString + ".", /* redirectURL */ null, null);
-        } catch (TenantManagementException | UserGroupManagementException e) {
+        } catch (UserGroupManagementException e) {
             return new SuccessInfo(false, "Could not delete tenant.", /* redirectURL */ null, null);
         }
     }
@@ -272,9 +270,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         User u = null;
         try {
             u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
-            getSecurityService().createAccessControlList(u)
-                .createOwnership(u, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId());
-        } catch (UserManagementException e) {
+            getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId());
+        } catch (UserManagementException | UserGroupManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());
         }
@@ -458,13 +455,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
-        HashMap<UUID, Role> roleMap = new HashMap<>();
-        for (Role role : accessControlStore.getRoles()) {
+        HashMap<UUID, RoleDTO> roleMap = new HashMap<>();
+        for (Role role : getSecurityService().getRoles()) {
             roleMap.put((UUID) role.getId(), createRoleDTOFromRole(role));
         }
+        TenantDTO defaultTenantDTO = createTenantDTOFromTenant(getSecurityService().getTenant(user.getDefaultTenant()));
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), new RolePermissionModelDTO(roleMap), user.getPermissions());
+                accountDTOs, user.getRoles(), new RolePermissionModelDTO(roleMap), defaultTenantDTO, user.getPermissions());
         return userDTO;
     }
 

@@ -20,19 +20,19 @@ import com.sap.sse.security.shared.UserManagementException;
  *
  */
 public interface ReplicableSecurityService extends SecurityService {
-    Void internalCreateAcl(String id, String displayName);
+    Void internalCreateAcl(String idAsString, String displayName);
     
-    Void internalAclPutPermissions(String id, UUID group, Set<String> permissions);
+    Void internalAclPutPermissions(String idAsString, UUID group, Set<String> permissions);
     
-    Void internalAclAddPermission(String id, UUID group, String permission);
+    Void internalAclAddPermission(String idAsString, UUID group, String permission);
     
-    Void internalAclRemovePermission(String id, UUID group, String permission);
+    Void internalAclRemovePermission(String idAsString, UUID group, String permission);
     
-    Void internalDeleteAcl(String id);
+    Void internalDeleteAcl(String idAsString);
     
-    Void internalCreateOwnership(String id, String owner, UUID tenantOwner, String displayName);
+    Void internalCreateOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
     
-    Void internalDeleteOwnership(String id);
+    Void internalDeleteOwnership(String idAsString);
     
     Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException;
     

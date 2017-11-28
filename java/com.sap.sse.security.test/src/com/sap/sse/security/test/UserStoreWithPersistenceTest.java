@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +53,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testCreateUser() throws UserManagementException {
-        store.createUser(username, email, "admin");
+        store.createUser(username, email, UUID.randomUUID());
         assertNotNull(store.getUserByName(username));
         assertNotNull(store.getUserByEmail(email));
 
@@ -63,8 +64,9 @@ public class UserStoreWithPersistenceTest {
     
     @Test
     public void testMasterdataIsSaved() throws UserManagementException {
-        store.createUser(username, email, "admin");
-        store.updateUser(new User(username, email, fullName, company, Locale.GERMAN, false, null, null, Collections.emptySet()));
+        UUID defaultTenant = UUID.randomUUID();
+        store.createUser(username, email, defaultTenant);
+        store.updateUser(new User(username, email, fullName, company, Locale.GERMAN, false, null, null, defaultTenant, Collections.emptySet()));
         newStore();
         User savedUser = store.getUserByName(username);
         assertEquals(username, savedUser.getName());
@@ -79,7 +81,7 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUser() throws UserManagementException {
-        store.createUser(username, email, "admin");
+        store.createUser(username, email, UUID.randomUUID());
         store.deleteUser(username);
         assertNull(store.getUserByName(username));
         assertNull(store.getUserByEmail(email));
@@ -91,7 +93,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testSetPreferences() throws UserManagementException {
-        store.createUser(username, email, "admin");
+        store.createUser(username, email, UUID.randomUUID());
         store.setPreference(username, prefKey, prefValue);
         assertEquals(prefValue, store.getPreference(username, prefKey));
         newStore();
@@ -100,7 +102,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testUnsetPreferences() throws UserManagementException {
-        store.createUser(username, email, "admin");
+        store.createUser(username, email, UUID.randomUUID());
         store.setPreference(username, prefKey, prefValue);
         store.unsetPreference(username, prefKey);
         assertNull(store.getPreference(username, prefKey));
@@ -113,7 +115,7 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUserWithPreferences() throws UserManagementException {
-        store.createUser(username, email, "admin");
+        store.createUser(username, email, UUID.randomUUID());
         store.setPreference(username, prefKey, prefValue);
         store.deleteUser(username);
         assertNull(store.getPreference(username, prefKey));

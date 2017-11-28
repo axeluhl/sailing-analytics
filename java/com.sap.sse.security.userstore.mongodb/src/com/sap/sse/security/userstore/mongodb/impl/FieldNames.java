@@ -39,6 +39,7 @@ public class FieldNames {
         EMAIL,
         ACCOUNTS,
         ROLES, PERMISSIONS,
+        DEFAULT_TENANT,
         EMAIL_VALIDATED,
         PASSWORD_RESET_SECRET,
         VALIDATION_SECRET;

@@ -17,8 +17,6 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
     private TabLayoutPanel center;
     
-    private UserDTO user;
-    
     @Override
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
@@ -26,10 +24,6 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
-                if (!hasRequiredRole(user) && hasRequiredRole(UserManagementEntryPoint.this.user)) {
-                    Window.Location.reload(); // user signed out or lost required role; reload to take the user to the log-in screen
-                }
-                UserManagementEntryPoint.this.user = user;
             }
         });
         UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), getStringMessages(),
@@ -41,9 +35,4 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
         RootPanel.get().add(new LoginPanel(Resources.INSTANCE.loginPanelCss(), getUserService()));
         setTabPanelSize(center, ""+Window.getClientWidth()+"px", ""+Window.getClientHeight()+"px");
     }
-
-    private boolean hasRequiredRole(UserDTO user) {
-        return user != null && user.hasRole("admin");
-    }
-
 }

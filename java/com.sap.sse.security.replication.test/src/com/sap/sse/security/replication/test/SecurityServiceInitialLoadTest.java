@@ -13,6 +13,8 @@ import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -29,7 +31,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
         super(new AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp() {
             @Override
             protected SecurityServiceImpl createNewMaster()
-                    throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
+                    throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, TenantManagementException, UserGroupManagementException {
                 final UserStore userStore = new UserStoreImpl(null, null); // no persistence
                 final AccessControlStore accessControlStore = new AccessControlStoreImpl(null, null); // no persistence
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);
