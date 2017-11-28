@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -121,6 +119,20 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         @Override
         protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.currentRideHeightInMeters;
+        }
+    }
+    
+    private class CurrentDistanceFoiledInMeters extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.currentDistanceFoiledInMeters;
+        }
+    }
+    
+    private class CurrentDurationFoiled extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.currentDurationFoiledInSeconds;
         }
     }
     
@@ -274,6 +286,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS, DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, 
                 DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.CURRENT_HEEL_IN_DEGREES,
                 DetailType.CURRENT_PITCH_IN_DEGREES, DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
+                DetailType.CURRENT_DISTANCE_FOILED_IN_METERS, DetailType.CURRENT_DURATION_FOILED_IN_SECONDS,
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 DetailType.TIME_TRAVELED, DetailType.CORRECTED_TIME_TRAVELED, DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
@@ -301,6 +314,10 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS, new RideHeightColumn(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
                 new CurrentRideHeightInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS, new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS,
+                new CurrentDistanceFoiledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.CURRENT_DURATION_FOILED_IN_SECONDS, new TotalTimeColumn(DetailType.CURRENT_DURATION_FOILED_IN_SECONDS,
+                new CurrentDurationFoiled(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
                 new FormattedDoubleDetailTypeColumn(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, new EstimatedTimeToNextWaypointInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
@@ -318,8 +335,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new WindwardDistanceToGoInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.TIME_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.TIME_TRAVELED, new TotalTimeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CORRECTED_TIME_TRAVELED,
                 new FormattedDoubleDetailTypeColumn(DetailType.CORRECTED_TIME_TRAVELED, new CorrectedTimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, 
@@ -375,7 +391,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
 
     @Override
-    public Header<SafeHtml> getHeader() {
+    public SortableExpandableColumnHeader getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(/* title */ stringMessages.leg()+(legIndex+1),
                 /* iconURL */ null, getLeaderboardPanel(), this, stringMessages);
         return result;

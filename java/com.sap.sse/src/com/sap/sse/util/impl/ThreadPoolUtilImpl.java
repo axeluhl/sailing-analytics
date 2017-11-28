@@ -31,6 +31,11 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     }
 
     @Override
+    public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name) {
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY-1, size);
+    }
+
+    @Override
     public ScheduledExecutorService createForegroundTaskThreadPoolExecutor(String name) {
         return createThreadPoolExecutor(name, Thread.NORM_PRIORITY);
     }

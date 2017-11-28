@@ -6,6 +6,8 @@ import com.sap.sse.gwt.client.shared.components.Component;
 
 public interface QueryRunner extends QueryDefinitionChangedListener, Component<QueryRunnerSettings> {
     
-    public void run(StatisticQueryDefinitionDTO queryDefinition);
+    void run(StatisticQueryDefinitionDTO queryDefinition);
+    
+    void runQuery();
 
 }

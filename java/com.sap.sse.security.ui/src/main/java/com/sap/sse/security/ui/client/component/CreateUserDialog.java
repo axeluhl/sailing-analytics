@@ -16,6 +16,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * @author Axel Uhl (D043530)
  *
  */
+// TODO: Add input fields for full name, company and locale information!
 public class CreateUserDialog extends AbstractUserDialog {
     public CreateUserDialog(final StringMessages stringMessages,
             final UserManagementServiceAsync userManagementService, final Iterable<UserCreatedEventHandler> handlers) {
@@ -26,7 +27,7 @@ public class CreateUserDialog extends AbstractUserDialog {
                         userManagementService
                                 .createSimpleUser(usernameEmailPassword.getUsername(),
                                         usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
-                                        /* fullName */ null, /* company */ null,
+                                        /* TOOD fullName */ null, /* TODO company */ null, /* TODO locale */ null,
                                         EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), "tenant", new AsyncCallback<UserDTO>() {
                                             @Override
                                             public void onSuccess(UserDTO result) {

@@ -22,6 +22,7 @@
         <g:HTMLPanel addStyleNames="{style.formPanelContent}">
 	        <g:FileUpload name="file" ui:field="fileUploadUi"/>
 	        <g:ListBox name="preferredImporter" ui:field="preferredImporterUi" height="21px"/>
+            <g:CheckBox name="downsample" checked="true" ui:field="downsampleUi">Downsample</g:CheckBox>
 	        <g:Button styleName="" ui:field="importButtonUi"/>
 	        <g:Image resource="{res.transparentGif}" addStyleNames="{style.loadingImage}" ui:field="loadingImageUi"/>
         </g:HTMLPanel>

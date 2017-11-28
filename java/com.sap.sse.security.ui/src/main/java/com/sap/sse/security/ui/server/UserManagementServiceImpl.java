@@ -19,6 +19,7 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import org.apache.shiro.SecurityUtils;
@@ -102,14 +103,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }.start();
     }
-    
+
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
         AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
         Owner ownership = getSecurityService().getOwnership(userGroup.getId().toString());
-        return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
+        return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(),
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
-    
+
     private TenantDTO createTenantDTOFromTenant(Tenant tenant) {
         if (tenant == null) {
             return null;
@@ -120,21 +121,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), tenant.getUsernames());
         }
     }
-    
+
     private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
         Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
         for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
             UserGroup group = getSecurityService().getUserGroup(entry.getKey());
-            permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
+            permissionMapDTO.put(createUserGroupDTOFromUserGroup(group),
                     entry.getValue());
         }
         return new AccessControlListDTO(acl.getId().toString(), acl.getDisplayName(), permissionMapDTO);
     }
-    
+
     private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
         return new OwnerDTO(ownership.getId().toString(), ownership.getOwner(), ownership.getTenantOwner(), ownership.getDisplayName());
     }
-    
+
     @Override
     public Collection<AccessControlListDTO> getAccessControlListList() {
         List<AccessControlListDTO> acls = new ArrayList<>();
@@ -144,12 +145,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         return acls;
     }
-    
+
     @Override
     public AccessControlListDTO getAccessControlList(String idAsString) {
         return createAclDTOFromAcl(getSecurityService().getAccessControlList(idAsString));
     }
-    
+
     @Override
     public AccessControlListDTO updateACL(String idAsString, Map<String, Set<String>> permissionStrings) {
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
@@ -158,19 +159,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         return createAclDTOFromAcl(getSecurityService().updateACL(idAsString, permissionMap));
     }
-    
+
     @Override
     public AccessControlListDTO addToACL(String idAsString, String tenantIdAsString, String permission) {
         UUID tenantId = UUID.fromString(tenantIdAsString);
         return createAclDTOFromAcl(getSecurityService().addToACL(idAsString, tenantId, permission));
     }
-    
+
     @Override
     public AccessControlListDTO removeFromACL(String idAsString, String tenantIdAsString, String permission) {
         UUID tenantId = UUID.fromString(tenantIdAsString);
         return createAclDTOFromAcl(getSecurityService().removeFromACL(idAsString, tenantId, permission));
     }
-    
+
     @Override
     public Collection<TenantDTO> getTenantList() {
         List<TenantDTO> tenants = new ArrayList<>();
@@ -180,7 +181,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         return tenants;
     }
-    
+
     @Override
     public TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException {
         UUID id = UUID.randomUUID();
@@ -193,7 +194,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         getSecurityService().createOwnership(id.toString(), (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId(), name);
         return createTenantDTOFromTenant(tenant);
     }
-    
+
     @Override
     public UserGroupDTO addUserToTenant(String idAsString, String user) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("usergroup:add_user:" + idAsString + ":" + user)) {
@@ -202,7 +203,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UnauthorizedException("Not permitted to add user from tenant");
         }
     }
-    
+
     @Override
     public UserGroupDTO removeUserFromTenant(String idAsString, String user) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(UserGroup.class.getName() + ":remove-user:" + user, true))) {
@@ -211,7 +212,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UnauthorizedException("Not permitted to remove user from tenant");
         }
     }
-    
+
     @Override
     public SuccessInfo deleteTenant(String idAsString) {
         try {
@@ -261,15 +262,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         logger.info("Logging out user: " + SecurityUtils.getSubject());
         getSecurityService().logout();
         getHttpSession().invalidate();
+        final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        getThreadLocalResponse().addCookie(cookie);
         logger.info("Invalidated HTTP session");
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
+            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
             getSecurityService().createOwnership(name, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId());
         } catch (UserManagementException | UserGroupManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
@@ -320,7 +325,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
         ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         getSecurityService().updateUserProperties(username, fullName, company,
-                localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
+                getLocaleFromLocaleName(localeName));
+    }
+
+    private Locale getLocaleFromLocaleName(String localeName) {
+        try {
+            return localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e, () -> "Error while parsing locale with name '" + localeName + "'");
+            return null;
+        }
     }
     
     @Override
@@ -394,7 +408,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
         Subject currentSubject = SecurityUtils.getSubject();
-        //if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) || 
+        //if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
         if (currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
@@ -430,7 +444,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
         }
     }
-    
+
     private RoleDTO createRoleDTOFromRole(Role role) {
         HashSet<String> stringPermissions = new HashSet<>();
         for (com.sap.sse.security.shared.WildcardPermission wildcardPermission : role.getPermissions()) {

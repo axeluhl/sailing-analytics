@@ -16,14 +16,14 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
     private TabLayoutPanel center;
-    
+
     @Override
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
         center = new TabLayoutPanel(2.5, Unit.EM);
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
             }
         });
         UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), getStringMessages(),

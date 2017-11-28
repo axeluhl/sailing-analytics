@@ -91,7 +91,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
         markPositionPanel.setComponentViewer(this);
-        userService.addUserStatusEventHandler(this);
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
                 String caption;
@@ -168,7 +167,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 mediaPlayerManagerComponent.getDependentCssClassName()));
             additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
                     "managemedia"));
-        onUserStatusChange(userService.getCurrentUser());
+        userService.addUserStatusEventHandler(this, true);
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
@@ -304,7 +303,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     }
 
     @Override
-    public void onUserStatusChange(UserDTO user) {
+    public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
         boolean forceLayout = false;

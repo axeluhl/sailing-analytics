@@ -44,6 +44,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointForLeagueOverallLeaderboard();
         case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
             return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
+        case LOW_POINT_WITH_AUTOMATIC_RDG:
+            return stringMessages.scoringSchemeLowPointWithAutomaticRdg();
         }
         return null;
     }
@@ -56,6 +58,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
         case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT_2017:
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight2017Description();
+        case HIGH_POINT_FIRST_GETS_ONE:
+            return stringMessages.scoringSchemeHighPointFirstGetsOneDescription();
         case HIGH_POINT_ESS_OVERALL:
             return stringMessages.scoringSchemeHighPointEssOverallDescription();
         case HIGH_POINT_ESS_OVERALL_12:

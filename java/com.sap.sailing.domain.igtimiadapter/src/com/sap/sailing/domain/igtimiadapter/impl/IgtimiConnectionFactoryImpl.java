@@ -3,8 +3,10 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +33,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
@@ -51,6 +52,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
@@ -321,9 +323,17 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort) {
+    public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPortAsString) throws MalformedURLException, UnsupportedEncodingException {
+        final URL redirectTarget;
+        int redirectPort;
+        if (redirectPortAsString == null || redirectPortAsString.trim().isEmpty() || (redirectPort=Integer.valueOf(redirectPortAsString)) == 0) {
+            redirectTarget = new URL(redirectProtocol, redirectHost, /* file */ "");
+        } else {
+            redirectTarget = new URL(redirectProtocol, redirectHost, redirectPort, /* file */ "");
+        }
         return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+
-                "&redirect_uri="+client.getRedirectUri(redirectProtocol, redirectHost, redirectPort);
+                "&redirect_uri="+URLEncoder.encode(client.getDefaultRedirectUri(), "UTF-8")
+                + "&state="+URLEncoder.encode(redirectTarget.toString(), "UTF-8");
     }
 
     private Client getClient() {
@@ -373,7 +383,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         DefaultHttpClient client = new SystemDefaultHttpClient();
         CookieStore cookieStore = new BasicCookieStore();
         client.setCookieStore(cookieStore);
-        client.setRedirectStrategy(new LaxRedirectStrategy());
+        client.setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes());
         HttpGet get = new HttpGet(getOauthAuthorizeUrl());
         HttpResponse responseForAuthorize = client.execute(get);
         return signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);

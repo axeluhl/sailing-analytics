@@ -139,10 +139,15 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
             }
         }
         // We can be sure that either a cache update was triggered or no further updated will be triggered
-        // We now wait for any result to be updated so that no new entry is generated after removing the entry
-        cache.get(trackedRace, true);
-        // it's now safe to remove the entry without the risk that it is added again later
-        cache.remove(trackedRace);
+        // We now wait for any result to be updated so that no new entry is generated after removing the entry.
+        // The triggerUpdate will at least have been called once.
+        final Thread t = new Thread(()->{
+            cache.get(trackedRace, true);
+            // it's now safe to remove the entry without the risk that it is added again later
+            cache.remove(trackedRace);
+        }, "Cache cleaner for tracked race "+trackedRace.getRace().getName());
+        t.setDaemon(true);
+        t.start();
     }
 
     private class Updater extends AbstractCacheUpdater<TrackedRace, TrackedRaceStatistics, EmptyUpdateInterval> {

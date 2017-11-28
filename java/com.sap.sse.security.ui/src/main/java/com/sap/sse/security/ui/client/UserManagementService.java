@@ -21,25 +21,25 @@ import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public interface UserManagementService extends RemoteService {
     Collection<AccessControlListDTO> getAccessControlListList();
-    
+
     AccessControlListDTO getAccessControlList(String idAsString);
-    
+
     AccessControlListDTO updateACL(String idAsString, Map<String, Set<String>> permissionStrings);
-    
+
     AccessControlListDTO addToACL(String idAsString, String tenantIdAsString, String permission);
-    
+
     AccessControlListDTO removeFromACL(String idAsString, String tenantIdAsString, String permission);
-    
+
     Collection<TenantDTO> getTenantList();
-    
+
     TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException;
-    
+
     UserGroupDTO addUserToTenant(String idAsString, String user) throws UnauthorizedException;
-    
+
     UserGroupDTO removeUserFromTenant(String idAsString, String user) throws UnauthorizedException;
-    
+
     SuccessInfo deleteTenant(String idAsString);
-    
+
     Collection<UserDTO> getUserList();
 
     Collection<UserDTO> getFilteredSortedUserList(String filter);
@@ -48,7 +48,7 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo login(String username, String password);
 
-    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException;
+    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException;
     
     /**
      * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have

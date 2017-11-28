@@ -39,7 +39,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -672,8 +671,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public void updateSettings(final LS newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
-
-
         if (newSettings.getOverallDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
@@ -698,17 +695,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
             }
         }
-        
-        oldShallAddOverallDetails = applyDetailSettings(newSettings);
-
+        applyDetailSettings(newSettings);
         addBusyTask();
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
             @Override
             public void run() {
                 try {
                     // avoid expansion during updateLeaderboard(...); will expand
-                    // later
-                    // if it was expanded before
+                    // later if it was expanded before
                     applyRaceSelection(newSettings);
                     updateLeaderboard(leaderboard);
                     postApplySettings(newSettings, columnsToExpandAgain);
@@ -716,10 +710,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     removeBusyTask();
                 }
             }
-
-            
         };
-        if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails
+        boolean newShallAddOverallDetails = shallAddOverallDetails();
+        if (oldShallAddOverallDetails == newShallAddOverallDetails || oldShallAddOverallDetails
                 || getLeaderboard().hasOverallDetails()) {
             doWhenNecessaryDetailHasBeenLoaded.run();
         } else { // meaning that now the details need to be loaded from the server
@@ -739,8 +732,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected abstract void applyRaceSelection(final LeaderboardSettings newSettings);
 
-    private boolean applyDetailSettings(final LeaderboardSettings newSettings) {
-        boolean oldShallAddOverallDetails = shallAddOverallDetails();
+    private void applyDetailSettings(final LeaderboardSettings newSettings) {
         if (newSettings.getOverallDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
@@ -768,7 +760,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
                     selectedRaceDetails);
         }
-        return oldShallAddOverallDetails;
     }
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
@@ -1103,7 +1094,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        public Header<SafeHtml> getHeader() {
+        public SortableExpandableColumnHeader getHeader() {
             SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
                     /* title */race.getRaceColumnName(),
                     /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this,
@@ -1119,6 +1110,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 DetailType.RACE_CALCULATED_TIME_TRAVELED,
                 DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
+                DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS, DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
@@ -1139,6 +1131,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
         return new DetailType[] { DetailType.REGATTA_RANK, DetailType.TOTAL_DISTANCE_TRAVELED,
                 DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
+                DetailType.TOTAL_DURATION_FOILED_IN_SECONDS, DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
                 DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, DetailType.TIME_ON_TIME_FACTOR,
                 DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE };
     }
@@ -1206,6 +1199,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             result.put(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                     new RideHeightColumn(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                             new RaceCurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
+                            new RaceDistanceFoiledInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS,
+                    new TotalTimeColumn(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS,
+                            new RaceDurationFoiledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
@@ -1348,7 +1349,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                final Distance distanceTraveledInMeters = row.getDistanceTraveledInMeters(getRaceColumnName());
+                final Distance distanceTraveledInMeters = row.getDistanceTraveled(getRaceColumnName());
                 final Duration time = row.getTimeSailed(getRaceColumnName());
                 final Double result;
                 if (distanceTraveledInMeters != null && time != null) {
@@ -1538,8 +1539,34 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                Distance distanceForRaceColumn = row.getDistanceTraveledInMeters(getRaceColumnName());
+                Distance distanceForRaceColumn = row.getDistanceTraveled(getRaceColumnName());
                 return distanceForRaceColumn == null ? null : distanceForRaceColumn.getMeters();
+            }
+        }
+
+        /**
+         * Accumulates the distance foiled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceFoiledInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Distance distanceForRaceColumn = row.getDistanceFoiled(getRaceColumnName());
+                return distanceForRaceColumn == null ? null : distanceForRaceColumn.getMeters();
+            }
+        }
+
+        /**
+         * Accumulates the duration foiled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDurationFoiledInSeconds implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Duration durationForRaceColumn = row.getDurationFoiled(getRaceColumnName());
+                return durationForRaceColumn == null ? null : durationForRaceColumn.asSeconds();
             }
         }
 
@@ -2056,6 +2083,20 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
+    private static class TotalDistanceFoiledInMetersField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalDistanceFoiledInMeters;
+        }
+    }
+
+    private static class TotalDurationFoiledInSecondsField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalDurationFoiledInSeconds;
+        }
+    }
+
     private static class TimeOnTimeFactorColumn implements LegDetailField<Double> {
         @Override
         public Double get(LeaderboardRowDTO row) {
@@ -2097,6 +2138,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
                 new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
+        result.put(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS, new TotalTimeColumn(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
+                new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+        result.put(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS, new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
+                new TotalDistanceFoiledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.TIME_ON_TIME_FACTOR, new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
                 new TimeOnTimeFactorColumn(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
@@ -2301,11 +2346,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
                             try {
                                 final boolean wasEmptyRaceColumnSelection = Util.isEmpty(raceColumnSelection.getSelectedRaceColumns());
                                 updateLeaderboard(result);
-                                // reapply, as columns might have changed
+                                LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
+                                // reapply, when this is the first time we received the race columns or if columns have changed
                                 if (wasEmptyRaceColumnSelection || !potentiallyChangedSettings.equals(currentSettings)) {
                                     updateSettings(potentiallyChangedSettings);
                                 }

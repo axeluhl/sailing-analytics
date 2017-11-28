@@ -41,9 +41,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
         this.cf = cf;
         SailingServiceAsync sailingService = cf.getSailingService();
 
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
         raceboardTimer = new Timer(PlayModes.Live, TIMER_ADVANCE_STEPSIZE);
-        raceboardTimer.setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
         raceboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         raceboardTimer.play();
         raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, AutoplayHelper.asyncActionsExecutor,

@@ -343,26 +343,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
-
-        SafeHtmlCell associatedRegattasCell = new SafeHtmlCell();
-        Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
-            @Override
-            public SafeHtml getValue(EventDTO event) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                int regattaCount = event.regattas.size();
-                int i = 1;
-                for (RegattaDTO regatta : event.regattas) {
-                    builder.appendEscaped(regatta.getName());
-                    if (i < regattaCount) {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    i++;
-                }
-                return builder.toSafeHtml();
-            }
-        };
         
-        AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = 
+        AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn =
                 new AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell>(new EventConfigImagesBarCell(stringMessages)) {
             @Override
             public Iterable<Action> getAllowedActions(EventDTO event) {
@@ -406,7 +388,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
         table.addColumn(imagesColumn, stringMessages.images());
         table.addColumn(videosColumn, stringMessages.videos());
-        table.addColumn(associatedRegattasColumn, stringMessages.regattas());
         table.addColumn(eventActionColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
 

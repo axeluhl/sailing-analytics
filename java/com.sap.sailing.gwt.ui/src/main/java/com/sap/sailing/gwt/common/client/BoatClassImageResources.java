@@ -40,6 +40,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/5.5mR.png")
     ImageResource _5_5MRIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/6MR.png")
+    ImageResource _6MRIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/8MR.png")
     ImageResource _8MRIcon();
     
@@ -308,5 +311,11 @@ public interface BoatClassImageResources extends ClientBundle {
     ImageResource WetaIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TOM_28_MAX.png")
-    ImageResource Tom28MaxIcon();    
+    ImageResource Tom28MaxIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TP52.png")
+    ImageResource TP52Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RUNNING.png")
+    ImageResource RunningIcon();        
 }

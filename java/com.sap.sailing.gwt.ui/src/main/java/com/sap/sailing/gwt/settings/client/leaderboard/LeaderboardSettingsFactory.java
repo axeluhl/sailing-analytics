@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
 /**
  * A factory class creating leaderboard settings for different contexts (user role, live or replay mode, etc.
@@ -59,24 +58,8 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.isShowCompetitorNationality());
     }
     
-    public SingleRaceLeaderboardSettings createSettingsWithCustomExpandPreselectedRaceState(SingleRaceLeaderboardSettings settings) {
-        return new SingleRaceLeaderboardSettings(
-                settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(),
-                settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
-                settings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                settings.isShowAddedScores(),
-                settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                settings.isShowCompetitorSailIdColumn(),
-                settings.isShowCompetitorFullNameColumn(),
-                settings.isShowRaceRankColumn(),
-                settings.isShowCompetitorNationality());
-    }
-    
     public MultiRaceLeaderboardSettings mergeLeaderboardSettings(MultiRaceLeaderboardSettings settingsWithRaceSelection, MultiRaceLeaderboardSettings settingsWithDetails) {
-        MultiRaceLeaderboardSettings newSettings = mergeLeaderboardSettingsHelper(settingsWithRaceSelection, settingsWithDetails);
-        MultiRaceLeaderboardSettings newDefaultSettings = mergeLeaderboardSettingsHelper(SettingsDefaultValuesUtils.getDefaultSettings(new MultiRaceLeaderboardSettings(), settingsWithRaceSelection), SettingsDefaultValuesUtils.getDefaultSettings(new MultiRaceLeaderboardSettings(), settingsWithDetails));
-        SettingsDefaultValuesUtils.keepDefaults(newDefaultSettings, newSettings);
+        final MultiRaceLeaderboardSettings newSettings = mergeLeaderboardSettingsHelper(settingsWithRaceSelection, settingsWithDetails);
         return newSettings;
     }
     

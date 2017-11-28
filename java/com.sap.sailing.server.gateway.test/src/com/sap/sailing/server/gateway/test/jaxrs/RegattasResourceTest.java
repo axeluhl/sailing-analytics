@@ -33,7 +33,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private String regattaName = "TestRegatta";
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();

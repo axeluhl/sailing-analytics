@@ -33,6 +33,7 @@ public class RaceTimesInfoProvider {
     
     private final HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
     private final Set<RaceTimesInfoProviderListener> listeners;
+    private boolean terminated = false;
     
     /**
      * The <code>raceIdentifiers</code> has to be non-<code>null</code>, but can be empty.
@@ -49,9 +50,11 @@ public class RaceTimesInfoProvider {
         RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
-                readTimesInfos();
-                Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestIntervalInMillis);
-                // don't execute *this* particular scheduled repeating command again; the line above re-scheduled already
+                if(!terminated){
+                    readTimesInfos();
+                    Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestIntervalInMillis);
+                    // don't execute *this* particular scheduled repeating command again; the line above re-scheduled already
+                }
                 return false;
             }
         };
@@ -215,8 +218,9 @@ public class RaceTimesInfoProvider {
             listener.raceTimesInfosReceived(getRaceTimesInfos(), clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         }
     }
-
-    public void reset() {
+    
+    public void terminate(){
+        terminated = true;
         listeners.clear();
         raceIdentifiers.clear();
         raceTimesInfos.clear();

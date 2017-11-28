@@ -1,0 +1,37 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="i18n_sec"
+		type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+	<ui:style>
+		.more {
+		display: inline-block;
+		cursor: pointer;
+		color: #008fcc;
+		}
+
+		.dismiss {
+		display: inline-block;
+		right: 0;
+		position: absolute;
+		cursor: pointer;
+		color: #008fcc;
+		}
+
+		.btns {
+		padding-top: 0.25em;
+		position: relative;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<div ui:field="main">
+			<g:Label text="{i18n_sec.showMoreInfoLogin}" />
+			<div class="{style.btns}">
+				<g:Anchor styleName="{style.more}" ui:field="moreInfo"
+					text="{i18n_sec.moreInfo}" />
+				<g:Anchor styleName="{style.dismiss}" ui:field="dismiss"
+					text="{i18n_sec.dismiss}" />
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

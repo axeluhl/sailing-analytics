@@ -16,23 +16,23 @@ import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public interface UserManagementServiceAsync {
     void getAccessControlListList(AsyncCallback<Collection<AccessControlListDTO>> callback);
-    
+
     void getAccessControlList(String id, AsyncCallback<AccessControlListDTO> callback);
-    
+
     void updateACL(String id, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlListDTO> callback);
-    
+
     void addToACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);
-    
+
     void removeFromACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);
-    
+
     void getTenantList(AsyncCallback<Collection<TenantDTO>> callback);
-    
+
     void createTenant(String name, String owner, AsyncCallback<TenantDTO> callback);
-    
+
     void addUserToTenant(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
-    
+
     void removeUserFromTenant(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
-    
+
     void deleteTenant(String name, AsyncCallback<SuccessInfo> callback);
 
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
@@ -43,7 +43,7 @@ public interface UserManagementServiceAsync {
 
     void logout(AsyncCallback<SuccessInfo> callback);
 
-    void createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL, String tenantOwner, AsyncCallback<UserDTO> callback);
+    void createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner, AsyncCallback<UserDTO> callback);
 
     void updateSimpleUserPassword(String name, String oldPassword, String passwordResetSecret, String newPassword, AsyncCallback<Void> callback);
 

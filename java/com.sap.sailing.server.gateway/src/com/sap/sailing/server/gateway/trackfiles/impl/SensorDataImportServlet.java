@@ -20,8 +20,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
@@ -50,10 +50,16 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * Searches the requested importer in the importers provided by the OSGi registry and imports the priovided sensor
      * data file.
      * 
+     * @param files
+     *            the file items together with the names of the importer to use for importing the respective file's
+     *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
+     *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
+     *            importer is selected on a per-file basis.
+     * 
      * @throws IOException
      */
-    private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files)
-            throws IOException {
+    private Iterable<TrackFileImportDeviceIdentifier> importFiles(boolean enableDownsampler,
+            Iterable<Pair<String, FileItem>> files) throws IOException {
         final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
@@ -96,7 +102,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                                 }
                             }
                         }
-                    }, fi.getName(), requestedImporterName);
+                    }, fi.getName(), requestedImporterName, enableDownsampler);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
                 } catch (FormatNotSupportedException e) {
                     logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
@@ -113,22 +119,27 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         String importerName = null;
-        searchForPrefferedImporter: for (FileItem fi : fileItems) {
-            if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
-                importerName = fi.getString();
-                break searchForPrefferedImporter;
+        boolean enableDownsampler = false;
+        for (FileItem fi : fileItems) {
+            if (fi.isFormField()) {
+                if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
+                    importerName = fi.getString();
+                } else if ("downsample".equalsIgnoreCase(fi.getFieldName())) {
+                    enableDownsampler = "on".equalsIgnoreCase(fi.getString());
+                }
             }
         }
         if (importerName == null) {
             throw new RuntimeException("Missing preferred importer");
         }
-        List<Pair<String, FileItem>> files = new ArrayList<>();
+        List<Pair<String, FileItem>> filesAndImporterNames = new ArrayList<>();
         for (FileItem fi : fileItems) {
             if ("file".equalsIgnoreCase(fi.getFieldName())) {
-                files.add(new Pair<>(importerName, fi));
+                filesAndImporterNames.add(new Pair<>(importerName, fi));
             }
         }
-        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files);
+        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(enableDownsampler,
+                filesAndImporterNames);
         resp.setContentType("text/html");
         for (TrackFileImportDeviceIdentifier mapping : mappingList) {
             String stringRep = mapping.getId().toString();

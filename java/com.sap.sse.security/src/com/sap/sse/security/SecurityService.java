@@ -35,71 +35,71 @@ import com.sap.sse.security.shared.UserManagementException;
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
 
     SecurityManager getSecurityManager();
-    
+
     Owner getOwnership(String idAsString);
-    
+
     Iterable<AccessControlList> getAccessControlListList();
-    
+
     AccessControlList getAccessControlList(String idAsString);
-    
+
     /**
      * @param idAsString Has to be globally unique
      */
     SecurityService createAccessControlList(String idAsString);
-    
+
     /**
      * @param id Has to be globally unique
      */
     SecurityService createAccessControlList(String idAsString, String displayName);
-    
+
     AccessControlList updateACL(String idAsString, Map<UserGroup, Set<String>> permissionMap);
-    
+
     /**
      * @param name The name of the user group to add
      */
     AccessControlList addToACL(String idAsString, UUID group, String permission);
-    
+
     /**
      * @param name The name of the user group to remove
      */
     AccessControlList removeFromACL(String idAsString, UUID group, String permission);
-    
+
     void deleteACL(String idAsString);
-    
+
     /**
      * @param idAsString Has to be globally unique
      */
     SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner);
-    
+
     /**
      * @param idAsString Has to be globally unique
      */
     SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
-    
+
     void deleteOwnership(String idAsString);
-    
+
     Iterable<UserGroup> getUserGroupList();
-    
+
     UserGroup getUserGroup(UUID id);
-    
+
     UserGroup getUserGroupByName(String name);
-    
+
     Iterable<Tenant> getTenantList();
-    
+
     Tenant getTenant(UUID id);
-    
+
     Tenant getTenantByName(String name);
-    
+
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
-    
+
     Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
-    
+
     UserGroup addUserToUserGroup(UUID group, String user);
 
     UserGroup removeUserFromUserGroup(UUID group, String user);
-    
+
     void deleteUserGroup(UUID id) throws UserGroupManagementException;
-    
+
     void deleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException;
 
     Iterable<User> getUserList();
@@ -126,6 +126,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException;
 
+    /**
+     * @param validationBaseURL if <code>null</code>, no validation will be attempted
+     */
+    User createSimpleUser(String username, String email, String password, String fullName, String company, Locale locale, String validationBaseURL) throws UserManagementException, MailException;
+
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
@@ -137,7 +142,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void deleteUser(String username) throws UserManagementException;
 
     Iterable<Role> getRoles();
-    
+
     Iterable<UUID> getRolesFromUser(String username) throws UserManagementException;
 
     void addRoleForUser(String username, UUID role);

@@ -18,7 +18,6 @@ Export-Package: com.sap.sse.common,
  com.sap.sse.common.settings.generic.converter,
  com.sap.sse.common.settings.generic.support,
  com.sap.sse.common.settings.serializer,
- com.sap.sse.common.settings.util,
  com.sap.sse.common.settings.value,
  com.sap.sse.common.util
 Require-Bundle: com.sap.sse.datamining.annotations

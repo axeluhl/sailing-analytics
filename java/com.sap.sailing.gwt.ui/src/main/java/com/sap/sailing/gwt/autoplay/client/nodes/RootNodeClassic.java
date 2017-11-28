@@ -10,19 +10,24 @@ import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeState;
 public class RootNodeClassic extends RootNodeBase {
     private final AutoPlayNode idle;
     private final AutoPlayNode live;
+    private final IdlePreEventNode preEvent;
 
     public RootNodeClassic(AutoPlayClientFactory cf) {
         super(RaceEndWithCompetitorsFlagsNode.class.getName(), cf);
         this.idle = new IdleRaceLeaderboard(cf);
         this.live = new LiveRaceBoardNode(cf);
+        this.preEvent = new IdlePreEventNode(cf);
     }
 
     protected boolean processStateTransition(RegattaAndRaceIdentifier currentPreLiveRace,
             RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
         getClientFactory().getAutoPlayCtx().updateLiveRace(currentPreLiveRace, currentLiveRace);
         switch (goingTo) {
-        case IDLE:
+        case PRE_EVENT:
+            transitionTo(preEvent);
+            break;
         case AFTER_LIVE:
+        case IDLE:
             transitionTo(idle);
             break;
         case PRE_RACE:
@@ -47,6 +52,5 @@ public class RootNodeClassic extends RootNodeBase {
         }
         transitionTo(idle);
     }
-
 
 }

@@ -166,9 +166,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    protected void onStop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
+    protected void onStop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         if (isTrackedRaceStillReachable()) {
-            TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+            TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, 1.0);
             trackedRace.onStatusChanged(this, newStatus);
         }
         connector.removeSailMasterListener(this);
@@ -281,11 +281,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     case COMPETITOR:
                     	String boatID = fix.getBoatID();
                     	Competitor competitor = getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass);
-                    	if(competitor == null) {
-                    		// TODO: read startlist again from Manage2Sail
-                    		// use competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)
+                        if (competitor == null) {
+                            // TODO: read startlist again from Manage2Sail
+                            // use competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)
                         }
-                    	if(competitor != null) {
+                	if (competitor != null) {
                             DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                             competitorTrack.addGPSFix(gpsFix);
                     	} else {
@@ -321,8 +321,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         Competitor result = null;
         // first look into the temp cache
         result = competitorsByBoatId.get(boatID);
-        if(result == null) {
-            if(boatClass != null) {
+        if (result == null) {
+            if (boatClass != null) {
                 result = getCompetitorByBoatIDAndBoatClass(boatID, boatClass);
             } else {
                 RaceType raceType = domainFactory.getRaceTypeFromRaceID(raceID);

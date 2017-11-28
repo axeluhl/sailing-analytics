@@ -269,7 +269,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         competitor doesn't appear in any of the race column's attached tracked races. A 0.0 score is returned
      *         if the competitor's result for <code>race</code> is discarded.
      */
-    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's standings for
@@ -448,10 +448,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
     
     /**
-     * @return <code>null</code> if no tracked race is available in this leaderboard, the competitor hasn't started
-     * a single race at <code>timePoint</code> or if the competitor has not finished one of the races. This method
-     * computes the average speed starting with the first mark passing until <code>timePoint</code> or if earlier then
-     * the timePoint of the last mark passing.
+     * @return the {@link #getTotalDistanceTraveled(Competitor, TimePoint) total distance} the competitor has traveled
+     *         up to {@code timePoint}, divided by the {@link #getTotalTimeSailed(Competitor, TimePoint) total time
+     *         sailed} up to this {@code timePoint}; {@code null} in case a zero or {@code null} time has been spent so
+     *         far, or a {@code null} distance is returned by {@link #getTotalDistanceTraveled(Competitor, TimePoint)}.
      */
     Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
 
@@ -481,6 +481,26 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         leaderboard
      */
     Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Computes the distance the <code>competitor</code> has been foiling in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled any distance in any tracked race in this
+     *         leaderboard
+     */
+    Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * Computes the duration the <code>competitor</code> has foiled in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled at any time in any tracked race in this
+     *         leaderboard
+     */
+    Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint);
     
     /**
      * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded
@@ -568,4 +588,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     BoatClass getBoatClass();
     
     LeaderboardType getLeaderboardType();
+
+    /**
+     * Tells if there is at least one non-{@code null} score for the given {@code competitor} in the
+     * leaderboard.
+     */
+    boolean hasScores(Competitor competitor, TimePoint timePoint);
 }

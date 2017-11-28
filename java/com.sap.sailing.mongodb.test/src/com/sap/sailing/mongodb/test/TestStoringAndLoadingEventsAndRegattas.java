@@ -414,7 +414,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         Competitor competitor1 = AbstractLeaderboardTest.createCompetitor("Humba1");
         Competitor competitor2 = AbstractLeaderboardTest.createCompetitor("Humba2");
-        res.getCompetitorStore().addCompetitors(Arrays.asList(competitor1, competitor2));
+        res.getCompetitorStore().addNewCompetitors(Arrays.asList(competitor1, competitor2));
         regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1));
         regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitor1));
