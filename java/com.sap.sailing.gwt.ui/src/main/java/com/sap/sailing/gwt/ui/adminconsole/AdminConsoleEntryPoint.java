@@ -54,7 +54,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     private Set<RegattasDisplayer> regattasDisplayers;
     private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
-    private Set<PairingListDisplayer> pairingListDisplayers;
 
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     
@@ -92,7 +91,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
-        pairingListDisplayers = new HashSet<>();
         
         final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, getStringMessages(), panel);
         eventManagementPanel.ensureDebugId("EventManagement");
