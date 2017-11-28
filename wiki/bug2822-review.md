@@ -6,14 +6,26 @@ Bug 2822 changes the way competitors and boats are handled. Specifically the 1:1
 
 ## 1. Data migration when starting server
 
-### 1.1 Migrate the competitor collection
+### 1.1 Migrate the COMPETITORS collection
 
 Check:  
 
 - Existing COMPETITORS Collection is migrated to COMPETITORS_WITH_BOAT_REFERENCES and BOATS collection
-- attribute boat name is cleared in new created boat objects
+- All migrated competitors have a link to a boat from boats collection
+- The attribute 'name' is cleared in new all created boat objects as the old names were not meaningful and not used
 
-### 1.2 Migrate the raceLog and regattaLog?
+### 1.2 Migrate an already existing 'competitor with boat' to a competitor with a separate boat
+
+In case of a server instance with already created competitors we don't know to which kind of regatta (with or without changing boats) a competitor belongs to. This will only become clear when the tracking of the already configured races starts. In case of the tractrac connector the decision can be made based on the existence of boat metadata. If we find such boat metadata we must migrate the existing 'competitor with boat' to a standalone competitor and a standalone boat.
+
+Check:
+
+- Before server start an existing competitor with emedded boat does exist in the COMPETITORS collection
+- After server start and migration according to 1.1 this competitor does exist in the COMPETITORS_WITH_BOAT_REFERENCES collection and does have a link to a boat in the BOATS collection
+- After starting the tractrac tracking of a race where this competitor is contained the tractrac connector recognizes the need for the migration and calls the corresponding function on the CompetitorStore
+- After the migration the competitor does not have a boat reference anymore and the migrated boat has the right properties
+
+### 1.3 Migrate the raceLog and regattaLog?
 
 ##  2. Managing boats
 
