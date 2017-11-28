@@ -8,6 +8,9 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UnauthorizedException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -24,23 +27,17 @@ public interface UserManagementService extends RemoteService {
     
     AccessControlListDTO updateACL(String idAsString, Map<String, Set<String>> permissionStrings);
     
-    AccessControlListDTO addToACL(String idAsString, String group, String permission);
+    AccessControlListDTO addToACL(String idAsString, String tenantIdAsString, String permission);
     
-    AccessControlListDTO removeFromACL(String idAsString, String group, String permission);
-    
-    Collection<UserGroupDTO> getUserGroupList(boolean withTenants);
-    
-    UserGroupDTO getUserGroupByName(String name);
+    AccessControlListDTO removeFromACL(String idAsString, String tenantIdAsString, String permission);
     
     Collection<TenantDTO> getTenantList();
     
-    UserGroupDTO createUserGroup(String name, String tenantOwner);
+    TenantDTO createTenant(String name, String tenantOwner) throws UserGroupManagementException, TenantManagementException;
     
-    TenantDTO createTenant(String name, String tenantOwner);
+    UserGroupDTO addUserToTenant(String idAsString, String user) throws UnauthorizedException;
     
-    UserGroupDTO addUserToUserGroup(String idAsString, String user);
-    
-    UserGroupDTO removeUserFromUserGroup(String idAsString, String user);
+    UserGroupDTO removeUserFromTenant(String idAsString, String user) throws UnauthorizedException;
     
     SuccessInfo deleteTenant(String idAsString);
     

@@ -49,6 +49,7 @@ import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -165,41 +166,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public AccessControlListDTO addToACL(String idAsString, String group, String permission) {
-        UUID groupId = (UUID) getSecurityService().getUserGroupByName(group).getId();
-        return createAclDTOFromAcl(getSecurityService().addToACL(idAsString, groupId, permission));
+    public AccessControlListDTO addToACL(String idAsString, String tenantIdAsString, String permission) {
+        UUID tenantId = UUID.fromString(tenantIdAsString);
+        return createAclDTOFromAcl(getSecurityService().addToACL(idAsString, tenantId, permission));
     }
     
     @Override
-    public AccessControlListDTO removeFromACL(String idAsString, String group, String permission) {
-        UUID groupId = (UUID) getSecurityService().getUserGroupByName(group).getId();
-        return createAclDTOFromAcl(getSecurityService().removeFromACL(idAsString, groupId, permission));
-    }
-    
-    @Override
-    public Collection<UserGroupDTO> getUserGroupList(boolean withTenants) {
-        List<UserGroupDTO> userGroups = new ArrayList<>();
-        for (UserGroup u : getSecurityService().getUserGroupList()) {
-            UserGroupDTO userGroupDTO = createUserGroupDTOFromUserGroup(u);
-            userGroups.add(userGroupDTO);
-        }
-        if (withTenants) {
-            for (TenantDTO t : getTenantList()) {
-                for (UserGroupDTO g : userGroups) {
-                    if (g.getName().equals(t.getName())) {
-                        userGroups.remove(g);
-                        break;
-                    }
-                }
-                userGroups.add(t);
-            }
-        }
-        return userGroups;
-    }
-    
-    @Override
-    public UserGroupDTO getUserGroupByName(String name) {
-        return createUserGroupDTOFromUserGroup(getSecurityService().getUserGroupByName(name));
+    public AccessControlListDTO removeFromACL(String idAsString, String tenantIdAsString, String permission) {
+        UUID tenantId = UUID.fromString(tenantIdAsString);
+        return createAclDTOFromAcl(getSecurityService().removeFromACL(idAsString, tenantId, permission));
     }
     
     @Override
@@ -213,55 +188,36 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public UserGroupDTO createUserGroup(String name, String tenantOwner) {
-        // TODO: create UserGroupManagementException_CustomSeri.....?
+    public TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException, UserGroupManagementException {
         UUID id = UUID.randomUUID();
-        try {
-            UserGroup userGroup = getSecurityService().createUserGroup(id, name);
-            getSecurityService().createAccessControlList(userGroup, name)
-                .createOwnership(userGroup, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId(), name);
-            return createUserGroupDTOFromUserGroup(userGroup);
-        } catch (UserGroupManagementException e) {
-            return null;
-        }
+        Tenant tenant = getSecurityService().createTenant(id, name);
+        getSecurityService().createAccessControlList(tenant, name)
+            .createOwnership(tenant, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId(), name);
+        return createTenantDTOFromTenant(tenant);
     }
     
     @Override
-    public TenantDTO createTenant(String name, String tenantOwner) {
-        // TODO: create TenantManagementException_CustomSeri.....?
-        UUID id = UUID.randomUUID();
-        try {
-            Tenant tenant = getSecurityService().createTenant(id, name);
-            getSecurityService().createAccessControlList(tenant, name)
-                .createOwnership(tenant, (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwner).getId(), name);
-            return createTenantDTOFromTenant(tenant);
-        } catch (TenantManagementException | UserGroupManagementException e) {
-            return null;
-        }
-    }
-    
-    @Override
-    public UserGroupDTO addUserToUserGroup(String idAsString, String user) {
+    public UserGroupDTO addUserToTenant(String idAsString, String user) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("usergroup:add_user:" + idAsString + ":" + user)) {
             return createUserGroupDTOFromUserGroup(getSecurityService().addUserToUserGroup(UUID.fromString(idAsString), user));
         } else {
-            return null; // TODO: implement this with exception
+            throw new UnauthorizedException("Not permitted to add user from tenant");
         }
     }
     
     @Override
-    public UserGroupDTO removeUserFromUserGroup(String idAsString, String user) {
+    public UserGroupDTO removeUserFromTenant(String idAsString, String user) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted(new WildcardPermission(UserGroup.class.getName() + ":remove-user:" + user, true))) {
             return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup(UUID.fromString(idAsString), user));
         } else {
-            return null; // TODO: implement this with exception
+            throw new UnauthorizedException("Not permitted to remove user from tenant");
         }
     }
     
     @Override
     public SuccessInfo deleteTenant(String idAsString) {
         try {
-            UUID id = (UUID) getSecurityService().getUserGroupByName(idAsString).getId();
+            UUID id = UUID.fromString(idAsString);
             getSecurityService().deleteTenant(id);
             getSecurityService().deleteACL(id.toString());
             getSecurityService().deleteOwnership(id.toString());

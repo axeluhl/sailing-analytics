@@ -362,7 +362,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void deleteUserGroup(UUID id) throws UserGroupManagementException {
-        if (!userGroups.contains(id)) {
+        if (!userGroups.containsKey(id)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
         }
         logger.info("Deleting user group: " + id);

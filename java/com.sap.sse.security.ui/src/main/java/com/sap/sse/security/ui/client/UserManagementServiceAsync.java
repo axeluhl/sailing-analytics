@@ -25,19 +25,13 @@ public interface UserManagementServiceAsync {
     
     void removeFromACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);
     
-    void getUserGroupList(boolean withTenants, AsyncCallback<Collection<UserGroupDTO>> callback);
-    
-    void getUserGroupByName(String name, AsyncCallback<UserGroupDTO> callback);
-    
     void getTenantList(AsyncCallback<Collection<TenantDTO>> callback);
-    
-    void createUserGroup(String name, String owner, AsyncCallback<UserGroupDTO> callback);
     
     void createTenant(String name, String owner, AsyncCallback<TenantDTO> callback);
     
-    void addUserToUserGroup(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
+    void addUserToTenant(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
     
-    void removeUserFromUserGroup(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
+    void removeUserFromTenant(String idAsString, String user, AsyncCallback<UserGroupDTO> asyncCallback);
     
     void deleteTenant(String name, AsyncCallback<SuccessInfo> callback);
 

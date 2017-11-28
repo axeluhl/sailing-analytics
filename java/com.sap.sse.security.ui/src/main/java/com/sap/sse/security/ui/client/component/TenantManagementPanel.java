@@ -57,7 +57,7 @@ public class TenantManagementPanel extends DockPanel {
                     return;
                 }
                 if (Window.confirm("Do you really want to remove tenant " + tenant.getName())) {
-                    userManagementService.deleteTenant(tenant.getName(), new AsyncCallback<SuccessInfo>() {
+                    userManagementService.deleteTenant(tenant.getId().toString(), new AsyncCallback<SuccessInfo>() {
                         @Override
                         public void onSuccess(SuccessInfo result) {
                             tenantListDataProvider.updateDisplays();
