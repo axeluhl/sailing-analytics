@@ -25,8 +25,10 @@ Bug 2822 changes the way competitors and boats are handled. Specifically the 1:1
 ### 3.1. Tracking of existing event league WITH boat metadata
 
 1. Bundesliga 2017 – Lindau:  
-http://event.tractrac.com/events/event_20170524_Bundesliga/jsonservice.php
+http://event.tractrac.com/events/event_20170524_Bundesliga/jsonservice.php  
+
 Check:  
+
 - 6 Boats must be created with correct name, color and sail number (boat number)
 - 18 Teams must be created (with short team name as ‚competitor short name‘ (e.g. NRV)
 - Regatta attribute ‚canBoatsChangePerRace‘ must be set to true
@@ -46,10 +48,12 @@ http://skitrac.traclive.dk/events/event_20160727_ESSHamburg/jsonservice.php
 
 505 IDM 2013 – Berlin:  
 http://traclive.dk/events/event_20130917_IDMO/jsonservice.php  
+
 Check:  
+
 - 6 Boats must be created with correct name, color and sail number (boat number)
 - 18 Teams must be created (with short team name as ‚competitor short name‘ (e.g. NRV)
-- Regatta attribute ‚canBoatsChangePerRace‘ must be ‚false‘
+- Regatta attribute ‚canBoatsChangePerRace‘ must be ‚false'
 - MultiRaceLeaderboard: shortName, fullName are visible, boat name is invisible
 - SingleRaceLeaderboard: shortName, fullName are visible, boat name is invisible
 - Overall Leaderboard: shortName, fullName are visible, boat name is invisible
@@ -94,10 +98,10 @@ Import competitors from a Manage2Sail event and check if the competitors and boa
 	CreateCompetitorWithBoat needed?
 
 ## 6. Webservice API
-RegattasResource:
-  	@Path("{regattaname}/competitors")
+	RegattasResource:
+	@Path("{regattaname}/competitors")
 	@Path("{regattaname}/competitors/{competitorid}/add")
 
-BoatsResource:
+	BoatsResource:
 	@Path("/v1/boats")
 	@Path("{boatId}")
