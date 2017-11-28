@@ -21,7 +21,6 @@ import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter.Callback;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleVectorFixData;
@@ -44,16 +43,21 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * TODO: access to columns enum actually by public static enum. Col definition should belong to instance, so we can have
  * different col definitions.
  */
-public class BaseBravoDataImporterImpl {
+public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
     private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
 
-    public BaseBravoDataImporterImpl(Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix) {
+    public BaseBravoDataImporterImpl(Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix, String type) {
+        super(type);
         this.columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     }
     
     /**
+     * @param inputStream
+     *            the stream from which to read the fixes; this method will <em>not</em> close the stream; it's the
+     *            caller who is responsible for closing it. This, in particular, allows for usages with ZIP files
+     *            that would suffer from closing the stream here
      * @param downsample
      *            if {@code true}, fixes will be down-sampled to a 1Hz frequency before being emitted to the
      *            {@code callback}. Otherwise, all fixes read will be forwarded straight to the {@link Callback}.
@@ -65,7 +69,7 @@ public class BaseBravoDataImporterImpl {
         try {
             LOG.fine("Import CSV from " + filename);
             final InputStreamReader isr;
-            if (sourceName.endsWith("gz")) {
+            if (filename.endsWith(".gz")) {
                 LOG.fine("Using gzip stream reader " + filename);
                 isr = new InputStreamReader(new GZIPInputStream(inputStream));
             } else {
@@ -73,33 +77,31 @@ public class BaseBravoDataImporterImpl {
             }
             LOG.fine("Start parsing bravo file");
             AtomicLong lineNr = new AtomicLong();
-            try (BufferedReader buffer = new BufferedReader(isr)) {
-                String headerLine = null;
-                headerSearch: while (headerLine == null) {
-                    LOG.fine("Searching for header in bravo file");
-                    String headerCandidate = buffer.readLine();
-                    lineNr.incrementAndGet();
-                    if (headerCandidate == null) {
-                        throw new RuntimeException("Missing required header in file " + filename);
-                    }
-                    if (headerCandidate.startsWith(BOF)) {
-                        LOG.fine("Found header");
-                        headerLine = headerCandidate;
-                        break headerSearch;
-                    }
+            BufferedReader buffer = new BufferedReader(isr);
+            String headerLine = null;
+            headerSearch: while (headerLine == null) {
+                LOG.fine("Searching for header in bravo file");
+                String headerCandidate = buffer.readLine();
+                lineNr.incrementAndGet();
+                if (headerCandidate == null) {
+                    throw new RuntimeException("Missing required header in file " + filename);
                 }
-                LOG.fine("Validate and parse header columns");
-                final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
-                DoubleFixProcessor downsampler = downsample ?
-                        createDownsamplingProcessor(callback, trackIdentifier) :
-                        fix->callback.addFixes(Collections.singleton(new DoubleVectorFixImpl(fix.getTimepoint(), fix.getFix())), trackIdentifier);
-                buffer.lines().forEach(line -> {
-                    lineNr.incrementAndGet();
-                    downsampler.accept(parseLine(lineNr.get(), filename, line, colIndices));
-                });
-                downsampler.finish();
-                buffer.close();
+                if (headerCandidate.startsWith(BOF)) {
+                    LOG.fine("Found header");
+                    headerLine = headerCandidate;
+                    break headerSearch;
+                }
             }
+            LOG.fine("Validate and parse header columns");
+            final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
+            DoubleFixProcessor downsampler = downsample ?
+                    createDownsamplingProcessor(callback, trackIdentifier) :
+                    fix->callback.addFixes(Collections.singleton(new DoubleVectorFixImpl(fix.getTimepoint(), fix.getFix())), trackIdentifier);
+            buffer.lines().forEach(line -> {
+                lineNr.incrementAndGet();
+                downsampler.accept(parseLine(lineNr.get(), filename, line, colIndices));
+            });
+            downsampler.finish();
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Exception parsing bravo CSV file " + filename, e);
         }
@@ -131,7 +133,7 @@ public class BaseBravoDataImporterImpl {
             if (epochColValue != null && epochColValue.length() > 0) {
                 epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
                 epoch = Long.parseLong(epochColValue);
-                double[] trackFixData = new double[getTrackColumnCount()];
+                Double[] trackFixData = new Double[getTrackColumnCount()];
                 for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
                     Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
                     trackFixData[columnNameToSearchForInFile.getValue()] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
@@ -171,6 +173,6 @@ public class BaseBravoDataImporterImpl {
     }
 
     private int getTrackColumnCount() {
-        return columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.size();
+        return Collections.max(columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.values())+1;
     }
 }

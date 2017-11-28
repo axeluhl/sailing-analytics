@@ -20,6 +20,8 @@ public class Activator implements BundleActivator {
                 new BravoDataImporterImpl(), context));
         registrations.addAll(SensorDataImporterRegistration
                 .register(new BravoExtendedDataImporterImpl(), context));
+        registrations.addAll(SensorDataImporterRegistration
+                .register(new ExpeditionExtendedDataImporterImpl(), context));
     }
 
     @Override

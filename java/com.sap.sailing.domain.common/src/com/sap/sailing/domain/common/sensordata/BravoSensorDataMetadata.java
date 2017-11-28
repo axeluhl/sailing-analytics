@@ -7,17 +7,17 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Metadata that defines the column structure of Bravo fixes when imported as {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * Metadata that defines the column structure of Bravo fixes when imported as
+ * {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * <p>
  * 
  * The current implementation only stores a subset of the information available during the import.
  */
-public enum BravoSensorDataMetadata {
-
+public enum BravoSensorDataMetadata implements ColumnMetadata {
     RIDE_HEIGHT_PORT_HULL("RideHeightPortHull"), //
     RIDE_HEIGHT_STBD_HULL("RideHeightStbdHull"), //
     HEEL("Heel"), //
     PITCH("ImuSensor_Pitch");
-
 
     private String columnName;
     

@@ -16,6 +16,5 @@ public interface FooterResources extends ClientBundle {
         String sitefooter_links();
         String sitefooter_links_link();
         String sitefooter_language();
-        String sitefooter_language_link();
     }
 }

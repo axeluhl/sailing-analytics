@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -22,7 +23,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter.Callback;
+import com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImportServlet;
 import com.sap.sailing.server.trackfiles.impl.BaseBravoDataImporterImpl;
@@ -30,6 +31,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class BravoWindImportServlet extends AbstractWindImportServlet {
+    private static final String BRAVO_WIND_IMPORT = "Bravo Wind Import";
+    private static final String GZIP_SUFFIX = ".gz";
     private static final long serialVersionUID = -4547876638456305135L;
     private static final Logger logger = Logger.getLogger(BravoWindImportServlet.class.getName());
     
@@ -41,7 +44,7 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         if (uploadRequest.files != null && !uploadRequest.files.isEmpty()) {
             sourceName = uploadRequest.files.stream().map(f->f.getName()).collect(Collectors.joining(", "));
         } else {
-            sourceName = "Bravo Wind Import";
+            sourceName = BRAVO_WIND_IMPORT;
         }
         windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, sourceName + "@" + MillisecondsTimePoint.now());
         return windSource;
@@ -74,7 +77,7 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
         for (final Fields field : Fields.values()) {
             columnsMap.put(field.name(), field.ordinal());
         }
-        final BaseBravoDataImporterImpl importer = new BaseBravoDataImporterImpl(columnsMap);
+        final BaseBravoDataImporterImpl importer = new BaseBravoDataImporterImpl(columnsMap, BRAVO_WIND_IMPORT);
         final Callback callback = new Callback() {
             @Override
             public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
@@ -90,18 +93,26 @@ public class BravoWindImportServlet extends AbstractWindImportServlet {
                 }
             }
         };
-        if (filename.toLowerCase().endsWith("zip")) {
+        if (filename.toLowerCase().endsWith(".zip")) {
             logger.info("Bravo file "+filename+" is a ZIP file");
-            final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-            ZipEntry entry;
-            while ((entry=zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().toLowerCase().endsWith(".txt")) {
-                    logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
-                    importer.importFixes(zipInputStream, callback, filename, filename, /* downsample */ false);
+            try (final ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+                ZipEntry entry;
+                while ((entry=zipInputStream.getNextEntry()) != null) {
+                    if (entry.getName().toLowerCase().endsWith(".txt")) {
+                        logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
+                        importer.importFixes(zipInputStream, callback, entry.getName(), BRAVO_WIND_IMPORT, /* downsample */ false);
+                    }
                 }
             }
         } else {
-            importer.importFixes(inputStream, callback, filename, filename, /* downsample */ false);
+            final String actualFileName;
+            if (filename.toLowerCase().endsWith(GZIP_SUFFIX)) {
+                inputStream = new GZIPInputStream(inputStream);
+                actualFileName = filename.substring(0, filename.length()-GZIP_SUFFIX.length());
+            } else {
+                actualFileName = filename;
+            }
+            importer.importFixes(inputStream, callback, actualFileName, BRAVO_WIND_IMPORT, /* downsample */ false);
         }
         return result;
     }

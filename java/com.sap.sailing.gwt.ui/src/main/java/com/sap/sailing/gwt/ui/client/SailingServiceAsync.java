@@ -39,6 +39,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
@@ -63,6 +64,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -620,12 +622,28 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
 
     /**
+     * Sets the a new finishing and end time.
+     * 
+     * @param dto
+     *            {@link RaceLogSetFinishingAndFinishTimeDTO} identifying the race and the new finishing and
+     *            end time.
+     */
+    void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
+    
+    /**
      * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the
      * pass identifier will still be returned, but the start time field will be <code>null</code>.
      */
     void getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Util.Triple<Date, Integer, RacingProcedureType>> callback);
 
+    /**
+     * Gets the race's current finishing and finish times as well as the current pass identifier. If no finishing or finish time is set, the
+     * pass identifier will still be returned, but the finishing/finish time field will be <code>null</code>.
+     */
+    void getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Util.Triple<Date, Date, Integer>> asyncCallback);
+    
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
 
     void getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort, AsyncCallback<String> callback);
@@ -845,9 +863,15 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * Used to determine for a Chart the available Detailtypes. This is for example used, to only show the RideHeight as
      * an option for charts, if it actually recorded for the race.
      */
-    void determineDetailTypes(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
+    void determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
             AsyncCallback<List<DetailType>> callback);
-    
+
+    void getExpeditionDeviceConfigurations(AsyncCallback<List<ExpeditionDeviceConfiguration>> callback);
+
+    void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
+
+    void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
+
     void getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Iterable<CompetitorDTO>> callback);
     
     void calculatePairingList(RegattaIdentifier regattaIdentifier, int competitorCount, int flightMultiplier, 

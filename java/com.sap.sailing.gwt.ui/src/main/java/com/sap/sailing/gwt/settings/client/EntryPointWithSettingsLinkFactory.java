@@ -28,13 +28,13 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
     private static final String REGATTA_OVERVIEW_PATH = "/gwt/RegattaOverview.html";
 
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings) {
-        return createRegattaOverviewLink(regattaOverviewSettings, new RegattaRaceStatesSettings());
+        return createRegattaOverviewLink(regattaOverviewSettings, new RegattaRaceStatesSettings(), true);
     }
 
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings,
-            RegattaRaceStatesSettings regattaRaceStatesSettings) {
+            RegattaRaceStatesSettings regattaRaceStatesSettings, boolean ignoreLocalSettings) {
         return new LinkWithSettingsGenerator<>(REGATTA_OVERVIEW_PATH, regattaOverviewSettings,
-                new IgnoreLocalSettings(true)).createUrl(regattaRaceStatesSettings);
+                new IgnoreLocalSettings(ignoreLocalSettings)).createUrl(regattaRaceStatesSettings);
     }
     
     public static String createLeaderboardLink(LeaderboardContextDefinition contextDefinition, LeaderboardPerspectiveOwnSettings perspectiveOwnSettings) {

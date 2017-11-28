@@ -69,7 +69,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.statistics.Statistics;
@@ -91,6 +91,7 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
@@ -128,7 +129,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
         LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
-        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver {
+        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver,
+        SensorFixStoreSupplier {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -550,12 +552,47 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
+    
+    /**
+     * Forces a new end time identified by the passed parameters.
+     * @param leaderboardName name of the RaceLog's leaderboard.
+     * @param raceColumnName name of the RaceLog's column
+     * @param fleetName name of the RaceLog's fleet
+     * @param authorName name of the {@link AbstractLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorPriority priority of the author.
+     * @param passId Pass identifier of the new start time event.
+     * @param logicalTimePoint logical {@link TimePoint} of the new event.
+     * @return
+     */
+    TimePoint setEndTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint);
+
+    /**
+     * Forces a new finishing time identified by the passed parameters.
+     * @param leaderboardName name of the RaceLog's leaderboard.
+     * @param raceColumnName name of the RaceLog's column
+     * @param fleetName name of the RaceLog's fleet
+     * @param authorName name of the {@link AbstractLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorPriority priority of the author.
+     * @param passId Pass identifier of the new start time event.
+     * @param logicalTimePoint logical {@link TimePoint} of the new event.
+     * @return
+     */
+    TimePoint setFinishingTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            Integer authorPriority, int passId, MillisecondsTimePoint millisecondsTimePoint);
 
     /**
      * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
     Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
+    /**
+     * Gets the finishing and finish times as well as the pass identifier for the queried race. The first TimePoint is the
+     * finishing time, the second on is the finish time. Finishing and/or finish times might be <code>null</code>.
+     */
+    com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndFinishTime(
+            String leaderboardName, String raceColumnName, String fleetName);
+    
     MongoObjectFactory getMongoObjectFactory();
     
     DomainObjectFactory getDomainObjectFactory();
@@ -565,8 +602,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
-    
-    SensorFixStore getSensorFixStore();
     
     RaceTracker getRaceTrackerById(Object id);
     
