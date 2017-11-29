@@ -108,6 +108,16 @@ Check:
 
 ## 5. Smartphone Tracking (SPT)
 
+### 5.1 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on regatta level
+
+Check:
+
+- Create a simple SPT regatta where boats can not change per race
+- Open 'Competitor registrations' dialog
+- Dialog must show 'Add Competitor' button
+- Dialog must show only competitors with a linked boat in the 'Competitor pool' table on the right side
+- The registered competitor must be added to regattaLog via the RegattaLogRegisterCompetitorAndBoatEvent
+
 ## 6. Incremental Leaderboard
 
 Make sure that attribute changes of competitors and boats in the admin console are reflected in the leaderboard shown to the user
