@@ -765,7 +765,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     /**
      * Create an unique key for a boat derived from the regatta, a leaderboardGroup (can be null) and the boat metadata
-     * @return the unique key (per tractrac event) 
+     * @return a unique boat key 
      */
     private Serializable createUniqueBoatIdentifierFromBoatMetadata(Regatta regatta, LeaderboardGroupBase leaderboardGroup, BoatMetaData boatMetadata) {
         Serializable boatIdentifier = null;
@@ -773,10 +773,9 @@ public class DomainFactoryImpl implements DomainFactory {
             boatIdentifier = boatMetadata.getUuid();
         } else {
             if (leaderboardGroup != null) {
-                boatIdentifier = leaderboardGroup.getId().toString() + '#' + boatMetadata.getId(); 
+                boatIdentifier = buildEscapedCompositeIdentifier(leaderboardGroup.getId().toString(), boatMetadata.getId()); 
             } else {
-                boatIdentifier = regatta.getId().toString() + '#' + boatMetadata.getId();
-                
+                boatIdentifier = buildEscapedCompositeIdentifier(regatta.getId().toString(), boatMetadata.getId());                
             }
         }
         return boatIdentifier;
@@ -789,6 +788,14 @@ public class DomainFactoryImpl implements DomainFactory {
     private String createUniqueBoatIdentifierFromCompetitor(ICompetitor competitor) {
         String boatIdentifier = competitor.getId().toString();
         return boatIdentifier;
+    }
+
+    private String buildEscapedCompositeIdentifier(String id1, String id2) {
+        return String.format("%s#%s", escapeIdentifierFragment(id1), escapeIdentifierFragment(id2));
+    }
+    
+    private String escapeIdentifierFragment(String fragment) {
+        return fragment.replace("\\", "\\\\").replace("#", "\\#");
     }
 
     /**
