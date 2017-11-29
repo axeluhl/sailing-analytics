@@ -1200,6 +1200,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String useStartTimeInference();
     String controlTrackingFromStartAndFinishTimes();
     String canBoatsOfCompetitorsChangePerRace();
+    String canBoatsChange();
     String numberOfQueueMessagesSent();
     String totalSize();
     String averageMessageSize();
