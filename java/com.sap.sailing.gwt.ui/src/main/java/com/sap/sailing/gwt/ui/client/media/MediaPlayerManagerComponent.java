@@ -32,7 +32,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
-import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
@@ -195,7 +194,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private MediaTrack getDefaultVideo() {
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+            if (mediaTrack.mimeType != null && MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
             }
         }
@@ -481,21 +480,22 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 if (videoTrack.isYoutube()) {
                     videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
                 } else {
-                    videoContainer = new VideoWindowPlayer(videoTrack, playerCloseListener);
+                    videoContainer = new VideoJsWindowPlayer(videoTrack, getRaceStartTime(), raceTimer,
+                        playerCloseListener);
                 }
                 playerCloseListener.setVideoContainer(videoContainer);
                 closeFloatingVideo(videoTrack);
             }
         };
-        final VideoSynchPlayer videoPlayer;
         final UserDTO currentUser = userService.getCurrentUser();
         boolean showSynchControls = currentUser != null
                 && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
                         SailingPermissionsForRoleProvider.INSTANCE);
+        VideoSynchPlayer videoPlayer;
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
-            videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
+            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer);
         }
         return videoContainerFactory.createVideoContainer(videoPlayer, showSynchControls, getMediaService(), errorReporter,
                 playerCloseListener, popoutListener);

@@ -192,4 +192,13 @@ public class VideoJSPlayer extends Widget {
        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
        player.dispose();     
     }-*/;
+
+    public native void pause() /*-{
+        if(this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
+            return;
+        }
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.pause();
+    }-*/;
+    
+
 }
