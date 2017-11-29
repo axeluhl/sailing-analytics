@@ -106,7 +106,26 @@ Make sure that attribute changes of competitors and boats in the admin console a
 
 ## 7. Competitor Import (Manage2Sail connector)
 
-Import competitors from a Manage2Sail event and check if the competitors and boats are created in the right way.
+Precondition: Create a result import provider for Manage2Sail  
+E.g.: http://manage2sail.com/api/public/links/event/c19b811f-8dd0-4d6f-b846-7d07bd0dead9?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
+
+### 7.1 Import Competitors into regatta where boats CAN change
+
+Check:  
+
+- Create a simple regatta where boats can change per race
+- Go to 'Connectors' -> 'Smartphone Tracking -> Select the regatta -> Click on 'Competitor registrations'
+- Select some competitors and import them
+- The competitors will be created and stored but without boats using the RegattaLogRegisterCompetitorEvent
+
+### 7.2 Import Competitors into regatta where boats CAN NOT change
+
+Check:
+
+- Create a simple regatta where boats can NOT change per race
+- Go to 'Connectors' -> 'Smartphone Tracking -> Select the regatta -> Click on 'Competitor registrations'
+- Select some competitors and import them
+- The competitors will be created and stored WITH linked boats using the RegattaLogRegisterCompetitorAndBoatEvent
 
 ## 8. WebService API
 
