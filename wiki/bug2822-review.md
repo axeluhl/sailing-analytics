@@ -27,6 +27,14 @@ Check:
 
 ### 1.3 Migrate the raceLog and regattaLog?
 
+We need to be very careful with refactoring here as the logic to load RaceLog/RegattaLog events relies on the class names, see com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl.loadRaceLogEvent(DBObject dbObject)...
+
+   if (eventClass.equals(RaceLogRegisterCompetitorEvent.class.getSimpleName())) {  
+      return loadRaceLogRegisterCompetitorEvent(..., dbObject);  
+   }  
+
+So we really need to keep the class names also for legacy events or we must rewrite the 'RACE_LOG_EVENT_CLASS' or 'REGATTA_LOG_EVENT_CLASS' property of the RaceLog/RegattaLog database entries.
+
 ##  2. Managing boats
 
 Boats can be created now in different ways:
