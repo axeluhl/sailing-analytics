@@ -1,9 +1,9 @@
 Beschreibung des Skripts:
 
-0. Voraussetzungen für Nutzung des Skripts
+0. Voraussetzungen fï¿½r Nutzung des Skripts
 
 - AWS CLI (https://aws.amazon.com/de/cli)
-- Cygwin Packages: 
+- Cygwin Packages:
 -- tmux
 -- jq
 -- openssh
@@ -12,7 +12,7 @@ Beschreibung des Skripts:
 
 0.1 AWS CLI konfigurieren
 
-"aws configure" durchführen. 
+"aws configure" durchfï¿½hren.
 Falls noch kein Keypair vorhanden:
 
 IAM-Konsole >> Users >> dein Benutzername >> Security Credentials >> Create access key
@@ -20,7 +20,7 @@ IAM-Konsole >> Users >> dein Benutzername >> Security Credentials >> Create acce
 0.2 Default-Werte anpassen
 
 Default-Werte in "aws_variables.sh" anpassen (key_name, key_file), damit diese nicht
-immer neu eingegeben werden müssen. Testweise erst einmal in Region "eu-west-2" bleiben.
+immer neu eingegeben werden mï¿½ssen. Testweise erst einmal in Region "eu-west-2" bleiben.
 
 key_name: Name des Keypairs zur Verbindung zur Instanz
 key_file: Pfad zur Datei
@@ -31,8 +31,8 @@ key_file: Pfad zur Datei
 ./aws-setup.sh --help
 ./aws-setup instance-with-load-balancer
 
-Falls Fehler auftaucht: 
-Skript mit "-d"-Parameter starten und in den Logs der Instanz nachsehen 
+Falls Fehler auftaucht:
+Skript mit "-d"-Parameter starten und in den Logs der Instanz nachsehen
 (./aws-setup.sh --tail --public-dns-name ec2-x...amazon.com)
 
 1. Aufbau:
@@ -40,26 +40,26 @@ Skript mit "-d"-Parameter starten und in den Logs der Instanz nachsehen
 1.1 Dateien und ihre Hauptaufgaben:
 
 aws-setup-sh:
-Parameteraufnahme, Main-Funktion, Dokumentation der Bedienung, Sourcing von lib/utils.sh 
+Parameteraufnahme, Main-Funktion, Dokumentation der Bedienung, Sourcing von lib/utils.sh
 
 lib/aws-functions.sh:
-Funktionen für AWS (z.B. Load Balancer erstellen) und App-Instanz (z.B. Event erstellen)
+Funktionen fï¿½r AWS (z.B. Load Balancer erstellen) und App-Instanz (z.B. Event erstellen)
 
 lib/aws-variables.sh:
 Festlegung von regionspezifischen Konstanten (z.B Hosted Zone ID) und Defaultwerten (z.B Region)
 
-lib/scenario_instance_with_load_balancer.sh:
-Erstellung einer Instanz und anschließendes Hinzufügen zu einem Load Balancer der über einen Route53 Eintrag
-mit einer bestimmten Domain (z.B. wcs17.sapsailing.com)  verknüpft wird.
+lib/scenario_instance.sh:
+Erstellung einer Instanz und anschlieï¿½endes Hinzufï¿½gen zu einem Load Balancer der ï¿½ber einen Route53 Eintrag
+mit einer bestimmten Domain (z.B. wcs17.sapsailing.com)  verknï¿½pft wird.
 
 lib/scenario_tail.sh:
 Automatische Anzeige der Log-Dateien einer Instanz mithilfe von tmux
 
 lib/tmux_functions.sh:
-Oberflächenkonstruktion, Vorbedingungstest, Befehlsausführung
+Oberflï¿½chenkonstruktion, Vorbedingungstest, Befehlsausfï¿½hrung
 
 lib/util_functions.sh:
-Erleichterung der Benutzereingabe, Validierungsfunktionen, sonstige potenziell relevante Hilfsfunktionen 
+Erleichterung der Benutzereingabe, Validierungsfunktionen, sonstige potenziell relevante Hilfsfunktionen
 
 lib/util_variables.sh:
 Sonstiges Hilfsvariablen (Zeitstempel, Skriptname, etc.)
@@ -69,56 +69,56 @@ Ausgabe von farbigen Meldungen, Logging (unbenutzt), Sourcing der restlichen Bas
 
 1.2 Szenarios
 
-Szenarios sind gekapselte Ausführungseinheiten, die durch Orchestrierung von AWS-Funktionen oder Bereitstellung
-eigener Funktionalität einen Mehrwert für die Automatisierung darstellen.
+Szenarios sind gekapselte Ausfï¿½hrungseinheiten, die durch Orchestrierung von AWS-Funktionen oder Bereitstellung
+eigener Funktionalitï¿½t einen Mehrwert fï¿½r die Automatisierung darstellen.
 
 Szenarios beinhalten folgende Funktionen:
 
-- Funktion zum Start des Ausführung des Szenarios
-- Funktion zur Überprüfung von Vorbedingungen (Abhängigkeiten von Paketen oder Umgebungsvariablen) [optional]
-- Funktion zur Sicherstellung der Initialisierung von benötigen Variablen
-- Funktion zur Ausführung der Programmlogik
+- Funktion zum Start des Ausfï¿½hrung des Szenarios
+- Funktion zur ï¿½berprï¿½fung von Vorbedingungen (Abhï¿½ngigkeiten von Paketen oder Umgebungsvariablen) [optional]
+- Funktion zur Sicherstellung der Initialisierung von benï¿½tigen Variablen
+- Funktion zur Ausfï¿½hrung der Programmlogik
 
-2. Funktionalität
+2. Funktionalitï¿½t
 
-2.1 Initialisierung von benötigten Variablen
+2.1 Initialisierung von benï¿½tigten Variablen
 
-Jedes Szenario benötigt für seine Ausführung bestimmte inititalisierte Variablen. Die Zuweisung eines Werts zu einer Variable erfolgt
-entweder beim Start des Skripts über die Mitgabe eines Parameters oder falls kein Parameter übergeben worden ist, über die Eingabe des 
+Jedes Szenario benï¿½tigt fï¿½r seine Ausfï¿½hrung bestimmte inititalisierte Variablen. Die Zuweisung eines Werts zu einer Variable erfolgt
+entweder beim Start des Skripts ï¿½ber die Mitgabe eines Parameters oder falls kein Parameter ï¿½bergeben worden ist, ï¿½ber die Eingabe des
 Benutzers nach entsprechender Aufforderung.
-Wenn der Benutzer zur Eingabe eines Werts für eine Variable aufgefordert wird, wird automatisch ein Default-Wert aus der
-Datei "aws_variables.sh" vorgeschlagen. Dies erleichtert die Benutzereingabe, da sich bestimmte Werte, wie z.B. der Name 
-des Keypairs zur Verbindung einer Instanz selten ändern. In der Datei werden außerdem regionspezifische Variablenwerte
+Wenn der Benutzer zur Eingabe eines Werts fï¿½r eine Variable aufgefordert wird, wird automatisch ein Default-Wert aus der
+Datei "aws_variables.sh" vorgeschlagen. Dies erleichtert die Benutzereingabe, da sich bestimmte Werte, wie z.B. der Name
+des Keypairs zur Verbindung einer Instanz selten ï¿½ndern. In der Datei werden auï¿½erdem regionspezifische Variablenwerte
 (z.B. IDs der Sicherheitsgruppen oder Images) festgelegt.
 
 2.2 Fehlerbehandlung
 
-Um die erfolgreiche Ausführung einer Funktion zu überprüfen werden verschiedene Strategien verfolgt:
+Um die erfolgreiche Ausfï¿½hrung einer Funktion zu ï¿½berprï¿½fen werden verschiedene Strategien verfolgt:
 
-1. Überprüfung des Rückgabewerts einer Funktion
+1. ï¿½berprï¿½fung des Rï¿½ckgabewerts einer Funktion
 
 Diese Strategie wird bei AWS-spezifischen Funktionen angewandt. Bei Aufruf eines AWS-Kommandos (z.B. aws elb create-load-balancer) wird
-bei Erfolg der Rückgabewert 0 zurückgegeben und bei Vorkommen eines Fehlers der Rückgabewert 1. 
+bei Erfolg der Rï¿½ckgabewert 0 zurï¿½ckgegeben und bei Vorkommen eines Fehlers der Rï¿½ckgabewert 1.
 
-2. Überprüfen des HTTP-Codes
+2. ï¿½berprï¿½fen des HTTP-Codes
 
-Bei Aufruf eines curl-Kommandos wird die Option -w "\n%{http_code}" mitübergeben. Dabei werden Response- und HTTP-Code auf zwei Zeilen
-aufgeteilt und damit ermöglicht, dass nach Aufruf der Funktion die Zuordnung zu zwei verschiedenen Variablen erfolgt. 
+Bei Aufruf eines curl-Kommandos wird die Option -w "\n%{http_code}" mitï¿½bergeben. Dabei werden Response- und HTTP-Code auf zwei Zeilen
+aufgeteilt und damit ermï¿½glicht, dass nach Aufruf der Funktion die Zuordnung zu zwei verschiedenen Variablen erfolgt.
 
 2.3 Meldungsausgabe
 
-Innerhalb von Methoden wird der Nutzer über Erfolg oder Misserfolg benachrichtigt. Die Ausgabe erfolgt über den 
+Innerhalb von Methoden wird der Nutzer ï¿½ber Erfolg oder Misserfolg benachrichtigt. Die Ausgabe erfolgt ï¿½ber den
 Standardfehlerkanal "stderr" (Workaround).
 
 2.4 Tail mit tmux
 
 Beim Verwenden des Parameters --tail werden automatisch relevante Log-Dateien angezeigt.
-Der Befehl ist in Kombination mit dem Parameter --public-dns-name oder auch mit dem Szenario 
---instance-with-load-balancer verwendbar. Zur Ausführung muss das Skript in einer tmux-Session
-ausgeführt werden. 
+Der Befehl ist in Kombination mit dem Parameter --public-dns-name oder auch mit dem Szenario
+--instance-with-load-balancer verwendbar. Zur Ausfï¿½hrung muss das Skript in einer tmux-Session
+ausgefï¿½hrt werden.
 
-Beispiele: 
-./aws-setup.sh --tail --public-dns-name ec2-xxx.eu-west-2.compute.amazonaws.com 
+Beispiele:
+./aws-setup.sh --tail --public-dns-name ec2-xxx.eu-west-2.compute.amazonaws.com
 Zeigt relevante Log-Dateien der Instanz mit dem DNS Namen "ec2-xxx.eu-west-2.compute.amazonaws.com" an.
 
 ./aws-setup.sh --tail --instance-with-load-balancer
@@ -129,33 +129,28 @@ Zeigt relevante Log-Dateien der Instanz die gerade erstellt wird, ab dem Zeitpun
 3.1 Fehlerbehebungen
 
 - Nutzer erstellen scheitert bisher mit "Precondition failed" (Nutzer-
-  name erfüllt Richtlinie nicht)
+  name erfï¿½llt Richtlinie nicht)
 
 3.2 Verbesserungen
 
-- Selektion von json-Attributen vereinfachen
-- tr -d '\r' Aufrufe als Wrapper-Funktionalität umbauen
-- While-loop für HTTP-Polling generalisieren
 - run-instance Funktion nach "aws_functions.sh" faktorisieren
-- hartcodierte Werte parametrisieren
-- Timeout für HTTP/SSH-Polling setzen
 - Anpassung der Dateierzeugung an Linux ("crlf" ersetzen)
 - Momentan wird der Admin-Nutzer als Eventersteller verwendet.
-  Die Rechtevergabe an einen anderen Nutzer über die REST-API 
+  Die Rechtevergabe an einen anderen Nutzer ï¿½ber die REST-API
   muss noch implementiert werden.
 
-3.2 Erweiterungen 
+3.2 Erweiterungen
 
 - list-Funktion mit Anzeige aller Instanznamen und deren DNS, Instanz-ID, etc. damit
   --tail nicht die Web-GUI erfordert
-- weitere Szenarios hinzufügen (Redeployment, Rückmigration in Archiv, etc.)
+- weitere Szenarios hinzufï¿½gen (Redeployment, Rï¿½ckmigration in Archiv, etc.)
 - regionspezifisches Sourcing von Dateien mit Variablen (Auskommentieren nicht mehr notwendig)
-- automatische Kontextübernahme nach tmux 
+- automatische Kontextï¿½bernahme nach tmux 
 
 
 Getestet unter Microsoft Windows [Version 10.0.10586]:
 - Cygwin 2.8.2(0.313/5/3)
-- aws-cli/1.11.129 
+- aws-cli/1.11.129
 - tmux 2.8.2(0.313/5/3)
 - openssh 7.5p1-1
 - wget 1.19.1

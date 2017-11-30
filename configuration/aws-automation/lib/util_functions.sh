@@ -83,6 +83,7 @@ function safeExit() {
   if is_dir "${tmpDir}"; then
     rm -r "${tmpDir}"
   fi
+	kill -WINCH $$
   trap - INT TERM EXIT
   exit
 }

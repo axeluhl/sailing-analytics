@@ -32,5 +32,5 @@ function associate_alb_execute() {
 	local domain=$(create_rule $listener_arn $instance_short_name $target_group_arn)
 
 	header "Apache configuration"
-	configure_apache "$public_dns_name" "$event_id" "$ssh_user" "$public_dns_name" "ssl"
+	configure_apache "$domain" "$event_id" "$ssh_user" "$public_dns_name" "ssl"
 }

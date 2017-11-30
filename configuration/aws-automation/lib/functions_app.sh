@@ -102,7 +102,7 @@ function configure_apache(){
 	wait_for_ssh_connection "$3" "$4"
 	wait_for_001_events_patch "$3" "$4"
 	local patched_content="Use Event-SSL $1 \"$2\" 127.0.0.1 8888"
-	ssh_wrapper $3 $4 echo "$patched_content" >> $events_conf
+	ssh_wrapper $3@$4 echo "$patched_content >> $events_conf"
 	#ssh_wraper $3@$4 "/etc/init.d/httpd reload"
 }
 

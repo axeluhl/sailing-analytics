@@ -33,5 +33,5 @@ function associate_clb_execute() {
 	local json_added_instance_response=$(add_instance_to_elb "$instance_name" "$instance_id")
 
 	header "Apache configuration"
-	configure_apache "$load_balancer_dns_name" "$event_id" "$ssh_user" "$public_dns_name" "ssl"
+	configure_apache "$public_dns_name" "$event_id" "$ssh_user" "$public_dns_name" "ssl"
 }

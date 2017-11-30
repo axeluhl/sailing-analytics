@@ -110,13 +110,12 @@ usage() {
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
-  --associate-alb               Add instance to existing application load balancer whos
-                                listener is defined in variables_aws.sh. automatically
+  --associate-alb               Associate instance with existing application load balancer whos
+                                listener is defined in variables_aws.sh. Automatically
                                 create necessary target group and host name rule.
-                                Currently *.dummy.sapsailing.com is used as hardcoded
-                                domain.
-  --associate-clb               Create classic load balancer and add instance to it.
-  --asslociate-elastic-ip       Create elastic ip and associate it with instance.
+                                Currently *.dummy.sapsailing.com is used for test purposes.
+  --associate-clb               Associate instance with new classic load balancer.
+  --asslociate-elastic-ip       Associate instance with new elastic ip.
   --tail                        Tail logs from instance using tmux
 
   ${bold}Other:${reset}
