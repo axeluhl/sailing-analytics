@@ -27,6 +27,14 @@ Check:
 
 ### 1.3 Migrate the raceLog and regattaLog?
 
+We need to be very careful with refactoring here as the logic to load RaceLog/RegattaLog events relies on the class names, see com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl.loadRaceLogEvent(DBObject dbObject)...
+
+   if (eventClass.equals(RaceLogRegisterCompetitorEvent.class.getSimpleName())) {  
+      return loadRaceLogRegisterCompetitorEvent(..., dbObject);  
+   }  
+
+So we really need to keep the class names also for legacy events or we must rewrite the 'RACE_LOG_EVENT_CLASS' or 'REGATTA_LOG_EVENT_CLASS' property of the RaceLog/RegattaLog database entries.
+
 ##  2. Managing boats
 
 Boats can be created now in different ways:
@@ -100,13 +108,42 @@ Check:
 
 ## 5. Smartphone Tracking (SPT)
 
+### 5.1 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on regatta level
+
+Check:
+
+- Create a simple SPT regatta where boats can not change per race
+- Open 'Competitor registrations' dialog
+- Dialog must show 'Add Competitor' button
+- Dialog must show only competitors with a linked boat in the 'Competitor pool' table on the right side
+- The registered competitor must be added to regattaLog via the RegattaLogRegisterCompetitorAndBoatEvent
+
 ## 6. Incremental Leaderboard
 
 Make sure that attribute changes of competitors and boats in the admin console are reflected in the leaderboard shown to the user
 
 ## 7. Competitor Import (Manage2Sail connector)
 
-Import competitors from a Manage2Sail event and check if the competitors and boats are created in the right way.
+Precondition: Create a result import provider for Manage2Sail  
+E.g.: http://manage2sail.com/api/public/links/event/c19b811f-8dd0-4d6f-b846-7d07bd0dead9?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
+
+### 7.1 Import Competitors into regatta where boats CAN change
+
+Check:  
+
+- Create a simple regatta where boats can change per race
+- Go to 'Connectors' -> 'Smartphone Tracking -> Select the regatta -> Click on 'Competitor registrations'
+- Select some competitors and import them
+- The competitors will be created and stored but without boats using the RegattaLogRegisterCompetitorEvent
+
+### 7.2 Import Competitors into regatta where boats CAN NOT change
+
+Check:
+
+- Create a simple regatta where boats can NOT change per race
+- Go to 'Connectors' -> 'Smartphone Tracking -> Select the regatta -> Click on 'Competitor registrations'
+- Select some competitors and import them
+- The competitors will be created and stored WITH linked boats using the RegattaLogRegisterCompetitorAndBoatEvent
 
 ## 8. WebService API
 
