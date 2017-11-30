@@ -201,3 +201,36 @@ With such an extensive existing system as the Sailing Analytics Suite, migration
 Another challenge besides the code changes is the data migration. For every existing data object an ACL has to be created and filled with the right permissions so the users do not notice a big change.
 
 Besides creating an ACL for every data objects that is access controlled, an owner has to be defined for each existing data object, so that in combination with the ACLs no user loses permissions they need to have. In order to do this, where will have to be a script that associates all data objects on a server with a tenant and a specific user as owner (e.g. on the archive all data objects are associated with the tenant “archive” and owned by the user “Axel”). Thereafter, the users on the server are assigned their respective role.
+
+**Role Migration**
+
+Following roles have to be migrated to dynamic roles. Beforehand they were hard coded in the SailingPermissionsForRoleProvider class. However, aside from the admin role, all roles listed here are only containing permissions that are checked in the frontend for showing/hiding tabs in the different menus.
+
+* admin
+  * "*"
+* eventmanager
+  * "manage_media"
+  * "manage_mark_passings"
+  * "manage_mark_positions"
+  * "manage_all_competitors"
+  * "manage_course_layout"
+  * "manage_device_configuration"
+  * "manage_events"
+  * "manage_igtimi_accounts"
+  * "manage_leaderboard_groups"
+  * "manage_leaderboards"
+  * "manage_leaderboard_results"
+  * "manage_racelog_tracking"
+  * "manage_regattas"
+  * "manage_result_import_urls"
+  * "manage_structure_import_urls"
+  * "manage_tracked_races"
+  * "manage_wind"
+  * "event"
+  * "regatta"
+  * "leaderboard"
+  * "leaderboard_group"
+* mediaeditor
+  * "manage_media"
+* moderator
+  * "can_replay_during_live_races"
