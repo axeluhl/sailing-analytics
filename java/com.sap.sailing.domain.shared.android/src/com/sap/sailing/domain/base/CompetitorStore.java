@@ -102,6 +102,11 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
 
     /**
+     * Returns true if the given competitor is of type CompetitorWithBoat AND competitor.getBoat() returns a valid boat  
+     */
+    boolean isValidCompetitorWithBoat(Competitor c);
+    
+    /**
      * Listeners added here are notified whenever {@link #updateCompetitor(String, String, Color, String, Nationality)} is called
      * for any competitor in this store.
      */

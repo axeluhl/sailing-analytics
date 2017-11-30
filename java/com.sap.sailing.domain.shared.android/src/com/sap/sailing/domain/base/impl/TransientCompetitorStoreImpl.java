@@ -197,10 +197,12 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         }
     }
 
-    protected boolean isValidCompetitorWithBoat(Competitor competitor) {
+    @Override
+    public boolean isValidCompetitorWithBoat(Competitor competitor) {
         return competitor instanceof CompetitorWithBoat && ((CompetitorWithBoat) competitor).getBoat() != null;
     }
 
+    @Override
     public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
         LockUtil.lockForRead(lock);
         try {

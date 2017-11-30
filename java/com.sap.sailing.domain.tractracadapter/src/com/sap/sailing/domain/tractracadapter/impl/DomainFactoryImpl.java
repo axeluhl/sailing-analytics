@@ -726,7 +726,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
                 Boat existingBoat = competitorAndBoatStore.getExistingBoatById(boatId);
                 Competitor existingCompetitor = competitorAndBoatStore.getExistingCompetitorById(competitorId);
-                boolean competitorMigrationRequired = existingCompetitor != null && existingCompetitor instanceof CompetitorWithBoat;
+                boolean competitorMigrationRequired = existingCompetitor != null && competitorAndBoatStore.isValidCompetitorWithBoat(existingCompetitor);
 
                 // Now we check if we already have a separate competitor and boat for this competitor in the store
                 if (existingCompetitor != null && existingBoat != null && !competitorMigrationRequired) {                    
