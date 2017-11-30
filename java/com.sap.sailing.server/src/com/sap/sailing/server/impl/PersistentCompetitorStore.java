@@ -119,19 +119,12 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
     }
 
-    /**
     @Override
-    public Pair<Competitor, Boat> migrateCompetitorToHaveASeparateBoat(Serializable boatId, CompetitorWithBoat competitorWithBoat) {
-        Boat existingBoat = competitorWithBoat.getBoat();
-        Competitor newCompetitor = getOrCreateCompetitor(competitorWithBoat.getId(), competitorWithBoat.getName(), competitorWithBoat.getShortName(),
-                competitorWithBoat.getColor(), competitorWithBoat.getEmail(), competitorWithBoat.getFlagImage(), (DynamicTeam) competitorWithBoat.getTeam(),
-                competitorWithBoat.getTimeOnTimeFactor(), competitorWithBoat.getTimeOnDistanceAllowancePerNauticalMile(), competitorWithBoat.getSearchTag());
-        Boat newBoat = getOrCreateBoat(boatId, existingBoat.getName(), existingBoat.getBoatClass(), existingBoat.getSailID(), existingBoat.getColor());
-        addNewCompetitor(newCompetitor.getId(), newCompetitor);
-        addNewBoat(newBoat.getId(), newBoat);
-        return new Pair<>(newCompetitor, newBoat);
+    public Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
+        Competitor migratedCompetitor = super.migrateToCompetitorWithoutBoat(competitorWithBoat);
+        storeTo.storeCompetitor(migratedCompetitor);
+        return migratedCompetitor; 
     }
-*/
 
     @Override
     protected void addNewCompetitor(Competitor competitor) {
@@ -145,8 +138,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         super.clearCompetitors();
     }
 
-    @Override
-    public void removeCompetitor(Competitor competitor) {
+    protected void removeCompetitor(Competitor competitor) {
         storeTo.removeCompetitor(competitor);
         super.removeCompetitor(competitor);
     }
@@ -189,8 +181,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         super.clearBoats();
     }
 
-    @Override
-    public void removeBoat(Boat boat) {
+    protected void removeBoat(Boat boat) {
         storeTo.removeBoat(boat);
         super.removeBoat(boat);
     }

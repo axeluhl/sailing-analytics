@@ -114,15 +114,13 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     @Override
     public Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
-        removeCompetitor(competitorWithBoat);
+        // We can't create a new competitor without boat here as the existing competitorWithBoat might be already referenced.
+        // Therefore we only clear the 'boat' property and make sure that 
         removeBoat(competitorWithBoat.getBoat());
         
-        Competitor newCompetitor = getOrCreateCompetitor(competitorWithBoat.getId(), competitorWithBoat.getName(), competitorWithBoat.getShortName(),
-                competitorWithBoat.getColor(), competitorWithBoat.getEmail(), competitorWithBoat.getFlagImage(), (DynamicTeam) competitorWithBoat.getTeam(),
-                competitorWithBoat.getTimeOnTimeFactor(), competitorWithBoat.getTimeOnDistanceAllowancePerNauticalMile(), competitorWithBoat.getSearchTag());
+        ((DynamicCompetitorWithBoat) competitorWithBoat).clearBoat();        
         
-        addNewCompetitor(newCompetitor);
-        return newCompetitor;
+        return competitorWithBoat;
     }
 
     /**
@@ -203,7 +201,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorCache.get(competitorId);
-            if (competitor instanceof CompetitorWithBoat) {
+            if (competitor instanceof CompetitorWithBoat && ((CompetitorWithBoat) competitor).getBoat() != null) {
                 return (CompetitorWithBoat) competitor;
             } else {
                 return null;
@@ -218,7 +216,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorsByIdAsString.get(competitorIdAsString);
-            if (competitor instanceof CompetitorWithBoat) {
+            if (competitor instanceof CompetitorWithBoat && ((CompetitorWithBoat) competitor).getBoat() != null) {
                 return (CompetitorWithBoat) competitor;
             } else {
                 return null;
@@ -269,7 +267,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         try {
             List<CompetitorWithBoat> competitors = new ArrayList<>();
             for (Competitor c: competitorCache.values()) {
-                if (c instanceof CompetitorWithBoat) {
+                if (c instanceof CompetitorWithBoat  && ((CompetitorWithBoat) c).getBoat() != null) {
                     competitors.add((CompetitorWithBoat) c);
                 }
             }
