@@ -143,7 +143,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<AccessControlListDTO> getAccessControlListList() throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("manage_access_control")) {
+        if (SecurityUtils.getSubject().isPermitted("access_control:manage")) {
             List<AccessControlListDTO> acls = new ArrayList<>();
             for (AccessControlList acl : getSecurityService().getAccessControlListList()) {
                 AccessControlListDTO aclDTO = createAclDTOFromAcl(acl);
@@ -195,7 +195,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<TenantDTO> getTenantList() throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("manage_tenants")) {
+        if (SecurityUtils.getSubject().isPermitted("tenants:manage")) {
             List<TenantDTO> tenants = new ArrayList<>();
             for (Tenant t : getSecurityService().getTenantList()) {
                 TenantDTO tenantDTO = createTenantDTOFromTenant(t);
@@ -261,7 +261,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("manage_users")) {
+        if (SecurityUtils.getSubject().isPermitted("users:manage")) {
             List<UserDTO> users = new ArrayList<>();
             for (User u : getSecurityService().getUserList()) {
                 UserDTO userDTO = createUserDTOFromUser(u);
@@ -401,7 +401,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("manage_users")) {
+        if (SecurityUtils.getSubject().isPermitted("users:manage")) {
             List<UserDTO> users = new ArrayList<>();
             for (User u : getSecurityService().getUserList()) {
                 if (filter != null && !"".equals(filter)) {

@@ -36,8 +36,8 @@ public class PermissionChecker {
             RolePermissionModel rolePermissionModel, Owner ownership, AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
-        // and action only has on sub-part
-        if (parts.size() < 2 || parts.get(1).size() != 1) {
+        // and data object part only has one sub-part
+        if (parts.size() < 2 || parts.get(0).size() != 1) {
             throw new WrongPermissionFormatException(permission);
         }
         String action = (String) parts.get(1).toArray()[0];
