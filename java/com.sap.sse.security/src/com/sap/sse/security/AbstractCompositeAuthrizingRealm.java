@@ -161,6 +161,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
 
     @Override
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
+        //TODO check whether WildcardPermission functionality can be used here (perm instanceof)
         String[] parts = perm.toString().replaceAll("\\[|\\]", "").split(":");
         String user = (String) principals.getPrimaryPrincipal();
         

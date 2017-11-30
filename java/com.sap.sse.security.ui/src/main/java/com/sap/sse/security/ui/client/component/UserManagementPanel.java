@@ -28,7 +28,6 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.Permission;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -50,11 +49,11 @@ public class UserManagementPanel extends DockPanel {
 
     private UserListDataProvider userListDataProvider;
     
-    public UserManagementPanel(final UserService userService, final StringMessages stringMessages, PermissionsForRoleProvider permissionsForRoleProvider) {
-        this(userService, stringMessages, permissionsForRoleProvider, Collections.<Role>emptySet(), Collections.<Permission>emptySet());
+    public UserManagementPanel(final UserService userService, final StringMessages stringMessages) {
+        this(userService, stringMessages, Collections.<Role>emptySet(), Collections.<Permission>emptySet());
     }
     
-    public UserManagementPanel(final UserService userService, final StringMessages stringMessages, PermissionsForRoleProvider permissionsForRoleProvider,
+    public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
@@ -139,8 +138,7 @@ public class UserManagementPanel extends DockPanel {
         TextBox filterBox = new TextBox();
         userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
         final UserDetailsView userDetailsView = new UserDetailsView(userService,
-                singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider,
-                permissionsForRoleProvider, additionalRoles, additionalPermissions);
+                singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, additionalRoles, additionalPermissions);
         add(userDetailsView, DockPanel.CENTER);
         userDetailsView.addUserChangeEventHandler(new UserChangeEventHandler() {
             @Override

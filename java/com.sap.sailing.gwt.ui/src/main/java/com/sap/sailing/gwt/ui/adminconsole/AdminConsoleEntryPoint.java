@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -87,7 +86,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     }
     
     private Widget createAdminConsolePanel() {
-        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), SailingPermissionsForRoleProvider.INSTANCE, 
+        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), 
                 sailingService, getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css(), getStringMessages());
         panel.addStyleName("adminConsolePanel");
         
@@ -297,7 +296,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             roles.add(role);
         }
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
-                SailingPermissionsForRoleProvider.INSTANCE, roles, Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()));
+                roles, Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()));
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel),
                 getStringMessages().userManagement(), Permission.MANAGE_USERS);
         

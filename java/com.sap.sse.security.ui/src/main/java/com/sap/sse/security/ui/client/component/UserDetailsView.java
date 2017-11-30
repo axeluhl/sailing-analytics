@@ -30,7 +30,6 @@ import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.Permission;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -59,14 +58,11 @@ public class UserDetailsView extends FlowPanel {
     private final ListBox allPermissionsList;
     private UserDTO user;
 
-    private final PermissionsForRoleProvider permissionForRoleProvider;
-
     public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages,
-            final UserListDataProvider userListDataProvider, PermissionsForRoleProvider permissionsForRoleProvider,
+            final UserListDataProvider userListDataProvider,
             Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         this.stringMessages = stringMessages;
-        this.permissionForRoleProvider = permissionsForRoleProvider;
         this.user = user;
         addStyleName("userDetailsView");
         List<String> defaultRoleNames = new ArrayList<>(); // TODO: add dynamic roles here
@@ -265,7 +261,7 @@ public class UserDetailsView extends FlowPanel {
             rolesEditor.setValue(user.getStringRoles(), /* fireEvents */ false);
             permissionsEditor.setValue(user.getStringPermissions(), /* fireEvents */ false);
             allPermissionsList.clear();
-            for (WildcardPermission permission : user.getAllPermissions(permissionForRoleProvider)) {
+            for (WildcardPermission permission : user.getAllPermissions()) {
                 allPermissionsList.addItem(permission.toString());
             }
         }

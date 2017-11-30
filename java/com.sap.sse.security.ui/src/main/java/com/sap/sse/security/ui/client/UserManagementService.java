@@ -20,35 +20,35 @@ import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public interface UserManagementService extends RemoteService {
-    Collection<AccessControlListDTO> getAccessControlListList();
+    Collection<AccessControlListDTO> getAccessControlListList() throws UnauthorizedException;
 
     AccessControlListDTO getAccessControlList(String idAsString);
 
-    AccessControlListDTO updateACL(String idAsString, Map<String, Set<String>> permissionStrings);
+    AccessControlListDTO updateACL(String idAsString, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
 
-    AccessControlListDTO addToACL(String idAsString, String tenantIdAsString, String permission);
+    AccessControlListDTO addToACL(String idAsString, String tenantIdAsString, String permission) throws UnauthorizedException;
 
-    AccessControlListDTO removeFromACL(String idAsString, String tenantIdAsString, String permission);
+    AccessControlListDTO removeFromACL(String idAsString, String tenantIdAsString, String permission) throws UnauthorizedException;
 
-    Collection<TenantDTO> getTenantList();
+    Collection<TenantDTO> getTenantList() throws UnauthorizedException;
 
-    TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException;
+    TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException, UnauthorizedException;
 
     UserGroupDTO addUserToTenant(String idAsString, String user) throws UnauthorizedException;
 
     UserGroupDTO removeUserFromTenant(String idAsString, String user) throws UnauthorizedException;
 
-    SuccessInfo deleteTenant(String idAsString);
+    SuccessInfo deleteTenant(String idAsString) throws UnauthorizedException;
 
-    Collection<UserDTO> getUserList();
+    Collection<UserDTO> getUserList() throws UnauthorizedException;
 
-    Collection<UserDTO> getFilteredSortedUserList(String filter);
+    Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException;
 
-    UserDTO getCurrentUser();
+    UserDTO getCurrentUser() throws UnauthorizedException;
 
     SuccessInfo login(String username, String password);
 
-    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException;
+    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException, UnauthorizedException;
     
     /**
      * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have
@@ -64,13 +64,13 @@ public interface UserManagementService extends RemoteService {
 
     boolean validateEmail(String username, String validationSecret) throws UserManagementException;
 
-    SuccessInfo deleteUser(String username);
+    SuccessInfo deleteUser(String username) throws UnauthorizedException;
 
     SuccessInfo logout();
 
-    SuccessInfo setRolesForUser(String username, Iterable<UUID> roles);
+    SuccessInfo setRolesForUser(String username, Iterable<UUID> roles) throws UnauthorizedException;
 
-    SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions);
+    SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) throws UnauthorizedException;
 
     Map<String, String> getSettings();
 
@@ -88,24 +88,24 @@ public interface UserManagementService extends RemoteService {
      * @param value must not be <code>null</code>
      * @throws UserManagementException 
      */
-    void setPreference(String username, String key, String value) throws UserManagementException;
+    void setPreference(String username, String key, String value) throws UserManagementException, UnauthorizedException;
     
-    void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException;
+    void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException, UnauthorizedException;
 
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
      * <code>username</code>.
      */
-    void unsetPreference(String username, String key) throws UserManagementException;
+    void unsetPreference(String username, String key) throws UserManagementException, UnauthorizedException;
 
     /**
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
-    String getPreference(String username, String key) throws UserManagementException;
+    String getPreference(String username, String key) throws UserManagementException, UnauthorizedException;
     
-    Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException;
+    Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException, UnauthorizedException;
     
-    Map<String, String> getAllPreferences(String username) throws UserManagementException;
+    Map<String, String> getAllPreferences(String username) throws UserManagementException, UnauthorizedException;
 
     String getAccessToken(String username);
 

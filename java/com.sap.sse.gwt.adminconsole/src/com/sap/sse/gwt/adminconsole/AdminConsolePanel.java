@@ -26,7 +26,6 @@ import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.shared.Permission;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -96,8 +95,6 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      */
     private final Map<Widget, RefreshableAdminConsolePanel> panelsByWidget;
     
-    private final PermissionsForRoleProvider permissionsForRoleProvider;
-    
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
      * you add a new tab then make sure to have a look at #refreshDataFor(Widget widget) to ensure that upon
@@ -150,10 +147,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return target;
     }
 
-    public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
+    public AdminConsolePanel(UserService userService,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages) {
-        this.permissionsForRoleProvider = permissionsForRoleProvider;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
         this.userService = userService;
         roleSpecificTabs = new LinkedHashSet<>();
@@ -446,7 +442,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
         for (Permission requiredStringPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
             WildcardPermission requiredPermission = new WildcardPermission(requiredStringPermission.getStringPermission());
-            for (WildcardPermission userPermission : user.getAllPermissions(permissionsForRoleProvider)) {
+            for (WildcardPermission userPermission : user.getAllPermissions()) {
                 if (requiredPermission.implies(userPermission) || userPermission.implies(requiredPermission)) {
                     return true;
                 }

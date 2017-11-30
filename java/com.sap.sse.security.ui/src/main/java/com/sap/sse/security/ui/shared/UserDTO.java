@@ -119,7 +119,7 @@ public class UserDTO implements IsSerializable {
      * @return a set of permissions with no duplicates, all in the format parsable by
      *         {@link WildcardPermission#WildcardPermission(String)}
      */
-    public Iterable<WildcardPermission> getAllPermissions(PermissionsForRoleProvider permissionsForRoleProvider) {
+    public Iterable<WildcardPermission> getAllPermissions() {
         Set<WildcardPermission> result = new LinkedHashSet<>();
         Util.addAll(permissions, result);
         if (rolePermissionModel != null) {
