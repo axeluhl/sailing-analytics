@@ -132,7 +132,7 @@ public interface DomainObjectFactory {
 
     RegattaLog loadRegattaLog(RegattaLikeIdentifier identifier);
 
-    Collection<CompetitorWithBoat> loadAllLegacyCompetitorsWithBoat();
+    Collection<CompetitorWithBoat> renameCompetitorsCollectionAndloadAllLegacyCompetitors();
 
     /**
      * Loads all competitors (with and without embedded boats) and resolves them via the domain factory.

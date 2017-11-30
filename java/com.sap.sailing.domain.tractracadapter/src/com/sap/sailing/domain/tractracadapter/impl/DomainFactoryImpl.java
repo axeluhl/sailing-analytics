@@ -44,6 +44,7 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MigratableRegattaImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -693,19 +694,27 @@ public class DomainFactoryImpl implements DomainFactory {
 
             // If the tractrac race contains boat metadata we assume the regatta can have changing boats per race.
             // As the attribute 'canBoatsOfCompetitorsChangePerRace' is new and 'false' is the default value 
-            // we need to set it's value to true for the regatta 
-            if (competitorBoatInfo != null && trackedRegatta.getRegatta().canBoatsOfCompetitorsChangePerRace() == false) {
-                // we need to set this to true for the regatta to make it possible to edit the boat/competitor mappings
-                trackedRegatta.getRegatta().setCanBoatsOfCompetitorsChangePerRace(true);
+            // we need to set it's value to true for the regatta, but only if the regatta is of type MigratableRegattaImpl
+            Regatta regatta = trackedRegatta.getRegatta();
+            if (competitorBoatInfo != null && regatta.canBoatsOfCompetitorsChangePerRace() == false) {
+                // we need to set this to true for the regatta to make it possible to create the boat/competitor mappings
+                if (regatta instanceof MigratableRegattaImpl) {
+                    MigratableRegattaImpl migratableRegatta = (MigratableRegattaImpl) regatta;
+                    migratableRegatta.migrateCanBoatsOfCompetitorsChangePerRace(true);
+                    logger.log(Level.INFO, "Successful migration of regatta " + regatta.getName() +
+                            " to be of type 'canBoatsOfCompetitorsChangePerRace=true'");
+                } else {
+                    logger.log(Level.SEVERE, "Regatta " + regatta.getName() +
+                            " has wrong type 'canBoatsOfCompetitorsChangePerRace' but can't be migrated because it is not of type MigratableRegattaImpl");
+                }
             }
 
             // Case 1
-            if (trackedRegatta.getRegatta().canBoatsOfCompetitorsChangePerRace()) {
+            if (regatta.canBoatsOfCompetitorsChangePerRace()) {
                 // create an unique identifier for the boat and try to find it in the boatStore
                 Serializable boatId;
                 String sailId;
                 if (competitorBoatInfo != null) {
-                    Regatta regatta = trackedRegatta.getRegatta();
                     LeaderboardGroup leaderboardGroup = leaderboardGroupResolver.resolveLeaderboardGroupByRegattaName(regatta.getName());
                     boatId = createUniqueBoatIdentifierFromBoatMetadata(regatta, leaderboardGroup, competitorBoatInfo);
                     sailId = competitorBoatInfo.getId(); // we take here the boatId as sailID which is a number like 1, 2, 3

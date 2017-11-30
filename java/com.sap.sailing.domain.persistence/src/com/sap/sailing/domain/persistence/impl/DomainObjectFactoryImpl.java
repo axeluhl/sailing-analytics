@@ -129,8 +129,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEv
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnTimeFactorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -159,6 +159,7 @@ import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.MigratableRegattaImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
@@ -1264,18 +1265,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Boolean canBoatsOfCompetitorsChangePerRace = (Boolean) dbRegatta
                     .get(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name());
             // for backward compatibility
+            boolean createMigratableRegatta = false;
             if (canBoatsOfCompetitorsChangePerRace == null) {
                 canBoatsOfCompetitorsChangePerRace = false;
+                createMigratableRegatta = true;
             }
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
-            result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                    canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
-                    loadScoringScheme(dbRegatta), id, courseArea,
-                    buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
-                            : buoyZoneRadiusInHullLengths,
-                    useStartTimeInference == null ? true : useStartTimeInference,
-                    controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                    rankingMetricConstructor);
+            if (createMigratableRegatta) {
+                result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
+                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        loadScoringScheme(dbRegatta), id, courseArea,
+                        buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
+                                : buoyZoneRadiusInHullLengths,
+                        useStartTimeInference == null ? true : useStartTimeInference,
+                        controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
+                        rankingMetricConstructor);
+            } else {
+                result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
+                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        loadScoringScheme(dbRegatta), id, courseArea,
+                        buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
+                                : buoyZoneRadiusInHullLengths,
+                        useStartTimeInference == null ? true : useStartTimeInference,
+                        controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
+                        rankingMetricConstructor);
+            }
             result.setRegattaConfiguration(configuration);
         }
         return result;
@@ -2371,7 +2385,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Collection<Competitor> loadAllCompetitors() {
         ArrayList<Competitor> result = new ArrayList<>();
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITH_BOAT_REFERENCES.name());
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
@@ -2386,9 +2400,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<CompetitorWithBoat> loadAllLegacyCompetitorsWithBoat() {
+    public Collection<CompetitorWithBoat> renameCompetitorsCollectionAndloadAllLegacyCompetitors() {
+        DBCollection orginalCompetitorCollection = database.getCollection(CollectionNames.COMPETITORS.name());
+        orginalCompetitorCollection.rename(CollectionNames.COMPETITORS_BAK.name());
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_BAK.name());
         ArrayList<CompetitorWithBoat> result = new ArrayList<>();
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
@@ -2397,7 +2413,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-            logger.log(Level.SEVERE, "loadLegacyCompetitors", e);
+            logger.log(Level.SEVERE, "renameCompetitorsCollectionAndloadAllLegacyCompetitors", e);
         }
         return result;
     }

@@ -744,8 +744,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return canBoatsOfCompetitorsChangePerRace;
     }
 
-    @Override
-    public void setCanBoatsOfCompetitorsChangePerRace(boolean canBoatsOfCompetitorsChangePerRace) {
+    /**
+     * Changes whether the competitors use the same boat for the whole regatta or change the boat used during the competition.
+     * Actually this should never be called as this should not change once set, but we need it to migrate older regattas to the new model.
+     */
+    protected void setCanBoatsOfCompetitorsChangePerRace(boolean canBoatsOfCompetitorsChangePerRace) {
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 

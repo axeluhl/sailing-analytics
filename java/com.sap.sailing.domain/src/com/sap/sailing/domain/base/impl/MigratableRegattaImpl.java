@@ -1,0 +1,30 @@
+package com.sap.sailing.domain.base.impl;
+
+import java.io.Serializable;
+
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sse.common.TimePoint;
+
+public class MigratableRegattaImpl extends RegattaImpl {
+    private static final long serialVersionUID = -3545488249832218320L;
+
+    public <S extends Series> MigratableRegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
+            BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate,
+            Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea,
+            Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
+        super(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, startDate, endDate, series,
+                persistent, scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
+                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
+    }
+    
+    public void migrateCanBoatsOfCompetitorsChangePerRace(boolean canBoatsOfCompetitorsChangePerRace) {
+        super.setCanBoatsOfCompetitorsChangePerRace(canBoatsOfCompetitorsChangePerRace);
+    }
+}

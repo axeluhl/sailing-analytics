@@ -72,14 +72,14 @@ public enum CollectionNames {
     
     /**
      * Legacy store for competitors before implementation of bug2822
-     * Stores competitors with contained boats.
+     * Contains the old competitors with contained boats.
      */
-    COMPETITORS,
+    COMPETITORS_BAK,
 
     /**
-     * Stores competitors with boat references.
+     * Stores competitors with or without boat references.
      */
-    COMPETITORS_WITH_BOAT_REFERENCES,
+    COMPETITORS,
 
     /**
      * Stores boats.

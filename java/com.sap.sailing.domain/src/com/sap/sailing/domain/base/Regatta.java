@@ -147,12 +147,6 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
     RegattaIdentifier getRegattaIdentifier();
 
     /**
-     * Changes whether the competitors use the same boat for the whole regatta or change the boat used during the competition.
-     * Actually this should never be called as this should not change once set, but we need it to migrate older regattas to the new model.
-     */
-    void setCanBoatsOfCompetitorsChangePerRace(boolean canBoatsOfCompetitorsChangePerRace); 
-
-    /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored durably and
      * don't contain valuable information worth being preserved; or they are constructed explicitly with series and race
      * columns in which case this data needs to be protected. This flag indicates whether the data of this regatta needs

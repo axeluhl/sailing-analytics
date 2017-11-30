@@ -78,7 +78,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     private void migrateCompetitorsIfRequired() {
         boolean migrationRequired = !storeTo.getDatabase().collectionExists(CollectionNames.BOATS.name());
         if (migrationRequired) {
-            Collection<CompetitorWithBoat> allLegacyCompetitorsWithBoat = loadFrom.loadAllLegacyCompetitorsWithBoat();
+            Collection<CompetitorWithBoat> allLegacyCompetitorsWithBoat = loadFrom.renameCompetitorsCollectionAndloadAllLegacyCompetitors();
             List<Competitor> newCompetitors = new ArrayList<>();
             List<Boat> newBoats = new ArrayList<>();
             

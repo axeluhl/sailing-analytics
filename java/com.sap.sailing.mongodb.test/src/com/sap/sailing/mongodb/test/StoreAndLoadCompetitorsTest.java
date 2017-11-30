@@ -74,7 +74,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     
     private void dropCompetitorCollection() {
         DB db = getMongoService().getDB();
-        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
+        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS_BAK.name());
         competitorCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
         competitorCollection.drop();
     }
