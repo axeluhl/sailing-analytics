@@ -10,6 +10,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class MigratableRegattaImpl extends RegattaImpl {
     private static final long serialVersionUID = -3545488249832218320L;
@@ -25,6 +26,8 @@ public class MigratableRegattaImpl extends RegattaImpl {
     }
     
     public void migrateCanBoatsOfCompetitorsChangePerRace(boolean canBoatsOfCompetitorsChangePerRace) {
+        // It should not be possible to call this after races have been already added to this regatta.
+        assert Util.size(getAllRaces()) == 0;
         super.setCanBoatsOfCompetitorsChangePerRace(canBoatsOfCompetitorsChangePerRace);
     }
 }
