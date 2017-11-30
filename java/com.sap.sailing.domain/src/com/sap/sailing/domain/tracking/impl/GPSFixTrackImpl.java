@@ -43,7 +43,6 @@ import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -1081,19 +1080,18 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     }
     
     @Override
-    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps) {
-        if (intervalBetweenBearingSteps.asMillis() <= 0) {
-            throw new IllegalArgumentException("intervalBetweenBearingSteps must be a positive duration but was "+intervalBetweenBearingSteps);
-        }
+    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint) {
         List<SpeedWithBearingStep> speedWithBearingSteps = new ArrayList<>();
         Bearing lastCourse = null;
         TimePoint lastTimePoint = null;
         double lastCourseChangeAngleInDegrees = 0;
-        lockForRead();
+        FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
         try {
-            for (TimePoint timePoint = fromTimePoint;; timePoint = timePoint.plus(intervalBetweenBearingSteps)) {
-                if (timePoint.after(toTimePoint)) {
-                    timePoint = toTimePoint;
+            lockForRead();
+            TimePoint timePoint = firstFix == null ? null : firstFix.getTimePoint();
+            for (Iterator<FixType> iterator = getFixesIterator(fromTimePoint, false); iterator.hasNext(); timePoint = iterator.next().getTimePoint()) {
+                if(timePoint == null) {
+                    continue;
                 }
                 SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
                 if (estimatedSpeed != null) {

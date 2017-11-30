@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -184,6 +183,6 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      *            Time distance between bearing steps
      * @return The list of bearings between the provided time range
      */
-    SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint, Duration intervalBetweenBearingSteps);
+    SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint);
 
 }

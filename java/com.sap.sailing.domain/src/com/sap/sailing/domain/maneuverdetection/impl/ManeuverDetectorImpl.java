@@ -302,6 +302,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (maneuverMainCurveDetails == null) {
             return result;
         }
+        System.out.println("");
         CurveDetails maneuverDetails = computeManeuverDetails(competitor, maneuverMainCurveDetails,
                 earliestManeuverStart, latestManeuverEnd);
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
@@ -576,10 +577,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private SpeedWithBearingStepsIterable getSpeedWithBearingSteps(Competitor competitor,
             TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver) {
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        Duration intervalBetweenSteps = getNormlizedIntervalForSpeedWithBearingSteps(
-                track.getAverageIntervalBetweenRawFixes());
         SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
-                timePointAfterManeuver, intervalBetweenSteps);
+                timePointAfterManeuver);
         return stepsToAnalyze;
     }
 
@@ -960,12 +959,13 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 refinedTimePointAfterManeuver = timePoint;
                 refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
             }
-            // Check whether the course change is performed in the target direction of maneuver. If yes, check consider
+         // Check whether the course change is performed in the target direction of maneuver. If yes, check consider
             // the step to locate the maneuver time point with the highest angular velocity within main curve.
             if (0 < currentCourseChangeInDegrees * totalCourseChangeSignum) {
                 if (maxAngularVelocityInDegreesPerSecond < entry.getAngularVelocityInDegreesPerSecond()) {
                     maxAngularVelocityInDegreesPerSecond = entry.getAngularVelocityInDegreesPerSecond();
-                    maneuverTimePoint = previousTimePoint;
+                    Duration durationFromPreviousStep = previousTimePoint.until(timePoint);
+                    maneuverTimePoint = previousTimePoint.plus(durationFromPreviousStep.divide(2.0));
                 }
             }
             // If the direction sign does not match, or the angular velocity at the beginning of the curve is nearly

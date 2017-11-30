@@ -18,9 +18,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -48,7 +46,7 @@ public class CurveEnteringAndExitingComputationTest {
         CurveDetails mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
-        assertEquals(constructTimePoint(2), mainCurve.getTimePoint());
+        assertEquals(constructTimePoint(2.5), mainCurve.getTimePoint());
         assertEquals(12, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
         assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
@@ -57,7 +55,7 @@ public class CurveEnteringAndExitingComputationTest {
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(4), mainCurve.getTimePointAfter());
-        assertEquals(constructTimePoint(2), mainCurve.getTimePoint());
+        assertEquals(constructTimePoint(2.5), mainCurve.getTimePoint());
         assertEquals(11, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
         assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
@@ -67,7 +65,7 @@ public class CurveEnteringAndExitingComputationTest {
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
-        assertEquals(constructTimePoint(0), mainCurve.getTimePoint());
+        assertEquals(constructTimePoint(0.5), mainCurve.getTimePoint());
         assertEquals(20, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
         assertEquals(10.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
@@ -91,7 +89,7 @@ public class CurveEnteringAndExitingComputationTest {
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(2), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
-        assertEquals(constructTimePoint(6), mainCurve.getTimePoint());
+        assertEquals(constructTimePoint(6.5), mainCurve.getTimePoint());
         assertEquals(18, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
         assertEquals(6.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
@@ -101,7 +99,7 @@ public class CurveEnteringAndExitingComputationTest {
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(1), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(11), mainCurve.getTimePointAfter());
-        assertEquals(constructTimePoint(1), mainCurve.getTimePoint());
+        assertEquals(constructTimePoint(1.5), mainCurve.getTimePoint());
         assertEquals(38, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
         assertEquals(20.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
@@ -111,7 +109,7 @@ public class CurveEnteringAndExitingComputationTest {
         mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(5), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(9), mainCurve.getTimePointAfter());
-        assertEquals(constructTimePoint(8), mainCurve.getTimePoint());
+        assertEquals(constructTimePoint(8.5), mainCurve.getTimePoint());
         assertEquals(24, mainCurve.getTotalCourseChangeInDegrees(), maxDeltaForDouble);
         assertEquals(9.0, mainCurve.getMaxAngularVelocityInDegreesPerSecond(), maxDeltaForDouble);
 
@@ -252,29 +250,6 @@ public class CurveEnteringAndExitingComputationTest {
         assertEquals(0, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
     }
     
-    @Test
-    public void testNormalizedIntervalComputation() {
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
-        Duration normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(1001));
-        assertEquals(normalizedInterval.asMillis(), 1000);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(1000));
-        assertEquals(normalizedInterval.asMillis(), 1000);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(0));
-        assertEquals(normalizedInterval.asMillis(), 100);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(-3));
-        assertEquals(normalizedInterval.asMillis(), 100);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(99));
-        assertEquals(normalizedInterval.asMillis(), 100);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(250));
-        assertEquals(normalizedInterval.asMillis(), 250);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(249));
-        assertEquals(normalizedInterval.asMillis(), 250);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(225));
-        assertEquals(normalizedInterval.asMillis(), 250);
-        normalizedInterval = maneuverDetector.getNormlizedIntervalForSpeedWithBearingSteps(new MillisecondsDurationImpl(224));
-        assertEquals(normalizedInterval.asMillis(), 200);
-    }
-
     private SpeedWithBearingStepsIterable constructStepsWithBearings(double... bearingsInDegrees) {
         List<SpeedWithBearingStep> steps = new ArrayList<>(bearingsInDegrees.length);
         SpeedWithBearingStep previousStep = null;

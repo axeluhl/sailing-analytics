@@ -54,7 +54,7 @@ public class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
 
     @Override
     public String toString() {
-        return "Speed: " + speedWithBearing.getKnots() + " kts, course change: " + courseChangeInDegrees
+        return "Timepoint: " + timePoint + ", speed: " + speedWithBearing.getKnots() + " kts, course change: " + courseChangeInDegrees
                 + "°, angular velocity: " + angularVelocityInDegreesPerSecond + "°/s, bearing: "
                 + speedWithBearing.getBearing().getDegrees() + "°";
     }

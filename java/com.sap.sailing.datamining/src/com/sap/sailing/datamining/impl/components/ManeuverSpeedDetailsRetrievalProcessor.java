@@ -19,7 +19,6 @@ import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
@@ -67,14 +66,8 @@ public class ManeuverSpeedDetailsRetrievalProcessor
 
     private SpeedPerTWAExtraction extractSpeedPerTWA(TrackedRace trackedRace, Competitor competitor, Wind wind,
             TimePoint timePointBeforeForAnalysis, TimePoint timePointAfterForAnalysis, double directionChangeInDegreesForAnalysis) {
-        long maneuverDuration = timePointBeforeForAnalysis.until(timePointAfterForAnalysis).asMillis();
-        long stepMillis = maneuverDuration < 200 * 5 ? maneuverDuration / 5 : 200;
-        if (stepMillis == 0) {
-            stepMillis = 1;
-        }
-
         final SpeedWithBearingStepsIterable maneuverBearingSteps = trackedRace.getTrack(competitor).getSpeedWithBearingSteps(
-                timePointBeforeForAnalysis, timePointAfterForAnalysis, new MillisecondsDurationImpl(stepMillis));
+                timePointBeforeForAnalysis, timePointAfterForAnalysis);
 
         NauticalSide maneuverDirection = directionChangeInDegreesForAnalysis < 0 ? NauticalSide.PORT
                 : NauticalSide.STARBOARD;
