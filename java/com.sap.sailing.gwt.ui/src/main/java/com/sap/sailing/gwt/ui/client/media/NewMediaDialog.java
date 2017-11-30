@@ -15,6 +15,8 @@ import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,7 +53,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     protected TextBox startTimeBox;
 
-    private Label infoLabel; // showing either mime type or youtube id
+    private SimplePanel infoLabel; // showing either mime type or youtube id
 
     private TextBox durationBox;
 
@@ -153,7 +155,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(1, 1, titleBox);
         infoLabelLabel = new Label();
         formGrid.setWidget(2, 0, infoLabelLabel);
-        infoLabel = new Label();
+        infoLabel = new SimplePanel();
+        infoLabel.setWidget(new Label(""));
         formGrid.setWidget(2, 1, infoLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
         startTimeBox = createTextBox(null);
@@ -279,10 +282,24 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         titleBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
         if (mediaTrack.isYoutube()) {
             infoLabelLabel.setText(stringMessages.youtubeId() + ":");
-            infoLabel.setText(mediaTrack.url);
+            infoLabel.setWidget(new Label(mediaTrack.url));
         } else {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
-            infoLabel.setText(mediaTrack.typeToString());
+            if(mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama){
+                ListBox mimeTypeListBox = createListBox(false);
+                mimeTypeListBox.addItem(MimeType.mp4.name());
+                mimeTypeListBox.addItem(MimeType.mp4panorama.name());
+                infoLabel.setWidget(mimeTypeListBox);
+                mimeTypeListBox.addChangeHandler(new ChangeHandler() {
+                    
+                    @Override
+                    public void onChange(ChangeEvent event) {
+                        mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
+                    }
+                });
+            }else{
+                infoLabel.setWidget(new Label(mediaTrack.typeToString()));
+            }
         }
         TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
         String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());

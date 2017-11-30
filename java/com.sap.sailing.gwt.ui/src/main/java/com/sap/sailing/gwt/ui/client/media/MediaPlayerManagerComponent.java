@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
+import com.sap.sailing.gwt.ui.client.media.popup.VideoJSWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
@@ -480,8 +481,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 if (videoTrack.isYoutube()) {
                     videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
                 } else {
-                    videoContainer = new VideoJsWindowPlayer(videoTrack, getRaceStartTime(), raceTimer,
-                        playerCloseListener);
+                    videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener);
                 }
                 playerCloseListener.setVideoContainer(videoContainer);
                 closeFloatingVideo(videoTrack);

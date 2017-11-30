@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.media.PlayEvent;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
-import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoViewImpl extends Composite implements VideoView {
@@ -39,7 +38,7 @@ public class VideoViewImpl extends Composite implements VideoView {
     @Override
     public void playVideo(VideoDTO video) {
         player = new VideoJSPlayer(true, true);
-        player.setVideo(video.getMimeType(), video.getSourceRef(), video.hasTag(MediaTagConstants.PANORAMA));
+        player.setVideo(video.getMimeType(), video.getSourceRef());
         player.addPlayHandler(new PlayEvent.Handler() {
             @Override
             public void onStart(PlayEvent event) {

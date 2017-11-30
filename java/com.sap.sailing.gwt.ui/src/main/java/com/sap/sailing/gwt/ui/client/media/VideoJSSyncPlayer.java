@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
@@ -11,7 +9,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynchPlayer {
+public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynchPlayer, RequiresResize {
     private VideoJSPlayer videoJsDelegate;
     
     private EditFlag editFlag;
@@ -20,12 +18,10 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
 
     public VideoJSSyncPlayer(MediaTrack mediaTrack, TimePoint raceStartTime, Timer raceTimer) {
         super(mediaTrack);
-        GWT.debugger();
-        videoJsDelegate = new VideoJSPlayer(true, true);
-        videoJsDelegate.videoElement.getStyle().setPosition(Position.ABSOLUTE);
+        videoJsDelegate = new VideoJSPlayer(true, false);
         this.raceStartTime = raceStartTime;
         this.raceTimer = raceTimer;
-        videoJsDelegate.setVideo(mediaTrack.mimeType, mediaTrack.url, false);
+        videoJsDelegate.setVideo(mediaTrack.mimeType, mediaTrack.url);
     }
 
     @Override
@@ -68,12 +64,12 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
 
     @Override
     public void setPlaybackSpeed(double newPlaySpeedFactor) {
-        Window.alert("Playback speed changed! " + newPlaySpeedFactor);
+        videoJsDelegate.setPlaybackRate(newPlaySpeedFactor);
     }
 
     @Override
     public void setMuted(boolean isToBeMuted) {
-        Window.alert("setMuted " + isToBeMuted);
+        videoJsDelegate.setMuted(isToBeMuted);
     }
 
     @Override
@@ -99,7 +95,7 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
 
     @Override
     public void setControlsVisible(boolean isVisible) {
-        Window.alert("Controlls visible");
+        videoJsDelegate.setControllsVisible(isVisible);
     }
 
     @Override
@@ -131,11 +127,16 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
 
     @Override
     public int getDefaultWidth() {
-        return -1;
+        return videoJsDelegate.getVideoWidth();
     }
 
     @Override
     public int getDefaultHeight() {
-        return -1;
+        return videoJsDelegate.getVideoHeight();
+    }
+
+    @Override
+    public void onResize() {
+        videoJsDelegate.onResize();
     }
 }
