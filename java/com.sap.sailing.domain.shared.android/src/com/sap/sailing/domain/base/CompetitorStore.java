@@ -79,8 +79,6 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      */
     Iterable<CompetitorWithBoat> getCompetitorsWithBoat();
 
-    void removeCompetitor(Competitor competitor);
-
     /**
      * Updates the competitor with {@link Competitor#getId() ID} <code>id</code> by setting the name, sail ID and nationality to
      * the values provided. Doing so will not fire any events nor will it replicate this change from a master to any replicas.
@@ -157,8 +155,6 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      * Obtains a non-live snapshot of the list of all boats which are NOT embedded into a competitor
      */
     Iterable<? extends Boat> getStandaloneBoats();
-
-    void removeBoat(Boat boat);
 
     /**
      * Migrates an existing competitor with contained boat to a competitor without a boat.

@@ -279,8 +279,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         }
     }
     
-    @Override
-    public void removeCompetitor(Competitor competitor) {
+    protected void removeCompetitor(Competitor competitor) {
         LockUtil.lockForWrite(lock);
         try {
             logger.fine("removing competitor "+competitor+" from competitor store "+this);
@@ -587,8 +586,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     }
 
-    @Override
-    public void removeBoat(Boat boat) {
+    protected void removeBoat(Boat boat) {
         LockUtil.lockForWrite(lock);
         try {
             logger.fine("Removing boat "+boat+" from boat store "+this);
