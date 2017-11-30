@@ -16,6 +16,8 @@
 * [Use Cases](#use cases)
 * [Algorithm for Composite Realm](#algorithm-bool-haspermission-wildcardpermission-permission-for-composite-realm)
 * [Migration](#migration)
+* [Implementation Details](#implementation-details)
+* [TODOs](#todos)
 
 ## Introduction
 
@@ -235,5 +237,30 @@ Following roles have to be migrated to dynamic roles. Beforehand they were hard 
 * moderator
   * "can_replay_during_live_races"
 
-## Implementation
+## Implementation Details
 
+
+
+## TODOs
+
+Dump of TODOs. More structured in Bugzilla.
+
+* Ownership/Access control list as expandable column in all access controlled data object tables
+* Permission checking for every domain data object type
+* Changing ownership (incl. replication)
+* Masterdataimport
+* Tenant management UI
+  * Tenant in create dialog check if tenant exists (red outline of text input field)
+  * Refresh tenant selection in tenant list on the left correctly
+  * String messages
+* User management UI
+  * Auto complete for roles and permissions
+* Access control list / Roles / Ownership UI
+* User role for editing own user parametrized by user name
+* Do we want to throw unauthorized exceptions or how should this work? (See addUserToTenant or removeUserFromTenant) / UnauthorizedException handling (i.e. popup that shows some text)
+* Create ownerships from config / Server-wide default owner and default tenant owner
+* Create test setup for final test
+* Button to transfer ownership of all objects from one user/tenant to another user/tenant (chgroup recursive?)
+* Rework meta permissions (rework to also check all permissions that are granted or revoked?)
+* Permission reloading without site refresh / Frontend update elements that require permission when permissions change (Refresh call on panels)
+* Default tenant input field in login popup
