@@ -428,7 +428,12 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 competitor.setTimeOnTimeFactor(timeOnTimeFactor);
                 competitor.setTimeOnDistanceAllowancePerNauticalMile(timeOnDistanceAllowancePerNauticalMile);
                 competitor.setSearchTag(newSearchTag);
-                competitor.setBoat(boat);
+                DynamicBoat boatOfCompetitor = competitor.getBoat();
+                if (boatOfCompetitor != null && boat != null) {
+                    boatOfCompetitor.setName(boat.getName());
+                    boatOfCompetitor.setSailId(boat.getSailID());
+                    boatOfCompetitor.setColor(boat.getColor());
+                }
                 weakCompetitorDTOCache.remove(competitor);
             } finally {
                 LockUtil.unlockAfterWrite(lock);

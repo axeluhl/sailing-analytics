@@ -31,8 +31,8 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
     }
 
     @Override
-    public void setBoat(DynamicBoat boat) {
-        this.boat = boat;
+    public void clearBoat() {
+        this.boat = null;
     }
 
     @Override

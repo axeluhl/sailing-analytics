@@ -5,5 +5,8 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
 public interface DynamicCompetitorWithBoat extends DynamicCompetitor, CompetitorWithBoat {
     DynamicBoat getBoat();
     
-    void setBoat(DynamicBoat boat);
+    /** Sets the boat to null 
+     *  Should only used only for migration purposes when 
+     */
+    void clearBoat();
 }
