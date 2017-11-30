@@ -123,17 +123,25 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
-        Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
-        for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
-            UserGroup group = getSecurityService().getUserGroup(entry.getKey());
-            permissionMapDTO.put(createUserGroupDTOFromUserGroup(group),
-                    entry.getValue());
+        if (acl != null) {
+            Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
+            for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
+                UserGroup group = getSecurityService().getUserGroup(entry.getKey());
+                permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
+                        entry.getValue());
+            }
+            return new AccessControlListDTO(acl.getId().toString(), acl.getDisplayName(), permissionMapDTO);
+        } else {
+            return null;
         }
-        return new AccessControlListDTO(acl.getId().toString(), acl.getDisplayName(), permissionMapDTO);
     }
 
     private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
-        return new OwnerDTO(ownership.getId().toString(), ownership.getOwner(), ownership.getTenantOwner(), ownership.getDisplayName());
+        if (ownership != null) {
+            return new OwnerDTO(ownership.getId().toString(), ownership.getOwner(), ownership.getTenantOwner(), ownership.getDisplayName());
+        } else {
+            return null;
+        }
     }
 
     @Override

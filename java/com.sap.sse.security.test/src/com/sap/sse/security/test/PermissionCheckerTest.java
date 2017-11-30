@@ -74,6 +74,8 @@ public class PermissionCheckerTest implements RolePermissionModel {
     @Test
     public void testOwnership() {
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
+                rolePermissionModel, null, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
                 rolePermissionModel, adminOwnership, acl));
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
                 rolePermissionModel, ownership, acl));
@@ -81,6 +83,8 @@ public class PermissionCheckerTest implements RolePermissionModel {
     
     @Test
     public void testAccessControlList() {
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
+                rolePermissionModel, adminOwnership, null));
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
                 rolePermissionModel, adminOwnership, acl));
         
@@ -141,6 +145,8 @@ public class PermissionCheckerTest implements RolePermissionModel {
         
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
                 rolePermissionModel, testOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
+                rolePermissionModel, null, acl));
     }
 
     @Override

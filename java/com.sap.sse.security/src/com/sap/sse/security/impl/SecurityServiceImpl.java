@@ -306,11 +306,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public AccessControlList getAccessControlList(String idAsString) {
-        AccessControlList acl = accessControlStore.getAccessControlList(idAsString);
-        if (acl == null) {
-            acl = accessControlStore.createAccessControlList(idAsString, "?");
-        }
-        return acl;
+        return accessControlStore.getAccessControlList(idAsString);
     }
 
     @Override
@@ -332,6 +328,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public AccessControlList updateACL(String idAsString, Map<UserGroup, Set<String>> permissionMap) {
+        if (getAccessControlList(idAsString) == null) {
+            createAccessControlList(idAsString);
+        }
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             apply(s->s.internalAclPutPermissions(idAsString, (UUID) entry.getKey().getId(), entry.getValue()));
         }
@@ -348,9 +347,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to add
      */
     @Override
-    public AccessControlList addToACL(String aclId, UUID group, String permission) {
-        apply(s->s.internalAclAddPermission(aclId, group, permission));
-        return accessControlStore.getAccessControlList(aclId);
+    public AccessControlList addToACL(String idAsString, UUID group, String permission) {
+        if (getAccessControlList(idAsString) == null) {
+            createAccessControlList(idAsString);
+        }
+        apply(s->s.internalAclAddPermission(idAsString, group, permission));
+        return accessControlStore.getAccessControlList(idAsString);
     }
 
     @Override
@@ -363,9 +365,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to remove
      */
     @Override
-    public AccessControlList removeFromACL(String aclId, UUID group, String permission) {
-        apply(s->s.internalAclRemovePermission(aclId, group, permission));
-        return accessControlStore.getAccessControlList(aclId);
+    public AccessControlList removeFromACL(String idAsString, UUID group, String permission) {
+        if (getAccessControlList(idAsString) != null) {
+            apply(s->s.internalAclRemovePermission(idAsString, group, permission));
+            return accessControlStore.getAccessControlList(idAsString);
+        }
+        return null;
     }
 
     @Override
@@ -376,7 +381,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteACL(String idAsString) {
-        apply(s->s.internalDeleteAcl(idAsString));
+        if (getAccessControlList(idAsString) != null) {
+            apply(s->s.internalDeleteAcl(idAsString));
+        }
     }
 
     @Override
@@ -392,7 +399,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
-        apply(s->s.internalCreateOwnership(idAsString, owner, tenantOwner, displayName));
+        UUID tenant;
+        if (tenantOwner == null || getTenant(tenantOwner) == null || 
+                !getTenant(tenantOwner).contains(owner)) {
+            tenant = getUserByName(owner).getDefaultTenant();
+        } else {
+            tenant = tenantOwner;
+        }
+        apply(s->s.internalCreateOwnership(idAsString, owner, tenant, displayName));
         return this;
     }
 
@@ -404,7 +418,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteOwnership(String idAsString) {
-        apply(s->s.internalDeleteOwnership(idAsString));
+        if (getOwnership(idAsString) != null) {
+            apply(s->s.internalDeleteOwnership(idAsString));
+        }
     }
 
     @Override
