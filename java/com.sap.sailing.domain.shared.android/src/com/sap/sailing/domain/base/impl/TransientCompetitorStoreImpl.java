@@ -197,11 +197,15 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         }
     }
 
+    protected boolean isValidCompetitorWithBoat(Competitor competitor) {
+        return competitor instanceof CompetitorWithBoat && ((CompetitorWithBoat) competitor).getBoat() != null;
+    }
+
     public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorCache.get(competitorId);
-            if (competitor instanceof CompetitorWithBoat && ((CompetitorWithBoat) competitor).getBoat() != null) {
+            if (isValidCompetitorWithBoat(competitor)) {
                 return (CompetitorWithBoat) competitor;
             } else {
                 return null;
@@ -216,7 +220,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorsByIdAsString.get(competitorIdAsString);
-            if (competitor instanceof CompetitorWithBoat && ((CompetitorWithBoat) competitor).getBoat() != null) {
+            if (isValidCompetitorWithBoat(competitor)) {
                 return (CompetitorWithBoat) competitor;
             } else {
                 return null;
@@ -267,7 +271,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         try {
             List<CompetitorWithBoat> competitors = new ArrayList<>();
             for (Competitor c: competitorCache.values()) {
-                if (c instanceof CompetitorWithBoat  && ((CompetitorWithBoat) c).getBoat() != null) {
+                if (isValidCompetitorWithBoat(c)) {
                     competitors.add((CompetitorWithBoat) c);
                 }
             }
@@ -577,7 +581,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             List<Boat> boats = new ArrayList<>(boatCache.values());
             Set<Boat> boatsEmbeddedInCompetitors = new HashSet<>();
             for (Competitor competitor: competitorCache.values()) {
-                if (competitor instanceof CompetitorWithBoat) {
+                if (isValidCompetitorWithBoat(competitor)) {
                     boatsEmbeddedInCompetitors.add(((CompetitorWithBoat) competitor).getBoat()); 
                 }
             }
@@ -688,7 +692,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     @Override
     public CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
-        if (competitor instanceof CompetitorWithBoat) {
+        if (isValidCompetitorWithBoat(competitor)) {
             return convertToCompetitorWithBoatDTO(competitor, ((CompetitorWithBoat) competitor).getBoat());
         } else {
             return convertToCompetitorWithBoatDTO(competitor, null);
