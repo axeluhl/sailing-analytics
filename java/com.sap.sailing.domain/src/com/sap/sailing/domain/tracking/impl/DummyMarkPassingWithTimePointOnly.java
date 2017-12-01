@@ -54,6 +54,11 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
+            public boolean hasBoat() {
+                return false;
+            }
+
+            @Override
             public Team getTeam() {
                 return null;
             }

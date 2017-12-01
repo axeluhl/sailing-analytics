@@ -59,6 +59,11 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
 
     @Override
+    public boolean hasBoat() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return getName();
     }

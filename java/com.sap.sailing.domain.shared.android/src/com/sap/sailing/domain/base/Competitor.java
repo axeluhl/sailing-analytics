@@ -27,6 +27,12 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
 
     String getShortName();
 
+    /**
+     * A helper to know if the competitor has a boat attached.
+     * See {@link CompetitorWithBoat}
+     */
+    boolean hasBoat();
+
     @Dimension(messageKey="SearchTag", ordinal=11)
     String getSearchTag();
     

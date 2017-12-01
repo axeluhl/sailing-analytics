@@ -34,6 +34,11 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
     public void clearBoat() {
         this.boat = null;
     }
+    
+    @Override
+    public boolean hasBoat() {
+        return boat != null;
+    }
 
     @Override
     public String getShortInfo() {
