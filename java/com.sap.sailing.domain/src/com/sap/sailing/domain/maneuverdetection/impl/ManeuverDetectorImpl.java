@@ -65,6 +65,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     private static final double MIN_ANGULAR_VELOCITY_FOR_MAIN_CURVE_BOUNDARIES_IN_DEGREES_PER_SECOND = 0.2;
 
+    private static final double MAX_COURSE_CHANGE_TOWARD_MANEUVER_OPPOSITE_DIRECTION_FOR_CURVE_EXTENSION_IN_DEGREES = 15.0;
+
     /**
      * Tracked race whose tracks are being processed for maneuver detection.
      */
@@ -709,14 +711,23 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis);
         CurveBoundaryExtension maneuverStart = findSpeedMaximum(stepsToAnalyze, true,
                 timePointSinceGlobalMaximumSearch);
+        if (checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverStart)) {
+            maneuverStart = null;
+        }
         TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
                 : maneuverStart.getExtensionTimePoint();
         double courseChangeSinceManeuverMainCurveInDegrees = maneuverStart == null ? 0
                 : maneuverStart.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
                 stableBearingAnalysisUntil);
-        maneuverStart = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze, true,
-                MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        CurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze,
+                true, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        if (stableBearingExtension != null
+                && !checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
+            maneuverStart = stableBearingExtension;
+            courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
+                    .getCourseChangeInDegreesWithinExtensionArea();
+        }
         return maneuverStart != null
                 ? new CurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
                         maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
@@ -724,6 +735,17 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                                 + maneuverStart.getCourseChangeInDegreesWithinExtensionArea())
                 : new CurveBoundaryExtension(maneuverMainCurveDetails.getTimePointBefore(),
                         maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0);
+    }
+
+    private boolean checkCourseChangeLimitExceededForCurveExtension(
+            CurveDetailsWithBearingSteps maneuverMainCurveDetails, CurveBoundaryExtension curveBoundaryExtension) {
+        if (curveBoundaryExtension == null) {
+            return false;
+        }
+        return curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()
+                * maneuverMainCurveDetails.getTotalCourseChangeInDegrees() < 0
+                && Math.abs(curveBoundaryExtension
+                        .getCourseChangeInDegreesWithinExtensionArea()) > MAX_COURSE_CHANGE_TOWARD_MANEUVER_OPPOSITE_DIRECTION_FOR_CURVE_EXTENSION_IN_DEGREES;
     }
 
     /**
@@ -768,19 +790,25 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(competitor,
                 earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis);
         CurveBoundaryExtension maneuverEnd = findSpeedMaximum(stepsToAnalyze, false, timePointBeforeLocalMaximumSearch);
+        if (checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverEnd)) {
+            maneuverEnd = null;
+        }
         TimePoint stableBearingAnalysisFrom = maneuverEnd == null ? maneuverMainCurveDetails.getTimePointAfter()
                 : maneuverEnd.getExtensionTimePoint();
         double courseChangeSinceManeuverMainCurveInDegrees = maneuverEnd == null ? 0
                 : maneuverEnd.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, stableBearingAnalysisFrom,
                 latestTimePointForSpeedTrendAnalysis);
-        maneuverEnd = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze, false,
-                MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
-        return maneuverEnd != null
-                ? new CurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
-                        maneuverEnd.getSpeedWithBearingAtExtensionTimePoint(),
-                        courseChangeSinceManeuverMainCurveInDegrees
-                                + maneuverEnd.getCourseChangeInDegreesWithinExtensionArea())
+        CurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze,
+                false, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        if (stableBearingExtension != null
+                && !checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
+            maneuverEnd = stableBearingExtension;
+            courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
+                    .getCourseChangeInDegreesWithinExtensionArea();
+        }
+        return maneuverEnd != null ? new CurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
+                maneuverEnd.getSpeedWithBearingAtExtensionTimePoint(), courseChangeSinceManeuverMainCurveInDegrees)
                 : new CurveBoundaryExtension(maneuverMainCurveDetails.getTimePointAfter(),
                         maneuverMainCurveDetails.getSpeedWithBearingAfter(), 0);
     }
@@ -959,7 +987,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 refinedTimePointAfterManeuver = timePoint;
                 refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
             }
-         // Check whether the course change is performed in the target direction of maneuver. If yes, check consider
+            // Check whether the course change is performed in the target direction of maneuver. If yes, check consider
             // the step to locate the maneuver time point with the highest angular velocity within main curve.
             if (0 < currentCourseChangeInDegrees * totalCourseChangeSignum) {
                 if (maxAngularVelocityInDegreesPerSecond < entry.getAngularVelocityInDegreesPerSecond()) {
