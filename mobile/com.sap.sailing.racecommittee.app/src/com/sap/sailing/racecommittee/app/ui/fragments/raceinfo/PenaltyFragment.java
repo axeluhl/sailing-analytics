@@ -506,63 +506,68 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     break;
                 }
             }
-            if (item != null && item.isDirty() && draft != null) { // result is in list and dirty
-                // check max point reason
-                if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
-                    if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
-                        setMergeState(item, MergeState.WARNING);
-                    } else {
-                        setMergeState(item, MergeState.ERROR);
-                    }
-                    item.setMaxPointsReason(result.getMaxPointsReason());
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
-                }
-
-                // check score
-                if (item.getScore() != null) {
-                    if (!item.getScore().equals(result.getScore())) {
-                        if (item.getScore().equals(draft.getScore())) {
+            if (item != null && draft != null) { // result is in list
+                if (item.isDirty()) {
+                    // check max point reason
+                    if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
+                        if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
                             setMergeState(item, MergeState.WARNING);
                         } else {
                             setMergeState(item, MergeState.ERROR);
                         }
+                        item.setMaxPointsReason(result.getMaxPointsReason());
+                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    }
+
+                    // check score
+                    if (item.getScore() != null) {
+                        if (!item.getScore().equals(result.getScore())) {
+                            if (item.getScore().equals(draft.getScore())) {
+                                setMergeState(item, MergeState.WARNING);
+                            } else {
+                                setMergeState(item, MergeState.ERROR);
+                            }
+                            item.setScore(result.getScore());
+                            changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        }
+                    } else if (result.getScore() != null && draft.getScore() != null) {
+                        setMergeState(item, MergeState.ERROR);
                         item.setScore(result.getScore());
                         changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                     }
-                } else if (result.getScore() != null && draft.getScore() != null) {
-                    setMergeState(item, MergeState.ERROR);
-                    item.setScore(result.getScore());
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
-                }
 
-                // check score
-                if (item.getComment() != null) {
-                    if (!item.getComment().equals(result.getComment())) {
-                        if (item.getComment().equals(draft.getComment())) {
-                            setMergeState(item, MergeState.WARNING);
-                        } else {
-                            setMergeState(item, MergeState.ERROR);
+                    // check score
+                    if (item.getComment() != null) {
+                        if (!item.getComment().equals(result.getComment())) {
+                            if (item.getComment().equals(draft.getComment())) {
+                                setMergeState(item, MergeState.WARNING);
+                            } else {
+                                setMergeState(item, MergeState.ERROR);
+                            }
+                            item.setDirty(true);
+                            item.setComment(item.getComment() + " ## " + result.getComment());
+                            changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                         }
-                        item.setDirty(true);
-                        item.setComment(item.getComment() + " ## " + result.getComment());
+                    } else if (result.getComment() != null && draft.getComment() == null) {
+                        setMergeState(item, MergeState.ERROR);
+                        item.setComment(result.getComment());
                         changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                     }
-                } else if (result.getComment() != null && draft.getComment() == null) {
-                    setMergeState(item, MergeState.ERROR);
-                    item.setComment(result.getComment());
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
-                }
 
-                // check merge state
-                if (!item.getMergeState().equals(result.getMergeState()) && item.getMergeState().equals(draft.getMergeState())) {
-                    setMergeState(item, result.getMergeState());
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    // check merge state
+                    if (!item.getMergeState().equals(result.getMergeState()) && item.getMergeState().equals(draft.getMergeState())) {
+                        setMergeState(item, result.getMergeState());
+                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    }
+                } else {
+                    item.setValue(result);
                 }
             } else { // unknown result, so it will be added
                 mCompetitorResults.add(new CompetitorResultEditableImpl(result));
             }
         }
         mAdapter.notifyDataSetChanged();
+        setPublishButton();
         if (changedCompetitor.size() > 0) { // show message to user
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
             builder.setTitle(R.string.refresh_title);
