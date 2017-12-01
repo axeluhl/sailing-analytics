@@ -4,11 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +28,6 @@ import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -86,8 +83,6 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
     protected Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files,
             GPSFixImporter preferredImporter) throws IOException {
         final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
-        final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
-        final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
         for (Pair<String, FileItem> pair : files) {
             final String fileName = pair.getA();
             final FileItem fileItem = pair.getB();
@@ -120,18 +115,6 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                                 deviceIds.add(device);
                                 storeFix(fix, device);
-                                TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
-                                if (earliestFixSoFarFromCurrentDevice == null
-                                        || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
-                                    earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                    from.put(device, earliestFixSoFarFromCurrentDevice);
-                                }
-                                TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
-                                if (latestFixSoFarFromCurrentDevice == null
-                                        || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
-                                    latestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                    to.put(device, latestFixSoFarFromCurrentDevice);
-                                }
                             }
                         }, true, fileName);
                         succeeded = true;
