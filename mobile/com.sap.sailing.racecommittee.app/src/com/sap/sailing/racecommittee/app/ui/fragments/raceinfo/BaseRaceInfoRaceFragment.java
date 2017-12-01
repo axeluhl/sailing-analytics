@@ -149,6 +149,10 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 case SCHEDULED:
                     showMainContent();
                     break;
+
+                default:
+                    // nothing
+                    break;
             }
         }
 
