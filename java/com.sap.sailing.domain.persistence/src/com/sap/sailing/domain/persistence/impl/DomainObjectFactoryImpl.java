@@ -2402,7 +2402,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Collection<CompetitorWithBoat> renameCompetitorsCollectionAndloadAllLegacyCompetitors() {
         DBCollection orginalCompetitorCollection = database.getCollection(CollectionNames.COMPETITORS.name());
-        orginalCompetitorCollection.rename(CollectionNames.COMPETITORS_BAK.name());
+        orginalCompetitorCollection.rename(CollectionNames.COMPETITORS_BAK.name(), /* dropTarget */ true);
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_BAK.name());
         ArrayList<CompetitorWithBoat> result = new ArrayList<>();
         try {

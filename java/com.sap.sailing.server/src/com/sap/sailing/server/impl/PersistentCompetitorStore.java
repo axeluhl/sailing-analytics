@@ -76,7 +76,9 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
      * Migrate competitors with contained boats (before bug2822) to competitors with separate boats if required
      */
     private void migrateCompetitorsIfRequired() {
-        boolean migrationRequired = !storeTo.getDatabase().collectionExists(CollectionNames.BOATS.name());
+        boolean competitorsCollectionExist = storeTo.getDatabase().collectionExists(CollectionNames.COMPETITORS.name());
+        boolean boatsCollectionCollectionExist = storeTo.getDatabase().collectionExists(CollectionNames.BOATS.name());
+        boolean migrationRequired = competitorsCollectionExist && !boatsCollectionCollectionExist;
         if (migrationRequired) {
             Collection<CompetitorWithBoat> allLegacyCompetitorsWithBoat = loadFrom.renameCompetitorsCollectionAndloadAllLegacyCompetitors();
             List<Competitor> newCompetitors = new ArrayList<>();
