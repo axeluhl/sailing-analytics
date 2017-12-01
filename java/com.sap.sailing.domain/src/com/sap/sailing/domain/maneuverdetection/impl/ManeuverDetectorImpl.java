@@ -304,7 +304,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (maneuverMainCurveDetails == null) {
             return result;
         }
-        System.out.println("");
         CurveDetails maneuverDetails = computeManeuverDetails(competitor, maneuverMainCurveDetails,
                 earliestManeuverStart, latestManeuverEnd);
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
