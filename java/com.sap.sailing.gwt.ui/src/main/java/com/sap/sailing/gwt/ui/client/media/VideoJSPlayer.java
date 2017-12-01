@@ -239,6 +239,8 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
               clickAndDrag: true,
               clickToToggle: false,
               NoticeMessage: messageThreeSixty,
+              backToVerticalCenter: false,
+              backToHorizonCenter: false,
             });
         }
         
