@@ -19,34 +19,34 @@
 You may need to select "All generations" instead of "Current generation" to see these instance configurations. Of course, you may choose variations of those as you feel is appropriate for your use case.
 
 - Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar.
-<pre>
-INSTALL_FROM_RELEASE=`name-of-release`
-USE_ENVIRONMENT=live-server
-MONGODB_NAME=myspecificevent
-REPLICATION_CHANNEL=myspecificevent
-SERVER_NAME=MYSPECIFICEVENT
-BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
-</pre>
+  <pre>
+  INSTALL_FROM_RELEASE=`name-of-release`
+  USE_ENVIRONMENT=live-server
+  MONGODB_NAME=myspecificevent
+  REPLICATION_CHANNEL=myspecificevent
+  SERVER_NAME=MYSPECIFICEVENT
+  BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+  SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+  </pre>
 
 Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_NAME` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
 - To build from git, install and start, set the following in the instance's user data, adjusting the branch name (`BUILD_FROM`), the `myspecificevent` naming and memory settings according to your needs:
-<pre>
-BUILD_BEFORE_START=True
-BUILD_FROM=master
-RUN_TESTS=False
-COMPILE_GWT=True
-BUILD_COMPLETE_NOTIFY=you@email.com
-SERVER_STARTUP_NOTIFY=
-SERVER_NAME=MYSPECIFICEVENT
-MEMORY=2048m
-REPLICATION_HOST=rabbit.internal.sapsailing.com
-REPLICATION_CHANNEL=myspecificevent
-MONGODB_HOST=dbserver.internal.sapsailing.com
-MONGODB_PORT=10202
-MONGODB_NAME=myspecificevent
-</pre>
+  <pre>
+  BUILD_BEFORE_START=True
+  BUILD_FROM=master
+  RUN_TESTS=False
+  COMPILE_GWT=True
+  BUILD_COMPLETE_NOTIFY=you@email.com
+  SERVER_STARTUP_NOTIFY=
+  SERVER_NAME=MYSPECIFICEVENT
+  MEMORY=2048m
+  REPLICATION_HOST=rabbit.internal.sapsailing.com
+  REPLICATION_CHANNEL=myspecificevent
+  MONGODB_HOST=dbserver.internal.sapsailing.com
+  MONGODB_PORT=10202
+  MONGODB_NAME=myspecificevent
+  </pre>
 
 #### Setting up a new image (AMI) from scratch (more or less)
 
@@ -222,7 +222,7 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 </pre>
 
-After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8880 and 8950. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
 
 You can now access this instance by either using the Administrator key (for root User) or the Sailing User key (for user sailing):
 
@@ -266,16 +266,15 @@ In a live event scenario, the SAP Sailing Analytics are largely bandwidth bound.
 
 To still get the usual logging and URL re-writing features, replicas need to run their local Apache server with a bit of configuration. Luckily, most of the grunt work is done for you automatically. You simply need to tell the replicas in their instance details to start replicating automatically, provide an `EVENT_ID` and set the `SERVER_NAME` variable properly. The Apache configuration on the replica will then automatically be adjusted such that the lower-case version of $SERVER_NAME.sapsailing.com will re-direct users to the event page for the event with ID $EVENT_ID.
 
-Here are the steps to create a load balanced setup:
+Here are the steps to create a load balanced setup, assuming there is already an "Application" load balancer defined in the region(s) where you need them:
 
 - Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
 - When using the Race Committee App (RCApp), try to make sure the app is configured to send its data to the master instance and not the ELB (otherwise, write requests may end up at replicas which then have to reverse-replicate these to the master which is as of this writing (2014-12-18) an EXPERIMENTAL feature). You may want to configure a separate URL for the master server for this purpose, so you don't have to re-configure the RCApp devices when switching to a different master server.
 - Create `n` instances that are configured to connect to the master server, automatically launching replication by using one of the `*...-replica-...*` environment from http://releases.sapsailing.com/environments.
-- Create a "Classic" load balancer that redirects everything from HTTP port 80 to HTTP port 80 as well as HTTPS port 443 to HTTPS port 443 and leave the other switches and checkboxes on their default value. For the HTTPS listener, use the `sapsailing.com` certificate that should be offered as an existing certificate from IAM.
-- As "Ping Port" enter HTTPS port 443 and use /index.html as the "Ping Path." Lower the interval to 10s and the "Healthy threshold" to 2 to ensure that servers are quickly recognized after adding them to the ELB. With the default settings (30 seconds interval, healthy threshold 10) this would last up to 5 minutes.
-- Put the ELB into the "Sailing Analytics App" security group as it will appear in the landscape as a regular sailing analytics application server.
-- Associate all your instances
-- Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup. Again, remember not to let the RCApp devices point to the ELB domain as their updates could hit a replica which wouldn't know how to handle!
+- Add a target group for the master and its replicas that external users will be directed to, using HTTP port 80 as the protocol settings. Note: as this target group will also be used for the HTTPS listener, "SSL offloading" will take place here. The re-directing from HTTP to HTTPS that shall occur when the user hits the server with an HTTP request will happen in the instance's Apache server if and only if the `X-Forwarded-Proto` is `http`. See also http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/x-forwarded-headers.html#x-forwarded-proto.
+- Add master and replicas as targets into this group. Create a second target group that only contains the master server. 
+- For both target groups configure the health checks, choosing HTTP as the protocol, using the default "traffic port" and setting the path to /index.html. Lower the interval to 10s and the "Healthy threshold" to 2 to ensure that servers are quickly recognized after adding them to the ELB. With the default settings (30 seconds interval, healthy threshold 10) this would last up to 5 minutes.
+- Add a rule to both listeners (http + https) that filter for the sub-domain you would like and that forwards to the target group containing master and replicas. Add another rule to both listeners that filters for the <your-sub-domain>-master.sapsailing.com sub-domain and that forwards to the target group containing only the master instance.
 
 It is important to understand that it wouldn't help to let all traffic run through our central Apache httpd server which usually acts as a reverse proxy with comprehensive URL rewriting rules and macros. This would make the Apache server the bandwidth bottleneck. Instead, the event traffic needs to go straight to the ELB which requires the event DNS domain name to be mapped to the ELB's host name. You need to set this up in the "Route 53" DNS server which you find in the Amazon Services drop-down.
 
