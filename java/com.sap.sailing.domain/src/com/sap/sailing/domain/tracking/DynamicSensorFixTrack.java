@@ -13,9 +13,4 @@ import com.sap.sse.common.WithID;
  */
 public interface DynamicSensorFixTrack<ItemType extends WithID & Serializable, FixT extends SensorFix> extends
         SensorFixTrack<ItemType, FixT>, DynamicTrack<FixT> {
-    /**
-     * Invoked when this track is added to a tracked race. This default implementation
-     * does nothing.
-     */
-    default void addedToTrackedRace(TrackedRace trackedRace) {}
 }

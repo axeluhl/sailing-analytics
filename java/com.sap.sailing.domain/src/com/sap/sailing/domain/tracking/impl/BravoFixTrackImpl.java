@@ -92,7 +92,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         setGpsTrack(gpsTrack);
     }
 
-    protected GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
+    public GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
         return gpsTrack;
     }
 
