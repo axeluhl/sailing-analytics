@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -4147,40 +4148,53 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        Optional<Runnable> executeAfterReleasingLock = Optional.empty();
+        TrackT result;
         LockUtil.lockForWrite(sensorTracksLock);
         try {
-            TrackT result = getTrackInternal(key);
+            result = getTrackInternal(key);
             if (result == null && tracks.containsKey(competitor)) {
                 // A track is only added if the given Competitor is known to participate in this race
                 result = newTrackFactory.get();
-                addSensorTrackInternal(key, result);
+                executeAfterReleasingLock = addSensorTrackInternal(key, result);
             }
-            return result;
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+        executeAfterReleasingLock.ifPresent(r->r.run());
+        return result;
     }
     
     protected void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        Optional<Runnable> executeAfterReleasingLock = Optional.empty();
         LockUtil.lockForWrite(sensorTracksLock);
         try {
-            if(getTrackInternal(key) != null) {
+            if (getTrackInternal(key) != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.WARNING)) {
                     logger.warning(SensorFixTrack.class.getName() + " already exists for competitor: "
                             + competitor.getName() + "; trackName: " + trackName);
                 }
             } else {
-                this.addSensorTrackInternal(key, track);
+                executeAfterReleasingLock = this.addSensorTrackInternal(key, track);
             }
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+        executeAfterReleasingLock.ifPresent(r->r.run());
     }
     
-    protected <FixT extends SensorFix> void addSensorTrackInternal(Pair<Competitor, String> key,
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #sensorTracksLock}.
+     * Optionally, the method may return a {@link Runnable} to execute after the lock has been released.
+     * This may, e.g., be a routine that notifies listeners. Callers are responsible for invoking this
+     * {@link Runnable} <em>after</em> releasing the write lock.
+     */
+    protected <FixT extends SensorFix> Optional<Runnable> addSensorTrackInternal(Pair<Competitor, String> key,
             DynamicSensorFixTrack<Competitor, FixT> track) {
+        assert sensorTracksLock.isWriteLockedByCurrentThread();
         sensorTracks.put(key, track);
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
