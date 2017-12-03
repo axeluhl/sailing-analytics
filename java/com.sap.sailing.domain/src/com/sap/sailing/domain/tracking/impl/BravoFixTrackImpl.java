@@ -45,7 +45,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
      * the object after de-serialization, so the cache invalidation listener can be re-established.
      */
-    private GPSFixTrack<ItemType, GPSFixMoving> gpsTrack;
+    private transient GPSFixTrack<ItemType, GPSFixMoving> gpsTrack;
     
     private class CacheInvalidationGpsTrackListener implements GPSTrackListener<ItemType, GPSFixMoving> {
         private static final long serialVersionUID = 6395529765232404414L;
@@ -89,6 +89,23 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         this.foilingTimeCache = createFoilingTimeCache(trackedItem);
         this.foilingDistanceCache = createFoilingDistanceCache(trackedItem);
         this.averageRideHeightCache = createAverageRideHeightCache(trackedItem);
+        setGpsTrack(gpsTrack);
+    }
+
+    protected GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
+        return gpsTrack;
+    }
+
+    /**
+     * Sets the {@link #gpsTrack} field and registers a cache invalidation listener
+     * on the {@code gpsTrack} to ensure that the foiling distance is invalidated if needed.<p>
+     * 
+     * Must be called only once for a non-{@code null} {@code gpsTrack}.
+     */
+    protected void setGpsTrack(GPSFixTrack<ItemType, GPSFixMoving> gpsTrack) {
+        if (gpsTrack != null) {
+            assert this.gpsTrack == null;
+        }
         this.gpsTrack = gpsTrack;
         if (gpsTrack != null) {
             gpsTrack.addListener(new CacheInvalidationGpsTrackListener());
@@ -119,9 +136,6 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         this.foilingTimeCache = createFoilingTimeCache(getTrackedItem());
         this.foilingDistanceCache = createFoilingDistanceCache(getTrackedItem());
         this.averageRideHeightCache = createAverageRideHeightCache(getTrackedItem());
-        if (gpsTrack != null) {
-            gpsTrack.addListener(new CacheInvalidationGpsTrackListener());
-        }
     }
 
     @Override
@@ -215,8 +229,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Distance getDistanceSpentFoiling(TimePoint from, TimePoint to) {
-        assert gpsTrack != null;
-        return getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, foilingDistanceCache,
+        return getGpsTrack() == null ? null :
+            getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, foilingDistanceCache,
                 /* valueCalculator */ new Track.TimeRangeValueCalculator<Distance>() {
             @Override
             public Distance calculate(TimePoint from, TimePoint to) {
@@ -226,7 +240,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                 for (final BravoFix fix : getFixes(from, true, to, true)) {
                     final boolean fixFoils = isFoiling(fix);
                     if (isFoiling && fixFoils) {
-                        result = result.add(gpsTrack.getDistanceTraveled(last, fix.getTimePoint()));
+                        result = result.add(getGpsTrack().getDistanceTraveled(last, fix.getTimePoint()));
                     }
                     last = fix.getTimePoint();
                     isFoiling = fixFoils;

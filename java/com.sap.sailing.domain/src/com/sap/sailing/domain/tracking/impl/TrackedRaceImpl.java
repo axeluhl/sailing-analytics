@@ -4194,6 +4194,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             DynamicSensorFixTrack<Competitor, FixT> track) {
         assert sensorTracksLock.isWriteLockedByCurrentThread();
         sensorTracks.put(key, track);
+        track.addedToTrackedRace(this);
         return Optional.empty();
     }
 
