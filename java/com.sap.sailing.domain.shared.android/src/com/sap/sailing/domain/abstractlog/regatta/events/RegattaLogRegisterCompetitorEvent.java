@@ -3,11 +3,15 @@ package com.sap.sailing.domain.abstractlog.regatta.events;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 
 /**
- * ATTENTION: This is the old legacy regatta log event for a competitor registration from the time before bug2822 
- * DON'T delete or rename for backward compatibility
- */
+* The event registers a {@link Competitor} or {@link CompetitorWithBoat} on a regatta.
+* The competitor type is determined by the {@link Regatta} attribute 'canBoatsOfCompetitorsChangePerRace'
+* If 'canBoatsOfCompetitorsChangePerRace' is true the type must be {@link Competitor}    
+* If 'canBoatsOfCompetitorsChangePerRace' is false the type must be {@link CompetitorWithBoat}    
+*/
 public interface RegattaLogRegisterCompetitorEvent
         extends RegattaLogEvent, RegisterCompetitorEvent<RegattaLogEventVisitor> {
 

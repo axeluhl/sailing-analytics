@@ -15,8 +15,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
@@ -74,7 +74,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorAndBoatEvent event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         leaderboard.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
@@ -96,14 +96,14 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorAndBoatEvent event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         deserializedLeaderboard.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
 
-    private RegattaLogRegisterCompetitorAndBoatEvent createRegattaLogEvent() {
-        final RegattaLogRegisterCompetitorAndBoatEvent event = new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), /* author */ null,
-                AbstractLeaderboardTest.createCompetitor("Someone"), AbstractLeaderboardTest.createBoat("Some boat"));
+    private RegattaLogRegisterCompetitorEvent createRegattaLogEvent() {
+        final RegattaLogRegisterCompetitorEvent event = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), /* author */ null,
+                AbstractLeaderboardTest.createCompetitor("Someone"));
         return event;
     }
 
@@ -129,7 +129,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorAndBoatEvent event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         regatta.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
@@ -151,7 +151,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorAndBoatEvent event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         deserializedRegatta.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
@@ -165,7 +165,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
         LeaderboardDTO dto = leaderboard.getLeaderboardDTO(now.plus(10), Collections.emptySet(), /* addOverallDetails */ false,
                 /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertTrue(dto.competitors.isEmpty());
-        final RegattaLogRegisterCompetitorAndBoatEvent event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         regatta.getRegattaLog().add(event);
         LeaderboardDTO dto2 = leaderboard.computeDTO(now.plus(20), Collections.emptySet(), /* addOverallDetails */ false,
                 /* waitForLatestAnalyses */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
@@ -197,7 +197,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
         LeaderboardDTO dto = deserializedLeaderboard.getLeaderboardDTO(now.plus(10), Collections.emptySet(), /* addOverallDetails */ false,
                 /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertTrue(dto.competitors.isEmpty());
-        final RegattaLogRegisterCompetitorAndBoatEvent event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         deserializedLeaderboard.getRegatta().getRegattaLog().add(event);
         LeaderboardDTO dto2 = deserializedLeaderboard.computeDTO(now.plus(20), Collections.emptySet(), /* addOverallDetails */ false,
                 /* waitForLatestAnalyses */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);

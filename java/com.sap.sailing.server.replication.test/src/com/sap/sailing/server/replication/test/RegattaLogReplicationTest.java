@@ -10,7 +10,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -34,7 +34,7 @@ public class RegattaLogReplicationTest extends
     @Before
     public void createEvent() throws Exception {
         final CompetitorAndBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Test Competitor");
-        regattaLogEvent = new RegattaLogRegisterCompetitorAndBoatEventImpl(t(0), t(0), author, 0, competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());
+        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), t(0), author, 0, competitorAndBoat.getCompetitor());
 //        anotherRegattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(1), author, t(1), 1, null);
     }
     

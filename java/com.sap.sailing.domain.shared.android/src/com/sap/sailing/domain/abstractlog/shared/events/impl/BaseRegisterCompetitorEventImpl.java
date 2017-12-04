@@ -5,20 +5,20 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public abstract class BaseRegisterCompetitorEventImpl<VisitorT> extends AbstractLogEventImpl<VisitorT> implements
         RegisterCompetitorEvent<VisitorT> {
     private static final long serialVersionUID = -30864810737555657L;
-    private final CompetitorWithBoat competitor;
+    private final Competitor competitor;
 
     /**
      * @throws IllegalArgumentException
      *             if {@code competitor} is null
      */
     public BaseRegisterCompetitorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, CompetitorWithBoat competitor) throws IllegalArgumentException {
+            AbstractLogEventAuthor author, Serializable pId, Competitor competitor) throws IllegalArgumentException {
         super(createdAt, logicalTimePoint, author, pId);
         checkCompetitor(competitor);
         this.competitor = competitor;
@@ -29,21 +29,18 @@ public abstract class BaseRegisterCompetitorEventImpl<VisitorT> extends Abstract
      *             if {@code competitor} is null
      */
     public BaseRegisterCompetitorEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            CompetitorWithBoat competitor) throws IllegalArgumentException {
+            Competitor competitor) throws IllegalArgumentException {
         this(now(), logicalTimePoint, author, randId(), competitor);
     }
 
-    private static void checkCompetitor(CompetitorWithBoat competitor) throws IllegalArgumentException {
+    private static void checkCompetitor(Competitor competitor) throws IllegalArgumentException {
         if (competitor == null) {
             throw new IllegalArgumentException("Competitor may not be null");
-        }
-        if (competitor.getBoat() == null) {
-            throw new IllegalArgumentException("BoaCompetitor may not be null");
         }
     }
 
     @Override
-    public CompetitorWithBoat getCompetitor() {
+    public Competitor getCompetitor() {
         return competitor;
     }
 

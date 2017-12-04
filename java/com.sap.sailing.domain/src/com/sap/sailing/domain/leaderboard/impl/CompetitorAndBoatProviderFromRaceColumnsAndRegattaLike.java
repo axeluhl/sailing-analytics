@@ -17,7 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAnd
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
@@ -83,7 +83,7 @@ public class CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike {
                 invalidateAllCompetitorsAndBoatsCaches();
             }
 
-            public void visit(RegattaLogRegisterCompetitorAndBoatEvent event) {
+            public void visit(RegattaLogRegisterBoatEvent event) {
                 invalidateAllCompetitorsAndBoatsCaches();
             }
 
@@ -91,7 +91,7 @@ public class CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike {
             public void visit(RegattaLogRevokeEvent event) {
                 try {
                     if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType())) ||
-                        RegattaLogRegisterCompetitorAndBoatEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
+                        RegattaLogRegisterBoatEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
                         invalidateAllCompetitorsAndBoatsCaches();
                     }
                 } catch (ClassNotFoundException e) {

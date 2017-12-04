@@ -23,7 +23,6 @@ import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -76,11 +75,8 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
      * Migrate competitors with contained boats (before bug2822) to competitors with separate boats if required
      */
     private void migrateCompetitorsIfRequired() {
-        boolean competitorsCollectionExist = storeTo.getDatabase().collectionExists(CollectionNames.COMPETITORS.name());
-        boolean boatsCollectionCollectionExist = storeTo.getDatabase().collectionExists(CollectionNames.BOATS.name());
-        boolean migrationRequired = competitorsCollectionExist && !boatsCollectionCollectionExist;
-        if (migrationRequired) {
-            Collection<CompetitorWithBoat> allLegacyCompetitorsWithBoat = loadFrom.renameCompetitorsCollectionAndloadAllLegacyCompetitors();
+        Collection<CompetitorWithBoat> allLegacyCompetitorsWithBoat = loadFrom.migrateLegacyCompetitorsIfRequired();
+        if (allLegacyCompetitorsWithBoat != null) {
             List<Competitor> newCompetitors = new ArrayList<>();
             List<Boat> newBoats = new ArrayList<>();
             
@@ -98,7 +94,6 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
             storeTo.storeBoats(newBoats);
         }
     }
-
 
     DomainObjectFactory getDomainObjectFactory() {
         return loadFrom;

@@ -52,10 +52,10 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -261,7 +261,6 @@ public class MasterDataImportTest {
         BoatClass boatClass = new BoatClassImpl("H16", true);
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", "KYC", Color.RED, null, null, team, /* timeOnTimeFactor */
                 null, /* timeOnDistanceAllowancePerNauticalMile */null, null);
-        Boat boat = new BoatImpl(competitorUUID, "Boat", boatClass, "GER1");
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -294,8 +293,8 @@ public class MasterDataImportTest {
 
         // Set RegattaLog event
         TimePoint regattaLogTimepoint = new MillisecondsTimePoint(84392048L);
-        RegattaLogRegisterCompetitorAndBoatEvent registerEvent = new RegattaLogRegisterCompetitorAndBoatEventImpl(
-                regattaLogTimepoint, regattaLogTimepoint, author, UUID.randomUUID(), competitor, boat);
+        RegattaLogRegisterCompetitorEvent registerEvent = new RegattaLogRegisterCompetitorEventImpl(
+                regattaLogTimepoint, regattaLogTimepoint, author, UUID.randomUUID(), competitor);
         regatta.getRegattaLog().add(registerEvent);
 
         // Add some racelogtracking stuff
@@ -458,7 +457,7 @@ public class MasterDataImportTest {
         raceColumnOnTarget.getRaceLog(fleet1OnTarget).add(postImportLogEvent);
 
         // Check for regatta log event
-        RegattaLogRegisterCompetitorAndBoatEvent registerEventOnTarget = (RegattaLogRegisterCompetitorAndBoatEvent) regattaOnTarget
+        RegattaLogRegisterCompetitorEvent registerEventOnTarget = (RegattaLogRegisterCompetitorEvent) regattaOnTarget
                 .getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
         Assert.assertNotNull(registerEventOnTarget);
         Assert.assertEquals(registerEvent.getId(), registerEventOnTarget.getId());
@@ -490,7 +489,7 @@ public class MasterDataImportTest {
 
         // Check for persisting of regatta log events
         Regatta regattaOnTarget2 = dest2.getRegattaByName(TEST_LEADERBOARD_NAME);
-        RegattaLogRegisterCompetitorAndBoatEvent registerEventOnTarget2 = (RegattaLogRegisterCompetitorAndBoatEvent) regattaOnTarget2
+        RegattaLogRegisterCompetitorEvent registerEventOnTarget2 = (RegattaLogRegisterCompetitorEvent) regattaOnTarget2
                 .getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
         Assert.assertNotNull(registerEventOnTarget2);
         Assert.assertEquals(registerEvent.getId(), registerEventOnTarget2.getId());

@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,11 +14,11 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatDeregistrator;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatsInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -207,29 +206,29 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog() {
+    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
-        CompetitorsAndBoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsAndBoatsInLogAnalyzer<>(
+        CompetitorsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsInLogAnalyzer<>(
                 regattaLog);
         return analyzer.analyze();
     }
-
+    
     @Override
-    public void registerCompetitorAndBoat(Competitor competitor, Boat boat) {
-        registerCompetitorsAndBoats(Collections.singletonMap(competitor, boat));
+    public void registerCompetitor(Competitor competitor) {
+        registerCompetitors(Collections.singletonList(competitor));
     }
     
     @Override
-    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats) {
+    public void registerCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
         
-        for (Map.Entry<Competitor, Boat> competitorAndBoatEntry : competitorsAndBoats.entrySet()) {
-            regattaLog.add(new RegattaLogRegisterCompetitorAndBoatEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
-                    UUID.randomUUID(), competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
+        for (Competitor competitor: competitors) {
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
+                    UUID.randomUUID(), competitor));
         }
     }
-    
+
     @Override
     public void deregisterCompetitor(Competitor competitor) {
         deregisterCompetitors(Collections.singleton(competitor));

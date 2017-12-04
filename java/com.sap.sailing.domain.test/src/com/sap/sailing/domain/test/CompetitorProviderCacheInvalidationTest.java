@@ -24,8 +24,8 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAnd
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Series;
@@ -105,10 +105,10 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
             regatta.removeSeries(seriesToRemove);
         }
         RegattaLog regattaLog = regattaLeaderboard.getRegatta().getRegattaLog();
-        final Map<Competitor, RegattaLogRegisterCompetitorAndBoatEvent> competitorOnRegattaLogRegistrationEvents = new HashMap<>();
+        final Map<Competitor, RegattaLogRegisterCompetitorEvent> competitorOnRegattaLogRegistrationEvents = new HashMap<>();
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
         for (Competitor c : compLists[0]) {
-            final RegattaLogRegisterCompetitorAndBoatEvent registerCompetitorEvent = new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), c, boats.get(c));
+            final RegattaLogRegisterCompetitorEvent registerCompetitorEvent = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), c);
             regattaLog.add(registerCompetitorEvent);
             competitorOnRegattaLogRegistrationEvents.put(c, registerCompetitorEvent);
         }
@@ -185,7 +185,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         flexibleLeaderboard.addRaceColumn("R1", /* medalRace */ false);
         RegattaLog regattaLog = flexibleLeaderboard.getRegattaLog();
         for (Competitor c : compLists[0]) {
-            regattaLog.add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), UUID.randomUUID(), c, boats.get(c)));
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), UUID.randomUUID(), c));
         }
         Set<Competitor> expected = new HashSet<>(compLists[0]);
         Set<Competitor> actual = new HashSet<>();
@@ -203,7 +203,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         flexibleLeaderboard.addRaceColumn("R1", /* medalRace */ false);
         RegattaLog regattaLog = flexibleLeaderboard.getRegattaLog();
         for (Competitor c : compLists[0]) {
-            regattaLog.add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), UUID.randomUUID(), c, boats.get(c)));
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), UUID.randomUUID(), c));
         }
         RaceLog raceLog = flexibleLeaderboard.getRacelog("R1", LeaderboardNameConstants.DEFAULT_FLEET_NAME);
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
@@ -326,10 +326,10 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
     @Test
     public void testSimpleCompetitorListOnRegattaLogInRegattaLeaderboard() throws NotRevokableException {
         RegattaLog regattaLog = regattaLeaderboard.getRegatta().getRegattaLog();
-        final Map<Competitor, RegattaLogRegisterCompetitorAndBoatEvent> competitorOnRegattaLogRegistrationEvents = new HashMap<>();
+        final Map<Competitor, RegattaLogRegisterCompetitorEvent> competitorOnRegattaLogRegistrationEvents = new HashMap<>();
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
         for (Competitor c : compLists[0]) {
-            final RegattaLogRegisterCompetitorAndBoatEvent registerCompetitorEvent = new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), c, boats.get(c));
+            final RegattaLogRegisterCompetitorEvent registerCompetitorEvent = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), c);
             regattaLog.add(registerCompetitorEvent);
             competitorOnRegattaLogRegistrationEvents.put(c, registerCompetitorEvent);
         }
@@ -362,7 +362,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         final RegattaLog regattaLog = regattaLeaderboard.getRegatta().getRegattaLog();
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
         for (Competitor c : compLists[0]) {
-            regattaLog.add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), c, boats.get(c)));
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), c));
         }
         final RaceLog raceLog = regattaLeaderboard.getRacelog("R1", "Yellow");
         final int passId = 1;

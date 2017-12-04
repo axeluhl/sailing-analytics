@@ -6545,7 +6545,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new DoesNotHaveRegattaLogException();
         }
         HasRegattaLike regattaLikeLeaderboard = ((HasRegattaLike) leaderboard);
-        return convertToCompetitorDTOs(regattaLikeLeaderboard.getCompetitorsAndBoatsRegisteredInRegattaLog().keySet());
+        return convertToCompetitorDTOs(regattaLikeLeaderboard.getCompetitorsRegisteredInRegattaLog());
     }
     
     @Override

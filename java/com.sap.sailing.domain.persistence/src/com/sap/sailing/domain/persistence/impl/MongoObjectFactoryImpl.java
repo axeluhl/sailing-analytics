@@ -62,7 +62,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
@@ -1345,7 +1344,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeCompetitor(Competitor competitor) {
         if (competitor instanceof CompetitorWithBoat) {
-            storeCompetitorWithBoat((CompetitorWithBoat) competitor);
+            storeCompetitorWithBoat((CompetitorWithBoat) competitor); 
         } else {
             storeCompetitorWithoutBoat(competitor);
         }
@@ -1637,14 +1636,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterCompetitorEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
-        storeRegattaLogEvent(regattaLikeId, result);
-    }
-
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterCompetitorAndBoatEvent event) {
-        DBObject result = createBasicRegattaLogEventDBObject(event);
-        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterCompetitorAndBoatEvent.class.getSimpleName());
-        result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
-        result.put(FieldNames.REGATTA_LOG_BOAT_ID.name(), event.getBoat().getId());
         storeRegattaLogEvent(regattaLikeId, result);
     }
 

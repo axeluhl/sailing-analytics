@@ -109,7 +109,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
@@ -123,7 +122,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCo
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl;
@@ -1951,8 +1949,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRegattaLogRegisterBoatEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRegisterCompetitorEvent.class.getSimpleName())) {
             return loadRegattaLogRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, dbObject);
-        } else if (eventClass.equals(RegattaLogRegisterCompetitorAndBoatEvent.class.getSimpleName())) {
-            return loadRegattaLogRegisterCompetitorAndBoatEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogSetCompetitorTimeOnTimeFactorEvent.class.getSimpleName())) {
             return loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass
@@ -2047,31 +2043,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             + " from registration event with ID " + id + ". Skipping this boat registration.");
         } else {
             result = new RegattaLogRegisterBoatEventImpl(createdAt, logicalTimePoint, author, id, boat);
-        }
-        return result;
-    }
-
-    private RegattaLogRegisterCompetitorAndBoatEvent loadRegattaLogRegisterCompetitorAndBoatEvent(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
-        Competitor comp = getCompetitorByID(dbObject);
-        Boat boat = getBoatByID(dbObject);
-        final RegattaLogRegisterCompetitorAndBoatEvent result;
-        if (comp == null || boat == null) {
-            result = null;
-            if (comp == null) {
-                logger.log(Level.SEVERE, "Couldn't resolve competitor with ID "
-                        + dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name())
-                        + " from registration event with ID " + id + ". Skipping this competitor registration.");
-            }
-            if (boat == null) {
-                logger.log(Level.SEVERE,
-                        "Couldn't resolve boat with ID " + dbObject.get(FieldNames.REGATTA_LOG_BOAT_ID.name())
-                                + " from registration event with ID " + id
-                                + ". Skipping this competitor registration.");
-            }
-        } else {
-            result = new RegattaLogRegisterCompetitorAndBoatEventImpl(createdAt, logicalTimePoint, author, id, comp,
-                    boat);
         }
         return result;
     }
@@ -2400,21 +2371,40 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<CompetitorWithBoat> renameCompetitorsCollectionAndloadAllLegacyCompetitors() {
+    public Collection<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired() {
+        ArrayList<CompetitorWithBoat> result = null;
+
+        boolean competitorsCollectionExist = database.collectionExists(CollectionNames.COMPETITORS.name());
+        boolean boatsCollectionCollectionExist = database.collectionExists(CollectionNames.BOATS.name());
         DBCollection orginalCompetitorCollection = database.getCollection(CollectionNames.COMPETITORS.name());
-        orginalCompetitorCollection.rename(CollectionNames.COMPETITORS_BAK.name(), /* dropTarget */ true);
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_BAK.name());
-        ArrayList<CompetitorWithBoat> result = new ArrayList<>();
-        try {
-            for (DBObject o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                CompetitorWithBoat c = legacyCompetitorWithBoatDeserializer.deserialize(json);
-                result.add(c);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-            logger.log(Level.SEVERE, "renameCompetitorsCollectionAndloadAllLegacyCompetitors", e);
-        }
+        
+        // there is a corner case where tests can create just one competitor without boat
+        // before we migrate we need to check if this case
+        if (competitorsCollectionExist && !boatsCollectionCollectionExist) {
+            long competitorCount = orginalCompetitorCollection.count();
+            if (competitorCount > 0) {
+                DBObject oneCompetitorDbObject = orginalCompetitorCollection.findOne();
+                Object boatObject = oneCompetitorDbObject.get("boat");
+                // only in case such a boat object exist we need a migration, because the new type stores only a boatID or no boat at all 
+                if (boatObject != null) {
+                    result = new ArrayList<>();
+                    
+                    orginalCompetitorCollection.rename(CollectionNames.COMPETITORS_BAK.name(), /* dropTarget */ true);
+                    DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_BAK.name());
+                    try {
+                        for (DBObject o : collection.find()) {
+                            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                            CompetitorWithBoat c = legacyCompetitorWithBoatDeserializer.deserialize(json);
+                            result.add(c);
+                        }
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
+                        logger.log(Level.SEVERE, "renameCompetitorsCollectionAndloadAllLegacyCompetitors", e);
+                    }
+                }
+            }                
+          }
+
         return result;
     }
 

@@ -296,11 +296,11 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final CompetitorWithBoat competitor = getService().getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
+            final Competitor competitor = getService().getCompetitorStore().getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
-                regatta.registerCompetitorAndBoat(competitor, competitor.getBoat());
+                regatta.registerCompetitor(competitor);
                 response = Response.ok().build();
             }
         }
@@ -338,7 +338,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             /* coach */ null), timeOnTimeFactor,
                     timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
                     searchTag, (DynamicBoat) boat);
-            regatta.registerCompetitorAndBoat(competitor, boat);
+            regatta.registerCompetitor(competitor);
             response = Response.ok(CompetitorWithBoatJsonSerializer.create().serialize(competitor).toJSONString()).
                     header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }

@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -429,8 +429,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Boat boat2 = AbstractLeaderboardTest.createBoat("Humba2 Boot");
         res.getCompetitorStore().addNewCompetitors(Arrays.asList(competitor1, competitor2));
         res.getCompetitorStore().addNewBoats(Arrays.asList(boat1, boat2));
-        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1, boat1));
-        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2, boat2));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitor1));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitor2));
         assertTrue(Util.contains(regatta.getAllBoats(), boat1));

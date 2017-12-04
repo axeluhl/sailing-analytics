@@ -23,8 +23,10 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsIn
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -40,7 +42,7 @@ import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest {
-    private Competitor competitor;
+    private CompetitorWithBoat competitor;
     private RegattaLog log;
     private RegattaLeaderboard leaderboard;
     private BoatClass boatClass = new BoatClassImpl("49er", false);
@@ -50,16 +52,16 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         super.setUp();
         Competitor c = createCompetitors(1).get(0);
         Boat boat = racingEventService.getBaseDomainFactory().getOrCreateBoat("boat", "boat", boatClass, "GER1", null);
-        competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(), c.getShortName(),
+        competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitorWithBoat(c.getId(), c.getName(), c.getShortName(),
                 c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, (DynamicBoat) boat);
         Regatta regatta = new RegattaImpl("regatta", boatClass, /* canBoatsOfCompetitorsChangePerRace */ true, MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,
                 new HighPoint(), 0, null, OneDesignRankingMetric::new);
         racingEventService.addRegattaWithoutReplication(regatta);
         leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "regatta", new int[] {});
-        regatta.registerCompetitorAndBoat(competitor, boat);
+        regatta.registerCompetitor(competitor);
         log = leaderboard.getRegattaLike().getRegattaLog();
     }
 

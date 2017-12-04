@@ -26,11 +26,12 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatDeregistrator;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatsInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -865,26 +866,26 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog() {
+    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLog();
-        CompetitorsAndBoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsAndBoatsInLogAnalyzer<>(
+        CompetitorsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsInLogAnalyzer<>(
                 regattaLog);
         return analyzer.analyze();
     }
     
     @Override
-    public void registerCompetitorAndBoat(Competitor competitor, Boat boat) {
-        registerCompetitorsAndBoats(Collections.singletonMap(competitor, boat));
+    public void registerCompetitor(Competitor competitor) {
+        registerCompetitors(Collections.singletonList(competitor));
     }
     
     @Override
-    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats) {
+    public void registerCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
         
-        for (Map.Entry<Competitor, Boat> competitorAndBoatEntry : competitorsAndBoats.entrySet()) {
-            regattaLog.add(new RegattaLogRegisterCompetitorAndBoatEventImpl(now, now, regattaLogEventAuthorForRegatta,
-                    UUID.randomUUID(), competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
+        for (Competitor competitor: competitors) {
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForRegatta,
+                    UUID.randomUUID(), competitor));
         }
     }
     

@@ -56,13 +56,13 @@ public interface HasRegattaLike {
     Iterable<Competitor> getAllCompetitors();
 
     /**
-     * Determines the competitors and boats registered in the regatta log. Note that this is not necessarily the complete set of
-     * competitors and boats participating in this "regatta." For that, use {@link #getAllCompetitorsAndBoats()}.
+     * Determines the competitors registered in the regatta log. Note that this is not necessarily the complete set of
+     * competitors participating in this "regatta." For that, use {@link #getAllCompetitors()}.
      */
-    Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog();
+    Iterable<Competitor> getCompetitorsRegisteredInRegattaLog();
     
-    void registerCompetitorAndBoat(Competitor competitor, Boat boat);
-    void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats);
+    void registerCompetitor(Competitor competitor);
+    void registerCompetitors(Iterable<Competitor> competitors);
 
     void deregisterCompetitor(Competitor competitor);
     void deregisterCompetitors(Iterable<Competitor> competitors);

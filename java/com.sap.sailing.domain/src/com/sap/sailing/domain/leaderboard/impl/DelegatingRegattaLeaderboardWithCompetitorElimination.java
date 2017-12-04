@@ -190,8 +190,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getRegatta();
     }
 
-    public Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog() {
-        return getFullLeaderboard().getCompetitorsAndBoatsRegisteredInRegattaLog();
+    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
+        return getFullLeaderboard().getCompetitorsRegisteredInRegattaLog();
     }
 
     public IsRegattaLike getRegattaLike() {
@@ -202,12 +202,12 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getRacelog(raceColumnName, fleetName);
     }
 
-    public void registerCompetitorAndBoat(Competitor competitor, Boat boat) {
-        getFullLeaderboard().registerCompetitorAndBoat(competitor, boat);
+    public void registerCompetitor(Competitor competitor) {
+        getFullLeaderboard().registerCompetitor(competitor);
     }
 
-    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats) {
-        getFullLeaderboard().registerCompetitorsAndBoats(competitorsAndBoats);
+    public void registerCompetitors(Iterable<Competitor> competitors) {
+        getFullLeaderboard().registerCompetitors(competitors);
     }
 
     public void deregisterCompetitor(Competitor competitor) {

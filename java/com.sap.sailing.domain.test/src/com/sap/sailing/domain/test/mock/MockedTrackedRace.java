@@ -528,16 +528,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog() {
+                    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
                         return null;
                     }
 
                     @Override
-                    public void registerCompetitorAndBoat(Competitor competitor, Boat boat) {
+                    public void registerCompetitor(Competitor competitor) {
                     }
 
                     @Override
-                    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats) {
+                    public void registerCompetitors(Iterable<Competitor> competitors) {
                     }
 
                     @Override
