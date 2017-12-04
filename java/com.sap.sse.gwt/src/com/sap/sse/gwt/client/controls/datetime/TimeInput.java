@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.controls.datetime;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Objects;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
@@ -43,6 +44,7 @@ public class TimeInput extends AbstractInput {
 
         private static final DateTimeFormat VIEW_FORMAT_SHORT = DateTimeFormat.getFormat(PredefinedFormat.TIME_SHORT);
         private static final DateTimeFormat VIEW_FORMAT_MEDIUM = DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM);
+        private static final String EMPTY_VALUE = "";
 
         private final DateTimeFormat viewFormat;
 
@@ -52,15 +54,12 @@ public class TimeInput extends AbstractInput {
 
         @Override
         public String render(Date object) {
-            if(object == null){
-                return "";
-            }
-            return viewFormat.format(object);
+            return Objects.isNull(object) ? EMPTY_VALUE : viewFormat.format(object);
         }
 
         @Override
         public Date parse(CharSequence text) throws ParseException {
-            if ("".equals(text.toString())) {
+            if (EMPTY_VALUE.equals(text.toString())) {
                 return null;
             }
 
