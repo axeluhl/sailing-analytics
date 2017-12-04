@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -817,14 +818,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
     
     /**
-     * Returns an <code>Iterable</code> of {@link Competitor}.
-     * 
-     * @param regattaIdentifier specifies Regatta of which the competitors are about to be fetched.
-     * @return <code>Iterable</code> of {@link Competitor}
-     */
-    Iterable<Competitor> getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier);
-    
-    /**
      * Returns a calculated {@link PairingListTemplate}, specified by flights, groups and competitors.
      *
      * @param regattaIdentifier {@link RegattaIdentifier} that specifies the flights and groups
@@ -832,6 +825,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param flightMultiplier
      * @return calculated {@link PairingListTemplate}
      */
-    PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount,
+    PairingListTemplate createPairingListFromRegatta(AbstractLeaderboardDTO leaderboardDTO, int competitorsCount,
             int flightMultiplier);
 }

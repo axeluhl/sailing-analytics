@@ -872,8 +872,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
 
-    void getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Iterable<CompetitorDTO>> callback);
-    
-    void calculatePairingList(RegattaIdentifier regattaIdentifier, int competitorCount, int flightMultiplier, 
+    void calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorCount, int flightMultiplier, 
             AsyncCallback<PairingListTemplateDTO> callback);
 }

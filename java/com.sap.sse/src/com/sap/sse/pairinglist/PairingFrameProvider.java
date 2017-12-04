@@ -6,6 +6,8 @@ public interface PairingFrameProvider {
     int getCompetitorsCount();
     
     default int getHashCode() {
-        return 916439 ^ this.getFlightsCount() ^ this.getGroupsCount() ^ this.getCompetitorsCount();
+        int groupsCount = this.getGroupsCount();
+        String result = "916" + this.getFlightsCount() + this.getGroupsCount() + this.getCompetitorsCount();
+        return Integer.parseInt(result);
     }
 }

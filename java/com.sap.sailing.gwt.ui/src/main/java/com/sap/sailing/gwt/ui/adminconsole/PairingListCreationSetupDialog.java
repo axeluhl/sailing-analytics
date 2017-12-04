@@ -7,14 +7,13 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 
-public class PairingListCreationSetupDialog extends PairingListCreationDialog {
+public class PairingListCreationSetupDialog extends AbstractPairingListCreationSetupDialog<PairingListTemplateDTO> {
     
     private final IntegerBox competitorCountTextBox;
     private final IntegerBox flightMultiplierTextBox;
@@ -22,14 +21,21 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     private final CheckBox flightMultiplierCheckBox;
     private final int groupCount;
     
-    public PairingListCreationSetupDialog(RegattaDTO regattaDTO, StringMessages stringMessages, 
+    protected static class PairingListParameterValidator extends AbstractPairingListParameterValidator {
+        public PairingListParameterValidator(StringMessages stringMessages) {
+            super(stringMessages);
+        }
+    }
+    
+    public PairingListCreationSetupDialog(StrippedLeaderboardDTO leaderboardDTO, StringMessages stringMessages, 
             DialogCallback<PairingListTemplateDTO> callback) {
         
-        super(new RegattaName(regattaDTO.getName()), stringMessages, null, callback);
+        super(leaderboardDTO, stringMessages.pairingLists(), stringMessages, new PairingListParameterValidator(stringMessages), 
+                callback);
+       
+        this.groupCount = Util.size(leaderboardDTO.getRaceList().get(0).getFleets());
         
-        this.groupCount = Util.size(regattaDTO.series.get(0).getFleets());
-        
-        this.competitorCountTextBox = createIntegerBox(0, 2);
+        this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
         this.flightMultiplierTextBox = createIntegerBox(0, 2);
         this.flightMultiplierTextBox.setEnabled(false);
         this.flightMultiplierCheckBox = createCheckbox("Flight Multiplier");
@@ -49,7 +55,7 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
         
-        Grid formGrid = new Grid(3, 2);
+        Grid formGrid = new Grid(4, 2);
         panel.add(formGrid);
         
         formGrid.setWidget(0, 0, new Label("Please set the competitors count:"));
@@ -57,7 +63,7 @@ public class PairingListCreationSetupDialog extends PairingListCreationDialog {
         formGrid.setWidget(1, 1, this.flightMultiplierCheckBox);
         formGrid.setWidget(2, 0, new Label("Flight Multiplier:"));
         formGrid.setWidget(2, 1, this.flightMultiplierTextBox);
-                
+        
         return panel;
     }
 

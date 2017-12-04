@@ -233,6 +233,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceIsKnownToStartUpwind();
     String events();
     String pairingLists();
+    String applyToRacelog();
+    String csvExport();
     String settingsForComponent(String localizedComponentName);
     String noEventsFound();
     String noEventSelected();

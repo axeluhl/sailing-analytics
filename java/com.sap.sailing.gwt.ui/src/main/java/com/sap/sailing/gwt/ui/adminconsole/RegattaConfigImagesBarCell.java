@@ -11,7 +11,6 @@ import com.sap.sse.gwt.client.IconResources;
 public class RegattaConfigImagesBarCell extends ImagesBarCell {
     static final String ACTION_REMOVE = "ACTION_REMOVE";
     public static final String ACTION_EDIT = "ACTION_EDIT";
-    public static final String ACTION_CREATE_PAIRINGLIST = "ACTION_CREATE_PAIRINGLIST";
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
@@ -28,7 +27,6 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())),
-                new ImageSpec(ACTION_CREATE_PAIRINGLIST, stringMessages.pairingLists(), makeImagePrototype(resources.openCoachDashboard())));
+                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
     }
 }

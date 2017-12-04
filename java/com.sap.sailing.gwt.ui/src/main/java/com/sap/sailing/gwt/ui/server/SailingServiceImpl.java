@@ -6787,18 +6787,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
         }
     }
-    @Override
-    public Iterable<CompetitorDTO> getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier) {
-        return convertToCompetitorDTOs(getService().getCompetitorsFromRegatta(regattaIdentifier));
-    }
     
     @Override
-    public PairingListTemplateDTO calculatePairingList(RegattaIdentifier regattaIdentifier, int competitorsCount, 
+    public PairingListTemplateDTO calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorsCount, 
             int flightMultiplier) {
-        PairingListTemplate template = getService().createPairingListFromRegatta(regattaIdentifier, competitorsCount, 
+        PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardDTO, competitorsCount, 
                 flightMultiplier);
-        Regatta regatta = getService().getRegatta(regattaIdentifier);
-        int flightCount = Util.size(regatta.getRaceColumns());
+        int flightCount = leaderboardDTO.getRaceColumnsCount();
         int groupCount = (int) (template.getPairingListTemplate().length / flightCount / (flightMultiplier > 0 ? (flightMultiplier + 1) : 1));
         return new PairingListTemplateDTO(flightCount, groupCount, 
                 competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality());

@@ -207,7 +207,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     private boolean checkValues(int flights, int groups, int competitors) {
-        if ((flights > 0) && (groups > 1) && (competitors > 1) && (competitors >= groups)) {
+        if ((flights > 0) && (groups > 0) && (competitors > 1) && (competitors >= groups)) {
             return true;
         }
         return false;
@@ -289,73 +289,75 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 //        for(int competitor=0;competitor<competitorCount;competitor++){
 //            competitors.add(competitor);
 //        }
-        int[] associationHigh = new int[groupCount - 1];
-        flightColumn[0][0] = seed;
-        contains[seed]=true;
-//        competitors.remove((Integer)seed);
-        int[] sumsOf3rdDemension=new int[competitorCount];
-        System.arraycopy(currentAssociations[seed], 0, sumsOf3rdDemension, 0, competitorCount);
-        int[] maxValues=new int[competitorCount];
-        System.arraycopy(currentAssociations[seed], 0, maxValues, 0, competitorCount);
-        for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
-            int associationSum = Integer.MAX_VALUE;
-            associationHigh[0] = Integer.MAX_VALUE;
-//            for(int competitorIndex:competitors) {
-                for(int competitorIndex=0;competitorIndex<competitorCount;competitorIndex++){
-                if (sumsOf3rdDemension[competitorIndex] <= associationSum
-                        && !contains[competitorIndex]
-                        && maxValues[competitorIndex] <= associationHigh[0]) {
-                    flightColumn[0][assignmentIndex] = competitorIndex;
-                    associationSum = sumsOf3rdDemension[competitorIndex];
-                    associationHigh[0] = maxValues[competitorIndex];
-                    
-                }
-            }
-            contains[flightColumn[0][assignmentIndex]]=true;
-//            competitors.remove((Integer)flightColumn[0][assignmentIndex]);
-            for(int competitor=0;competitor<competitorCount;competitor++){
-                if(flightColumn[0][assignmentIndex]!=competitor){
-                    sumsOf3rdDemension[competitor]+=currentAssociations[flightColumn[0][assignmentIndex]][competitor];
-                    if(maxValues[competitor]<flightColumn[0][assignmentIndex]){
-                        maxValues[competitor]=flightColumn[0][assignmentIndex];
-                    }
-                }
-            }
-        }
-        for (int groupIndex = 1; groupIndex < groupCount - 1; groupIndex++) {
-//                    flightColumn[groupIndex][0]=competitors.get(0);
-//                    competitors.remove(0);
-            for(int competitorIndex=0;competitorIndex<competitorCount;competitorIndex++){
-                if(!contains[competitorIndex]){
-                    flightColumn[groupIndex][0]=competitorIndex;
-                    contains[flightColumn[groupIndex][0]]=true;
-                    System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, sumsOf3rdDemension, 0, competitorCount);
-                    System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, maxValues, 0, competitorCount);
-                    break;
-                }
-            }
-
+        if (groupCount > 1) {
+            int[] associationHigh = new int[groupCount - 1];
+            flightColumn[0][0] = seed;
+            contains[seed] = true;
+            // competitors.remove((Integer)seed);
+            int[] sumsOf3rdDemension = new int[competitorCount];
+            System.arraycopy(currentAssociations[seed], 0, sumsOf3rdDemension, 0, competitorCount);
+            int[] maxValues = new int[competitorCount];
+            System.arraycopy(currentAssociations[seed], 0, maxValues, 0, competitorCount);
             for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
                 int associationSum = Integer.MAX_VALUE;
-                associationHigh[groupIndex] = Integer.MAX_VALUE;
-
-//                for (int competitorIndex:competitors) {
-                  for(int competitorIndex=0;competitorIndex<competitorCount;competitorIndex++){
-                    if (sumsOf3rdDemension[competitorIndex] <= associationSum
-                            && !contains[competitorIndex]
-                            && maxValues[competitorIndex] <= associationHigh[groupIndex]) {
-                        flightColumn[groupIndex][assignmentIndex] = competitorIndex;
+                associationHigh[0] = Integer.MAX_VALUE;
+                // for(int competitorIndex:competitors) {
+                for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
+                    if (sumsOf3rdDemension[competitorIndex] <= associationSum && !contains[competitorIndex]
+                            && maxValues[competitorIndex] <= associationHigh[0]) {
+                        flightColumn[0][assignmentIndex] = competitorIndex;
                         associationSum = sumsOf3rdDemension[competitorIndex];
-                        associationHigh[groupIndex] = maxValues[competitorIndex];
+                        associationHigh[0] = maxValues[competitorIndex];
+
                     }
                 }
-//                competitors.remove((Integer)flightColumn[groupIndex][assignmentIndex]);
-                contains[flightColumn[groupIndex][assignmentIndex]]=true;
-                for(int competitor=0;competitor<competitorCount;competitor++){
-                    if(flightColumn[groupIndex][assignmentIndex]!=competitor){
-                        sumsOf3rdDemension[competitor]+=currentAssociations[flightColumn[groupIndex][assignmentIndex]][competitor];
-                        if(maxValues[competitor]<flightColumn[groupIndex][assignmentIndex]){
-                            maxValues[competitor]=flightColumn[groupIndex][assignmentIndex];
+                contains[flightColumn[0][assignmentIndex]] = true;
+                // competitors.remove((Integer)flightColumn[0][assignmentIndex]);
+                for (int competitor = 0; competitor < competitorCount; competitor++) {
+                    if (flightColumn[0][assignmentIndex] != competitor) {
+                        sumsOf3rdDemension[competitor] += currentAssociations[flightColumn[0][assignmentIndex]][competitor];
+                        if (maxValues[competitor] < flightColumn[0][assignmentIndex]) {
+                            maxValues[competitor] = flightColumn[0][assignmentIndex];
+                        }
+                    }
+                }
+            }
+            for (int groupIndex = 1; groupIndex < groupCount - 1; groupIndex++) {
+                // flightColumn[groupIndex][0]=competitors.get(0);
+                // competitors.remove(0);
+                for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
+                    if (!contains[competitorIndex]) {
+                        flightColumn[groupIndex][0] = competitorIndex;
+                        contains[flightColumn[groupIndex][0]] = true;
+                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, sumsOf3rdDemension, 0,
+                                competitorCount);
+                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, maxValues, 0,
+                                competitorCount);
+                        break;
+                    }
+                }
+
+                for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
+                    int associationSum = Integer.MAX_VALUE;
+                    associationHigh[groupIndex] = Integer.MAX_VALUE;
+
+                    // for (int competitorIndex:competitors) {
+                    for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
+                        if (sumsOf3rdDemension[competitorIndex] <= associationSum && !contains[competitorIndex]
+                                && maxValues[competitorIndex] <= associationHigh[groupIndex]) {
+                            flightColumn[groupIndex][assignmentIndex] = competitorIndex;
+                            associationSum = sumsOf3rdDemension[competitorIndex];
+                            associationHigh[groupIndex] = maxValues[competitorIndex];
+                        }
+                    }
+                    // competitors.remove((Integer)flightColumn[groupIndex][assignmentIndex]);
+                    contains[flightColumn[groupIndex][assignmentIndex]] = true;
+                    for (int competitor = 0; competitor < competitorCount; competitor++) {
+                        if (flightColumn[groupIndex][assignmentIndex] != competitor) {
+                            sumsOf3rdDemension[competitor] += currentAssociations[flightColumn[groupIndex][assignmentIndex]][competitor];
+                            if (maxValues[competitor] < flightColumn[groupIndex][assignmentIndex]) {
+                                maxValues[competitor] = flightColumn[groupIndex][assignmentIndex];
+                            }
                         }
                     }
                 }

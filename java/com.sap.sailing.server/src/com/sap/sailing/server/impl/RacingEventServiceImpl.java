@@ -1,6 +1,6 @@
 package com.sap.sailing.server.impl;
 
-import java.io.BufferedReader;
+import java.io.BufferedReader; 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -112,6 +112,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -4151,35 +4152,21 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public Iterable<Competitor> getCompetitorsFromRegatta(RegattaIdentifier regattaIdentifier) {
-        Regatta regatta = getRegatta(regattaIdentifier);
-        return regatta.getAllCompetitors();
-    }
-    
-    @Override
-    public PairingListTemplate createPairingListFromRegatta(RegattaIdentifier regattaIdentifier, int competitorsCount,
+    public PairingListTemplate createPairingListFromRegatta(AbstractLeaderboardDTO leaderboardDTO, int competitorsCount,
             int flightMultiplier) {
 
-        Regatta regatta = getRegatta(regattaIdentifier);
-
-        if (regatta != null) {
-            // TODO flightMultiplier (not implemented yet)
+        if (leaderboardDTO != null) {
             PairingListTemplate template = pairingListTemplateFactory
                     .getOrCreatePairingListTemplate(new PairingFrameProvider() {
 
                         @Override
                         public int getGroupsCount() {
-                            for (Series series : regatta.getSeries()) {
-                                if (Util.size(series.getFleets()) > 1) {
-                                    return Util.size(series.getFleets());
-                                }
-                            }
-                            return 1;
+                            return leaderboardDTO.getRaceList().get(0).getFleets().size();
                         }
 
                         @Override
                         public int getFlightsCount() {
-                            return Util.size(regatta.getRaceColumns());
+                            return Util.size(leaderboardDTO.getRaceList());
                         }
 
                         @Override
