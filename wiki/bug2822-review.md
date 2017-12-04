@@ -10,7 +10,8 @@ Bug 2822 changes the way competitors and boats are handled. Specifically the 1:1
 
 Check:  
 
-- Existing COMPETITORS Collection is migrated to COMPETITORS_WITH_BOAT_REFERENCES and BOATS collection
+- Existing COMPETITORS Collection is renamed to COMPETITORS_BAK collection
+- Competitors from COMPETITORS_BAK collection will be migrated to COMPETITORS and BOATS collection
 - All migrated competitors have a link to a boat from boats collection
 - The attribute 'name' is cleared in new all created boat objects as the old names were not meaningful and not used
 
@@ -21,7 +22,7 @@ In case of a server instance with already created competitors we don't know to w
 Check:
 
 - Before server start an existing competitor with emedded boat does exist in the COMPETITORS collection
-- After server start and migration according to 1.1 this competitor does exist in the COMPETITORS_WITH_BOAT_REFERENCES collection and does have a link to a boat in the BOATS collection
+- After server start and migration according to 1.1 this competitor does exist in the COMPETITORS collection and does have a link to a boat in the BOATS collection
 - After starting the tractrac tracking of a race where this competitor is contained the tractrac connector recognizes the need for the migration and calls the corresponding function on the CompetitorStore
 - After the migration the competitor does not have a boat reference anymore and the migrated boat has the right properties
 
