@@ -25,4 +25,10 @@ public interface DynamicTrack<FixType extends Timed> extends Track<FixType> {
      * @return <code>true</code> if the element was added, <code>false</code> otherwise.
      */
     boolean add(FixType fix, boolean replace);
+
+    /**
+     * Invoked when this track is added to a tracked race. The method is also invoked after de-serializing the
+     * containing {@link TrackedRace}. This default implementation does nothing.
+     */
+    default void addedToTrackedRace(TrackedRace trackedRace) {}
 }

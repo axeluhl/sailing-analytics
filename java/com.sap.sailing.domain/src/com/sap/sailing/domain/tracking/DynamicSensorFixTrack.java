@@ -13,5 +13,4 @@ import com.sap.sse.common.WithID;
  */
 public interface DynamicSensorFixTrack<ItemType extends WithID & Serializable, FixT extends SensorFix> extends
         SensorFixTrack<ItemType, FixT>, DynamicTrack<FixT> {
-
 }

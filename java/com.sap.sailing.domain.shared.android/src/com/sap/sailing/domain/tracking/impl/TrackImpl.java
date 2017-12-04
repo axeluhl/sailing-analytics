@@ -479,22 +479,26 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
                     perfectCacheHit = true; // potentially a cache hit; but if it doesn't span the full interval, it's not perfect; see below
                     // compute the missing stretches between best cache entry's "from" and our "from" and the cache
                     // entry's "to" and our "to"
-                    T distanceFromFromToBeginningOfCacheEntry = nullElement;
-                    T distanceFromEndOfCacheEntryToTo = nullElement;
+                    T valueFromFromToBeginningOfCacheEntry = nullElement;
+                    T valueFromEndOfCacheEntryToTo = nullElement;
                     if (!bestCacheEntry.getB().getA().equals(from)) {
                         assert bestCacheEntry.getB().getA().after(from);
                         perfectCacheHit = false;
-                        distanceFromFromToBeginningOfCacheEntry = getValueSumRecursively(from, bestCacheEntry
+                        valueFromFromToBeginningOfCacheEntry = getValueSumRecursively(from, bestCacheEntry
                                 .getB().getA(), recursionDepth + 1, nullElement, adder, cache, valueCalculator);
                     }
                     if (!bestCacheEntry.getA().equals(to)) {
                         assert bestCacheEntry.getA().before(to);
                         perfectCacheHit = false;
-                        distanceFromEndOfCacheEntryToTo = getValueSumRecursively(bestCacheEntry.getA(), to,
+                        valueFromEndOfCacheEntryToTo = getValueSumRecursively(bestCacheEntry.getA(), to,
                                 recursionDepth + 1, nullElement, adder, cache, valueCalculator);
                     }
-                    result = adder.add(adder.add(distanceFromFromToBeginningOfCacheEntry, bestCacheEntry.getB().getB()), 
-                            distanceFromEndOfCacheEntryToTo);
+                    if (valueFromEndOfCacheEntryToTo == null || bestCacheEntry.getB().getB() == null) {
+                        result = null;
+                    } else {
+                        result = adder.add(adder.add(valueFromFromToBeginningOfCacheEntry, bestCacheEntry.getB().getB()), 
+                                valueFromEndOfCacheEntryToTo);
+                    }
                 } else {
                     if (from.compareTo(to) < 0) {
                         result = valueCalculator.calculate(from, to);

@@ -70,6 +70,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Security
   * [[Fortify Tests|wiki/info/security/fortify]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
+  * [[Permission Concept|wiki/info/security/permission-concept]]
 
 ### Miscellaneous
 
