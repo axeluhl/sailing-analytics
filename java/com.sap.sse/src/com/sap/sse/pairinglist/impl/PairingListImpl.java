@@ -37,7 +37,9 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         
         final List<Competitor> result = new ArrayList<>();
         for (final int competitorIndexInRace : competitorIndicesInRace) {
-            result.add(Util.get(competitionFormat.getCompetitors(), competitorIndexInRace));
+            if (competitorIndexInRace > -1) {
+                result.add(Util.get(competitionFormat.getCompetitors(), competitorIndexInRace));
+            }
         }
         return result;
     }

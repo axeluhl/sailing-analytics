@@ -696,5 +696,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
     
-    PairingListTemplateDTO calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorsCount, int flightMultiplier);    
+    PairingListTemplateDTO calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorsCount, int flightMultiplier);
+    
+    void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO) 
+            throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;
 }

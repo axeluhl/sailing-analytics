@@ -14,10 +14,6 @@ public interface CompetitionFormat<Flight, Group, Competitor> extends PairingFra
 
     Iterable<Group> getGroups(Flight flight);
 
-    default int getGroupsCount(Flight flight) {
-        return Util.size(getGroups(flight));
-    }
-
     Iterable<Competitor> getCompetitors();
 
     default int getCompetitorsCount() {

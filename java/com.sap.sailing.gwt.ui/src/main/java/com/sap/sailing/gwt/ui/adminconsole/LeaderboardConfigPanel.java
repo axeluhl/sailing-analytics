@@ -1053,7 +1053,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     private void openPairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, PairingListTemplateDTO template) {
-        PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template);
+        PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template, sailingService);
         dialog.show();
     }
 }

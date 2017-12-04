@@ -493,6 +493,8 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.pairinglist.CompetitionFormat;
+import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
@@ -6797,5 +6799,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         int groupCount = (int) (template.getPairingListTemplate().length / flightCount / (flightMultiplier > 0 ? (flightMultiplier + 1) : 1));
         return new PairingListTemplateDTO(flightCount, groupCount, 
                 competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality());
+    }
+    
+    @Override
+    public void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO,
+            StrippedLeaderboardDTO leaderboardDTO) throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
+        PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardDTO, pairingListTemplateDTO.getCompetitorCount(), 
+                pairingListTemplateDTO.getFlightMultiplier());
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardDTO.getName());
+        PairingList<RaceColumn, Fleet, Competitor> pairingList = template.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
+
+            @Override
+            public Iterable<RaceColumn> getFlights() {
+                return leaderboard.getRaceColumns();
+            }
+
+            @Override
+            public Iterable<Competitor> getCompetitors() {
+                return leaderboard.getAllCompetitors();
+            }
+
+            @Override
+            public Iterable<Fleet> getGroups(RaceColumn flight) {
+                // TODO fix this
+                return (Iterable<Fleet>) leaderboard.getRaceColumnByName(flight.getName()).getFleets();
+            }
+
+            @Override
+            public int getGroupsCount() {
+                return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
+            }
+        });
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>(this.convertToCompetitorDTOs(pairingList.getCompetitors(raceColumn, fleet)));
+                this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(), fleet.getName(), 
+                        competitors);
+            }
+        }
     }
 }

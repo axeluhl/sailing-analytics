@@ -4,6 +4,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -12,6 +13,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -19,6 +21,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class PairingListCreationDialog extends DataEntryDialog<PairingListTemplateDTO> {
 
     private final PairingListTemplateDTO template;
+    private final SailingServiceAsync sailingService;
+    private final StrippedLeaderboardDTO leaderboardDTO;
     /*
      * private final FlowPanel panelForAdditionalWidget; private final DockPanel buttonPanel; private final FlowPanel
      * rightButtonPanel; private final FlowPanel leftButtonPanel;
@@ -28,13 +32,19 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final Button cSVExportButton;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
-            PairingListTemplateDTO template) {
+            PairingListTemplateDTO template, SailingServiceAsync sailingService) {
         super("Pairing List", null, stringMessages.close(), null, null, null);
         this.template = template;
+        this.sailingService = sailingService;
+        this.leaderboardDTO = leaderboardDTO;
         this.ensureDebugId("PairingListCreationDialog");
 
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
         cSVExportButton = new Button(stringMessages.csvExport());
+        
+        if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
+            this.disableApplyToRacelogs();
+        }
     }
 
     @Override
@@ -116,7 +126,18 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
             @Override
             public void onClick(ClickEvent event) {
-
+                sailingService.fillRaceLogsFromPairingListTemplate(template, leaderboardDTO, new AsyncCallback<Void>() {
+                    
+                    @Override
+                    public void onSuccess(Void result) {
+                        System.out.println("it worked ;-)");
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        caught.printStackTrace();
+                    }
+                });
             }
 
         });
@@ -149,6 +170,10 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             result.append("\n");
         }
         return result.toString();
+    }
+    
+    private void disableApplyToRacelogs() {
+        this.applyToRacelogButton.setEnabled(false);
     }
 
 }
