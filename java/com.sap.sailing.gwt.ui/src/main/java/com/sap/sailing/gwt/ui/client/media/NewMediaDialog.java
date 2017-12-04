@@ -12,6 +12,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -21,7 +23,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.common.TimePoint;
@@ -63,13 +67,16 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     final private RegattaAndRaceIdentifier raceIdentifier;
 
-    public NewMediaDialog(TimePoint defaultStartTime, StringMessages stringMessages,
+    private MediaServiceAsync mediaService;
+
+    public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR,
                 dialogCallback);
         this.defaultStartTime = defaultStartTime != null ? defaultStartTime : MillisecondsTimePoint.now();
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
+        this.mediaService = mediaService;
         registerNativeMethods();
     }
 
@@ -88,7 +95,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         String duration = durationBox.getValue();
         if (duration != null && !duration.trim().isEmpty()) {
             mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
-        } else { 
+        } else {
             mediaTrack.duration = null;
         }
     }
@@ -106,7 +113,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 Date startTime = TimeFormatUtil.DATETIME_FORMAT.parse(startTimeText);
                 mediaTrack.startTime = new MillisecondsTimePoint(startTime);
             } catch (IllegalArgumentException ex) {
-                //TODO: highlight format error in UI
+                // TODO: highlight format error in UI
             }
         }
     }
@@ -165,7 +172,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         durationBox = createTextBox(null);
         formGrid.setWidget(4, 1, durationBox);
         mainPanel.add(formGrid);
-        
+
         return mainPanel;
     }
 
@@ -249,11 +256,12 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 		setTimeout(
 				function() {
 					//Remove temporary script element.
-					if (window != null && window.youtubeMetadataCallbackScript != null) {
-					    document.body
-							.removeChild(window.youtubeMetadataCallbackScript);
-							
-					    delete window.youtubeMetadataCallbackScript;
+					if (window != null
+							&& window.youtubeMetadataCallbackScript != null) {
+						document.body
+								.removeChild(window.youtubeMetadataCallbackScript);
+
+						delete window.youtubeMetadataCallbackScript;
 					}
 					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
 				}, 2000);
@@ -264,8 +272,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         setUiEnabled(true);
         mediaTrack.title = title;
         try {
-            long duration = (long) Math.round(1000 * Double
-                    .valueOf(durationInSeconds));
+            long duration = (long) Math.round(1000 * Double.valueOf(durationInSeconds));
             if (duration > 0) {
                 mediaTrack.duration = new MillisecondsDurationImpl(duration);
             } else {
@@ -285,23 +292,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             infoLabel.setWidget(new Label(mediaTrack.url));
         } else {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
-            if(mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama){
-                ListBox mimeTypeListBox = createListBox(false);
-                mimeTypeListBox.addItem(MimeType.mp4.name());
-                mimeTypeListBox.addItem(MimeType.mp4panorama.name());
-                infoLabel.setWidget(mimeTypeListBox);
-                mimeTypeListBox.addChangeHandler(new ChangeHandler() {
-                    
-                    @Override
-                    public void onChange(ChangeEvent event) {
-                        mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
-                    }
-                });
-            }else{
+            if (mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama) {
+                processMp4(mediaTrack, infoLabel);
+            } else {
                 infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             }
         }
-        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
+        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime;
         String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());
 
         startTimeBox.setText(startTimeText);
@@ -311,6 +308,49 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             durationBox.setText("");
         }
+    }
+
+    private void processMp4(MediaTrack mediaTrack, SimplePanel infoLabel2) {
+        this.setUiEnabled(false);
+        infoLabel.setWidget(new Label("TODO Please wait, analyzing"));
+        if (mediaTrack.startTime == null) {
+            mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+
+                @Override
+                public void onSuccess(VideoMetadataDTO result) {
+                    setUiEnabled(true);
+                    if (!result.isDownloadable()) {
+                        Window.alert("Could not download file " + mediaTrack.url);
+                        manualMimeTypeSelection(mediaTrack);
+                    } else {
+                        mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
+                        // check for startime here
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    setUiEnabled(true);
+                    manualMimeTypeSelection(mediaTrack);
+                }
+            });
+        } else {
+            manualMimeTypeSelection(mediaTrack);
+        }
+    }
+
+    private void manualMimeTypeSelection(MediaTrack mediaTrack) {
+        ListBox mimeTypeListBox = createListBox(false);
+        mimeTypeListBox.addItem(MimeType.mp4.name());
+        mimeTypeListBox.addItem(MimeType.mp4panorama.name());
+        infoLabel.setWidget(mimeTypeListBox);
+        mimeTypeListBox.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
+            }
+        });
     }
 
     @Override

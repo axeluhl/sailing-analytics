@@ -616,7 +616,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public void addMediaTrack() {
         TimePoint raceStartTime = getRaceStartTime();
         TimePoint defaultStartTime = raceStartTime;
-        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages,
+        NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime, MediaPlayerManagerComponent.this.stringMessages,
                 this.getCurrentRace(), new DialogCallback<MediaTrack>() {
 
                     @Override

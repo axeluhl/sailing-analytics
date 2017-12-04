@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.adminconsole.AssignRacesToMediaDialog;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -29,11 +30,11 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
     private AssignRacesToMediaDialog racesForMediaDialog;
 
-    public NewMediaWithRaceSelectionDialog(TimePoint defaultStartTime, StringMessages stringMessages,
+    public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService,TimePoint defaultStartTime, StringMessages stringMessages,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
             Set<RegattasDisplayer> regattasDisplayers,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<MediaTrack> dialogCallback) {
-        super(defaultStartTime, stringMessages, null, dialogCallback);
+        super(mediaService, defaultStartTime, stringMessages, null, dialogCallback);
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;

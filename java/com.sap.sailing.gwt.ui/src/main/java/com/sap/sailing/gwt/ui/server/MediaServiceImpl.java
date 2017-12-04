@@ -1,13 +1,32 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.channels.Channels;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.mp4parser.IsoFile;
+import org.mp4parser.boxes.UserBox;
+import org.mp4parser.boxes.iso14496.part12.MovieBox;
+import org.mp4parser.boxes.iso14496.part12.MovieHeaderBox;
+import org.mp4parser.tools.Path;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
@@ -87,6 +106,45 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public void updateRace(MediaTrack mediaTrack) {
         racingEventService().mediaTrackAssignedRacesChanged(mediaTrack);
         
+    }
+    
+    @Override
+    public VideoMetadataDTO checkMetadata(String url)
+            throws IOException, ParserConfigurationException, SAXException {
+        
+        URL input = new URL(url);
+        boolean canDownload = false;
+        boolean spherical = false;
+        Date recordStartedTimer = null;
+        try(IsoFile isof = new IsoFile(Channels.newChannel(input.openStream()))){
+            canDownload = true;
+            // MovieHeaderBox movieHeaderBox = Path.getPath(isof, "moov[0]/mvhd");
+            // System.out.println(movieHeaderBox.getCreationTime());
+            UserBox uuidBox = Path.getPath(isof, "moov[0]/trak[0]/uuid");
+
+            MovieBox mbox = isof.getMovieBox();
+            if(mbox != null){
+                MovieHeaderBox mhb = mbox.getMovieHeaderBox();
+                if(mhb != null){
+                    recordStartedTimer = mhb.getCreationTime();
+                }
+            }
+            
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(new ByteArrayInputStream(uuidBox.getData()));
+
+            NodeList childs = doc.getDocumentElement().getChildNodes();
+            for (int i = 0; i < childs.getLength(); i++) {
+                Node child = childs.item(i);
+                if (child.getNodeName().toLowerCase().contains(":spherical")) {
+                    spherical = true;
+                }
+            }
+            
+            
+        }
+        return new VideoMetadataDTO(canDownload, spherical, recordStartedTimer);
     }
 
 }
