@@ -614,8 +614,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         final String fleetName = fleetDTO.getName();
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
         EditCompetitorToBoatMappingsDialog dialog = new EditCompetitorToBoatMappingsDialog(sailingService, 
-                selectedLeaderboardName, raceColumnName, fleetName, raceName, stringMessages, 
-                errorReporter, new DialogCallback<List<CompetitorDTO>>() {
+                stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, 
+                raceName, false, new DialogCallback<List<CompetitorDTO>>() {
             @Override
             public void cancel() {
             }

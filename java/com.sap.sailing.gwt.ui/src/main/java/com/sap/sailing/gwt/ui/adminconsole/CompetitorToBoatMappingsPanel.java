@@ -54,8 +54,9 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
 
     private final BusyIndicator busyIndicator;
 
-    public CompetitorToBoatMappingsPanel(final SailingServiceAsync sailingService, final String leaderboardName,
-            final String raceColumnName, final String fleetName, final StringMessages stringMessages, final ErrorReporter errorReporter) {
+    public CompetitorToBoatMappingsPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
+            final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName, final String fleetName,
+            boolean enableChangeActions) {
         super();
         this.sailingService = sailingService;
         this.leaderboardName = leaderboardName;
@@ -75,7 +76,9 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
                 }
             }
         });
-        competitorTable.getTable().addColumn(raceActionColumn, stringMessages.actions());
+        if (enableChangeActions) {
+            competitorTable.getTable().addColumn(raceActionColumn, stringMessages.actions());
+        }
         
         refreshableBoatSelectionModel = boatTable.getSelectionModel();
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
@@ -114,7 +117,10 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
                 return selectedBoat.equals(selectedCompetitor.getBoat());
             }
         };
-        boatListHandlerRegistration = refreshableBoatSelectionModel.addSelectionChangeHandler(boatListHandler);
+        if (enableChangeActions) {
+            // boat selection changes should only have an effect in case the 'actions' are enabled
+            boatListHandlerRegistration = refreshableBoatSelectionModel.addSelectionChangeHandler(boatListHandler);
+        }
 
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {

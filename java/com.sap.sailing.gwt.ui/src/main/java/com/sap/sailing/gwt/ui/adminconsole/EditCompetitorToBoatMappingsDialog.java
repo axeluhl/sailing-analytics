@@ -16,6 +16,7 @@ public class EditCompetitorToBoatMappingsDialog extends DataEntryDialog<List<Com
     private final String leaderboardName;
     private final String raceColumnName;
     private final String fleetName;
+    private final boolean enableActions;
 
     protected static class CompetitorsValidator implements Validator<List<CompetitorDTO>> {
         public CompetitorsValidator() {
@@ -28,9 +29,9 @@ public class EditCompetitorToBoatMappingsDialog extends DataEntryDialog<List<Com
         }
     }
         
-    public EditCompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, String leaderboardName, 
-            final String raceColumnName, final String fleetName, String raceName, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, DialogCallback<List<CompetitorDTO>> callback) {
+    public EditCompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages, 
+            final ErrorReporter errorReporter, String leaderboardName, final String raceColumnName, final String fleetName,
+            String raceName, boolean enableActions, DialogCallback<List<CompetitorDTO>> callback) {
         super(stringMessages.actionEditCompetitorToBoatAssignmentsForRace(raceName),
                 null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
         this.sailingService = sailingService;
@@ -39,6 +40,7 @@ public class EditCompetitorToBoatMappingsDialog extends DataEntryDialog<List<Com
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
+        this.enableActions = enableActions;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class EditCompetitorToBoatMappingsDialog extends DataEntryDialog<List<Com
     @Override
     protected Widget getAdditionalWidget() {
         CompetitorToBoatMappingsPanel competitorPanel = new CompetitorToBoatMappingsPanel(sailingService,
-                leaderboardName, raceColumnName, fleetName, stringMessages, errorReporter);
+                stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, enableActions);
 
         return competitorPanel; 
     }
