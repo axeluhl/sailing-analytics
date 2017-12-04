@@ -16,6 +16,8 @@
 * [Use Cases](#use cases)
 * [Algorithm for Composite Realm](#algorithm-bool-haspermission-wildcardpermission-permission-for-composite-realm)
 * [Migration](#migration)
+* [Implementation Details](#implementation-details)
+* [TODOs](#todos)
 
 ## Introduction
 
@@ -201,3 +203,64 @@ With such an extensive existing system as the Sailing Analytics Suite, migration
 Another challenge besides the code changes is the data migration. For every existing data object an ACL has to be created and filled with the right permissions so the users do not notice a big change.
 
 Besides creating an ACL for every data objects that is access controlled, an owner has to be defined for each existing data object, so that in combination with the ACLs no user loses permissions they need to have. In order to do this, where will have to be a script that associates all data objects on a server with a tenant and a specific user as owner (e.g. on the archive all data objects are associated with the tenant “archive” and owned by the user “Axel”). Thereafter, the users on the server are assigned their respective role.
+
+**Role Migration**
+
+Following roles have to be migrated to dynamic roles. Beforehand they were hard coded in the SailingPermissionsForRoleProvider class. However, aside from the admin role, all roles listed here are only containing permissions that are checked in the frontend for showing/hiding tabs in the different menus.
+
+* admin
+  * "*"
+* eventmanager
+  * "manage_media"
+  * "manage_mark_passings"
+  * "manage_mark_positions"
+  * "manage_all_competitors"
+  * "manage_course_layout"
+  * "manage_device_configuration"
+  * "manage_events"
+  * "manage_igtimi_accounts"
+  * "manage_leaderboard_groups"
+  * "manage_leaderboards"
+  * "manage_leaderboard_results"
+  * "manage_racelog_tracking"
+  * "manage_regattas"
+  * "manage_result_import_urls"
+  * "manage_structure_import_urls"
+  * "manage_tracked_races"
+  * "manage_wind"
+  * "event"
+  * "regatta"
+  * "leaderboard"
+  * "leaderboard_group"
+* mediaeditor
+  * "manage_media"
+* moderator
+  * "can_replay_during_live_races"
+
+## Implementation Details
+
+Access control relevant objects are stored in the AccessControlStore, while user related objects are stored in the user, i.e. the UserStore. Tenants are currently stored as UserGroups in the user store. The algorithm outlined above is implemented in the PermissionChecker, which is one of the most central classes in the permission system. Therefrom it should be possible to find all other relevant classes. Other relevant classes include the AbstractCompositeAuthorizingRealm that implements permission checking in Shiro. Therefor it uses the PermissionChecker and is connected to the UserStore and the AccessControlStore. Furthermore the RolePermissionModel implements how roles imply permissions. The RolePermissionModel as well as the parameterization of roles need more work and are just a rough sketch. The UserManagementService exposes most of the access control relevant parts to the frontend. It works through the SecurityService with the AccessControlStore and the UserStore. Permission checking in the frontend is also done with the PermissionChecker. To ease the creation of WildcardPermissions, a PermissionBuilder was introduced that also needs some more work. All access control relevant UI parts can be found in the "Advanced" tab under "User management" and "Tenant management". A further tab "Access Control Management" should be introduced. Unit tests can be found in the package com.sap.sse.security.test.
+
+## TODOs
+
+Dump of TODOs. More structured in Bugzilla.
+
+* Ownership/Access control list as expandable column in all access controlled data object tables
+* Permission checking for every domain data object type
+* Changing ownership (incl. replication)
+* Masterdataimport
+* Tenant management UI
+  * Tenant in create dialog check if tenant exists (red outline of text input field)
+  * Refresh tenant selection in tenant list on the left correctly
+  * String messages
+* User management UI
+  * Auto complete for roles and permissions
+* Access control list / Roles / Ownership UI
+* User role for editing own user parametrized by user name
+* Do we want to throw unauthorized exceptions or how should this work? (See addUserToTenant or removeUserFromTenant) / UnauthorizedException handling (i.e. popup that shows some text)
+* Create ownerships from config / Server-wide default owner and default tenant owner
+* Create test setup for final test
+* Button to transfer ownership of all objects from one user/tenant to another user/tenant (chgroup recursive?)
+* Rework meta permissions (rework to also check all permissions that are granted or revoked?)
+* Permission reloading without site refresh / Frontend update elements that require permission when permissions change (Refresh call on panels)
+* Default tenant input field in login popup

@@ -191,7 +191,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * is empty.
      */
     private void initEmptyStore() {
-        if (Util.isEmpty(store.getUsers())) {
+        if (!store.hasUsers()) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
