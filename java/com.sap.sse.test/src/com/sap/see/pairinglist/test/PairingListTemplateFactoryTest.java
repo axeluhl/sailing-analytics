@@ -64,8 +64,7 @@ public class PairingListTemplateFactoryTest {
     @Test
     public void testGeneration() {
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
-        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18),3);
-        System.out.println(Arrays.deepToString(example1.getPairingListTemplate()));
+        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18),0);
         PairingListTemplate example6 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 14),0);
         PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(100, 6, 18),0);
         PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30),0);
@@ -86,6 +85,21 @@ public class PairingListTemplateFactoryTest {
         }
         System.out.println(example1.getQuality());
         */
+    }
+    
+    @Test
+    public void testMultiplyFlights() {
+        final int flightCount = 15;
+        final int groupCount = 3;
+        final int competitorCount = 18;                
+        final int multiplier = 2;
+        
+        PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
+        PairingListTemplate example = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flightCount, groupCount, competitorCount), multiplier);
+        
+        for (int groupIndex = 0; groupIndex < flightCount * groupCount; groupIndex = groupIndex + (groupCount * (multiplier + 1))) {
+            assertArrayEquals(example.getPairingListTemplate()[groupIndex], example.getPairingListTemplate()[groupIndex + groupCount]);
+        }
     }
    
     
