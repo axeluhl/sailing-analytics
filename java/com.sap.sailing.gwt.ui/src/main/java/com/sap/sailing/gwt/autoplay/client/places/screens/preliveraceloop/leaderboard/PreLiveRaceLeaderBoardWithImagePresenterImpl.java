@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -110,7 +111,8 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
         leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings, true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
-                false, null, false, null, false, true, false, false, false,new SixtyInchLeaderBoardStyle(false));
+                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(false),
+                FlagImageResolverImpl.get());
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
 

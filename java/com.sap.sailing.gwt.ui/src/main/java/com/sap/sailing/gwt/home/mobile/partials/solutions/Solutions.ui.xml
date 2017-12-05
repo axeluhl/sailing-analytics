@@ -5,10 +5,11 @@
         xmlns:sb="urn:import:com.sap.sailing.gwt.home.shared.partials.storebadges">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="res_local" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
     <a:Accordion>
         <a:item>
             <s:SolutionsItem title="{i18n.sapInSailing}"
-                    imageUrl="images/mobile/solutions-sap-in-sailing.jpg" showInitial="true">
+                    image="{res_local.sapInSailing}" showInitial="true">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -60,7 +61,7 @@
         </a:item>
         <a:item>
             <s:SolutionsItem title="{i18n.sapSailingAnalyticsTitle}"
-                    imageUrl="images/mobile/solutions-sap-trimmed.png" showInitial="false">
+                    image="{res_local.sapTrimmed}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -78,7 +79,7 @@
         </a:item>
         <a:item>
             <s:SolutionsItem title="{i18n.sapSailingRaceManager}"
-                    imageUrl="images/mobile/solutions-race.png" showInitial="false">
+                    image="{res_local.race}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -94,7 +95,7 @@
         </a:item>
         <a:item>
             <s:SolutionsItem title="{i18n.sapSailInSight}"
-                    imageUrl="images/mobile/solutions-sap-sailing-insight.png" showInitial="false">
+                    image="{res_local.sapSailingInsight}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -111,7 +112,7 @@
         </a:item>
         <a:item>
             <s:SolutionsItem title="{i18n.sapSailingBuoyPinger}"
-                    imageUrl="images/mobile/solutions-sap-sailing-buoy-pinger.png" showInitial="false">
+                    image="{res_local.sapSailingBuoyPinger}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -127,7 +128,7 @@
         </a:item>
         <a:item>
             <s:SolutionsItem title="{i18n.postRaceAnalytics}"
-                    imageUrl="images/mobile/solutions-post-trimmed.png" showInitial="false">
+                    image="{res_local.postTrimmed}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -142,7 +143,7 @@
         </a:item>
         <a:item>
             <s:SolutionsItem title="{i18n.strategySimulator}"
-                    imageUrl="images/mobile/solutions-simulator-trimmed.png" showInitial="false">
+                    image="{res_local.simulatorTrimmed}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>

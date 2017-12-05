@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -49,7 +50,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     private final EventSeriesViewDTO series;
 
     public SeriesActivity(AbstractSeriesTabPlace place, EventSeriesViewDTO series, SeriesClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
+            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay, FlagImageResolver flagImageResolver) {
         this.currentPlace = place;
         this.series = series;
         this.ctx = new SeriesContext(place.getCtx());
@@ -61,7 +62,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
                     clientFactory.getSailingService(), //
                     asyncActionsExecutor, //
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds), //
-                    clientFactory.getErrorReporter()));
+                    clientFactory.getErrorReporter(), flagImageResolver));
 
         }
         

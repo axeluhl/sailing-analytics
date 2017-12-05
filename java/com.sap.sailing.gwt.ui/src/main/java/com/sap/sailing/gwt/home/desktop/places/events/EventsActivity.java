@@ -10,21 +10,21 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
+import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class EventsActivity extends AbstractActivity {
+public class EventsActivity extends AbstractActivity implements ProvidesNavigationPath{
 
     private final EventsClientFactory clientFactory;
     private final EventsPlace place;
     private final DesktopPlacesNavigator homePlacesNavigator;
+    private NavigationPathDisplay navigationPathDisplay;
 
-    public EventsActivity(EventsPlace place, EventsClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
+    public EventsActivity(EventsPlace place, EventsClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.clientFactory = clientFactory;
         this.place = place;
         this.homePlacesNavigator = homePlacesNavigator;
-        
-        initNavigationPath(navigationPathDisplay);
     }
     
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
@@ -35,6 +35,7 @@ public class EventsActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        initNavigationPath(navigationPathDisplay);
         panel.setWidget(clientFactory.createBusyView());
         clientFactory.getDispatch().execute(new GetEventListViewAction(),
                 new ActivityCallback<EventListViewDTO>(clientFactory, panel) {
@@ -46,5 +47,10 @@ public class EventsActivity extends AbstractActivity {
                 eventsView.setEvents(eventListView);
             }
         });
+    }
+
+    @Override
+    public void setNavigationPathDisplay(NavigationPathDisplay navigationPathDisplay) {
+        this.navigationPathDisplay = navigationPathDisplay;
     }
 }

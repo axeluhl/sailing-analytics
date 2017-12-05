@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -64,11 +65,11 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller,LeaderBoardStyle style) {
+            boolean enableSyncScroller,LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller,style);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller,style, flagImageResolver);
         assert preSelectedRace != null;
         this.preSelectedRace = preSelectedRace;
         this.showRaceRankColumn = settings.isShowRaceRankColumn();
