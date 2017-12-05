@@ -564,9 +564,12 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     
     private int[][] multiplyFlights(int[][] bestPLT, int flightCount, int groupCount, int competitorCount) {
         int[][] result = new int[(flightCount * groupCount) * (flightMultiplier + 1)][competitorCount / groupCount];
-        for (int i = 0; i < bestPLT.length; i++) {
+       
+        for (int flightIndex = 0; flightIndex < flightCount; flightIndex++) {
             for (int x = 0; x <= flightMultiplier; x++) {
-                result[i * (flightMultiplier + 1) + x] = bestPLT[i];
+                for (int groupIndex = 0; groupIndex < groupCount; groupIndex++) {
+                    result[(flightIndex * groupCount * (flightMultiplier + 1) + groupIndex) + x * groupCount] = bestPLT[flightIndex * groupCount + groupIndex];
+                }
             }
         }
         return result;

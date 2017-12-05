@@ -64,7 +64,8 @@ public class PairingListTemplateFactoryTest {
     @Test
     public void testGeneration() {
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
-        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18),0);
+        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18),3);
+        System.out.println(Arrays.deepToString(example1.getPairingListTemplate()));
         PairingListTemplate example6 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 14),0);
         PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(100, 6, 18),0);
         PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30),0);
