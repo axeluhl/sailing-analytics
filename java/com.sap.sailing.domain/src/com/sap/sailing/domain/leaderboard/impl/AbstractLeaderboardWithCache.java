@@ -513,7 +513,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     private Integer getTotalRaces(Competitor competitor, LeaderboardRowDTO row, TimePoint timePoint) {
         int amount = 0;
         for (RaceColumn raceColumn : getRaceColumns()) {
-            //reuse calculations already done earlier
+            // reuse calculations already done earlier
             LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(raceColumn.getName());
             if (entry.netPoints != null) {
                 if (entry.reasonForMaxPoints.equals(MaxPointsReason.NONE)
@@ -539,36 +539,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
-        
-        // private int computeNumberOfRacesCompleted(LeaderboardRowDTO object) {
- 
-        // int racesSailedInRow = 0;
-        // for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
-        // LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
-        // if (entryBefore.netPoints != null) {
-        // if (entryBefore.reasonForMaxPoints.equals(MaxPointsReason.NONE)
-        // || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
-        // entryBefore.reasonForMaxPoints)) {
-        // if (raceColumn instanceof MetaLeaderboardRaceColumnDTO) {
-        // MetaLeaderboardRaceColumnDTO metaRaceColumn = (MetaLeaderboardRaceColumnDTO) raceColumn;
-        // /**
-        // * Assumption here is, that no BasicRaceDto is set, if the race was not finished
-        // */
-        // for (BasicRaceDTO actualRace : metaRaceColumn.getRaceList()) {
-        // if (actualRace.endOfRace != null) {
-        // GWT.debugger();
-        // racesSailedInRow++;
-        // }
-        // }
-        // } else {
-        // racesSailedInRow++;
-        // }
-        // }
-        // }
-        // }
-        // return racesSailedInRow;
-        // }
-        
         return amount;
     }
 
@@ -597,8 +567,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
         entryDTO.totalPointsCorrected = entry.isTotalPointsCorrected();
         entryDTO.netPoints = entry.getNetPoints();
-        //FIDNEM
-//        entryDTO.racesCompleted = 42;
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace == null ? null : trackedRace.getTrack(competitor);
