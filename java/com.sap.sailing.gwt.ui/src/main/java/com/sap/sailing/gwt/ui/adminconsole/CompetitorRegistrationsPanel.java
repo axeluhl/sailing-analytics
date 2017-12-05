@@ -97,15 +97,6 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                 registeredCompetitorsTable.openEditCompetitorDialog(competitorDTO);
             }
         });
-        addCompetitorWithoutBoatButton = new Button(stringMessages.add("competitor"));
-        addCompetitorWithoutBoatButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                CompetitorDTOImpl competitorDTO = new CompetitorDTOImpl();
-                competitorDTO.setBoat(null);
-                registeredCompetitorsTable.openEditCompetitorDialog(competitorDTO);
-            }
-        });
         addCompetitorWithBoatButton = new Button(stringMessages.add("competitor and boat"));
         addCompetitorWithBoatButton.addClickHandler(new ClickHandler() {
             @Override
