@@ -89,7 +89,7 @@ public class PairingListTemplateFactoryTest {
     
     @Test
     public void testMultiplyFlights() {
-        final int flightCount = 15;
+        final int flightCount = 14;
         final int groupCount = 3;
         final int competitorCount = 18;                
         final int multiplier = 2;
@@ -97,7 +97,7 @@ public class PairingListTemplateFactoryTest {
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
         PairingListTemplate example = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flightCount, groupCount, competitorCount), multiplier);
         
-        for (int groupIndex = 0; groupIndex < flightCount * groupCount; groupIndex = groupIndex + (groupCount * (multiplier + 1))) {
+        for (int groupIndex = 0; groupIndex < flightCount * groupCount; groupIndex = groupIndex + (groupCount * (multiplier))) {
             assertArrayEquals(example.getPairingListTemplate()[groupIndex], example.getPairingListTemplate()[groupIndex + groupCount]);
         }
     }

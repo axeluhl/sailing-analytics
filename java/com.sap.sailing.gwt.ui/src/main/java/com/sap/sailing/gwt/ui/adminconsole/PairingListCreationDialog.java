@@ -119,9 +119,13 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         applyToRacelogButton.ensureDebugId("ApplyToRacelogButton");
         cSVExportButton.getElement().getStyle().setMargin(3, Unit.PX);
         cSVExportButton.ensureDebugId("CSVExportButton");
+        if(!applyToRacelogButton.isEnabled()){
+            Label label=new Label("Registered Competitors are unequal to Competitors from Pairinglist!");
+            label.getElement().getStyle().setColor("red");
+            getRightButtonPannel().add(label);
+        }
         getRightButtonPannel().add(applyToRacelogButton);
         getRightButtonPannel().add(cSVExportButton);
-        // TODO: Implement Export in Racelog
         applyToRacelogButton.addClickHandler(new ClickHandler() {
 
             @Override

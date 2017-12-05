@@ -39,11 +39,19 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }else{
                 dummys=0;
             }
+            if(flightMultiplier<=1){
             this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
                     pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount()+dummys);
             this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
                     new int[pairingFrameProvider.getCompetitorsCount()+dummys][pairingFrameProvider.getCompetitorsCount()+dummys]));
             this.resetDummys(pairingListTemplate, pairingFrameProvider.getCompetitorsCount()+dummys);
+            }else{
+                this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount()/flightMultiplier,
+                        pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount()+dummys);
+                this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
+                        new int[pairingFrameProvider.getCompetitorsCount()+dummys][pairingFrameProvider.getCompetitorsCount()+dummys]));
+                this.resetDummys(pairingListTemplate, pairingFrameProvider.getCompetitorsCount()+dummys);
+            }
         } else {
             throw new IllegalArgumentException("Wrong arguments for creating a pairing list template: count of flights "
                     + "has to be greater than 0; count of groups has to be greater than 1; count of competitors has to "
@@ -147,7 +155,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         
         bestPLT = this.improveAssignment(bestPLT, flightCount, groupCount, competitorCount);
         bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitorCount);
-        if(flightMultiplier>0){
+        if(flightMultiplier>1){
             bestPLT=this.multiplyFlights(bestPLT,flightCount,groupCount,competitorCount);
         }
         
@@ -563,12 +571,12 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
     
     private int[][] multiplyFlights(int[][] bestPLT, int flightCount, int groupCount, int competitorCount) {
-        int[][] result = new int[(flightCount * groupCount) * (flightMultiplier + 1)][competitorCount / groupCount];
+        int[][] result = new int[((flightCount*flightMultiplier) * groupCount)][competitorCount / groupCount];
        
         for (int flightIndex = 0; flightIndex < flightCount; flightIndex++) {
-            for (int x = 0; x <= flightMultiplier; x++) {
+            for (int x = 0; x < flightMultiplier; x++) {
                 for (int groupIndex = 0; groupIndex < groupCount; groupIndex++) {
-                    result[(flightIndex * groupCount * (flightMultiplier + 1) + groupIndex) + x * groupCount] = bestPLT[flightIndex * groupCount + groupIndex];
+                    result[(flightIndex * groupCount * (flightMultiplier) + groupIndex) + x * groupCount] = bestPLT[flightIndex * groupCount + groupIndex];
                 }
             }
         }

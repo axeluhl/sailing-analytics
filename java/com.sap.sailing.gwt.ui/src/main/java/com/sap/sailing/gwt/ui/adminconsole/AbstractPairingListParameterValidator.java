@@ -17,8 +17,10 @@ public class AbstractPairingListParameterValidator implements Validator<PairingL
         
         if (valueToValidate.getCompetitorCount() < valueToValidate.getGroupCount()) {
             errorMessage = "Invalid competitor count";
-        } else if (valueToValidate.getFlightMultiplier() < 0) {
+        } else if (valueToValidate.getFlightMultiplier() < 1) {
             errorMessage = "Invalid flight multiplier";
+        } else if(valueToValidate.getFlightCount()%valueToValidate.getFlightMultiplier()!=0 &&valueToValidate.getFlightMultiplier()>0){
+            errorMessage= "Flightcount has to be a multiple of Flightmultiplier!";
         }
         
         return errorMessage;
