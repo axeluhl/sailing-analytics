@@ -10,10 +10,14 @@ import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -68,6 +72,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     final private RegattaAndRaceIdentifier raceIdentifier;
 
     private MediaServiceAsync mediaService;
+
+    private boolean remoteMp4WasStarted;
+    private boolean remoteMp4WasFinished;
+
+    private Button defaultTimeButton;
 
     public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
@@ -129,14 +138,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     native void addLoadMetadataHandler(MediaElement mediaElement) /*-{
-		var that = this;
-		mediaElement
-				.addEventListener(
-						'loadedmetadata',
-						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
-						});
-    }-*/;
+                                                                  var that = this;
+                                                                  mediaElement
+                                                                  .addEventListener(
+                                                                  'loadedmetadata',
+                                                                  function() {
+                                                                  that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
+                                                                  });
+                                                                  }-*/;
 
     public void loadedmetadata(MediaElement mediaElement) {
         mediaTrack.startTime = this.defaultStartTime;
@@ -167,7 +176,18 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(2, 1, infoLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
         startTimeBox = createTextBox(null);
-        formGrid.setWidget(3, 1, startTimeBox);
+        FlowPanel startTimePanel = new FlowPanel();
+        startTimePanel.add(startTimeBox);
+        defaultTimeButton = new Button(StringMessages.INSTANCE.resetStartTimeToDefault());
+        defaultTimeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                mediaTrack.startTime = defaultStartTime;
+                refreshUI();
+            }
+        });
+        startTimePanel.add(defaultTimeButton);
+        formGrid.setWidget(3, 1, startTimePanel);
         formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));
         durationBox = createTextBox(null);
         formGrid.setWidget(4, 1, durationBox);
@@ -214,11 +234,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 mediaTrack.mimeType = null;
             }
         }
+        remoteMp4WasStarted = false;
+        remoteMp4WasFinished = false;
         refreshUI();
     }
 
     protected void setUiEnabled(boolean isEnabled) {
         urlBox.setEnabled(isEnabled);
+        defaultTimeButton.setEnabled(isEnabled);
+        startTimeBox.setEnabled(isEnabled);
         getOkButton().setEnabled(isEnabled);
         if (isEnabled) {
             setCursor(Style.Cursor.AUTO);
@@ -228,14 +252,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     private native void registerNativeMethods() /*-{
-		var that = this;
-		window.youtubeMetadataCallback = function(metadata) {
-			var title = metadata.entry.media$group.media$title.$t;
-			var duration = metadata.entry.media$group.yt$duration.seconds;
-			var description = metadata.entry.media$group.media$description.$t;
-			that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
-		}
-    }-*/;
+                                                var that = this;
+                                                window.youtubeMetadataCallback = function(metadata) {
+                                                var title = metadata.entry.media$group.media$title.$t;
+                                                var duration = metadata.entry.media$group.yt$duration.seconds;
+                                                var description = metadata.entry.media$group.media$description.$t;
+                                                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
+                                                }
+                                                }-*/;
 
     /**
      * Inspired by https://developers.google.com/web-toolkit/doc/latest/tutorial/Xsite
@@ -243,30 +267,30 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
      * @param youtubeId
      */
     public native void loadYoutubeMetadata(String youtubeId) /*-{
-		var that = this;
-
-		//Create temporary script element.
-		window.youtubeMetadataCallbackScript = document.createElement("script");
-		window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
-				+ youtubeId
-				+ "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
-		document.body.appendChild(window.youtubeMetadataCallbackScript);
-
-		// Cancel meta data capturing after has 2-seconds timeout.
-		setTimeout(
-				function() {
-					//Remove temporary script element.
-					if (window != null
-							&& window.youtubeMetadataCallbackScript != null) {
-						document.body
-								.removeChild(window.youtubeMetadataCallbackScript);
-
-						delete window.youtubeMetadataCallbackScript;
-					}
-					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
-				}, 2000);
-
-    }-*/;
+                                                             var that = this;
+                                                             
+                                                             //Create temporary script element.
+                                                             window.youtubeMetadataCallbackScript = document.createElement("script");
+                                                             window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
+                                                             + youtubeId
+                                                             + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
+                                                             document.body.appendChild(window.youtubeMetadataCallbackScript);
+                                                             
+                                                             // Cancel meta data capturing after has 2-seconds timeout.
+                                                             setTimeout(
+                                                             function() {
+                                                             //Remove temporary script element.
+                                                             if (window != null
+                                                             && window.youtubeMetadataCallbackScript != null) {
+                                                             document.body
+                                                             .removeChild(window.youtubeMetadataCallbackScript);
+                                                             
+                                                             delete window.youtubeMetadataCallbackScript;
+                                                             }
+                                                             that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
+                                                             }, 2000);
+                                                             
+                                                             }-*/;
 
     public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
         setUiEnabled(true);
@@ -293,7 +317,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
             if (mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama) {
-                processMp4(mediaTrack, infoLabel);
+                if (!remoteMp4WasStarted) {
+                    processMp4(mediaTrack);
+                } else if (remoteMp4WasFinished) {
+                    infoLabel.setWidget(new Label(mediaTrack.mimeType.name()));
+                } else {
+                    infoLabel.setWidget(new Label(stringMessages.processingMP4()));
+                }
             } else {
                 infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             }
@@ -310,40 +340,49 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         }
     }
 
-    private void processMp4(MediaTrack mediaTrack, SimplePanel infoLabel2) {
+    private void processMp4(MediaTrack mediaTrack) {
         this.setUiEnabled(false);
+        remoteMp4WasStarted = true;
+        remoteMp4WasFinished = false;
         infoLabel.setWidget(new Label("TODO Please wait, analyzing"));
-        if (mediaTrack.startTime == null) {
-            mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+        mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
 
-                @Override
-                public void onSuccess(VideoMetadataDTO result) {
-                    setUiEnabled(true);
-                    if (!result.isDownloadable()) {
-                        Window.alert("Could not download file " + mediaTrack.url);
-                        manualMimeTypeSelection(mediaTrack);
-                    } else {
-                        mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
-                        // check for startime here
-                    }
-                }
+            @Override
+            public void onSuccess(VideoMetadataDTO result) {
+                setUiEnabled(true);
+                remoteMp4WasFinished = true;
+                mp4MetadataResult(result);
+            }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    setUiEnabled(true);
-                    manualMimeTypeSelection(mediaTrack);
-                }
-            });
+            @Override
+            public void onFailure(Throwable caught) {
+                setUiEnabled(true);
+                remoteMp4WasFinished = true;
+                manualMimeTypeSelection(caught.getMessage(), mediaTrack);
+            }
+        });
+    }
+
+    protected void mp4MetadataResult(VideoMetadataDTO result) {
+        if (!result.isDownloadable()) {
+            Window.alert("Could not download file " + mediaTrack.url);
+            manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
-            manualMimeTypeSelection(mediaTrack);
+            mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
+            mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
+            refreshUI();
         }
     }
 
-    private void manualMimeTypeSelection(MediaTrack mediaTrack) {
+    private void manualMimeTypeSelection(String message, MediaTrack mediaTrack) {
+        FlowPanel fp = new FlowPanel();
+        if (message != null) {
+            fp.add(new Label(message));
+        }
+
         ListBox mimeTypeListBox = createListBox(false);
         mimeTypeListBox.addItem(MimeType.mp4.name());
         mimeTypeListBox.addItem(MimeType.mp4panorama.name());
-        infoLabel.setWidget(mimeTypeListBox);
         mimeTypeListBox.addChangeHandler(new ChangeHandler() {
 
             @Override
@@ -351,6 +390,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
             }
         });
+        fp.add(mimeTypeListBox);
+        infoLabel.setWidget(fp);
     }
 
     @Override
