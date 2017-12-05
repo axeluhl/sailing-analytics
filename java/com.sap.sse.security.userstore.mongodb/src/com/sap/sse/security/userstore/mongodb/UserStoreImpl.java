@@ -470,6 +470,11 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
+    public boolean hasUsers() {
+        return !users.isEmpty();
+    }
+
+    @Override
     public User getUserByName(String name) {
         final User result;
         if (name == null) {

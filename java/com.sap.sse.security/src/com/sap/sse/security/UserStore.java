@@ -38,6 +38,8 @@ public interface UserStore extends Named {
     void deleteTenantWithUserGroup(UUID id) throws TenantManagementException, UserGroupManagementException;
     
     Iterable<User> getUsers();
+    
+    boolean hasUsers();
 
     /**
      * The user with that {@link User#getName() name} or {@code null} if no such user exists
