@@ -89,7 +89,7 @@ Miscellaneous auxiliary variables (time stamp, script name, etc.)
 lib/utils.sh:
 Functions for the output of colored messages, logging and sourcing of remaining bash files
 
-1.2 Szenarios
+1.2 Scenarios
 
 Scenarios are encapsulated execution units that are orchestrated by AWS and instance-specific functions 
 to automate a specific use case.
