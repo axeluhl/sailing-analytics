@@ -52,21 +52,21 @@ The inital idea for this document is based on the existing Shiro RBAC system tha
 
 It is common place in cloud applications where multiple groups of users that each belong to some kind of organization work in one system to summarize these groups of users as tenants. The tenants represent the organizations and---if a hierarchy is allowed---the sub-organizations working in the system. In the Sailing Analytics the organizations could be SAP in general (e.g. archive server), sailing clubs, events like the Travemünder Woche or in the future private users.
 
-One idea behind tenants is to encapsulate organizations so users of one organization cannot work with data objects from another organization if they are not granted the permissions explicitly. Furthermore, tenants are used to group data objects so users can have access to all data objects of a tenant and do not have to be granted every permission explicitly. Additional to data objects, tenants are also associated with roles. Thus, granting a role associated with a tenant is equivalent to granting the role for each data object which is associated with the tenant. 
+One idea behind tenants is to encapsulate organizations so users of one organization cannot work with data objects from another organization if they are not granted the permissions explicitly. Furthermore, tenants are used to group data objects so users can have access to all data objects of a tenant and do not have to be granted every permission explicitly. Additional to data objects, tenants are also associated with roles. Thus, assigning to a user a role associated with a tenant is equivalent to granting the permissions implied by that role for each data object which is associated with (owned by) the tenant. 
 
 In the Sailing Analytics the set of roles for each tenant may, apart from certain exceptions, represent the subjects a user can adopt. A constraint could be introduced that only allows the roles for one tenant as a subject.
 
-Tenants pose an UI problem, because it has to be clear to the user in which tenant he is currently working. The user has to be member of the tenant he is working for. Currently the best idea is to let the user select a tenant when he logs in and have default tenants for event and club servers that correspond to the event or club. Every following action is performed as that tenant.
+Tenants pose a UI problem because it has to be clear to the user in which tenant he/she is currently working. The user has to be member of the tenant he/she is working for. Currently the best idea is to let the user select a tenant when he/she logs in and have default tenants for event and club servers that correspond to the event or club. Every following action is performed as that tenant. In particular, when creating new objects then that tenant will be set as the new object's tenant owner.
 
-In some cases, it might be necessary to transfer the ownership to another tenant/user. Thus, the owner should not be final but changeable.
+In some cases, it might be necessary to transfer the ownership to another tenant/user. Thus, ownership should not be final but changeable.
 
-### Users or Tenants as Owners
+### Users and/or Tenants as Owners
 
-A problem with the tenant approach is that users could have no permissions to e.g. remove data objects that they have just created on accident, because the remove permission is reserved to admins of the tenant which a user that has create permissions may not be.
+A problem with the tenant approach is that users could have no permissions to e.g. remove data objects that they have just created by accident, because the remove permission is reserved to admins of the tenant which a user who has create permissions may not be.
 
-Four solutions come to mind. (1) The creator of a data object could always be granted the permission to remove the data object explicitly. (2) Moreover, the log where the creation was logged could be crawled to find the user that created the data object and override the permission system when in a certain timespan. 
+Four solutions come to mind. (1) The creator of a data object could always be granted the permission to remove the data object explicitly. (2) Moreover, the log where the creation was logged could be crawled to find the user that created the data object and override the permission system when in a certain timespan.
 
-(3) There is an alternative approach to ownership. In this approach, a single user would own a data object so he can do everything with it. The tenant would then be a kind of secondary owner or group in Linux terms. This solves the problem that users could have no permissions to e.g. remove data objects that they have just created on accident. However, it also introduces a second layer of ownership. (4) Only grant the create permission when the user also has the corresponding delete permission.
+(3) There is an alternative approach to ownership. In this approach, a single user would own a data object so he can do everything with it. The tenant would then be a kind of secondary owner or group in Linux terms. This solves the problem that users could have no permissions to e.g. remove data objects that they have just created by accident. However, it also introduces a second layer of ownership. (4) Only grant the create permission when the user also has the corresponding delete permission.
 
 Approaches (2) and (4) are impractical. (2) is too complicated. The user would need delete permission for everything in the tenant for (4) to work.
 
