@@ -2024,6 +2024,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             return row.competitor.getTimeOnTimeFactor();
         }
     }
+    
+    private static class TotalScoredRacesCountField implements LegDetailField<Integer> {
+        @Override
+        public Integer get(LeaderboardRowDTO row) {
+            return row.totalScoredRaces;
+        }
+    }
 
     private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements LegDetailField<Double> {
         @Override
@@ -2071,13 +2078,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                         new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE,
                         RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_SCORED_RACE_COUNT,
-                new TotalRaceColumn(DetailType.TOTAL_SCORED_RACE_COUNT,
-                        new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
-                new TotalTimeColumn(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
-                        new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        
+        result.put(DetailType.TOTAL_SCORED_RACE_COUNT, new IntegerDetailTypeColumn(DetailType.TOTAL_SCORED_RACE_COUNT,
+                new TotalScoredRacesCountField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         return result;
     }
 
