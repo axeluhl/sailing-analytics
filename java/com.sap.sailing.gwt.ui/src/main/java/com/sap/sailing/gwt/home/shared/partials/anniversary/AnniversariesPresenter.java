@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
  */
 public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDTO> {
 
-    private static final String ANNOUNCEMENT_ICON = "images/mobile/icon-bottle-white.svg";
+    private static final String ANNOUNCEMENT_ICON = AnniversaryResources.INSTANCE.bottle().getSafeUri().asString();
     private static final StringMessages I18N = StringMessages.INSTANCE;
     private static final NumberFormat COUNT_FORMAT = NumberFormat.getFormat("#,###");
 

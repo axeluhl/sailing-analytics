@@ -1,13 +1,13 @@
 package com.sap.sse.security.ui.authentication;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sse.gwt.common.CommonIcons;
 
 /**
  * Resources used by the authentication framework.
  */
-public interface UserManagementResources extends ClientBundle {
+public interface UserManagementResources extends CommonIcons {
     
     public static final UserManagementResources INSTANCE = GWT.create(UserManagementResources.class);
 

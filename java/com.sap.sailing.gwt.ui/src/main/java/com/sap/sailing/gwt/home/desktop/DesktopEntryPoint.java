@@ -19,8 +19,6 @@ import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
-import com.sap.sse.gwt.resources.CommonControlsCSS;
-import com.sap.sse.gwt.resources.Highcharts;
 
 /**
  * Desktop/tablet EntryPoint for the Home module. Be aware that this EntryPoint isn't directly started but instead the
@@ -33,9 +31,6 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, Des
     public void doOnModuleLoad() {
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());
         
-        CommonControlsCSS.ensureInjected();
-        Highcharts.ensureInjected();
-
         ServerConfigurationServiceAsync serverConfigService = GWT.create(ServerConfigurationService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) serverConfigService, RemoteServiceMappingConstants.serverConfigurationServiceRemotePath);
        

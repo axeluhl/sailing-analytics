@@ -53,6 +53,7 @@ import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProv
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
@@ -94,6 +95,12 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     private RegattaRacesTabViewFilterPresenter filterPresenter;
     private Navigation currentlySelectedTab = Navigation.SORT_LIST_FORMAT;
     private RefreshManager refreshManager;
+
+    private final FlagImageResolver flagImageResolver;
+    
+    public RegattaRacesTabView(FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
+    }
     
     @Override
     public void setPresenter(Presenter currentPresenter) {
@@ -199,7 +206,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> windSourcesCountColumn = RaceListColumnFactory.getWindSourcesCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
-        private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn(flagImageResolver);
         private boolean hasWind;
         private boolean hasVideos;
         private boolean hasAudios;
