@@ -6821,7 +6821,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             @Override
             public Iterable<Fleet> getGroups(RaceColumn flight) {
-                // TODO fix this
+                // FIXME
                 return (Iterable<Fleet>) leaderboard.getRaceColumnByName(flight.getName()).getFleets();
             }
 
