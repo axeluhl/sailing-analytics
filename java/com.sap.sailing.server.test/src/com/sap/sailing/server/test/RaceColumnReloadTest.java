@@ -85,7 +85,7 @@ public class RaceColumnReloadTest {
         this.service = new RacingEventServiceImpl();
 
         objectFactory = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
-        
+
         final String boatClassName = "49er";
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = service.getBaseDomainFactory();
@@ -118,12 +118,12 @@ public class RaceColumnReloadTest {
                 /* millisecondsOverWhichToAverageSpeed */10000));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
-        
+
         raceLogIdentifier = raceColumn.getRaceLogIdentifier(defaultFleet);
         raceLog = raceColumn.getRaceLog(defaultFleet);
 
         trackedRace.attachRaceLog(raceLog);
-        
+
         mongoStoreVisitor = new MongoRaceLogStoreVisitor(raceLogIdentifier, objectFactory);
 
         TimePoint t1 = MillisecondsTimePoint.now();
@@ -147,7 +147,7 @@ public class RaceColumnReloadTest {
                         DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     }
-    
+
     @Test
     public void testWindAddedOnlyViaDB() throws InterruptedException {
         AtomicInteger seenWindEvents = new AtomicInteger(0);
@@ -157,16 +157,16 @@ public class RaceColumnReloadTest {
                 seenWindEvents.incrementAndGet();
             }
         });
-        AtomicInteger raceCommiteeSeenWindEvents = new AtomicInteger(0);        
-        trackedRace.addListener(new AbstractRaceChangeListener(){
+        AtomicInteger raceCommiteeSeenWindEvents = new AtomicInteger(0);
+        trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override
             public void windDataReceived(Wind wind, WindSource windSource) {
-                if(WindSourceType.RACECOMMITTEE == windSource.getType()){
+                if (WindSourceType.RACECOMMITTEE == windSource.getType()) {
                     raceCommiteeSeenWindEvents.incrementAndGet();
                 }
             }
         });
-        
+
         mongoStoreVisitor.visit(testWindEvent1);
         mongoStoreVisitor.visit(testWindEvent2);
         Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
@@ -175,8 +175,7 @@ public class RaceColumnReloadTest {
         Assert.assertEquals(2, seenWindEvents.get());
         Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
     }
-    
-    
+
     @Test
     public void testWindAddedAndDbWithDifferentAddedReloadWithTrackedRace() throws InterruptedException {
         AtomicInteger seenWindEvents = new AtomicInteger(0);
@@ -186,24 +185,24 @@ public class RaceColumnReloadTest {
                 seenWindEvents.incrementAndGet();
             }
         });
-        AtomicInteger raceCommiteeSeenWindEvents = new AtomicInteger(0);        
-        trackedRace.addListener(new AbstractRaceChangeListener(){
+        AtomicInteger raceCommiteeSeenWindEvents = new AtomicInteger(0);
+        trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override
             public void windDataReceived(Wind wind, WindSource windSource) {
-                System.out.println("Wind data " +  wind + " " + windSource);
-                if(WindSourceType.RACECOMMITTEE == windSource.getType()){
+                System.out.println("Wind data " + wind + " " + windSource);
+                if (WindSourceType.RACECOMMITTEE == windSource.getType()) {
                     raceCommiteeSeenWindEvents.incrementAndGet();
                 }
             }
-            
+
             @Override
             public void raceLogAttached(RaceLog raceLog) {
                 System.out.println("RaceLog attached");
             }
         });
-        
+
         raceLog.add(testWindEvent1);
-        
+
         Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
 
         mongoStoreVisitor.visit(testWindEvent2);
@@ -295,6 +294,5 @@ public class RaceColumnReloadTest {
         raceColumn.reloadRaceLog(defaultFleet);
         Assert.assertEquals(2, seenWindEvents.get());
     }
-
 
 }
