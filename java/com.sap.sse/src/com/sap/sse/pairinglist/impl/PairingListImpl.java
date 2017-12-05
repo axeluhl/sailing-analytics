@@ -26,13 +26,12 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         final int[][] competitorIndices = pairingListTemplate.getPairingListTemplate();
         final int flightIndex = Util.indexOf(competitionFormat.getFlights(), flight);
         final int groupIndex = Util.indexOf(competitionFormat.getGroups(flight), group);
-        final int[] competitorIndicesInRace = new int[competitionFormat.getCompetitorsCount() / competitionFormat.getGroupsCount()];
+        final ArrayList<Integer> competitorIndicesInRace = new ArrayList<>();
         /*
         System.arraycopy(competitorIndices[flightIndex], groupIndex * competitorIndicesInRace.length,
                 competitorIndicesInRace, 0, competitorIndicesInRace.length);*/
-        
-        for(int i = competitorIndicesInRace.length; i>0; i--) {
-            competitorIndicesInRace[i-1] = competitorIndices[flightIndex*groupIndex+groupIndex][i-1];
+        for (Integer integer : competitorIndices[flightIndex*groupIndex+groupIndex]) {
+            competitorIndicesInRace.add(integer);
         }
         
         final List<Competitor> result = new ArrayList<>();
