@@ -57,9 +57,12 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getContextDefinition().getLeaderboardName(),
                 getPlace().getLastRace().getRaceName()));
 
-        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null, false, false,
-                 false,
-                 false, true);
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
+                /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
+                /* showAddedScores */ false, /* showCompetitorSailIdColumn */ false,
+                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
+                /* showRaceRankColumn */ true);
 
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
 

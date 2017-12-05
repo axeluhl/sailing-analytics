@@ -72,10 +72,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
-            Long delayBetweenAutoAdvancesInMilliseconds, 
-            boolean showAddedScores,
-            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
-            boolean isCompetitorNationalityColumnVisible) {
+            Long delayBetweenAutoAdvancesInMilliseconds, boolean showAddedScores, boolean showCompetitorSailIdColumn,
+            boolean showCompetitorFullNameColumn, boolean isCompetitorNationalityColumnVisible) {
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
         this.overallDetailsToShow.setValues(overallDetailsToShow);

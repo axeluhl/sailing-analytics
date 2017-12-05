@@ -93,8 +93,12 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
 
         RegattaAndRaceIdentifier liveRace = getSlideCtx().getPreLiveRace();
 
-        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null,
-                false, false, false, false, false);
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
+                /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
+                /* showAddedScores */ false, /* showCompetitorSailIdColumn */ false,
+                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
+                /* showRaceRankColumn */ false);
 
         GWT.log("event " + getSlideCtx().getEvent());
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);

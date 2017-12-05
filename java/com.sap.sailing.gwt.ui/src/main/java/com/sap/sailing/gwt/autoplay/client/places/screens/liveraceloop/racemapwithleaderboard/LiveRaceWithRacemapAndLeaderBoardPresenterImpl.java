@@ -148,8 +148,12 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             view.showErrorNoLive(this, panel, new IllegalStateException("No race is live"));
             return;
         }
-        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null,
-                false, false, false, false, true);
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
+                /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
+                /* showAddedScores */ false, /* showCompetitorSailIdColumn */ false,
+                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
+                /* showRaceRankColumn */ true);
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
