@@ -112,9 +112,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final EventsRefresher eventsRefresher;
     private final HandleTabSelectable handleTabSelectable;
     
-    @SuppressWarnings("unchecked")
     public EventListComposite(final SailingServiceAsync sailingService, final UserDTO user, final ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final HandleTabSelectable handleTabSelectable, final StringMessages stringMessages) {
+            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final HandleTabSelectable handleTabSelectable,
+            final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -197,7 +197,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventTable = createEventTable(user);
         eventTable.ensureDebugId("EventsCellTable");
         filterTextbox.setTable(eventTable);
-        refreshableEventSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
+        @SuppressWarnings("unchecked")
+        final RefreshableMultiSelectionModel<EventDTO> selectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
+        refreshableEventSelectionModel = selectionModel;
         eventTable.setVisible(false);
 
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
