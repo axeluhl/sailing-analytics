@@ -88,6 +88,8 @@ Another challenge with subtenants is how to communicate the concept to users. Wh
 
 An alternative strategy is just creating a completely new top level tenant for the 49er boat class races of “tw2017”. This would not introduce a hierarchy, but would require users that have roles for all boat classes to have their roles for both tenants instead of only the role for the parent tenant.
 
+For now, we will not consider the concept of subtenants further.
+
 ### Administration of Authorization
 
 This section will discuss how it is determined if a user can grant or revoke a permission. Therefore, we define two rules:
@@ -95,13 +97,13 @@ This section will discuss how it is determined if a user can grant or revoke a p
 * We define authority as power which has been legitimately obtained (Krishnan & Zimmer, 1991)
 * We regard ownership as the starting point for delegation of authority (Krishnan & Zimmer, 1991)
 
-With these two facts in mind, data objects must have a single user as the owner. However, as discussed earlier tenants are a second tier of ownership. Not every user that can create data objects in a tenant should automatically be the owner of every data object of the tenant, but in return should also not lose rights e.g. for removing an accidentally created data object on creation, because the tenant is the owner. Thus, in our approach the creator of a data object will be the owner and the tenant he is currently logged in to will be the owning tenant.
+With these two facts in mind, data objects must have a single user as the owner. User ownership can changed over time. Additionally, as discussed earlier, tenants are a second tier of ownership. Not every user that can create data objects in a tenant should automatically be the owner of every data object of the tenant, but in return should also not lose rights e.g. for removing an accidentally created data object on creation, because the tenant is the owner. Thus, in our approach the creator of a data object will be the owner and the tenant he is currently logged in to will be the owning tenant.
 
 Another challenge after having a concept for ownership is the delegation of power. Not every user should be allowed to delegate his permissions to other users, thus there has to be a “grantPermission” permission that allows a user to delegate all his permissions to other users.
 
 ### Implementation of Ownership
 
-Ownership is modeled as an explicit association between exactly one user and data objects and exactly one tenant and data objects. Owning a data object implies having all permissions on that object, as ownership is the regarded as the source of authority. In order to change ownership one has to be either owning user or tenant owner. If the user only changes the tenant owner he may remain owning user. If the user only changes the owning user he may remain owning tenant.
+Ownership is modeled as an explicit association between exactly one user and data objects and exactly one tenant and data objects. Owning a data object implies having all permissions on that object, as ownership is regarded as the source of authority. In order to change ownership one has to be either owning user or tenant owner. If the user only changes the tenant owner he may remain owning user. If the user only changes the owning user he may remain owning tenant.
 
 ### Implementation of Sharing Data Objects with Public
 
@@ -112,10 +114,10 @@ The ACL will also be checked for permission requests by not authenticated users.
 
 ## Permissions in Frontend
 
-Currently the permissions of the roles are hard coded and can thus be easily imported in the frontend. Dynamic roles that can change on runtime would require passing the permissions implied by the roles to the frontend.
+Currently the permissions of the roles are hard coded and can thus be easily imported in the frontend. Dynamic roles that can change at runtime would require passing the permissions implied by the roles to the frontend.
 
 1. One option would be to resolve all permissions of a user before passing the set of permissions into the frontend. In a distributed system with multiple servers where a user could have permissions this is no viable solution.
-2. ACLs could be delivered with the object itself. A permission on an object can then be checked in the frontend by asking the ACL delivered with the object. This would require adding a call to the permission system to every remote procedure call that returns an object.
+2. ACLs could be delivered with the object itself. A permission on an object can then be checked in the frontend by asking the ACL delivered with the object. This would require adding a call to the permission system to every remote procedure call that returns an object so as to annotate the object returned with the ACL obtained.
 3. A third but possibly resource hungry possibility would be to implement a service that can be called from the frontend to check single permissions. The service would implement some kind of hasPermission(permission) method. This could then be used from the frontend as well as the server code.
 
 As ACLs will probably remain small in general, we will implement the (2) second approach. Furthermore, the ACLs that are returned by the server will be reduced to the entries that are relevant for the current user.
@@ -138,14 +140,17 @@ There currently are only a few hardcoded global roles. These shall be usable in 
 2. Create Tenant (Users that manage events and servers)
 3. Media Admin
 
-Furthermore, there would be a difference between global roles and roles used in ACLs. The most basic role used in ACLs is the tenant role that exists for every tenant. This role is only granted to a few people that have every right for every data object the tenant owns. The other roles in a tenant that are of the pattern “role:tenant” (where tenant is replaced by the tenants name) are custom to every tenant, but some examples are listed here:
+Roles may declare formal parameters. For now we see tenant and user as possible parameter types. Such roles are then instantiated by adding actual values for the tenant / user parameter(s). When the role's permissions are then inferred, if the role instance has a tenant parameter then the role's permissions are only implied if the object's tenant owner matches the role's tenant parameter; similarly, if the role instance has a user parameter then the role's permissions are only implied if the object's user owner matches the role's user parameter. If both, a user and tenant parameter are declared for a role then both have to match in order for the role's permissions to be implied.
 
-1. Tenant Owner “owner:tenant” (Can delete the tenant, additionally to everything the tenant admin can do)
-2. Tenant Admin “admin:tenant” (Has (almost) every permission in his tenant)
-3. Eventmanager “eventmanager:tenant”
-4. Racemanager “racemanager:tenant”
-5. Editor “editor:tenant”
-6. Resultservice “resultservice:tenant”
+Roles with a tenant parameter are applied in the form "<rolename>:<tenantname>". Examples:
+
+1. Tenant Owner "owner:tw2018" (Can delete the tenant, in addition to everything the tenant admin can do)
+2. Tenant Admin "admin:kw2018" (Has (almost) every permission in his tenant)
+3. Eventmanager "eventmanager:VSaW"
+4. Racemanager "racemanager:KYC"
+5. Editor "editor:BYC"
+6. Resultservice "resultservice:swc2018-miami"
+7. User "user:johndoe" (A role that every user should have for himself/herself; grants permissions to modify the respective
 
 ## Constraints
 
@@ -153,7 +158,7 @@ A problem that is not easily solved with either ACLs or RBAC is constraining acc
 
 Clubs may only be able to create races with e.g. < 60 boats, so club events cannot exceed the infrastructure provided to them. How could this be implemented with permission checking?
 
-A “create_big_race” permission could be hardcoded that is checked when a user tries to add more than 60 competitors to a race.
+A "create_big_race" permission could be hardcoded that is checked when a user tries to add more than 60 competitors to a race.
 
 There are even more expressive access control systems than RBAC. They are called constraint based access control systems. They allow constraints to be expressed in a less black and white way, however are very complex. This concept is not supported by the permission concept proposed here, because use cases like the above are probably edge cases that will be hard coded.
 
@@ -190,18 +195,18 @@ It is always assumed that the ID of the user is “user” and the ID of its ten
 10. First boot of server
   * On first boot of the server, an admin user is created. The creator of the server will log in as that admin user and in most cases create a new tenant. Thereafter, the creator will create at least one new users, assign the admin role to that user and delete the default admin user.
 
-## Algorithm `bool hasPermission(WildcardPermission permission)` for Composite Realm
+## Algorithm `boolean isPermitted(PrincipalCollection principals, WildcardPermission permission)` for Composite Realm
 
-The above describes the data model that is relevant to the composite realm that implements the hasPermission function. The “permission” parameter should be of the pattern “type:action:instance”. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
+The above describes the data model that is relevant to the composite realm that implements the `isPermitted` function. The “permission” parameter should be of the pattern “type:action:instance”. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
 
-1. Check if the user is the owner or tenant owner of the data object for which the permission is requested
+1. Check if the user is the owning user or belongs to a tenant that is owning tenant of the data object for which the permission is requested
   * If this is true return true
 2. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
   * If there is an entry, return true if granted and false if revoked, but take the most explicit entry and in doubt return false
 3. Check if the permission is directly assigned to the user
   * If this is true return true
-4. Check if a role grants the permission to the user
-  * If this is true return true
+4. Check if a role grants the permission to the user, which for instances of parameterized roles requires the tenant/user parameter values to match the object's tenant / user.
+  * If this is true return true.
 
 ## Migration
 With such an extensive existing system as the Sailing Analytics Suite, migration is a big concern. The existing RBAC system is easily extended to support ACLs. However, implementing permission checking in the whole system will be a long process, because probably almost every service request will have to be edited.
