@@ -350,8 +350,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     private void confirmData() {
-        sendUnconfirmed();
-        getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
+        CompetitorResultsImpl results = getCompetitorResultsDiff(mDraftData);
+        getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now(), results);
         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
         initLocalData();
         loadCompetitors();

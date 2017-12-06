@@ -268,8 +268,7 @@ public class TrackingListFragment extends BaseFragment
                 mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        sendUnconfirmed();
-                        getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
+                        getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now(), getCompetitorResultsDiff(mConfirmedData));
                         initLocalData();
                         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
