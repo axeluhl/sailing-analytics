@@ -31,7 +31,7 @@ import com.sap.sse.common.settings.generic.ValueSetting;
  */
 public class SettingsToStringMapSerializer {
     
-    private static final Logger LOG = Logger.getLogger(AbstractSettingsToJsonSerializer.class.getName());
+    private static final Logger LOG = Logger.getLogger(SettingsToStringMapSerializer.class.getName());
     
     private static final String ADDED_SUFFIX = GenericSerializableSettings.PATH_SEPARATOR + GenericSerializableSettings.ADDED_TOKEN;
     private static final String REMOVED_SUFFIX = GenericSerializableSettings.PATH_SEPARATOR + GenericSerializableSettings.REMOVED_TOKEN;
