@@ -500,6 +500,7 @@
         <execution>
           <configuration>
             <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+             <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>
           -->

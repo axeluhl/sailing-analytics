@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesViewImpl extends Composite implements SeriesView {
@@ -40,13 +41,13 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     private final Presenter currentPresenter;
     private final RefreshManager refreshManager;
 
-    public SeriesViewImpl(SeriesView.Presenter presenter) {
+    public SeriesViewImpl(SeriesView.Presenter presenter, FlagImageResolver flagImageResolver) {
         this.currentPresenter = presenter;
         this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
         EventSeriesViewDTO series = currentPresenter.getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
         this.setupStatisticsBox(series);
-        leaderboardUi = new MinileaderboardBox(true);
+        leaderboardUi = new MinileaderboardBox(true, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         this.setupListContent(series);
         this.setupEventListContent(series);

@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLif
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.OverallLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
@@ -63,7 +64,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
                 settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false, new ClassicLeaderboardStyle()));
+                /* enableSyncScroller */ false, new ClassicLeaderboardStyle(), FlagImageResolverImpl.get()));
 
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
@@ -105,7 +106,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
                                         false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, FlagImageResolverImpl.get());
                                 mainPanel.add(overallLeaderboardPanel);
                                 addChildComponent(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
