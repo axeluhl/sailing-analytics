@@ -56,7 +56,7 @@ import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.OwnerDTO;
+import com.sap.sse.security.ui.shared.OwnershipDTO;
 import com.sap.sse.security.ui.shared.RoleDTO;
 import com.sap.sse.security.ui.shared.RolePermissionModelDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -133,9 +133,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
-    private OwnerDTO createOwnershipDTOFromOwnership(Ownership ownership) {
+    private OwnershipDTO createOwnershipDTOFromOwnership(Ownership ownership) {
         if (ownership != null) {
-            return new OwnerDTO(ownership.getIdOfOwnedObjectAsString(), ownership.getOwnerUsername(), ownership.getTenantOwnerId(), ownership.getDisplayNameOfOwnedObject());
+            return new OwnershipDTO(ownership.getIdOfOwnedObjectAsString(), ownership.getOwnerUsername(), ownership.getTenantOwnerId(), ownership.getDisplayNameOfOwnedObject());
         } else {
             return null;
         }

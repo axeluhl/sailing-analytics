@@ -5,15 +5,15 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.Ownership;
 
-public class OwnerDTO implements Ownership, IsSerializable {    
+public class OwnershipDTO implements Ownership, IsSerializable {    
     private String idOfOwnedObjectAsString;
     private String ownerUsername;
     private UUID tenantOwnerId;
     private String displayNameOfOwnedObject;
     
-    OwnerDTO() {} // for serialization only
+    OwnershipDTO() {} // for serialization only
     
-    public OwnerDTO(String idOfOwnedObjectAsString, String ownerUsername, UUID tenantOwnerId, String displayNameOfOwnedObject) {
+    public OwnershipDTO(String idOfOwnedObjectAsString, String ownerUsername, UUID tenantOwnerId, String displayNameOfOwnedObject) {
         this.idOfOwnedObjectAsString = idOfOwnedObjectAsString;
         this.ownerUsername = ownerUsername;
         this.tenantOwnerId = tenantOwnerId;

@@ -164,11 +164,11 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
         //TODO check whether WildcardPermission functionality can be used here (perm instanceof)
         String[] parts = perm.toString().replaceAll("\\[|\\]", "").split(":");
-        String user = (String) principals.getPrimaryPrincipal();
+        String username = (String) principals.getPrimaryPrincipal();
         
         try {
             ArrayList<WildcardPermission> directPermissions = new ArrayList<>();
-            for (String directPermission : getUserStore().getPermissionsFromUser(user)) {
+            for (String directPermission : getUserStore().getPermissionsFromUser(username)) {
                 directPermissions.add(new WildcardPermission(directPermission));
             }
             
@@ -180,12 +180,12 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             }
             
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
-                    user, getUserStore().getUserGroups(), directPermissions, 
-                    getUserStore().getRolesFromUser(user), this, 
+                    username, getUserStore().getUserGroups(), directPermissions, 
+                    getUserStore().getRolesFromUser(username), this, 
                     ownership, 
                     acl);
         } catch (UserManagementException e) {
-            logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
+            logger.log(Level.SEVERE, "User " + username + " does not exist.", e);
             return false;
         }
     }

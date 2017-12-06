@@ -507,7 +507,7 @@ import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
-import com.sap.sse.security.ui.shared.OwnerDTO;
+import com.sap.sse.security.ui.shared.OwnershipDTO;
 import com.sap.sse.security.ui.shared.UserGroupDTO;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -3978,9 +3978,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
     
-    private OwnerDTO createOwnershipDTOFromOwnership(Ownership ownership) {
+    private OwnershipDTO createOwnershipDTOFromOwnership(Ownership ownership) {
         if (ownership != null) {
-            return new OwnerDTO(ownership.getIdOfOwnedObjectAsString().toString(), ownership.getOwnerUsername(), ownership.getTenantOwnerId(), ownership.getDisplayNameOfOwnedObject());
+            return new OwnershipDTO(ownership.getIdOfOwnedObjectAsString().toString(), ownership.getOwnerUsername(), ownership.getTenantOwnerId(), ownership.getDisplayNameOfOwnedObject());
         } else {
             return null;
         }

@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -18,12 +19,12 @@ public class AccessControlListImpl implements AccessControlList {
     /**
      * Maps from UserGroup name to its permissions
      */
-    private final Map<UUID, Set<String>> permissionMap;
+    private final Map<UUID, Set<String>> permissionsByUserGroupId;
     
-    public AccessControlListImpl(String idAsString, String displayName, Map<UUID, Set<String>> permissionMap) {
+    public AccessControlListImpl(String idAsString, String displayName, Map<UUID, Set<String>> permissionsByUserGroupId) {
         this.idAsString = idAsString;
         this.displayName = displayName;
-        this.permissionMap = permissionMap;
+        this.permissionsByUserGroupId = permissionsByUserGroupId;
     }
     
     public AccessControlListImpl(String idAsString, String displayName) {
@@ -31,10 +32,10 @@ public class AccessControlListImpl implements AccessControlList {
     }
     
     @Override
-    public PermissionChecker.PermissionState hasPermission(String username, String action, Iterable<UserGroup> tenants) {
-        for (Map.Entry<UUID, Set<String>> entry : permissionMap.entrySet()) {
-            for (UserGroup tenant : tenants) {
-                if (tenant.getId().equals(entry.getKey()) && tenant.contains(username)) {
+    public PermissionChecker.PermissionState hasPermission(String username, String action, Iterable<UserGroup> userGroups) {
+        for (Map.Entry<UUID, Set<String>> entry : permissionsByUserGroupId.entrySet()) {
+            for (UserGroup userGroup : userGroups) {
+                if (userGroup.getId().equals(entry.getKey()) && userGroup.contains(username)) {
                     if (entry.getValue().contains("!" + action)) {
                         return PermissionState.REVOKED;
                     } else if (entry.getValue().contains(action)) {
@@ -58,6 +59,6 @@ public class AccessControlListImpl implements AccessControlList {
 
     @Override
     public Map<UUID, Set<String>> getPermissionMap() {
-        return permissionMap;
+        return Collections.unmodifiableMap(permissionsByUserGroupId);
     }
 }

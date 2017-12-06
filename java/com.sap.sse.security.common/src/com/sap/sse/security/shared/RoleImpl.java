@@ -1,6 +1,7 @@
 package com.sap.sse.security.shared;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -34,6 +35,6 @@ public class RoleImpl implements Role {
 
     @Override
     public Set<WildcardPermission> getPermissions() {
-        return permissions;
+        return Collections.unmodifiableSet(permissions);
     }
 }

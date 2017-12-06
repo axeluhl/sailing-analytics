@@ -12,12 +12,12 @@ public class UserGroupDTO implements UserGroup, IsSerializable {
     private UUID id;
     private String name;
     private AccessControlListDTO acl;
-    private OwnerDTO owner;
+    private OwnershipDTO owner;
     private Set<String> usernames;
     
     UserGroupDTO() {} // just for serialization
     
-    public UserGroupDTO(UUID id, String name, AccessControlListDTO acl, OwnerDTO owner, Set<String> usernames) {
+    public UserGroupDTO(UUID id, String name, AccessControlListDTO acl, OwnershipDTO owner, Set<String> usernames) {
         this.id = id;
         this.name = name;
         this.acl = acl;
@@ -39,7 +39,7 @@ public class UserGroupDTO implements UserGroup, IsSerializable {
         return acl;
     }
     
-    public OwnerDTO getOwner() {
+    public OwnershipDTO getOwner() {
         return owner;
     }
     
