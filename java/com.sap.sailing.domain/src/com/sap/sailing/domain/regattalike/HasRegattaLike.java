@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.regattalike;
 
-import java.util.Map;
-
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
