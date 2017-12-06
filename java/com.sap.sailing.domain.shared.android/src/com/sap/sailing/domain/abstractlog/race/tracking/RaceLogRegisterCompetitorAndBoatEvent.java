@@ -5,10 +5,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorAndBoatEvent;
 
 /**
- * The event registers a {@link Competitor} or {@link CompetitorWithBoat} on a race.
- * The competitor type is determined by the {@link Regatta} attribute 'canBoatsOfCompetitorsChangePerRace'
- * If 'canBoatsOfCompetitorsChangePerRace' is true the type must be {@link Competitor}    
- * If 'canBoatsOfCompetitorsChangePerRace' is false the type must be {@link CompetitorWithBoat}    
+ * The event registers or rather links a {@link Competitor} and a {@link Boat} for a race.
  */
 public interface RaceLogRegisterCompetitorAndBoatEvent
         extends RaceLogEvent, RegisterCompetitorAndBoatEvent<RaceLogEventVisitor> {
