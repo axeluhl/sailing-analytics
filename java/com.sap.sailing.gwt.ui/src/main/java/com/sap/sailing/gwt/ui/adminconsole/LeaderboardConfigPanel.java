@@ -1027,6 +1027,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             public void ok(PairingListTemplateDTO editedObject) {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
+                try{
                 sailingService.calculatePairingList(leaderboardDTO, editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
                         new AsyncCallback<PairingListTemplateDTO>() {
 
@@ -1042,6 +1043,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     }
                     
                 });
+                }catch(Exception exception){
+                    //TODO show error somehow
+                }
             }
 
             @Override

@@ -256,6 +256,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 }
                 return null;
             }
+
+            @Override
+            public void setFleetsCanRunInParallelToTrue() {
+                // TODO Auto-generated method stub
+                
+            }
         };
         this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(raceColumnListeners));
         this.raceExecutionOrderCache = new RaceExecutionOrderCache();
@@ -854,6 +860,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForRegatta);
         deregisterer.deregister(deregisterer.analyze());
+    }
+
+    @Override
+    public void setFleetsCanRunInParallelToTrue() {
+        for (Series series : this.series) {
+            series.setIsFleetsCanRunInParallel(true);
+        }
     }
 
 }

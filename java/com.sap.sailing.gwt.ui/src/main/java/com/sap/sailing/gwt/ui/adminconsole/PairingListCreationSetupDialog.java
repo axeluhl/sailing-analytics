@@ -17,7 +17,6 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     
     private final IntegerBox competitorCountTextBox;
     private final IntegerBox flightMultiplierTextBox;
-    
     private final CheckBox flightMultiplierCheckBox;
     private final int groupCount;
     
@@ -32,9 +31,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         
         super(leaderboardDTO, stringMessages.pairingLists(), stringMessages, new PairingListParameterValidator(stringMessages), 
                 callback);
-       
         this.groupCount = Util.size(leaderboardDTO.getRaceList().get(0).getFleets());
-        
         this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
         this.flightMultiplierTextBox = createIntegerBox(0, 2);
         this.flightMultiplierTextBox.setEnabled(false);

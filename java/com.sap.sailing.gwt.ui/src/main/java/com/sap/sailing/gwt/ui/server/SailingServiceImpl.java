@@ -6792,7 +6792,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public PairingListTemplateDTO calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorsCount, 
-            int flightMultiplier) {
+            int flightMultiplier) throws NotFoundException,IllegalArgumentException {
+        if(!(getLeaderboardByName(leaderboardDTO.getName()) instanceof LeaderboardThatHasRegattaLike)){
+            throw new IllegalArgumentException("This Leaderboard is not suiteable for a Pairinglist!"); 
+        }
         PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardDTO, competitorsCount, 
                 flightMultiplier);
         int flightCount = leaderboardDTO.getRaceColumnsCount();
@@ -6807,6 +6810,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardDTO, pairingListTemplateDTO.getCompetitorCount(), 
                 pairingListTemplateDTO.getFlightMultiplier());
         Leaderboard leaderboard = getLeaderboardByName(leaderboardDTO.getName());
+        if(pairingListTemplateDTO.getFlightMultiplier()>1){
+            //FIXME type cast...
+            LeaderboardThatHasRegattaLike leaderboardThatHasRegattaLike = (LeaderboardThatHasRegattaLike) leaderboard;
+            leaderboardThatHasRegattaLike.getRegattaLike().setFleetsCanRunInParallelToTrue();
+            //TODO Warning to user 
+        }
         PairingList<RaceColumn, Fleet, Competitor> pairingList = template.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
 
             @Override

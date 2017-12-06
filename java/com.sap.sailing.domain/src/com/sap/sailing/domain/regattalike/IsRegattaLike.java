@@ -67,4 +67,6 @@ public interface IsRegattaLike extends Serializable {
      * @see #getTimeOnTimeFactor(Competitor)
      */
     Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor);
+    
+    void setFleetsCanRunInParallelToTrue();
 }

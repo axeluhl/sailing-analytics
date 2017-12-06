@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
@@ -873,7 +874,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
 
     void calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorCount, int flightMultiplier, 
-            AsyncCallback<PairingListTemplateDTO> callback);
+            AsyncCallback<PairingListTemplateDTO> callback) throws NotFoundException,IllegalArgumentException ;
     
     void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO, 
             AsyncCallback<Void> callback);
