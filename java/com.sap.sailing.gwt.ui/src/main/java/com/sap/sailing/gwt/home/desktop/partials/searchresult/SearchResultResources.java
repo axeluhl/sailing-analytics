@@ -3,12 +3,19 @@ package com.sap.sailing.gwt.home.desktop.partials.searchresult;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 
 public interface SearchResultResources extends ClientBundle {
     public static final SearchResultResources INSTANCE = GWT.create(SearchResultResources.class);
 
-    @Source("SearchResult.css")
+    @Source("SearchResult.gss")
     LocalCss css();
+    
+    @Source("paging-icons.png")
+    ImageResource paging();
+    
+    @Source("search-icon-grey.png")
+    ImageResource search();
 
     public interface LocalCss extends CssResource {
         String paging();

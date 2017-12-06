@@ -5,13 +5,14 @@ import java.util.Date;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetTimePointDialog extends DataEntryDialogWithBootstrap<Date> {
-    private final BetterDateTimeBox time;
+public class SetTimePointDialog extends DataEntryDialogWithDateTimeBox<Date> {
+    private final DateAndTimeInput time;
     private final StringMessages stringMessages;
     
     public SetTimePointDialog(final StringMessages stringMessages, String title, DialogCallback<Date> callback) {
@@ -25,7 +26,7 @@ public class SetTimePointDialog extends DataEntryDialogWithBootstrap<Date> {
         
         this.stringMessages = stringMessages;
         
-        time = createDateTimeBox(new Date());
+        time = createDateTimeBox(new Date(), Accuracy.SECONDS);
     }
     
     @Override

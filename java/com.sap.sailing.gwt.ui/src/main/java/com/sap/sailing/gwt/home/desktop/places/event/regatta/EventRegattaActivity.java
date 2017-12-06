@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -39,19 +40,20 @@ import com.sap.sse.security.ui.client.UserService;
  *            The concrete {@link AbstractEventRegattaPlace} subclass, this instance is bound to.
  */
 public class EventRegattaActivity extends AbstractEventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
-    private EventRegattaView currentView = new TabletAndDesktopRegattaEventView();
+    private EventRegattaView currentView;
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS;
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventViewDTO eventDTO, EventClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
+            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay, FlagImageResolver flagImageResolver) {
         super(place, eventDTO, clientFactory, homePlacesNavigator);
+        currentView = new TabletAndDesktopRegattaEventView(flagImageResolver);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
                     clientFactory.getSailingService(),
                     asyncActionsExecutor,
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
-                    clientFactory.getErrorReporter()));
+                    clientFactory.getErrorReporter(), flagImageResolver));
         }
         
         initNavigationPath(navigationPathDisplay);

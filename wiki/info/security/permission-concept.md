@@ -16,6 +16,8 @@
 * [Use Cases](#use cases)
 * [Algorithm for Composite Realm](#algorithm-bool-haspermission-wildcardpermission-permission-for-composite-realm)
 * [Migration](#migration)
+* [Implementation Details](#implementation-details)
+* [TODOs](#todos)
 
 ## Introduction
 
@@ -35,11 +37,17 @@ The following requirements result from the above described (the access control s
 ## Access Control Concepts
 
 The two big concepts that play together in this permission concept are access control lists (ACLs) (also used e.g. in the Linux or Windows file system) and RBAC. Furthermore, there is the concept of attribute based access control (ABAC) that is not explored in this concept document.
+
 The concept of ACLs is based on the idea of assigning each data object that is access controlled an ACL. The ACL is a list of entries that assign a user or group of users to permissions. If e.g. read access is requested for a data object, its ACL is checked if the user or a group, the user belongs to, has an entry granting the read permission.
+
 RBAC is based on the idea of having roles that imply certain permissions and assigning roles to users. The roles of RBAC are on a simple level equivalent to groups for ACLs. (Barkley, 1997) However, in general roles combine a set of users with a set of permissions, whereas groups represent only a set of users. According to (Sandhu, Coyne, Feinstein, & Youman, 1996) there are multiple models for RBAC. The model described above is called RBAC_0. Furthermore, there are RBAC_1, RBAC_2 and RBAC_3 which all include RBAC_0, but add additional features. 
+
 RBAC_1 adds the concept of role hierarchies, where roles inherit the permissions granted by their parent roles. However, they do not inherit the set of users. RBAC_2 adds constraints which restrict how and when roles and permissions can be combined with other roles or permissions. Besides mutual exclusion of roles or permissions, constraints could also require a user to have role s when assigned role r (or the same with permissions, which could be used e.g. to require to be able to view an event when a view permission for a race in the event is granted). Furthermore, the concept of constraints could also restrict the roles and permissions that a user can simultaneously have in a session (e.g. only one tenant role at a time). RBAC_3 combines RBAC_1 and RBAC_2.
+
 In the context of RBAC (Ferraiolo, Cugini, & Kuhn) mentions the concept of subjects. A user may in one session only have a certain set of roles and permissions. This may be due to choice to reduce accidental actions with a wrong role or a constraint enforced by the system (See RBAC_2). This set of roles and permissions is called a subject. A user may have any number of active subjects. However, a subject is only associated with one user.
+
 It is to note that simple RBAC models show no difference in their ability to express access control policies than ACLs. (Barkley, 1997) More complex RBAC models are more expressive than ACLs.
+
 In the course of this concept document there will be no difference in meaning between roles and groups. In the existing system they are named roles, thus the term roles will be used for both roles and groups.
 
 ## Initial Idea
@@ -50,27 +58,27 @@ The inital idea for this document is based on the existing Shiro RBAC system tha
 
 It is common place in cloud applications where multiple groups of users that each belong to some kind of organization work in one system to summarize these groups of users as tenants. The tenants represent the organizations and---if a hierarchy is allowed---the sub-organizations working in the system. In the Sailing Analytics the organizations could be SAP in general (e.g. archive server), sailing clubs, events like the Travemünder Woche or in the future private users.
 
-One idea behind tenants is to encapsulate organizations so users of one organization cannot work with data objects from another organization if they are not granted the permissions explicitly. Furthermore, tenants are used to group data objects so users can have access to all data objects of a tenant and do not have to be granted every permission explicitly. Additional to data objects, tenants are also associated with roles. Thus, granting a role associated with a tenant is equivalent to granting the role for each data object which is associated with the tenant. 
+One idea behind tenants is to encapsulate organizations so users of one organization cannot work with data objects from another organization if they are not granted the permissions explicitly. Furthermore, tenants are used to group data objects so users can have access to all data objects of a tenant and do not have to be granted every permission explicitly. Additional to data objects, tenants are also associated with roles. Thus, assigning to a user a role associated with a tenant is equivalent to granting the permissions implied by that role for each data object which is associated with (owned by) the tenant. 
 
 In the Sailing Analytics the set of roles for each tenant may, apart from certain exceptions, represent the subjects a user can adopt. A constraint could be introduced that only allows the roles for one tenant as a subject.
 
-Tenants pose an UI problem, because it has to be clear to the user in which tenant he is currently working. The user has to be member of the tenant he is working for. Currently the best idea is to let the user select a tenant when he logs in and have default tenants for event and club servers that correspond to the event or club. Every following action is performed as that tenant.
+Tenants pose a UI problem because it has to be clear to the user in which tenant he/she is currently working. The user has to be member of the tenant he/she is working for. Currently the best idea is to let the user select a tenant when he/she logs in and have default tenants for event and club servers that correspond to the event or club. Every following action is performed as that tenant. In particular, when creating new objects then that tenant will be set as the new object's tenant owner.
 
-In some cases, it might be necessary to transfer the ownership to another tenant/user. Thus, the owner should not be final but changeable.
+In some cases, it might be necessary to transfer the ownership to another tenant/user. Thus, ownership should not be final but changeable.
 
-### Users or Tenants as Owners
+### Users and/or Tenants as Owners
 
-A problem with the tenant approach is that users could have no permissions to e.g. remove data objects that they have just created on accident, because the remove permission is reserved to admins of the tenant which a user that has create permissions may not be.
+A problem with the tenant approach is that users could have no permissions to e.g. remove data objects that they have just created by accident, because the remove permission is reserved to admins of the tenant which a user who has create permissions may not be.
 
-Four solutions come to mind. (1) The creator of a data object could always be granted the permission to remove the data object explicitly. (2) Moreover, the log where the creation was logged could be crawled to find the user that created the data object and override the permission system when in a certain timespan. 
+Four solutions come to mind. (1) The creator of a data object could always be granted the permission to remove the data object explicitly. (2) Moreover, the log where the creation was logged could be crawled to find the user that created the data object and override the permission system when in a certain timespan.
 
-(3) There is an alternative approach to ownership. In this approach, a single user would own a data object so he can do everything with it. The tenant would then be a kind of secondary owner or group in Linux terms. This solves the problem that users could have no permissions to e.g. remove data objects that they have just created on accident. However, it also introduces a second layer of ownership. (4) Only grant the create permission when the user also has the corresponding delete permission.
+(3) There is an alternative approach to ownership. In this approach, a single user would own a data object so he can do everything with it. The tenant would then be a kind of secondary owner or group in Linux terms. This solves the problem that users could have no permissions to e.g. remove data objects that they have just created by accident. However, it also introduces a second layer of ownership. (4) Only grant the create permission when the user also has the corresponding delete permission.
 
 Approaches (2) and (4) are impractical. (2) is too complicated. The user would need delete permission for everything in the tenant for (4) to work.
 
 Approach (1) solves the problem on hand, however these explicitly granted remove permissions are not just removed when the ownership of the data object changes, but remain. This could lead to users being able to delete data objects in other tenants, just because they created the object. Approach (3) more explicitly creates an ownership relation that can be edited and is thus chosen.
 
-As the tenant is a data object itself, it also has an owner. The owning tenant of a tenant is the tenant itself.
+As the tenant is a data object itself, it also has an owner. The owning tenant of a tenant is the tenant itself. (TODO: Should it be possible to change the tenant owner of a tenant? What is the best default tenant owner for a tenant? The tenant itself or the tenant to which the user creating the tenant is currently logged on?)
 
 ### Subtenants
 
@@ -201,3 +209,64 @@ With such an extensive existing system as the Sailing Analytics Suite, migration
 Another challenge besides the code changes is the data migration. For every existing data object an ACL has to be created and filled with the right permissions so the users do not notice a big change.
 
 Besides creating an ACL for every data objects that is access controlled, an owner has to be defined for each existing data object, so that in combination with the ACLs no user loses permissions they need to have. In order to do this, where will have to be a script that associates all data objects on a server with a tenant and a specific user as owner (e.g. on the archive all data objects are associated with the tenant “archive” and owned by the user “Axel”). Thereafter, the users on the server are assigned their respective role.
+
+**Role Migration**
+
+Following roles have to be migrated to dynamic roles. Beforehand they were hard coded in the SailingPermissionsForRoleProvider class. However, aside from the admin role, all roles listed here are only containing permissions that are checked in the frontend for showing/hiding tabs in the different menus.
+
+* admin
+  * "*"
+* eventmanager
+  * "manage_media"
+  * "manage_mark_passings"
+  * "manage_mark_positions"
+  * "manage_all_competitors"
+  * "manage_course_layout"
+  * "manage_device_configuration"
+  * "manage_events"
+  * "manage_igtimi_accounts"
+  * "manage_leaderboard_groups"
+  * "manage_leaderboards"
+  * "manage_leaderboard_results"
+  * "manage_racelog_tracking"
+  * "manage_regattas"
+  * "manage_result_import_urls"
+  * "manage_structure_import_urls"
+  * "manage_tracked_races"
+  * "manage_wind"
+  * "event"
+  * "regatta"
+  * "leaderboard"
+  * "leaderboard_group"
+* mediaeditor
+  * "manage_media"
+* moderator
+  * "can_replay_during_live_races"
+
+## Implementation Details
+
+Access control relevant objects are stored in the AccessControlStore, while user related objects are stored in the user, i.e. the UserStore. Tenants are currently stored as UserGroups in the user store. The algorithm outlined above is implemented in the PermissionChecker, which is one of the most central classes in the permission system. Therefrom it should be possible to find all other relevant classes. Other relevant classes include the AbstractCompositeAuthorizingRealm that implements permission checking in Shiro. Therefor it uses the PermissionChecker and is connected to the UserStore and the AccessControlStore. Furthermore the RolePermissionModel implements how roles imply permissions. The RolePermissionModel as well as the parameterization of roles need more work and are just a rough sketch. The UserManagementService exposes most of the access control relevant parts to the frontend. It works through the SecurityService with the AccessControlStore and the UserStore. Permission checking in the frontend is also done with the PermissionChecker. To ease the creation of WildcardPermissions, a PermissionBuilder was introduced that also needs some more work. All access control relevant UI parts can be found in the "Advanced" tab under "User management" and "Tenant management". A further tab "Access Control Management" should be introduced. Unit tests can be found in the package com.sap.sse.security.test.
+
+## TODOs
+
+Dump of TODOs. More structured in Bugzilla.
+
+* Ownership/Access control list as expandable column in all access controlled data object tables
+* Permission checking for every domain data object type
+* Changing ownership (incl. replication)
+* Masterdataimport
+* Tenant management UI
+  * Tenant in create dialog check if tenant exists (red outline of text input field)
+  * Refresh tenant selection in tenant list on the left correctly
+  * String messages
+* User management UI
+  * Auto complete for roles and permissions
+* Access control list / Roles / Ownership UI
+* User role for editing own user parametrized by user name
+* Do we want to throw unauthorized exceptions or how should this work? (See addUserToTenant or removeUserFromTenant) / UnauthorizedException handling (i.e. popup that shows some text)
+* Create ownerships from config / Server-wide default owner and default tenant owner
+* Create test setup for final test
+* Button to transfer ownership of all objects from one user/tenant to another user/tenant (chgroup recursive?)
+* Rework meta permissions (rework to also check all permissions that are granted or revoked?)
+* Permission reloading without site refresh / Frontend update elements that require permission when permissions change (Refresh call on panels)
+* Default tenant input field in login popup

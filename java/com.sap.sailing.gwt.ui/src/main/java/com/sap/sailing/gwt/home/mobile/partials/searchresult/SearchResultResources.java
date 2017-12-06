@@ -1,14 +1,20 @@
 package com.sap.sailing.gwt.home.mobile.partials.searchresult;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
-public interface SearchResultResources extends ClientBundle {
+public interface SearchResultResources extends SharedHomeResources {
     public static final SearchResultResources INSTANCE = GWT.create(SearchResultResources.class);
 
     @Source("SearchResult.gss")
     LocalCss css();
+    
+    @Source("search-icon-yellow.svg")
+    @MimeType("image/svg+xml")
+    DataResource search();
 
     public interface LocalCss extends CssResource {
         String searchresult();

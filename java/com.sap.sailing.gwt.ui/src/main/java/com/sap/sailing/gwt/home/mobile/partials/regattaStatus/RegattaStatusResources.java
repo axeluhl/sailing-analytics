@@ -15,7 +15,6 @@ public interface RegattaStatusResources extends ClientBundle {
         String grid();
         String regattastatus_header();
         String regattastatus_header_title();
-        String regattastatus_header_select();
         String regattastatus_content();
         String regattastatus_content_regatta();
         String regattastatus_content_regatta_race();
