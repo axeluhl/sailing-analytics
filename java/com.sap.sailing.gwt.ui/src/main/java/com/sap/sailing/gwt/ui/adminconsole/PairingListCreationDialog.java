@@ -56,7 +56,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         CaptionPanel dataPanel = new CaptionPanel();
         dataPanel.setCaptionText("Pairing List Data");
 
-        Grid formGrid = new Grid(4, 2);
+        Grid formGrid = new Grid(5, 2);
         dataPanel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label("Number of Flights:"));
@@ -67,6 +67,10 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         formGrid.setWidget(2, 1, new Label(String.valueOf(this.template.getCompetitorCount())));
         formGrid.setWidget(3, 0, new Label("Quality:"));
         formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
+        if (this.template.getFlightMultiplier() > 1) {
+            formGrid.setWidget(4, 0, new Label("Flight Multiplier:"));
+            formGrid.setWidget(4, 1, new Label(String.valueOf(this.template.getFlightMultiplier())));
+        }
 
         formGrid.setCellSpacing(10);
 
