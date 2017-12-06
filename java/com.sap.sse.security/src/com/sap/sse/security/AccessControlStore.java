@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -22,9 +22,9 @@ public interface AccessControlStore extends Named {
     AccessControlStore removeAclPermission(String idAsString, UUID group, String permission);
     AccessControlStore removeAccessControlList(String idAsString);
     
-    Iterable<Owner> getOwnerships();
-    Owner getOwnership(String idAsString);
-    Owner createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
+    Iterable<Ownership> getOwnerships();
+    Ownership getOwnership(String idAsString);
+    Ownership createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
     AccessControlStore setOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
     AccessControlStore removeOwnership(String idAsString);
     

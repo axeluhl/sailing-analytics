@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.mongodb.DB;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 
@@ -15,9 +15,9 @@ public interface MongoObjectFactory {
     
     public void deleteAccessControlList(AccessControlList acl);
     
-    public void storeOwnership(Owner owner);
+    public void storeOwnership(Ownership owner);
     
-    public void deleteOwnership(Owner owner);
+    public void deleteOwnership(Ownership owner);
     
     public void storeRole(Role role);
     

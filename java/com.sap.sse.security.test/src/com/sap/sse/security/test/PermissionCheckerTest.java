@@ -14,10 +14,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.security.AccessControlListImpl;
-import com.sap.sse.security.OwnerImpl;
+import com.sap.sse.security.OwnershipImpl;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.shared.PermissionBuilderImpl;
 import com.sap.sse.security.shared.PermissionChecker;
@@ -43,8 +43,8 @@ public class PermissionCheckerTest implements RolePermissionModel {
     private ArrayList<WildcardPermission> directPermissions;
     private ArrayList<UUID> roles;
     private final RolePermissionModel rolePermissionModel = this;
-    private final Owner ownership = new OwnerImpl(eventId.toString(), user, (UUID) userTenant.getId(), "event");
-    private final Owner adminOwnership = new OwnerImpl(eventId.toString(), adminUser, (UUID) adminTenant.getId(), "event");
+    private final Ownership ownership = new OwnershipImpl(eventId.toString(), user, (UUID) userTenant.getId(), "event");
+    private final Ownership adminOwnership = new OwnershipImpl(eventId.toString(), adminUser, (UUID) adminTenant.getId(), "event");
     private AccessControlList acl;
     private final UUID globalRoleId = UUID.randomUUID();
     private Role globalRole;
@@ -141,7 +141,7 @@ public class PermissionCheckerTest implements RolePermissionModel {
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
                 rolePermissionModel, adminOwnership, acl));
         
-        Owner testOwnership = new OwnerImpl(eventId.toString(), adminUser, (UUID) userTenant.getId(), "event");
+        Ownership testOwnership = new OwnershipImpl(eventId.toString(), adminUser, (UUID) userTenant.getId(), "event");
         
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, directPermissions, roles, 
                 rolePermissionModel, testOwnership, acl));
@@ -171,16 +171,16 @@ public class PermissionCheckerTest implements RolePermissionModel {
     }
     
     @Override
-    public boolean implies(UUID id, WildcardPermission permission, Owner ownership) {
+    public boolean implies(UUID id, WildcardPermission permission, Ownership ownership) {
         return implies(id, roleModel.get(id).getName(), permission, ownership);
     }
     
     // TODO as default implementation in interface
     @Override
-    public boolean implies(UUID id, String name, WildcardPermission permission, Owner ownership) {
+    public boolean implies(UUID id, String name, WildcardPermission permission, Ownership ownership) {
         String[] parts = name.split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(UUID.fromString(parts[1])))) {
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwnerId().equals(UUID.fromString(parts[1])))) {
             for (WildcardPermission rolePermission : getPermissions(id)) {
                 if (rolePermission.implies(permission)) {
                     return true;

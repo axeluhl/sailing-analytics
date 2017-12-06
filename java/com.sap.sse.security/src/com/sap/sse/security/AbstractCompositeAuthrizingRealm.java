@@ -22,7 +22,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RolePermissionModel;
@@ -172,7 +172,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
                 directPermissions.add(new WildcardPermission(directPermission));
             }
             
-            Owner ownership = null;
+            Ownership ownership = null;
             AccessControlList acl = null;
             if (parts.length > 2) {
                 ownership = getAccessControlStore().getOwnership(parts[2]);
@@ -324,7 +324,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
     
     @Override
-    public boolean implies(UUID id, WildcardPermission permission, Owner ownership) {
+    public boolean implies(UUID id, WildcardPermission permission, Ownership ownership) {
         Role role = getRole(id);
         if (role != null) {
             return implies(id, role.getName(), permission, ownership);
@@ -335,10 +335,10 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     
     // TODO as default implementation in interface
     @Override
-    public boolean implies(UUID id, String name, WildcardPermission permission, Owner ownership) {
+    public boolean implies(UUID id, String name, WildcardPermission permission, Ownership ownership) {
         String[] parts = name.split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwnerId().equals(parts[1]))) {
             for (WildcardPermission rolePermission : getPermissions(id)) {
                 if (rolePermission.implies(permission)) {
                     return true;

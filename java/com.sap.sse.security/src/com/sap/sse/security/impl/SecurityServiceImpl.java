@@ -91,7 +91,7 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -291,7 +291,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Owner getOwnership(String idAsString) {
+    public Ownership getOwnership(String idAsString) {
         return accessControlStore.getOwnership(idAsString);
     }
 
@@ -398,15 +398,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
+    public SecurityService createOwnership(String idOfOwnedObjectAsString, String ownerUsername, UUID tenantOwner, String displayName) {
         UUID tenant;
         if (tenantOwner == null || getTenant(tenantOwner) == null || 
-                !getTenant(tenantOwner).contains(owner)) {
-            tenant = getUserByName(owner).getDefaultTenant();
+                !getTenant(tenantOwner).contains(ownerUsername)) {
+            tenant = getUserByName(ownerUsername).getDefaultTenant();
         } else {
             tenant = tenantOwner;
         }
-        apply(s->s.internalCreateOwnership(idAsString, owner, tenant, displayName));
+        apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, ownerUsername, tenant, displayName));
         return this;
     }
 
@@ -518,8 +518,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException {
-        for (Owner ownership : accessControlStore.getOwnerships()) {
-            if (ownership.getTenantOwner().equals(id)) {
+        for (Ownership ownership : accessControlStore.getOwnerships()) {
+            if (ownership.getTenantOwnerId().equals(id)) {
                 throw new TenantManagementException("The tenant still is tenant owner");
             }
         }

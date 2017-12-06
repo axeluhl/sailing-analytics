@@ -41,7 +41,7 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -103,7 +103,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
         AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
-        Owner ownership = getSecurityService().getOwnership(userGroup.getId().toString());
+        Ownership ownership = getSecurityService().getOwnership(userGroup.getId().toString());
         return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(),
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
@@ -113,7 +113,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return null;
         } else {
             AccessControlList acl = getSecurityService().getAccessControlList(tenant.getId().toString());
-            Owner ownership = getSecurityService().getOwnership(tenant.getId().toString());
+            Ownership ownership = getSecurityService().getOwnership(tenant.getId().toString());
             return new TenantDTO((UUID) tenant.getId(), tenant.getName(),
                     createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), tenant.getUsernames());
         }
@@ -133,9 +133,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
-    private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
+    private OwnerDTO createOwnershipDTOFromOwnership(Ownership ownership) {
         if (ownership != null) {
-            return new OwnerDTO(ownership.getId().toString(), ownership.getOwner(), ownership.getTenantOwner(), ownership.getDisplayName());
+            return new OwnerDTO(ownership.getIdOfOwnedObjectAsString(), ownership.getOwnerUsername(), ownership.getTenantOwnerId(), ownership.getDisplayNameOfOwnedObject());
         } else {
             return null;
         }

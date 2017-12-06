@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 
@@ -15,7 +15,7 @@ public interface DomainObjectFactory {
     
     AccessControlList loadAccessControlList(String id);
 
-    Iterable<Owner> loadAllOwnerships();
+    Iterable<Ownership> loadAllOwnerships();
     
     Iterable<Role> loadAllRoles();
     

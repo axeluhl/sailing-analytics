@@ -8,7 +8,7 @@ public interface RolePermissionModel {
     Iterable<Role> getRoles();
     
     boolean implies(UUID id, WildcardPermission permission);
-    boolean implies(UUID id, WildcardPermission permission, Owner ownership);
+    boolean implies(UUID id, WildcardPermission permission, Ownership ownership);
     /**
      * @param id Id of role
      * @param name Role name of the form "role_title:tenant". The tenant is an optional
@@ -22,5 +22,5 @@ public interface RolePermissionModel {
      *          "tw2016-dyas" would have "tw2016" as the tenant owner)
      * @param ownership Ownership of the data object
      */
-    boolean implies(UUID id, String name, WildcardPermission permission, Owner ownership);
+    boolean implies(UUID id, String name, WildcardPermission permission, Ownership ownership);
 }

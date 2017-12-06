@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -41,16 +41,16 @@ public class RolePermissionModelDTO implements RolePermissionModel, IsSerializab
     }
     
     @Override
-    public boolean implies(UUID id, WildcardPermission permission, Owner ownership) {
+    public boolean implies(UUID id, WildcardPermission permission, Ownership ownership) {
         return implies(id, roles.get(id).getName(), permission, ownership);
     }
     
     // TODO as default implementation in interface
     @Override
-    public boolean implies(UUID id, String name, WildcardPermission permission, Owner ownership) {
+    public boolean implies(UUID id, String name, WildcardPermission permission, Ownership ownership) {
         String[] parts = name.split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwnerId().equals(parts[1]))) {
             for (WildcardPermission rolePermission : getPermissions(id)) {
                 if (rolePermission.implies(permission)) {
                     return true;

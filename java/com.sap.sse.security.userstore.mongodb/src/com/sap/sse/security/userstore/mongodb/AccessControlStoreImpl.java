@@ -8,10 +8,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.OwnerImpl;
+import com.sap.sse.security.OwnershipImpl;
 import com.sap.sse.security.AccessControlListImpl;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -23,11 +23,14 @@ public class AccessControlStoreImpl implements AccessControlStore {
     
     private String name = "Access control store";
     
+    /**
+     * 
+     */
     private final ConcurrentHashMap<String, AccessControlList> accessControlLists;
     
-    private final ConcurrentHashMap<String, Owner> ownershipList;
+    private final ConcurrentHashMap<String, Ownership> ownerships;
     
-    private final ConcurrentHashMap<UUID, Role> roleList;
+    private final ConcurrentHashMap<UUID, Role> roles;
     
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
@@ -40,8 +43,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     
     public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         accessControlLists = new ConcurrentHashMap<>();
-        ownershipList = new ConcurrentHashMap<>();
-        roleList = new ConcurrentHashMap<>();
+        ownerships = new ConcurrentHashMap<>();
+        roles = new ConcurrentHashMap<>();
         
         this.mongoObjectFactory = mongoObjectFactory;
         
@@ -49,11 +52,11 @@ public class AccessControlStoreImpl implements AccessControlStore {
             for (AccessControlList acl : domainObjectFactory.loadAllAccessControlLists()) {
                 accessControlLists.put(acl.getId().toString(), acl);
             }
-            for (Owner ownership : domainObjectFactory.loadAllOwnerships()) {
-                ownershipList.put(ownership.getId().toString(), ownership);
+            for (Ownership ownership : domainObjectFactory.loadAllOwnerships()) {
+                ownerships.put(ownership.getIdOfOwnedObjectAsString(), ownership);
             }
             for (Role role : domainObjectFactory.loadAllRoles()) {
-                roleList.put(UUID.fromString(role.getId().toString()), role);
+                roles.put(UUID.fromString(role.getId().toString()), role);
             }
         }
     }
@@ -64,8 +67,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     @Override
-    public AccessControlList getAccessControlList(String idAsString) {
-        return accessControlLists.get(idAsString);
+    public AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString) {
+        return accessControlLists.get(idOfAccessControlledObjectAsString);
     }
 
     @Override
@@ -127,57 +130,57 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     @Override
-    public Owner createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
+    public Ownership createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
         setOwnership(idAsString, owner, tenantOwner, displayName);
-        return ownershipList.get(idAsString);
+        return ownerships.get(idAsString);
     }
 
     @Override
     public AccessControlStore setOwnership(String idAsString, String owner, UUID tenantOwner, String displayName) {
-        Owner ownership = new OwnerImpl(idAsString, owner, tenantOwner, displayName);
-        ownershipList.put(idAsString, ownership);
+        Ownership ownership = new OwnershipImpl(idAsString, owner, tenantOwner, displayName);
+        ownerships.put(idAsString, ownership);
         mongoObjectFactory.storeOwnership(ownership);
         return this;
     }
 
     @Override
     public AccessControlStore removeOwnership(String idAsString) {
-        Owner ownership = ownershipList.remove(idAsString);
+        Ownership ownership = ownerships.remove(idAsString);
         mongoObjectFactory.deleteOwnership(ownership);
         return this;
     }
 
     @Override
-    public Owner getOwnership(String idAsString) {
-        return ownershipList.get(idAsString);
+    public Ownership getOwnership(String idAsString) {
+        return ownerships.get(idAsString);
     }
     
     @Override 
-    public Iterable<Owner> getOwnerships() {
-        return new ArrayList<>(ownershipList.values());
+    public Iterable<Ownership> getOwnerships() {
+        return new ArrayList<>(ownerships.values());
     }
     
     @Override
     public Iterable<Role> getRoles() {
-        return new ArrayList<>(roleList.values());
+        return new ArrayList<>(roles.values());
     }
 
     @Override
     public Role getRole(UUID id) {
-        return roleList.get(id);
+        return roles.get(id);
     }
 
     @Override
     public Role createRole(UUID id, String displayName, Set<WildcardPermission> permissions) {
         Role role = new RoleImpl(id, displayName, permissions);
-        roleList.put(id, role);
+        roles.put(id, role);
         mongoObjectFactory.storeRole(role);
         return role;
     }
 
     @Override
     public AccessControlStore setRolePermissions(UUID id, Set<WildcardPermission> permissions) {
-        Role role = roleList.get(id);
+        Role role = roles.get(id);
         role = new RoleImpl(id, role.getName(), permissions);
         mongoObjectFactory.storeRole(role);
         return this;
@@ -185,7 +188,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public AccessControlStore addRolePermission(UUID id, WildcardPermission permission) {
-        Role role = roleList.get(id);
+        Role role = roles.get(id);
         Set<WildcardPermission> permissions = role.getPermissions();
         permissions.add(permission);
         role = new RoleImpl(id, role.getName(), permissions);
@@ -195,7 +198,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public AccessControlStore removeRolePermission(UUID id, WildcardPermission permission) {
-        Role role = roleList.get(id);
+        Role role = roles.get(id);
         Set<WildcardPermission> permissions = role.getPermissions();
         permissions.remove(permission);
         role = new RoleImpl(id, role.getName(), permissions);
@@ -205,7 +208,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public AccessControlStore setRoleDisplayName(UUID id, String displayName) {
-        Role role = roleList.get(id);
+        Role role = roles.get(id);
         role = new RoleImpl(id, displayName, role.getPermissions());
         mongoObjectFactory.storeRole(role);
         return this;
@@ -213,15 +216,15 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public AccessControlStore removeRole(UUID id) {
-        mongoObjectFactory.deleteRole(roleList.get(id));
-        roleList.remove(id);
+        mongoObjectFactory.deleteRole(roles.get(id));
+        roles.remove(id);
         return this;
     }
 
     @Override
     public void clear() {
         accessControlLists.clear();
-        ownershipList.clear();        
+        ownerships.clear();        
     }
 
     @Override
@@ -230,8 +233,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
         for (AccessControlList acl : newAccessControlStore.getAccessControlLists()) {
             accessControlLists.put(acl.getId().toString(), acl);
         }
-        for (Owner ownership : newAccessControlStore.getOwnerships()) {
-            ownershipList.put(ownership.getId().toString(), ownership);
+        for (Ownership ownership : newAccessControlStore.getOwnerships()) {
+            ownerships.put(ownership.getIdOfOwnedObjectAsString(), ownership);
         }
     }
 }

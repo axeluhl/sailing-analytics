@@ -20,7 +20,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.sap.sse.security.OwnerImpl;
+import com.sap.sse.security.OwnershipImpl;
 import com.sap.sse.security.AccessControlListImpl;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
@@ -28,7 +28,7 @@ import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -90,8 +90,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Owner> loadAllOwnerships() {
-        ArrayList<Owner> result = new ArrayList<>();
+    public Iterable<Ownership> loadAllOwnerships() {
+        ArrayList<Ownership> result = new ArrayList<>();
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         try {
             for (DBObject o : ownershipCollection.find()) {
@@ -104,12 +104,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private Owner loadOwnership(DBObject ownershipDBObject) {
-        final String id = (String) ownershipDBObject.get(FieldNames.Ownership.ID.name());
-        final String displayName = (String) ownershipDBObject.get(FieldNames.Ownership.DISPLAY_NAME.name());
-        final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER.name());
-        final UUID tenantOwner = UUID.fromString((String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER.name()));
-        return new OwnerImpl(id, owner, tenantOwner, displayName);
+    private Ownership loadOwnership(DBObject ownershipDBObject) {
+        final String id = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
+        final String displayName = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
+        final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
+        final UUID tenantOwner = UUID.fromString((String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name()));
+        return new OwnershipImpl(id, owner, tenantOwner, displayName);
     }
     
     @Override

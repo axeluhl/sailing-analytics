@@ -3,7 +3,6 @@ package com.sap.sse.security;
 import java.util.Set;
 import java.util.UUID;
 
-import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.shared.UserGroup;
 
 public class Tenant extends UserGroupImpl {
@@ -19,5 +18,10 @@ public class Tenant extends UserGroupImpl {
     
     public Tenant(UUID id, String name, Set<String> usernames) {
         super(id, name, usernames);
+    }
+
+    @Override
+    public UUID getId() {
+        return (UUID) super.getId();
     }
 }

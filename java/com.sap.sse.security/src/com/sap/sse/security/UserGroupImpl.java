@@ -1,6 +1,5 @@
 package com.sap.sse.security;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -26,7 +25,7 @@ public class UserGroupImpl implements UserGroup {
     }
     
     @Override
-    public Serializable getId() {
+    public UUID getId() {
         return id;
     }
     

@@ -503,7 +503,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.ShiroPermissionBuilderImpl;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
@@ -3680,27 +3680,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
             Iterable<UUID> leaderboardGroupIds, String tenantOwnerName)
             throws MalformedURLException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(
-                ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.CREATE))) {
-            UUID eventUuid = UUID.randomUUID();
-            TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
-            TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-            URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
-            URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-            Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
-            
-            List<ImageDescriptor> eventImages = convertToImages(images);
-            List<VideoDescriptor> eventVideos = convertToVideos(videos);
-            getService().apply(
-                    new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                            officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
-            createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-            getSecurityService().createAccessControlList(eventUuid.toString(), eventName);
-            getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(), (UUID) getSecurityService().getTenantByName(tenantOwnerName).getId(), eventName);
-            EventDTO result = getEventById(eventUuid, false);
-            return result;
-        }
-        throw new UnauthorizedException("You are not permitted to create events");
+        SecurityUtils.getSubject().checkPermission(
+                ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.CREATE));
+        UUID eventUuid = UUID.randomUUID();
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
+        URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+        Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
+        
+        List<ImageDescriptor> eventImages = convertToImages(images);
+        List<VideoDescriptor> eventVideos = convertToVideos(videos);
+        getService().apply(
+                new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
+                        officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
+        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
+        getSecurityService().createAccessControlList(eventUuid.toString(), eventName);
+        getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(),
+                getSecurityService().getTenantByName(tenantOwnerName).getId(), eventName);
+        EventDTO result = getEventById(eventUuid, false);
+        return result;
     }
 
     @Override
@@ -3974,14 +3973,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
         AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
-        Owner ownership = getSecurityService().getOwnership(userGroup.getId().toString());
+        Ownership ownership = getSecurityService().getOwnership(userGroup.getId().toString());
         return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
                 createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
     
-    private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
+    private OwnerDTO createOwnershipDTOFromOwnership(Ownership ownership) {
         if (ownership != null) {
-            return new OwnerDTO(ownership.getId().toString(), ownership.getOwner(), ownership.getTenantOwner(), ownership.getDisplayName());
+            return new OwnerDTO(ownership.getIdOfOwnedObjectAsString().toString(), ownership.getOwnerUsername(), ownership.getTenantOwnerId(), ownership.getDisplayNameOfOwnedObject());
         } else {
             return null;
         }

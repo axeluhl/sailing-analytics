@@ -25,10 +25,12 @@ public class UserGroupDTO implements UserGroup, IsSerializable {
         this.usernames = usernames;
     }
     
+    @Override
     public UUID getId() {
         return id;
     }
     
+    @Override
     public String getName() {
         return name;
     }

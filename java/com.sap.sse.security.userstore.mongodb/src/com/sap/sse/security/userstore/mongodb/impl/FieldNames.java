@@ -9,10 +9,13 @@ public class FieldNames {
     }
     
     public static enum Ownership {
-        ID,
-        OWNER,
-        DISPLAY_NAME,
-        TENANT_OWNER
+        /**
+         * The ID of the owned object
+         */
+        OBJECT_ID,
+        OWNER_USERNAME,
+        OBJECT_DISPLAY_NAME,
+        TENANT_OWNER_ID
     }
     
     public static enum Role {

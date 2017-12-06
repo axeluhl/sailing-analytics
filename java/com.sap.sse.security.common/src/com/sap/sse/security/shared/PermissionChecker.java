@@ -33,7 +33,7 @@ public class PermissionChecker {
      *          object type is asked after (e.g. "event:create").
      */
     public static boolean isPermitted(WildcardPermission permission, String user, Iterable<UserGroup> tenants, Iterable<WildcardPermission> directPermissions, Iterable<UUID> roles, 
-            RolePermissionModel rolePermissionModel, Owner ownership, AccessControlList acl) {
+            RolePermissionModel rolePermissionModel, Ownership ownership, AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
@@ -44,7 +44,7 @@ public class PermissionChecker {
         PermissionState result = PermissionState.NONE;
         
         // 1. check ownership
-        if (ownership != null && user.equals(ownership.getOwner())) {
+        if (ownership != null && user.equals(ownership.getOwnerUsername())) {
             result = PermissionState.GRANTED;
         }
         // 2. check ACL

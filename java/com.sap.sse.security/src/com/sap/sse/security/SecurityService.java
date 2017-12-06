@@ -16,7 +16,7 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -36,7 +36,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     SecurityManager getSecurityManager();
 
-    Owner getOwnership(String idAsString);
+    Ownership getOwnership(String idAsString);
 
     Iterable<AccessControlList> getAccessControlListList();
 

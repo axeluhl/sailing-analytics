@@ -3,40 +3,40 @@ package com.sap.sse.security.ui.shared;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.security.shared.Owner;
+import com.sap.sse.security.shared.Ownership;
 
-public class OwnerDTO implements Owner, IsSerializable {    
-    private String idAsString;
-    private String owner;
-    private UUID tenantOwner;
-    private String displayName;
+public class OwnerDTO implements Ownership, IsSerializable {    
+    private String idOfOwnedObjectAsString;
+    private String ownerUsername;
+    private UUID tenantOwnerId;
+    private String displayNameOfOwnedObject;
     
     OwnerDTO() {} // for serialization only
     
-    public OwnerDTO(String idAsString, String owner, UUID tenantOwner, String displayName) {
-        this.idAsString = idAsString;
-        this.owner = owner;
-        this.tenantOwner = tenantOwner;
-        this.displayName = displayName;
+    public OwnerDTO(String idOfOwnedObjectAsString, String ownerUsername, UUID tenantOwnerId, String displayNameOfOwnedObject) {
+        this.idOfOwnedObjectAsString = idOfOwnedObjectAsString;
+        this.ownerUsername = ownerUsername;
+        this.tenantOwnerId = tenantOwnerId;
+        this.displayNameOfOwnedObject = displayNameOfOwnedObject;
     }
     
     @Override
-    public String getId() {
-        return idAsString;
+    public String getIdOfOwnedObjectAsString() {
+        return idOfOwnedObjectAsString;
     }
     
     @Override
-    public String getOwner() {
-        return owner;
+    public String getOwnerUsername() {
+        return ownerUsername;
     }
     
     @Override
-    public UUID getTenantOwner() {
-        return tenantOwner;
+    public UUID getTenantOwnerId() {
+        return tenantOwnerId;
     }
 
     @Override
-    public String getDisplayName() {
-        return displayName;
+    public String getDisplayNameOfOwnedObject() {
+        return displayNameOfOwnedObject;
     }
 }
