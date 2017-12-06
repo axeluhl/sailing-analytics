@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.adminconsole.HandleTabSelectable;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows administrators to manage a sailing event.
@@ -32,7 +32,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private final CaptionPanel eventsPanel;
     private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     
-    public EventManagementPanel(final SailingServiceAsync sailingService, UserDTO user, final ErrorReporter errorReporter,
+    public EventManagementPanel(final SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final HandleTabSelectable handleTabSelectable) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
@@ -43,7 +43,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
 
-        eventListComposite = new EventListComposite(sailingService, user, errorReporter, regattaRefresher, this, handleTabSelectable, stringMessages);
+        eventListComposite = new EventListComposite(sailingService, userService, errorReporter, regattaRefresher, this, handleTabSelectable, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         

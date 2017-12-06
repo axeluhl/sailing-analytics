@@ -95,7 +95,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
 
-        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, getUserService().getCurrentUser(), this, this, getStringMessages(), panel);
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, getUserService(), this, this, getStringMessages(), panel);
         eventManagementPanel.ensureDebugId("EventManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
             @Override

@@ -521,7 +521,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         for (Role role : getSecurityService().getRoles()) {
             roleMap.put((UUID) role.getId(), createRoleDTOFromRole(role));
         }
-        TenantDTO defaultTenantDTO = createTenantDTOFromTenant(getSecurityService().getTenant(user.getDefaultTenant()));
+        TenantDTO defaultTenantDTO = createTenantDTOFromTenant(getSecurityService().getTenant(user.getDefaultTenantId()));
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
                 accountDTOs, user.getRoles(), new RolePermissionModelDTO(roleMap), defaultTenantDTO, user.getPermissions());

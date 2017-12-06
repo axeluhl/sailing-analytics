@@ -167,7 +167,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         dbUser.put(FieldNames.User.ROLES.name(), roles);
         dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
-        dbUser.put(FieldNames.User.DEFAULT_TENANT.name(), user.getDefaultTenant().toString());
+        dbUser.put(FieldNames.User.DEFAULT_TENANT.name(), user.getDefaultTenantId().toString());
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
     

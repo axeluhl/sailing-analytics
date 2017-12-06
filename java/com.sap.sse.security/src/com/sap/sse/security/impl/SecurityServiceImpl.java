@@ -207,7 +207,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 User user = createSimpleUser("admin", "nobody@sapsailing.com", "admin",
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
-                createOwnership("admin", "admin", user.getDefaultTenant(), "admin");
+                createOwnership("admin", "admin", user.getDefaultTenantId(), "admin");
                 addRoleForUser("admin", (UUID) AdminRole.getInstance().getId());
             } catch (UserManagementException | MailException | UserGroupManagementException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -393,21 +393,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner) {
-        return createOwnership(idAsString, owner, tenantOwner, "?");
+    public void createOwnership(String idAsString, String owner, UUID tenantOwner) {
+        createOwnership(idAsString, owner, tenantOwner, null);
     }
 
     @Override
-    public SecurityService createOwnership(String idOfOwnedObjectAsString, String ownerUsername, UUID tenantOwner, String displayName) {
-        UUID tenant;
-        if (tenantOwner == null || getTenant(tenantOwner) == null || 
-                !getTenant(tenantOwner).contains(ownerUsername)) {
-            tenant = getUserByName(ownerUsername).getDefaultTenant();
+    public void createOwnership(String idOfOwnedObjectAsString, String ownerUsername, UUID tenantOwnerId, String displayNameOfOwnedObject) {
+        UUID tenantId;
+        if (tenantOwnerId == null || getTenant(tenantOwnerId) == null || 
+                !getTenant(tenantOwnerId).contains(ownerUsername)) {
+            tenantId = getUserByName(ownerUsername).getDefaultTenantId();
         } else {
-            tenant = tenantOwner;
+            tenantId = tenantOwnerId;
         }
-        apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, ownerUsername, tenant, displayName));
-        return this;
+        apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, ownerUsername, tenantId, displayNameOfOwnedObject));
     }
 
     @Override

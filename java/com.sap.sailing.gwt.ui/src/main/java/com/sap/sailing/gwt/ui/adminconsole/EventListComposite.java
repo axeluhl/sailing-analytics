@@ -68,6 +68,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.PermissionBuilderImpl;
 import com.sap.sse.security.shared.PermissionBuilder.Action;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -77,6 +78,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  */
 public class EventListComposite extends Composite implements EventsRefresher, LeaderboardGroupsDisplayer {
     private final SailingServiceAsync sailingService;
+    private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
@@ -112,10 +114,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final EventsRefresher eventsRefresher;
     private final HandleTabSelectable handleTabSelectable;
     
-    public EventListComposite(final SailingServiceAsync sailingService, final UserDTO user, final ErrorReporter errorReporter,
+    public EventListComposite(final SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final HandleTabSelectable handleTabSelectable,
             final StringMessages stringMessages) {
         this.sailingService = sailingService;
+        this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -151,7 +154,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
-        if (!user.hasPermission(
+        if (!userService.getCurrentUser().hasPermission(
                 PermissionBuilderImpl.getInstance().getPermission("com.sap.sailing.domain.base.Event", DefaultActions.CREATE))) {
             createEventBtn.setVisible(false);
         }
@@ -194,7 +197,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
-        eventTable = createEventTable(user);
+        eventTable = createEventTable(userService.getCurrentUser());
         eventTable.ensureDebugId("EventsCellTable");
         filterTextbox.setTable(eventTable);
         @SuppressWarnings("unchecked")
@@ -211,17 +214,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 removeEventsButton.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
             }
         });
-        
         panel.add(filterTextbox);
         panel.add(eventTable);
-        
         noEventsLabel = new Label(stringMessages.noEventsYet());
         noEventsLabel.ensureDebugId("NoRegattasLabel");
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
-
         fillEvents();
-        
         initWidget(mainPanel);
     }
 
@@ -716,7 +715,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
                 newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
-                newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos(), newEvent.getLeaderboardGroupIds(), "tenant", new AsyncCallback<EventDTO>() {
+                newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos(), newEvent.getLeaderboardGroupIds(),
+                userService.getCurrentUser().getDefaultTenant().getName(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": " + t.getMessage());

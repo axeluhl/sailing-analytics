@@ -67,14 +67,26 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void deleteACL(String idAsString);
 
     /**
-     * @param idAsString Has to be globally unique
+     * Same as {@link #createOwnership(String, String, UUID, String)}, leaving the display name
+     * of the object owned undefined.
      */
-    SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner);
+    void createOwnership(String idAsString, String owner, UUID tenantOwner);
 
     /**
-     * @param idAsString Has to be globally unique
+     * @param idOfOwnedObjectAsString
+     *            the ID of the object for which ownership is declared
+     * @param owningUsername
+     *            the {@link User#getName() user name} of the user to become the owning user of the object with ID
+     *            {@code idOfOwnedObjectAsString}
+     * @param tenantOwnerId
+     *            the ID of the tenant to become owning tenant of the object with ID {@code idOfOwnedObjectAsString}
+     * @param displayNameOfOwnedObject
+     *            a display name that this store can use to produce a user-readable hint regarding the ownership
+     *            definition that this call creates; there is no guarantee that the display name will remain up to date
+     *            as the object identified by {@link idOfOwnedObjectAsString} may change its name without notifying this
+     *            store
      */
-    SecurityService createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
+    void createOwnership(String idOfOwnedObjectAsString, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
 
     void deleteOwnership(String idAsString);
 

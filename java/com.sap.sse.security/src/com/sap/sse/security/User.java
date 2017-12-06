@@ -171,7 +171,7 @@ public class User implements NamedWithID {
         permissions.remove(permission);
     }
     
-    public UUID getDefaultTenant() {
+    public UUID getDefaultTenantId() {
         return defaultTenant;
     }
     

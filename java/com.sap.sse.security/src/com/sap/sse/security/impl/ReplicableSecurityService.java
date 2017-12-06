@@ -30,9 +30,9 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalDeleteAcl(String idAsString);
     
-    Void internalCreateOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
+    Void internalCreateOwnership(String idOfOwnedObjectAsString, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
     
-    Void internalDeleteOwnership(String idAsString);
+    Void internalDeleteOwnership(String idOfOwnedObjectAsString);
     
     Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException;
     
