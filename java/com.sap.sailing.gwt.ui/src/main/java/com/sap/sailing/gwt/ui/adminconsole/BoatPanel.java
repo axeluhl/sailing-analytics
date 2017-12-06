@@ -87,7 +87,7 @@ public class BoatPanel extends SimplePanel {
     }
 
     private void openAddBoatDialog() {
-        boatTable.openEditBoatDialog(new BoatDTO());
+        boatTable.openEditBoatDialog(new BoatDTO(), null);
     }
     
     public void refreshBoatList() {

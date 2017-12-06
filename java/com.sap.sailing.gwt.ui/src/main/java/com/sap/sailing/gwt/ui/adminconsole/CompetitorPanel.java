@@ -177,7 +177,7 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     private void openAddCompetitorDialog() {
         CompetitorDTOImpl competitorDTO = new CompetitorDTOImpl();
         competitorDTO.setBoat(null);
-        competitorTable.openEditCompetitorDialog(competitorDTO);
+        competitorTable.openEditCompetitorWithoutBoatDialog(competitorDTO);
     }
 
     public void refreshCompetitorList() {

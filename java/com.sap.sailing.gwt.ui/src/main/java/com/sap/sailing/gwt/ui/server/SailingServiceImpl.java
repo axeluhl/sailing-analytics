@@ -60,6 +60,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -5625,6 +5626,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
 
+    private Boat getBoat(BoatDTO dto) {
+        return getService().getCompetitorStore().getExistingBoatByIdAsString(dto.getIdAsString());
+    }
+
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
@@ -5638,11 +5643,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Map<Competitor, Boat> competitorsToRemove = raceColumn.getCompetitorsAndBoatsRegisteredInRacelog(fleet);
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
         Util.addAll(competitorsToRemove.keySet(), competitorSetToRemove);
-        filterDuplicates(competitorsToRegister, competitorSetToRemove);
+        filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
         
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
-        
-        // TODO bug 2822: temporary commented out -> needs first cleanup of CompetitorDTO and BoatDTO passing  
+
+        // TODO bug2822: temporary commented out -> needs first cleanup of CompetitorDTO and BoatDTO passing  
         // raceColumn.registerCompetitors(competitorsToRegister, fleet);
     }
     
@@ -5663,15 +5668,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<Competitor> competitorsToRemove = leaderboard.getAllCompetitors();
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
         Util.addAll(competitorsToRemove, competitorSetToRemove);
-        filterDuplicates(competitorsToRegister, competitorSetToRemove);
+        filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
         
         hasRegattaLike.deregisterCompetitors(competitorSetToRemove);
-
-        // TODO bug 2822: temporary commented out -> needs first cleanup of CompetitorDTO and BoatDTO passing  
-        // hasRegattaLike.registerCompetitors(competitorsToRegister);
+        hasRegattaLike.registerCompetitors(competitorsToRegister);
     }
 
-    private HashSet<Competitor> filterDuplicates(Set<Competitor> competitorsToRegister, HashSet<Competitor> competitorSetToRemove) {
+    private HashSet<Competitor> filterCompetitorDuplicates(Set<Competitor> competitorsToRegister, HashSet<Competitor> competitorSetToRemove) {
         for (Iterator<Competitor> iterator = competitorSetToRemove.iterator(); iterator.hasNext();) {
             Competitor competitor = iterator.next();
             if (competitorsToRegister.remove(competitor)) {
@@ -5680,7 +5683,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return competitorSetToRemove;
     }
-    
+
+    private HashSet<Boat> filterBoatDuplicates(Set<Boat> boatsToRegister, HashSet<Boat> boatSetToRemove) {
+        for (Iterator<Boat> iterator = boatSetToRemove.iterator(); iterator.hasNext();) {
+            Boat boat = iterator.next();
+            if (boatsToRegister.remove(boat)) {
+                iterator.remove();
+            }
+        }
+        return boatSetToRemove;
+    }
+
     private Mark convertToMark(MarkDTO dto, boolean resolve) {
         Mark result = null;
         if (resolve) {
@@ -6555,6 +6568,45 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
         return convertToCompetitorDTOs(raceColumn.getCompetitorsAndBoatsRegisteredInRacelog(fleet).keySet());
+    }
+
+    @Override
+    public Collection<BoatDTO> getBoatRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (! (leaderboard instanceof HasRegattaLike)) {
+            throw new DoesNotHaveRegattaLogException();
+        }
+        HasRegattaLike regattaLikeLeaderboard = ((HasRegattaLike) leaderboard);
+        return convertToBoatDTOs(regattaLikeLeaderboard.getBoatsRegisteredInRegattaLog());
+    }
+    
+    @Override
+    public void setBoatRegistrationsInRegattaLog(String leaderboardName, Set<BoatDTO> boatDTOs)
+            throws DoesNotHaveRegattaLogException, NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (!(leaderboard instanceof HasRegattaLike)){
+            throw new DoesNotHaveRegattaLogException();
+        }
+        
+        Set<Boat> boatsToRegister = new HashSet<Boat>();
+        for (BoatDTO dto : boatDTOs) {
+            boatsToRegister.add(getBoat(dto));
+        }
+        
+        HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
+        Iterable<Boat> boatsToRemove = leaderboard.getAllBoats();
+        HashSet<Boat> boatSetToRemove = new HashSet<>();
+        Util.addAll(boatsToRemove, boatSetToRemove);
+        filterBoatDuplicates(boatsToRegister, boatSetToRemove);
+        
+        hasRegattaLike.deregisterBoats(boatSetToRemove);
+        hasRegattaLike.registerBoats(boatsToRegister);        
+    }
+
+    @Override
+    public Collection<BoatDTO> getBoatRegistrationsForLeaderboard(String leaderboardName) throws NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        return convertToBoatDTOs(leaderboard.getAllBoats());
     }
 
     @Override

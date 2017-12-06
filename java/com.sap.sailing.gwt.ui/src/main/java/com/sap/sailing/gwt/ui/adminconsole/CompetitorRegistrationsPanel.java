@@ -49,7 +49,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     private Button registerBtn;
     private Button unregisterBtn;
     private Button addCompetitorWithBoatButton;
-    private Button addCompetitorWithoutBoatButton;
+    private Button addCompetitorButton;
     private CheckBox showOnlyCompetitorsOfLogCheckBox;
     private final String leaderboardName;
     private final BusyIndicator busyIndicator;
@@ -88,20 +88,21 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         this.registeredCompetitorsRetriever = registeredCompetitorsRetriever;
         this.importCompetitorCallback = new RaceOrRegattaImportCompetitorCallback(this, sailingService, errorReporter, stringMessages);
         final HorizontalPanel buttonPanel = new HorizontalPanel();
-        addCompetitorWithoutBoatButton = new Button(stringMessages.add("competitor"));
-        addCompetitorWithoutBoatButton.addClickHandler(new ClickHandler() {
+        addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
+        addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 CompetitorDTOImpl competitorDTO = new CompetitorDTOImpl();
                 competitorDTO.setBoat(null);
-                registeredCompetitorsTable.openEditCompetitorDialog(competitorDTO);
+                registeredCompetitorsTable.openEditCompetitorWithoutBoatDialog(competitorDTO);
             }
         });
-        addCompetitorWithBoatButton = new Button(stringMessages.add("competitor and boat"));
+        addCompetitorWithBoatButton = new Button(stringMessages.add(stringMessages.competitorWithBoat()));
         addCompetitorWithBoatButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                registeredCompetitorsTable.openCreateCompetitorWithBoatDialog(boatClass);
+                CompetitorDTOImpl competitorDTO = new CompetitorDTOImpl();
+                registeredCompetitorsTable.openEditCompetitorWithBoatDialog(competitorDTO, boatClass);
             }
         });
 
@@ -171,7 +172,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         competitorRegistrationPanel.setCellVerticalAlignment(movePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         competitorRegistrationPanel.add(allCompetitorsPanel);
         if (canBoatsOfCompetitorsChangePerRace) {
-            buttonPanel.add(addCompetitorWithoutBoatButton);
+            buttonPanel.add(addCompetitorButton);
         } else {
             buttonPanel.add(addCompetitorWithBoatButton);
         }
@@ -275,11 +276,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         registerBtn.setEnabled(false);
         unregisterBtn.setEnabled(false);
         addCompetitorWithBoatButton.setEnabled(false);
-        addCompetitorWithoutBoatButton.setEnabled(false);
+        addCompetitorButton.setEnabled(false);
         registerBtn.setTitle(tooltip);
         unregisterBtn.setTitle(tooltip);
         addCompetitorWithBoatButton.setTitle(tooltip);
-        addCompetitorWithoutBoatButton.setTitle(tooltip);
+        addCompetitorButton.setTitle(tooltip);
         validateAndUpdate();
     }
     
@@ -293,11 +294,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         registerBtn.setEnabled(true);
         unregisterBtn.setEnabled(true);
         addCompetitorWithBoatButton.setEnabled(true);
-        addCompetitorWithoutBoatButton.setEnabled(true);
+        addCompetitorButton.setEnabled(true);
         registerBtn.setTitle("");
         unregisterBtn.setTitle("");
         addCompetitorWithBoatButton.setTitle("");
-        addCompetitorWithoutBoatButton.setTitle("");
+        addCompetitorButton.setTitle("");
         validateAndUpdate();
     }
 

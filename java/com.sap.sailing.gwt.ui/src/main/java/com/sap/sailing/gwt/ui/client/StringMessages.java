@@ -51,6 +51,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
     String boat();
     String boats();
+    String competitorWithBoat();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
     String newDotDotDot();
@@ -979,8 +980,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterBoats();
     String editCompetitor();
     String pleaseEnterASailNumber();
-    String pleaseEnterASailNumberOrAName();
+    String pleaseEnterASailNumberOrABoatName();
     String successfullyAllowedCompetitorReset(String names);
+    String successfullyAllowedBoatReset(String names);
     String allowReload();
     String id();
     String compress();
@@ -1091,6 +1093,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterByLeaderboard();
     String removeLeaderboardFilter();
     String competitorRegistrations();
+    String boatRegistrations();
     String trackerStatus();
     String courseStatus();
     String canOnlyBeEditedBeforeStartingTracking();
@@ -1137,6 +1140,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String twoMarkControlPoint();
     String registeredCompetitors();
     String competitorPool();
+    String registeredBoats();
+    String boatPool();
     String selectAtLeastOne();
     String selectRaces();
     String importFixes();
@@ -1505,6 +1510,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String inviteSelectedCompetitors();
     String denoteAllRacesForRaceLogTrackingShorctut();
     String registerCompetitors();
+    String registerBoats();
     String createDefaultRegattaLeaderboard();
     String doYouWantToCreateADefaultRegattaLeaderboard();
     String copyCourse();
@@ -1558,8 +1564,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String bufferLineStrokeWeight();
     String profile();
     String showOnlyCompetitorsOfLog();
+    String showOnlyBoatsOfLog();
     String maneuverType();
     String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
+    String confirmLosingBoatEditsWhenTogglingLogBasedView();
     String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
     String pleaseCreateAtLeastOneMappingBy();
     String createDefaultLeaderboardGroup();

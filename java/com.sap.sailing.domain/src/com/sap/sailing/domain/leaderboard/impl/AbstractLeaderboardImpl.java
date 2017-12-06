@@ -103,6 +103,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Iterable<Boat> getAllBoats() {
+        return getOrCreateCompetitorsProvider().getAllBoats();
+    }
+
+    @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
     }
@@ -242,15 +247,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
     
     // boat functions
-    /**
-     * This collects all boats by visiting all {@link TrackedRace}s associated with this
-     * leaderboard's columns (see {@link #getTrackedRaces()}).
-     */
-    @Override
-    public Iterable<Boat> getAllBoats() {
-        return getBoatsRegisteredInRegattaLog();
-    }
-
     @Override
     public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();

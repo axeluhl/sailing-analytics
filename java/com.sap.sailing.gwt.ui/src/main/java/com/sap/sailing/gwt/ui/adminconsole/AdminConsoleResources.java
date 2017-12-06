@@ -83,6 +83,9 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/competitor_registrations.png")
     ImageResource competitorRegistrations();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boat_registrations.png")
+    ImageResource boatRegistrations();
+
     @Source("com/sap/sailing/gwt/ui/client/images/define_course.png")
     ImageResource defineCourse();
 

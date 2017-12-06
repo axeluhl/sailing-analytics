@@ -143,6 +143,17 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> boats = new HashSet<>();
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            for (Boat boat: leaderboard.getAllBoats()) {
+                boats.add(boat);
+            }
+        }
+        return boats;
+    }
+
+    @Override
     public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         Set<Competitor> competitors = new HashSet<Competitor>();
         Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();

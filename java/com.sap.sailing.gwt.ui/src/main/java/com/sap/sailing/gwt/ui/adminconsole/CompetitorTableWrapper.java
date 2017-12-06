@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -305,7 +304,15 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public void update(int index, final CompetitorDTO competitor, String value) {
                 if (CompetitorConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditCompetitorDialog(competitor);
+                    if (competitor.getBoat() != null) {
+                        String boatClass = null;
+                        if (competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
+                            boatClass = competitor.getBoat().getBoatClass().getName();
+                        }
+                        openEditCompetitorWithBoatDialog(competitor, boatClass);
+                    } else {
+                        openEditCompetitorWithoutBoatDialog(competitor);
+                    }
                 } else if (CompetitorConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
                     allowUpdate(Collections.singleton(competitor));
                 }
@@ -380,44 +387,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         filterField.updateAll(result);
     }
 
-    void openCreateCompetitorWithBoatDialog(String boatClass) {
-        final CompetitorWithBoatCreateDialog dialog = new CompetitorWithBoatCreateDialog(sailingService, stringMessages, errorReporter, 
-                new CompetitorDTOImpl(), new DialogCallback<CompetitorDTO>() {
-            @Override
-            public void ok(final CompetitorDTO competitor) {
-                sailingService.addOrUpdateCompetitorWithBoat(competitor, new AsyncCallback<CompetitorDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to create competitor with boat: " + caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(CompetitorDTO updatedCompetitor) {
-                        getFilterField().add(updatedCompetitor);
-                        getDataProvider().refresh();
-                    }  
-                });
-            }
-
-            @Override
-            public void cancel() {
-            }
-        },  boatClass);
-        dialog.show();
-    }
-
-    public void openEditCompetitorDialog(final CompetitorDTO competitor) {
-        if (competitor.getBoat() != null) {
-            String boatClass = null;
-            if (competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
-                boatClass = competitor.getBoat().getBoatClass().getName();
-            }
-            openEditCompetitorWithBoatDialog(competitor, boatClass);
-        } else {
-            openEditCompetitorWithoutBoatDialog(competitor);
-        }
-    }
-    
     void openEditCompetitorWithBoatDialog(final CompetitorDTO originalCompetitor, String boatClass) {
         final CompetitorWithBoatEditDialog dialog = new CompetitorWithBoatEditDialog(stringMessages, 
                 originalCompetitor, new DialogCallback<CompetitorDTO>() {

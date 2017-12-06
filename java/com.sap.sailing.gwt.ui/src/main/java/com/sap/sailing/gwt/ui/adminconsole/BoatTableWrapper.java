@@ -136,7 +136,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
             @Override
             public void update(int index, final BoatDTO boat, String value) {
                 if (BoatConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditBoatDialog(boat);
+                    openEditBoatDialog(boat, /* boatClassName */ null);
                 } else if (BoatConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
                     allowUpdate(Collections.singleton(boat));
                 }
@@ -215,8 +215,8 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         filterField.updateAll(result);
     }
     
-    void openEditBoatDialog(final BoatDTO originalBoat) {
-        final BoatEditDialog dialog = new BoatEditDialog(stringMessages, originalBoat, new DialogCallback<BoatDTO>() {
+    void openEditBoatDialog(final BoatDTO originalBoat, String boatClassName) {
+        final BoatEditDialog dialog = new BoatEditDialog(stringMessages, originalBoat, boatClassName, new DialogCallback<BoatDTO>() {
             @Override
             public void ok(BoatDTO boat) {
                 sailingService.addOrUpdateBoat(boat, new AsyncCallback<BoatDTO>() {
@@ -260,7 +260,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
             @Override
             public void onSuccess(Void result) {
-                Window.alert(stringMessages.successfullyAllowedCompetitorReset(boats.toString()));
+                Window.alert(stringMessages.successfullyAllowedBoatReset(boats.toString()));
             }
         });
     }

@@ -2,7 +2,6 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -23,7 +22,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatE
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -189,7 +188,23 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     public Iterable<Competitor> getAllCompetitors() {
         return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
-    
+
+    /**
+     * Returns a Collection of all {@link Boat boats} collected over {@link RegattaLog}, {@link RaceLog} as
+     * well as the {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached.
+     * While subsequent calls may return different {@link Collection Collections} the contents of a {@link Collection} returned may never change.
+     */
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> result = new HashSet<>();
+        for (RaceColumn rc: provider.getRaceColumns()) {
+            result.addAll(rc.getAllCompetitorsAndTheirBoats().values());
+        }
+        for (Boat boat: provider.getBoatsRegisteredInRegattaLog()) {
+            result.add(boat);
+        }
+        return result; 
+    }
+
     /**
      * Returns a Collection of all {@link Competitor Competitors} collected over {@link RegattaLog}, {@link RaceLog} as
      * well as the {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached. While
@@ -212,8 +227,8 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
             // If no race exists, the regatta log-provided competitor registrations will not have
             // been considered yet; add them:
-            final Map<Competitor, Boat> regattaLogProvidedCompetitorsAndBoats = new CompetitorsAndBoatsInLogAnalyzer<>(regattaLog).analyze();
-            result.addAll(regattaLogProvidedCompetitorsAndBoats.keySet());
+            final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
+            result.addAll(regattaLogProvidedCompetitors);
             // else, don't add regatta log competitors because they have been added in each column already.
             // The competitors are collected from the races. Those, however, will be the regatta log
             // competitors if the race does not define its own.

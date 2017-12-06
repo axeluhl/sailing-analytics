@@ -35,14 +35,14 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
             String result = super.getErrorMessage(competitorToValidate);
             if (result == null) {
                 BoatDTO boatToValidate = competitorToValidate.getBoat();
-                if (boatToValidate == null) {
-                    result = "You need to specify a boat for the competitor";
-                } else {
-                    if (boatToValidate.getSailId() == null || boatToValidate.getSailId().isEmpty()) {
-                        result = stringMessages.pleaseEnterASailNumber();
-                    } else if (boatToValidate.getBoatClass().getName() == null || boatToValidate.getBoatClass().getName().isEmpty()) {
-                        result = stringMessages.pleaseEnterABoatClass();
-                    }
+                boolean invalidSailId = boatToValidate.getSailId() == null || boatToValidate.getSailId().isEmpty(); 
+                boolean invalidName = boatToValidate.getName() == null || boatToValidate.getName().isEmpty();
+                if (invalidSailId && invalidName) {
+                    result = stringMessages.pleaseEnterASailNumberOrABoatName();
+                } else if (boatToValidate.getColor() != null && boatToValidate.getColor() instanceof InvalidColor) {
+                    result = boatToValidate.getColor().getAsHtml();
+                } else if (boatToValidate.getBoatClass().getName() == null || boatToValidate.getBoatClass().getName().isEmpty()) {
+                    result = stringMessages.pleaseEnterABoatClass();
                 }
             }
             return result;

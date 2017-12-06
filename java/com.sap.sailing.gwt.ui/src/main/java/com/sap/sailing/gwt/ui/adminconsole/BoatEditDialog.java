@@ -21,11 +21,15 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  */
 public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     private final BoatDTO boatToEdit;
-    private final TextBox name;
-    private final SuggestBox boatClassName;
+    private final TextBox nameTextBox;
+    private final SuggestBox boatClassNameBox;
     private final TextBox displayColorTextBox;
-    private final TextBox sailId;
+    private final TextBox sailIdTextBox;
     private final StringMessages stringMessages;
+
+    public BoatEditDialog(final StringMessages stringMessages, BoatDTO boatToEdit, DialogCallback<BoatDTO> callback) {
+        this(stringMessages, boatToEdit, null, callback);
+    }
     
     /**
      * The class creates the UI-dialog to edit the data of a boat.
@@ -33,7 +37,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
      * @param boatToEdit
      *            The 'boatToEdit' parameter contains the boat which should be changed or initialized.
      */
-    public BoatEditDialog(final StringMessages stringMessages, BoatDTO boatToEdit,
+    public BoatEditDialog(final StringMessages stringMessages, BoatDTO boatToEdit, String boatClassName,
             DialogCallback<BoatDTO> callback) {
         super(stringMessages.edit() + " " + stringMessages.boat(), null, stringMessages.ok(), stringMessages
                 .cancel(), new Validator<BoatDTO>() {
@@ -43,7 +47,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                         boolean invalidSailId = valueToValidate.getSailId() == null || valueToValidate.getSailId().isEmpty(); 
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
                         if (invalidSailId && invalidName) {
-                            result = stringMessages.pleaseEnterASailNumberOrAName();
+                            result = stringMessages.pleaseEnterASailNumberOrABoatName();
                         } else if (valueToValidate.getColor() != null && valueToValidate.getColor() instanceof InvalidColor) {
                             result = valueToValidate.getColor().getAsHtml();
                         } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
@@ -56,24 +60,24 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
         this.stringMessages = stringMessages;
         this.boatToEdit = boatToEdit;
                 
-        this.boatClassName = createSuggestBox(new BoatClassMasterdataSuggestOracle());
-        boatClassName.ensureDebugId("BoatClassNameSuggestBox");
+        this.boatClassNameBox = createSuggestBox(new BoatClassMasterdataSuggestOracle());
+        boatClassNameBox.ensureDebugId("BoatClassNameSuggestBox");
         if (boatToEdit.getBoatClass() != null) {
-            boatClassName.setValue(boatToEdit.getBoatClass().getName());
-            boatClassName.setEnabled(false);
+            boatClassNameBox.setValue(boatToEdit.getBoatClass().getName());
+            boatClassNameBox.setEnabled(false);
         } else {
-            boatClassName.setValue(null); // widgets have to accept null values here
+            boatClassNameBox.setValue(boatClassName); // widgets have to accept null values here
         }
-        this.name = createTextBox(boatToEdit.getName());
-        name.ensureDebugId("NameTextBox");
+        this.nameTextBox = createTextBox(boatToEdit.getName());
+        nameTextBox.ensureDebugId("NameTextBox");
         this.displayColorTextBox = createTextBox(boatToEdit.getColor() == null ? "" : boatToEdit.getColor().getAsHtml()); 
-        this.sailId = createTextBox(boatToEdit.getSailId());
-        sailId.ensureDebugId("SailIdTextBox");
+        this.sailIdTextBox = createTextBox(boatToEdit.getSailId());
+        sailIdTextBox.ensureDebugId("SailIdTextBox");
     }
 
     @Override
     protected FocusWidget getInitialFocusWidget() {
-        return name;
+        return nameTextBox;
     }
 
     /**
@@ -123,8 +127,8 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL, Distance.NULL);
-        BoatDTO boat = new BoatDTO(boatToEdit.getIdAsString(), name.getText(), boatClass, sailId.getText(), color);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassNameBox.getValue(), Distance.NULL, Distance.NULL);
+        BoatDTO boat = new BoatDTO(boatToEdit.getIdAsString(), nameTextBox.getText(), boatClass, sailIdTextBox.getText(), color);
         return boat;
     }
 
@@ -132,13 +136,13 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     protected Widget getAdditionalWidget() {
         Grid result = new Grid(4, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
-        result.setWidget(0, 1, name);
+        result.setWidget(0, 1, nameTextBox);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
-        result.setWidget(1, 1, sailId);
+        result.setWidget(1, 1, sailIdTextBox);
         result.setWidget(2, 0, new Label(stringMessages.color()));
         result.setWidget(2, 1, displayColorTextBox);
         result.setWidget(3, 0, new Label(stringMessages.boatClass()));
-        result.setWidget(3, 1, boatClassName);
+        result.setWidget(3, 1, boatClassNameBox);
         return result;
     }
 

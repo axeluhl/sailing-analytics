@@ -1160,7 +1160,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     public Iterable<Competitor> getAllCompetitors() {
         return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
-    
+
     @Override
     public void destroy() {
         for (CacheInvalidationListener cacheInvalidationListener : cacheInvalidationListeners) {

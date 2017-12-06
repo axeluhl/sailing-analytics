@@ -100,6 +100,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     Iterable<Competitor> getAllCompetitors();
 
+    Iterable<Boat> getAllBoats();
+
     /**
      * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element in a pair
      * which {@link RaceDefinition}s were used in order to fetch their {@link RaceDefinition#getCompetitors()} to
