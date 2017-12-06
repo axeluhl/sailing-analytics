@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -28,6 +30,8 @@ import com.sap.sse.common.settings.generic.ValueSetting;
  *
  */
 public class SettingsToStringMapSerializer {
+    
+    private static final Logger LOG = Logger.getLogger(AbstractSettingsToJsonSerializer.class.getName());
     
     private static final String ADDED_SUFFIX = GenericSerializableSettings.PATH_SEPARATOR + GenericSerializableSettings.ADDED_TOKEN;
     private static final String REMOVED_SUFFIX = GenericSerializableSettings.PATH_SEPARATOR + GenericSerializableSettings.REMOVED_TOKEN;
@@ -177,7 +181,14 @@ public class SettingsToStringMapSerializer {
             // Additional values are currently silently skipped.
             // This should only happen if somebody manipulates the data or a List setting is changed to a single setting
             // value.
-            valueSetting.setValue(valueSetting.getValueConverter().fromStringValue(iterator.next()));
+            final ValueConverter<T> valueConverter = valueSetting.getValueConverter();
+            final String stringValue = iterator.next();
+            try {
+                valueSetting.setValue(valueConverter.fromStringValue(stringValue));
+            } catch(Exception e) {
+                LOG.log(Level.WARNING, "Error while converting String value \"" + stringValue + "\" using converter \""
+                        + valueConverter.getClass().getSimpleName() + "\"", e);
+            }
         }
     }
 
@@ -197,7 +208,12 @@ public class SettingsToStringMapSerializer {
         List<T> deserializedValues = new ArrayList<>();
         if(values != null) {
             for (String stringValue : values) {
-                deserializedValues.add(valueConverter.fromStringValue(stringValue));
+                try {
+                    deserializedValues.add(valueConverter.fromStringValue(stringValue));
+                } catch(Exception e) {
+                    LOG.log(Level.WARNING, "Error while converting String value \"" + stringValue + "\" using converter \""
+                            + valueConverter.getClass().getSimpleName() + "\"", e);
+                }
             }
         }
         return deserializedValues;
