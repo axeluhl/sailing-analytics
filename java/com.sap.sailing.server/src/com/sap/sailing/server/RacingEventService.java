@@ -54,7 +54,6 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -826,8 +825,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param flightMultiplier
      * @return calculated {@link PairingListTemplate}
      */
-    PairingListTemplate createPairingListFromRegatta(AbstractLeaderboardDTO leaderboardDTO, int competitorsCount,
-            int flightMultiplier);
+    PairingListTemplate createPairingListFromRegatta(final String leaderboardName, final int competitorsCount, final int flightMultiplier);
     
-    PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, Leaderboard leaderboard);
+    PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
+            final String leaderboardName);
 }

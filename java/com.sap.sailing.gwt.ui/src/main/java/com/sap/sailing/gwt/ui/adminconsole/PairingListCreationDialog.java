@@ -143,7 +143,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.fillRaceLogsFromPairingListTemplate(template, leaderboardDTO, new AsyncCallback<Void>() {
+                sailingService.fillRaceLogsFromPairingListTemplate(template, leaderboardDTO.getName(), new AsyncCallback<Void>() {
                     
                     @Override
                     public void onSuccess(Void result) {

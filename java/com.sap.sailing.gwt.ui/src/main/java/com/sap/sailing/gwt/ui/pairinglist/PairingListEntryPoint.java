@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -19,7 +18,6 @@ import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
@@ -61,7 +59,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 PairingListTemplateDTO pairingListTemplateDTO = new PairingListTemplateDTO(result.competitorsCount, 
                         pairingListContextDefinition.getFlightMultiplier());
                 
-                sailingService.getPairingListFromTemplate(pairingListTemplateDTO, result, new AsyncCallback<PairingListDTO>() {
+                sailingService.getPairingListFromTemplate(pairingListTemplateDTO, result.getName(), new AsyncCallback<PairingListDTO>() {
                     
                     @Override
                     public void onSuccess(PairingListDTO result) {

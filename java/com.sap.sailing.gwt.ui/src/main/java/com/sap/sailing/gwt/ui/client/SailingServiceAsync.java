@@ -874,13 +874,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
 
-    void calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorCount, int flightMultiplier, 
+    void calculatePairingList(final String leaderboardName, int competitorCount, int flightMultiplier, 
             AsyncCallback<PairingListTemplateDTO> callback) throws NotFoundException,IllegalArgumentException ;
     
-    void getPairingListFromTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO,
+    void getPairingListFromTemplate(PairingListTemplateDTO pairingListTemplateDTO, final String leaderboardName,
             AsyncCallback<PairingListDTO> callback);
     
-    void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO, 
+    void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, final String leaderboardName, 
             AsyncCallback<Void> callback);
 
 }

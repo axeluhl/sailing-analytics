@@ -112,7 +112,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -4154,21 +4153,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public PairingListTemplate createPairingListFromRegatta(AbstractLeaderboardDTO leaderboardDTO, int competitorsCount,
+    public PairingListTemplate createPairingListFromRegatta(final String leaderboardName, int competitorsCount, 
             int flightMultiplier) {
+        
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
 
-        if (leaderboardDTO != null) {
+        if (leaderboard != null) {
             PairingListTemplate template = pairingListTemplateFactory
                     .getOrCreatePairingListTemplate(new PairingFrameProvider() {
 
                         @Override
                         public int getGroupsCount() {
-                            return leaderboardDTO.getRaceList().get(0).getFleets().size();
+                            return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
                         }
 
                         @Override
                         public int getFlightsCount() {
-                            return Util.size(leaderboardDTO.getRaceList());
+                            return Util.size(leaderboard.getRaceColumns());
                         }
 
                         @Override
@@ -4184,7 +4185,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
-            Leaderboard leaderboard) {
+            final String leaderboardName) {
+        
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        
         PairingList<RaceColumn, Fleet, Competitor> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
 
             @Override
