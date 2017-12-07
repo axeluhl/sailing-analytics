@@ -531,17 +531,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         VideoContainer removedVideoContainer = activeVideoContainers.remove(videoTrack);
         if (removedVideoContainer != null) {
             removedVideoContainer.shutDown();
-            if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) { // in case this video
-                                                                                                // has been the sound
-                                                                                                // source, replace the
-                                                                                                // video player with a
-                                                                                                // dedicated audio
-                                                                                                // player
-                if (videoTrack.isYoutube()) {
-                    assignNewAudioPlayer(null);
-                } else {
-                    assignNewAudioPlayer(videoTrack);
-                }
+            if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) {
+                assignNewAudioPlayer(null);
             }
             notifyStateChange();
         } else {
