@@ -6813,14 +6813,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         PairingList<RaceColumn, Fleet, Competitor> pairingList = 
                 getService().getPairingListFromTemplate(pairingListTemplate, leaderboardName);
         
-        List<List<List<CompetitorDTO>>> result = new ArrayList<>();
+        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
+        
+        List<BoatDTO> boats = new ArrayList<>();
+        int boatIndex;
         
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            List<List<CompetitorDTO>> fleets = new ArrayList<>();
-            for (Fleet fleet : raceColumn.getFleets()) {
-                fleets.add(this.convertToCompetitorDTOs(pairingList.getCompetitors(raceColumn, fleet)));
+            List<List<Pair<CompetitorDTO, BoatDTO>>> flights = new ArrayList<>();
+            for (Fleet fleetElement : raceColumn.getFleets()) {
+                List<Pair<CompetitorDTO, BoatDTO>> fleets = new ArrayList<>();
+                boatIndex = 0;
+                for (Competitor competitor : pairingList.getCompetitors(raceColumn, fleetElement)) {
+                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                    if (boats.size() <= boatIndex) {
+                        boats.add(new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID()));
+                    }
+                    
+                    fleets.add(new Pair<CompetitorDTO, BoatDTO>(competitorDTO, boats.get(boatIndex)));
+                    boatIndex++;
+                }
+                flights.add(fleets);
             }
-            result.add(fleets);
+            result.add(flights);
         }
         
         return new PairingListDTO(result);
@@ -6839,6 +6853,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
+                // TODO set boat and competitors in race logs
                 Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>(this.convertToCompetitorDTOs(pairingList.getCompetitors(raceColumn, fleet)));
                 this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(), fleet.getName(), 
                         competitors);

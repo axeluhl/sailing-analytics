@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
@@ -19,6 +20,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class PairingListEntryPoint extends AbstractSailingEntryPoint {
@@ -99,12 +101,12 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             pairingListGrid.getCellFormatter().getElement(0, i).getStyle().setTextAlign(TextAlign.CENTER);
         }
         
-        for (List<List<CompetitorDTO>> flight : pairingListDTO.getPairingList()) {
-            for (List<CompetitorDTO> group : flight) {
+        for (List<List<Pair<CompetitorDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
+            for (List<Pair<CompetitorDTO, BoatDTO>> group : flight) {
                 pairingListGrid.setWidget(groupCounter, 0, new Label(getStringMessages().fleet() + " " + String.valueOf(groupCounter)));
                 boatCounter = 1;
-                for (CompetitorDTO competitorDTO : group) {
-                    pairingListGrid.setWidget(groupCounter, boatCounter, new Label(competitorDTO.getSailID()));
+                for (Pair<CompetitorDTO, BoatDTO> competitorDTO : group) {
+                    pairingListGrid.setWidget(groupCounter, boatCounter, new Label(competitorDTO.getA().getSailID()));
                     
                     pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
                             .setFontWeight(Style.FontWeight.BOLD);
