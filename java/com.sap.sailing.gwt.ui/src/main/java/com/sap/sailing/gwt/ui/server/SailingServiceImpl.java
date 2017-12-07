@@ -5651,14 +5651,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             canBoatsOfCompetitorsChangePerRace = false;
         }        
         
-        Map<Competitor, Boat> competitorsToRemove = raceColumn.getCompetitorsAndBoatsRegisteredInRacelog(fleet);
+        Map<Competitor, Boat> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet);
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
         Util.addAll(competitorsToRemove.keySet(), competitorSetToRemove);
         filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
         
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
-
-        // raceColumn.registerCompetitors(competitorsToRegister, fleet);
+        raceColumn.registerCompetitors(competitorsToRegister, fleet);
     }
     
     @Override
@@ -6577,7 +6576,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        return convertToCompetitorDTOs(raceColumn.getCompetitorsAndBoatsRegisteredInRacelog(fleet).keySet());
+        return convertToCompetitorDTOs(raceColumn.getCompetitorsRegisteredInRacelog(fleet).keySet());
     }
 
     @Override

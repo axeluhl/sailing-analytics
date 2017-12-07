@@ -123,7 +123,7 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     }
     
     @Override
-    public Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRacelog(final Fleet fleet) {
+    public Map<Competitor, Boat> getCompetitorsRegisteredInRacelog(final Fleet fleet) {
         RaceLog raceLog = getRaceLog(fleet);
         if (raceLog == null) {
             return Collections.emptyMap();

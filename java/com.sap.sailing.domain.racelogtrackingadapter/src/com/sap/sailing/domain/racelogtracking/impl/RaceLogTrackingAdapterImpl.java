@@ -230,10 +230,10 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             final Fleet toFleet = toRace.getB();
             try {
                 if (toRaceColumn.isCompetitorRegistrationInRacelogEnabled(toFleet)) {
-                    toRaceColumn.registerCompetitorsAndBoats(competitorsAndBoatsToCopy, toFleet);
+                    toRaceColumn.registerCompetitors(competitorsAndBoatsToCopy, toFleet);
                 } else {
                     toRaceColumn.enableCompetitorRegistrationOnRaceLog(toFleet);
-                    toRaceColumn.registerCompetitorsAndBoats(competitorsAndBoatsToCopy, toFleet);
+                    toRaceColumn.registerCompetitors(competitorsAndBoatsToCopy, toFleet);
                 }
             } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
                 // cannot happen as we explicitly checked successfully before, or enabled it when the check failed; still produce a log documenting this strangeness:

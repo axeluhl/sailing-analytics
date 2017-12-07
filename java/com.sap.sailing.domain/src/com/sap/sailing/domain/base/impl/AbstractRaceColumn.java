@@ -328,14 +328,14 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
     
     @Override
-    public void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+    public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);
-        registerCompetitorsAndBoats(competitorsAndBoats, fleet);
+        registerCompetitors(competitorsAndBoats, fleet);
     }
 
     @Override
-    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
+    public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);

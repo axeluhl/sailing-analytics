@@ -282,13 +282,13 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet)
+    public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         throw new CompetitorRegistrationOnRaceLogDisabledException();
     }
 
     @Override
-    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
+    public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         throw new CompetitorRegistrationOnRaceLogDisabledException();
     }
