@@ -45,11 +45,9 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
     private Button unregisterBtn;
     private Button addBoatButton;
     private CheckBox showOnlyBoatsOfLogCheckBox;
-    private final String leaderboardName;
     private final BusyIndicator busyIndicator;
     private final Runnable validator;
     private final Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever;
-    private final boolean restrictPoolToLeaderboard;
 
     /**
      * @param boatClass
@@ -73,10 +71,8 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
             Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever,
             boolean restrictPoolToLeaderboard) {
         this.errorReporter = errorReporter;
-        this.restrictPoolToLeaderboard = restrictPoolToLeaderboard;
         this.validator = validator;
-        this.leaderboardName = leaderboardName;
-        this.busyIndicator = new SimpleBusyIndicator();
+         this.busyIndicator = new SimpleBusyIndicator();
         this.registeredBoatsRetriever = registeredBoatsRetriever;
         final HorizontalPanel buttonPanel = new HorizontalPanel();
         addBoatButton = new Button(stringMessages.add(stringMessages.boat()));
