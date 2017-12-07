@@ -75,6 +75,7 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
     @Override
     public void shutDown() {
         videoJsDelegate.removeFromParent();
+        videoJsDelegate.disposeIf2D();
     }
 
     @Override

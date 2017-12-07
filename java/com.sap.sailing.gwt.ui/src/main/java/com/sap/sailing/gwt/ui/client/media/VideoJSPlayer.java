@@ -310,4 +310,10 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
         }
     }
 
+    public void disposeIf2D() {
+        if(!panorama){
+            _onUnload();
+        }
+    }
+
 }
