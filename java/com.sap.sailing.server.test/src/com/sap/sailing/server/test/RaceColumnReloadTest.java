@@ -2,10 +2,9 @@ package com.sap.sailing.server.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,19 +29,24 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoRaceLogStoreVisitor;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -61,238 +65,189 @@ import com.sap.sse.mongodb.MongoDBService;
 import junit.framework.Assert;
 
 public class RaceColumnReloadTest {
-    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
+    private MongoRaceLogStoreVisitor mongoStoreVisitor;
     private RaceColumn raceColumn;
     private RaceLog raceLog;
-    private RaceLogWindFixEventImpl testWindEvent1;
-    private MongoObjectFactoryImpl objectFactory;
-    private RaceLogIdentifier raceLogIdentifier;
-    private RaceLogWindFixEventImpl testWindEvent2;
-    private MongoRaceLogStoreVisitor mongoStoreVisitor;
-
-    private RacingEventServiceImpl service;
-
-    private RegattaNameAndRaceName raceIdentifier;
-
     private DynamicTrackedRace trackedRace;
-
+    private RaceLogWindFixEventImpl testWindEvent1, testWindEvent2;
     private Fleet defaultFleet;
 
     @Before
     public void setUp() {
         MongoDBService.INSTANCE.getDB().dropDatabase();
-        this.service = new RacingEventServiceImpl();
-
-        objectFactory = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
-
-        final String boatClassName = "49er";
+        final RacingEventServiceImpl service = new RacingEventServiceImpl();
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = service.getBaseDomainFactory();
-        BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
-        Competitor competitor = createCompetitor(masterDomainFactory);
-        int[] discardThreshold = { 1, 2 };
-        CreateFlexibleLeaderboard createLeaderboardOperation = new CreateFlexibleLeaderboard("Test Leaderboard", "Test",
-                discardThreshold, new LowPoint(), null);
-        service.apply(createLeaderboardOperation);
-        AddColumnToLeaderboard leaderboardColumnOperation = new AddColumnToLeaderboard("R1", "Test Leaderboard", false);
-        raceColumn = service.apply(leaderboardColumnOperation);
+        final MongoObjectFactory objectFactory = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
 
-        final String baseRegattaName = "Test Event";
-        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(
-                RegattaImpl.getDefaultName(baseRegattaName, boatClassName), boatClassName, /* startDate */ null,
-                /* endDate */ null, UUID.randomUUID());
-        Regatta regatta = service.apply(addRegattaOperation);
-        final String raceName = "Test Race";
+        final String leaderboardName = "Test Leaderboard", boatClassName = "49er", raceName = "Test Race";
+        BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
+        PersonImpl sailor = new PersonImpl("Sailor", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null);
+        PersonImpl coach = new PersonImpl("Coach", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null);
+        Competitor comp = masterDomainFactory.getOrCreateCompetitor("GER 61", "Team", Color.RED, "noone@nowhere.de",
+                null, new TeamImpl("Team", Arrays.asList(sailor), coach), new BoatImpl("GER 61", boatClass, "GER 61"),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        service.apply(new CreateFlexibleLeaderboard(leaderboardName, "Test", new int[] { 1, 2 }, new LowPoint(), null));
+        raceColumn = service.apply(new AddColumnToLeaderboard("R1", leaderboardName, false));
+
+        Regatta regatta = service.apply(new AddDefaultRegatta(RegattaImpl.getDefaultName("Test Event", boatClassName),
+                boatClassName, /* startDate */ null, /* endDate */ null, UUID.randomUUID()));
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass,
-                Collections.singletonList(competitor));
-        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
-        service.apply(addRaceOperation);
+        final RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Arrays.asList(comp));
+        service.apply(new AddRaceDefinition(new RegattaName(regatta.getName()), race));
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"),
                 /* passingInstruction */ null));
-        raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
+        final RegattaNameAndRaceName raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         service.apply(new TrackRegatta(raceIdentifier));
-        trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE,
+        trackedRace = service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 5000, /* millisecondsOverWhichToAverageWind */ 10000,
                 /* millisecondsOverWhichToAverageSpeed */10000));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
 
-        raceLogIdentifier = raceColumn.getRaceLogIdentifier(defaultFleet);
+        final RaceLogIdentifier raceLogIdentifier = raceColumn.getRaceLogIdentifier(defaultFleet);
         raceLog = raceColumn.getRaceLog(defaultFleet);
 
         trackedRace.attachRaceLog(raceLog);
 
         mongoStoreVisitor = new MongoRaceLogStoreVisitor(raceLogIdentifier, objectFactory);
 
-        TimePoint t1 = MillisecondsTimePoint.now();
+        final TimePoint t1 = MillisecondsTimePoint.now(), t2 = MillisecondsTimePoint.now().plus(1000);
+        final SpeedWithBearing s1 = new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(10));
+        final SpeedWithBearing s2 = new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(20));
+        final Position p1 = new DegreePosition(1, 1), p2 = new DegreePosition(2, 2);
+        final AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
-        Wind wind1 = new WindImpl(/* position */ null, t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(10)));
-        testWindEvent1 = new RaceLogWindFixEventImpl(t1, author, 0, wind1, false);
-
-        TimePoint t2 = MillisecondsTimePoint.now().plus(1000);
-        Wind wind2 = new WindImpl(/* position */ null, t1, new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(20)));
-        testWindEvent2 = new RaceLogWindFixEventImpl(t2, author, 0, wind2, false);
-
-    }
-
-    private Competitor createCompetitor(final DomainFactory masterDomainFactory) {
-        return masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", Color.RED, "noone@nowhere.de", null,
-                new TeamImpl("Sailor",
-                        (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1",
-                                DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
-                        new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                new BoatImpl("GER 61",
-                        DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        testWindEvent1 = new RaceLogWindFixEventImpl(t1, author, 0, new WindImpl(p1, t1, s1), false);
+        testWindEvent2 = new RaceLogWindFixEventImpl(t2, author, 0, new WindImpl(p2, t2, s2), false);
     }
 
     @Test
     public void testWindAddedOnlyViaDB() throws InterruptedException {
-        AtomicInteger seenWindEvents = new AtomicInteger(0);
-        raceLog.addListener(new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogWindFixEvent event) {
-                seenWindEvents.incrementAndGet();
-            }
-        });
-        AtomicInteger raceCommiteeSeenWindEvents = new AtomicInteger(0);
-        trackedRace.addListener(new AbstractRaceChangeListener() {
-            @Override
-            public void windDataReceived(Wind wind, WindSource windSource) {
-                if (WindSourceType.RACECOMMITTEE == windSource.getType()) {
-                    raceCommiteeSeenWindEvents.incrementAndGet();
-                }
-            }
-        });
+        final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
+        final WindFixLoggingRaceChangeListener trackedRaceListener = new WindFixLoggingRaceChangeListener(trackedRace);
 
         mongoStoreVisitor.visit(testWindEvent1);
         mongoStoreVisitor.visit(testWindEvent2);
-        Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(0);
+        trackedRaceListener.assertWindFixCount(0);
 
         raceColumn.reloadRaceLog(defaultFleet);
-        Assert.assertEquals(2, seenWindEvents.get());
-        Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(2);
+        trackedRaceListener.assertWindFixCount(2);
     }
 
     @Test
     public void testWindAddedAndDbWithDifferentAddedReloadWithTrackedRace() throws InterruptedException {
-        AtomicInteger seenWindEvents = new AtomicInteger(0);
-        raceLog.addListener(new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogWindFixEvent event) {
-                seenWindEvents.incrementAndGet();
-            }
-        });
-        AtomicInteger raceCommiteeSeenWindEvents = new AtomicInteger(0);
-        trackedRace.addListener(new AbstractRaceChangeListener() {
-            @Override
-            public void windDataReceived(Wind wind, WindSource windSource) {
-                System.out.println("Wind data " + wind + " " + windSource);
-                if (WindSourceType.RACECOMMITTEE == windSource.getType()) {
-                    raceCommiteeSeenWindEvents.incrementAndGet();
-                }
-            }
-
-            @Override
-            public void raceLogAttached(RaceLog raceLog) {
-                System.out.println("RaceLog attached");
-            }
-        });
+        final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
+        final WindFixLoggingRaceChangeListener trackedRaceListener = new WindFixLoggingRaceChangeListener(trackedRace);
 
         raceLog.add(testWindEvent1);
-
-        Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(1);
+        trackedRaceListener.assertWindFixCount(1);
 
         mongoStoreVisitor.visit(testWindEvent2);
-        Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(1);
+        trackedRaceListener.assertWindFixCount(1);
 
         raceColumn.reloadRaceLog(defaultFleet);
-        Assert.assertEquals(2, seenWindEvents.get());
-        Assert.assertEquals(raceCommiteeSeenWindEvents.get(), seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(2);
+        trackedRaceListener.assertWindFixCount(2);
     }
 
     @Test
     public void testAddedWind() throws InterruptedException {
-        AtomicInteger seenWindEvents = new AtomicInteger(0);
-        raceLog.addListener(new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogWindFixEvent event) {
-                seenWindEvents.incrementAndGet();
-            }
-        });
-        raceLog.add(testWindEvent1);
+        final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
 
-        Assert.assertEquals(1, seenWindEvents.get());
+        raceLog.add(testWindEvent1);
+        raceLogVisitor.assertWindFixCount(1);
     }
 
     @Test
     public void testAddedWindAndReloadAndTheSameWindMerged() throws InterruptedException {
-        AtomicInteger seenWindEvents = new AtomicInteger(0);
-        raceLog.addListener(new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogWindFixEvent event) {
-                seenWindEvents.incrementAndGet();
-            }
-        });
+        final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
+
         raceLog.add(testWindEvent1);
         raceColumn.reloadRaceLog(defaultFleet);
         raceLog.add(testWindEvent1);
         raceColumn.reloadRaceLog(defaultFleet);
-        Assert.assertEquals(1, seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(1);
     }
 
     @Test
     public void testAddedWindAndReloadAndAddAnotherAndReloadAgain() throws InterruptedException {
-        AtomicInteger seenWindEvents = new AtomicInteger(0);
-        raceLog.addListener(new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogWindFixEvent event) {
-                seenWindEvents.incrementAndGet();
-            }
-        });
+        final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
+
         raceLog.add(testWindEvent1);
         raceColumn.reloadRaceLog(defaultFleet);
         raceLog.add(testWindEvent2);
         raceColumn.reloadRaceLog(defaultFleet);
-        Assert.assertEquals(2, seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(2);
     }
 
     @Test
     public void testWindAddedAndDbWithSameAndReload() throws InterruptedException {
-        AtomicInteger seenWindEvents = new AtomicInteger(0);
-        raceLog.addListener(new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogWindFixEvent event) {
-                seenWindEvents.incrementAndGet();
-            }
-        });
+        final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
+
         raceLog.add(testWindEvent1);
-        Assert.assertEquals(1, seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(1);
 
         mongoStoreVisitor.visit(testWindEvent1);
         raceColumn.reloadRaceLog(defaultFleet);
-        Assert.assertEquals(1, seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(1);
     }
 
     @Test
     public void testWindAddedAndDbWithDifferentAndReload() throws InterruptedException {
-        AtomicInteger seenWindEvents = new AtomicInteger(0);
-        raceLog.addListener(new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogWindFixEvent event) {
-                seenWindEvents.incrementAndGet();
-            }
-        });
+        final WindFixLoggingRaceLogVisitor raceLogVisitor = new WindFixLoggingRaceLogVisitor(raceLog);
+
         raceLog.add(testWindEvent1);
-        Assert.assertEquals(1, seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(1);
 
         mongoStoreVisitor.visit(testWindEvent2);
-        Assert.assertEquals(1, seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(1);
 
         raceColumn.reloadRaceLog(defaultFleet);
-        Assert.assertEquals(2, seenWindEvents.get());
+        raceLogVisitor.assertWindFixCount(2);
     }
 
+    private class WindFixLoggingRaceLogVisitor extends BaseRaceLogEventVisitor {
+
+        private final Set<Wind> loggedWindFixes = ConcurrentHashMap.newKeySet();
+
+        private WindFixLoggingRaceLogVisitor(RaceLog raceLog) {
+            raceLog.addListener(this);
+        }
+
+        @Override
+        public void visit(RaceLogWindFixEvent event) {
+            this.loggedWindFixes.add(event.getWindFix());
+        }
+
+        private void assertWindFixCount(int expected) {
+            Assert.assertEquals(expected, loggedWindFixes.size());
+        }
+    }
+
+    private class WindFixLoggingRaceChangeListener extends AbstractRaceChangeListener {
+
+        private final Set<Wind> loggedWindFixes = ConcurrentHashMap.newKeySet();
+
+        private WindFixLoggingRaceChangeListener(TrackedRace trackedRace) {
+            trackedRace.addListener(this);
+        }
+
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            if (WindSourceType.RACECOMMITTEE == windSource.getType()) {
+                this.loggedWindFixes.add(wind);
+            }
+        }
+
+        private void assertWindFixCount(int expected) {
+            Assert.assertEquals(expected, loggedWindFixes.size());
+        }
+    }
+    
 }
