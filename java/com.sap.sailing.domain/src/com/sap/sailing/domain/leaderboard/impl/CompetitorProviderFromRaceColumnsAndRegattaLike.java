@@ -12,9 +12,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
@@ -113,17 +111,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             }
 
             @Override
-            public void visit(RaceLogRegisterCompetitorAndBoatEvent event) {
-                invalidateAllCompetitorsCaches();
-            }
-
-            @Override
             public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
-                invalidateAllCompetitorsCaches();
-            }
-
-            @Override
-            public void visit(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
                 invalidateAllCompetitorsCaches();
             }
 
@@ -132,9 +120,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                 try {
                     final Class<?> revokedEventClass = Class.forName(event.getRevokedEventType());
                     if (RaceLogRegisterCompetitorEvent.class.isAssignableFrom(revokedEventClass) ||
-                            RaceLogUseCompetitorsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass) ||
-                            RaceLogRegisterCompetitorAndBoatEvent.class.isAssignableFrom(revokedEventClass) ||
-                            RaceLogUseCompetitorsAndBoatsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
+                            RaceLogUseCompetitorsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
                         invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {

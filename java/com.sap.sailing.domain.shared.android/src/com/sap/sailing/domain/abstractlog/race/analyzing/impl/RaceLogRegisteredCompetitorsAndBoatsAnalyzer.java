@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAndBoatsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsInLogAnalyzer;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -18,7 +18,7 @@ public class RaceLogRegisteredCompetitorsAndBoatsAnalyzer extends RaceLogAnalyze
     @Override
     protected Map<Competitor, Boat> performAnalysis() {
         final Map<Competitor, Boat> result;
-        if (new RaceLogUsesOwnCompetitorsAndBoatsAnalyzer(getLog()).analyze()){
+        if (new RaceLogUsesOwnCompetitorsAnalyzer(getLog()).analyze()){
             // get Events from RaceLog
             result = new CompetitorsAndBoatsInLogAnalyzer<>(getLog()).analyze();
         } else {

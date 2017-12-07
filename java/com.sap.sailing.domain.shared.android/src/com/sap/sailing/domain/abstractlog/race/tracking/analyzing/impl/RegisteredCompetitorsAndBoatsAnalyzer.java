@@ -32,7 +32,7 @@ public class RegisteredCompetitorsAndBoatsAnalyzer extends RaceLogAnalyzer<Map<C
     @Override
     protected Map<Competitor, Boat> performAnalysis() {
         final Map<Competitor, Boat> result;
-        if (new RaceLogUsesOwnCompetitorsAndBoatsAnalyzer(getLog()).analyze()) {
+        if (new RaceLogUsesOwnCompetitorsAnalyzer(getLog()).analyze()) {
             // get Events from RaceLog
             result = new CompetitorsAndBoatsInLogAnalyzer<>(getLog()).analyze();
         } else {

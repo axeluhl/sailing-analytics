@@ -26,12 +26,15 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChanged
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -61,14 +64,12 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> startTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> revokeEventSerializer;
     private JsonSerializer<RaceLogEvent> registerCompetitorEventSerializer;
-    private JsonSerializer<RaceLogEvent> registerCompetitorAndBoatEventSerializer;
     private JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer;
     private JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer;
     private JsonSerializer<RaceLogEvent> suppressedMarkPassingsSerializer;
     private JsonSerializer<RaceLogEvent> dependentStartTimeEventSerializer;
     private JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer;
-    private JsonSerializer<RaceLogEvent> useBoatsFromRaceLogEventSerializer;
     private JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
 
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
@@ -93,14 +94,12 @@ public class RaceLogEventSerializerTest {
         startTrackingEventSerializer = mock(JsonSerializer.class);
         revokeEventSerializer = mock(JsonSerializer.class);
         registerCompetitorEventSerializer = mock(JsonSerializer.class);
-        registerCompetitorAndBoatEventSerializer = mock(JsonSerializer.class);
         additionalScoringInformationSerializer = mock(JsonSerializer.class);
         fixedMarkPassingEventSerializer = mock(JsonSerializer.class);
         suppressedMarkPassingsSerializer = mock(JsonSerializer.class);
         dependentStartTimeEventSerializer = mock(JsonSerializer.class);
         startOfTrackingEventSerializer = mock(JsonSerializer.class);
         useCompetitorsFromRaceLogEventSerializer = mock(JsonSerializer.class);
-        useBoatsFromRaceLogEventSerializer = mock(JsonSerializer.class);
         endOfTrackingEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
@@ -109,10 +108,10 @@ public class RaceLogEventSerializerTest {
                 pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
                 denoteForTrackingEventSerializer, startTrackingEventSerializer, revokeEventSerializer,
-                registerCompetitorEventSerializer, registerCompetitorAndBoatEventSerializer, 
+                registerCompetitorEventSerializer, 
                 fixedMarkPassingEventSerializer, suppressedMarkPassingsSerializer, 
                 additionalScoringInformationSerializer, dependentStartTimeEventSerializer, 
-                startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer, useBoatsFromRaceLogEventSerializer,
+                startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer, 
                 endOfTrackingEventSerializer);
     }
 
@@ -246,14 +245,23 @@ public class RaceLogEventSerializerTest {
     }
 
     @Test
-    public void testRegisterCompetitorAndBoatEventSerializer() {
+    public void testRegisterCompetitorEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
         Competitor c = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c", null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
                 null, null);
         Boat b = DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
 
-        RaceLogEvent event = new RaceLogRegisterCompetitorAndBoatEventImpl(null, author, 0, c, b);
+        RaceLogEvent event = new RaceLogRegisterCompetitorEventImpl(null, author, 0, c, b);
         serializer.serialize(event);
-        verify(registerCompetitorAndBoatEventSerializer).serialize(event);
+        verify(registerCompetitorEventSerializer).serialize(event);
+        
+        Boat b2 = new BoatImpl("boat", "b", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
+        CompetitorWithBoat c2 = DomainFactory.INSTANCE.getOrCreateCompetitorWithBoat("comp", "comp", "c", null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
+                null, null, (DynamicBoat) b2);
+
+        RaceLogEvent event2 = new RaceLogRegisterCompetitorEventImpl(null, author, 0, c2, b2);
+        serializer.serialize(event2);
+        verify(registerCompetitorEventSerializer).serialize(event2);        
     }
+
 }

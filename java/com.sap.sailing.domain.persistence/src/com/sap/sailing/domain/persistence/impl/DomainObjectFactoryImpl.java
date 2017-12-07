@@ -90,16 +90,12 @@ import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformat
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
@@ -1550,9 +1546,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogRegisterCompetitorEvent.class.getSimpleName())) {
             return loadRaceLogRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, passId, competitors,
                     dbObject);
-        } else if (eventClass.equals(RaceLogRegisterCompetitorAndBoatEvent.class.getSimpleName())) {
-            return loadRaceLogRegisterCompetitorAndBoatEvent(createdAt, author, logicalTimePoint, id, passId,
-                    competitors, dbObject);
         } else if (eventClass.equals(RaceLogAdditionalScoringInformationEvent.class.getSimpleName())) {
             return loadRaceLogAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, passId,
                     competitors, dbObject);
@@ -1565,9 +1558,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogUseCompetitorsFromRaceLogEvent.class.getSimpleName())) {
             return loadRaceLogUseCompetitorsFromRaceLogEvent(createdAt, author, logicalTimePoint, id, passId,
                     competitors, dbObject);
-        } else if (eventClass.equals(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent.class.getSimpleName())) {
-            return loadRaceLogUseCompetitorsAndBoatsFromRaceLogEvent(createdAt, author, logicalTimePoint, id, passId,
-                    competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -1577,12 +1567,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             DBObject dbObject) {
         return new RaceLogUseCompetitorsFromRaceLogEventImpl(createdAt, author, logicalTimePoint, id, passId);
-    }
-
-    private RaceLogEvent loadRaceLogUseCompetitorsAndBoatsFromRaceLogEvent(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
-            List<Competitor> competitors, DBObject dbObject) {
-        return new RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl(createdAt, author, logicalTimePoint, id, passId);
     }
 
     private RaceLogEvent loadRaceLogWindFixEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -1627,19 +1611,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             DBObject dbObject) {
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.RACE_LOG_COMPETITOR_ID.name());
-        CompetitorWithBoat comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
-        return new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, comp);
-    }
-
-    private RaceLogEvent loadRaceLogRegisterCompetitorAndBoatEvent(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
-            DBObject dbObject) {
-        Serializable competitorId = (Serializable) dbObject.get(FieldNames.RACE_LOG_COMPETITOR_ID.name());
         Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
-        Competitor comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
-        Boat boat = baseDomainFactory.getCompetitorStore().getExistingBoatById(boatId);
-        return new RaceLogRegisterCompetitorAndBoatEventImpl(createdAt, logicalTimePoint, author, id, passId, comp,
-                boat);
+
+        // legacy RaceLogRegisterCompetitorEvent's do not have an boatId, it's expected that the
+        // corresponding competitors have the type CompetitorWithBoat
+        if (boatId == null) {
+            CompetitorWithBoat competitorWithBoat = baseDomainFactory.getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
+            return new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitorWithBoat);
+        } else {
+            CompetitorWithBoat competitorWithBoat = baseDomainFactory.getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
+            if (competitorWithBoat != null) {
+                return new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitorWithBoat);
+            } else {
+                Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+                Boat boat = baseDomainFactory.getCompetitorStore().getExistingBoatById(boatId);
+                return new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, boat);
+            }
+        }
     }
 
     private RaceLogEvent loadRaceLogAdditionalScoringInformationEvent(TimePoint createdAt,

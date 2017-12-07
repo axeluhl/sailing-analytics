@@ -44,7 +44,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.racelog.tracking.CompetitorAndBoatRegistrationOnRaceLogDisabledException;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -229,13 +229,13 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             final RaceColumn toRaceColumn = toRace.getA();
             final Fleet toFleet = toRace.getB();
             try {
-                if (toRaceColumn.isCompetitorAndBoatRegistrationInRacelogEnabled(toFleet)) {
+                if (toRaceColumn.isCompetitorRegistrationInRacelogEnabled(toFleet)) {
                     toRaceColumn.registerCompetitorsAndBoats(competitorsAndBoatsToCopy, toFleet);
                 } else {
-                    toRaceColumn.enableCompetitorAndBoatRegistrationOnRaceLog(toFleet);
+                    toRaceColumn.enableCompetitorRegistrationOnRaceLog(toFleet);
                     toRaceColumn.registerCompetitorsAndBoats(competitorsAndBoatsToCopy, toFleet);
                 }
-            } catch (CompetitorAndBoatRegistrationOnRaceLogDisabledException e1) {
+            } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
                 // cannot happen as we explicitly checked successfully before, or enabled it when the check failed; still produce a log documenting this strangeness:
                 logger.log(Level.WARNING, "Internal error: race column "+toRaceColumn.getName()+" does not accept competitor registration although it should", e1);
             }

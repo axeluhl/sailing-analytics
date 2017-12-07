@@ -34,9 +34,9 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -212,14 +212,14 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreAndLoadRegisterCompetitorAndBoatEvent() {
-        RaceLogRegisterCompetitorAndBoatEvent expectedEvent = new RaceLogRegisterCompetitorAndBoatEventImpl(expectedEventTime,
+        RaceLogRegisterCompetitorEvent expectedEvent = new RaceLogRegisterCompetitorEventImpl(expectedEventTime,
                 expectedEventTime, author, expectedId, expectedPassId, DomainFactory.INSTANCE.getOrCreateCompetitor(
                         "comp", "comp", "c", null, null, null, null,
                         /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */null, null),
                 DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", boatClass, null, null));
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogRegisterCompetitorAndBoatEvent actualEvent = loadEvent(dbObject);
+        RaceLogRegisterCompetitorEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getCompetitor(), actualEvent.getCompetitor());

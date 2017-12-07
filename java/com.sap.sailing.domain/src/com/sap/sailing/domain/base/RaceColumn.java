@@ -8,7 +8,6 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.racelog.tracking.CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -318,55 +317,55 @@ public interface RaceColumn extends Named {
 
     /**
      * Returns the competitor and their boats registered in the race column's race log associated to the passed fleet. If competitor
-     * registration in RaceLog is {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet) disabled} or in case of a
+     * registration in RaceLog is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled} or in case of a
      * MetaLeaderboardColumn an empty set is returned.
      * 
-     * @return competitors and boats in RaceLog if registration {@link #enableCompetitorAndBoatRegistrationOnRaceLog(Fleet) enabled} or
-     *         empty set in case registration is {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet) disabled} or this
+     * @return competitors and boats in RaceLog if registration {@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabled} or
+     *         empty set in case registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled} or this
      *         column belongs to a {@link MetaLeaderboard}
      */
     Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRacelog(Fleet fleet);
 
     /**
-     * Checks whether competitor and boat registration on RaceLog is enabled.
+     * Checks whether competitor registration on RaceLog is enabled.
      * 
      * @return boolean if competitor and boat registration on the RaceLog is enabled, false in case this column belongs to a
      *         {@link MetaLeaderboard}
      *         
-     * @see #enableCompetitorAndBoatRegistrationOnRaceLog(Fleet)
-     * @see #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet)
+     * @see #enableCompetitorRegistrationOnRaceLog(Fleet)
+     * @see #disableCompetitorRegistrationOnRaceLog(Fleet)
      */
-    boolean isCompetitorAndBoatRegistrationInRacelogEnabled(Fleet fleet);
+    boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
     
     /**
-     * Activates competitor and boat registration on the race column's race log associated to the passed fleet. As a result,
-     * competitor and boat registrations that were added to the race log before this was disabled by
-     * {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet)} will again be honored.<p>
+     * Activates competitor registration on the race column's race log associated to the passed fleet. As a result,
+     * competitor registrations that were added to the race log before this was disabled by
+     * {@link #disableCompetitorRegistrationOnRaceLog(Fleet)} will again be honored.<p>
      * 
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
      */
-    void enableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet);
+    void enableCompetitorRegistrationOnRaceLog(Fleet fleet);
     
     /**
-     * Disables competitor and boat registration on the race column's race log associated to the passed fleet. Performs nothing
+     * Disables competitor registration on the race column's race log associated to the passed fleet. Performs nothing
      * in case this column belongs to a {@link MetaLeaderboard}. If there are already competitor and boat registrations on the
-     * race log, those will not be removed from the log but they will be ignored, and the regatta log's competitor and boat
-     * registrations will be used instead. Re-{@link #enableCompetitorAndBoatRegistrationOnRaceLog(Fleet) enabling} competitor and boat
+     * race log, those will not be removed from the log but they will be ignored, and the regatta log's competitor
+     * registrations will be used instead. Re-{@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabling} competitor
      * registrations in the race log will cause such existing registrations to be honored again.
      * <p>
      * 
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
      */
-    void disableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
+    void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
 
     /**
      * Registers a competitor and his boat on the the race column's race log associated to the passed fleet.
      * 
      * @throws CompetitorAndBoatRegistrationOnRaceLogDisabledException
-     *             thrown if competitor registration is {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet) disabled}
+     *             thrown if competitor registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled}
      *             on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
      */
-    void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
+    void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 
     /**
      * Registers competitors and their boats on the the race column's race log associated to the passed fleet.
@@ -375,7 +374,7 @@ public interface RaceColumn extends Named {
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}
      */
-    void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
+    void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
     
     /**
      * Deregisters a competitor on the the race column's race log associated to the passed fleet.

@@ -2,10 +2,8 @@ package com.sap.sailing.domain.abstractlog.race;
 
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 
@@ -44,8 +42,6 @@ public interface RaceLogEventVisitor {
 
     public void visit(RaceLogRegisterCompetitorEvent event);
 
-    public void visit(RaceLogRegisterCompetitorAndBoatEvent event);
-
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
     
     public void visit(RaceLogFixedMarkPassingEvent event);
@@ -59,6 +55,4 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogEndOfTrackingEvent event);
 
     public void visit(RaceLogUseCompetitorsFromRaceLogEvent event);
-
-    public void visit(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event);
 }

@@ -88,9 +88,9 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -5116,7 +5116,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null && existingCompetitor != null && existingBoat != null) {
-            raceLog.add(new RaceLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), 
+            raceLog.add(new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), 
                     getService().getServerAuthor(), raceLog.getCurrentPassId(), existingCompetitor, existingBoat));
             result = true;
         }        
@@ -5129,14 +5129,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null && existingCompetitor != null) {
-            List<RaceLogRegisterCompetitorAndBoatEvent> linkEventsToRevoke = new ArrayList<>();
+            List<RaceLogRegisterCompetitorEvent> linkEventsToRevoke = new ArrayList<>();
             for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
-                if (event instanceof RaceLogRegisterCompetitorAndBoatEvent) {
-                    linkEventsToRevoke.add((RaceLogRegisterCompetitorAndBoatEvent) event);
+                if (event instanceof RaceLogRegisterCompetitorEvent) {
+                    linkEventsToRevoke.add((RaceLogRegisterCompetitorEvent) event);
                 }
             }
             try {
-                for (RaceLogRegisterCompetitorAndBoatEvent eventToRevoke : linkEventsToRevoke) {
+                for (RaceLogRegisterCompetitorEvent eventToRevoke : linkEventsToRevoke) {
                     raceLog.revokeEvent(getService().getServerAuthor(), eventToRevoke, "unlink competitor from boat");
                 }
             } catch (NotRevokableException e) {
@@ -5638,8 +5638,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             competitorsToRegister.add(getCompetitor(dto));
         }
         
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
+        
+        boolean canBoatsOfCompetitorsChangePerRace;
+        if (leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            Regatta regatta = regattaLeaderboard.getRegatta();
+            canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
+        } else {
+            canBoatsOfCompetitorsChangePerRace = false;
+        }        
+        
         Map<Competitor, Boat> competitorsToRemove = raceColumn.getCompetitorsAndBoatsRegisteredInRacelog(fleet);
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
         Util.addAll(competitorsToRemove.keySet(), competitorSetToRemove);
@@ -5647,7 +5658,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
 
-        // TODO bug2822: temporary commented out -> needs first cleanup of CompetitorDTO and BoatDTO passing  
         // raceColumn.registerCompetitors(competitorsToRegister, fleet);
     }
     
@@ -6614,7 +6624,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        return raceColumn.isCompetitorAndBoatRegistrationInRacelogEnabled(fleet);
+        return raceColumn.isCompetitorRegistrationInRacelogEnabled(fleet);
     }
     
     private Fleet getFleetByName(RaceColumn raceColumn, String fleetName) throws NotFoundException{
@@ -6649,7 +6659,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void disableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException {
         if (areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
             RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-            raceColumn.disableCompetitorAndBoatRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
+            raceColumn.disableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
         }
     }
 
@@ -6657,7 +6667,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void enableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException {
         if (!areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
             RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-            raceColumn.enableCompetitorAndBoatRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
+            raceColumn.enableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
         }
     }
 

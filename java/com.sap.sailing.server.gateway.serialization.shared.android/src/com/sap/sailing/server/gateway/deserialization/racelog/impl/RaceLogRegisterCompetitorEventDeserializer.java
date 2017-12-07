@@ -8,25 +8,40 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRegisterCompetitorEventSerializer;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogRegisterCompetitorEventDeserializer extends BaseRaceLogEventDeserializer {
     private final JsonDeserializer<CompetitorWithBoat> competitorWithBoatDeserializer;
-    
-    public RaceLogRegisterCompetitorEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer, JsonDeserializer<CompetitorWithBoat> competitorWithBoatDeserializer) {
+    private final BoatJsonDeserializer boatDeserializer;
+
+    public RaceLogRegisterCompetitorEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer, 
+            JsonDeserializer<CompetitorWithBoat> competitorWithBoatDeserializer, BoatJsonDeserializer boatDeserializer) {
         super(competitorDeserializer);
         this.competitorWithBoatDeserializer = competitorWithBoatDeserializer;
+        this.boatDeserializer = boatDeserializer;
     }
-
+ 
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
         assert competitors.size() == 1 : "Expected exactly one competitor for RegisterCompetitorEvent";
-        CompetitorWithBoat competitorWithBoat = competitorWithBoatDeserializer.deserialize(object);
-    	return new RaceLogRegisterCompetitorEventImpl(createdAt, timePoint, author, id, passId, competitorWithBoat);
+        JSONObject competitorWithBoatObject = (JSONObject) object.get(RaceLogRegisterCompetitorEventSerializer.FIELD_COMPETITOR_WITHBOAT);
+        if (competitorWithBoatObject != null) {
+            CompetitorWithBoat competitorWithBoat = competitorWithBoatDeserializer.deserialize(competitorWithBoatObject);
+            return new RaceLogRegisterCompetitorEventImpl(createdAt, timePoint, author, id, passId, competitorWithBoat);
+        } else {
+            JSONObject competitorObject = (JSONObject) object.get(RaceLogRegisterCompetitorEventSerializer.FIELD_COMPETITOR);
+            JSONObject boatObject = (JSONObject) object.get(RaceLogRegisterCompetitorEventSerializer.FIELD_BOAT);
+            Competitor competitor = competitorDeserializer.deserialize(competitorObject);            
+            Boat boat = boatDeserializer.deserialize(boatObject);            
+            return new RaceLogRegisterCompetitorEventImpl(createdAt, timePoint, author, id, passId, competitor, boat);
+        }
     }
 
 }
