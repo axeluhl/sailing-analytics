@@ -334,16 +334,6 @@
             "key": "ASL2.0"
         },
         {
-            "name": "GWT-Bootstrap",
-            "version": "2.3.2.0",
-            "owner": "GWT-Bootstrap",
-            "homepage": "http://gwtbootstrap.github.com/",
-            "acknowledgements": [
-                "Copyright ${year} GWT-Bootstrap"
-            ],
-            "key": "ASL2.0"
-        },
-        {
             "name": "gwt-google-apis",
             "version": "ajaxloader-svn",
             "owner": "Google, Inc.",
