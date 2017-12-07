@@ -79,7 +79,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
             int start = range.getStart();
             int end = range.getStart() + range.getLength();
             if (tenant != null) {
-                for (String username : tenant.getUsernames()) {
+                for (String username : tenant.getUsers()) {
                     if (username.contains(filterBox.getText())) {
                         result.add(username);
                     }
@@ -107,7 +107,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
             UserGroupDTO tenant = tenantSelectionModel.getSelectedObject();
             final List<String> alreadyAddedUsers = new ArrayList<>();
             if (tenant != null) {
-                alreadyAddedUsers.addAll(tenant.getUsernames());
+                alreadyAddedUsers.addAll(tenant.getUsers());
             }
             final Range range = display.getVisibleRange();
             

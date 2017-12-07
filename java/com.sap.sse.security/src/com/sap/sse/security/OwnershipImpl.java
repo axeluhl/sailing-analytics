@@ -1,19 +1,19 @@
 package com.sap.sse.security;
 
-import java.util.UUID;
-
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.SecurityUser;
 
 public class OwnershipImpl implements Ownership {    
     private final String idOfOwnedObjectAsString;
-    private final String ownerUsername;
-    private final UUID tenantOwnerId;
+    private final SecurityUser userOwner;
+    private final Tenant tenantOwner;
     private final String displayName;
     
-    public OwnershipImpl(String idAsString, String ownerUsername, UUID tenantOwnerId, String displayName) {
+    public OwnershipImpl(String idAsString, SecurityUser userOwner, Tenant tenantOwner, String displayName) {
         this.idOfOwnedObjectAsString = idAsString;
-        this.ownerUsername = ownerUsername;
-        this.tenantOwnerId = tenantOwnerId;
+        this.userOwner = userOwner;
+        this.tenantOwner = tenantOwner;
         this.displayName = displayName;
     }
     
@@ -23,13 +23,13 @@ public class OwnershipImpl implements Ownership {
     }
 
     @Override
-    public String getOwnerUsername() {
-        return ownerUsername;
+    public SecurityUser getUserOwner() {
+        return userOwner;
     }
 
     @Override
-    public UUID getTenantOwnerId() {
-        return tenantOwnerId;
+    public Tenant getTenantOwner() {
+        return tenantOwner;
     }
     
     @Override

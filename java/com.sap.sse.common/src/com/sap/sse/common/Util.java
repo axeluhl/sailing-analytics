@@ -434,8 +434,8 @@ public class Util {
      * then adds {@code value} to that set. No synchronization / concurrency control effort is
      * made. This is the caller's obligation.
      */
-    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        addToValueSet(map, key, value, new ValueSetConstructor<V>() {
+    public static <K, V> boolean addToValueSet(Map<K, Set<V>> map, K key, V value) {
+        return addToValueSet(map, key, value, new ValueSetConstructor<V>() {
             @Override
             public Set<V> createSet() {
                 return new HashSet<V>();
@@ -448,17 +448,19 @@ public class Util {
     }
     
     /**
-     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and
-     * then adds {@code value} to that set. No synchronization / concurrency control effort is
-     * made. This is the caller's obligation.
+     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and then adds {@code value}
+     * to that set. No synchronization / concurrency control effort is made. This is the caller's obligation.
+     * 
+     * @return {@code true} if the {@code value} was not yet contained in the {@code value} set for {@code key} or if
+     *         the {@code map} did not even contain a value set for {@code key} yet.
      */
-    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
+    public static <K, V> boolean addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
         Set<V> set = map.get(key);
         if (set == null) {
             set = setConstructor.createSet();
             map.put(key, set);
         }
-        set.add(value);
+        return set.add(value);
     }
 
     /**
@@ -479,14 +481,21 @@ public class Util {
      * Removes {@code value} from the set that is the value for {@code key} in {@code map} if that key exists. If the
      * set existed and is emptied by this removal it is removed from the map. No synchronization / concurrency control
      * effort is made. This is the caller's obligation.
+     * 
+     * @return {@code true} if the {@code value} was contained in the set for {@code key} and was removed successfully
      */
-    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
+    public static <K, V> boolean removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
         final Set<V> valuesPerKey = map.get(key);
+        final boolean removed;
         if (valuesPerKey != null) {
-            if (valuesPerKey.remove(value) && valuesPerKey.isEmpty()) {
+            removed = valuesPerKey.remove(value);
+            if (removed && valuesPerKey.isEmpty()) {
                 map.remove(key);
             }
+        } else {
+            removed = false;
         }
+        return removed;
     }
 
     public static String join(String separator, String... strings) {

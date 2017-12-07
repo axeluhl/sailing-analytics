@@ -165,25 +165,21 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         //TODO check whether WildcardPermission functionality can be used here (perm instanceof)
         String[] parts = perm.toString().replaceAll("\\[|\\]", "").split(":");
         String username = (String) principals.getPrimaryPrincipal();
-        
         try {
             ArrayList<WildcardPermission> directPermissions = new ArrayList<>();
-            for (String directPermission : getUserStore().getPermissionsFromUser(username)) {
-                directPermissions.add(new WildcardPermission(directPermission));
+            for (WildcardPermission directPermission : getUserStore().getPermissionsFromUser(username)) {
+                directPermissions.add(directPermission);
             }
-            
             Ownership ownership = null;
             AccessControlList acl = null;
             if (parts.length > 2) {
                 ownership = getAccessControlStore().getOwnership(parts[2]);
                 acl = getAccessControlStore().getAccessControlList(parts[2]);
             }
-            
+            final UserImpl user = getUserStore().getUserByName(username);
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
-                    username, getUserStore().getUserGroups(), directPermissions, 
-                    getUserStore().getRolesFromUser(username), this, 
-                    ownership, 
-                    acl);
+                    user, getUserStore().getUserGroupsOfUser(user), getUserStore().getRolesFromUser(username), 
+                    this, ownership, acl);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "User " + username + " does not exist.", e);
             return false;
@@ -229,11 +225,11 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
     
     @Override
-    public boolean hasRole(PrincipalCollection principals, String roleIdentifier) {
+    public boolean hasRole(PrincipalCollection principals, String roleName) {
         String user = (String) principals.getPrimaryPrincipal();
         try {
-            for (UUID role : getUserStore().getRolesFromUser(user)) {
-                if (role.equals(UUID.fromString(roleIdentifier))) {
+            for (Role role : getUserStore().getRolesFromUser(user)) {
+                if (role.getName().equals(roleName)) {
                     return true;
                 }
             }
@@ -289,11 +285,11 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
     
     private Role getRole(UUID id) {
-        return getAccessControlStore().getRole(id);
+        return getUserStore().getRole(id);
     }
     
     @Override
-    public String getName(UUID id) {
+    public String getRoleName(UUID id) {
         Role role = getRole(id);
         if (role != null) {
             return role.getName();
@@ -314,32 +310,23 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     
     @Override
     public Iterable<Role> getRoles() {
-        return getAccessControlStore().getRoles();
+        return getUserStore().getRoles();
     }
     
     // TODO as default implementation in interface
     @Override
-    public boolean implies(UUID id, WildcardPermission permission) {
-        return implies(id, permission, null);
-    }
-    
-    @Override
-    public boolean implies(UUID id, WildcardPermission permission, Ownership ownership) {
-        Role role = getRole(id);
-        if (role != null) {
-            return implies(id, role.getName(), permission, ownership);
-        } else {
-            return false;
-        }
+    public boolean implies(Role role, WildcardPermission permission) {
+        return implies(role, permission, null);
     }
     
     // TODO as default implementation in interface
     @Override
-    public boolean implies(UUID id, String name, WildcardPermission permission, Ownership ownership) {
-        String[] parts = name.split(":");
+    public boolean implies(Role role, WildcardPermission permission, Ownership ownership) {
+        String[] parts = role.getName().split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwnerId().equals(parts[1]))) {
-            for (WildcardPermission rolePermission : getPermissions(id)) {
+        // TODO consider user as Role parameter, comparing to ownership.getUserOwner()
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
+            for (WildcardPermission rolePermission : role.getPermissions()) {
                 if (rolePermission.implies(permission)) {
                     return true;
                 }

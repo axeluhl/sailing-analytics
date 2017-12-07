@@ -1,13 +1,14 @@
 package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Map;
-import java.util.UUID;
 
 import com.mongodb.DB;
-import com.sap.sse.security.User;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 
 public interface MongoObjectFactory {
@@ -23,17 +24,17 @@ public interface MongoObjectFactory {
     
     public void deleteRole(Role role);
     
-    public void storeTenant(UUID id);
+    public void storeTenant(Tenant tenant);
     
-    public void deleteTenant(UUID id);
+    public void deleteTenant(Tenant tenant);
     
     public void storeUserGroup(UserGroup group);
     
-    public void deleteUserGroup(UUID id);
+    public void deleteUserGroup(UserGroup userGroup);
 
     public void storeUser(User user);
     
-    public void deleteUser(User user);
+    public void deleteUser(SecurityUser user);
     
     public void storeSettings(Map<String, Object> settings);
     

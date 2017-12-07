@@ -2,7 +2,6 @@ package com.sap.sse.security.shared;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * The {@link PermissionChecker} is an implementation of the permission 
@@ -32,8 +31,9 @@ public class PermissionChecker {
      *          The instance id can be omitted when a general permission for the data
      *          object type is asked after (e.g. "event:create").
      */
-    public static boolean isPermitted(WildcardPermission permission, String user, Iterable<UserGroup> tenants, Iterable<WildcardPermission> directPermissions, Iterable<UUID> roles, 
-            RolePermissionModel rolePermissionModel, Ownership ownership, AccessControlList acl) {
+    public static boolean isPermitted(WildcardPermission permission, SecurityUser user, Iterable<UserGroup> groupsOfWhichUserIsMember,
+            Iterable<Role> roles, RolePermissionModel rolePermissionModel,
+            Ownership ownership, AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
@@ -43,17 +43,17 @@ public class PermissionChecker {
         String action = (String) parts.get(1).toArray()[0];
         PermissionState result = PermissionState.NONE;
         
-        // 1. check ownership
-        if (ownership != null && user.equals(ownership.getOwnerUsername())) {
+        // 1. check user ownership
+        if (ownership != null && user.equals(ownership.getUserOwner())) {
             result = PermissionState.GRANTED;
         }
         // 2. check ACL
         else if (acl != null) {
-            result = acl.hasPermission(user, action, tenants);
+            result = acl.hasPermission(user, action, groupsOfWhichUserIsMember);
         }
         // 3. check direct permissions
         if (result == PermissionState.NONE) {
-            for (WildcardPermission directPermission : directPermissions) {
+            for (WildcardPermission directPermission : user.getPermissions()) {
                 if (directPermission.implies(permission)) {
                     result = PermissionState.GRANTED;
                     break;
@@ -62,7 +62,7 @@ public class PermissionChecker {
         }
         // 4. check role permissions
         if (result == PermissionState.NONE) {
-            for (UUID role : roles) {
+            for (Role role : roles) {
                 if (rolePermissionModel.implies(role, permission, ownership)) {
                     result = PermissionState.GRANTED;
                     break;

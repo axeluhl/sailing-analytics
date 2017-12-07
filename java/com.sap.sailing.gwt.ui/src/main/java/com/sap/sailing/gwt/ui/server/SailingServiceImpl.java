@@ -502,13 +502,7 @@ import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.ShiroPermissionBuilderImpl;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
-import com.sap.sse.security.ui.shared.AccessControlListDTO;
-import com.sap.sse.security.ui.shared.OwnershipDTO;
-import com.sap.sse.security.ui.shared.UserGroupDTO;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -3696,8 +3690,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
         createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
         getSecurityService().createAccessControlList(eventUuid.toString(), eventName);
-        getSecurityService().createOwnership(eventUuid.toString(), (String) SecurityUtils.getSubject().getPrincipal(),
-                getSecurityService().getTenantByName(tenantOwnerName).getId(), eventName);
+        getSecurityService().createOwnership(eventUuid.toString(),
+                getSecurityService().getUserByName((String) SecurityUtils.getSubject().getPrincipal()),
+                getSecurityService().getTenantByName(tenantOwnerName), eventName);
         EventDTO result = getEventById(eventUuid, false);
         return result;
     }
@@ -3952,40 +3947,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, withStatisticalData));
         }
-        eventDTO.setAclDTO(createAclDTOFromAcl(getSecurityService().getAccessControlList(event.getId().toString())));
-        eventDTO.setOwnershipDTO(createOwnershipDTOFromOwnership(getSecurityService().getOwnership(event.getId().toString())));
+        eventDTO.setAcl(getSecurityService().getAccessControlList(event.getId().toString()));
+        eventDTO.setOwnership(getSecurityService().getOwnership(event.getId().toString()));
         return eventDTO;
     }
     
-    private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
-        if (acl != null) {
-            Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
-            for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
-                UserGroup group = getSecurityService().getUserGroup(entry.getKey());
-                permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
-                        entry.getValue());
-            }
-            return new AccessControlListDTO(acl.getId().toString(), acl.getDisplayName(), permissionMapDTO);
-        } else {
-            return null;
-        }
-    }
-    
-    private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
-        AccessControlList acl = getSecurityService().getAccessControlList(userGroup.getId().toString());
-        Ownership ownership = getSecurityService().getOwnership(userGroup.getId().toString());
-        return new UserGroupDTO((UUID) userGroup.getId(), userGroup.getName(), 
-                createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
-    }
-    
-    private OwnershipDTO createOwnershipDTOFromOwnership(Ownership ownership) {
-        if (ownership != null) {
-            return new OwnershipDTO(ownership.getIdOfOwnedObjectAsString().toString(), ownership.getOwnerUsername(), ownership.getTenantOwnerId(), ownership.getDisplayNameOfOwnedObject());
-        } else {
-            return null;
-        }
-    }
-
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
         CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
         courseAreaDTO.id = courseArea.getId();

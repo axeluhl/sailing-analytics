@@ -6,11 +6,11 @@ import java.util.UUID;
 import com.sap.sse.common.NamedWithID;
 
 public interface UserGroup extends NamedWithID {
-    public Set<String> getUsernames();
+    public Set<SecurityUser> getUsers();
     
-    public void add(String user);
-    public void remove(String user);
-    public boolean contains(String user);
+    public void add(SecurityUser user);
+    public void remove(SecurityUser user);
+    public boolean contains(SecurityUser user);
 
     @Override
     UUID getId();

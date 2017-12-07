@@ -1,41 +1,32 @@
 package com.sap.sse.security;
 
 import java.util.Set;
-import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 
 public interface AccessControlStore extends Named {
     Iterable<AccessControlList> getAccessControlLists();
-    AccessControlList getAccessControlList(String idAsString);
+    AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString);
     /**
-     * @param idAsString ID of the object the ACL is attached to
-     * @param owner Owner of the object the ACL is attached to
+     * @param idOfAccessControlledObjectAsString ID of the object the ACL is attached to
+     * @param displayNameOfAccessControlledObject the display name of the object the ACL is attached to
      */
-    AccessControlList createAccessControlList(String idAsString, String displayName);
-    AccessControlStore setAclPermissions(String idAsString, UUID group, Set<String> permissions);
-    AccessControlStore addAclPermission(String idAsString, UUID group, String permission);
-    AccessControlStore removeAclPermission(String idAsString, UUID group, String permission);
-    AccessControlStore removeAccessControlList(String idAsString);
+    AccessControlList createAccessControlList(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject);
+    void setAclPermissions(String idOfAccessControlledObjectAsString, UserGroup userGroup, Set<String> actions);
+    void addAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action);
+    void removeAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action);
+    void removeAccessControlList(String idOfAccessControlledObjectAsString);
     
     Iterable<Ownership> getOwnerships();
-    Ownership getOwnership(String idAsString);
-    Ownership createOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
-    AccessControlStore setOwnership(String idAsString, String owner, UUID tenantOwner, String displayName);
-    AccessControlStore removeOwnership(String idAsString);
-    
-    Iterable<Role> getRoles();
-    Role getRole(UUID id);
-    Role createRole(UUID id, String displayName, Set<WildcardPermission> permissions);
-    AccessControlStore setRolePermissions(UUID id, Set<WildcardPermission> permissions);
-    AccessControlStore addRolePermission(UUID id, WildcardPermission permission);
-    AccessControlStore removeRolePermission(UUID id, WildcardPermission permission);
-    AccessControlStore setRoleDisplayName(UUID id, String displayName);
-    AccessControlStore removeRole(UUID id);
+    Ownership getOwnership(String idOfOwnedObjectAsString);
+    Ownership createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
+    void setOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
+    void removeOwnership(String idOfOwnedObjectAsString);
     
     void clear();
     void replaceContentsFrom(AccessControlStore newAccessControlStore);

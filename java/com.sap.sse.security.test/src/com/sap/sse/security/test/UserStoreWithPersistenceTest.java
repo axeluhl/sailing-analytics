@@ -16,7 +16,7 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.security.User;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -71,9 +71,9 @@ public class UserStoreWithPersistenceTest {
     public void testMasterdataIsSaved() throws UserManagementException {
         UUID defaultTenant = userGroupId;
         store.createUser(username, email, defaultTenant);
-        store.updateUser(new User(username, email, fullName, company, Locale.GERMAN, false, null, null, defaultTenant, Collections.emptySet()));
+        store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null, defaultTenant, Collections.emptySet()));
         newStore();
-        User savedUser = store.getUserByName(username);
+        UserImpl savedUser = store.getUserByName(username);
         assertEquals(username, savedUser.getName());
         assertEquals(email, savedUser.getEmail());
         assertEquals(company, savedUser.getCompany());
@@ -165,7 +165,7 @@ public class UserStoreWithPersistenceTest {
     @Test
     public void testDeleteTenantWithUserGroup() throws UserGroupManagementException {
         store.createTenant(userGroupId, userGroupName);
-        store.deleteTenantWithUserGroup(userGroupId);
+        store.deleteTenant(userGroupId);
         assertNull(store.getTenant(userGroupId));
         assertNull(store.getTenantByName(userGroupName));
         assertNull(store.getUserGroup(userGroupId));

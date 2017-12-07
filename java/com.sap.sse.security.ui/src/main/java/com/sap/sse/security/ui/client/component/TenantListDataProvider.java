@@ -49,7 +49,7 @@ public class TenantListDataProvider extends AbstractDataProvider<TenantDTO> {
     @Override
     protected void onRangeChanged(final HasData<TenantDTO> display) {
         final Range range = display.getVisibleRange();
-        userManagementService.getTenantList(new AsyncCallback<Collection<TenantDTO>>() {
+        userManagementService.getTenants(new AsyncCallback<Collection<TenantDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());

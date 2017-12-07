@@ -1,7 +1,6 @@
 package com.sap.sse.security.ui.shared;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,49 +8,42 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.SecurityUserImpl;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public class UserDTO implements IsSerializable {
-    private String name;
+public class UserDTO extends SecurityUserImpl implements IsSerializable {
+    private static final long serialVersionUID = -4807678211983511872L;
+    
     private String email;
     private String fullName;
     private String company;
     private String locale;
     private List<AccountDTO> accounts;
-    private Set<UUID> roles;
     private RolePermissionModelDTO rolePermissionModel;
-    private Set<WildcardPermission> permissions;
-    private TenantDTO defaultTenant;
     private boolean emailValidated;
 
-    UserDTO() {} // for serialization only
+    // for GWT serialization only
+    @Deprecated
+    UserDTO() {
+        super();
+    }
 
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<UUID> roles, RolePermissionModelDTO rolePermissionModelDTO, TenantDTO defaultTenant,
-            Iterable<String> stringPermissions) {
-        this.name = name;
+            List<AccountDTO> accounts, Iterable<Role> roles, RolePermissionModelDTO rolePermissionModelDTO, Tenant defaultTenant,
+            Iterable<WildcardPermission> permissions) {
+        super(name, roles, defaultTenant, permissions);
         this.email = email;
         this.fullName = fullName;
         this.company = company;
         this.locale = locale;
         this.emailValidated = emailValidated;
         this.accounts = accounts;
-        this.roles = new HashSet<>();
-        Util.addAll(roles, this.roles);
         this.rolePermissionModel = rolePermissionModelDTO;
-        this.defaultTenant = defaultTenant;
-        this.permissions = new HashSet<>();
-        for (String permission : stringPermissions) {
-            this.permissions.add(new WildcardPermission(permission, true));
-        }
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getFullName() {
@@ -66,10 +58,6 @@ public class UserDTO implements IsSerializable {
         return locale;
     }
 
-    public Iterable<UUID> getRoles() {
-        return roles;
-    }
-    
     public UUID getRoleIdByName(String name) {
         for (Role role : rolePermissionModel.getRoles()) {
             if (name.equals(role.getName())) {
@@ -81,19 +69,10 @@ public class UserDTO implements IsSerializable {
     
     public Iterable<String> getStringRoles() {
         ArrayList<String> result = new ArrayList<>();
-        for (UUID id : roles) {
-            result.add(rolePermissionModel.getName(id));
+        for (Role role : getRoles()) {
+            result.add(role.getName());
         }
         return result;
-    }
-    
-    /**
-     * Returns the "raw" permissions explicitly set for this user. This does not include permissions
-     * inferred by any {@link PermissionsForRoleProvider} for the {@link #getRoles() roles} that this
-     * user has. Use {@link #getAllPermissions(PermissionsForRoleProvider)} for that.
-     */
-    public Iterable<WildcardPermission> getPermissions() {
-        return this.permissions;
     }
     
     /**
@@ -121,10 +100,10 @@ public class UserDTO implements IsSerializable {
      */
     public Iterable<WildcardPermission> getAllPermissions() {
         Set<WildcardPermission> result = new LinkedHashSet<>();
-        Util.addAll(permissions, result);
+        Util.addAll(getPermissions(), result);
         if (rolePermissionModel != null) {
-            for (UUID role : getRoles()) {
-                Util.addAll(rolePermissionModel.getPermissions(role), result);
+            for (Role role : getRoles()) {
+                Util.addAll(role.getPermissions(), result);
             }
         }
         return result;
@@ -134,26 +113,18 @@ public class UserDTO implements IsSerializable {
         return hasPermission(new WildcardPermission(permission));
     }
     
-    public boolean hasPermission(WildcardPermission permission) {
-        return hasPermission(permission, null, null);
+    public boolean hasPermission(String permission, AccessControlList acl, Ownership ownership) {
+        return hasPermission(new WildcardPermission(permission), acl, ownership);
     }
     
-    public boolean hasPermission(String permission, AccessControlListDTO acl, OwnershipDTO owner) {
-        return hasPermission(new WildcardPermission(permission), acl, owner);
-    }
-    
-    public boolean hasPermission(WildcardPermission permission, AccessControlListDTO acl, OwnershipDTO owner) {
-        ArrayList<UserGroup> userGroups = new ArrayList<>();
+    public boolean hasPermission(WildcardPermission permission, AccessControlList acl, Ownership owner) {
+        ArrayList<Tenant> tenantsTheUserBelongsTo = new ArrayList<>();
         if (acl != null) {
-            userGroups = new ArrayList<>(acl.getUserGroupPermissionMap().keySet());
+            tenantsTheUserBelongsTo = new ArrayList<>(acl.getActionsByUserGroup().keySet());
         }
-        return PermissionChecker.isPermitted(permission, name, userGroups, permissions, roles, rolePermissionModel, owner, acl);
+        return PermissionChecker.isPermitted(permission, this, tenantsTheUserBelongsTo, getRoles(), rolePermissionModel, owner, acl);
     }
     
-    public TenantDTO getDefaultTenant() {
-        return defaultTenant;
-    }
-
     public List<AccountDTO> getAccounts() {
         return accounts;
     }

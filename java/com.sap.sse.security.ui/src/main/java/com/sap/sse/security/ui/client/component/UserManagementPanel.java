@@ -13,8 +13,8 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -26,13 +26,13 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -42,7 +42,7 @@ public class UserManagementPanel extends DockPanel {
     
     private List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
     
-    private SingleSelectionModel<AccessControlListDTO> aclSingleSelectionModel;
+    private SingleSelectionModel<AccessControlList> aclSingleSelectionModel;
     private AccessControlListListDataProvider aclListDataProvider;
     
     private SingleSelectionModel<UserDTO> singleSelectionModel;
@@ -108,17 +108,17 @@ public class UserManagementPanel extends DockPanel {
         });
         buttonPanel.add(editACLButton);
         aclSingleSelectionModel = new SingleSelectionModel<>();
-        final CellTable<AccessControlListDTO> aclTable = new CellTable<AccessControlListDTO>();
-        TextColumn<AccessControlListDTO> idColumn = new TextColumn<AccessControlListDTO>() {
+        final CellTable<AccessControlList> aclTable = new CellTable<>();
+        TextColumn<AccessControlList> idColumn = new TextColumn<AccessControlList>() {
             @Override
-            public String getValue(AccessControlListDTO acl) {
-                return acl.getId();
+            public String getValue(AccessControlList acl) {
+                return acl.getIdOfAccessControlledObjectAsString();
             }
         };
-        TextColumn<AccessControlListDTO> displayNameColumn = new TextColumn<AccessControlListDTO>() {
+        TextColumn<AccessControlList> displayNameColumn = new TextColumn<AccessControlList>() {
             @Override
-            public String getValue(AccessControlListDTO acl) {
-                return acl.getDisplayName();
+            public String getValue(AccessControlList acl) {
+                return acl.getDisplayNameOfAccessControlledObject()==null?"":acl.getDisplayNameOfAccessControlledObject();
             }
         };
         aclTable.addColumn(idColumn, "ID");

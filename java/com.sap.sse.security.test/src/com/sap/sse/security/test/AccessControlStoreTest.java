@@ -14,8 +14,15 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.TenantImpl;
+import com.sap.sse.security.UserImpl;
+import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
+import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
 /**
@@ -24,11 +31,12 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 public class AccessControlStoreTest {
     private final String testIdAsString = "test";
     private final String testDisplayName = "testDN";
-    private final String testOwner = "admin";
-    private final UUID testTenantOwner = UUID.randomUUID();
+    private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new TenantImpl(UUID.randomUUID(), "admin-tenant"));
+    private final Tenant testTenantOwner = new TenantImpl(UUID.randomUUID(), "test-tenant");
     private final UUID testRoleId = UUID.randomUUID();
 
-    private AccessControlStoreImpl store;
+    private UserStore userStore;
+    private AccessControlStore accessControlStore;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
@@ -38,67 +46,68 @@ public class AccessControlStoreTest {
         db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).drop();
         db.getCollection(CollectionNames.OWNERSHIPS.name()).drop();
         db.getCollection(CollectionNames.ROLES.name()).drop();
-        newStore();
+        newStores();
     }
 
-    private void newStore() {
-        store = new AccessControlStoreImpl();
+    private void newStores() {
+        userStore = new UserStoreImpl();
+        accessControlStore = new AccessControlStoreImpl(userStore);
     }
 
     @Test
     public void testCreateAccessControlList() {
-        store.createAccessControlList(testIdAsString, testDisplayName);
-        assertNotNull(store.getAccessControlList(testIdAsString));
+        accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
+        assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
 
-        newStore();
-        assertNotNull(store.getAccessControlList(testIdAsString));
+        newStores();
+        assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
     }
     
     @Test
     public void testDeleteAccessControlList() {
-        store.createAccessControlList(testIdAsString, testDisplayName);
-        store.removeAccessControlList(testIdAsString);
-        assertNull(store.getAccessControlList(testIdAsString));
+        accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
+        accessControlStore.removeAccessControlList(testIdAsString);
+        assertNull(accessControlStore.getAccessControlList(testIdAsString));
 
-        newStore();
-        assertNull(store.getAccessControlList(testIdAsString));
+        newStores();
+        assertNull(accessControlStore.getAccessControlList(testIdAsString));
     }
     
     @Test
     public void testCreateOwnership() {
-        store.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
-        assertNotNull(store.getOwnership(testIdAsString));
+        accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
+        assertNotNull(accessControlStore.getOwnership(testIdAsString));
 
-        newStore();
-        assertNotNull(store.getOwnership(testIdAsString));
+        newStores();
+        assertNotNull(accessControlStore.getOwnership(testIdAsString));
     }
     
     @Test
     public void testDeleteOwnership() {
-        store.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
-        store.removeOwnership(testIdAsString);
-        assertNull(store.getOwnership(testIdAsString));
+        accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
+        accessControlStore.removeOwnership(testIdAsString);
+        assertNull(accessControlStore.getOwnership(testIdAsString));
 
-        newStore();
-        assertNull(store.getOwnership(testIdAsString));
+        newStores();
+        assertNull(accessControlStore.getOwnership(testIdAsString));
     }
     
     @Test
     public void testCreateRole() {
-        store.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
-        assertNotNull(store.getRole(testRoleId));
+        userStore.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
+        assertNotNull(userStore.getRole(testRoleId));
 
-        newStore();
-        assertNotNull(store.getRole(testRoleId));
+        newStores();
+        assertNotNull(userStore.getRole(testRoleId));
     }
     
     @Test
     public void testDeleteRole() {
-        store.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
-        store.removeRole(testRoleId);
-        assertNull(store.getRole(testRoleId));
+        userStore.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
+        userStore.removeRole(testRoleId);
+        assertNull(userStore.getRole(testRoleId));
 
-        newStore();
-        assertNull(store.getRole(testRoleId));
+        newStores();
+        assertNull(userStore.getRole(testRoleId));
     }
 }

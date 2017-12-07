@@ -1,7 +1,6 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -18,20 +17,24 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.OwnershipImpl;
-import com.sap.sse.security.AccessControlListImpl;
 import com.sap.sse.security.Social;
-import com.sap.sse.security.User;
+import com.sap.sse.security.TenantImpl;
 import com.sap.sse.security.UserGroupImpl;
+import com.sap.sse.security.UserImpl;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListImpl;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -47,12 +50,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<AccessControlList> loadAllAccessControlLists() {
+    public Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore) {
         ArrayList<AccessControlList> result = new ArrayList<>();
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         try {
             for (DBObject o : aclCollection.find()) {
-                result.add(loadAccessControlList(o));
+                result.add(loadAccessControlList(o, userStore));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ACLs.");
@@ -61,41 +64,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    @Override
-    public AccessControlList loadAccessControlList(String id) {
-        DBObject query = new BasicDBObject();
-        query.put(FieldNames.AccessControlList.ID.name(), id);
-        DBCursor cursor = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).find(query);
-        if (cursor.hasNext()) {
-            return loadAccessControlList(cursor.next());
-        }
-        return null;
-    }
-
-    public AccessControlList loadAccessControlList(DBObject aclDBObject) {
-        final String id = (String) aclDBObject.get(FieldNames.AccessControlList.ID.name());
-        final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.DISPLAY_NAME.name());
+    private AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore) {
+        final String id = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name());
+        final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
         Map<?, ?> permissionMapAsBSON = ((BSONObject) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name())).toMap();
-        Map<UUID, Set<String>> permissionMap = new HashMap<>();
+        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         for (Map.Entry<?, ?> entry : permissionMapAsBSON.entrySet()) {
-            UUID key = UUID.fromString(entry.getKey().toString());
+            final UUID userGroupKey = UUID.fromString(entry.getKey().toString());
+            final UserGroup userGroup = userStore.getUserGroup(userGroupKey);
             Set<String> value = new HashSet<>();
             for (Object o : (BasicDBList) entry.getValue()) {
                 value.add(o.toString());
             }
-            permissionMap.put(key, value);
+            permissionMap.put(userGroup, value);
         }
         AccessControlList result = new AccessControlListImpl(id, displayName, permissionMap);
         return result;
     }
     
     @Override
-    public Iterable<Ownership> loadAllOwnerships() {
+    public Iterable<Ownership> loadAllOwnerships(UserStore userStore) {
         ArrayList<Ownership> result = new ArrayList<>();
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         try {
             for (DBObject o : ownershipCollection.find()) {
-                result.add(loadOwnership(o));
+                result.add(loadOwnership(o, userStore));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ownerships.");
@@ -104,12 +97,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private Ownership loadOwnership(DBObject ownershipDBObject) {
-        final String id = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
-        final String displayName = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
-        final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
-        final UUID tenantOwner = UUID.fromString((String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name()));
-        return new OwnershipImpl(id, owner, tenantOwner, displayName);
+    private Ownership loadOwnership(DBObject ownershipDBObject, UserStore userStore) {
+        final String idOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
+        final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
+        final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
+        final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());
+        final SecurityUser userOwner = userStore.getUserByName(userOwnerName);
+        final Tenant tenantOwner = userStore.getTenant(tenantOwnerId);
+        return new OwnershipImpl(idOfOwnedObject, userOwner, tenantOwner, displayNameOfOwnedObject);
     }
     
     @Override
@@ -138,8 +133,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    @Override
-    public Collection<UUID> loadAllTenantIds() {
+    private Set<UUID> loadAllTenantIds() {
         Set<UUID> result = new HashSet<>();
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         for (DBObject o : tenantCollection.find()) {
@@ -149,41 +143,54 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<UserGroup> loadAllUserGroups() {
-        ArrayList<UserGroup> result = new ArrayList<>();
+    public Pair<Iterable<UserGroup>, Iterable<Tenant>> loadAllUserGroupsAndTenants(Map<String, UserImpl> usersByName) {
+        Set<UserGroup> userGroups = new HashSet<>();
+        Set<Tenant> tenants = new HashSet<>();
+        final Set<UUID> tenantIds = loadAllTenantIds();
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         try {
             for (DBObject o : userGroupCollection.find()) {
-                result.add(loadUserGroup(o));
+                final UserGroup userGroup = loadUserGroup(o, usersByName);
+                if (tenantIds.contains(userGroup.getId())) {
+                    tenants.add(new TenantImpl(userGroup));
+                } else {
+                    userGroups.add(userGroup);
+                }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load user groups.");
             logger.log(Level.SEVERE, "loadAllUserGroups", e);
         }
-        return result;
+        return new Pair<Iterable<UserGroup>, Iterable<Tenant>>(userGroups, tenants);
     }
     
-    private UserGroup loadUserGroup(DBObject groupDBObject) {
+    private UserGroup loadUserGroup(DBObject groupDBObject, Map<String, UserImpl> usersByName) {
         final UUID id = UUID.fromString((String) groupDBObject.get(FieldNames.UserGroup.ID.name()));
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
-        Set<String> users = new HashSet<String>();
-        BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERS.name());
+        Set<SecurityUser> users = new HashSet<>();
+        BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
         if (usersO != null) {
             for (Object o : usersO) {
-                users.add((String) o);
+                users.add(usersByName.get((String) o));
             }
         }
         UserGroup result = new UserGroupImpl(id, name, users);
         return result;
     }
 
+    /**
+     * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
+     *         tenant} attribute which need to be replaced by the caller once the {@link Tenant} objects have been
+     *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects
+     *         is their {@link Tenant#getId() ID} field.
+     */
     @Override
-    public Iterable<User> loadAllUsers() {
-        ArrayList<User> result = new ArrayList<>();
+    public Iterable<UserImpl> loadAllUsers(Map<UUID, Role> rolesById) {
+        ArrayList<UserImpl> result = new ArrayList<>();
         DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
             for (DBObject o : userCollection.find()) {
-                result.add(loadUser(o));
+                result.add(loadUser(o, rolesById));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load users.");
@@ -192,22 +199,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    @Override
-    public User loadUser(String name) {
-        User result;
-        BasicDBObject query = new BasicDBObject();
-        query.put(FieldNames.User.NAME.name(), name);
-        DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
-        DBObject userDBObject = userCollection.findOne(query);
-        if (userDBObject != null) {
-            result = loadUser(userDBObject);
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
-    private User loadUser(DBObject userDBObject) {
+    /**
+     * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
+     *         tenant} attribute which need to be replaced by the caller once the {@link Tenant} objects have been
+     *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects
+     *         is their {@link Tenant#getId() ID} field.
+     */
+    private UserImpl loadUser(DBObject userDBObject, Map<UUID, Role> rolesById) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
@@ -219,7 +217,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         Set<UUID> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();
-        BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLES.name());
+        BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLE_IDS.name());
         if (rolesO != null) {
             for (Object o : rolesO) {
                 roles.add(UUID.fromString((String) o));
@@ -231,15 +229,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 permissions.add((String) o);
             }
         }
-        UUID defaultTenant = UUID.fromString((String) userDBObject.get(FieldNames.User.DEFAULT_TENANT.name()));
+        final UUID defaultTenantId = UUID.fromString((String) userDBObject.get(FieldNames.User.DEFAULT_TENANT_ID.name()));
+        final Tenant defaultTenantOnlyWithId = defaultTenantId == null ? null : new TenantImpl(defaultTenantId, null);
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        User result = new User(name, email, fullName, company, locale, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, defaultTenant, accounts.values());
-        for (UUID role : roles) {
-            result.addRole(role);
+        UserImpl result = new UserImpl(name, email, fullName, company, locale,
+                emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenantOnlyWithId,
+                accounts.values());
+        for (UUID roleId : roles) {
+            result.addRole(rolesById.get(roleId));
         }
         for (String permission : permissions) {
-            result.addPermission(permission);
+            result.addPermission(new WildcardPermission(permission));
         }
         return result;
     }

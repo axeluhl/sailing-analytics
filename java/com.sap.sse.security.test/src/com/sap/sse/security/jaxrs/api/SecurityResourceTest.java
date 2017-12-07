@@ -22,7 +22,7 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.User;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
@@ -42,7 +42,7 @@ public class SecurityResourceTest {
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             final UserStoreImpl store = new UserStoreImpl();
-            final AccessControlStore accessControlStore = new AccessControlStoreImpl();
+            final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
                     store, accessControlStore, /* setAsActivatorSecurityService */ true);
@@ -57,7 +57,7 @@ public class SecurityResourceTest {
                     return service;
                 }
             };
-            store.addPermissionForUser("admin", "can do");
+            store.addPermissionForUser("admin", "can do"); // equivalent to "can do:*:*"
             store.addPermissionForUser("admin", "event:view:*");
             store.addPermissionForUser("admin", "event:edit:123");
         } finally {
@@ -91,7 +91,7 @@ public class SecurityResourceTest {
     @Test
     public void createAccessTokenAndAuthenticate() throws ParseException {
         String accessToken = getOrCreateAccessToken();
-        User user = service.getUserByAccessToken(accessToken);
+        UserImpl user = service.getUserByAccessToken(accessToken);
         assertNotNull(user);
         assertEquals("admin", user.getName());
         final Subject subject = SecurityUtils.getSubject();
@@ -111,7 +111,7 @@ public class SecurityResourceTest {
     public void ensureOldBearerTokenIsInvalidatedByObtainingNewOne() throws ParseException {
         String accessToken = getOrCreateAccessToken();
         createAccessToken();
-        User user = service.getUserByAccessToken(accessToken);
+        UserImpl user = service.getUserByAccessToken(accessToken);
         assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one
     }
 
@@ -119,7 +119,7 @@ public class SecurityResourceTest {
     public void ensureOldBearerTokenIsInvalidatedByRequestingItsRemoval() throws ParseException {
         String accessToken = getOrCreateAccessToken();
         removeAccessToken();
-        User user = service.getUserByAccessToken(accessToken);
+        UserImpl user = service.getUserByAccessToken(accessToken);
         assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one
     }
 }

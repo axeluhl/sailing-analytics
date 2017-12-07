@@ -4,11 +4,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.User;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.TenantManagementException;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 
 /**
  * Publishes those methods of {@link SecurityServiceImpl} that are required by operations implemented as lambda
@@ -20,31 +20,33 @@ import com.sap.sse.security.shared.UserManagementException;
  *
  */
 public interface ReplicableSecurityService extends SecurityService {
-    Void internalCreateAcl(String idAsString, String displayName);
+    Void internalCreateAcl(String idOfAccessControlledObjectAsString, String displayName);
     
-    Void internalAclPutPermissions(String idAsString, UUID group, Set<String> permissions);
+    Void internalAclPutPermissions(String idOfAccessControlledObjectAsString, UUID groupId, Set<String> actions);
     
-    Void internalAclAddPermission(String idAsString, UUID group, String permission);
+    Void internalAclAddPermission(String idOfAccessControlledObjectAsString, UUID groupId, String action);
     
-    Void internalAclRemovePermission(String idAsString, UUID group, String permission);
+    Void internalAclRemovePermission(String idOfAccessControlledObjectAsString, UUID groupId, String action);
     
-    Void internalDeleteAcl(String idAsString);
+    Void internalDeleteAcl(String idOfAccessControlledObjectAsString);
     
     Void internalCreateOwnership(String idOfOwnedObjectAsString, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
     
     Void internalDeleteOwnership(String idOfOwnedObjectAsString);
     
-    Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException;
+    Void internalCreateUserGroup(UUID groupId, String name) throws UserGroupManagementException;
     
-    Void internalCreateTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
+    Void internalCreateTenant(UUID groupId, String name) throws TenantManagementException, UserGroupManagementException;
     
-    Void internalUpdateUserGroup(UserGroup group);
+    Void internalDeleteUserGroup(UUID groupId) throws UserGroupManagementException;
     
-    Void internalDeleteUserGroup(UUID id) throws UserGroupManagementException;
+    Void internalAddUserToUserGroup(UUID groupId, String username) throws UserGroupManagementException;
+
+    Void internalRemoveUserFromUserGroup(UUID groupId, String username) throws UserGroupManagementException;
     
-    Void internalDeleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException;
+    Void internalDeleteTenant(UUID tenantId) throws TenantManagementException, UserGroupManagementException;
     
-    Void internalStoreUser(User user);
+    Void internalStoreUser(UserImpl user);
 
     Void internalSetPreference(String username, String key, String value);
 
@@ -67,9 +69,9 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalRemoveRoleFromUser(String username, UUID role) throws UserManagementException;
 
-    Void internalAddPermissionForUser(String username, String permissionToAdd) throws UserManagementException;
+    Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException;
 
-    Void internalRemovePermissionForUser(String username, String permissionToRemove) throws UserManagementException;
+    Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException;
 
     Void internalDeleteUser(String username) throws UserManagementException;
 

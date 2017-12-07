@@ -17,7 +17,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.User;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -257,14 +257,14 @@ public class PreferenceObjectBasedNotificationSetTest {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private static HashSet<User> users(User... values) {
+    private static HashSet<UserImpl> users(UserImpl... values) {
         return new HashSet<>(Arrays.asList(values));
     }
     
     private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
         UUID defaultTenant = UUID.randomUUID();
         store.createUser(username, email, defaultTenant);
-        store.updateUser(new User(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet()));
+        store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet()));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {
@@ -279,11 +279,11 @@ public class PreferenceObjectBasedNotificationSetTest {
         }
     }
     
-    private static class UserConsumerMock implements Consumer<User> {
-        final HashSet<User> calls = new HashSet<>();
+    private static class UserConsumerMock implements Consumer<UserImpl> {
+        final HashSet<UserImpl> calls = new HashSet<>();
 
         @Override
-        public void accept(User user) {
+        public void accept(UserImpl user) {
             if(user == null) {
                 throw new IllegalArgumentException("User is null");
             }

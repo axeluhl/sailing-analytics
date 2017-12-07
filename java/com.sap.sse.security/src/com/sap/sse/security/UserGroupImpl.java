@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 
 public class UserGroupImpl implements UserGroup {
@@ -12,16 +13,16 @@ public class UserGroupImpl implements UserGroup {
     private final UUID id;
     private final String name;
     
-    private Set<String> usernames;
+    private Set<SecurityUser> users;
         
     public UserGroupImpl(UUID id, String name) {
         this(id, name, new HashSet<>());
     }
     
-    public UserGroupImpl(UUID id, String name, Set<String> usernames) {
+    public UserGroupImpl(UUID id, String name, Set<? extends SecurityUser> users) {
         this.id = id;
         this.name = name;
-        this.usernames = usernames;
+        this.users = new HashSet<>(users);
     }
     
     @Override
@@ -35,22 +36,22 @@ public class UserGroupImpl implements UserGroup {
     }
     
     @Override
-    public void add(String name) {
-        usernames.add(name);
+    public void add(SecurityUser user) {
+        users.add(user);
     }
     
     @Override
-    public void remove(String user) {
-        usernames.remove(user);
+    public void remove(SecurityUser user) {
+        users.remove(user);
     }
     
     @Override
-    public boolean contains(String user) {
-        return usernames.contains(user);
+    public boolean contains(SecurityUser user) {
+        return users.contains(user);
     }
 
     @Override
-    public Set<String> getUsernames() {
-        return usernames;
+    public Set<SecurityUser> getUsers() {
+        return users;
     }  
 }

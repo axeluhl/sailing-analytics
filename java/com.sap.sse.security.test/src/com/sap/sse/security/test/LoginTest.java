@@ -21,6 +21,7 @@ import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -38,7 +39,7 @@ public class LoginTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         userStore = new UserStoreImpl();
-        accessControlStore = new AccessControlStoreImpl(null, null);
+        accessControlStore = new AccessControlStoreImpl(userStore);
         
         Activator.setTestStores(userStore, accessControlStore);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
@@ -79,7 +80,7 @@ public class LoginTest {
         userStore.createUser("me", "me@sap.com", UUID.randomUUID());
         userStore.addPermissionForUser("me", "a:b:c");
         UserStoreImpl store2 = new UserStoreImpl();
-        assertTrue(store2.getUserByName("me").hasPermission("a:b:c"));
+        assertTrue(store2.getUserByName("me").hasPermission(new WildcardPermission("a:b:c")));
     }
 
 }

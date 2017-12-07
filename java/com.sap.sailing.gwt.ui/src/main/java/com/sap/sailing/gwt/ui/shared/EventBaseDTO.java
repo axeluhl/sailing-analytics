@@ -13,8 +13,8 @@ import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.security.ui.shared.AccessControlListDTO;
-import com.sap.sse.security.ui.shared.OwnershipDTO;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Ownership;
 
 public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
@@ -32,8 +32,8 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private List<ImageDTO> images = new ArrayList<>();
     private List<VideoDTO> videos = new ArrayList<>();
     
-    private AccessControlListDTO aclDTO;
-    private OwnershipDTO ownershipDTO;
+    private AccessControlList acl;
+    private Ownership ownership;
 
     /**
      * For the image URL keys holds the sizes of these images if known. An image size is "known" by this object if it
@@ -187,19 +187,19 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         return imageSizes.get(imageURL);
     }
     
-    public void setAclDTO(AccessControlListDTO aclDTO) {
-        this.aclDTO = aclDTO;
+    public void setAcl(AccessControlList acl) {
+        this.acl = acl;
     }
     
-    public AccessControlListDTO getAclDTO() {
-        return this.aclDTO;
+    public AccessControlList getAcl() {
+        return this.acl;
     }
     
-    public void setOwnershipDTO(OwnershipDTO ownershipDTO) {
-        this.ownershipDTO = ownershipDTO;
+    public void setOwnership(Ownership ownership) {
+        this.ownership = ownership;
     }
     
-    public OwnershipDTO getOwnershipDTO() {
-        return this.ownershipDTO;
+    public Ownership getOwnership() {
+        return this.ownership;
     }
 }

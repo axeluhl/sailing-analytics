@@ -11,16 +11,16 @@ import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class RolePermissionModelDTO implements RolePermissionModel, IsSerializable {
-    private Map<UUID, RoleDTO> roles;
+    private Map<UUID, Role> roles;
     
     RolePermissionModelDTO() {} // for serialization only
     
-    public RolePermissionModelDTO(Map<UUID, RoleDTO> roles) {
+    public RolePermissionModelDTO(Map<UUID, Role> roles) {
         this.roles = roles;
     }
     
     @Override
-    public String getName(UUID id) {
+    public String getRoleName(UUID id) {
         return roles.get(id).getName();
     }
     
@@ -36,22 +36,17 @@ public class RolePermissionModelDTO implements RolePermissionModel, IsSerializab
     
     // TODO as default implementation in interface
     @Override
-    public boolean implies(UUID id, WildcardPermission permission) {
-        return implies(id, permission, null);
-    }
-    
-    @Override
-    public boolean implies(UUID id, WildcardPermission permission, Ownership ownership) {
-        return implies(id, roles.get(id).getName(), permission, ownership);
+    public boolean implies(Role role, WildcardPermission permission) {
+        return implies(role, permission, null);
     }
     
     // TODO as default implementation in interface
     @Override
-    public boolean implies(UUID id, String name, WildcardPermission permission, Ownership ownership) {
-        String[] parts = name.split(":");
+    public boolean implies(Role role, WildcardPermission permission, Ownership ownership) {
+        String[] parts = role.getName().split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwnerId().equals(parts[1]))) {
-            for (WildcardPermission rolePermission : getPermissions(id)) {
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
+            for (WildcardPermission rolePermission : role.getPermissions()) {
                 if (rolePermission.implies(permission)) {
                     return true;
                 }

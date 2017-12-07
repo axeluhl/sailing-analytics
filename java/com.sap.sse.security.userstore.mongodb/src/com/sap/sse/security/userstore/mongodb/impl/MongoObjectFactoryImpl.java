@@ -1,11 +1,9 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -14,13 +12,15 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.Social;
-import com.sap.sse.security.User;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -42,14 +42,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeAccessControlList(AccessControlList acl) {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
-        aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.ID.name(), 1));
+        aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), 1));
         DBObject dbACL = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.AccessControlList.ID.name(), acl.getId().toString());
-        dbACL.put(FieldNames.AccessControlList.ID.name(), acl.getId().toString());
-        dbACL.put(FieldNames.AccessControlList.DISPLAY_NAME.name(), acl.getDisplayName());
-        Map<String, Set<String>> permissionMap = new HashMap<>();
-        for (Map.Entry<UUID, Set<String>> entry : acl.getPermissionMap().entrySet()) {
-            permissionMap.put(entry.getKey().toString(), entry.getValue());
+        DBObject query = new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString().toString());
+        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString());
+        dbACL.put(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name(), acl.getDisplayNameOfAccessControlledObject());
+        DBObject permissionMap = new BasicDBObject();
+        for (Entry<UserGroup, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+            final BasicDBList dbUsernames = new BasicDBList();
+            dbUsernames.addAll(entry.getValue());
+            permissionMap.put(entry.getKey().toString(), dbUsernames);
         }
         dbACL.put(FieldNames.AccessControlList.PERMISSION_MAP.name(), permissionMap);
         aclCollection.update(query, dbACL, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
@@ -59,7 +61,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void deleteAccessControlList(AccessControlList acl) {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         DBObject dbACL = new BasicDBObject();
-        dbACL.put(FieldNames.AccessControlList.ID.name(), acl.getId().toString());
+        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString());
         aclCollection.remove(dbACL);
     }
     
@@ -70,8 +72,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbOwnership = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfOwnedObjectAsString());
         dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfOwnedObjectAsString());
-        dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getOwnerUsername());
-        dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getTenantOwnerId().toString());
+        dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getUserOwner().getName());
+        dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getTenantOwner().getId());
         dbOwnership.put(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name(), owner.getDisplayNameOfOwnedObject());
         ownershipCollection.update(query, dbOwnership, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
@@ -109,20 +111,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void storeTenant(UUID id) {
+    public void storeTenant(Tenant tenant) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.ID.name(), 1));
         DBObject dbTenant = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Tenant.ID.name(), id.toString());
-        dbTenant.put(FieldNames.Tenant.ID.name(), id.toString());
+        DBObject query = new BasicDBObject(FieldNames.Tenant.ID.name(), tenant.toString());
+        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.toString());
         tenantCollection.update(query, dbTenant, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 
     @Override
-    public void deleteTenant(UUID id) {
+    public void deleteTenant(Tenant tenant) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         DBObject dbTenant = new BasicDBObject();
-        dbTenant.put(FieldNames.Tenant.ID.name(), id.toString());
+        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.toString());
         tenantCollection.remove(dbTenant);
     }
     
@@ -134,15 +136,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.UserGroup.ID.name(), group.getId().toString());
         dbUserGroup.put(FieldNames.UserGroup.ID.name(), group.getId().toString());
         dbUserGroup.put(FieldNames.UserGroup.NAME.name(), group.getName());
-        dbUserGroup.put(FieldNames.UserGroup.USERS.name(), group.getUsernames());
+        BasicDBList dbUsernames = new BasicDBList();
+        for (SecurityUser user : group.getUsers()) {
+            dbUsernames.add(user.getName());
+        }
+        dbUserGroup.put(FieldNames.UserGroup.USERNAMES.name(), dbUsernames);
         userGroupCollection.update(query, dbUserGroup, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
     
     @Override
-    public void deleteUserGroup(UUID id) {
+    public void deleteUserGroup(UserGroup userGroup) {
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         DBObject dbUserGroup = new BasicDBObject();
-        dbUserGroup.put(FieldNames.UserGroup.ID.name(), id.toString());
+        dbUserGroup.put(FieldNames.UserGroup.ID.name(), userGroup.getId().toString());
         userGroupCollection.remove(dbUserGroup);
     }
 
@@ -161,18 +167,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.PASSWORD_RESET_SECRET.name(), user.getPasswordResetSecret());
         dbUser.put(FieldNames.User.VALIDATION_SECRET.name(), user.getValidationSecret());
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
-        HashSet<String> roles = new HashSet<>();
-        for (UUID id : user.getRoles()) {
-            roles.add(id.toString());
+        BasicDBList dbRoles = new BasicDBList();
+        for (Role role : user.getRoles()) {
+            dbRoles.add(role.getId().toString());
         }
-        dbUser.put(FieldNames.User.ROLES.name(), roles);
-        dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
-        dbUser.put(FieldNames.User.DEFAULT_TENANT.name(), user.getDefaultTenantId().toString());
+        dbUser.put(FieldNames.User.ROLE_IDS.name(), dbRoles);
+        BasicDBList dbPermissions = new BasicDBList();
+        for (WildcardPermission permission : user.getPermissions()) {
+            dbPermissions.add(permission.toString());
+        }
+        dbUser.put(FieldNames.User.PERMISSIONS.name(), dbPermissions);
+        dbUser.put(FieldNames.User.DEFAULT_TENANT_ID.name(), user.getDefaultTenant().getId().toString());
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
     
     @Override
-    public void deleteUser(User user) {
+    public void deleteUser(SecurityUser user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
         DBObject dbUser = new BasicDBObject();
         dbUser.put(FieldNames.User.NAME.name(), user.getName());

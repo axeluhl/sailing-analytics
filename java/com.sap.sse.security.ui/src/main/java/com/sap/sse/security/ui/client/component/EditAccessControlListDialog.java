@@ -19,51 +19,51 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog.AccessControlListData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.AccessControlListDTO;
-import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public class EditAccessControlListDialog extends DataEntryDialog<AccessControlListData> {
     // private final StringMessages stringMessages;
     
     private final Grid grid;
-    private final String id;
+    private final String accessControlledObjectIdAsString;
     private final List<Label> labels;
     private final List<TextBox> newGroups;
     private final List<TextBox> textBoxes;
     private final Button addGroupButton;
     
     public static class AccessControlListData {
-        private final String id;
+        private final String accessControlledObjectIdAsString;
         private final Map<String, Set<String>> permissionStrings;
         
-        protected AccessControlListData(String id, Map<String, Set<String>> permissionStrings) {
+        protected AccessControlListData(String accessControlledObjectIdAsString, Map<String, Set<String>> permissionStrings) {
             super();
-            this.id = id;
+            this.accessControlledObjectIdAsString = accessControlledObjectIdAsString;
             this.permissionStrings = permissionStrings;
         }
-        public String getId() {
-            return id;
+        public String getAccessControlledObjectIdAsString() {
+            return accessControlledObjectIdAsString;
         }
-        public Map<String, Set<String>> getPermissionStrings() {
+        public Map<String, Set<String>> getActionStrings() {
             return permissionStrings;
         }
     }
     
     public EditAccessControlListDialog(final StringMessages stringMessages, final UserManagementServiceAsync userManagementService, 
-            final AccessControlListListDataProvider aclListDataProvider, AccessControlListDTO acl) {
-        this(stringMessages, "Edit an access control list", acl.getId(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
+            final AccessControlListListDataProvider aclListDataProvider, AccessControlList acl) {
+        this(stringMessages, "Edit an access control list", acl.getIdOfAccessControlledObjectAsString(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
             @Override
             public void ok(AccessControlListData aclData) {
-                userManagementService.updateACL(aclData.getId(), aclData.getPermissionStrings(), new AsyncCallback<AccessControlListDTO>() {
+                userManagementService.updateACL(aclData.getAccessControlledObjectIdAsString(), aclData.getActionStrings(), new AsyncCallback<AccessControlList>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert("Error editing access control list.");
                     }
                     @Override
-                    public void onSuccess(AccessControlListDTO result) {
+                    public void onSuccess(AccessControlList result) {
                         aclListDataProvider.updateDisplays();
                     }
                 });
@@ -75,8 +75,8 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
     }
     
     private EditAccessControlListDialog(final StringMessages stringMessages, final String title, final String message,
-                final UserManagementServiceAsync userManagementService, final AccessControlListDTO acl
-                , final DialogCallback<AccessControlListData> callback) {
+            final UserManagementServiceAsync userManagementService, final AccessControlList acl,
+            final DialogCallback<AccessControlListData> callback) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 new DataEntryDialog.Validator<AccessControlListData>() {
                     @Override
@@ -98,13 +98,13 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
                 updateGrid();                
             }
         });
-        id = acl.getId();
-        for (Map.Entry<UserGroupDTO, Set<String>> entry : acl.getUserGroupPermissionMap().entrySet()) {
+        accessControlledObjectIdAsString = acl.getIdOfAccessControlledObjectAsString();
+        for (Map.Entry<UserGroup, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
             Label label = new Label(entry.getKey().getName());
             labels.add(label);
             String concatenated = "";
-            for (String permission : entry.getValue()) {
-                concatenated += permission + ", ";                
+            for (String action : entry.getValue()) {
+                concatenated += action + ", ";                
             }
             TextBox textBox = createTextBox(concatenated, 200);
             textBoxes.add(textBox);
@@ -154,6 +154,6 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
                 permissionMap.put(newGroups.get(i - labelCount).getText(), permissionList);
             }
         }
-        return new AccessControlListData(id, permissionMap);
+        return new AccessControlListData(accessControlledObjectIdAsString, permissionMap);
     }
 }

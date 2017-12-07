@@ -11,6 +11,7 @@ import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
@@ -18,11 +19,15 @@ import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -36,57 +41,61 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     SecurityManager getSecurityManager();
 
-    Ownership getOwnership(String idAsString);
+    Ownership getOwnership(String idOfOwnedObjectAsString);
+    
+    Ownership createDefaultOwnershipForNewObject(WithID newObject);
+
+    void deleteAllDataForRemovedObject(WithID removedObject);
 
     Iterable<AccessControlList> getAccessControlListList();
 
-    AccessControlList getAccessControlList(String idAsString);
+    AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString);
 
     /**
-     * @param idAsString Has to be globally unique
+     * @param idOfAccessControlledObjectAsString Has to be globally unique
      */
-    SecurityService createAccessControlList(String idAsString);
+    SecurityService createAccessControlList(String idOfAccessControlledObjectAsString);
 
     /**
      * @param id Has to be globally unique
      */
-    SecurityService createAccessControlList(String idAsString, String displayName);
+    SecurityService createAccessControlList(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject);
 
-    AccessControlList updateACL(String idAsString, Map<UserGroup, Set<String>> permissionMap);
+    AccessControlList updateACL(String idOfAccessControlledObjectAsString, Map<UserGroup, Set<String>> permissionMap);
 
     /**
      * @param name The name of the user group to add
      */
-    AccessControlList addToACL(String idAsString, UUID group, String permission);
+    AccessControlList addToACL(String idOfAccessControlledObjectAsString, UUID groupId, String action);
 
     /**
      * @param name The name of the user group to remove
      */
-    AccessControlList removeFromACL(String idAsString, UUID group, String permission);
+    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, UUID group, String action);
 
-    void deleteACL(String idAsString);
+    void deleteACL(String idOfAccessControlledObjectAsString);
 
     /**
-     * Same as {@link #createOwnership(String, String, UUID, String)}, leaving the display name
+     * Same as {@link #createOwnership(String, UserImpl, Tenant, String)}, leaving the display name
      * of the object owned undefined.
      */
-    void createOwnership(String idAsString, String owner, UUID tenantOwner);
+    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner);
 
     /**
      * @param idOfOwnedObjectAsString
      *            the ID of the object for which ownership is declared
-     * @param owningUsername
-     *            the {@link User#getName() user name} of the user to become the owning user of the object with ID
+     * @param userOwner
+     *            the user to become the owning user of the object with ID
      *            {@code idOfOwnedObjectAsString}
-     * @param tenantOwnerId
-     *            the ID of the tenant to become owning tenant of the object with ID {@code idOfOwnedObjectAsString}
+     * @param tenantOwner
+     *            the tenant to become owning tenant of the object with ID {@code idOfOwnedObjectAsString}
      * @param displayNameOfOwnedObject
      *            a display name that this store can use to produce a user-readable hint regarding the ownership
      *            definition that this call creates; there is no guarantee that the display name will remain up to date
      *            as the object identified by {@link idOfOwnedObjectAsString} may change its name without notifying this
      *            store
      */
-    void createOwnership(String idOfOwnedObjectAsString, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
+    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
 
     void deleteOwnership(String idAsString);
 
@@ -96,7 +105,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     UserGroup getUserGroupByName(String name);
 
-    Iterable<Tenant> getTenantList();
+    Iterable<Tenant> getTenants();
 
     Tenant getTenant(UUID id);
 
@@ -106,19 +115,19 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
 
-    UserGroup addUserToUserGroup(UUID group, String user);
+    UserGroup addUserToUserGroup(UserGroup group, SecurityUser user);
 
-    UserGroup removeUserFromUserGroup(UUID group, String user);
+    UserGroup removeUserFromUserGroup(UserGroup group, SecurityUser user);
 
-    void deleteUserGroup(UUID id) throws UserGroupManagementException;
+    void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
 
-    void deleteTenant(UUID id) throws TenantManagementException, UserGroupManagementException;
+    void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException;
 
-    Iterable<User> getUserList();
+    Iterable<UserImpl> getUserList();
 
-    User getUserByName(String username);
+    UserImpl getUserByName(String username);
 
-    User getUserByEmail(String email);
+    SecurityUser getUserByEmail(String email);
 
     User getCurrentUser();
 
@@ -129,19 +138,19 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     String getAuthenticationUrl(Credential credential) throws UserManagementException;
 
-    User verifySocialUser(Credential credential) throws UserManagementException;
+    UserImpl verifySocialUser(Credential credential) throws UserManagementException;
 
     void logout();
 
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException;
+    SecurityUser createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException;
 
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    User createSimpleUser(String username, String email, String password, String fullName, String company, Locale locale, String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException;
+    UserImpl createSimpleUser(String username, String email, String password, String fullName, String company, Locale locale, String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
@@ -149,23 +158,27 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
-    User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException, TenantManagementException, UserGroupManagementException;
+    SecurityUser createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException, TenantManagementException, UserGroupManagementException;
 
     void deleteUser(String username) throws UserManagementException;
 
     Iterable<Role> getRoles();
 
-    Iterable<UUID> getRolesFromUser(String username) throws UserManagementException;
-
-    void addRoleForUser(String username, UUID role);
-
-    void removeRoleFromUser(String username, UUID role);
-
-    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+    Role getRole(UUID idOfRole);
     
-    void removePermissionFromUser(String username, String permissionToRemove);
+    void addRoleForUser(SecurityUser user, Role role);
 
-    void addPermissionForUser(String username, String permissionToAdd);
+    void addRoleForUser(String username, Role role);
+
+    void removeRoleFromUser(SecurityUser user, Role role);
+    
+    void removeRoleFromUser(String username, Role role);
+
+    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
+    
+    void removePermissionFromUser(String username, WildcardPermission permissionToRemove);
+
+    void addPermissionForUser(String username, WildcardPermission permissionToAdd);
 
     /**
      * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}
@@ -276,9 +289,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * 
      * @return <code>null</code> in case the access token is unknown or was deleted / invalidated
      */
-    User getUserByAccessToken(String accessToken);
+    SecurityUser getUserByAccessToken(String accessToken);
 
     void removeAccessToken(String username);
 
-    User loginByAccessToken(String accessToken);
+    SecurityUser loginByAccessToken(String accessToken);
 }

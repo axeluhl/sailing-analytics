@@ -353,7 +353,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 for (Action action : Arrays.asList(DefaultActions.EDIT, DefaultActions.REMOVE)) {
                     if (user.hasPermission(
                             PermissionBuilderImpl.getInstance().getPermission("com.sap.sailing.domain.base.Event", action, event.id.toString()),
-                            event.getAclDTO(), event.getOwnershipDTO())) {
+                            event.getAcl(), event.getOwnership())) {
                         allowedActions.add(action);
                     }
                 }

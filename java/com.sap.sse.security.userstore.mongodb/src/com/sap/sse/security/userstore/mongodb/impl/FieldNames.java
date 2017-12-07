@@ -3,8 +3,8 @@ package com.sap.sse.security.userstore.mongodb.impl;
 public class FieldNames {
     
     public static enum AccessControlList {
-        ID,
-        DISPLAY_NAME,
+        OBJECT_ID,
+        OBJECT_DISPLAY_NAME,
         PERMISSION_MAP
     }
     
@@ -31,7 +31,7 @@ public class FieldNames {
     public static enum UserGroup {
         ID,
         NAME,
-        USERS
+        USERNAMES
     }
     
     public static enum User {
@@ -41,8 +41,8 @@ public class FieldNames {
         LOCALE,
         EMAIL,
         ACCOUNTS,
-        ROLES, PERMISSIONS,
-        DEFAULT_TENANT,
+        ROLE_IDS, PERMISSIONS,
+        DEFAULT_TENANT_ID,
         EMAIL_VALIDATED,
         PASSWORD_RESET_SECRET,
         VALIDATION_SECRET;

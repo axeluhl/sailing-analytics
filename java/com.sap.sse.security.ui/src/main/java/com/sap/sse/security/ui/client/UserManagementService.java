@@ -8,37 +8,37 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
-import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public interface UserManagementService extends RemoteService {
-    Collection<AccessControlListDTO> getAccessControlListList() throws UnauthorizedException;
+    Collection<AccessControlList> getAccessControlListList() throws UnauthorizedException;
 
-    AccessControlListDTO getAccessControlList(String idAsString);
+    AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString);
 
-    AccessControlListDTO updateACL(String idAsString, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
+    AccessControlList updateACL(String idOfAccessControlledObjectAsString, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
 
-    AccessControlListDTO addToACL(String idAsString, String tenantIdAsString, String permission) throws UnauthorizedException;
+    AccessControlList addToACL(String idOfAccessControlledObjectAsString, String tenantIdAsString, String action) throws UnauthorizedException;
 
-    AccessControlListDTO removeFromACL(String idAsString, String tenantIdAsString, String permission) throws UnauthorizedException;
+    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, String tenantIdAsString, String action) throws UnauthorizedException;
 
-    Collection<TenantDTO> getTenantList() throws UnauthorizedException;
+    Collection<Tenant> getTenants() throws UnauthorizedException;
 
-    TenantDTO createTenant(String name, String tenantOwner) throws TenantManagementException, UnauthorizedException;
+    Tenant createTenant(String name, String tenantOwner) throws TenantManagementException, UnauthorizedException;
 
-    UserGroupDTO addUserToTenant(String idAsString, String user) throws UnauthorizedException;
+    UserGroup addUserToTenant(String tenantIdAsString, String username) throws UnauthorizedException;
 
-    UserGroupDTO removeUserFromTenant(String idAsString, String user) throws UnauthorizedException;
+    UserGroup removeUserFromTenant(String tenantIdAsString, String username) throws UnauthorizedException;
 
-    SuccessInfo deleteTenant(String idAsString) throws UnauthorizedException;
+    SuccessInfo deleteTenant(String tenantIdAsString) throws UnauthorizedException;
 
     Collection<UserDTO> getUserList() throws UnauthorizedException;
 

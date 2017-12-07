@@ -12,34 +12,46 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
-import com.sap.sse.security.Tenant;
-import com.sap.sse.security.User;
+import com.sap.sse.security.TenantImpl;
 import com.sap.sse.security.UserGroupImpl;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 
 /**
  * An implementation of the {@link UserStore} interface, intended to store its state durably in a MongoDB instance.
  * A de-serialized copy, however, will have its {@link #mongoObjectFactory} field set to <code>null</code> and will
  * therefore not perform any changes to the database. This is also the reason why all access to the
  * {@link #mongoObjectFactory} field needs to be <code>null</code>-safe.<p>
+ * 
+ * The storage pattern for {@link UserGroup} and {@link Tenant} objects deserves some explanation. As a {@link Tenant}
+ * is a specialized {@link UserGroup}, this store mainly needs to keep track of the users in that {@link Tenant}. Hence,
+ * the same collection is used for the storage of these user lists, and hence the same methods can be used for
+ * maintaining this collection. Additionally, the tenant ID is stored in a separate collection as a "marker" which
+ * entries in the user groups collection are actually tenants and not only user groups.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -53,12 +65,14 @@ public class UserStoreImpl implements UserStore {
 
     private String name = "MongoDB user store";
     
-    private final ConcurrentSkipListSet<UUID> tenants;
+    private final ConcurrentHashMap<UUID, Tenant> tenants;
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UUID> userGroupsByName;
     
-    private final ConcurrentHashMap<String, User> users;
-    private final ConcurrentHashMap<String, Set<User>> usersByEmail;
+    private final ConcurrentHashMap<String, UserImpl> users;
+    private final ConcurrentHashMap<String, Set<UserImpl>> usersByEmail;
+    private final ConcurrentHashMap<UUID, Role> roles;
+
     private final ConcurrentHashMap<String, User> usersByAccessToken;
     private final ConcurrentHashMap<String, String> emailForUsername;
     private final ConcurrentHashMap<String, Object> settings;
@@ -83,7 +97,7 @@ public class UserStoreImpl implements UserStore {
     
     /**
      * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
-     * the specific preference object for a {@link User}.
+     * the specific preference object for a {@link UserImpl}.
      */
     private transient Map<String, Set<PreferenceObjectListener<?>>> listeners;
     
@@ -102,7 +116,8 @@ public class UserStoreImpl implements UserStore {
     }
     
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
-        tenants = new ConcurrentSkipListSet<>();
+        tenants = new ConcurrentHashMap<>();
+        roles = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
         userGroupsByName = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
@@ -134,14 +149,27 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storeSettingTypes(settingTypes);
                 mongoObjectFactory.storeSettings(settings);
             }
-            tenants.addAll(domainObjectFactory.loadAllTenantIds());
-            for (UserGroup group : domainObjectFactory.loadAllUserGroups()) {
-                userGroups.put((UUID) group.getId(), group);
-                userGroupsByName.put(group.getName(), (UUID) group.getId());
+            for (Role role : domainObjectFactory.loadAllRoles()) {
+                roles.put(UUID.fromString(role.getId().toString()), role);
             }
-            for (User u : domainObjectFactory.loadAllUsers()) {
+            for (UserImpl u : domainObjectFactory.loadAllUsers(roles)) {
                 users.put(u.getName(), u);
                 addToUsersByEmail(u);
+            }
+            final Pair<Iterable<UserGroup>, Iterable<Tenant>> userGroupsAndTenants = domainObjectFactory.loadAllUserGroupsAndTenants(users);
+            for (UserGroup group : userGroupsAndTenants.getA()) {
+                userGroups.put(group.getId(), group);
+                userGroupsByName.put(group.getName(), group.getId());
+            }
+            for (final Tenant tenant : userGroupsAndTenants.getB()) {
+                tenants.put(tenant.getId(), tenant);
+            }
+            // the users loaded have dummy default tenant objects which have only their ID set;
+            // replace them with the real Tenant objects loaded only now
+            for (final User userWithDummyDefaultTenant : users.values()) {
+                if (userWithDummyDefaultTenant.getDefaultTenant() != null) {
+                    userWithDummyDefaultTenant.setDefaultTenant(getTenant(userWithDummyDefaultTenant.getDefaultTenant().getId()));
+                }
             }
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
                 if (e.getValue() != null) {
@@ -183,6 +211,7 @@ public class UserStoreImpl implements UserStore {
         settings.clear();
         settingTypes.clear();
         users.clear();
+        roles.clear();
         usersByEmail.clear();
         usersByAccessToken.clear();
     }
@@ -203,13 +232,16 @@ public class UserStoreImpl implements UserStore {
     public void replaceContentsFrom(UserStore newUserStore) {
         clear();
         for (Tenant tenant : newUserStore.getTenants()) {
-            tenants.add((UUID) tenant.getId());
+            tenants.put(tenant.getId(), tenant);
         }
         for (UserGroup group : newUserStore.getUserGroups()) {
             userGroups.put((UUID) group.getId(), group);
             userGroupsByName.put(group.getName(), (UUID) group.getId());
         }
-        for (User user : newUserStore.getUsers()) {
+        for (Role role : newUserStore.getRoles()) {
+            roles.put(role.getId(), role);
+        }
+        for (UserImpl user : newUserStore.getUsers()) {
             users.put(user.getName(), user);
             addToUsersByEmail(user);
             for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
@@ -228,9 +260,66 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
+    public Iterable<Role> getRoles() {
+        return new ArrayList<>(roles.values());
+    }
+
+    @Override
+    public Role getRole(UUID roleId) {
+        return roles.get(roleId);
+    }
+
+    @Override
+    public Role createRole(UUID roleId, String displayName, Iterable<WildcardPermission> permissions) {
+        Role role = new RoleImpl(roleId, displayName, permissions);
+        roles.put(roleId, role);
+        mongoObjectFactory.storeRole(role);
+        return role;
+    }
+
+    @Override
+    public void setRolePermissions(UUID roleId, Set<WildcardPermission> permissions) {
+        Role role = roles.get(roleId);
+        role = new RoleImpl(roleId, role.getName(), permissions);
+        mongoObjectFactory.storeRole(role);
+    }
+
+    @Override
+    public void addRolePermission(UUID roleId, WildcardPermission permission) {
+        Role role = roles.get(roleId);
+        Set<WildcardPermission> permissions = role.getPermissions();
+        permissions.add(permission);
+        role = new RoleImpl(roleId, role.getName(), permissions);
+        mongoObjectFactory.storeRole(role);
+    }
+
+    @Override
+    public void removeRolePermission(UUID roleId, WildcardPermission permission) {
+        Role role = roles.get(roleId);
+        Set<WildcardPermission> permissions = role.getPermissions();
+        permissions.remove(permission);
+        role = new RoleImpl(roleId, role.getName(), permissions);
+        mongoObjectFactory.storeRole(role);
+    }
+
+    @Override
+    public void setRoleDisplayName(UUID roleId, String displayName) {
+        Role role = roles.get(roleId);
+        role = new RoleImpl(roleId, displayName, role.getPermissions());
+        mongoObjectFactory.storeRole(role);
+    }
+
+    @Override
+    public void removeRole(UUID roleId) {
+        mongoObjectFactory.deleteRole(roles.get(roleId));
+        roles.remove(roleId);
+    }
+
+
+    @Override
     public boolean setAccessToken(String username, String accessToken) {
         final boolean result;
-        final User user = getUserByName(username);
+        final UserImpl user = getUserByName(username);
         if (user == null) {
             result = false;
         } else {
@@ -247,6 +336,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public String getAccessToken(String username) {
+        // TODO replace check for admin role by a check for the read permission for the access token which then has to be implied for the user by the user role
         // only the user or an administrator may request a user's access token
         final Object principal = SecurityUtils.getSubject().getPrincipal();
         if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
@@ -259,10 +349,11 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeAccessToken(String username) {
+        // TODO replace check for admin role by a check for the read permission for the access token which then has to be implied for the user by the user role
         // only the user or an administrator may request a user's access token
         if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
             SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
-            User user = users.get(username);
+            SecurityUser user = users.get(username);
             if (user != null) {
                 final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
                 if (accessToken != null) {
@@ -276,9 +367,9 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
-    private void addToUsersByEmail(User u) {
+    private void addToUsersByEmail(UserImpl u) {
         if (u.getEmail() != null && !u.getEmail().isEmpty()) {
-            Set<User> set = usersByEmail.get(u.getEmail());
+            Set<UserImpl> set = usersByEmail.get(u.getEmail());
             if (set == null) {
                 set = new HashSet<>();
                 usersByEmail.put(u.getEmail(), set);
@@ -288,11 +379,11 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
-    private void removeFromUsersByEmail(User u) {
+    private void removeFromUsersByEmail(UserImpl u) {
         if (u != null) {
             final String email = emailForUsername.remove(u.getName());
             if (email != null) {
-                Set<User> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
+                Set<UserImpl> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
                 if (set != null) {
                     set.remove(u);
                 }
@@ -337,17 +428,17 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
-        if (userGroups.contains(id)) {
+    public UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
+        if (userGroups.contains(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
-        logger.info("Creating user group: " + id);
-        UserGroup group = new UserGroupImpl(id, name);
+        logger.info("Creating user group: " + groupId);
+        UserGroup group = new UserGroupImpl(groupId, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
-        userGroups.put(id, group);
-        userGroupsByName.put(name, id);
+        userGroups.put(groupId, group);
+        userGroupsByName.put(name, groupId);
         return group;
     }
 
@@ -361,56 +452,61 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void deleteUserGroup(UUID id) throws UserGroupManagementException {
-        if (!userGroups.containsKey(id)) {
+    public Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user) {
+        
+        return null;
+    }
+
+    @Override
+    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        if (!userGroups.containsKey(userGroup.getId())) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
         }
-        logger.info("Deleting user group: " + id);
-        userGroupsByName.remove(userGroups.get(id).getName());
-        userGroups.remove(id);
+        logger.info("Deleting user group: " + userGroup);
+        userGroupsByName.remove(userGroup.getName());
+        userGroups.remove(userGroup.getId());
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteUserGroup(id);
+            mongoObjectFactory.deleteUserGroup(userGroup);
         }
     }
     
     @Override
     public Iterable<Tenant> getTenants() {
-        Set<Tenant> result = new HashSet<>();
-        for (UUID id : tenants) {
-            result.add(getTenant(id));
-        }
-        return result;
+        return new HashSet<>(tenants.values());
     }
 
     @Override
     public Tenant getTenantByName(String name) {
         UserGroup group = getUserGroupByName(name);
+        final Tenant result;
         if (group != null && tenants.contains((UUID) group.getId())) {
-            return new Tenant(group);
+            result = new TenantImpl(group);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Tenant getTenant(UUID tenantId) {
+        if (tenants.contains(tenantId)) {
+            return new TenantImpl(userGroups.get(tenantId));
         }
         return null;
     }
 
     @Override
-    public Tenant getTenant(UUID id) {
-        if (tenants.contains(id)) {
-            return new Tenant(userGroups.get(id));
-        }
-        return null;
-    }
-
-    @Override
-    public Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException {
-        if (tenants.contains(id)) {
+    public Tenant createTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException {
+        if (tenants.contains(tenantId)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
-        UserGroup group = createUserGroup(id, name);
-        logger.info("Creating tenant: " + id);
-        Tenant tenant = new Tenant(group);
+        logger.info("Creating tenant: " + tenantId);
+        Tenant tenant = new TenantImpl(tenantId, name);
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeTenant(id);
+            mongoObjectFactory.storeTenant(tenant);
+            mongoObjectFactory.storeUserGroup(tenant);
         }
-        tenants.add(id);
+        tenants.put(tenantId, tenant);
         return tenant;
     }
 
@@ -420,30 +516,29 @@ public class UserStoreImpl implements UserStore {
         logger.info("Updating tenant " + tenant.getId() + " in DB");
     }
 
-    @Override
-    public void deleteTenant(UUID id) throws TenantManagementException {
-        if (!tenants.contains(id)) {
+    private void deleteTenantId(Tenant tenant) throws TenantManagementException {
+        if (!tenants.contains(tenant)) {
             throw new TenantManagementException(TenantManagementException.TENANT_DOES_NOT_EXIST);
         }
-        logger.info("Deleting tenant: " + id);
-        tenants.remove(id);
+        logger.info("Deleting tenant: " + tenant);
+        tenants.remove(tenant);
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteTenant(id);
+            mongoObjectFactory.deleteTenant(tenant);
         }
     }
     
     @Override
-    public void deleteTenantWithUserGroup(UUID id) throws TenantManagementException, UserGroupManagementException {
-        deleteTenant(id);
-        deleteUserGroup(id);
+    public void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException {
+        deleteTenantId(tenant);
+        deleteUserGroup(tenant);
     }
 
     @Override
-    public User createUser(String name, String email, UUID defaultTenant, Account... accounts) throws UserManagementException {
+    public UserImpl createUser(String name, String email, Tenant defaultTenant, Account... accounts) throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        User user = new User(name, email, defaultTenant, accounts);
+        UserImpl user = new UserImpl(name, email, defaultTenant, accounts);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
@@ -454,7 +549,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void updateUser(User user) {
+    public void updateUser(UserImpl user) {
         logger.info("Updating user "+user+" in DB");
         users.put(user.getName(), user);
         removeFromUsersByEmail(user);
@@ -465,8 +560,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<User> getUsers() {
-        return new ArrayList<User>(users.values());
+    public Iterable<UserImpl> getUsers() {
+        return new ArrayList<UserImpl>(users.values());
     }
 
     @Override
@@ -475,8 +570,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public User getUserByName(String name) {
-        final User result;
+    public UserImpl getUserByName(String name) {
+        final UserImpl result;
         if (name == null) {
             result = null;
         } else {
@@ -497,12 +592,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public User getUserByEmail(String email) {
-        final User result;
+    public UserImpl getUserByEmail(String email) {
+        final UserImpl result;
         if (email == null) {
             result = null;
         } else {
-            Set<User> set = usersByEmail.get(email);
+            Set<UserImpl> set = usersByEmail.get(email);
             if (set == null || set.isEmpty()) {
                 result = null;
             } else {
@@ -513,7 +608,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<UUID> getRolesFromUser(String username) throws UserManagementException {
+    public Iterable<Role> getRolesFromUser(String username) throws UserManagementException {
         if (users.get(username) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -521,8 +616,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void addRoleForUser(String name, UUID role) throws UserManagementException {
-        final User user = users.get(name);
+    public void addRoleForUser(String name, Role role) throws UserManagementException {
+        final UserImpl user = users.get(name);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -533,7 +628,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void removeRoleFromUser(String name, UUID role) throws UserManagementException {
+    public void removeRoleFromUser(String name, Role role) throws UserManagementException {
         if (users.get(name) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -544,7 +639,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<String> getPermissionsFromUser(String username) throws UserManagementException {
+    public Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException {
         if (users.get(username) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -552,8 +647,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void addPermissionForUser(String name, String permission) throws UserManagementException {
-        final User user = users.get(name);
+    public void addPermissionForUser(String name, WildcardPermission permission) throws UserManagementException {
+        final UserImpl user = users.get(name);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -564,7 +659,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void removePermissionFromUser(String name, String permission) throws UserManagementException {
+    public void removePermissionFromUser(String name, WildcardPermission permission) throws UserManagementException {
         if (users.get(name) == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }

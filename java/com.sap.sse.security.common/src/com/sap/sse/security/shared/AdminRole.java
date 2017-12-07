@@ -1,6 +1,5 @@
 package com.sap.sse.security.shared;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -26,7 +25,7 @@ public class AdminRole implements Role {
     }
 
     @Override
-    public Serializable getId() {
+    public UUID getId() {
         return id;
     }
 

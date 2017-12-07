@@ -1,75 +1,105 @@
 package com.sap.sse.security;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 
+/**
+ * Keeps track of all {@link User}, {@link UserGroup}, {@link Tenant} and {@link Role}
+ * objects persistently; furthermore, aspects such as user access tokens, preferences and
+ * settings are stored durably.<p>
+ * 
+ * {@link Tenant}s are special {@link UserGroup}s. Then asking this user store for its
+ * {@link UserGroup}s, the {@link Tenant}s will not be part of the answer although technically
+ * each {@link Tenant} also is a {@link UserGroup}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface UserStore extends Named {
     Iterable<UserGroup> getUserGroups();
     
-    UserGroup getUserGroup(UUID id);
+    UserGroup getUserGroup(UUID groupId);
     
     UserGroup getUserGroupByName(String name);
     
-    UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
+    Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user);
+
+    UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException;
     
-    void updateUserGroup(UserGroup tenant);
+    void updateUserGroup(UserGroup userGroup);
     
-    void deleteUserGroup(UUID id) throws UserGroupManagementException;
+    void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
     
+    /**
+     * Obtains a non-live copy of the current set of {@link Tenant}s known to this user store.
+     */
     Iterable<Tenant> getTenants();
     
-    Tenant getTenant(UUID id);
+    Tenant getTenant(UUID tenantId);
     
     Tenant getTenantByName(String name);
     
-    Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
+    Tenant createTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException;
     
     void updateTenant(Tenant tenant);
     
-    void deleteTenant(UUID id) throws TenantManagementException;
+    void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException;
     
-    void deleteTenantWithUserGroup(UUID id) throws TenantManagementException, UserGroupManagementException;
-    
-    Iterable<User> getUsers();
+    Iterable<UserImpl> getUsers();
     
     boolean hasUsers();
 
     /**
-     * The user with that {@link User#getName() name} or {@code null} if no such user exists
+     * The user with that {@link UserImpl#getName() name} or {@code null} if no such user exists
      */
-    User getUserByName(String name);
+    UserImpl getUserByName(String username);
 
     /**
-     * The user with that {@link User#getEmail() email} or {@code null} if no such user exists
+     * The user with that {@link UserImpl#getEmail() email} or {@code null} if no such user exists
      */
-    User getUserByEmail(String email);
+    SecurityUser getUserByEmail(String email);
     
     User getUserByAccessToken(String accessToken);
 
-    User createUser(String name, String email, UUID defaultTenant, Account... accounts) throws UserManagementException;
+    UserImpl createUser(String name, String email, Tenant defaultTenant, Account... accounts) throws UserManagementException;
 
-    void updateUser(User user);
+    void updateUser(UserImpl user);
 
-    Iterable<UUID> getRolesFromUser(String username) throws UserManagementException;
+    Iterable<Role> getRolesFromUser(String username) throws UserManagementException;
 
-    void addRoleForUser(String name, UUID role) throws UserManagementException;
+    void addRoleForUser(String username, Role role) throws UserManagementException;
 
-    void removeRoleFromUser(String name, UUID role) throws UserManagementException;
+    void removeRoleFromUser(String username, Role role) throws UserManagementException;
 
-    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
 
-    void removePermissionFromUser(String name, String permission) throws UserManagementException;
+    void removePermissionFromUser(String username, WildcardPermission permission) throws UserManagementException;
 
-    void addPermissionForUser(String name, String permission) throws UserManagementException;
+    void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException;
 
-    void deleteUser(String name) throws UserManagementException;
+    void deleteUser(String username) throws UserManagementException;
+
+    Iterable<Role> getRoles();
+    Role getRole(UUID roleId);
+    Role createRole(UUID roleId, String displayName, Iterable<WildcardPermission> permissions);
+    void setRolePermissions(UUID roleId, Set<WildcardPermission> permissions);
+    void addRolePermission(UUID roleId, WildcardPermission permission);
+    void removeRolePermission(UUID roleId, WildcardPermission permission);
+    void setRoleDisplayName(UUID roleId, String displayName);
+    void removeRole(UUID roleId);
 
     /**
      * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}

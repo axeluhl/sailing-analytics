@@ -18,7 +18,7 @@ import com.sap.sse.mail.SerializableImageMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.mail.queue.MailNotification;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.User;
+import com.sap.sse.security.UserImpl;
 
 public abstract class NotificationSetNotification<T> implements MailNotification {
     private static final Logger logger = Logger.getLogger(NotificationSetNotification.class.getName());
@@ -89,7 +89,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         });
     }
     
-    private String getMailContent(NotificationMailTemplate notificationMailTemplate, User user, Locale locale) {
+    private String getMailContent(NotificationMailTemplate notificationMailTemplate, UserImpl user, Locale locale) {
         StringBuilder bodyContent = new StringBuilder();
         if (notificationMailTemplate.getTitle() != null) {
             bodyContent.append("<h1>")

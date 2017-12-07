@@ -41,7 +41,7 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthrizingRealm {
         // read password hash and salt from db
         String saltedPassword = null;
         byte[] salt = null;
-        User user = getUserStore().getUserByName(username);
+        UserImpl user = getUserStore().getUserByName(username);
         if (user == null) {
             return null;
         }

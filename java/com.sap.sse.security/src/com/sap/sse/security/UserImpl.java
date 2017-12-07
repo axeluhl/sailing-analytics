@@ -4,28 +4,22 @@ import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
-import com.sap.sse.common.NamedWithID;
-import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.SecurityUserImpl;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.User;
 
-public class User implements NamedWithID {
+public class UserImpl extends SecurityUserImpl implements User {
     private static final long serialVersionUID = 1788215575606546042L;
-
-    /**
-     * The ID for this user; usually a nickname or short name. Implements the {@link WithID} key
-     */
-    private String name;
 
     /**
      * An optional clear-text user name, used to address the user, e.g., in the UI ("Hello ...")
@@ -65,34 +59,27 @@ public class User implements NamedWithID {
     
     private boolean emailValidated;
 
-    private final Set<UUID> roles;
-    private final Set<String> permissions;
-    private final UUID defaultTenant;
     private final Map<AccountType, Account> accounts;
 
-    public User(String name, String email, UUID defaultTenant, Account... accounts) {
+    public UserImpl(String name, String email, Tenant defaultTenant, Account... accounts) {
         this(name, email, defaultTenant, Arrays.asList(accounts));
     }
 
-    public User(String name, String email, UUID defaultTenant, Collection<Account> accounts) {
+    public UserImpl(String name, String email, Tenant defaultTenant, Collection<Account> accounts) {
         this(name, email, /* fullName */ null, /* company */ null, /* locale */ null, /* is email validated */ false,
              /* password reset secret */ null, /* validation secret */ null, defaultTenant, accounts);
     }
 
-    public User(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
-            String passwordResetSecret, String validationSecret, UUID defaultTenant, Collection<Account> accounts) {
-        super();
-        this.name = name;
+    public UserImpl(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
+            String passwordResetSecret, String validationSecret, Tenant defaultTenant, Collection<Account> accounts) {
+        super(name, defaultTenant);
         this.fullName = fullName;
         this.company = company;
         this.locale = locale;
-        this.roles = new HashSet<>();
-        this.permissions = new HashSet<>();
         this.email = email;
         this.passwordResetSecret = passwordResetSecret;
         this.validationSecret = validationSecret;
         this.emailValidated = emailValidated;
-        this.defaultTenant = defaultTenant;
         this.accounts = new HashMap<>();
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
@@ -107,86 +94,57 @@ public class User implements NamedWithID {
         return getName();
     }
 
-    public String getName() {
-        return name;
-    }
-
+    @Override
     public String getFullName() {
         return fullName;
     }
 
+    @Override
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
 
+    @Override
     public String getCompany() {
         return company;
     }
 
+    @Override
     public void setCompany(String company) {
         this.company = company;
     }
     
+    @Override
     public Locale getLocale() {
         return locale;
     }
     
+    @Override
     public void setLocale(Locale locale) {
         this.locale = locale;
     }
     
+    @Override
     public Locale getLocaleOrDefault() {
         return locale == null ? Locale.ENGLISH : locale;
     }
 
-    public Iterable<UUID> getRoles() {
-        return roles;
-    }
-
-    public void addRole(UUID role) {
-        roles.add(role);
-    }
-
-    public boolean hasRole(UUID role) {
-        return roles.contains(role);
-    }
-    
-    public void removeRole(UUID role) {
-        roles.remove(role);
-    }
-
-    public Iterable<String> getPermissions() {
-        return permissions;
-    }
-
-    public void addPermission(String permission) {
-        permissions.add(permission);
-    }
-    
-    public boolean hasPermission(String permission) {
-        return permissions.contains(permission);
-    }
-    
-    public void removePermission(String permission) {
-        permissions.remove(permission);
-    }
-    
-    public UUID getDefaultTenantId() {
-        return defaultTenant;
-    }
-    
+    @Override
     public Account getAccount(AccountType type) {
         return accounts.get(type);
     }
 
+    @Override
     public void removeAccount(AccountType type) {
         accounts.remove(type);
     }
 
+    @Override
     public Map<AccountType, Account> getAllAccounts() {
-        return accounts;
+        return Collections.unmodifiableMap(accounts);
     }
 
+    @Override
     public String getEmail() {
         return email;
     }
@@ -196,6 +154,7 @@ public class User implements NamedWithID {
      * {@link #emailValidated} flag is reset, and a new {@link #validationSecret} is generated and returned which
      * can be used in a call to {@link #validate(String)} to validate the e-mail address.
      */
+    @Override
     public String setEmail(String email) {
         this.email = email;
         return startEmailValidation();
@@ -206,6 +165,7 @@ public class User implements NamedWithID {
      * {@link #emailValidated} flag. A new {@link #validationSecret} is generated and returned which
      * can be used in a call to {@link #validate(String)} to validate the e-mail address.
      */
+    @Override
     public String startEmailValidation() {
         validationSecret = createRandomSecret();
         emailValidated = false;
@@ -217,11 +177,13 @@ public class User implements NamedWithID {
      * by calling {@link #getPasswordResetSecret()}. A user store should only allow a service call to reset
      * a user's password in case the service can provide the correct password reset secret.
      */
+    @Override
     public String startPasswordReset() {
         passwordResetSecret = createRandomSecret();
         return passwordResetSecret;
     }
     
+    @Override
     public String getPasswordResetSecret() {
         return passwordResetSecret;
     }
@@ -239,6 +201,7 @@ public class User implements NamedWithID {
      * {@link #emailValidated marked as validated}, and <code>true</code> is returned. Otherwise, the validation secret
      * on this user remains in place, and the e-mail address is not marked as validated.
      */
+    @Override
     public boolean validate(final String validationSecret) {
         final boolean result;
         if (emailValidated) {
@@ -256,24 +219,25 @@ public class User implements NamedWithID {
     /**
      * Clears the {@link #passwordResetSecret}.
      */
+    @Override
     public void passwordWasReset() {
         passwordResetSecret = null;
     }
 
+    @Override
     public boolean isEmailValidated() {
         return emailValidated;
     }
 
     @Override
     public String toString() {
-        return "User [name=" + name + ", email=" + email + ", fullName=" + fullName + ", company=" + company
-                + ", locale=" + locale + (isEmailValidated() ? " (validated)" : ")") + "permissions="
-                + Arrays.toString(permissions.toArray(new String[permissions.size()])) + ", roles="
-                + Arrays.toString(roles.toArray(new String[roles.size()])) + ", defaultTenant="
-                + defaultTenant + ", accounts="
+        return "User [name=" + getName() + ", email=" + email + ", fullName=" + fullName + ", company=" + company
+                + ", locale=" + locale + (isEmailValidated() ? " (validated)" : ")") + "permissions=" + getPermissions()
+                + ", roles=" + getRoles() + ", defaultTenant=" + getDefaultTenant() + ", accounts="
                 + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
     }
 
+    @Override
     public String getValidationSecret() {
         return validationSecret;
     }

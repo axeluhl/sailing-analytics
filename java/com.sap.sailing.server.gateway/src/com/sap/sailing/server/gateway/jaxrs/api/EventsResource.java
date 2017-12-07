@@ -90,7 +90,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.User;
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -458,8 +458,8 @@ public class EventsResource extends AbstractSailingServerResource {
         return "Session "+username+" "+dateTimeFormat.format(new Date());
     }
 
-    private User getCurrentUser() {
-        User user = getSecurityService().getCurrentUser();
+    private SecurityUser getCurrentUser() {
+        SecurityUser user = getSecurityService().getCurrentUser();
         return user;
     }
 
