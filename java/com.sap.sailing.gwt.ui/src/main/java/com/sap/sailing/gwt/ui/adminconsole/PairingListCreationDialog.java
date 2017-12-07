@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -13,6 +16,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -30,6 +34,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
     private final Button applyToRacelogButton;
     private final Button cSVExportButton;
+    private final Button printViewButton;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
             PairingListTemplateDTO template, SailingServiceAsync sailingService) {
@@ -41,6 +46,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
         cSVExportButton = new Button(stringMessages.csvExport());
+        printViewButton = new Button(stringMessages.printView());
         
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogs();
@@ -123,13 +129,16 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         applyToRacelogButton.ensureDebugId("ApplyToRacelogButton");
         cSVExportButton.getElement().getStyle().setMargin(3, Unit.PX);
         cSVExportButton.ensureDebugId("CSVExportButton");
+        printViewButton.getElement().getStyle().setMargin(3, Unit.PX);
+        printViewButton.ensureDebugId("printViewButton");
+        getRightButtonPannel().add(applyToRacelogButton);
+        getRightButtonPannel().add(cSVExportButton);
+        getRightButtonPannel().add(printViewButton);
         if(!applyToRacelogButton.isEnabled()){
             Label label=new Label("Registered Competitors are unequal to Competitors from Pairinglist!");
             label.getElement().getStyle().setColor("red");
             getRightButtonPannel().add(label);
         }
-        getRightButtonPannel().add(applyToRacelogButton);
-        getRightButtonPannel().add(cSVExportButton);
         applyToRacelogButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -157,6 +166,15 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             }
 
         });
+        printViewButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                
+                String link = EntryPointLinkFactory.createPairingListLink(createLinkParameters());
+                Window.open(link, "", "");
+            }
+        });
     }
 
     private native void downloadPairingListTemplate(String pairingListCSV)/*-{
@@ -182,6 +200,13 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     
     private void disableApplyToRacelogs() {
         this.applyToRacelogButton.setEnabled(false);
+    }
+    
+    private Map<String, String> createLinkParameters() {
+        Map<String, String> result = new HashMap<>();
+        result.put("leaderboardName", leaderboardDTO.getName());
+        result.put("flightMultiplier", String.valueOf(template.getFlightMultiplier()));
+        return result;
     }
 
 }
