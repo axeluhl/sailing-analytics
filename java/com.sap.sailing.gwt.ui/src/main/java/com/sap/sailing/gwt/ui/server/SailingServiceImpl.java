@@ -199,6 +199,7 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -493,7 +494,6 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.OperationWithResult;
@@ -6792,10 +6792,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public PairingListTemplateDTO calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorsCount, 
-            int flightMultiplier) throws NotFoundException,IllegalArgumentException {
-        if(!(getLeaderboardByName(leaderboardDTO.getName()) instanceof LeaderboardThatHasRegattaLike)){
-            throw new IllegalArgumentException("This Leaderboard is not suiteable for a Pairinglist!"); 
-        }
+            int flightMultiplier) {
         PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardDTO, competitorsCount, 
                 flightMultiplier);
         int flightCount = leaderboardDTO.getRaceColumnsCount();
@@ -6805,40 +6802,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public PairingListDTO getPairingListFromTemplate(PairingListTemplateDTO pairingListTemplateDTO, 
+            StrippedLeaderboardDTO leaderboardDTO) throws NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardDTO.getName());
+        
+        PairingListTemplate pairingListTemplate = getService().createPairingListFromRegatta(leaderboardDTO, 
+                pairingListTemplateDTO.getCompetitorCount(), pairingListTemplateDTO.getFlightMultiplier());
+        PairingList<RaceColumn, Fleet, Competitor> pairingList = 
+                getService().getPairingListFromTemplate(pairingListTemplate, leaderboard);
+        
+        List<List<List<CompetitorDTO>>> result = new ArrayList<>();
+        
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            List<List<CompetitorDTO>> fleets = new ArrayList<>();
+            for (Fleet fleet : raceColumn.getFleets()) {
+                fleets.add(this.convertToCompetitorDTOs(pairingList.getCompetitors(raceColumn, fleet)));
+            }
+            result.add(fleets);
+        }
+        
+        return new PairingListDTO(result);
+    }
+    
+    // TODO remove StrippedLeaderboardDTO
+    @Override
     public void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO,
             StrippedLeaderboardDTO leaderboardDTO) throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
-        PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardDTO, pairingListTemplateDTO.getCompetitorCount(), 
+        
+        PairingListTemplate pairingListTemplate = getService().createPairingListFromRegatta(leaderboardDTO, pairingListTemplateDTO.getCompetitorCount(), 
                 pairingListTemplateDTO.getFlightMultiplier());
+        
         Leaderboard leaderboard = getLeaderboardByName(leaderboardDTO.getName());
-        if(pairingListTemplateDTO.getFlightMultiplier()>1){
-            //FIXME type cast...
-            LeaderboardThatHasRegattaLike leaderboardThatHasRegattaLike = (LeaderboardThatHasRegattaLike) leaderboard;
-            leaderboardThatHasRegattaLike.getRegattaLike().setFleetsCanRunInParallelToTrue();
-            //TODO Warning to user 
-        }
-        PairingList<RaceColumn, Fleet, Competitor> pairingList = template.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
-
-            @Override
-            public Iterable<RaceColumn> getFlights() {
-                return leaderboard.getRaceColumns();
-            }
-
-            @Override
-            public Iterable<Competitor> getCompetitors() {
-                return leaderboard.getAllCompetitors();
-            }
-
-            @Override
-            public Iterable<Fleet> getGroups(RaceColumn flight) {
-                // FIXME
-                return (Iterable<Fleet>) leaderboard.getRaceColumnByName(flight.getName()).getFleets();
-            }
-
-            @Override
-            public int getGroupsCount() {
-                return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
-            }
-        });
+        
+        PairingList<RaceColumn, Fleet, Competitor> pairingList = getService().getPairingListFromTemplate(pairingListTemplate, leaderboard);
+        
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>(this.convertToCompetitorDTOs(pairingList.getCompetitors(raceColumn, fleet)));

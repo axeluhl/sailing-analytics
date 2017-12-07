@@ -1,16 +1,31 @@
 package com.sap.sailing.gwt.ui.pairinglist;
 
+import java.util.List;
+
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class PairingListEntryPoint extends AbstractSailingEntryPoint {
+    
+    private PairingListContextDefinition pairingListContextDefinition;
     
     @Override
     protected void doOnModuleLoad() {
@@ -23,17 +38,89 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         
-        SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication("PairingList");
+        SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().pairingLists());
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         mainPanel.addNorth(header, 75);
         
-        mainPanel.add(new ScrollPanel(createPairingListPanel()));
+        pairingListContextDefinition = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new PairingListContextDefinition());
+        
+        sailingService.getLeaderboard(pairingListContextDefinition.getLeaderboardName(), new AsyncCallback<StrippedLeaderboardDTO>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                try {
+                    throw caught;
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSuccess(StrippedLeaderboardDTO result) {
+                PairingListTemplateDTO pairingListTemplateDTO = new PairingListTemplateDTO(result.competitorsCount, 
+                        pairingListContextDefinition.getFlightMultiplier());
+                
+                sailingService.getPairingListFromTemplate(pairingListTemplateDTO, result, new AsyncCallback<PairingListDTO>() {
+                    
+                    @Override
+                    public void onSuccess(PairingListDTO result) {
+                        mainPanel.add(createPairingListPanel(result));
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        try {
+                            throw caught;
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });                
+            }
+        });
     }
     
-    private Widget createPairingListPanel() {
+    private Widget createPairingListPanel(PairingListDTO pairingListDTO) {
         VerticalPanel pairingListPanel = new VerticalPanel();
+        pairingListPanel.ensureDebugId("PairingListPanel");
+        pairingListPanel.getElement().setPropertyString("overflow", "auto");
         
-        // TODO show pairing list
+        final int flightCount = pairingListDTO.getPairingList().size();
+        final int groupCount = pairingListDTO.getPairingList().get(0).size();
+        final int boatCount = pairingListDTO.getPairingList().get(0).get(0).size();
+        
+        Grid pairingListGrid = new Grid(flightCount * groupCount + 1, boatCount + 1);
+        pairingListGrid.setCellPadding(15);
+        
+        int groupCounter = 1;
+        int boatCounter = 1;
+        
+        for (int i = 1; i <= boatCount; i++) {
+            pairingListGrid.setWidget(0, i, new Label(getStringMessages().boat() + " " + String.valueOf(i)));
+            pairingListGrid.getCellFormatter().getElement(0, i).getStyle().setTextAlign(TextAlign.CENTER);
+        }
+        
+        for (List<List<CompetitorDTO>> flight : pairingListDTO.getPairingList()) {
+            for (List<CompetitorDTO> group : flight) {
+                pairingListGrid.setWidget(groupCounter, 0, new Label(getStringMessages().fleet() + " " + String.valueOf(groupCounter)));
+                boatCounter = 1;
+                for (CompetitorDTO competitorDTO : group) {
+                    pairingListGrid.setWidget(groupCounter, boatCounter, new Label(competitorDTO.getSailID()));
+                    
+                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
+                            .setFontWeight(Style.FontWeight.BOLD);
+                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
+                            .setTextAlign(TextAlign.CENTER);
+                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
+                            .setPadding(5, Unit.PX);
+                    boatCounter++;
+                }
+                groupCounter++;
+            }
+        }
+        
+        pairingListPanel.add(pairingListGrid);
         
         return pairingListPanel;
     }

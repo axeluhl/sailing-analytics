@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -697,6 +698,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
     
     PairingListTemplateDTO calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorsCount, int flightMultiplier) throws NotFoundException,IllegalArgumentException;
+    
+    PairingListDTO getPairingListFromTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO)
+            throws NotFoundException;
     
     void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO) 
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;

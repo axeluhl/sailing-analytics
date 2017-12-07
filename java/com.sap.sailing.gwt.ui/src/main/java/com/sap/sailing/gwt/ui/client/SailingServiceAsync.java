@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -875,6 +876,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void calculatePairingList(StrippedLeaderboardDTO leaderboardDTO, int competitorCount, int flightMultiplier, 
             AsyncCallback<PairingListTemplateDTO> callback) throws NotFoundException,IllegalArgumentException ;
+    
+    void getPairingListFromTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO,
+            AsyncCallback<PairingListDTO> callback);
     
     void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, StrippedLeaderboardDTO leaderboardDTO, 
             AsyncCallback<Void> callback);

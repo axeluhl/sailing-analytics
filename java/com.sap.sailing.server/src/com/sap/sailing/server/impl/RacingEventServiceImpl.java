@@ -1,6 +1,6 @@
 package com.sap.sailing.server.impl;
 
-import java.io.BufferedReader; 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -259,7 +259,9 @@ import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
+import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.replication.OperationExecutionListener;
@@ -4178,6 +4180,35 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } else {
             return null;
         }
+    }
+    
+    @Override
+    public PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
+            Leaderboard leaderboard) {
+        PairingList<RaceColumn, Fleet, Competitor> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
+
+            @Override
+            public Iterable<RaceColumn> getFlights() {
+                return leaderboard.getRaceColumns();
+            }
+
+            @Override
+            public Iterable<Competitor> getCompetitors() {
+                return (Iterable<Competitor>) leaderboard.getAllCompetitors();
+            }
+
+            @Override
+            public Iterable<Fleet> getGroups(RaceColumn flight) {
+                // FIXME
+                return (Iterable<Fleet>) leaderboard.getRaceColumnByName(flight.getName()).getFleets();
+            }
+
+            @Override
+            public int getGroupsCount() {
+                return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
+            }
+        });
+        return pairingList;
     }
 
 }

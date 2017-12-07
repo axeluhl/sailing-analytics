@@ -43,24 +43,6 @@ h1 {
 table {
   border-collapse: separate; }
 
-.leaderboardContent {
-}
-
-.leaderboardContent td, .leaderboardContent th {
-/*  vertical-align: bottom; */
-    line-height: 1.3;
-/*  padding-top: 2px; */
-}
-
-.leaderboardContent-toolbar {
-
-}
-
-.leaderboardLabel {
-  border-bottom: 2px solid #007dc0;
-  font-weight: bold;
-  margin: 5px;
- }
 
 .refreshAndSettings {
   background: #f2f2f2;
