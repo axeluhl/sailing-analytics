@@ -12,17 +12,8 @@ public interface SeriesHeaderResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String eventheader();
-        String sidenavigation();
-        String sidenavigation_drawer();
-        String eventheaderreduced();
         String eventheader_info_subtitle();
 
-        String quickfinder();
-        String eventheader_inputwrapper();
-        String eventheaderfixedup();
-        String eventheaderfixeddown();
-        String eventheadernobox();
-        String eventheaderwithinputbox();
         String eventheader_info();
         String eventheader_info_title();
         String eventheader_info_title_text();
@@ -32,9 +23,5 @@ public interface SeriesHeaderResources extends ClientBundle {
         String eventheader_info_subtitle_info();
         String eventheader_info_subtitle_info_date();
         String eventheader_info_subtitle_info_location();
-        String eventheader_input();
-        String eventheader_button();
-        String quickfinder_select();
-        String eventheaderplaceholder();
     }
 }
