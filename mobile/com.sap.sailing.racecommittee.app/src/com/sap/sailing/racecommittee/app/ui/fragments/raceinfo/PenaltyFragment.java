@@ -510,12 +510,16 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     break;
                 }
             }
-            if (item != null && draft != null) { // result is in list
+            if (item != null) { // result is in list
                 if (checkDirty & item.isDirty()) {
                     // check max point reason
                     if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
-                        if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
-                            setMergeState(item, MergeState.WARNING);
+                        if (draft != null) {
+                            if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
+                                setMergeState(item, MergeState.WARNING);
+                            } else {
+                                setMergeState(item, MergeState.ERROR);
+                            }
                         } else {
                             setMergeState(item, MergeState.ERROR);
                         }
@@ -526,15 +530,19 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     // check score
                     if (item.getScore() != null) {
                         if (!item.getScore().equals(result.getScore())) {
-                            if (item.getScore().equals(draft.getScore())) {
-                                setMergeState(item, MergeState.WARNING);
+                            if (draft != null) {
+                                if (item.getScore().equals(draft.getScore())) {
+                                    setMergeState(item, MergeState.WARNING);
+                                } else {
+                                    setMergeState(item, MergeState.ERROR);
+                                }
                             } else {
                                 setMergeState(item, MergeState.ERROR);
                             }
                             item.setScore(result.getScore());
                             changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                         }
-                    } else if (result.getScore() != null && draft.getScore() != null) {
+                    } else if (result.getScore() != null) {
                         setMergeState(item, MergeState.ERROR);
                         item.setScore(result.getScore());
                         changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
@@ -543,23 +551,26 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     // check score
                     if (item.getComment() != null) {
                         if (!item.getComment().equals(result.getComment())) {
-                            if (item.getComment().equals(draft.getComment())) {
-                                setMergeState(item, MergeState.WARNING);
+                            if (draft != null) {
+                                if (item.getComment().equals(draft.getComment())) {
+                                    setMergeState(item, MergeState.WARNING);
+                                } else {
+                                    setMergeState(item, MergeState.ERROR);
+                                }
                             } else {
                                 setMergeState(item, MergeState.ERROR);
                             }
-                            item.setDirty(true);
                             item.setComment(item.getComment() + " ## " + result.getComment());
                             changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                         }
-                    } else if (result.getComment() != null && draft.getComment() == null) {
+                    } else if (result.getComment() != null) {
                         setMergeState(item, MergeState.ERROR);
                         item.setComment(result.getComment());
                         changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                     }
 
                     // check merge state
-                    if (!item.getMergeState().equals(result.getMergeState()) && item.getMergeState().equals(draft.getMergeState())) {
+                    if (!item.getMergeState().equals(result.getMergeState())) {
                         setMergeState(item, result.getMergeState());
                         changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
                     }
@@ -692,12 +703,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                setPublishButton();
             }
         });
         builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
+                setPublishButton();
                 mAdapter.notifyDataSetChanged();
             }
         });

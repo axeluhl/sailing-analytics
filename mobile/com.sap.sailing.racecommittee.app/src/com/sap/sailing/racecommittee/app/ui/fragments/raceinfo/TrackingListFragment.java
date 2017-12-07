@@ -784,9 +784,9 @@ public class TrackingListFragment extends BaseFragment
         } else if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
             onItemRemove(index);
         } else {
-            setPublishButton();
             mFinishedAdapter.notifyItemChanged(index);
         }
+        setPublishButton();
     }
 
     private CharSequence[] getAllMaxPointsReasons() {
@@ -961,11 +961,15 @@ public class TrackingListFragment extends BaseFragment
                     break;
                 }
             }
-            if (item != null && draft != null) { // result is in list
+            if (item != null) { // result is in list
                 // check one based rank
                 if (item.getOneBasedRank() != result.getOneBasedRank()) {
-                    if (item.getOneBasedRank() == draft.getOneBasedRank()) {
-                        state = MergeState.WARNING;
+                    if (draft != null) {
+                        if (item.getOneBasedRank() == draft.getOneBasedRank()) {
+                            state = MergeState.WARNING;
+                        } else {
+                            state = MergeState.ERROR;
+                        }
                     } else {
                         state = MergeState.ERROR;
                     }
@@ -977,8 +981,12 @@ public class TrackingListFragment extends BaseFragment
 
                 // check max point reasons
                 if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
-                    if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
-                        state = MergeState.WARNING;
+                    if (draft != null) {
+                        if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
+                            state = MergeState.WARNING;
+                        } else {
+                            state = MergeState.ERROR;
+                        }
                     } else {
                         state = MergeState.ERROR;
                     }
@@ -991,8 +999,12 @@ public class TrackingListFragment extends BaseFragment
                 // check score
                 if (item.getScore() != null) {
                     if (!item.getScore().equals(result.getScore())) {
-                        if (item.getScore().equals(draft.getScore())) {
-                            state = MergeState.WARNING;
+                        if (draft != null) {
+                            if (item.getScore().equals(draft.getScore())) {
+                                state = MergeState.WARNING;
+                            } else {
+                                state = MergeState.ERROR;
+                            }
                         } else {
                             state = MergeState.ERROR;
                         }
@@ -1001,7 +1013,7 @@ public class TrackingListFragment extends BaseFragment
                             .getComment(), getMergeState(item, state));
                         item = updateChangedItem(changedCompetitor, item, newItem);
                     }
-                } else if (result.getScore() != null && draft.getScore() != null) {
+                } else if (result.getScore() != null) {
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), result.getScore(), item.getFinishingTime(), item
                         .getComment(), getMergeState(item, MergeState.ERROR));
@@ -1011,8 +1023,12 @@ public class TrackingListFragment extends BaseFragment
                 // check finishing time
                 if (item.getFinishingTime() != null) {
                     if (!item.getFinishingTime().equals(result.getFinishingTime())) {
-                        if (item.getFinishingTime().equals(draft.getFinishingTime())) {
-                            state = MergeState.WARNING;
+                        if (draft != null) {
+                            if (item.getFinishingTime().equals(draft.getFinishingTime())) {
+                                state = MergeState.WARNING;
+                            } else {
+                                state = MergeState.ERROR;
+                            }
                         } else {
                             state = MergeState.ERROR;
                         }
@@ -1021,7 +1037,7 @@ public class TrackingListFragment extends BaseFragment
                             .getComment(), getMergeState(item, state));
                         item = updateChangedItem(changedCompetitor, item, newItem);
                     }
-                } else if (result.getFinishingTime() != null && draft.getFinishingTime() != null) {
+                } else if (result.getFinishingTime() != null) {
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), result.getFinishingTime(), item
                         .getComment(), getMergeState(item, MergeState.ERROR));
@@ -1031,8 +1047,12 @@ public class TrackingListFragment extends BaseFragment
                 // check comment
                 if (item.getComment() != null) {
                     if (!item.getComment().equals(result.getComment())) {
-                        if (item.getComment().equals(draft.getComment())) {
-                            state = MergeState.WARNING;
+                        if (draft != null) {
+                            if (item.getComment().equals(draft.getComment())) {
+                                state = MergeState.WARNING;
+                            } else {
+                                state = MergeState.ERROR;
+                            }
                         } else {
                             state = MergeState.ERROR;
                         }
@@ -1041,7 +1061,7 @@ public class TrackingListFragment extends BaseFragment
                             item.getComment() + " ## " + result.getComment(), getMergeState(item, state));
                         item = updateChangedItem(changedCompetitor, item, newItem);
                     }
-                } else if (result.getComment() != null && draft.getComment() == null) {
+                } else if (result.getComment() != null) {
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), result
                         .getComment(), getMergeState(item, MergeState.ERROR));
@@ -1049,7 +1069,7 @@ public class TrackingListFragment extends BaseFragment
                 }
 
                 // check merge state
-                if (!item.getMergeState().equals(result.getMergeState()) && item.getMergeState().equals(draft.getMergeState())) {
+                if (!item.getMergeState().equals(result.getMergeState())) {
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item
                         .getComment(), getMergeState(item, result.getMergeState()));
@@ -1124,6 +1144,5 @@ public class TrackingListFragment extends BaseFragment
                 fragment.mergeData(state.getFinishPositioningList());
             }
         }
-
     }
 }
