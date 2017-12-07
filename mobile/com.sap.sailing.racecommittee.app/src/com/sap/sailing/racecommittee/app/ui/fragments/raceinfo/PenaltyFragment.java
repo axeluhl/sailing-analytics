@@ -198,7 +198,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             mPublishButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    confirmData();
+                    sendConfirmed();
                 }
             });
         }
@@ -294,6 +294,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
         }
 
+        initConfirmedData();
+    }
+
+    private void initConfirmedData() {
         mConfirmedData.clear();
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
@@ -349,7 +353,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
     }
 
-    private void confirmData() {
+    private void sendConfirmed() {
         CompetitorResultsImpl results = getCompetitorResultsDiff(mDraftData);
         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now(), results);
         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
@@ -489,7 +493,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         setPublishButton();
     }
 
-    private void mergeData(CompetitorResults results) {
+    private void mergeData(CompetitorResults results, boolean checkDirty) {
         Map<Serializable, String> changedCompetitor = new HashMap<>();
         for (CompetitorResult result : results) {
             CompetitorResultEditableImpl item = null;
@@ -507,7 +511,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 }
             }
             if (item != null && draft != null) { // result is in list
-                if (item.isDirty()) {
+                if (checkDirty & item.isDirty()) {
                     // check max point reason
                     if (!item.getMaxPointsReason().equals(result.getMaxPointsReason())) {
                         if (item.getMaxPointsReason().equals(draft.getMaxPointsReason())) {
@@ -610,10 +614,14 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private void setPublishButton() {
         Set<Serializable> changed = new HashSet<>();
         boolean isChecked = false;
+        boolean hasError = false;
 
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
             if (item.isChecked()) {
                 isChecked = true;
+            }
+            if (item.getMergeState() != MergeState.OK) {
+                hasError = true;
             }
         }
         CompetitorResults list = getCompetitorResultsDiff(mDraftData);
@@ -634,7 +642,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             text = getString(R.string.publish_button_other, changed.size());
         }
         mPublishButton.setText(text);
-        mPublishButton.setEnabled(changed.size() != 0);
+        int warningSign = hasError ? R.drawable.ic_warning_red_small : 0;
+        mPublishButton.setCompoundDrawablesWithIntrinsicBounds(warningSign, 0, 0, 0);
+        mPublishButton.setEnabled(changed.size() != 0 && !hasError);
         mButtonBar.setVisibility((changed.size() != 0 || isChecked) ? View.VISIBLE : View.GONE);
     }
 
@@ -682,6 +692,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                setPublishButton();
             }
         });
         builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -760,12 +771,24 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
 
         @Override
+        public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
+            super.onFinishingPositionsConfirmed(state);
+
+            PenaltyFragment fragment = mReference.get();
+            if (fragment != null) {
+                fragment.initConfirmedData();
+                fragment.mergeData(state.getConfirmedFinishPositioningList(), false);
+                fragment.setPublishButton();
+            }
+        }
+
+        @Override
         public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
             super.onFinishingPositioningsChanged(state);
 
             PenaltyFragment fragment = mReference.get();
             if (fragment != null) {
-                fragment.mergeData(state.getFinishPositioningList());
+                fragment.mergeData(state.getFinishPositioningList(), true);
             }
         }
     }

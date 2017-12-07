@@ -7,8 +7,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
@@ -60,6 +62,7 @@ import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -248,11 +251,11 @@ public class TrackingListFragment extends BaseFragment
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
                 mAdapter = new FinishListAdapter(getActivity(), mFinishedData);
                 mAdapter.setListener(this);
-                @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> dragManager = mDragDropManager
-                    .createWrappedAdapter(mAdapter);
+                @SuppressWarnings("unchecked")
+                RecyclerView.Adapter<FinishListAdapter.ViewHolder> dragManager = mDragDropManager.createWrappedAdapter(mAdapter);
                 mFinishedAdapter = dragManager;
-                @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> swipeManager = mSwipeManager
-                    .createWrappedAdapter(mFinishedAdapter);
+                @SuppressWarnings("unchecked")
+                RecyclerView.Adapter<FinishListAdapter.ViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mFinishedAdapter);
                 mFinishedAdapter = swipeManager;
                 mFinishView.setLayoutManager(layoutManager);
                 mFinishView.setAdapter(mFinishedAdapter);
@@ -424,6 +427,30 @@ public class TrackingListFragment extends BaseFragment
         return dirty;
     }
 
+    private void setPublishButton() {
+        Set<Integer> positions = new HashSet<>();
+        boolean multiplePositions = false;
+        Set<Serializable> errors = new HashSet<>();
+
+        for (CompetitorResult item : mFinishedData) {
+            // check for multiple positions
+            if (item.getOneBasedRank() != 0 && positions.contains(item.getOneBasedRank())) {
+                multiplePositions = true;
+            }
+            positions.add(item.getOneBasedRank());
+
+            // check for merge errors
+            if (item.getMergeState() != MergeState.OK) {
+                errors.add(item.getCompetitorId());
+            }
+        }
+
+        boolean error = multiplePositions || errors.size() > 0;
+        int warningSign = error ? R.drawable.ic_warning_red_small : 0;
+        mConfirm.setEnabled(!error);
+        mConfirm.setCompoundDrawablesWithIntrinsicBounds(warningSign, 0, 0, 0);
+    }
+
     private void sendUnconfirmed() {
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResultsDiff(mConfirmedData));
     }
@@ -525,6 +552,7 @@ public class TrackingListFragment extends BaseFragment
             }
         }
         mFinishedData.removeAll(toBeDeleted);
+        setPublishButton();
         mFinishedAdapter.notifyDataSetChanged();
     }
 
@@ -576,6 +604,7 @@ public class TrackingListFragment extends BaseFragment
         mFinishedData.add(pos, new CompetitorResultWithIdImpl(mId, competitor.getId(), name, greatestOneBasedRankSoFar + 1, MaxPointsReason.NONE,
                     /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         mId++;
+        setPublishButton();
         mFinishedAdapter.notifyItemInserted(pos);
         if (mDots.size() > 0) {
             Toast.makeText(getActivity(), getString(R.string.added_to_result_list, name, pos + 1), Toast.LENGTH_SHORT).show();
@@ -616,6 +645,7 @@ public class TrackingListFragment extends BaseFragment
         final int firstPositionChanged = Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition));
         final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition) + 1);
         adjustRanks(firstPositionChanged, lastPositionChanged);
+        setPublishButton();
         mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged - firstPositionChanged);
     }
 
@@ -625,6 +655,7 @@ public class TrackingListFragment extends BaseFragment
         if (position >= 0) { // found
             mFinishedData.remove(position);
             adjustRanks(position, getFirstRankZeroPosition());
+            setPublishButton();
             mFinishedAdapter.notifyItemRemoved(position);
         }
         Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getCompetitorId());
@@ -674,6 +705,7 @@ public class TrackingListFragment extends BaseFragment
         builder.setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
                 setMaxPointsReasonForItem(item, maxPointsReasons[position]);
+                setPublishButton();
                 mFinishedAdapter.notifyItemChanged(mFinishedData.indexOf(item));
             }
         });
@@ -752,6 +784,7 @@ public class TrackingListFragment extends BaseFragment
         } else if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
             onItemRemove(index);
         } else {
+            setPublishButton();
             mFinishedAdapter.notifyItemChanged(index);
         }
     }
@@ -939,9 +972,7 @@ public class TrackingListFragment extends BaseFragment
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), result
                         .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item
                         .getComment(), getMergeState(item, state));
-                    updateItem(item, newItem);
-                    item = newItem;
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
                 // check max point reasons
@@ -954,9 +985,7 @@ public class TrackingListFragment extends BaseFragment
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), result.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item
                         .getComment(), getMergeState(item, state));
-                    updateItem(item, newItem);
-                    item = newItem;
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
                 // check score
@@ -970,17 +999,13 @@ public class TrackingListFragment extends BaseFragment
                         newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                             .getOneBasedRank(), item.getMaxPointsReason(), result.getScore(), item.getFinishingTime(), item
                             .getComment(), getMergeState(item, state));
-                        updateItem(item, newItem);
-                        item = newItem;
-                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        item = updateChangedItem(changedCompetitor, item, newItem);
                     }
                 } else if (result.getScore() != null && draft.getScore() != null) {
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), result.getScore(), item.getFinishingTime(), item
                         .getComment(), getMergeState(item, MergeState.ERROR));
-                    updateItem(item, newItem);
-                    item = newItem;
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
                 // check finishing time
@@ -994,17 +1019,13 @@ public class TrackingListFragment extends BaseFragment
                         newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                             .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), result.getFinishingTime(), item
                             .getComment(), getMergeState(item, state));
-                        updateItem(item, newItem);
-                        item = newItem;
-                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        item = updateChangedItem(changedCompetitor, item, newItem);
                     }
                 } else if (result.getFinishingTime() != null && draft.getFinishingTime() != null) {
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), result.getFinishingTime(), item
                         .getComment(), getMergeState(item, MergeState.ERROR));
-                    updateItem(item, newItem);
-                    item = newItem;
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
                 // check comment
@@ -1018,17 +1039,13 @@ public class TrackingListFragment extends BaseFragment
                         newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                             .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
                             item.getComment() + " ## " + result.getComment(), getMergeState(item, state));
-                        updateItem(item, newItem);
-                        item = newItem;
-                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        item = updateChangedItem(changedCompetitor, item, newItem);
                     }
                 } else if (result.getComment() != null && draft.getComment() == null) {
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), result
                         .getComment(), getMergeState(item, MergeState.ERROR));
-                    updateItem(item, newItem);
-                    item = newItem;
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
                 // check merge state
@@ -1036,14 +1053,13 @@ public class TrackingListFragment extends BaseFragment
                     newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(), item
                         .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item
                         .getComment(), getMergeState(item, result.getMergeState()));
-                    updateItem(item, newItem);
-                    item = newItem;
-                    changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                    item = updateChangedItem(changedCompetitor, item, newItem);
                 }
             } else { // unknown result, so it will be added
                 mFinishedData.add(new CompetitorResultWithIdImpl(mFinishedData.size(), result));
             }
         }
+        setPublishButton();
         mAdapter.notifyDataSetChanged();
         if (changedCompetitor.size() > 0) { // show message to user
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
@@ -1057,6 +1073,14 @@ public class TrackingListFragment extends BaseFragment
             builder.setPositiveButton(R.string.refresh_positive, null);
             builder.show();
         }
+    }
+
+    @NonNull
+    private CompetitorResultWithIdImpl updateChangedItem(Map<Serializable, String> changedCompetitor, CompetitorResultWithIdImpl item,
+        CompetitorResultWithIdImpl newItem) {
+        updateItem(item, newItem);
+        changedCompetitor.put(newItem.getCompetitorId(), newItem.getCompetitorDisplayName());
+        return newItem;
     }
 
     private MergeState getMergeState(CompetitorResultWithIdImpl item, MergeState newState) {
