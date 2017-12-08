@@ -4007,13 +4007,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
                         seriesDTO.getFleets().add(fleetDTO);
                         seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
-                        
-                        for(Competitor c: leaderboard.getCompetitors()) {
-                            Boat b = null;  // TODO bug2822: How do we get the boat?
-                            if(b != null && b.getBoatClass() != null) {
-                                raceGroup.boatClass = b.getBoatClass().getDisplayName();
-                            }
-                        }
+
+                        BoatClass boatClass = leaderboard.getBoatClass();
+                        raceGroup.boatClass = boatClass != null ? boatClass.getDisplayName(): null;
                     }
                     raceGroups.add(raceGroup);
                 }
