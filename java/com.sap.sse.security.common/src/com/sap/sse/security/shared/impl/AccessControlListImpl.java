@@ -1,4 +1,4 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
 public class AccessControlListImpl implements AccessControlList {

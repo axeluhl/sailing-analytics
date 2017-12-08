@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.shared.impl;
 
 import java.util.UUID;
 

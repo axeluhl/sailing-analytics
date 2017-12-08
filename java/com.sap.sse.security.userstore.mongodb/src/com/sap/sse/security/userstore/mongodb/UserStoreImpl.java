@@ -24,8 +24,6 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
-import com.sap.sse.security.TenantImpl;
-import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
@@ -40,6 +38,8 @@ import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.TenantImpl;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
  * An implementation of the {@link UserStore} interface, intended to store its state durably in a MongoDB instance.

@@ -12,10 +12,10 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.SecurityUserImpl;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
 public class UserDTO extends SecurityUserImpl implements IsSerializable {
     private static final long serialVersionUID = -4807678211983511872L;

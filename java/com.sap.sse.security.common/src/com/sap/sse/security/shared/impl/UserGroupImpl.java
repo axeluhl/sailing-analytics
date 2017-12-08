@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.shared.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ public class UserGroupImpl implements UserGroup {
     protected UserGroupImpl() {} // for GWT serialization only
         
     public UserGroupImpl(UUID id, String name) {
-        this(id, name, new HashSet<>());
+        this(id, name, new HashSet<SecurityUser>());
     }
     
     public UserGroupImpl(UUID id, String name, Iterable<? extends SecurityUser> users) {

@@ -1,10 +1,14 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.impl;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class SecurityUserImpl implements SecurityUser {
     private static final long serialVersionUID = -3639860207453072248L;

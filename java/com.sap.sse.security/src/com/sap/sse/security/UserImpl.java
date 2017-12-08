@@ -14,7 +14,7 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.SecurityUserImpl;
+import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 
