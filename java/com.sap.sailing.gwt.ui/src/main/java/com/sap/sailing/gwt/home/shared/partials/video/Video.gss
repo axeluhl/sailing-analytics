@@ -7,19 +7,6 @@
 .videoitem .info {
   font-size: inherit;
 }
-.videoitem .playicon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  cursor: pointer;
-  width: 5.333333333333333em;
-  height: 5.333333333333333em;
-  -webkit-transform: translate(-50%, -50%);
-     -moz-transform: translate(-50%, -50%);
-      -ms-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
-  background-image: url("../images/home/play.png");
-}
 .videoitem .videoplaceholder {
   height: 100%;
 }

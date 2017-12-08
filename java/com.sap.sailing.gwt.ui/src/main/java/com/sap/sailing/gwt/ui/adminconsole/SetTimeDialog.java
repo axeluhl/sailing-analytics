@@ -15,14 +15,15 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
+public abstract class SetTimeDialog<T> extends DataEntryDialogWithDateTimeBox<T> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
@@ -36,7 +37,7 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
     protected int currentPassId = -1;
     protected Label currentStartOrFinishingTimeLabel;
     protected Label currentPassIdBox;
-    protected BetterDateTimeBox timeBox;
+    protected DateTimeInput timeBox;
     protected TextBox authorNameBox;
     protected com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
 
@@ -99,9 +100,7 @@ public abstract class SetTimeDialog<T> extends DataEntryDialogWithBootstrap<T> {
 
     private Widget createInputPanel() {
         Grid content = new Grid(7, 2);
-        timeBox = createDateTimeBox(new Date());
-        timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
-        timeBox.ensureDebugId("StartTimeTimeBox");
+        timeBox = createDateTimeBox(new Date(), Accuracy.SECONDS);
         content.setWidget(0, 0, createLabel(getTimeLabel()));
         content.setWidget(0, 1, timeBox);
         

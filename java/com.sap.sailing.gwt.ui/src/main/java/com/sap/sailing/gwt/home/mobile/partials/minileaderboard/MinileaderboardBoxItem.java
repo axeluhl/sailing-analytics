@@ -25,7 +25,7 @@ public class MinileaderboardBoxItem extends Widget {
     @UiField Element competitorCountryNameUi;
     @UiField ImageElement competitorFlagUi;
     
-    public MinileaderboardBoxItem(MiniLeaderboardItemDTO entry, boolean showRaceCount) {
+    public MinileaderboardBoxItem(MiniLeaderboardItemDTO entry, boolean showRaceCount, FlagImageResolver flagImageResolver) {
         setElement(uiBinder.createAndBindUi(this));
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
         competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getShortInfo()));
@@ -38,7 +38,7 @@ public class MinileaderboardBoxItem extends Widget {
         SimpleCompetitorDTO competitor = entry.getCompetitor();
         String flagImageURL = competitor.getFlagImageURL();
         String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-        SafeUri imageUri = FlagImageResolver.getFlagImageUri(flagImageURL, twoLetterIsoCountryCode);
+        SafeUri imageUri = flagImageResolver.getFlagImageUri(flagImageURL, twoLetterIsoCountryCode);
         competitorFlagUi.setSrc(imageUri.asString());
     }
 }

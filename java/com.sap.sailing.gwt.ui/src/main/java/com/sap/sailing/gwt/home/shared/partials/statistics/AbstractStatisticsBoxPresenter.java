@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.shared.partials.statistics;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.resources.client.DataResource;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -13,33 +14,33 @@ public abstract class AbstractStatisticsBoxPresenter {
         this.view = view;
     }
 
-    public void addCompetitorItem(String iconUrl, String name, SimpleCompetitorDTO competitor) {
+    public void addCompetitorItem(DataResource icon, String name, SimpleCompetitorDTO competitor) {
         if (competitor != null) {
-            addItem(iconUrl, name, competitor.getShortInfo() != null ? competitor.getShortInfo() : competitor.getName());
+            addItem(icon, name, competitor.getShortInfo() != null ? competitor.getShortInfo() : competitor.getName());
         }
     }
     
-    public void addKnotsItem(String iconUrl, String name, Double speedInKnots) {
+    public void addKnotsItem(DataResource icon, String name, Double speedInKnots) {
         if (speedInKnots != null) {
-            addItem(iconUrl, name, StringMessages.INSTANCE.knotsValue(speedInKnots));
+            addItem(icon, name, StringMessages.INSTANCE.knotsValue(speedInKnots));
         }
     }
     
-    public void addItemWithCompactFormat(String iconUrl, String name, Double payload) {
+    public void addItemWithCompactFormat(DataResource icon, String name, Double payload) {
         if (payload != null && payload != 0) {
-            addItem(iconUrl, name, compactNumber(payload));
+            addItem(icon, name, compactNumber(payload));
         }
     }
     
-    public void addItemWithCompactFormat(String iconUrl, String name, long payload) {
+    public void addItemWithCompactFormat(DataResource icon, String name, long payload) {
         if (payload != 0) {
-            addItem(iconUrl, name, compactNumber(payload));
+            addItem(icon, name, compactNumber(payload));
         }
     }
 
-    public void addItemIfNotNull(String iconUrl, String name, Object payload) {
+    public void addItemIfNotNull(DataResource icon, String name, Object payload) {
         if (payload != null || payload instanceof Number && ((Number) payload).longValue() != 0) {
-            addItem(iconUrl, name, payload);
+            addItem(icon, name, payload);
         }
     }
     
@@ -68,6 +69,10 @@ public abstract class AbstractStatisticsBoxPresenter {
     
     protected void clear() {
         view.clear();
+    }
+    
+    protected void addItem(DataResource icon, String name, Object payload) {
+        addItem(icon.getSafeUri().asString(), name, payload);
     }
     
     protected void addItem(String iconUrl, String name, Object payload) {

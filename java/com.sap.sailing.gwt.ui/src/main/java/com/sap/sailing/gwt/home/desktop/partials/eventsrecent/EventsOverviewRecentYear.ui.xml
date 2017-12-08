@@ -3,6 +3,7 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecentResources" />
+  <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
   <ui:style>
   	.quickFix {
 		padding: 0px 10px;
@@ -26,7 +27,7 @@
                 </td>
                 <td>
                   <div class="{local_res.css.eventsoverviewrecent_year_header_info_arrow}">
-                    <img src="images/home/arrow-down-grey.png" class="{local_res.css.eventsoverviewrecent_year_header_info_arrow_image}"></img>
+                    <img src="{shr.arrowDownGrey.getSafeUri}" class="{local_res.css.eventsoverviewrecent_year_header_info_arrow_image}"></img>
                   </div>
                 </td>
               </tr>

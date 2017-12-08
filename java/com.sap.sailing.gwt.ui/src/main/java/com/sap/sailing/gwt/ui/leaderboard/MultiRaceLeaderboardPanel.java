@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,9 +45,9 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             MultiRaceLeaderboardSettings settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
-            LeaderBoardStyle style) {
+            LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails, style);
+                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver);
         initialize(settings);
     }
 
@@ -58,11 +59,11 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller, LeaderBoardStyle style) {
+            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style, flagImageResolver);
         initialize(settings);
     }
 
@@ -70,9 +71,9 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             MultiRaceLeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            boolean showRaceDetails, LeaderBoardStyle style) {
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
-                leaderboardName, errorReporter, stringMessages, showRaceDetails,style);
+                leaderboardName, errorReporter, stringMessages, showRaceDetails,style, flagImageResolver);
         initialize(settings);
     }
 

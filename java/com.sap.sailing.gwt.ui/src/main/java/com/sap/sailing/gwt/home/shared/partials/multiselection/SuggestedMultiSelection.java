@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.AbstractAsyncSuggestBoxFi
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSuggestBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.SuggestionItemsCallback;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public final class SuggestedMultiSelection<T> extends Composite implements SuggestedMultiSelectionDataProvider.Display<T> {
@@ -157,11 +158,12 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     }
     
     public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
-            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle) {
+            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle,
+            FlagImageResolver flagImageResolver) {
         return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<SimpleCompetitorWithIdDTO>() {
             @Override
             public IsWidget getItemDescriptionWidget(SimpleCompetitorWithIdDTO item) {
-                return new SuggestedMultiSelectionCompetitorItemDescription(item);
+                return new SuggestedMultiSelectionCompetitorItemDescription(item, flagImageResolver);
             }
 
             @Override

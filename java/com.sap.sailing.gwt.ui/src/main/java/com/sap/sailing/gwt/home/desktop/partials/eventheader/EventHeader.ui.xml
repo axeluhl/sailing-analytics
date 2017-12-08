@@ -42,7 +42,7 @@
           <div ui:field="eventDate" class="{local_res.css.eventheader_intro_details_item}">
           </div>
           <div ui:field="eventVenueContainer" class="{local_res.css.eventheader_intro_details_item}">
-            <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
+            <img src="{local_res.location.getSafeUri}" class="{local_res.css.locationicon}"></img>
             <span ui:field="eventVenue"></span>
           </div>
           <a ui:field="eventLink" class="{local_res.css.eventheader_intro_details_item}"></a>

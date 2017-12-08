@@ -28,7 +28,7 @@ public class StandingsListCompetitor extends UIObject {
     @UiField ImageElement flagUi;
     @UiField DivElement pointsUi;
 
-    public StandingsListCompetitor(MiniLeaderboardItemDTO item, boolean showRaceCounts) {
+    public StandingsListCompetitor(MiniLeaderboardItemDTO item, boolean showRaceCounts, FlagImageResolver flagImageResolver) {
         setElement(uiBinder.createAndBindUi(this));
         SimpleCompetitorDTO competitor = item.getCompetitor();
         
@@ -40,7 +40,7 @@ public class StandingsListCompetitor extends UIObject {
             pointsString += " (" + i18n.racesCount(item.getRaceCount()) + ")";
         }
         pointsUi.setInnerText(pointsString);
-        SafeUri imageUri = FlagImageResolver.getFlagImageUri(competitor.getFlagImageURL(), competitor.getTwoLetterIsoCountryCode());
+        SafeUri imageUri = flagImageResolver.getFlagImageUri(competitor.getFlagImageURL(), competitor.getTwoLetterIsoCountryCode());
         flagUi.setSrc(imageUri.asString());
     }
 

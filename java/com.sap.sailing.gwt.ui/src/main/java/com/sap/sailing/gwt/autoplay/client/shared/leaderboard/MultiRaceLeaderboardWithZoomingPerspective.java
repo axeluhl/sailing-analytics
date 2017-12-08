@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -194,7 +195,8 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
                 leaderboardName, errorReporter, stringMessages,
                 /* showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
-                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,new ClassicLeaderboardStyle());
+                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,
+                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get());
 
         return leaderboardPanel;
     }
