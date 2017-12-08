@@ -20,6 +20,9 @@ public class RoleImpl implements Role {
     private String name;
     private Set<WildcardPermission> permissions;
 
+    @Deprecated
+    RoleImpl() {} // for GWT serialization only
+    
     public RoleImpl(UUID id, String name) {
         this(id, name, new HashSet<WildcardPermission>());
     }
