@@ -8,14 +8,7 @@ public class UserGroupManagementException extends Exception implements Serializa
     public static final String USER_GROUP_DOES_NOT_EXIST = "User group does not exist";
     public static final String USER_GROUP_ALREADY_EXISTS = "User group already exists";
     
-    private final String message;
-    
-    @Override
-    public String getMessage() {
-        return message;
-    }
-
     public UserGroupManagementException(String message) {
-        this.message = message;
+        super(message);
     }
 }
