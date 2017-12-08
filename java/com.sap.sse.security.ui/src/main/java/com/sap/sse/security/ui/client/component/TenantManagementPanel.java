@@ -17,15 +17,15 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.TenantDTO;
-import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public class TenantManagementPanel extends DockPanel {
-    private SingleSelectionModel<UserGroupDTO> tenantSingleSelectionModel;
+    private SingleSelectionModel<UserGroup> tenantSingleSelectionModel;
     private TenantListDataProvider tenantListDataProvider;
     private TenantDetailPanel tenantDetailPanel;
     
@@ -51,7 +51,7 @@ public class TenantManagementPanel extends DockPanel {
         buttonPanel.add(new Button("Remove tenant", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupDTO tenant = tenantSingleSelectionModel.getSelectedObject();
+                UserGroup tenant = tenantSingleSelectionModel.getSelectedObject();
                 if (tenant == null) {
                     Window.alert("You have to select a tenant.");
                     return;
@@ -75,9 +75,9 @@ public class TenantManagementPanel extends DockPanel {
         tenantSingleSelectionModel = new SingleSelectionModel<>();
         TextBox filterBox = new TextBox();
         filterBox.getElement().setPropertyString("placeholder", "Filter tenants...");
-        final CellList<TenantDTO> tenantList = new CellList<TenantDTO>(new AbstractCell<TenantDTO>() {
+        final CellList<Tenant> tenantList = new CellList<Tenant>(new AbstractCell<Tenant>() {
             @Override
-            public void render(Context context, TenantDTO value, SafeHtmlBuilder sb) {
+            public void render(Context context, Tenant value, SafeHtmlBuilder sb) {
                 if (value == null) {
                     return;
                 }

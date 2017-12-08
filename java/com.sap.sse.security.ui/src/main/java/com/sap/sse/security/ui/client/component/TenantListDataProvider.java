@@ -14,10 +14,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.shared.TenantDTO;
 
-public class TenantListDataProvider extends AbstractDataProvider<TenantDTO> {
+public class TenantListDataProvider extends AbstractDataProvider<Tenant> {
     private UserManagementServiceAsync userManagementService;
     private TextBox filterBox;
     
@@ -47,27 +47,27 @@ public class TenantListDataProvider extends AbstractDataProvider<TenantDTO> {
     }
    
     @Override
-    protected void onRangeChanged(final HasData<TenantDTO> display) {
+    protected void onRangeChanged(final HasData<Tenant> display) {
         final Range range = display.getVisibleRange();
-        userManagementService.getTenants(new AsyncCallback<Collection<TenantDTO>>() {
+        userManagementService.getTenants(new AsyncCallback<Collection<Tenant>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
    
             @Override
-            public void onSuccess(Collection<TenantDTO> result) {
-                List<TenantDTO> resultList = new ArrayList<>();
-                for (TenantDTO tenant : result) {
+            public void onSuccess(Collection<Tenant> result) {
+                List<Tenant> resultList = new ArrayList<>();
+                for (Tenant tenant : result) {
                     if (tenant.getName().contains(filterBox.getText())) {
                         resultList.add(tenant);
                     }
                 }
-                List<TenantDTO> show = new ArrayList<>();
+                List<Tenant> show = new ArrayList<>();
                 int start = range.getStart();
                 int end = range.getStart() + range.getLength();
                 for (int i = start; show.size() < end && i < resultList.size(); i++) {
-                    final TenantDTO e = resultList.get(i);
+                    final Tenant e = resultList.get(i);
                     show.add(e);
                 }
                 updateRowData(start, show);
@@ -80,7 +80,7 @@ public class TenantListDataProvider extends AbstractDataProvider<TenantDTO> {
     }
    
     public void updateDisplays() {
-        for (HasData<TenantDTO> hd : getDataDisplays()) {
+        for (HasData<Tenant> hd : getDataDisplays()) {
             onRangeChanged(hd);
         }
     }

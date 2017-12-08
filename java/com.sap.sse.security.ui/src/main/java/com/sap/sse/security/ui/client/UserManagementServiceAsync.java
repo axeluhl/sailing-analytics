@@ -9,7 +9,6 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -29,9 +28,9 @@ public interface UserManagementServiceAsync {
 
     void createTenant(String name, String owner, AsyncCallback<Tenant> callback);
 
-    void addUserToTenant(String tenantIdAsString, String username, AsyncCallback<UserGroup> asyncCallback);
+    void addUserToTenant(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
 
-    void removeUserFromTenant(String idAsString, String user, AsyncCallback<UserGroup> asyncCallback);
+    void removeUserFromTenant(String idAsString, String user, AsyncCallback<Void> asyncCallback);
 
     void deleteTenant(String name, AsyncCallback<SuccessInfo> callback);
 

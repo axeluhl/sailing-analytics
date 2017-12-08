@@ -37,7 +37,8 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
  javax.servlet;bundle-version="3.1.0",
- com.sap.sse.mail
+ com.sap.sse.mail,
+ com.sap.sse.security.common
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;

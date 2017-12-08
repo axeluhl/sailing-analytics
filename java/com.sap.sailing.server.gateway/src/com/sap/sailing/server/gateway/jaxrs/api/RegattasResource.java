@@ -109,7 +109,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.User;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -327,7 +327,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else if (boatClassName == null) {
             response = getBadBoatClassResponse(boatClassName);
         } else {
-            final SecurityUser user = getService(SecurityService.class).getCurrentUser();
+            final User user = getService(SecurityService.class).getCurrentUser();
             final Competitor competitor = getService().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
                     user.getFullName() == null ? user.getName() : user.getFullName(),
                     /* displayColor */ null, user.getEmail(), /* flagImageURI */ null,

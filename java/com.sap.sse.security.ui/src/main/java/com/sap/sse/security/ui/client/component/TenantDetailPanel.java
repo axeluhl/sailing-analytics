@@ -32,14 +32,15 @@ import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.TenantListDataProvider.TenantListDataProviderChangeHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public class TenantDetailPanel extends HorizontalPanel implements Handler, ChangeHandler, KeyUpHandler, TenantListDataProviderChangeHandler {
     private final TextBox filterBox;
-    private final SingleSelectionModel<UserGroupDTO> tenantSelectionModel;
+    private final SingleSelectionModel<UserGroup> tenantSelectionModel;
     
     private final CellList<String> tenantUsersList;
     private final MultiSelectionModel<String> tenantUsersSelectionModel;
@@ -72,16 +73,16 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
     private class TenantUsersListDataProvider extends AbstractDataProvider<String> {
         @Override
         protected void onRangeChanged(HasData<String> display) {
-            UserGroupDTO tenant = tenantSelectionModel.getSelectedObject();
+            UserGroup tenant = tenantSelectionModel.getSelectedObject();
             List<String> result = new ArrayList<>();
             List<String> show = new ArrayList<>();
             final Range range = display.getVisibleRange();
             int start = range.getStart();
             int end = range.getStart() + range.getLength();
             if (tenant != null) {
-                for (String username : tenant.getUsers()) {
-                    if (username.contains(filterBox.getText())) {
-                        result.add(username);
+                for (final SecurityUser user : tenant.getUsers()) {
+                    if (user.getName().contains(filterBox.getText())) {
+                        result.add(user.getName());
                     }
                 }
                 for (int i = start; i < end && i < result.size(); i++) {
@@ -104,13 +105,14 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
     private class AllUsersListDataProvider extends AbstractDataProvider<UserDTO> {
         @Override
         protected void onRangeChanged(HasData<UserDTO> display) {
-            UserGroupDTO tenant = tenantSelectionModel.getSelectedObject();
-            final List<String> alreadyAddedUsers = new ArrayList<>();
+            UserGroup tenant = tenantSelectionModel.getSelectedObject();
+            final List<String> namesOfAlreadyAddedUsers = new ArrayList<>();
             if (tenant != null) {
-                alreadyAddedUsers.addAll(tenant.getUsers());
+                for (final SecurityUser tenantUser : tenant.getUsers()) {
+                    namesOfAlreadyAddedUsers.add(tenantUser.getName());
+                }
             }
             final Range range = display.getVisibleRange();
-            
             userManagementService.getUserList(new AsyncCallback<Collection<UserDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -121,7 +123,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                 public void onSuccess(Collection<UserDTO> result) {
                     List<UserDTO> resultList = new ArrayList<>();
                     for (UserDTO user : result) {
-                        if (!alreadyAddedUsers.contains(user.getName()) && 
+                        if (!namesOfAlreadyAddedUsers.contains(user.getName()) && 
                                 user.getName().contains(filterBox.getText())) {
                             resultList.add(user);
                         }
@@ -146,7 +148,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
         }
     }
     
-    public TenantDetailPanel(TextBox filterBox, SingleSelectionModel<UserGroupDTO> tenantSelectionModel, 
+    public TenantDetailPanel(TextBox filterBox, SingleSelectionModel<UserGroup> tenantSelectionModel, 
             TenantListDataProvider tenantListDataProvider, UserManagementServiceAsync userManagementService) {
         this.filterBox = filterBox;
         filterBox.addChangeHandler(this);
@@ -191,20 +193,20 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
         addBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupDTO tenant = tenantSelectionModel.getSelectedObject();
+                UserGroup tenant = tenantSelectionModel.getSelectedObject();
                 Set<UserDTO> users = allUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
                     Window.alert("You have to select a tenant.");
                     return;
                 }
                 for (UserDTO user : users) {
-                    userManagementService.addUserToTenant(tenant.getId().toString(), user.getName(), new AsyncCallback<UserGroupDTO>() {
+                    userManagementService.addUserToTenant(tenant.getId().toString(), user.getName(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert("Could not add user " + user.getName() + " to tenant.");
                         }
                         @Override
-                        public void onSuccess(UserGroupDTO result) {
+                        public void onSuccess(Void result) {
                             tenantListDataProvider.updateDisplays();
                         }
                     });
@@ -214,20 +216,20 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
         removeBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupDTO tenant = tenantSelectionModel.getSelectedObject();
+                UserGroup tenant = tenantSelectionModel.getSelectedObject();
                 Set<String> users = tenantUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
                     Window.alert("You have to select a tenant.");
                     return;
                 }
                 for (String username : users) {
-                    userManagementService.removeUserFromTenant(tenant.getId().toString(), username, new AsyncCallback<UserGroupDTO>() {
+                    userManagementService.removeUserFromTenant(tenant.getId().toString(), username, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert("Could not remove user " + username + " from tenant.");
                         }
                         @Override
-                        public void onSuccess(UserGroupDTO result) {
+                        public void onSuccess(Void result) {
                             tenantListDataProvider.updateDisplays();
                         }
                     });

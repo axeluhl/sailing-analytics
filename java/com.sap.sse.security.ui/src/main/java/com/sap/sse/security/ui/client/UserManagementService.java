@@ -12,8 +12,8 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -34,9 +34,9 @@ public interface UserManagementService extends RemoteService {
 
     Tenant createTenant(String name, String tenantOwner) throws TenantManagementException, UnauthorizedException;
 
-    UserGroup addUserToTenant(String tenantIdAsString, String username) throws UnauthorizedException;
+    void addUserToTenant(String tenantIdAsString, String username) throws UnauthorizedException;
 
-    UserGroup removeUserFromTenant(String tenantIdAsString, String username) throws UnauthorizedException;
+    void removeUserFromTenant(String idAsString, String user) throws UnauthorizedException;
 
     SuccessInfo deleteTenant(String tenantIdAsString) throws UnauthorizedException;
 
@@ -70,7 +70,7 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo setRolesForUser(String username, Iterable<UUID> roles) throws UnauthorizedException;
 
-    SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) throws UnauthorizedException;
+    SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException;
 
     Map<String, String> getSettings();
 

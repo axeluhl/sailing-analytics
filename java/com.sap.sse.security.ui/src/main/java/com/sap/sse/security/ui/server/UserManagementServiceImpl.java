@@ -45,6 +45,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -54,16 +55,15 @@ import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.RoleDTO;
 import com.sap.sse.security.ui.shared.RolePermissionModelDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserGroupDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
@@ -209,22 +209,22 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserGroup addUserToTenant(String tenantIdAsString, String username) throws UnauthorizedException {
+    public void addUserToTenant(String tenantIdAsString, String username) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:add_user:" + tenantIdAsString)) {
-            return createUserGroupDTOFromUserGroup(getSecurityService().addUserToUserGroup(
-                    getSecurityService().getTenant(UUID.fromString(tenantIdAsString)),
-                    getSecurityService().getUserByName(username)));
+            final Tenant tenant = getSecurityService().getTenant(UUID.fromString(tenantIdAsString));
+            getSecurityService().addUserToTenant(tenant, getSecurityService().getUserByName(username));
+            createUserGroupDTOFromUserGroup(tenant);
         } else {
             throw new UnauthorizedException("Not permitted to add user to tenant");
         }
     }
 
     @Override
-    public UserGroup removeUserFromTenant(String tenantIdAsString, String username) throws UnauthorizedException {
+    public void removeUserFromTenant(String tenantIdAsString, String username) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:remove_user:" + tenantIdAsString)) {
-            return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup(
-                    getSecurityService().getTenant(UUID.fromString(tenantIdAsString)),
-                    getSecurityService().getUserByName(username)));
+            final Tenant tenant = getSecurityService().getTenant(UUID.fromString(tenantIdAsString));
+            getSecurityService().removeUserFromTenant(tenant, getSecurityService().getUserByName(username));
+            createUserGroupDTOFromUserGroup(tenant);
         } else {
             throw new UnauthorizedException("Not permitted to remove user from tenant");
         }
@@ -445,22 +445,22 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) throws UnauthorizedException {
+    public SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("user:grant_permission,revoke_permission:" + username)) {
             UserImpl u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
             }
-            Set<String> permissionsToRemove = new HashSet<>();
+            Set<WildcardPermission> permissionsToRemove = new HashSet<>();
             Util.addAll(u.getPermissions(), permissionsToRemove);
             Util.removeAll(permissions, permissionsToRemove);
-            for (String permissionToRemove : permissionsToRemove) {
+            for (WildcardPermission permissionToRemove : permissionsToRemove) {
                 getSecurityService().removePermissionFromUser(username, permissionToRemove);
             }
-            Set<String> permissionsToAdd = new HashSet<>();
+            Set<WildcardPermission> permissionsToAdd = new HashSet<>();
             Util.addAll(permissions, permissionsToAdd);
             Util.removeAll(u.getPermissions(), permissionsToAdd);
-            for (String permissionToAdd : permissionsToAdd) {
+            for (WildcardPermission permissionToAdd : permissionsToAdd) {
                 getSecurityService().addPermissionForUser(username, permissionToAdd);
             }
             return new SuccessInfo(true, "Set roles " + permissions + " for user " + username, /* redirectURL */null,
@@ -486,12 +486,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
-    private RoleDTO createRoleDTOFromRole(Role role) {
-        HashSet<String> stringPermissions = new HashSet<>();
-        for (com.sap.sse.security.shared.WildcardPermission wildcardPermission : role.getPermissions()) {
-            stringPermissions.add(wildcardPermission.toString());
-        }
-        return new RoleDTO((UUID) role.getId(), role.getName(), stringPermissions);
+    private Role createRoleDTOFromRole(Role role) {
+        // TODO strip down the role object graph to what the client needs...
+        return new RoleImpl(role.getId(), role.getName(), role.getPermissions());
     }
 
     private UserDTO createUserDTOFromUser(User user) {
@@ -510,7 +507,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
-        HashMap<UUID, RoleDTO> roleMap = new HashMap<>();
+        HashMap<UUID, Role> roleMap = new HashMap<>();
         for (Role role : getSecurityService().getRoles()) {
             roleMap.put((UUID) role.getId(), createRoleDTOFromRole(role));
         }

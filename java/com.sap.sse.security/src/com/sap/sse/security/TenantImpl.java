@@ -29,7 +29,7 @@ public class TenantImpl extends UserGroupImpl implements Tenant {
         super(id, name);
     }
     
-    public TenantImpl(UUID id, String name, Set<SecurityUser> users) {
+    public TenantImpl(UUID id, String name, Iterable<SecurityUser> users) {
         super(id, name, users);
     }
 
