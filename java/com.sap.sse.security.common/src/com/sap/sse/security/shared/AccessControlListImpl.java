@@ -79,4 +79,11 @@ public class AccessControlListImpl implements AccessControlList {
         actionsByUserGroup.put(userGroup, actions);
     }
 
+    @Override
+    public String toString() {
+        return "AccessControlList for Object ID " + idOfAccessControlledObjectAsString
+                + " (" + displayNameOfAccessControlledObject
+                + "), actionsByUserGroup=" + actionsByUserGroup + "]";
+    }
+
 }

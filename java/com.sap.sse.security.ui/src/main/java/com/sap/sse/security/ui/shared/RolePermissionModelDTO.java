@@ -20,11 +20,6 @@ public class RolePermissionModelDTO implements RolePermissionModel, IsSerializab
     }
     
     @Override
-    public String getRoleName(UUID id) {
-        return roles.get(id).getName();
-    }
-    
-    @Override
     public Iterable<WildcardPermission> getPermissions(UUID id) {
         return roles.get(id).getPermissions();
     }

@@ -3,7 +3,6 @@ package com.sap.sse.security.shared;
 import java.util.UUID;
 
 public interface RolePermissionModel {
-    String getRoleName(UUID roleId);
     Iterable<WildcardPermission> getPermissions(UUID roleId);
     Iterable<Role> getRoles();
     

@@ -289,16 +289,6 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     }
     
     @Override
-    public String getRoleName(UUID id) {
-        Role role = getRole(id);
-        if (role != null) {
-            return role.getName();
-        } else {
-            return "";
-        }
-    }
-    
-    @Override
     public Iterable<WildcardPermission> getPermissions(UUID id) {
         Role role = getRole(id);
         if (role != null) {

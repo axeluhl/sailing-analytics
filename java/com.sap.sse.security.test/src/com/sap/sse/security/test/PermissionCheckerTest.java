@@ -60,12 +60,12 @@ public class PermissionCheckerTest implements RolePermissionModel {
     public void setUp() {
         adminUser = new SecurityUserImpl("admin", adminTenant);
         user = new UserImpl("jonas", "jonas@dann.io", userTenant);
-        ownership = new OwnershipImpl(eventId.toString(), user, userTenant, "event");
-        adminOwnership = new OwnershipImpl(eventId.toString(), adminUser, adminTenant, "event");
         userTenant = new TenantImpl(userTenantId, "jonas-tenant");
         userTenant.add(user);
+        ownership = new OwnershipImpl(eventId.toString(), user, userTenant, "event");
         adminTenant = new TenantImpl(adminTenantId, "admin-tenant");
         adminTenant.add(adminUser);
+        adminOwnership = new OwnershipImpl(eventId.toString(), adminUser, adminTenant, "event");
         tenants = new ArrayList<>();
         tenants.add(userTenant);
         tenants.add(adminTenant);
@@ -139,7 +139,7 @@ public class PermissionCheckerTest implements RolePermissionModel {
         roles.add(globalRole);
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
-        roles.remove(globalRoleId);
+        roles.remove(globalRole);
         roles.add(tenantRole);
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
@@ -150,11 +150,6 @@ public class PermissionCheckerTest implements RolePermissionModel {
                 null, acl));
     }
 
-    @Override
-    public String getRoleName(UUID id) {
-        return roleModel.get(id).getName();
-    }
-    
     @Override
     public Iterable<WildcardPermission> getPermissions(UUID id) {
         return roleModel.get(id).getPermissions();
@@ -177,7 +172,7 @@ public class PermissionCheckerTest implements RolePermissionModel {
         String[] parts = role.getName().split(":");
         // if there is no parameter or the first parameter (tenant) equals the tenant owner
         // TODO consider user as Role parameter, comparing to ownership.getUserOwner()
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(UUID.fromString(parts[1])))) {
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().getId().equals(UUID.fromString(parts[1])))) {
             for (WildcardPermission rolePermission : role.getPermissions()) {
                 if (rolePermission.implies(permission)) {
                     return true;

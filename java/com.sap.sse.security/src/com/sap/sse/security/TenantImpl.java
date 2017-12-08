@@ -32,4 +32,9 @@ public class TenantImpl extends UserGroupImpl implements Tenant {
     public TenantImpl(UUID id, String name, Set<SecurityUser> users) {
         super(id, name, users);
     }
+
+    @Override
+    public String toString() {
+        return "TenantImpl [getId()=" + getId() + ", getName()=" + getName() + ", getUsers()=" + getUsers() + "]";
+    }
 }

@@ -36,4 +36,10 @@ public class OwnershipImpl implements Ownership {
     public String getDisplayNameOfOwnedObject() {
         return displayName;
     }
+
+    @Override
+    public String toString() {
+        return "OwnershipImpl [idOfOwnedObjectAsString=" + idOfOwnedObjectAsString + ", userOwner=" + userOwner
+                + ", tenantOwner=" + tenantOwner + ", displayName=" + displayName + "]";
+    }
 }

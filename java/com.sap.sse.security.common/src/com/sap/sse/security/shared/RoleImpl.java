@@ -39,4 +39,9 @@ public class RoleImpl implements Role {
     public Set<WildcardPermission> getPermissions() {
         return Collections.unmodifiableSet(permissions);
     }
+
+    @Override
+    public String toString() {
+        return "RoleImpl [id=" + id + ", name=" + name + ", permissions=" + permissions + "]";
+    }
 }

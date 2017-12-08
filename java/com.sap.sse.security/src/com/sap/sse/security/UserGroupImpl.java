@@ -56,5 +56,10 @@ public class UserGroupImpl implements UserGroup {
     @Override
     public Iterable<SecurityUser> getUsers() {
         return Collections.unmodifiableSet(users);
+    }
+
+    @Override
+    public String toString() {
+        return "UserGroupImpl [id=" + id + ", name=" + name + ", users=" + users + "]";
     }  
 }
