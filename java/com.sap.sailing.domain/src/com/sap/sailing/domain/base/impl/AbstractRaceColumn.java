@@ -330,7 +330,9 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
-        registerCompetitor(competitorWithBoat, competitorWithBoat.getBoat(), fleet);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
     }
 
     @Override
@@ -339,18 +341,23 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         for (CompetitorWithBoat competitorWithBoat: competitorWithBoats) {
             competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
         }
-        registerCompetitors(competitorsAndBoats, fleet);
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
     }
 
     @Override
     public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);
-        registerCompetitors(competitorsAndBoats, fleet);
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
     }
 
     @Override
     public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    private void registerCompetitorsInternal(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);
@@ -363,6 +370,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                     UUID.randomUUID(), passId, competitorAndBoat.getKey(), competitorAndBoat.getValue()));
         }
     }
+    
 
     @Override
     public void deregisterCompetitor(Competitor competitor, Fleet fleet)
