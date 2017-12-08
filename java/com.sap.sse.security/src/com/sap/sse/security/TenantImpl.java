@@ -20,6 +20,9 @@ import com.sap.sse.security.shared.UserGroup;
 public class TenantImpl extends UserGroupImpl implements Tenant {
     private static final long serialVersionUID = -8831840409264252279L;
 
+    @Deprecated
+    TenantImpl() {} // for GWT serialization only
+    
     public TenantImpl(UserGroup group) {
         super(group.getId(), group.getName(), group.getUsers());
     }

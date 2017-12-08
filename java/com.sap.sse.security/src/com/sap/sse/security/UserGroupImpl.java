@@ -12,10 +12,13 @@ import com.sap.sse.security.shared.UserGroup;
 public class UserGroupImpl implements UserGroup {
     private static final long serialVersionUID = -6387489363559803841L;
 
-    private final UUID id;
-    private final String name;
+    private UUID id;
+    private String name;
     
     private Set<SecurityUser> users;
+    
+    @Deprecated
+    protected UserGroupImpl() {} // for GWT serialization only
         
     public UserGroupImpl(UUID id, String name) {
         this(id, name, new HashSet<>());
