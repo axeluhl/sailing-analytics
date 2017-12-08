@@ -10,13 +10,13 @@ public class AdminRole implements Role {
     private static AdminRole INSTANCE;
     private static final String NAME = "admin";
     private static final String UUID_STRING = "dc77e3d1-d405-435e-8699-ce7245f6fd7a";
-    private final UUID id;
-    private final Set<WildcardPermission> permissions;
+    private UUID id;
+    private Set<WildcardPermission> permissions;
     
     AdminRole() {
         id = UUID.fromString(UUID_STRING);
         permissions = new HashSet<>();
-        permissions.add(new WildcardPermission("*"));
+        permissions.add(new WildcardPermission(WildcardPermission.WILDCARD_TOKEN));
     }
     
     @Override
