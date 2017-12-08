@@ -165,7 +165,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private UserGroup loadUserGroup(DBObject groupDBObject, Map<String, UserImpl> usersByName) {
-        final UUID id = UUID.fromString((String) groupDBObject.get(FieldNames.UserGroup.ID.name()));
+        final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<SecurityUser> users = new HashSet<>();
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());

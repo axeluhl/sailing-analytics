@@ -66,6 +66,7 @@ public class UserStoreImpl implements UserStore {
     private String name = "MongoDB user store";
     
     private final ConcurrentHashMap<UUID, Tenant> tenants;
+    private final ConcurrentHashMap<String, Tenant> tenantsByName;
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
     
@@ -125,6 +126,7 @@ public class UserStoreImpl implements UserStore {
     
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         tenants = new ConcurrentHashMap<>();
+        tenantsByName = new ConcurrentHashMap<>();
         roles = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
         userGroupsByName = new ConcurrentHashMap<>();
@@ -213,6 +215,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void clear() {
         tenants.clear();
+        tenantsByName.clear();
         userGroups.clear();
         userGroupsByName.clear();
         LockUtil.lockForWrite(userGroupsUserCacheLock);
@@ -249,6 +252,7 @@ public class UserStoreImpl implements UserStore {
         clear();
         for (Tenant tenant : newUserStore.getTenants()) {
             tenants.put(tenant.getId(), tenant);
+            tenantsByName.put(tenant.getName(), tenant);
         }
         LockUtil.lockForWrite(userGroupsUserCacheLock);
         try {
@@ -455,7 +459,7 @@ public class UserStoreImpl implements UserStore {
         if (userGroups.contains(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
-        logger.info("Creating user group: " + groupId);
+        logger.info("Creating user group: " + groupId + " with name "+name);
         UserGroup group = new UserGroupImpl(groupId, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
@@ -523,6 +527,10 @@ public class UserStoreImpl implements UserStore {
         } finally {
             LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
         }
+        deleteUserGroupFromDB(userGroup);
+    }
+
+    private void deleteUserGroupFromDB(UserGroup userGroup) {
         if (mongoObjectFactory != null) {
             mongoObjectFactory.deleteUserGroup(userGroup);
         }
@@ -535,16 +543,9 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Tenant getTenantByName(String name) {
-        UserGroup group = getUserGroupByName(name);
-        final Tenant result;
-        if (group != null && tenants.contains((UUID) group.getId())) {
-            result = new TenantImpl(group);
-        } else {
-            result = null;
-        }
-        return result;
+        return tenantsByName.get(name);
     }
-
+    
     @Override
     public Tenant getTenant(UUID tenantId) {
         return tenants.get(tenantId);
@@ -562,6 +563,7 @@ public class UserStoreImpl implements UserStore {
         }
         updateUserGroup(tenant);
         tenants.put(tenantId, tenant);
+        tenantsByName.put(tenant.getName(), tenant);
         return tenant;
     }
 
@@ -576,7 +578,8 @@ public class UserStoreImpl implements UserStore {
             throw new TenantManagementException(TenantManagementException.TENANT_DOES_NOT_EXIST);
         }
         logger.info("Deleting tenant: " + tenant);
-        tenants.remove(tenant);
+        tenants.remove(tenant.getId());
+        tenantsByName.remove(tenant.getName());
         if (mongoObjectFactory != null) {
             mongoObjectFactory.deleteTenant(tenant);
         }
@@ -585,7 +588,9 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException {
         deleteTenantId(tenant);
-        deleteUserGroup(tenant);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.deleteUserGroup(tenant);
+        }
     }
 
     @Override

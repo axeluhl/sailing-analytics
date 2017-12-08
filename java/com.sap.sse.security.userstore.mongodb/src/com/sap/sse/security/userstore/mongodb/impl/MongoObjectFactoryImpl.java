@@ -133,8 +133,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         userGroupCollection.createIndex(new BasicDBObject(FieldNames.UserGroup.ID.name(), 1));
         DBObject dbUserGroup = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.UserGroup.ID.name(), group.getId().toString());
-        dbUserGroup.put(FieldNames.UserGroup.ID.name(), group.getId().toString());
+        DBObject query = new BasicDBObject(FieldNames.UserGroup.ID.name(), group.getId());
+        dbUserGroup.put(FieldNames.UserGroup.ID.name(), group.getId());
         dbUserGroup.put(FieldNames.UserGroup.NAME.name(), group.getName());
         BasicDBList dbUsernames = new BasicDBList();
         for (SecurityUser user : group.getUsers()) {
@@ -148,7 +148,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void deleteUserGroup(UserGroup userGroup) {
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         DBObject dbUserGroup = new BasicDBObject();
-        dbUserGroup.put(FieldNames.UserGroup.ID.name(), userGroup.getId().toString());
+        dbUserGroup.put(FieldNames.UserGroup.ID.name(), userGroup.getId());
         userGroupCollection.remove(dbUserGroup);
     }
 

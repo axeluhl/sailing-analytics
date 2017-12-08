@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -21,8 +23,8 @@ public class UserStoreTest {
     private final String prefValue = "pv";
     
     @Before
-    public void setUp() throws UserManagementException {
-        userStore.createUser(username, email, UUID.randomUUID());
+    public void setUp() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        userStore.createUser(username, email, userStore.createTenant(UUID.randomUUID(), username+"-tenant"));
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
     }

@@ -19,6 +19,9 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -170,7 +173,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingTest() throws UserManagementException {
+    public void userMappingTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -183,8 +186,8 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException {
-        store.createUser(user1, mail, UUID.randomUUID());
+    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        store.createUser(user1, mail, store.createTenant(UUID.randomUUID(), user1+"-tenant"));
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -196,7 +199,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithTwoUsersTest() throws UserManagementException {
+    public void userMappingWithTwoUsersTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         createUserWithVerifiedEmail(user2, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
@@ -214,7 +217,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException {
+    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -230,8 +233,8 @@ public class PreferenceObjectBasedNotificationSetTest {
      * There was a bug that caused the preferences not to be removed when a user was deleted.
      */
     @Test
-    public void deleteUserWithMappingTest() throws UserManagementException {
-        store.createUser(user1, mail, UUID.randomUUID());
+    public void deleteUserWithMappingTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        store.createUser(user1, mail, store.createTenant(UUID.randomUUID(), user1+"-tenant"));
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -242,8 +245,8 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void removePreferenceConverterTest() throws UserManagementException {
-        store.createUser(user1, mail, UUID.randomUUID());
+    public void removePreferenceConverterTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        store.createUser(user1, mail, store.createTenant(UUID.randomUUID(), user1+"-tenant"));
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -261,8 +264,8 @@ public class PreferenceObjectBasedNotificationSetTest {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
-        UUID defaultTenant = UUID.randomUUID();
+    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        Tenant defaultTenant = store.createTenant(UUID.randomUUID(), username+"-tenant");
         store.createUser(username, email, defaultTenant);
         store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet()));
     }
