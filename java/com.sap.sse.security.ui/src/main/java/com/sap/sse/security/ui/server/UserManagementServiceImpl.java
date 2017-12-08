@@ -34,7 +34,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.Credential;
-import com.sap.sse.security.OwnershipImpl;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.TenantImpl;
@@ -43,7 +42,6 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -113,15 +111,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return null;
         } else {
             return new TenantImpl(tenant.getId(), tenant.getName(), tenant.getUsers());
-        }
-    }
-
-    // TODO strip down the elements in an Ownership object graph with its users and tenants to the scope of the current user
-    private Ownership createOwnershipDTOFromOwnership(Ownership ownership) {
-        if (ownership != null) {
-            return new OwnershipImpl(ownership.getIdOfOwnedObjectAsString(), ownership.getUserOwner(), ownership.getTenantOwner(), ownership.getDisplayNameOfOwnedObject());
-        } else {
-            return null;
         }
     }
 
