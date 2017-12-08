@@ -375,7 +375,26 @@ public interface RaceColumn extends Named {
      *             {@link MetaLeaderboard}
      */
     void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+
     
+    /**
+     * Registers a competitor and his boat on the the race column's race log associated to the passed fleet.
+     * 
+     * @throws CompetitorRegistrationOnRaceLogDisabledException
+     *             thrown if competitor registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled}
+     *             on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
+     */
+    void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+
+    /**
+     * Registers competitors including their boats on the the race column's race log associated to the passed fleet.
+     * 
+     * @throws CompetitorRegistrationOnRaceLogDisabledException
+     *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
+     *             {@link MetaLeaderboard}
+     */
+    void registerCompetitors(Iterable<CompetitorWithBoat> competitorWithBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+
     /**
      * Deregisters a competitor on the the race column's race log associated to the passed fleet.
      * 

@@ -60,7 +60,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -5632,32 +5631,55 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
+        Set<Competitor> competitorsToRegister = new HashSet<>();
+        Map<Competitor, Boat> competitorToBoatMapping = new HashMap<>();
+        for (Entry<CompetitorDTO, BoatDTO> competitorAndBoatEntry: competitorAndBoatDTOs.entrySet()) {
+            Competitor competitor = getCompetitor(competitorAndBoatEntry.getKey());
+            competitorsToRegister.add(competitor);
+            competitorToBoatMapping.put(competitor, getBoat(competitorAndBoatEntry.getValue()));
+        }
+        
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+
+        Collection<Competitor> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet).keySet();
+        HashSet<Competitor> competitorSetToRemove = new HashSet<>();
+        Util.addAll(competitorsToRemove, competitorSetToRemove);
+        filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
+        
+        raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
+        
+        // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
+        for (Competitor competitorToRegister: competitorsToRegister) {
+            raceColumn.registerCompetitor(competitorToRegister, competitorToBoatMapping.get(competitorToRegister), fleet);  
+        }
+    }
+    
+    @Override
+    public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
-        Set<Competitor> competitorsToRegister = new HashSet<Competitor>();
+        Set<Competitor> competitorsToRegister = new HashSet<>();
         for (CompetitorDTO dto : competitorDTOs) {
             competitorsToRegister.add(getCompetitor(dto));
         }
         
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        
-        boolean canBoatsOfCompetitorsChangePerRace;
-        if (leaderboard instanceof RegattaLeaderboard) {
-            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-            Regatta regatta = regattaLeaderboard.getRegatta();
-            canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
-        } else {
-            canBoatsOfCompetitorsChangePerRace = false;
-        }        
-        
-        Map<Competitor, Boat> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet);
+
+        Collection<Competitor> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet).keySet();
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
-        Util.addAll(competitorsToRemove.keySet(), competitorSetToRemove);
+        Util.addAll(competitorsToRemove, competitorSetToRemove);
         filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
         
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
-        raceColumn.registerCompetitors(competitorsToRegister, fleet);
+        
+        // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
+        for (Competitor competitorToRegister: competitorsToRegister) {
+            if (competitorToRegister instanceof CompetitorWithBoat) {
+                raceColumn.registerCompetitor((CompetitorWithBoat) competitorToRegister, fleet);  
+            }
+        }
     }
     
     @Override

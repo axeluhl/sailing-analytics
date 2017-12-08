@@ -692,11 +692,18 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             final boolean trackWind, final boolean correctWindByDeclination, AsyncCallback<Void> callback);
     
     /**
-     * Set the competitor registrations in the racelog. Unregisters formerly registered competitors that are not listed
+     * Set the competitor (with contained boats) registrations in the racelog. Unregisters formerly registered competitors that are not listed
      * in {@code competitors}.
      */
     void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitors, AsyncCallback<Void> callback);
+
+    /**
+     * Set the competitor and boat registrations in the racelog. Unregisters formerly registered competitors that are not listed
+     * in {@code competitors}.
+     */
+    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            Map<CompetitorDTO, BoatDTO> competitorsAndBoats, AsyncCallback<Void> callback);
 
     /**
      * Set the competitor registrations in the leaderboard. Unregisters formerly registered competitors that are not

@@ -515,7 +515,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean correctWindByDeclination) throws NotDenotedForRaceLogTrackingException, Exception;
 
     void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException;
-    
+
+    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Map<CompetitorDTO, BoatDTO> competitorsAndBoats) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException;
+
     /**
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints
      * from the previous course definition in the racelog.

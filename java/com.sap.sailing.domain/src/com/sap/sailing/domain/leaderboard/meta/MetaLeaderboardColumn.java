@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Mark;
@@ -279,6 +280,18 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public Iterable<Mark> getAvailableMarks(Fleet fleet) {
         return Collections.emptySet();
+    }
+
+    @Override
+    public void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void registerCompetitors(Iterable<CompetitorWithBoat> competitorsWithBoat, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.Regatt
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -326,7 +327,21 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         }
         return competitors;
     }
-    
+
+    @Override
+    public void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        registerCompetitor(competitorWithBoat, competitorWithBoat.getBoat(), fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Iterable<CompetitorWithBoat> competitorWithBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        for (CompetitorWithBoat competitorWithBoat: competitorWithBoats) {
+            competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        }
+        registerCompetitors(competitorsAndBoats, fleet);
+    }
+
     @Override
     public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
