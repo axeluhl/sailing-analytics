@@ -67,7 +67,15 @@ public class UserStoreImpl implements UserStore {
     
     private final ConcurrentHashMap<UUID, Tenant> tenants;
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
-    private final ConcurrentHashMap<String, UUID> userGroupsByName;
+    private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
+    
+    /**
+     * Protects access to the two maps {@link #userGroupsContainingUser} and {@link #usersInUserGroups} which implement
+     * an efficient lookup for the m:n association between {@link UserGroup#getUsers()} and {@link SecurityUser}.
+     */
+    private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock("User Groups Cache", /* fair */ false);
+    private final ConcurrentHashMap<SecurityUser, Set<UserGroup>> userGroupsContainingUser;
+    private final ConcurrentHashMap<UserGroup, Set<SecurityUser>> usersInUserGroups;
     
     private final ConcurrentHashMap<String, UserImpl> users;
     private final ConcurrentHashMap<String, Set<UserImpl>> usersByEmail;
@@ -120,6 +128,8 @@ public class UserStoreImpl implements UserStore {
         roles = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
         userGroupsByName = new ConcurrentHashMap<>();
+        userGroupsContainingUser = new ConcurrentHashMap<>();
+        usersInUserGroups = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
@@ -159,7 +169,7 @@ public class UserStoreImpl implements UserStore {
             final Pair<Iterable<UserGroup>, Iterable<Tenant>> userGroupsAndTenants = domainObjectFactory.loadAllUserGroupsAndTenants(users);
             for (UserGroup group : userGroupsAndTenants.getA()) {
                 userGroups.put(group.getId(), group);
-                userGroupsByName.put(group.getName(), group.getId());
+                userGroupsByName.put(group.getName(), group);
             }
             for (final Tenant tenant : userGroupsAndTenants.getB()) {
                 tenants.put(tenant.getId(), tenant);
@@ -205,7 +215,13 @@ public class UserStoreImpl implements UserStore {
         tenants.clear();
         userGroups.clear();
         userGroupsByName.clear();
-        
+        LockUtil.lockForWrite(userGroupsUserCacheLock);
+        try {
+            userGroupsContainingUser.clear();
+            usersInUserGroups.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
+        }
         clearAllPreferenceObjects();
         emailForUsername.clear();
         settings.clear();
@@ -234,9 +250,20 @@ public class UserStoreImpl implements UserStore {
         for (Tenant tenant : newUserStore.getTenants()) {
             tenants.put(tenant.getId(), tenant);
         }
-        for (UserGroup group : newUserStore.getUserGroups()) {
-            userGroups.put((UUID) group.getId(), group);
-            userGroupsByName.put(group.getName(), (UUID) group.getId());
+        LockUtil.lockForWrite(userGroupsUserCacheLock);
+        try {
+            for (UserGroup group : newUserStore.getUserGroups()) {
+                userGroups.put(group.getId(), group);
+                userGroupsByName.put(group.getName(), group);
+                final HashSet<SecurityUser> usersInGroup = new HashSet<>();
+                Util.addAll(group.getUsers(), usersInGroup);
+                usersInUserGroups.put(group, usersInGroup);
+                for (final SecurityUser userInGroup : group.getUsers()) {
+                    Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+                }
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
         }
         for (Role role : newUserStore.getRoles()) {
             roles.put(role.getId(), role);
@@ -415,11 +442,7 @@ public class UserStoreImpl implements UserStore {
     
     @Override
     public UserGroup getUserGroupByName(String name) {
-        UUID id = userGroupsByName.get(name);
-        if (id != null) {
-            return getUserGroup(id);
-        }
-        return null;
+        return userGroupsByName.get(name);
     }
 
     @Override
@@ -438,14 +461,34 @@ public class UserStoreImpl implements UserStore {
             mongoObjectFactory.storeUserGroup(group);
         }
         userGroups.put(groupId, group);
-        userGroupsByName.put(name, groupId);
+        userGroupsByName.put(name, group);
         return group;
     }
 
     @Override
     public void updateUserGroup(UserGroup group) {
         logger.info("Updating user group " + group.getName() + " in DB");
-        userGroups.put((UUID) group.getId(), group);
+        LockUtil.lockForWrite(userGroupsUserCacheLock);
+        try {
+            Set<SecurityUser> usersInGroupBefore = new HashSet<>();
+            Util.addAll(usersInUserGroups.get(group), usersInGroupBefore);
+            for (final SecurityUser userNowInUpdatedGroup : group.getUsers()) {
+                if (usersInGroupBefore == null || !Util.contains(usersInGroupBefore, userNowInUpdatedGroup)) {
+                    // the user was added:
+                    Util.addToValueSet(usersInUserGroups, group, userNowInUpdatedGroup);
+                    Util.addToValueSet(userGroupsContainingUser, userNowInUpdatedGroup, group);
+                }
+            }
+            for (final SecurityUser userInGroupBefore : usersInGroupBefore) {
+                if (!Util.contains(group.getUsers(), userInGroupBefore)) {
+                    // the user was removed
+                    Util.removeFromValueSet(usersInUserGroups, group, userInGroupBefore);
+                    Util.removeFromValueSet(userGroupsContainingUser, userInGroupBefore, group);
+                }
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
+        }
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
@@ -453,8 +496,14 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user) {
-        
-        return null;
+        final Iterable<UserGroup> preResult;
+        LockUtil.lockForRead(userGroupsUserCacheLock);
+        try {
+            preResult = userGroupsContainingUser.get(user);
+        } finally {
+            LockUtil.unlockAfterRead(userGroupsUserCacheLock);
+        }
+        return preResult == null ? Collections.<UserGroup>emptySet() : preResult;
     }
 
     @Override
@@ -465,6 +514,15 @@ public class UserStoreImpl implements UserStore {
         logger.info("Deleting user group: " + userGroup);
         userGroupsByName.remove(userGroup.getName());
         userGroups.remove(userGroup.getId());
+        LockUtil.lockForWrite(userGroupsUserCacheLock);
+        try {
+            for (final SecurityUser userInDeletedGroup : userGroup.getUsers()) {
+                Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
+            }
+            usersInUserGroups.remove(userGroup);
+        } finally {
+            LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
+        }
         if (mongoObjectFactory != null) {
             mongoObjectFactory.deleteUserGroup(userGroup);
         }
@@ -489,23 +547,20 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Tenant getTenant(UUID tenantId) {
-        if (tenants.contains(tenantId)) {
-            return new TenantImpl(userGroups.get(tenantId));
-        }
-        return null;
+        return tenants.get(tenantId);
     }
 
     @Override
     public Tenant createTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException {
-        if (tenants.contains(tenantId)) {
+        if (tenants.containsKey(tenantId)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
         logger.info("Creating tenant: " + tenantId);
         Tenant tenant = new TenantImpl(tenantId, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeTenant(tenant);
-            mongoObjectFactory.storeUserGroup(tenant);
         }
+        updateUserGroup(tenant);
         tenants.put(tenantId, tenant);
         return tenant;
     }

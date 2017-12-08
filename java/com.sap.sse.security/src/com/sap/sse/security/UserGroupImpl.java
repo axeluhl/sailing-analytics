@@ -1,9 +1,11 @@
 package com.sap.sse.security;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 
@@ -19,10 +21,11 @@ public class UserGroupImpl implements UserGroup {
         this(id, name, new HashSet<>());
     }
     
-    public UserGroupImpl(UUID id, String name, Set<? extends SecurityUser> users) {
+    public UserGroupImpl(UUID id, String name, Iterable<? extends SecurityUser> users) {
         this.id = id;
         this.name = name;
-        this.users = new HashSet<>(users);
+        this.users = new HashSet<>();
+        Util.addAll(users, this.users);
     }
     
     @Override
@@ -51,7 +54,7 @@ public class UserGroupImpl implements UserGroup {
     }
 
     @Override
-    public Set<SecurityUser> getUsers() {
-        return users;
+    public Iterable<SecurityUser> getUsers() {
+        return Collections.unmodifiableSet(users);
     }  
 }

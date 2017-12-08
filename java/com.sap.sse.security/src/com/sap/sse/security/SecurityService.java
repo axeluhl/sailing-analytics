@@ -115,9 +115,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
 
-    UserGroup addUserToUserGroup(UserGroup group, SecurityUser user);
-
-    UserGroup removeUserFromUserGroup(UserGroup group, SecurityUser user);
+    void addUserToTenant(Tenant tenant, SecurityUser user);
+    
+    void removeUserFromTenant(Tenant tenant, SecurityUser user);
+    
+    void addUserToUserGroup(UserGroup group, SecurityUser user);
+    
+    void removeUserFromUserGroup(UserGroup group, SecurityUser user);
 
     void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
 

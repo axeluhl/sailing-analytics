@@ -488,18 +488,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
-        apply(s->s.internalCreateUserGroup(id, name));
-        return userStore.getUserGroup(id);
-    }
-
-    @Override
-    public Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException {
-        userStore.createUserGroup(id, name);
-        return null;
-    }
-
-    @Override
     public Tenant createTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException {
         apply(s->s.internalCreateTenant(tenantId, name));
         return userStore.getTenant(tenantId);
@@ -512,45 +500,35 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserGroup addUserToUserGroup(UserGroup userGroup, SecurityUser user) {
-        userGroup.add(user);
-        final UUID groupId = userGroup.getId();
+    public void addUserToTenant(Tenant tenant, SecurityUser user) {
+        tenant.add(user);
+        final UUID tenantId = tenant.getId();
         final String username = user.getName();
-        apply(s->s.internalAddUserToUserGroup(groupId, username));
-        return userGroup;
+        apply(s->s.internalAddUserToTenant(tenantId, username));
     }
 
     @Override
-    public Void internalAddUserToUserGroup(UUID groupId, String username) {
-        getUserGroup(groupId).add(getUserByName(username));
+    public Void internalAddUserToTenant(UUID tenantId, String username) {
+        final Tenant tenant = getTenant(tenantId);
+        tenant.add(getUserByName(username));
+        userStore.updateTenant(tenant);
         return null;
     }
     
     @Override
-    public Void internalRemoveUserFromUserGroup(UUID groupId, String username) {
-        getUserGroup(groupId).remove(getUserByName(username));
+    public Void internalRemoveUserFromTenant(UUID tenantId, String username) {
+        final Tenant tenant = getTenant(tenantId);
+        tenant.remove(getUserByName(username));
+        userStore.updateTenant(tenant);
         return null;
     }
     
     @Override
-    public UserGroup removeUserFromUserGroup(UserGroup userGroup, SecurityUser user) {
-        userGroup.remove(user);
-        final UUID userGroupId = userGroup.getId();
+    public void removeUserFromTenant(Tenant tenant, SecurityUser user) {
+        tenant.remove(user);
+        final UUID tenantId = tenant.getId();
         final String username = user.getName();
-        apply(s->s.internalRemoveUserFromUserGroup(userGroupId, username));
-        return userGroup;
-    }
-
-    @Override
-    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
-        final UUID groupId = userGroup.getId();
-        apply(s->s.internalDeleteUserGroup(groupId));
-    }
-    
-    @Override
-    public Void internalDeleteUserGroup(UUID groupId) throws UserGroupManagementException {
-        userStore.deleteUserGroup(getUserGroup(groupId));
-        return null;
+        apply(s->s.internalRemoveUserFromTenant(tenantId, username));
     }
 
     @Override
@@ -569,6 +547,62 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalDeleteTenant(UUID tenantId) throws TenantManagementException, UserGroupManagementException {
         userStore.deleteTenant(getTenant(tenantId));
+        return null;
+    }
+
+    @Override
+    public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
+        apply(s->s.internalCreateUserGroup(id, name));
+        return userStore.getUserGroup(id);
+    }
+
+    @Override
+    public Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException {
+        userStore.createUserGroup(id, name);
+        return null;
+    }
+
+    @Override
+    public void addUserToUserGroup(UserGroup userGroup, SecurityUser user) {
+        userGroup.add(user);
+        final UUID groupId = userGroup.getId();
+        final String username = user.getName();
+        apply(s->s.internalAddUserToUserGroup(groupId, username));
+    }
+
+    @Override
+    public Void internalAddUserToUserGroup(UUID groupId, String username) {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.add(getUserByName(username));
+        userStore.updateUserGroup(userGroup);
+        return null;
+    }
+    
+    @Override
+    public Void internalRemoveUserFromUserGroup(UUID groupId, String username) {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.remove(getUserByName(username));
+        userStore.updateUserGroup(userGroup);
+        return null;
+    }
+    
+    @Override
+    public void removeUserFromUserGroup(UserGroup userGroup, SecurityUser user) {
+        userGroup.remove(user);
+        final UUID userGroupId = userGroup.getId();
+        final String username = user.getName();
+        apply(s->s.internalRemoveUserFromUserGroup(userGroupId, username));
+    }
+
+    @Override
+    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        final UUID groupId = userGroup.getId();
+        apply(s->s.internalDeleteUserGroup(groupId));
+    }
+    
+    @Override
+    public Void internalDeleteUserGroup(UUID groupId) throws UserGroupManagementException {
+        userStore.deleteUserGroup(getUserGroup(groupId));
         return null;
     }
 
@@ -623,7 +657,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public UserImpl getUserByAccessToken(String accessToken) {
+    public User getUserByAccessToken(String accessToken) {
         return userStore.getUserByAccessToken(accessToken);
     }
 

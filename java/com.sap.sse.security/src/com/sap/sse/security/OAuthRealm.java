@@ -33,8 +33,9 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 // GWT has similar class. 
@@ -182,12 +183,11 @@ public class OAuthRealm extends AbstractCompositeAuthrizingRealm {
         SecurityUser user = getUserStore().getUserByName(socialname);
         if (user == null) {
             try {
-                TenantImpl tenant = getUserStore().createTenant(UUID.randomUUID(), socialname + "-tenant");
-                getAccessControlStore().createOwnership(tenant.getId().toString(), socialname, (UUID) tenant.getId(), tenant.getName());
-                user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), (UUID) tenant.getId(), socialUser);
-                tenant.add(user.getName());
-                getUserStore().updateUserGroup(tenant);
-                
+                Tenant tenant = getUserStore().createTenant(UUID.randomUUID(), socialname + "-tenant");
+                getAccessControlStore().createOwnership(tenant.getId().toString(), user, tenant, tenant.getName());
+                user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), tenant, socialUser);
+                tenant.add(user);
+                getUserStore().updateTenant(tenant);
             } catch (UserManagementException | UserGroupManagementException e) {
                 throw new AuthenticationException(e.getMessage());
             }

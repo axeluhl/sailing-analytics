@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.sap.sse.security.OwnershipImpl;
 import com.sap.sse.security.TenantImpl;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListImpl;
 import com.sap.sse.security.shared.Ownership;
@@ -27,6 +28,7 @@ import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SecurityUserImpl;
 import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -38,16 +40,15 @@ public class PermissionCheckerTest implements RolePermissionModel {
                     DefaultActions.EDIT, eventId.toString());
     private final UUID userTenantId = UUID.randomUUID();
     private final UUID adminTenantId = UUID.randomUUID();
-    private Tenant adminTenant = new TenantImpl(adminTenantId, "admin-tenant");
-    private final SecurityUser adminUser = new SecurityUserImpl("admin", adminTenant);
-    private Tenant userTenant = new TenantImpl(userTenantId, "jonas-tenant");
-    private final SecurityUser user = new SecurityUserImpl("jonas", userTenant);
+    private Tenant adminTenant;
+    private SecurityUser adminUser;
+    private Tenant userTenant;
+    private User user;
     private ArrayList<UserGroup> tenants;
-    private ArrayList<WildcardPermission> directPermissions;
-    private ArrayList<UUID> roles;
+    private ArrayList<Role> roles;
     private final RolePermissionModel rolePermissionModel = this;
-    private final Ownership ownership = new OwnershipImpl(eventId.toString(), user, userTenant, "event");
-    private final Ownership adminOwnership = new OwnershipImpl(eventId.toString(), adminUser, adminTenant, "event");
+    private Ownership ownership;
+    private Ownership adminOwnership;
     private AccessControlList acl;
     private final UUID globalRoleId = UUID.randomUUID();
     private Role globalRole;
@@ -57,12 +58,17 @@ public class PermissionCheckerTest implements RolePermissionModel {
     
     @Before
     public void setUp() {
+        adminUser = new SecurityUserImpl("admin", adminTenant);
+        user = new UserImpl("jonas", "jonas@dann.io", userTenant);
+        ownership = new OwnershipImpl(eventId.toString(), user, userTenant, "event");
+        adminOwnership = new OwnershipImpl(eventId.toString(), adminUser, adminTenant, "event");
+        userTenant = new TenantImpl(userTenantId, "jonas-tenant");
         userTenant.add(user);
+        adminTenant = new TenantImpl(adminTenantId, "admin-tenant");
         adminTenant.add(adminUser);
         tenants = new ArrayList<>();
         tenants.add(userTenant);
         tenants.add(adminTenant);
-        directPermissions = new ArrayList<>();
         roles = new ArrayList<>();
         acl = new AccessControlListImpl(eventId.toString(), "event");
         Set<WildcardPermission> permissionSet = new HashSet<>();
@@ -91,16 +97,16 @@ public class PermissionCheckerTest implements RolePermissionModel {
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
         
-        Map<UUID, Set<String>> permissionMap = new HashMap<>();
+        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         Set<String> permissionSet = new HashSet<>();
         permissionSet.add(DefaultActions.EDIT.name());
-        permissionMap.put((UUID) userTenant.getId(), permissionSet);
+        permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(eventId.toString(), "event", permissionMap);
         
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
         
-        directPermissions.add(permission);
+        user.addPermission(permission);
         
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
@@ -108,7 +114,7 @@ public class PermissionCheckerTest implements RolePermissionModel {
         permissionMap = new HashMap<>();
         permissionSet = new HashSet<>();
         permissionSet.add("!" + DefaultActions.EDIT.name());
-        permissionMap.put((UUID) userTenant.getId(), permissionSet);
+        permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(eventId.toString(), "event", permissionMap);
         
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
@@ -121,9 +127,7 @@ public class PermissionCheckerTest implements RolePermissionModel {
     public void testDirectPermission() {
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
-        
-        directPermissions.add(permission);
-        
+        user.addPermission(permission);
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
     }
@@ -132,20 +136,14 @@ public class PermissionCheckerTest implements RolePermissionModel {
     public void testRole() {
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
-        
-        roles.add(globalRoleId);
-        
+        roles.add(globalRole);
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
-        
         roles.remove(globalRoleId);
-        roles.add(tenantRoleId);
-        
+        roles.add(tenantRole);
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 adminOwnership, acl));
-        
-        Ownership testOwnership = new OwnershipImpl(eventId.toString(), adminUser, (UUID) userTenant.getId(), "event");
-        
+        Ownership testOwnership = new OwnershipImpl(eventId.toString(), adminUser, userTenant, "event");
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
                 testOwnership, acl));
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 

@@ -36,13 +36,17 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalCreateUserGroup(UUID groupId, String name) throws UserGroupManagementException;
     
-    Void internalCreateTenant(UUID groupId, String name) throws TenantManagementException, UserGroupManagementException;
-    
     Void internalDeleteUserGroup(UUID groupId) throws UserGroupManagementException;
     
     Void internalAddUserToUserGroup(UUID groupId, String username) throws UserGroupManagementException;
 
     Void internalRemoveUserFromUserGroup(UUID groupId, String username) throws UserGroupManagementException;
+    
+    Void internalCreateTenant(UUID groupId, String name) throws TenantManagementException, UserGroupManagementException;
+    
+    Void internalAddUserToTenant(UUID tenantId, String username) throws UserGroupManagementException;
+
+    Void internalRemoveUserFromTenant(UUID tenantId, String username) throws UserGroupManagementException;
     
     Void internalDeleteTenant(UUID tenantId) throws TenantManagementException, UserGroupManagementException;
     

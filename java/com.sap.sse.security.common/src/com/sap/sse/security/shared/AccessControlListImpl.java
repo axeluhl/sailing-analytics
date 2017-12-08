@@ -38,10 +38,12 @@ public class AccessControlListImpl implements AccessControlList {
     public PermissionChecker.PermissionState hasPermission(SecurityUser user, String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
         for (final UserGroup userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
             final Set<String> actions = actionsByUserGroup.get(userGroupOfWhichUserIsMember);
-            if (actions.contains("!" + action)) {
-                return PermissionState.REVOKED;
-            } else if (actions.contains(action)) {
-                return PermissionState.GRANTED;
+            if (actions != null) {
+                if (actions.contains("!" + action)) {
+                    return PermissionState.REVOKED;
+                } else if (actions.contains(action)) {
+                    return PermissionState.GRANTED;
+                }
             }
         }
         return PermissionState.NONE;
