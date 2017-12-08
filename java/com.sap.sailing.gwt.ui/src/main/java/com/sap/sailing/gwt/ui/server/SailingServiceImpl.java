@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
+import com.sap.sse.common.Color;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -150,6 +151,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -210,6 +212,7 @@ import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
@@ -6815,6 +6818,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         
+        ColorMap<BoatDTO> colorMap = new ColorMapImpl<BoatDTO>();
+        
         List<BoatDTO> boats = new ArrayList<>();
         int boatIndex;
         
@@ -6826,7 +6831,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (Competitor competitor : pairingList.getCompetitors(raceColumn, fleetElement)) {
                     CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                     if (boats.size() <= boatIndex) {
-                        boats.add(new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID()));
+                        BoatDTO boatDTO = new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID());
+                        boatDTO.setColor(colorMap.getColorByID(boatDTO));
+                        boats.add(boatDTO);
                     }
                     
                     fleets.add(new Pair<CompetitorDTO, BoatDTO>(competitorDTO, boats.get(boatIndex)));
