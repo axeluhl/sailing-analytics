@@ -39,6 +39,8 @@ public class PairingListImpl<Flight, Group, Competitor> implements PairingList<F
         for (final int competitorIndexInRace : competitorIndicesInRace) {
             if (competitorIndexInRace > -1) {
                 result.add(Util.get(competitionFormat.getCompetitors(), competitorIndexInRace));
+            } else {
+                result.add(null);
             }
         }
         return result;

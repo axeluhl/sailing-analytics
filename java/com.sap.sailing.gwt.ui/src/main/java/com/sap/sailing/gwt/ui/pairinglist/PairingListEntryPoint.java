@@ -19,13 +19,16 @@ import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class PairingListEntryPoint extends AbstractSailingEntryPoint {
     
     private PairingListContextDefinition pairingListContextDefinition;
+    private StringMessages stringmessages = StringMessages.INSTANCE;
     
     @Override
     protected void doOnModuleLoad() {
@@ -90,7 +93,8 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         final int groupCount = pairingListDTO.getPairingList().get(0).size();
         final int boatCount = pairingListDTO.getPairingList().get(0).get(0).size();
         
-        Grid pairingListGrid = new Grid(flightCount * groupCount + 1, boatCount + 1);
+        Grid pairingListGrid = new Grid(flightCount * groupCount + 1, (boatCount + 1));
+        pairingListGrid.getElement().setId("grid");
         pairingListGrid.setCellPadding(15);
         
         int groupCounter = 1;
@@ -105,15 +109,23 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             for (List<Pair<CompetitorDTO, BoatDTO>> group : flight) {
                 pairingListGrid.setWidget(groupCounter, 0, new Label(getStringMessages().fleet() + " " + String.valueOf(groupCounter)));
                 boatCounter = 1;
-                for (Pair<CompetitorDTO, BoatDTO> competitorDTO : group) {
-                    pairingListGrid.setWidget(groupCounter, boatCounter, new Label(competitorDTO.getA().getSailID()));
-                    
+                for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
+                    if (competitorAndBoatPair.getA().getName()==null) {
+                        pairingListGrid.setWidget(groupCounter, boatCounter,
+                                new Label(stringmessages.empty()));
+                        pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
+                        .setColor(Color.RED.toString());
+                    } else {
+                        // TODO change competitor name to competitor shorthand symbol
+                        pairingListGrid.setWidget(groupCounter, boatCounter,
+                                new Label(competitorAndBoatPair.getA().getName()));
+                    }
                     pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
                             .setFontWeight(Style.FontWeight.BOLD);
                     pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
                             .setTextAlign(TextAlign.CENTER);
-                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle()
-                            .setPadding(5, Unit.PX);
+                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter).getStyle().setPadding(5,
+                            Unit.PX);
                     boatCounter++;
                 }
                 groupCounter++;
@@ -124,4 +136,5 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         
         return pairingListPanel;
     }
+    
 }

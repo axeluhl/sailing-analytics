@@ -194,6 +194,7 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
@@ -6819,16 +6820,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         int boatIndex;
         
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            //TODO change flights to fleets
             List<List<Pair<CompetitorDTO, BoatDTO>>> flights = new ArrayList<>();
             for (Fleet fleetElement : raceColumn.getFleets()) {
                 List<Pair<CompetitorDTO, BoatDTO>> fleets = new ArrayList<>();
                 boatIndex = 0;
                 for (Competitor competitor : pairingList.getCompetitors(raceColumn, fleetElement)) {
-                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                    if (boats.size() <= boatIndex) {
-                        boats.add(new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID()));
+                    CompetitorDTO competitorDTO;
+                    if (competitor == null) {
+                        competitorDTO = new CompetitorDTOImpl();
+                        if (boats.size() <= boatIndex) {
+                            // TODO change competitor name to competitor shorthand symbol (bug2822)
+                            boats.add(new BoatDTO("Boat " + String.valueOf(boatIndex + 1), ""));
+                        }
+                    } else {
+                        competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                        if (boats.size() <= boatIndex) {
+                            // TODO change competitor name to competitor shorthand symbol (bug2822)
+                            boats.add(new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID()));
+                        }
                     }
-                    
                     fleets.add(new Pair<CompetitorDTO, BoatDTO>(competitorDTO, boats.get(boatIndex)));
                     boatIndex++;
                 }
@@ -6837,6 +6848,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(flights);
         }
         
+        //TODO: fix getGroupCount
         return new PairingListDTO(result);
     }
     
