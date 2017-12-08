@@ -22,10 +22,11 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -42,7 +43,7 @@ public class SecurityResourceTest {
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             final UserStoreImpl store = new UserStoreImpl();
-            final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
+            final AccessControlStore accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
                     store, accessControlStore, /* setAsActivatorSecurityService */ true);
@@ -57,9 +58,9 @@ public class SecurityResourceTest {
                     return service;
                 }
             };
-            store.addPermissionForUser("admin", "can do"); // equivalent to "can do:*:*"
-            store.addPermissionForUser("admin", "event:view:*");
-            store.addPermissionForUser("admin", "event:edit:123");
+            store.addPermissionForUser("admin", new WildcardPermission("can do")); // equivalent to "can do:*:*"
+            store.addPermissionForUser("admin", new WildcardPermission("event:view:*"));
+            store.addPermissionForUser("admin", new WildcardPermission("event:edit:123"));
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         }
@@ -91,7 +92,7 @@ public class SecurityResourceTest {
     @Test
     public void createAccessTokenAndAuthenticate() throws ParseException {
         String accessToken = getOrCreateAccessToken();
-        UserImpl user = service.getUserByAccessToken(accessToken);
+        User user = service.getUserByAccessToken(accessToken);
         assertNotNull(user);
         assertEquals("admin", user.getName());
         final Subject subject = SecurityUtils.getSubject();
@@ -111,7 +112,7 @@ public class SecurityResourceTest {
     public void ensureOldBearerTokenIsInvalidatedByObtainingNewOne() throws ParseException {
         String accessToken = getOrCreateAccessToken();
         createAccessToken();
-        UserImpl user = service.getUserByAccessToken(accessToken);
+        User user = service.getUserByAccessToken(accessToken);
         assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one
     }
 
@@ -119,7 +120,7 @@ public class SecurityResourceTest {
     public void ensureOldBearerTokenIsInvalidatedByRequestingItsRemoval() throws ParseException {
         String accessToken = getOrCreateAccessToken();
         removeAccessToken();
-        UserImpl user = service.getUserByAccessToken(accessToken);
+        User user = service.getUserByAccessToken(accessToken);
         assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one
     }
 }

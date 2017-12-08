@@ -157,20 +157,29 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlList addToACL(String idAsString, String tenantIdAsString, String permission) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission:" + tenantIdAsString)) {
-            UUID tenantId = UUID.fromString(tenantIdAsString);
-            return getSecurityService().addToACL(idAsString, tenantId, permission);
+    public AccessControlList addToACL(String idAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission:" + groupOrTenantIdAsString)) {
+            UserGroup userGroup = getTenantOrUserGroup(groupOrTenantIdAsString);
+            return getSecurityService().addToACL(idAsString, userGroup, action);
         } else {
             throw new UnauthorizedException("Not permitted to grant permission for user");
         }
     }
 
+    private UserGroup getTenantOrUserGroup(String groupOrTenantIdAsString) {
+        UUID groupOrTenantId = UUID.fromString(groupOrTenantIdAsString);
+        UserGroup userGroup = getSecurityService().getTenant(groupOrTenantId);
+        if (userGroup == null) {
+            userGroup = getSecurityService().getUserGroup(groupOrTenantId);
+        }
+        return userGroup;
+    }
+
     @Override
-    public AccessControlList removeFromACL(String idAsString, String tenantIdAsString, String permission) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + tenantIdAsString)) {
-            UUID tenantId = UUID.fromString(tenantIdAsString);
-            return getSecurityService().removeFromACL(idAsString, tenantId, permission);
+    public AccessControlList removeFromACL(String idAsString, String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + groupOrTenantIdAsString)) {
+            UserGroup userGroup = getTenantOrUserGroup(groupOrTenantIdAsString);
+            return getSecurityService().removeFromACL(idAsString, userGroup, permission);
         } else {
             throw new UnauthorizedException("Not permitted to revoke permission for user");
         }

@@ -26,9 +26,9 @@ public interface UserManagementService extends RemoteService {
 
     AccessControlList updateACL(String idOfAccessControlledObjectAsString, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
 
-    AccessControlList addToACL(String idOfAccessControlledObjectAsString, String tenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlList addToACL(String idOfAccessControlledObjectAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
-    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, String tenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
     Collection<Tenant> getTenants() throws UnauthorizedException;
 

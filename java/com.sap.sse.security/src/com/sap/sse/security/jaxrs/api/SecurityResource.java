@@ -24,6 +24,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sun.jersey.api.client.ClientResponse.Status;
@@ -149,7 +150,7 @@ public class SecurityResource extends AbstractSecurityResource {
         if (subject.getPrincipal() == null || (username != null && !subject.hasRole(AdminRole.getInstance().getName()))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
-            final SecurityUser user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
+            final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
             if (user == null) {
                 return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
             } else {

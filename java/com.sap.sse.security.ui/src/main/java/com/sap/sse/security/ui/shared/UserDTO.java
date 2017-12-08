@@ -14,6 +14,7 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SecurityUserImpl;
 import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class UserDTO extends SecurityUserImpl implements IsSerializable {
@@ -117,12 +118,12 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         return hasPermission(new WildcardPermission(permission), acl, ownership);
     }
     
-    public boolean hasPermission(WildcardPermission permission, AccessControlList acl, Ownership owner) {
-        ArrayList<Tenant> tenantsTheUserBelongsTo = new ArrayList<>();
+    public boolean hasPermission(WildcardPermission permission, AccessControlList acl, Ownership ownership) {
+        ArrayList<UserGroup> groupsTheUserBelongsTo = new ArrayList<>();
         if (acl != null) {
-            tenantsTheUserBelongsTo = new ArrayList<>(acl.getActionsByUserGroup().keySet());
+            groupsTheUserBelongsTo = new ArrayList<>(acl.getActionsByUserGroup().keySet());
         }
-        return PermissionChecker.isPermitted(permission, this, tenantsTheUserBelongsTo, getRoles(), rolePermissionModel, owner, acl);
+        return PermissionChecker.isPermitted(permission, this, groupsTheUserBelongsTo, getRoles(), rolePermissionModel, ownership, acl);
     }
     
     public List<AccountDTO> getAccounts() {

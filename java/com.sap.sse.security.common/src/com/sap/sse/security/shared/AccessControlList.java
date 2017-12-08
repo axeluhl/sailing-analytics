@@ -13,6 +13,11 @@ import java.util.Set;
  * {@link #getIdOfAccessControlledObjectAsString()} are known and don't need to and make no sense to be specified.
  * <p>
  * 
+ * It is allowed to use the {@code "*"} wildcard as an action string, granting access to all actions on the object
+ * concerned. The same logic for permission implication as on {@link WildcardPermission} is applied when matching
+ * a particular action passed to the {@link #hasPermission(SecurityUser, String, Iterable)} method against the
+ * actions allowed by this ACL.<p>
+ * 
  * The actions to be permitted or forbidden are provided as strings. To forbid a action, the action string is prefixed
  * with an exclamation mark '!'.
  * 

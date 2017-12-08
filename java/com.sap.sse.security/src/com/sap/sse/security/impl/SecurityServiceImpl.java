@@ -336,19 +336,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityService createAccessControlList(String idAsString) {
-        return createAccessControlList(idAsString, null);
+    public SecurityService createAccessControlList(String idOfAccessControlledObjectAsString) {
+        return createAccessControlList(idOfAccessControlledObjectAsString, /* display name of access-controlled object */ null);
     }
 
     @Override
-    public SecurityService createAccessControlList(String idAsString, String displayName) {
-        apply(s->s.internalCreateAcl(idAsString, displayName));
+    public SecurityService createAccessControlList(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+        apply(s->s.internalCreateAcl(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
 
     @Override
-    public Void internalCreateAcl(String idAsString, String displayName) {
-        accessControlStore.createAccessControlList(idAsString, displayName);
+    public Void internalCreateAcl(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+        accessControlStore.createAccessControlList(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject);
         return null;
     }
 
@@ -367,8 +367,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalAclPutPermissions(String idAsString, UUID groupId, Set<String> actions) {
-        accessControlStore.setAclPermissions(idAsString, getUserGroup(groupId), actions);
+    public Void internalAclPutPermissions(String idOfAccessControlledObjectAsString, UUID groupId, Set<String> actions) {
+        accessControlStore.setAclPermissions(idOfAccessControlledObjectAsString, getUserGroup(groupId), actions);
         return null;
     }
 
@@ -376,17 +376,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to add
      */
     @Override
-    public AccessControlList addToACL(String idAsString, UUID group, String permission) {
-        if (getAccessControlList(idAsString) == null) {
-            createAccessControlList(idAsString);
+    public AccessControlList addToACL(String idOfAccessControlledObjectAsString, UserGroup group, String action) {
+        if (getAccessControlList(idOfAccessControlledObjectAsString) == null) {
+            createAccessControlList(idOfAccessControlledObjectAsString);
         }
-        apply(s->s.internalAclAddPermission(idAsString, group, permission));
-        return accessControlStore.getAccessControlList(idAsString);
+        final UUID groupId = group.getId();
+        apply(s->s.internalAclAddPermission(idOfAccessControlledObjectAsString, groupId, action));
+        return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
     }
 
     @Override
-    public Void internalAclAddPermission(String idAsString, UUID groupId, String permission) {
-        accessControlStore.addAclPermission(idAsString, getUserGroup(groupId), permission);
+    public Void internalAclAddPermission(String idOfAccessControlledObjectAsString, UUID groupId, String permission) {
+        accessControlStore.addAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
         return null;
     }
 
@@ -394,17 +395,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to remove
      */
     @Override
-    public AccessControlList removeFromACL(String idAsString, UUID group, String permission) {
-        if (getAccessControlList(idAsString) != null) {
-            apply(s->s.internalAclRemovePermission(idAsString, group, permission));
-            return accessControlStore.getAccessControlList(idAsString);
+    public AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, UserGroup group, String permission) {
+        if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
+            final UUID groupId = group.getId();
+            apply(s->s.internalAclRemovePermission(idOfAccessControlledObjectAsString, groupId, permission));
+            return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
         }
         return null;
     }
 
     @Override
-    public Void internalAclRemovePermission(String idAsString, UUID groupId, String permission) {
-        accessControlStore.removeAclPermission(idAsString, getUserGroup(groupId), permission);
+    public Void internalAclRemovePermission(String idOfAccessControlledObjectAsString, UUID groupId, String permission) {
+        accessControlStore.removeAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
         return null;
     }
 

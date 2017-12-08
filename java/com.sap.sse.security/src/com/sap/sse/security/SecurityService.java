@@ -66,12 +66,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param name The name of the user group to add
      */
-    AccessControlList addToACL(String idOfAccessControlledObjectAsString, UUID groupId, String action);
+    AccessControlList addToACL(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action);
 
     /**
      * @param name The name of the user group to remove
      */
-    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, UUID group, String action);
+    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, UserGroup group, String action);
 
     void deleteACL(String idOfAccessControlledObjectAsString);
 
