@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
 public class AccessControlListImpl implements AccessControlList {
+    private static final long serialVersionUID = -8587238587604749862L;
     private String idOfAccessControlledObjectAsString;
     private String displayNameOfAccessControlledObject;
     
@@ -24,7 +24,7 @@ public class AccessControlListImpl implements AccessControlList {
      * 
      * Note that no negated actions are part of this map. See also {@link #deniedActionsByUserGroup}.
      */
-    private ConcurrentHashMap<UserGroup, Set<WildcardPermission>> allowedActionsByUserGroup;
+    private Map<UserGroup, Set<WildcardPermission>> allowedActionsByUserGroup;
     
     /**
      * Maps from {@link UserGroup} to the actions denied for this group on the
@@ -37,7 +37,7 @@ public class AccessControlListImpl implements AccessControlList {
      * 
      * Note that no negated actions are part of this map. See also {@link #allowedActionsByUserGroup}.
      */
-    private ConcurrentHashMap<UserGroup, Set<WildcardPermission>> deniedActionsByUserGroup;
+    private Map<UserGroup, Set<WildcardPermission>> deniedActionsByUserGroup;
 
     @Deprecated
     protected AccessControlListImpl() {} // for GWT serialization only
@@ -49,8 +49,8 @@ public class AccessControlListImpl implements AccessControlList {
     public AccessControlListImpl(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap) {
         this.idOfAccessControlledObjectAsString = idOfAccessControlledObjectAsString;
         this.displayNameOfAccessControlledObject = displayNameOfAccessControlledObject;
-        this.allowedActionsByUserGroup = new ConcurrentHashMap<>();
-        this.deniedActionsByUserGroup = new ConcurrentHashMap<>();
+        this.allowedActionsByUserGroup = new HashMap<>();
+        this.deniedActionsByUserGroup = new HashMap<>();
         for (final Entry<UserGroup, Set<String>> permissionMapEntry : permissionMap.entrySet()) {
             setPermissions(permissionMapEntry.getKey(), permissionMapEntry.getValue());
         }
@@ -64,7 +64,7 @@ public class AccessControlListImpl implements AccessControlList {
             if (allowedActions != null) {
                 for (final WildcardPermission allowedAction : allowedActions) {
                     if (allowedAction.implies(requestedAction)) {
-                        return PermissionState.REVOKED;
+                        return PermissionState.GRANTED;
                     }
                 }
             }
@@ -72,7 +72,7 @@ public class AccessControlListImpl implements AccessControlList {
             if (deniedActions != null) {
                 for (final WildcardPermission deniedAction : deniedActions) {
                     if (deniedAction.implies(requestedAction)) {
-                        return PermissionState.GRANTED;
+                        return PermissionState.REVOKED;
                     }
                 }
             }

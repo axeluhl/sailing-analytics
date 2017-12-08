@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ import java.util.Set;
  * @author Axel Uhl (d043530)
  *
  */
-public interface AccessControlList {
+public interface AccessControlList extends Serializable {
     PermissionChecker.PermissionState hasPermission(SecurityUser user, String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember);
 
     String getIdOfAccessControlledObjectAsString();

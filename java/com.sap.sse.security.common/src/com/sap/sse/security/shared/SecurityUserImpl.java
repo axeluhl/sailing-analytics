@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.NamedImpl;
 
-public class SecurityUserImpl extends NamedImpl implements SecurityUser {
+public class SecurityUserImpl implements SecurityUser {
     private static final long serialVersionUID = -3639860207453072248L;
+    private String name;
     private Set<Role> roles;
     private Set<WildcardPermission> permissions;
     private Tenant defaultTenant;
@@ -16,7 +16,6 @@ public class SecurityUserImpl extends NamedImpl implements SecurityUser {
     // For GWT serialization only
     @Deprecated
     protected SecurityUserImpl() {
-        super(null);
     }
     
     /**
@@ -27,7 +26,7 @@ public class SecurityUserImpl extends NamedImpl implements SecurityUser {
     }
     
     public SecurityUserImpl(String name, Iterable<Role> roles, Tenant defaultTenant, Iterable<WildcardPermission> permissions) {
-        super(name);
+        this.name = name;
         this.roles = new HashSet<>();
         Util.addAll(roles, this.roles);
         this.defaultTenant = defaultTenant;
@@ -35,6 +34,11 @@ public class SecurityUserImpl extends NamedImpl implements SecurityUser {
         for (WildcardPermission permission : permissions) {
             this.permissions.add(permission);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

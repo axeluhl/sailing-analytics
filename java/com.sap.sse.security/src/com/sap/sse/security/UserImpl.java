@@ -231,9 +231,10 @@ public class UserImpl extends SecurityUserImpl implements User {
 
     @Override
     public String toString() {
-        return "User [name=" + getName() + ", email=" + email + ", fullName=" + fullName + ", company=" + company
-                + ", locale=" + locale + (isEmailValidated() ? " (validated)" : ")") + "permissions=" + getPermissions()
-                + ", roles=" + getRoles() + ", defaultTenant=" + getDefaultTenant().getName() + ", accounts="
+        return "User [name=" + getName() + ", email=" + email + (isEmailValidated() ? " (validated)" : "")
+                + ", fullName=" + fullName + ", company=" + company + ", locale=" + locale + ", permissions="
+                + getPermissions() + ", roles=" + getRoles() + ", defaultTenant="
+                + (getDefaultTenant() == null ? "null" : getDefaultTenant().getName()) + ", accounts="
                 + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
     }
 
