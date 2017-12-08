@@ -11,8 +11,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bson.BSONObject;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -67,16 +65,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore) {
         final String id = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name());
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
-        Map<?, ?> permissionMapAsBSON = ((BSONObject) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name())).toMap();
+        Iterable<?> dbPermissionMap = ((BasicDBList) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-        for (Map.Entry<?, ?> entry : permissionMapAsBSON.entrySet()) {
-            final UUID userGroupKey = UUID.fromString(entry.getKey().toString());
+        for (Object dbPermissionMapEntryO : dbPermissionMap) {
+            DBObject dbPermissionMapEntry = (DBObject) dbPermissionMapEntryO;
+            final UUID userGroupKey = (UUID) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name());
             final UserGroup userGroup = userStore.getUserGroup(userGroupKey);
-            Set<String> value = new HashSet<>();
-            for (Object o : (BasicDBList) entry.getValue()) {
-                value.add(o.toString());
+            Set<String> actions = new HashSet<>();
+            for (Object o : (BasicDBList) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name())) {
+                actions.add(o.toString());
             }
-            permissionMap.put(userGroup, value);
+            permissionMap.put(userGroup, actions);
         }
         AccessControlList result = new AccessControlListImpl(id, displayName, permissionMap);
         return result;

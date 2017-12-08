@@ -37,10 +37,9 @@ public class PermissionChecker {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
-        if (parts.size() < 2 || parts.get(0).size() != 1) {
+        if (parts.get(0).size() != 1) {
             throw new WrongPermissionFormatException(permission);
         }
-        String action = (String) parts.get(1).toArray()[0];
         PermissionState result = PermissionState.NONE;
         
         // 1. check user ownership
@@ -49,6 +48,8 @@ public class PermissionChecker {
         }
         // 2. check ACL
         else if (acl != null) {
+            // if no specific action is requested then this translates to a request for all permissions ("*")
+            String action = parts.size() < 2 ? WildcardPermission.WILDCARD_TOKEN : (String) parts.get(1).toArray()[0];
             result = acl.hasPermission(user, action, groupsOfWhichUserIsMember);
         }
         // 3. check direct permissions

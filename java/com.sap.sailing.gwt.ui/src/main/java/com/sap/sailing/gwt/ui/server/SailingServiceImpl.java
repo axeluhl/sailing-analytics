@@ -4005,7 +4005,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceGroups;
     }
 
-    /** the replacement service for getRegattaStructureForEvent() */
+    /**
+     * the replacement service for {@link #getRegattaStructureForEvent(UUID)}
+     */
     @Override
     public List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId) {
         List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();

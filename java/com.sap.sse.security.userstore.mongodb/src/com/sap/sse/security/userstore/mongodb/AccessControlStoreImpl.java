@@ -73,28 +73,46 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public void setAclPermissions(String idOfAccessControlledObjectAsString, UserGroup userGroup, Set<String> actions) {
+        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        acl.setPermissions(userGroup, actions);
+        mongoObjectFactory.storeAccessControlList(acl);
+    }
+
+    private AccessControlList getOrCreateAcl(String idOfAccessControlledObjectAsString) {
         AccessControlList acl = accessControlLists.get(idOfAccessControlledObjectAsString);
         if (acl == null) {
-            final Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-            permissionMap.put(userGroup, actions);
-            acl = new AccessControlListImpl(idOfAccessControlledObjectAsString, /* displayNameOfAccessControlledObject */ null, permissionMap);
-        } else {
-            acl.setPermissions(userGroup, actions);
+            acl = new AccessControlListImpl(idOfAccessControlledObjectAsString, /* displayNameOfAccessControlledObject */ null);
         }
-        mongoObjectFactory.storeAccessControlList(acl);
+        return acl;
     }
 
     @Override
     public void addAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
-        AccessControlList acl = accessControlLists.get(idOfAccessControlledObjectAsString);
+        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
         acl.addPermission(userGroup, action);
         mongoObjectFactory.storeAccessControlList(acl);
     }
 
     @Override
     public void removeAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
-        AccessControlList acl = accessControlLists.get(idOfAccessControlledObjectAsString);
+        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
         if (acl.removePermission(userGroup, action)) {
+            mongoObjectFactory.storeAccessControlList(acl);
+        }
+    }
+
+    @Override
+    public void denyAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
+        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        if (acl.denyPermission(userGroup, action)) {
+            mongoObjectFactory.storeAccessControlList(acl);
+        }
+    }
+
+    @Override
+    public void removeAclDenial(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
+        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        if (acl.removeDenial(userGroup, action)) {
             mongoObjectFactory.storeAccessControlList(acl);
         }
     }

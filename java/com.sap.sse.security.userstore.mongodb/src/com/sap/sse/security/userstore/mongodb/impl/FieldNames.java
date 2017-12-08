@@ -5,7 +5,9 @@ public class FieldNames {
     public static enum AccessControlList {
         OBJECT_ID,
         OBJECT_DISPLAY_NAME,
-        PERMISSION_MAP
+        PERMISSION_MAP, // a list of objects with two components each:
+            PERMISSION_MAP_USER_GROUP_ID,
+            PERMISSION_MAP_ACTIONS
     }
     
     public static enum Ownership {

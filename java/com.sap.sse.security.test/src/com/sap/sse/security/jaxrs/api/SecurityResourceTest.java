@@ -22,9 +22,12 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
@@ -32,24 +35,29 @@ import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class SecurityResourceTest {
+    private static final String USERNAME = "user-123";
+    private static final String PASSWORD = "pass-234";
     private SecurityResource servlet;
     private SecurityServiceImpl service;
     private Subject authenticatedAdmin;
+    private UserStore store;
+    private AccessControlStore accessControlStore;
 
     @Before
-    public void setUp() throws UserManagementException, MailException {
+    public void setUp() throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase().dropDatabase();
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
-            final UserStoreImpl store = new UserStoreImpl();
-            final AccessControlStore accessControlStore = new AccessControlStoreImpl(store);
+            store = new UserStoreImpl();
+            accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
                     store, accessControlStore, /* setAsActivatorSecurityService */ true);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
+            service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE", /* validation URL */ null);
             authenticatedAdmin = SecurityUtils.getSubject();
-            authenticatedAdmin.login(new UsernamePasswordToken("admin", "admin"));
+            authenticatedAdmin.login(new UsernamePasswordToken(USERNAME, PASSWORD));
             Session session = authenticatedAdmin.getSession();
             assertNotNull(session);
             servlet = new SecurityResource() {
@@ -58,49 +66,52 @@ public class SecurityResourceTest {
                     return service;
                 }
             };
-            store.addPermissionForUser("admin", new WildcardPermission("can do")); // equivalent to "can do:*:*"
-            store.addPermissionForUser("admin", new WildcardPermission("event:view:*"));
-            store.addPermissionForUser("admin", new WildcardPermission("event:edit:123"));
+            store.addPermissionForUser(USERNAME, new WildcardPermission("can do")); // equivalent to "can do:*:*"
+            store.addPermissionForUser(USERNAME, new WildcardPermission("event:view:*"));
+            store.addPermissionForUser(USERNAME, new WildcardPermission("event:edit:123"));
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         }
     }
     
     private String getOrCreateAccessToken() throws ParseException {
-        String responseJsonString = (String) servlet.respondWithAccessTokenForUser("admin").getEntity();
+        String responseJsonString = (String) servlet.respondWithAccessTokenForUser(USERNAME).getEntity();
         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
-        assertEquals("admin", responseJson.get("username"));
+        assertEquals(USERNAME, responseJson.get("username"));
         String accessToken = (String) responseJson.get("access_token");
         assertNotNull(accessToken);
         return accessToken;
     }
 
     private String createAccessToken() throws ParseException {
-        assertEquals(Response.Status.OK.getStatusCode(), servlet.respondToRemoveAccessTokenForUser("admin").getStatus());
-        String responseJsonString = (String) servlet.respondWithAccessTokenForUser("admin").getEntity();
+        assertEquals(Response.Status.OK.getStatusCode(), servlet.respondToRemoveAccessTokenForUser(USERNAME).getStatus());
+        String responseJsonString = (String) servlet.respondWithAccessTokenForUser(USERNAME).getEntity();
         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
-        assertEquals("admin", responseJson.get("username"));
+        assertEquals(USERNAME, responseJson.get("username"));
         String accessToken = (String) responseJson.get("access_token");
         assertNotNull(accessToken);
         return accessToken;
     }
 
     private void removeAccessToken() {
-        assertEquals(Response.Status.OK.getStatusCode(), servlet.respondToRemoveAccessTokenForUser("admin").getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), servlet.respondToRemoveAccessTokenForUser(USERNAME).getStatus());
     }
 
     @Test
-    public void createAccessTokenAndAuthenticate() throws ParseException {
+    public void createAccessTokenAndAuthenticate() throws ParseException, UserManagementException {
         String accessToken = getOrCreateAccessToken();
         User user = service.getUserByAccessToken(accessToken);
         assertNotNull(user);
-        assertEquals("admin", user.getName());
+        assertEquals(USERNAME, user.getName());
         final Subject subject = SecurityUtils.getSubject();
         subject.login(new BearerAuthenticationToken(accessToken));
         assertTrue(subject.isAuthenticated());
-        assertEquals("admin", subject.getPrincipal());
+        assertEquals(USERNAME, subject.getPrincipal());
         assertTrue(subject.isPermitted("can do"));
         assertFalse(subject.isPermitted("can't do"));
+        service.addPermissionForUser(USERNAME, new WildcardPermission("can't do"));
+        assertTrue(subject.isPermitted("can't do"));
+
         assertTrue(subject.isPermitted("event:view:999"));
         assertTrue(subject.isPermitted("event:edit:123"));
         assertFalse(subject.isPermitted("event:edit:234"));

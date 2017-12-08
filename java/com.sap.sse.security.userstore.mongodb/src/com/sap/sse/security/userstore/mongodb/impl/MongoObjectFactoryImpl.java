@@ -44,14 +44,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), 1));
         DBObject dbACL = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString().toString());
+        DBObject query = new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString());
         dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString());
         dbACL.put(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name(), acl.getDisplayNameOfAccessControlledObject());
-        DBObject permissionMap = new BasicDBObject();
+        BasicDBList permissionMap = new BasicDBList();
         for (Entry<UserGroup, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
-            final BasicDBList dbUsernames = new BasicDBList();
-            dbUsernames.addAll(entry.getValue());
-            permissionMap.put(entry.getKey().toString(), dbUsernames);
+            DBObject permissionMapEntry = new BasicDBObject();
+            permissionMapEntry.put(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name(), entry.getKey().getId());
+            final BasicDBList dbActions = new BasicDBList();
+            dbActions.addAll(entry.getValue());
+            permissionMapEntry.put(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name(), dbActions);
+            permissionMap.add(permissionMapEntry);
         }
         dbACL.put(FieldNames.AccessControlList.PERMISSION_MAP.name(), permissionMap);
         aclCollection.update(query, dbACL, /* upsrt */true, /* multi */false, WriteConcern.SAFE);

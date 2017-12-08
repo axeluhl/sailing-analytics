@@ -707,8 +707,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void addPermissionForUser(String name, WildcardPermission permission) throws UserManagementException {
-        final UserImpl user = users.get(name);
+    public void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException {
+        final UserImpl user = users.get(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
