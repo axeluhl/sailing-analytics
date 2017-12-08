@@ -1,6 +1,5 @@
 package com.sap.sse.security;
 
-import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.shared.Ownership;

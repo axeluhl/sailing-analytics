@@ -137,7 +137,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Set<UUID> result = new HashSet<>();
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         for (DBObject o : tenantCollection.find()) {
-            result.add(UUID.fromString((String) o.get(FieldNames.Tenant.ID.name())));
+            result.add((UUID) o.get(FieldNames.Tenant.ID.name()));
         }
         return result;
     }
@@ -220,7 +220,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLE_IDS.name());
         if (rolesO != null) {
             for (Object o : rolesO) {
-                roles.add(UUID.fromString((String) o));
+                roles.add((UUID) o);
             }
         }
         BasicDBList permissionsO = (BasicDBList) userDBObject.get(FieldNames.User.PERMISSIONS.name());

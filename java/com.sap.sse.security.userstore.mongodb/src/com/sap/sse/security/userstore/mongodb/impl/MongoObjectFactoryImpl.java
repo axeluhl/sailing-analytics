@@ -115,8 +115,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.ID.name(), 1));
         DBObject dbTenant = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Tenant.ID.name(), tenant.toString());
-        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.toString());
+        DBObject query = new BasicDBObject(FieldNames.Tenant.ID.name(), tenant.getId());
+        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.getId());
         tenantCollection.update(query, dbTenant, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 
@@ -124,7 +124,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void deleteTenant(Tenant tenant) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         DBObject dbTenant = new BasicDBObject();
-        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.toString());
+        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.getId());
         tenantCollection.remove(dbTenant);
     }
     
@@ -169,7 +169,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
         BasicDBList dbRoles = new BasicDBList();
         for (Role role : user.getRoles()) {
-            dbRoles.add(role.getId().toString());
+            dbRoles.add(role.getId());
         }
         dbUser.put(FieldNames.User.ROLE_IDS.name(), dbRoles);
         BasicDBList dbPermissions = new BasicDBList();

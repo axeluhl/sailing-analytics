@@ -689,7 +689,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final UserImpl result = userStore.createUser(username, email, tenant, upa); // TODO: get the principal as owner
-        addUserToUserGroup(tenant, result);
+        addUserToTenant(tenant, result);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
         accessControlStore.createOwnership(tenant.getId().toString(), result, tenant, tenant.getName());
         result.setFullName(fullName);
