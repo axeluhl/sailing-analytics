@@ -180,7 +180,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbPermissions.add(permission.toString());
         }
         dbUser.put(FieldNames.User.PERMISSIONS.name(), dbPermissions);
-        dbUser.put(FieldNames.User.DEFAULT_TENANT_ID.name(), user.getDefaultTenant().getId().toString());
+        dbUser.put(FieldNames.User.DEFAULT_TENANT_ID.name(), user.getDefaultTenant().getId());
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
     

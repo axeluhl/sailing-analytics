@@ -228,7 +228,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 permissions.add((String) o);
             }
         }
-        final UUID defaultTenantId = UUID.fromString((String) userDBObject.get(FieldNames.User.DEFAULT_TENANT_ID.name()));
+        final UUID defaultTenantId = (UUID) userDBObject.get(FieldNames.User.DEFAULT_TENANT_ID.name());
         final Tenant defaultTenantOnlyWithId = defaultTenantId == null ? null : new TenantImpl(defaultTenantId, null);
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
