@@ -42,21 +42,21 @@ public class TenantManagementPanel extends DockPanel {
                 tenantDetailPanel.updateLists();
             }
         }));
-        buttonPanel.add(new Button("Create tenant", new ClickHandler() {
+        buttonPanel.add(new Button(stringMessages.createTenant(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 new CreateTenantDialog(stringMessages, userManagementService, tenantListDataProvider).show();
             }
         }));
-        buttonPanel.add(new Button("Remove tenant", new ClickHandler() {
+        buttonPanel.add(new Button(stringMessages.removeTenant(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 UserGroup tenant = tenantSingleSelectionModel.getSelectedObject();
                 if (tenant == null) {
-                    Window.alert("You have to select a tenant.");
+                    Window.alert(stringMessages.youHaveToSelectATenant());
                     return;
                 }
-                if (Window.confirm("Do you really want to remove tenant " + tenant.getName())) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTenant(tenant.getName()))) {
                     userManagementService.deleteTenant(tenant.getId().toString(), new AsyncCallback<SuccessInfo>() {
                         @Override
                         public void onSuccess(SuccessInfo result) {
@@ -66,7 +66,7 @@ public class TenantManagementPanel extends DockPanel {
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Could not delete tenant.");
+                            Window.alert(stringMessages.couldNotDeleteTenant());
                         }
                     });
                 }
@@ -74,7 +74,7 @@ public class TenantManagementPanel extends DockPanel {
         }));
         tenantSingleSelectionModel = new SingleSelectionModel<>();
         TextBox filterBox = new TextBox();
-        filterBox.getElement().setPropertyString("placeholder", "Filter tenants...");
+        filterBox.getElement().setPropertyString("placeholder", stringMessages.filterTenants());
         final CellList<Tenant> tenantList = new CellList<Tenant>(new AbstractCell<Tenant>() {
             @Override
             public void render(Context context, Tenant value, SafeHtmlBuilder sb) {

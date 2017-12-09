@@ -543,12 +543,12 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Tenant getTenantByName(String name) {
-        return tenantsByName.get(name);
+        return name == null ? null : tenantsByName.get(name);
     }
     
     @Override
     public Tenant getTenant(UUID tenantId) {
-        return tenants.get(tenantId);
+        return tenantId == null ? null : tenants.get(tenantId);
     }
 
     @Override

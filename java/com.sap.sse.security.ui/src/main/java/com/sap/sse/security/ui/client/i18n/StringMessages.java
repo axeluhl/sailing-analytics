@@ -103,4 +103,15 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String showMoreInfoLogin();
     String moreInfo();
     String dismiss();
+    String editACL();
+    String errorEditingACL();
+    String editAnACL();
+    String createTenant();
+    String removeTenant();
+    String youHaveToSelectATenant();
+    String doYouReallyWantToRemoveTenant(String name);
+    String couldNotDeleteTenant();
+    String filterTenants();
+    String id();
+    String displayName();
 }

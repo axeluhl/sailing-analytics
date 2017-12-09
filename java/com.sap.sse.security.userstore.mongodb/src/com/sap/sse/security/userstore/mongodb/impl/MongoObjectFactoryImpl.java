@@ -75,8 +75,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbOwnership = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfOwnedObjectAsString());
         dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfOwnedObjectAsString());
-        dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getUserOwner().getName());
-        dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getTenantOwner().getId());
+        dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getUserOwner()==null?null:owner.getUserOwner().getName());
+        dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getTenantOwner()==null?null:owner.getTenantOwner().getId());
         dbOwnership.put(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name(), owner.getDisplayNameOfOwnedObject());
         ownershipCollection.update(query, dbOwnership, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }

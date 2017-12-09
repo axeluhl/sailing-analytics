@@ -100,7 +100,7 @@ public class UserManagementPanel extends DockPanel {
         deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
         
         // TODO: find the right place for the acl controls
-        Button editACLButton = new Button("Edit ACL", new ClickHandler() {
+        Button editACLButton = new Button(stringMessages.editACL(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 new EditAccessControlListDialog(stringMessages, userManagementService, aclListDataProvider, aclSingleSelectionModel.getSelectedObject()).show();
@@ -121,8 +121,8 @@ public class UserManagementPanel extends DockPanel {
                 return acl.getDisplayNameOfAccessControlledObject()==null?"":acl.getDisplayNameOfAccessControlledObject();
             }
         };
-        aclTable.addColumn(idColumn, "ID");
-        aclTable.addColumn(displayNameColumn, "Display Name");
+        aclTable.addColumn(idColumn, stringMessages.id());
+        aclTable.addColumn(displayNameColumn, stringMessages.displayName());
         aclTable.setSelectionModel(aclSingleSelectionModel);
         aclListDataProvider = new AccessControlListListDataProvider(userManagementService);
         aclTable.setPageSize(20);

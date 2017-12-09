@@ -432,7 +432,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject) {
         final UUID tenantId;
         if (tenantOwner == null || !tenantOwner.contains(userOwner)) {
-            tenantId = userOwner.getDefaultTenant().getId();
+            tenantId = userOwner.getDefaultTenant() == null ? null : userOwner.getDefaultTenant().getId();
         } else {
             tenantId = tenantOwner.getId();
         }
