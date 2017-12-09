@@ -214,12 +214,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Boolean emailValidated = (Boolean) userDBObject.get(FieldNames.User.EMAIL_VALIDATED.name());
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
-        Set<UUID> roles = new HashSet<>();
+        Set<Role> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();
         BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLE_IDS.name());
+        boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
-                roles.add((UUID) o);
+                roles.add(rolesById.get((UUID) o));
+            }
+        } else {
+            // migration of old name-based, non-entity roles:
+            // qualify role with default tenant of server instance; if no such default tenant is known,
+            // try to find an equal-named role in the set of roles known so far
+            BasicDBList roleNames = (BasicDBList) userDBObject.get("ROLES");
+            if (roleNames != null) {
+                for (Object o : roleNames) {
+                    for (final Role role : rolesById.values()) {
+                        if (role.getName().equals(o.toString())) {
+                            roles.add(role);
+                            rolesMigrated = true;
+                        }
+                    }
+                }
             }
         }
         BasicDBList permissionsO = (BasicDBList) userDBObject.get(FieldNames.User.PERMISSIONS.name());
@@ -235,11 +251,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UserImpl result = new UserImpl(name, email, fullName, company, locale,
                 emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenantOnlyWithId,
                 accounts.values());
-        for (UUID roleId : roles) {
-            result.addRole(rolesById.get(roleId));
+        for (final Role role : roles) {
+            result.addRole(role);
         }
         for (String permission : permissions) {
             result.addPermission(new WildcardPermission(permission));
+        }
+        if (rolesMigrated) {
+            // update the user object after roles have been migrated;
+            // the default tenant is only a dummy object but should be sufficient
+            // for the DB update because, as for the read process, the write process
+            // is also only interested in the object's ID
+            new MongoObjectFactoryImpl(db).storeUser(result);
         }
         return result;
     }
