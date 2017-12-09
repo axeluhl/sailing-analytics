@@ -5,10 +5,14 @@ import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.SecurityUser;
 
 public class OwnershipImpl implements Ownership {    
-    private final String idOfOwnedObjectAsString;
-    private final SecurityUser userOwner;
-    private final Tenant tenantOwner;
-    private final String displayName;
+    private static final long serialVersionUID = -6379054499434958440L;
+    private String idOfOwnedObjectAsString;
+    private SecurityUser userOwner;
+    private Tenant tenantOwner;
+    private String displayName;
+    
+    @Deprecated
+    OwnershipImpl() {} // for GWT serialization only
     
     public OwnershipImpl(String idAsString, SecurityUser userOwner, Tenant tenantOwner, String displayName) {
         this.idOfOwnedObjectAsString = idAsString;
