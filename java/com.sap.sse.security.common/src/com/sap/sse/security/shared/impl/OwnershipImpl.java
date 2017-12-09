@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.shared.impl;
 
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Tenant;

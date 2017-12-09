@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.OwnershipImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
@@ -13,6 +12,7 @@ import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
 
 public class AccessControlStoreImpl implements AccessControlStore {
     private static final long serialVersionUID = 2165649781000936074L;

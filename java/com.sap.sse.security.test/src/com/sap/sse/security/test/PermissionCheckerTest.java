@@ -13,12 +13,12 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.security.OwnershipImpl;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.TenantImpl;
 import com.sap.sse.security.shared.PermissionBuilderImpl;
