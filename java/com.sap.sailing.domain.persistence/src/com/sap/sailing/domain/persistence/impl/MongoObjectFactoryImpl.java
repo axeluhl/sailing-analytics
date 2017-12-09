@@ -583,11 +583,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
         eventCollection.createIndex(new BasicDBObject(FieldNames.EVENT_ID.name(), 1));
         DBObject query = new BasicDBObject();
-        query.put(FieldNames.EVENT_ID.name(), event.getId().toString());
+        query.put(FieldNames.EVENT_ID.name(), event.getId());
         DBObject eventDBObject = new BasicDBObject();
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
         eventDBObject.put(FieldNames.EVENT_DESCRIPTION.name(), event.getDescription());
-        eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId().toString());
+        eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
         eventDBObject.put(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name(), event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
         eventDBObject.put(FieldNames.EVENT_BASE_URL.name(), event.getBaseURL() != null ? event.getBaseURL().toString() : null);
         storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
