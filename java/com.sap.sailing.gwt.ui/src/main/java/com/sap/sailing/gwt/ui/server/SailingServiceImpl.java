@@ -6801,7 +6801,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
 
         int flightCount = Util.size(leaderboard.getRaceColumns());
-        int groupCount = (int) (template.getPairingListTemplate().length / flightCount / (flightMultiplier > 0 ? (flightMultiplier + 1) : 1));
+        int groupCount = (int) (template.getPairingListTemplate().length / flightCount * flightMultiplier);
         return new PairingListTemplateDTO(flightCount, groupCount, 
                 competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality());
     }
