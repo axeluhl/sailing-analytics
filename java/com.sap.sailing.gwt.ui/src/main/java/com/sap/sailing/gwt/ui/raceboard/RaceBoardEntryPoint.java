@@ -106,9 +106,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
+                // TODO bug2822: also determine regatta's boat change parameter and parameterize Leaderboard settings --> show boat info column yes/no?
                 sailingService.determineDetailTypesForCompetitorChart(raceboardContextDefinition.getLeaderboardGroupName(),
                         raceboardData.getRace().getRaceIdentifier(), new AsyncCallback<List<DetailType>>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 reportError("Error trying to create the raceboard: " + caught.getMessage());
@@ -137,7 +137,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                         });
                             }
                         });
-                
             }
             
             @Override

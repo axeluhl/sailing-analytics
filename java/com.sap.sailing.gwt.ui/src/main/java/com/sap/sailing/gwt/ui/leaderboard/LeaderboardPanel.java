@@ -953,14 +953,22 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             BoatDTO boat = boatFetcher.getBoat(object);
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
-            if (boat.getSailId() != null) {
-                sb.appendEscaped(boat.getSailId());
-            } else if (boat.getName() != null) {
-                sb.appendEscaped(boat.getName());
-            }
+            sb.appendEscaped(getShortInfo(boat));
             if (boatColorShown) {
                 sb.appendHtmlConstant("</div>");
             }
+        }
+        
+        private String getShortInfo(BoatDTO boat) {
+            final String result;
+            if (boat.getSailId() != null) {
+                result = boat.getSailId();
+            } else if (boat.getName() != null) {
+                result = boat.getName();
+            } else {
+                result = null;
+            }
+            return result;
         }
         
         @Override
@@ -968,11 +976,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             return new InvertibleComparatorAdapter<T>() {
                 @Override
                 public int compare(T o1, T o2) {
-                    return boatFetcher.getBoat(o1).getName() == null
-                            ? boatFetcher.getBoat(o2).getName() == null ? 0 : -1
-                            : boatFetcher.getBoat(o2).getName() == null ? 1
-                                    : Collator.getInstance().compare(boatFetcher.getBoat(o1).getName(),
-                                            boatFetcher.getBoat(o2).getName());
+                    return getShortInfo(boatFetcher.getBoat(o1)) == null
+                            ? getShortInfo(boatFetcher.getBoat(o2)) == null ? 0 : -1
+                            : getShortInfo(boatFetcher.getBoat(o2)) == null ? 1
+                                    : Collator.getInstance().compare(getShortInfo(boatFetcher.getBoat(o1)),
+                                            getShortInfo(boatFetcher.getBoat(o2)));
                 }
             };
         }
