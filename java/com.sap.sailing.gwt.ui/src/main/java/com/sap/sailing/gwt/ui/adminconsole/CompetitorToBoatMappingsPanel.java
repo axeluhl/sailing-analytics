@@ -148,15 +148,18 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
         
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
-        Button refreshButton = new Button(stringMessages.refresh());
-        refreshButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                refreshData();
-            }
-        });
-        refreshButton.ensureDebugId("RefreshButton");
-        buttonPanel.add(refreshButton);
+        
+        if (enableChangeActions) {
+            Button refreshButton = new Button(stringMessages.refresh());
+            refreshButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    refreshData();
+                }
+            });
+            refreshButton.ensureDebugId("RefreshButton");
+            buttonPanel.add(refreshButton);
+        }
         
         mainPanel.add(buttonPanel);
         mainPanel.add(busyIndicator);
@@ -219,7 +222,7 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
         if (selectedCompetitor != null) {
             selectBoatForCompetitor(selectedCompetitor);
         } else {
-            boatTable.getSelectionModel().clear();;
+            boatTable.getSelectionModel().clear();
         }
     }
 
@@ -287,7 +290,7 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
     }
 
     public void refreshData() {
-        competitorTable.refreshCompetitorList(leaderboardName, raceColumnName, fleetName);
+        competitorTable.refreshCompetitorListFromRace(leaderboardName, raceColumnName, fleetName);
         boatTable.refreshBoatList();
     }
 

@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -29,7 +28,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  * A compact filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
  * order to set an initial set of competitors to display by this table, use {@link #refreshCompetitorList(Iterable)}.
  * The selected competitors can be obtained from the {@link #getSelectionModel() selection model}. 
- * The competitors currently in the table (regardless of the current filter settings) are returned by {@link #getAllCompetitors()}.
+ * The competitors currently in the table (regardless of the current filter settings) are returned by {@link #getAllCompetitorsOfRace()}.
  * 
  * @author Frank Mittag
  *
@@ -166,31 +165,17 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
         getFilteredCompetitors(competitors);
     }
     
-    public void refreshCompetitorList(String leaderboardName, String raceColumnName, String fleetName) {
-        refreshCompetitorList(leaderboardName, raceColumnName, fleetName, null);
-    }
-    
-    /**
-     * @param leaderboardName If null, all existing competitors are loaded
-     */
-    public void refreshCompetitorList(String leaderboardName, String raceColumnName, String fleetName, 
-            final Callback<Iterable<CompetitorDTO>, Throwable> callback) {
+    public void refreshCompetitorListFromRace(String leaderboardName, String raceColumnName, String fleetName) {
         final AsyncCallback<Iterable<CompetitorDTO>> myCallback = new AsyncCallback<Iterable<CompetitorDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                if (callback != null) {
-                    callback.onFailure(caught);
-                }
             }
 
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
                 getFilteredCompetitors(result);
                 refreshCompetitorList(result);
-                if (callback != null) {
-                    callback.onSuccess(result);
-                }
             }
         };
         sailingService.getCompetitorsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);

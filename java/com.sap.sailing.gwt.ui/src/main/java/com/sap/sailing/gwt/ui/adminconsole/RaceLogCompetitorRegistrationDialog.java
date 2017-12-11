@@ -105,7 +105,9 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String raceColumnName, String fleetName, List<FleetDTO> fleets, Validator validator) {
-        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass, validator);
+        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, 
+                canBoatsOfCompetitorsChangePerRace, boatClass, 
+                canBoatsOfCompetitorsChangePerRace ? stringMessages.actionContinueToBoatAssignment() : stringMessages.save(), validator);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;

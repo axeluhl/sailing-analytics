@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class EditCompetitorToBoatMappingsDialog extends DataEntryDialog<List<CompetitorDTO>> {
+public class ShowCompetitorToBoatMappingsDialog extends DataEntryDialog<List<CompetitorDTO>> {
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -29,11 +29,11 @@ public class EditCompetitorToBoatMappingsDialog extends DataEntryDialog<List<Com
         }
     }
         
-    public EditCompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages, 
+    public ShowCompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages, 
             final ErrorReporter errorReporter, String leaderboardName, final String raceColumnName, final String fleetName,
             String raceName, boolean enableActions, DialogCallback<List<CompetitorDTO>> callback) {
-        super(stringMessages.actionEditCompetitorToBoatAssignmentsForRace(raceName),
-                null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
+        super(stringMessages.actionShowCompetitorToBoatAssignments(),
+                stringMessages.race() + ":" + raceName, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;

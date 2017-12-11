@@ -23,8 +23,9 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
     public AbstractCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
-            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Validator<Set<CompetitorDTO>> validator) {
-        super(stringMessages.registerCompetitors(), /* messsage */null, stringMessages.save(), stringMessages.cancel(),
+            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String okButtonMessage,
+            Validator<Set<CompetitorDTO>> validator) {
+        super(stringMessages.registerCompetitors(), /* messsage */null, okButtonMessage, stringMessages.cancel(),
                 validator, callback);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
