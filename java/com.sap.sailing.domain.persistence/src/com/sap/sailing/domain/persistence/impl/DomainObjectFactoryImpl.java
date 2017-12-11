@@ -2343,24 +2343,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Collection<Competitor> loadAllCompetitors() {
-        ArrayList<Competitor> result = new ArrayList<>();
+        Map<Serializable, Competitor> competitorsById = new HashMap<>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
                 Competitor c = competitorWithBoatRefDeserializer.deserialize(json);
-                result.add(c);
+                // ensure that in case there should be multiple competitors with equal IDs in the DB
+                // only one will survive
+                if (competitorsById.containsKey(c.getId())) {
+                    collection.remove(o);
+                } else {
+                    competitorsById.put(c.getId(), c);
+                }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
             logger.log(Level.SEVERE, "loadCompetitors", e);
         }
-        return result;
+        return competitorsById.values();
     }
 
     @Override
     public Collection<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired() {
-        ArrayList<CompetitorWithBoat> result = null;
+        Map<Serializable, CompetitorWithBoat> competitorsById = null;
 
         boolean competitorsCollectionExist = database.collectionExists(CollectionNames.COMPETITORS.name());
         boolean boatsCollectionCollectionExist = database.collectionExists(CollectionNames.BOATS.name());
@@ -2375,15 +2381,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 Object boatObject = oneCompetitorDbObject.get("boat");
                 // only in case such a boat object exist we need a migration, because the new type stores only a boatID or no boat at all 
                 if (boatObject != null) {
-                    result = new ArrayList<>();
-                    
+                    competitorsById = new HashMap<>();
                     orginalCompetitorCollection.rename(CollectionNames.COMPETITORS_BAK.name(), /* dropTarget */ true);
                     DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_BAK.name());
                     try {
                         for (DBObject o : collection.find()) {
                             JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
                             CompetitorWithBoat c = legacyCompetitorWithBoatDeserializer.deserialize(json);
-                            result.add(c);
+                            // accept only the first instance for any given ID
+                            if (!competitorsById.containsKey(c.getId())) {
+                                competitorsById.put(c.getId(), c);
+                            }
                         }
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
@@ -2393,7 +2401,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }                
           }
 
-        return result;
+        return competitorsById.values();
     }
 
     @Override
