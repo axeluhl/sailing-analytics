@@ -4157,7 +4157,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             int flightMultiplier) {
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-
+        
         if (leaderboard != null) {
             PairingListTemplate template = pairingListTemplateFactory
                     .getOrCreatePairingListTemplate(new PairingFrameProvider() {
@@ -4169,7 +4169,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
                         @Override
                         public int getFlightsCount() {
-                            return Util.size(leaderboard.getRaceColumns());
+                            int flightCount = 0;
+                            
+                            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                                if (!raceColumn.isMedalRace()) {
+                                    flightCount++;
+                                }
+                            }
+                            
+                            return flightCount;
                         }
 
                         @Override

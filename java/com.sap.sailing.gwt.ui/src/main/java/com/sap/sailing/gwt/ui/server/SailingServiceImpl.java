@@ -6799,20 +6799,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardName, competitorsCount, 
                 flightMultiplier);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        
+        int flightCount = 0;
+        
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (!raceColumn.isMedalRace()) {
+                flightCount++;
+            }
+        }
 
-        int flightCount = Util.size(leaderboard.getRaceColumns());
         int groupCount = (int) (template.getPairingListTemplate().length / flightCount * flightMultiplier);
         return new PairingListTemplateDTO(flightCount, groupCount, 
                 competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality());
     }
     
     @Override
-    public PairingListDTO getPairingListFromTemplate(PairingListTemplateDTO pairingListTemplateDTO, 
-            final String leaderboardName) throws NotFoundException {
+    public PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier) 
+            throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
         PairingListTemplate pairingListTemplate = getService().createPairingListFromRegatta(leaderboardName, 
-                pairingListTemplateDTO.getCompetitorCount(), pairingListTemplateDTO.getFlightMultiplier());
+                Util.size(leaderboard.getCompetitors()), flightMultiplier);
         PairingList<RaceColumn, Fleet, Competitor> pairingList = 
                 getService().getPairingListFromTemplate(pairingListTemplate, leaderboardName);
         
@@ -6824,6 +6831,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         int boatIndex;
         
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (raceColumn.isMedalRace()) {
+                continue;
+            }
             //TODO change flights to fleets
             List<List<Pair<CompetitorDTO, BoatDTO>>> flights = new ArrayList<>();
             for (Fleet fleetElement : raceColumn.getFleets()) {
@@ -6856,7 +6866,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(flights);
         }
         
-        //TODO: fix getGroupCount
         return new PairingListDTO(result);
     }
     

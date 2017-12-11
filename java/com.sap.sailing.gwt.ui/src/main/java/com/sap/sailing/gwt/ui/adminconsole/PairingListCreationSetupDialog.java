@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -70,7 +71,16 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         PairingListTemplateDTO dto = new PairingListTemplateDTO(this.competitorCountTextBox.getValue(), 
                 this.flightMultiplierTextBox.getValue());
         dto.setGroupCount(this.groupCount);
-        dto.setFlightCount(leaderboardDTO.getRaceColumnsCount());
+        
+        int flightCount = 0;
+        
+        for (RaceColumnDTO raceColumn : leaderboardDTO.getRaceList()) {
+            if (!raceColumn.isMedalRace()) {
+                flightCount++;
+            }
+        }
+        
+        dto.setFlightCount(flightCount);
         dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
         return dto; 
     }

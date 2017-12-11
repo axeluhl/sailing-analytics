@@ -877,7 +877,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void calculatePairingList(final String leaderboardName, int competitorCount, int flightMultiplier, 
             AsyncCallback<PairingListTemplateDTO> callback) throws NotFoundException,IllegalArgumentException ;
     
-    void getPairingListFromTemplate(PairingListTemplateDTO pairingListTemplateDTO, final String leaderboardName,
+    void getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
             AsyncCallback<PairingListDTO> callback);
     
     void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, final String leaderboardName, 
