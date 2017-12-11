@@ -26,9 +26,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Permission;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -49,12 +49,12 @@ public class UserManagementPanel extends DockPanel {
 
     private UserListDataProvider userListDataProvider;
     
-    public UserManagementPanel(final UserService userService, final StringMessages stringMessages) {
-        this(userService, stringMessages, Collections.<Role>emptySet(), Collections.<Permission>emptySet());
+    public UserManagementPanel(final UserService userService, final StringMessages stringMessages, ErrorReporter errorReporter) {
+        this(userService, stringMessages, Collections.<Permission>emptySet(), errorReporter);
     }
     
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
-            Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
+            Iterable<Permission> additionalPermissions, ErrorReporter errorReporter) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();
@@ -138,7 +138,7 @@ public class UserManagementPanel extends DockPanel {
         TextBox filterBox = new TextBox();
         userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
         final UserDetailsView userDetailsView = new UserDetailsView(userService,
-                singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, additionalRoles, additionalPermissions);
+                singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, additionalPermissions, errorReporter);
         add(userDetailsView, DockPanel.CENTER);
         userDetailsView.addUserChangeEventHandler(new UserChangeEventHandler() {
             @Override
@@ -149,7 +149,7 @@ public class UserManagementPanel extends DockPanel {
         singleSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                userDetailsView.updateUser(singleSelectionModel.getSelectedObject(), userManagementService);
+                userDetailsView.updateUser(singleSelectionModel.getSelectedObject(), userManagementService, userService, userListDataProvider);
                 deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
             }
         });

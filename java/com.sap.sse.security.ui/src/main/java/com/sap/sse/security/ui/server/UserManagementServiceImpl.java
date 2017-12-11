@@ -53,8 +53,8 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.TenantImpl;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
@@ -100,9 +100,22 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }.start();
     }
 
-    // TODO produce a version of userGroup stripped down to the current user's scope
-    private UserGroup createUserGroupDTOFromUserGroup(UserGroup userGroup) {
-        return new UserGroupImpl(userGroup.getId(), userGroup.getName(), userGroup.getUsers());
+    private SecurityUser createUserDTOFromUser(SecurityUser user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser) {
+        SecurityUser result = fromOriginalToStrippedDownUser.get(user);
+        if (result == null) {
+            final SecurityUserImpl preResult = new SecurityUserImpl(user.getName(), /* default tenant to be set later: */ null);
+            result = preResult;
+            fromOriginalToStrippedDownUser.put(user, result);
+            preResult.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser));
+        }
+        return result;
+    }
+    
+    @Override
+    public ArrayList<Role> getRoles() {
+        final ArrayList<Role> result = new ArrayList<>();
+        Util.addAll(getSecurityService().getRoles(), result);
+        return result;
     }
 
     /**
@@ -115,12 +128,18 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return createTenantDTOFromTenant(tenant, new HashMap<>(), new HashMap<>());
     }
     
-    private Tenant createTenantDTOFromTenant(Tenant tenant, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<User, SecurityUser> fromOriginalToStrippedDownUser) {
+    private Tenant createTenantDTOFromTenant(Tenant tenant, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser) {
         final Tenant result;
         if (tenant == null) {
             result = null;
+        } else if (fromOriginalToStrippedDownTenant.containsKey(tenant)) {
+            result = fromOriginalToStrippedDownTenant.get(tenant);
         } else {
-            result = new TenantImpl(tenant.getId(), tenant.getName(), tenant.getUsers());
+            result = new TenantImpl(tenant.getId(), tenant.getName());
+            fromOriginalToStrippedDownTenant.put(tenant, result);
+            for (final SecurityUser user : tenant.getUsers()) {
+                result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser));
+            }
         }
         return result;
     }
@@ -222,7 +241,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("tenant:add_user:" + tenantIdAsString)) {
             final Tenant tenant = getSecurityService().getTenant(UUID.fromString(tenantIdAsString));
             getSecurityService().addUserToTenant(tenant, getSecurityService().getUserByName(username));
-            createUserGroupDTOFromUserGroup(tenant);
         } else {
             throw new UnauthorizedException("Not permitted to add user to tenant");
         }
@@ -233,7 +251,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("tenant:remove_user:" + tenantIdAsString)) {
             final Tenant tenant = getSecurityService().getTenant(UUID.fromString(tenantIdAsString));
             getSecurityService().removeUserFromTenant(tenant, getSecurityService().getUserByName(username));
-            createUserGroupDTOFromUserGroup(tenant);
         } else {
             throw new UnauthorizedException("Not permitted to remove user from tenant");
         }

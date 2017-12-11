@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -55,6 +57,8 @@ public interface UserManagementServiceAsync {
     void updateUserProperties(String username, String fullName, String company, String localeName, AsyncCallback<Void> callback);
 
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
+
+    void getRoles(AsyncCallback<ArrayList<Role>> callback);
 
     void setRolesForUser(String username, Iterable<UUID> roleIds, AsyncCallback<SuccessInfo> callback);
 

@@ -2,7 +2,9 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -52,20 +55,24 @@ public class UserDetailsView extends FlowPanel {
     
     private final Label usernameLabel;
     private final Label emailLabel;
-    private final StringListEditorComposite rolesEditor;
     private final StringListEditorComposite permissionsEditor;
     private final VerticalPanel accountPanels;
     private final ListBox allPermissionsList;
     private UserDTO user;
+    private final ErrorReporter errorReporter;
+    private final Map<String, Role> serverRoles;
+
+    private final FlowPanel rolesEditorWrapper;
 
     public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages,
             final UserListDataProvider userListDataProvider,
-            Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
+            Iterable<Permission> additionalPermissions, ErrorReporter errorReporter) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
+        this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.user = user;
+        serverRoles = new HashMap<>();
         addStyleName("userDetailsView");
-        List<String> defaultRoleNames = new ArrayList<>(); // TODO: add dynamic roles here
         List<String> defaultPermissionNames = new ArrayList<>();
         for (DefaultPermissions defaultPermission : DefaultPermissions.values()) {
             defaultPermissionNames.add(defaultPermission.getStringPermission());
@@ -73,41 +80,6 @@ public class UserDetailsView extends FlowPanel {
         for (Permission permission : additionalPermissions) {
             defaultPermissionNames.add(permission.getStringPermission());
         }
-        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getStringRoles(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultRoleNames,
-                stringMessages.enterRoleName());
-        rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                final ArrayList<UUID> newRoleIds = new ArrayList<>();
-                final UserDTO selectedUser = UserDetailsView.this.user;
-                for (String roleName : event.getValue()) {
-                    UUID id = selectedUser.getRoleIdByName(roleName);
-                    if (id != null) {
-                        newRoleIds.add(id);
-                    }    
-                }
-                userManagementService.setRolesForUser(selectedUser.getName(), newRoleIds, new MarkedAsyncCallback<SuccessInfo>(
-                        new AsyncCallback<SuccessInfo>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), caught.getMessage()));
-                            }
-
-                            @Override
-                            public void onSuccess(SuccessInfo result) {
-                                if (!result.isSuccessful()) {
-                                    Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), result.getMessage()));
-                                } else {
-                                    userListDataProvider.updateDisplays();
-                                    if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
-                                        // if the current user's roles changed, update the user object in the user service and notify others
-                                        userService.updateUser(/* notify other instances */ true);
-                                    }
-                                }
-                            }
-                        }));
-            }
-        });
         permissionsEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getStringPermissions(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultPermissionNames,
                 stringMessages.enterPermissionName());
@@ -180,18 +152,87 @@ public class UserDetailsView extends FlowPanel {
         fp.add(accountPanels);
         decoratorPanel.setWidget(fp);
         this.add(decoratorPanel);
-        this.add(rolesEditor);
+        rolesEditorWrapper = new FlowPanel();
+        this.add(rolesEditorWrapper);
+        updateRoles(userManagementService, userService, userListDataProvider);
         this.add(permissionsEditor);
         this.add(new Label(stringMessages.allPermissions()));
         allPermissionsList = new ListBox();
         allPermissionsList.setVisibleItemCount(10);
         allPermissionsList.setEnabled(false);
         this.add(allPermissionsList);
-        updateUser(user, userManagementService);
+        updateUser(user, userManagementService, userService, userListDataProvider);
     }
 
-    public void updateUser(final UserDTO user, final UserManagementServiceAsync userManagementService) {
+    /**
+     * Assumes {@link #serverRoles} to be up to date; ideally called from an onSuccess callback after
+     * retrieving a fresh roles copy from the server
+     */
+    private void setRolesEditor(UserManagementServiceAsync userManagementService,
+            UserService userService, UserListDataProvider userListDataProvider) {
+        final StringListEditorComposite result = new StringListEditorComposite(
+                user == null ? Collections.<String> emptySet() : user.getStringRoles(), stringMessages,
+                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), serverRoles.keySet(),
+                stringMessages.enterRoleName());
+        result.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
+                final ArrayList<UUID> newRoleIds = new ArrayList<>();
+                final UserDTO selectedUser = UserDetailsView.this.user;
+                for (String roleName : event.getValue()) {
+                    Role role = serverRoles.get(roleName);
+                    if (role != null) {
+                        newRoleIds.add(role.getId());
+                    }    
+                }
+                userManagementService.setRolesForUser(selectedUser.getName(), newRoleIds, new MarkedAsyncCallback<SuccessInfo>(
+                        new AsyncCallback<SuccessInfo>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), caught.getMessage()));
+                            }
+
+                            @Override
+                            public void onSuccess(SuccessInfo result) {
+                                if (!result.isSuccessful()) {
+                                    Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), result.getMessage()));
+                                } else {
+                                    userListDataProvider.updateDisplays();
+                                    if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
+                                        // if the current user's roles changed, update the user object in the user service and notify others
+                                        userService.updateUser(/* notify other instances */ true);
+                                    }
+                                }
+                            }
+                        }));
+            }
+        });
+        while (rolesEditorWrapper.getWidgetCount() > 0) {
+            rolesEditorWrapper.remove(0);
+        }
+        rolesEditorWrapper.add(result);
+    }
+
+    private void updateRoles(final UserManagementServiceAsync userManagementService, UserService userService, UserListDataProvider userListDataProvider) {
+        userManagementService.getRoles(new AsyncCallback<ArrayList<Role>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+            @Override
+            public void onSuccess(ArrayList<Role> roles) {
+                serverRoles.clear();
+                for (final Role role : roles) {
+                    serverRoles.put(role.getName(), role);
+                }
+                setRolesEditor(userManagementService, userService, userListDataProvider);
+            }
+        });
+    }
+
+    public void updateUser(final UserDTO user, final UserManagementServiceAsync userManagementService, UserService userService, UserListDataProvider userListDataProvider) {
         this.user = user;
+        updateRoles(userManagementService, userService, userListDataProvider);
         accountPanels.clear();
         if (user == null) {
             usernameLabel.setText("");
@@ -258,7 +299,6 @@ public class UserDetailsView extends FlowPanel {
                 }
                 accountPanels.add(accountPanelDecorator);
             }
-            rolesEditor.setValue(user.getStringRoles(), /* fireEvents */ false);
             permissionsEditor.setValue(user.getStringPermissions(), /* fireEvents */ false);
             allPermissionsList.clear();
             for (WildcardPermission permission : user.getAllPermissions()) {

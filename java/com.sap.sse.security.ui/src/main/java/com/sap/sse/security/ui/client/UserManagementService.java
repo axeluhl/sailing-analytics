@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
@@ -41,6 +43,8 @@ public interface UserManagementService extends RemoteService {
     SuccessInfo deleteTenant(String tenantIdAsString) throws UnauthorizedException;
 
     Collection<UserDTO> getUserList() throws UnauthorizedException;
+
+    ArrayList<Role> getRoles();
 
     Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException;
 
@@ -116,5 +120,4 @@ public interface UserManagementService extends RemoteService {
     public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
 
     public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
-
 }

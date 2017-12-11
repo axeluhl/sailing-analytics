@@ -95,7 +95,7 @@ public class TenantManagementPanel extends DockPanel {
         tenantListWrapper.add(filterBox);
         tenantListWrapper.add(tenantPanel);
         tenantListWrapper.add(tenantPager);
-        CaptionPanel tenantListCaption = new CaptionPanel("Tenants");
+        CaptionPanel tenantListCaption = new CaptionPanel(stringMessages.tenants());
         tenantListCaption.add(tenantListWrapper);
         TextBox userFilterBox = new TextBox();
         userFilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
@@ -103,7 +103,7 @@ public class TenantManagementPanel extends DockPanel {
         tenantDetailPanel = new TenantDetailPanel(userFilterBox, tenantSingleSelectionModel, tenantListDataProvider, userManagementService);
         userListWrapper.add(userFilterBox);
         userListWrapper.add(tenantDetailPanel);
-        CaptionPanel userListCaption = new CaptionPanel("Users");
+        CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());
         userListCaption.add(userListWrapper);
         HorizontalPanel listsWrapper = new HorizontalPanel();
         listsWrapper.add(tenantListCaption);

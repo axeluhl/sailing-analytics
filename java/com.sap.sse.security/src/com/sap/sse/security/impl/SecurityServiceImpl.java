@@ -88,9 +88,9 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.AbstractRoles;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
@@ -104,10 +104,16 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
+
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
+
+    private static final String ADMIN_USERNAME = "admin";
+
+    private static final String ADMIN_DEFAULT_PASSWORD = "admin";
 
     private CachingSecurityManager securityManager;
     
@@ -215,19 +221,29 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Set<String> adminPermissions = new HashSet<>();
             adminPermissions.add("*");
             adminRole = userStore.createRole((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
+            for (final AbstractRoles otherPredefinedRole : AbstractRoles.values()) {
+                final Set<WildcardPermission> permissions = new HashSet<>();
+                for (final String stringPermission : otherPredefinedRole.getPermissions()) {
+                    permissions.add(new WildcardPermission(stringPermission));
+                }
+                userStore.createRole(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
+            }
         } else {
             adminRole = userStore.getRole(adminRolePrototype.getId());
         }
-        if (!userStore.hasUsers()) {
-            try {
-                logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                SecurityUser adminUser = createSimpleUser("admin", "nobody@sapsailing.com", "admin",
+        try {
+            final SecurityUser adminUser;
+            if (!userStore.hasUsers()) {
+                logger.info("No users found, creating default user \""+ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
+                adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com", ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
-                createOwnership("admin", adminUser, /* no admin tenant */ null, "admin");
-                addRoleForUser(adminUser, adminRole);
-            } catch (UserManagementException | MailException | UserGroupManagementException e) {
-                logger.log(Level.SEVERE, "Exception while creating default admin user", e);
+            } else {
+                adminUser = userStore.getUserByName(ADMIN_USERNAME);
             }
+            createOwnership(ADMIN_USERNAME, adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
+            addRoleForUser(adminUser, adminRole);
+        } catch (UserManagementException | MailException | UserGroupManagementException e) {
+            logger.log(Level.SEVERE, "Exception while creating default admin user", e);
         }
     }
     

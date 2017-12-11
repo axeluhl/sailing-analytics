@@ -114,4 +114,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterTenants();
     String id();
     String displayName();
+    String tenants();
 }
