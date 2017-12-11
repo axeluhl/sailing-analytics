@@ -76,6 +76,6 @@ public class RoleImpl implements Role {
 
     @Override
     public String toString() {
-        return "RoleImpl [id=" + id + ", name=" + name + ", permissions=" + permissions + "]";
+        return name + " (permissions: " + permissions + ")";
     }
 }

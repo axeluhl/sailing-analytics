@@ -3,7 +3,6 @@ package com.sap.sse.security;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -25,7 +24,6 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -37,8 +35,9 @@ import com.sap.sse.security.shared.WildcardPermission;
  * this realm is highly dynamic, doGetAuthorizationInfo cannot be easily implemented and is thus never called.
  * 
  * @author Jonas Dann
+ * @author Axel Uhl (D043530)
  */
-public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm implements RolePermissionModel {
+public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm {
     private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
     private final Future<UserStore> userStore;
     private final Future<AccessControlStore> accessControlStore;
@@ -179,7 +178,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             final UserImpl user = getUserStore().getUserByName(username);
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
                     user, getUserStore().getUserGroupsOfUser(user), getUserStore().getRolesFromUser(username), 
-                    this, ownership, acl);
+                    ownership, acl);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "User " + username + " does not exist.", e);
             return false;
@@ -282,46 +281,5 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         // As all the public methods of AuthorizingRealm are overridden to not use this, this should never be called.
         throw new UnsupportedOperationException("Call to doGetAuthorizationInfo(PrincipalCollection principals. This should never happen!)");
-    }
-    
-    private Role getRole(UUID id) {
-        return getUserStore().getRole(id);
-    }
-    
-    @Override
-    public Iterable<WildcardPermission> getPermissions(UUID id) {
-        Role role = getRole(id);
-        if (role != null) {
-            return role.getPermissions();
-        } else {
-            return new ArrayList<>();
-        }
-    }
-    
-    @Override
-    public Iterable<Role> getRoles() {
-        return getUserStore().getRoles();
-    }
-    
-    // TODO as default implementation in interface
-    @Override
-    public boolean implies(Role role, WildcardPermission permission) {
-        return implies(role, permission, null);
-    }
-    
-    // TODO as default implementation in interface
-    @Override
-    public boolean implies(Role role, WildcardPermission permission, Ownership ownership) {
-        String[] parts = role.getName().split(":");
-        // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        // TODO consider user as Role parameter, comparing to ownership.getUserOwner()
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().equals(parts[1]))) {
-            for (WildcardPermission rolePermission : role.getPermissions()) {
-                if (rolePermission.implies(permission)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

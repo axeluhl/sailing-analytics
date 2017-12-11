@@ -94,4 +94,9 @@ public class SecurityUserImpl implements SecurityUser {
     public void removePermission(WildcardPermission permission) {
         permissions.remove(permission);
     }
+
+    @Override
+    public String toString() {
+        return name+" (roles: "+getRoles()+")";
+    }
 }

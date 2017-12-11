@@ -17,22 +17,21 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
-import com.sap.sse.security.shared.impl.AccessControlListImpl;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
-import com.sap.sse.security.shared.impl.SecurityUserImpl;
-import com.sap.sse.security.shared.impl.TenantImpl;
 import com.sap.sse.security.shared.PermissionBuilderImpl;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.RolePermissionModel;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlListImpl;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.SecurityUserImpl;
+import com.sap.sse.security.shared.impl.TenantImpl;
 
-public class PermissionCheckerTest implements RolePermissionModel {
+public class PermissionCheckerTest {
     private final String eventDataObjectType = "event";
     private final UUID eventId = UUID.randomUUID();
     private final WildcardPermission permission = 
@@ -46,7 +45,6 @@ public class PermissionCheckerTest implements RolePermissionModel {
     private User user;
     private ArrayList<UserGroup> tenants;
     private ArrayList<Role> roles;
-    private final RolePermissionModel rolePermissionModel = this;
     private Ownership ownership;
     private Ownership adminOwnership;
     private AccessControlList acl;
@@ -82,103 +80,49 @@ public class PermissionCheckerTest implements RolePermissionModel {
     
     @Test
     public void testOwnership() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                null, acl));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                ownership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, null, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, ownership, acl));
     }
     
     @Test
     public void testAccessControlList() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, null));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
-        
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, null));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         Set<String> permissionSet = new HashSet<>();
         permissionSet.add(DefaultActions.EDIT.name());
         permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(eventId.toString(), "event", permissionMap);
-        
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
-        
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
         user.addPermission(permission);
-        
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
-        
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
         permissionMap = new HashMap<>();
         permissionSet = new HashSet<>();
         permissionSet.add("!" + DefaultActions.EDIT.name());
         permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(eventId.toString(), "event", permissionMap);
-        
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                ownership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, ownership, acl));
     }
     
     @Test
     public void testDirectPermission() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
         user.addPermission(permission);
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
     }
     
     @Test
     public void testRole() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
         roles.add(globalRole);
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
         roles.remove(globalRole);
         roles.add(tenantRole);
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                adminOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, adminOwnership, acl));
         Ownership testOwnership = new OwnershipImpl(eventId.toString(), adminUser, userTenant, "event");
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                testOwnership, acl));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, rolePermissionModel, 
-                null, acl));
-    }
-
-    @Override
-    public Iterable<WildcardPermission> getPermissions(UUID id) {
-        return roleModel.get(id).getPermissions();
-    }
-    
-    @Override
-    public Iterable<Role> getRoles() {
-        return new ArrayList<Role>(roleModel.values());
-    }
-    
-    // TODO as default implementation in interface
-    @Override
-    public boolean implies(Role role, WildcardPermission permission) {
-        return implies(role, permission, null);
-    }
-    
-    // TODO as default implementation in interface
-    @Override
-    public boolean implies(Role role, WildcardPermission permission, Ownership ownership) {
-        String[] parts = role.getName().split(":");
-        // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        // TODO consider user as Role parameter, comparing to ownership.getUserOwner()
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().getId().equals(UUID.fromString(parts[1])))) {
-            for (WildcardPermission rolePermission : role.getPermissions()) {
-                if (rolePermission.implies(permission)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, roles, testOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, roles, null, acl));
     }
 }

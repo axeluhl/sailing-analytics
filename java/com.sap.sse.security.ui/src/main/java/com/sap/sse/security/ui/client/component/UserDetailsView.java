@@ -78,15 +78,15 @@ public class UserDetailsView extends FlowPanel {
         rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                final ArrayList<UUID> newRoleList = new ArrayList<>();
+                final ArrayList<UUID> newRoleIds = new ArrayList<>();
                 final UserDTO selectedUser = UserDetailsView.this.user;
                 for (String roleName : event.getValue()) {
                     UUID id = selectedUser.getRoleIdByName(roleName);
                     if (id != null) {
-                        newRoleList.add(id);
+                        newRoleIds.add(id);
                     }    
                 }
-                userManagementService.setRolesForUser(selectedUser.getName(), newRoleList, new MarkedAsyncCallback<SuccessInfo>(
+                userManagementService.setRolesForUser(selectedUser.getName(), newRoleIds, new MarkedAsyncCallback<SuccessInfo>(
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {

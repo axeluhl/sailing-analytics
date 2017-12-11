@@ -37,6 +37,6 @@ public class TenantImpl extends UserGroupImpl implements Tenant {
 
     @Override
     public String toString() {
-        return "TenantImpl [getId()=" + getId() + ", getName()=" + getName() + ", getUsers()=" + getUsers() + "]";
+        return getName() + " (users: " + getUsers() + ")";
     }
 }

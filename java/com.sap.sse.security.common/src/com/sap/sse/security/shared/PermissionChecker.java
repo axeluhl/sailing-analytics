@@ -32,8 +32,8 @@ public class PermissionChecker {
      *          object type is asked after (e.g. "event:create").
      */
     public static boolean isPermitted(WildcardPermission permission, SecurityUser user, Iterable<UserGroup> groupsOfWhichUserIsMember,
-            Iterable<Role> roles, RolePermissionModel rolePermissionModel,
-            Ownership ownership, AccessControlList acl) {
+            Iterable<Role> roles, Ownership ownership,
+            AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
@@ -64,12 +64,39 @@ public class PermissionChecker {
         // 4. check role permissions
         if (result == PermissionState.NONE) {
             for (Role role : roles) {
-                if (rolePermissionModel.implies(role, permission, ownership)) {
+                if (implies(role, permission, ownership)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
             }
         }
         return result == PermissionState.GRANTED;
+    }
+    
+    /**
+     * @param role
+     *            the role; its name can, e.g., be of the form "role_title:tenant". The tenant is an optional parameter.
+     *            It restricts permissions with a * as the instance id to data objects where the tenant parameter equals
+     *            the tenant owner of the data object. E.g.: event-admin:tw2016 -> {event:edit:*, regatta:edit:*} This
+     *            role would grant the user edit permission for every event and regatta where the tenant owner is
+     *            "tw2016".
+     * @param permission
+     *            E.g. "regatta:edit:tw2016-dyas" (would return true if "tw2016-dyas" would have "tw2016" as the tenant
+     *            owner)
+     * @param ownership
+     *            Ownership of the data object for which the {@code permission} is requested
+     */
+   private static boolean implies(Role role, WildcardPermission permission, Ownership ownership) {
+        String[] parts = role.getName().split(":");
+        // if there is no parameter or the first parameter (tenant) equals the tenant owner
+        // TODO consider user as Role parameter, comparing to ownership.getUserOwner()
+        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().getId().toString().equals(parts[1]))) {
+            for (WildcardPermission rolePermission : role.getPermissions()) {
+                if (rolePermission.implies(permission)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

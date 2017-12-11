@@ -1,12 +1,10 @@
 package com.sap.sse.security.ui.authentication.app;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.RolePermissionModelDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -16,7 +14,7 @@ public class AuthenticationContextImpl implements AuthenticationContext {
 
     private final UserDTO currentUser;
     private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", null, false, new ArrayList<AccountDTO>(),
-            new ArrayList<Role>(), new RolePermissionModelDTO(new HashMap<>()), /* default tenant */ null, new ArrayList<WildcardPermission>());
+            new ArrayList<Role>(), /* default tenant */ null, new ArrayList<WildcardPermission>());
 
     /**
      * Creating an {@link AuthenticationContextImpl} containing an anonymous {@link UserDTO} object.

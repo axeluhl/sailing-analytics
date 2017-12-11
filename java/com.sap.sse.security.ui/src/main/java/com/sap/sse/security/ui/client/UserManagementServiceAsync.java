@@ -56,7 +56,7 @@ public interface UserManagementServiceAsync {
 
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
-    void setRolesForUser(String username, Iterable<UUID> roles, AsyncCallback<SuccessInfo> callback);
+    void setRolesForUser(String username, Iterable<UUID> roleIds, AsyncCallback<SuccessInfo> callback);
 
     void setPermissionsForUser(String username, Iterable<String> permissions, AsyncCallback<SuccessInfo> callback);
 

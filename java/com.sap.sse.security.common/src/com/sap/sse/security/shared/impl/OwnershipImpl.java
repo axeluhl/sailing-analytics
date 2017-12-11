@@ -9,16 +9,16 @@ public class OwnershipImpl implements Ownership {
     private String idOfOwnedObjectAsString;
     private SecurityUser userOwner;
     private Tenant tenantOwner;
-    private String displayName;
+    private String displayNameOfOwnedObject;
     
     @Deprecated
     OwnershipImpl() {} // for GWT serialization only
     
-    public OwnershipImpl(String idAsString, SecurityUser userOwner, Tenant tenantOwner, String displayName) {
-        this.idOfOwnedObjectAsString = idAsString;
+    public OwnershipImpl(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject) {
+        this.idOfOwnedObjectAsString = idOfOwnedObjectAsString;
         this.userOwner = userOwner;
         this.tenantOwner = tenantOwner;
-        this.displayName = displayName;
+        this.displayNameOfOwnedObject = displayNameOfOwnedObject;
     }
     
     @Override
@@ -38,12 +38,12 @@ public class OwnershipImpl implements Ownership {
     
     @Override
     public String getDisplayNameOfOwnedObject() {
-        return displayName;
+        return displayNameOfOwnedObject;
     }
 
     @Override
     public String toString() {
         return "OwnershipImpl [idOfOwnedObjectAsString=" + idOfOwnedObjectAsString + ", userOwner=" + userOwner
-                + ", tenantOwner=" + tenantOwner + ", displayName=" + displayName + "]";
+                + ", tenantOwner=" + tenantOwner + ", displayNameOfOwnedObject=" + displayNameOfOwnedObject + "]";
     }
 }

@@ -25,7 +25,6 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     private String company;
     private String locale;
     private List<AccountDTO> accounts;
-    private RolePermissionModelDTO rolePermissionModel;
     private boolean emailValidated;
 
     // for GWT serialization only
@@ -35,8 +34,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     }
 
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<Role> roles, RolePermissionModelDTO rolePermissionModelDTO, Tenant defaultTenant,
-            Iterable<WildcardPermission> permissions) {
+            List<AccountDTO> accounts, Iterable<Role> roles, Tenant defaultTenant, Iterable<WildcardPermission> permissions) {
         super(name, roles, defaultTenant, permissions);
         this.email = email;
         this.fullName = fullName;
@@ -44,7 +42,6 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         this.locale = locale;
         this.emailValidated = emailValidated;
         this.accounts = accounts;
-        this.rolePermissionModel = rolePermissionModelDTO;
     }
 
     public String getFullName() {
@@ -60,7 +57,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     }
 
     public UUID getRoleIdByName(String name) {
-        for (Role role : rolePermissionModel.getRoles()) {
+        for (Role role : getRoles()) {
             if (name.equals(role.getName())) {
                 return (UUID) role.getId();
             }
@@ -102,10 +99,8 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     public Iterable<WildcardPermission> getAllPermissions() {
         Set<WildcardPermission> result = new LinkedHashSet<>();
         Util.addAll(getPermissions(), result);
-        if (rolePermissionModel != null) {
-            for (Role role : getRoles()) {
-                Util.addAll(role.getPermissions(), result);
-            }
+        for (Role role : getRoles()) {
+            Util.addAll(role.getPermissions(), result);
         }
         return result;
     }
@@ -123,7 +118,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         if (acl != null) {
             groupsTheUserBelongsTo = new ArrayList<>(acl.getActionsByUserGroup().keySet());
         }
-        return PermissionChecker.isPermitted(permission, this, groupsTheUserBelongsTo, getRoles(), rolePermissionModel, ownership, acl);
+        return PermissionChecker.isPermitted(permission, this, groupsTheUserBelongsTo, getRoles(), ownership, acl);
     }
     
     public List<AccountDTO> getAccounts() {
@@ -137,5 +132,4 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     public boolean isEmailValidated() {
         return emailValidated;
     }
-
 }

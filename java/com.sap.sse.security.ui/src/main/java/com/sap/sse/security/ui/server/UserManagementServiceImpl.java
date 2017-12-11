@@ -40,10 +40,9 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.impl.TenantImpl;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -54,12 +53,13 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.TenantImpl;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.RolePermissionModelDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
@@ -105,13 +105,24 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return new UserGroupImpl(userGroup.getId(), userGroup.getName(), userGroup.getUsers());
     }
 
-    // TODO this is to produce a stripped-down Tenant object in the context of the currently signed-in user
+    /**
+     * Produces a stripped-down {@link Tenant} object that has stripped-down {@link User} objects
+     * with their default tenants stripped down and mapped by this same method recursively where
+     * for a single {@link User} object only a single stripped-down user object will be created,
+     * as will for tenants.
+     */
     private Tenant createTenantDTOFromTenant(Tenant tenant) {
+        return createTenantDTOFromTenant(tenant, new HashMap<>(), new HashMap<>());
+    }
+    
+    private Tenant createTenantDTOFromTenant(Tenant tenant, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<User, SecurityUser> fromOriginalToStrippedDownUser) {
+        final Tenant result;
         if (tenant == null) {
-            return null;
+            result = null;
         } else {
-            return new TenantImpl(tenant.getId(), tenant.getName(), tenant.getUsers());
+            result = new TenantImpl(tenant.getId(), tenant.getName(), tenant.getUsers());
         }
+        return result;
     }
 
     @Override
@@ -511,7 +522,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), new RolePermissionModelDTO(roleMap), user.getDefaultTenant(),
+                accountDTOs, user.getRoles(), user.getDefaultTenant(),
                 user.getPermissions());
         return userDTO;
     }
