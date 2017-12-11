@@ -153,7 +153,6 @@ import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.MigratableRegattaImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
@@ -187,6 +186,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -1273,7 +1273,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor);
+                        rankingMetricConstructor, new MongoObjectFactoryImpl(database));
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
@@ -2367,18 +2367,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Collection<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired() {
         Map<Serializable, CompetitorWithBoat> competitorsById = null;
-
         boolean competitorsCollectionExist = database.collectionExists(CollectionNames.COMPETITORS.name());
         boolean boatsCollectionCollectionExist = database.collectionExists(CollectionNames.BOATS.name());
         DBCollection orginalCompetitorCollection = database.getCollection(CollectionNames.COMPETITORS.name());
-        
         // there is a corner case where tests can create just one competitor without boat
         // before we migrate we need to check if this case
         if (competitorsCollectionExist && !boatsCollectionCollectionExist) {
             long competitorCount = orginalCompetitorCollection.count();
             if (competitorCount > 0) {
                 DBObject oneCompetitorDbObject = orginalCompetitorCollection.findOne();
-                Object boatObject = oneCompetitorDbObject.get("boat");
+                Object boatObject = oneCompetitorDbObject.get(CompetitorJsonConstants.FIELD_BOAT);
                 // only in case such a boat object exist we need a migration, because the new type stores only a boatID or no boat at all 
                 if (boatObject != null) {
                     competitorsById = new HashMap<>();
@@ -2399,9 +2397,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     }
                 }
             }                
-          }
-
-        return competitorsById.values();
+        }
+        return competitorsById==null?null:competitorsById.values();
     }
 
     @Override

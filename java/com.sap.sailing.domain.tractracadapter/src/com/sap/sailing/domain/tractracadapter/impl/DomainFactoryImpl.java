@@ -34,6 +34,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.MigratableRegatta;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -44,7 +45,6 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MigratableRegattaImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -697,16 +697,19 @@ public class DomainFactoryImpl implements DomainFactory {
             // As the attribute 'canBoatsOfCompetitorsChangePerRace' is new and 'false' is the default value 
             // we need to set it's value to true for the regatta, but only if the regatta is of type MigratableRegattaImpl
             Regatta regatta = trackedRegatta.getRegatta();
-            if (competitorBoatInfo != null && regatta.canBoatsOfCompetitorsChangePerRace() == false) {
-                // we need to set this to true for the regatta to make it possible to create the boat/competitor mappings
-                if (regatta instanceof MigratableRegattaImpl) {
-                    MigratableRegattaImpl migratableRegatta = (MigratableRegattaImpl) regatta;
-                    migratableRegatta.migrateCanBoatsOfCompetitorsChangePerRace(true);
-                    logger.log(Level.INFO, "Successful migration of regatta " + regatta.getName() +
-                            " to be of type 'canBoatsOfCompetitorsChangePerRace=true'");
-                } else {
-                    logger.log(Level.SEVERE, "Regatta " + regatta.getName() +
-                            " has wrong type 'canBoatsOfCompetitorsChangePerRace' but can't be migrated because it is not of type MigratableRegattaImpl");
+            // the check for migration needs to obtain the lock for check and possible migration
+            synchronized (regatta) {
+                if (competitorBoatInfo != null && regatta.canBoatsOfCompetitorsChangePerRace() == false) {
+                    // we need to set this to true for the regatta to make it possible to create the boat/competitor mappings
+                    if (regatta instanceof MigratableRegatta) {
+                        MigratableRegatta migratableRegatta = (MigratableRegatta) regatta;
+                        migratableRegatta.migrateCanBoatsOfCompetitorsChangePerRace();
+                        logger.log(Level.INFO, "Successful migration of regatta " + regatta.getName() +
+                                " to be of type 'canBoatsOfCompetitorsChangePerRace=true'");
+                    } else {
+                        logger.log(Level.SEVERE, "Regatta " + regatta.getName() +
+                                " has wrong type 'canBoatsOfCompetitorsChangePerRace' but can't be migrated because it is not of type MigratableRegattaImpl");
+                    }
                 }
             }
 
