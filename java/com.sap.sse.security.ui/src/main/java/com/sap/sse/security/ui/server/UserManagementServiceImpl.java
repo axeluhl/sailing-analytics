@@ -419,7 +419,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("users:manage")) {
             List<UserDTO> users = new ArrayList<>();
             for (UserImpl u : getSecurityService().getUserList()) {
-                if (filter != null && !"".equals(filter)) {
+                if (filter != null && filter.isEmpty()) {
                     if (u.getName().contains(filter)) {
                         users.add(createUserDTOFromUser(u));
                     }
