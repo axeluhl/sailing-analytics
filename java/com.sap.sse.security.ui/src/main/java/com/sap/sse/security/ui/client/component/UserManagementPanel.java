@@ -64,6 +64,7 @@ public class UserManagementPanel extends DockPanel {
             @Override
             public void onClick(ClickEvent event) {
                 userListDataProvider.updateDisplays();
+                aclListDataProvider.updateDisplays();
             }
         }));
         Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
