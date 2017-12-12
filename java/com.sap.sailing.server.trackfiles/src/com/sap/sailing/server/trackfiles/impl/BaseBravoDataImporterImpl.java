@@ -55,12 +55,12 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
         super(type);
         this.columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     }
-
+    
     /**
      * @param inputStream
      *            the stream from which to read the fixes; this method will <em>not</em> close the stream; it's the
-     *            caller who is responsible for closing it. This, in particular, allows for usages with ZIP files that
-     *            would suffer from closing the stream here
+     *            caller who is responsible for closing it. This, in particular, allows for usages with ZIP files
+     *            that would suffer from closing the stream here
      * @param downsample
      *            if {@code true}, fixes will be down-sampled to a 1Hz frequency before being emitted to the
      *            {@code callback}. Otherwise, all fixes read will be forwarded straight to the {@link Callback}.
@@ -116,15 +116,15 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
     protected DoubleFixProcessor createDownsamplingProcessor(Callback callback,
             final TrackFileImportDeviceIdentifier trackIdentifier) {
         LearningBatchProcessor batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
-        DoubleFixProcessor downsampler = new DownsamplerTo1HzProcessor(getTrackColumnCount(), batchProcessor);
+        DoubleFixProcessor downsampler = new DownsamplerTo1HzProcessor(getTrackColumnCount(),
+                batchProcessor);
         return downsampler;
     }
 
     /**
      * Parses the CSV line and reads the double data values in the order defined by the col enums.
      */
-    private DoubleVectorFixData parseLine(long lineNr, String filename, String line,
-            Map<String, Integer> columnsInFileFromHeader) {
+    private DoubleVectorFixData parseLine(long lineNr, String filename, String line, Map<String, Integer> columnsInFileFromHeader) {
         try {
             final DoubleVectorFixData result;
             String[] fileContentTokens = split(line);
@@ -134,11 +134,9 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
                 epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
                 epoch = Long.parseLong(epochColValue);
                 Double[] trackFixData = new Double[getTrackColumnCount()];
-                for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix
-                        .entrySet()) {
+                for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
                     Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
-                    trackFixData[columnNameToSearchForInFile.getValue()] = Double
-                            .parseDouble(fileContentTokens[columnsInFileIdx]);
+                    trackFixData[columnNameToSearchForInFile.getValue()] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
                 }
                 result = new DoubleVectorFixData(epoch, trackFixData);
             } else {
@@ -177,6 +175,6 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
     }
 
     private int getTrackColumnCount() {
-        return columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.size();
+        return Collections.max(columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.values())+1;
     }
 }

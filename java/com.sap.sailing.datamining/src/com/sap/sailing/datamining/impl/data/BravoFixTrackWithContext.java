@@ -56,7 +56,7 @@ public class BravoFixTrackWithContext implements HasBravoFixTrackContext {
             end = endOfRace;
         }
         return bravoFixTrack.getDistanceSpentFoiling(
-                getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getTrack(getRaceOfCompetitorContext().getCompetitor()),
-                startOfRace, end);
+                startOfRace,
+                end);
     }
 }

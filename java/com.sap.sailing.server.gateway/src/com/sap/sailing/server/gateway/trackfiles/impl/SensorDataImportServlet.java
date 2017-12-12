@@ -19,8 +19,8 @@ import org.json.simple.JSONObject;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
@@ -56,7 +56,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @throws IOException
      */
-    private void importFiles(JsonHolder jsonResult, Iterable<Pair<String, FileItem>> files) throws IOException {
+    private void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> files) throws IOException {
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
         for (Pair<String, FileItem> file : files) {
@@ -73,7 +73,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                 throw new RuntimeException("Sensor importer not found: " + requestedImporterName);
             }
             logger.log(Level.INFO,
-                    "Start import sensor data file with importer " + importerToUse.getClass().getSimpleName());
+                    "Going to import sensor data file  with importer " + importerToUse.getClass().getSimpleName());
             try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
                 final String filename = fi.getName();
                 try {
@@ -83,7 +83,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                             storeFixes(fixes, device);
                             jsonResult.add(device);
                         }
-                    }, filename, requestedImporterName, /* downsample */ true);
+                    }, filename, requestedImporterName, enableDownsampler);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
                 } catch (FormatNotSupportedException e) {
                     jsonResult.add(requestedImporterName, filename, e);
@@ -99,12 +99,14 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         JsonHolder jsonResult = new JsonHolder(logger);
+        boolean enableDownsampler = false;;
         try {
             String importerName = null;
-            searchForPreferredImporter: for (FileItem fi : fileItems) {
+            for (FileItem fi : fileItems) {
                 if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
                     importerName = fi.getString();
-                    break searchForPreferredImporter;
+                } else if ("downsample".equalsIgnoreCase(fi.getFieldName())) {
+                    enableDownsampler = "on".equalsIgnoreCase(fi.getString());
                 }
             }
             if (importerName == null) {
@@ -116,7 +118,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                     filesAndImporterNames.add(new Pair<>(importerName, fi));
                 }
             }
-            importFiles(jsonResult, filesAndImporterNames);
+            importFiles(enableDownsampler, jsonResult, filesAndImporterNames);
         } catch (Exception e) {
             jsonResult.add(e);
         } finally {

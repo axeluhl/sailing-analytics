@@ -27,9 +27,9 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
@@ -39,7 +39,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Importer for CSV data files from Bravo units used by the SAP Extreme Sailing Team.
+ * Importer for CSV data files from Expedition log files, as used, e.g., by Team Phoenix.
  */
 public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixImporter implements DoubleVectorFixImporter {
     public static final String EXPEDITION_EXTENDED_TYPE = "EXPEDITION_EXTENDED";
@@ -47,6 +47,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private static final String ORIGINAL_POSITION_HEADER = "Pos[ddd.dd]";
     public static final String COL_NAME_LAT = "Lat";
     public static final String COL_NAME_LON = "Lon";
+    private static final String UTC_COLUMN = "Utc";
     private static final String DATE_COLUMN_1 = "dd/mm/yy";
     private static final String DATE_COLUMN_1_PATTERN = "dd/MM/yy";
     private static final String DATE_COLUMN_2 = "mm/dd/yy";
@@ -104,7 +105,9 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                             Double[] trackFixData = new Double[trackColumnCount];
                             for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.entrySet()) {
                                 Integer columnsInFileIdx = columnsInFileFromHeader.get(columnNameToSearchForInFile.getKey());
-                                trackFixData[columnNameToSearchForInFile.getValue()] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
+                                trackFixData[columnNameToSearchForInFile.getValue()] = columnsInFileIdx >= fileContentTokens.length ?
+                                        null : fileContentTokens[columnsInFileIdx].trim().isEmpty() ? null :
+                                            Double.parseDouble(fileContentTokens[columnsInFileIdx]);
                             }
                             callback.addFixes(Collections.singleton(new DoubleVectorFixImpl(
                                     timePoint, trackFixData)), trackIdentifier);
@@ -114,7 +117,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                 buffer.close();
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Exception parsing bravo CSV file " + filename, e);
+            logger.log(Level.SEVERE, "Exception parsing Expedition CSV log file " + filename, e);
         }
     }
 
@@ -184,7 +187,9 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             final TimePoint timePoint;
             final String date;
             final String dateFormatPattern;
-            if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1) || columnsInFileFromHeader.containsKey(DATE_COLUMN_2)) {
+            if (columnsInFileFromHeader.containsKey(UTC_COLUMN)) {
+                timePoint = getTimePoint(fileContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)]);
+            } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1) || columnsInFileFromHeader.containsKey(DATE_COLUMN_2)) {
                 if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
                     date = fileContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)];
                     dateFormatPattern = DATE_COLUMN_1_PATTERN;

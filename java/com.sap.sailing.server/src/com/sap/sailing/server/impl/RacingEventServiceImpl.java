@@ -54,7 +54,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -95,6 +98,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -115,6 +119,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -149,7 +154,6 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -3480,6 +3484,38 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         return result;
     }
+    
+    @Override
+    public TimePoint setEndTime(String leaderboardName, String raceColumnName, String fleetName,
+            String authorName, int authorPriority, int passId, TimePoint logicalTimePoint) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final TimePoint result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            LogEventAuthorImpl author = new LogEventAuthorImpl(authorName, authorPriority);
+            raceLog.add(new RaceLogRaceStatusEventImpl(logicalTimePoint, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED));
+            result = new FinishedTimeFinder(raceLog).analyze();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public TimePoint setFinishingTime(String leaderboardName, String raceColumnName, String fleetName,
+            String authorName, Integer authorPriority, int passId, MillisecondsTimePoint logicalTimePoint) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final TimePoint result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            LogEventAuthorImpl author = new LogEventAuthorImpl(authorName, authorPriority);
+            raceLog.add(new RaceLogRaceStatusEventImpl(logicalTimePoint, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING));
+            result = new FinishingTimeFinder(raceLog).analyze();
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
     public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
@@ -3503,6 +3539,22 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
             result = new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
                 raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndFinishTime(
+            String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final Triple<TimePoint, TimePoint, Integer> result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
+            result = new com.sap.sse.common.Util.Triple<>(state.getFinishingTime(), state.getFinishedTime(),
+                raceLog.getCurrentPassId());
         } else {
             result = null;
         }
@@ -4092,4 +4144,5 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public AnniversaryRaceDeterminator getAnniversaryRaceDeterminator() {
         return anniversaryRaceDeterminator;
     }
+
 }

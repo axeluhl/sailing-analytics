@@ -184,6 +184,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String secondsUnit();
     String secondsPerNauticalMileUnit();
     String metersUnit();
+    String millimetersUnit();
     String degreesUnit();
     @Override
     String close();
@@ -1021,8 +1022,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String overwriteRacingProceduresConfigurationHelpText();
     
     String setStartTime();
+    String finishTimeString();
+    String setFinishingAndFinishTime();
+    String finishTimeMustBeAtOrAfterFinishingTime();
     String currentPass();
     String setStartTimeDescription();
+    String setFinishingAndFinishTimeDescription();
     String setTrackingTimesDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
@@ -1048,6 +1053,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveLeaderboard(String name);
     String metaLeaderboardCannotBeChanged();
     String failedToSetNewStartTime();
+    String failedToSetNewFinishingAndFinishTime();
     String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
     String igtimiWindImport();
     String seeIgtimiTabForAccountSettings();
@@ -1932,6 +1938,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentStbdRudderRakeTooltip();
     String currentMastRotationInDegree();
     String currentMastRotationInDegreeTooltip();
+    String finishingTime();
     String boatNameMustNotBeEmpty();
     String errorUpdatingExpeditionDeviceConfiguration(String name, String message);
     String doYouReallyWantToRemoveExpeditionDeviceConfiguration(String name);
@@ -1943,4 +1950,40 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionBoatId();
     String doYouReallyWantToRemoveTheSelectedExpeditionDeviceConfigurations();
     String doYouReallyWantToRemoveTheSelectedIgtimiAccounts();
+    String currentDepthInMeters();
+    String currentDriftInDegrees();
+    String currentLeewayInDegrees();
+    String currentRudderInDegrees();
+    String currentSet();
+    String currentTackAngleInDegrees();
+    String currentDeflectorInMillimeters();
+    String currentDeflectorPercentage();
+    String currentForestayLoad();
+    String currentForestayPressure();
+    String currentRakeInDegrees();
+    String currentTargetBoatspeedPercentage();
+    String currentTargetHeelAngleInDegrees();
+    String percent();
+    String currentTargetHeelAngleInDegreesTooltip();
+    String currentTargetBoatspeedPercentageTooltip();
+    String currentRakeInDegreesTooltip();
+    String currentForestayLoadTooltip();
+    String currentForestayPressureTooltip();
+    String currentDeflectorPercentageTooltip();
+    String currentDeflectorInMillimetersTooltip();
+    String currentTackAngleInDegreesTooltip();
+    String currentSetTooltip();
+    String currentRudderInDegreesTooltip();
+    String currentLeewayInDegreesTooltip();
+    String currentDriftInDegreesTooltip();
+    String currentDepthInMetersTooltip();
+    String tonsUnit();
+    String currentDistanceFoiledInMeters();
+    String currentDurationFoiled();
+    String currentDistanceFoiledInMetersTooltip();
+    String currentDurationFoiledTooltip();
+    String totalDurationFoiledInSeconds();
+    String totalDistanceFoiledInMeters();
+    String totalDurationFoiledInSecondsTooltip();
+    String totalDistanceFoiledInMetersTooltip();
 }

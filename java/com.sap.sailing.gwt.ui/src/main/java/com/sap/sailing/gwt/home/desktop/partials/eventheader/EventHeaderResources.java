@@ -1,14 +1,18 @@
 package com.sap.sailing.gwt.home.desktop.partials.eventheader;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
-public interface EventHeaderResources extends ClientBundle {
+public interface EventHeaderResources extends SharedDesktopResources {
     public static final EventHeaderResources INSTANCE = GWT.create(EventHeaderResources.class);
 
     @Source("EventHeader.gss")
     LocalCss css();
+    
+    @Source("location-icon.png")
+    ImageResource location();
 
     public interface LocalCss extends CssResource {
         String jsdropdown();
@@ -27,7 +31,6 @@ public interface EventHeaderResources extends ClientBundle {
         String leaderboardquickaccess();
         String eventheader();
         String eventheader_breadcrumb();
-        String eventheader_breadcrumbback();
         String eventheader_intro();
         String eventheader_intro_logo();
         String eventheader_intro_logo_image();

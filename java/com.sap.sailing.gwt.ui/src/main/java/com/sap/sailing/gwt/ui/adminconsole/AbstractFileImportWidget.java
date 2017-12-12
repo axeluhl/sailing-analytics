@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -26,6 +27,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class AbstractFileImportWidget extends Composite {
+
     private static AbstractFileImportWidgetUiBinder uiBinder = GWT.create(AbstractFileImportWidgetUiBinder.class);
 
     interface AbstractFileImportWidgetUiBinder extends UiBinder<Widget, AbstractFileImportWidget> {
@@ -42,10 +44,12 @@ public abstract class AbstractFileImportWidget extends Composite {
     @UiField
     Image loadingImageUi;
     @UiField
+    CheckBox downsampleUi;
+    @UiField
     FormPanel formPanelUi;
+
     private final TrackFileImportDeviceIdentifierTableWrapper table;
     protected final SailingServiceAsync sailingService;
-    private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private boolean shouldClearListOnNewUploadComplete = true;
 
@@ -54,7 +58,6 @@ public abstract class AbstractFileImportWidget extends Composite {
             final ErrorReporter errorReporter) {
         this.table = table;
         this.sailingService = sailingService;
-        this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         initWidget(uiBinder.createAndBindUi(this));
         importButtonUi.setText(stringMessages.importFixes());
@@ -79,6 +82,10 @@ public abstract class AbstractFileImportWidget extends Composite {
         formPanelUi.submit();
     }
 
+    protected void setDownsampleOptionVisible(boolean visible) {
+        downsampleUi.setVisible(visible);
+    }
+    
     @UiHandler("formPanelUi")
     void onFileImportComplete(SubmitCompleteEvent event) {
         if (shouldClearListOnNewUploadComplete) {

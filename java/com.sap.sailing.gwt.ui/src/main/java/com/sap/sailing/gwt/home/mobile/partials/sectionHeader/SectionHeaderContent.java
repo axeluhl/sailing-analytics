@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -42,7 +41,7 @@ public class SectionHeaderContent extends Composite {
     @UiField DivElement subtitleUi;
     @UiField DivElement headerRightUi;
     @UiField DivElement infoTextUi;
-    @UiField ImageElement actionArrowUi;
+    @UiField DivElement actionArrowUi;
     @UiField SimplePanel filterSelectContainerUi;
 
     public SectionHeaderContent() {
@@ -94,7 +93,6 @@ public class SectionHeaderContent extends Composite {
                 animation.animate(collapsed);
             }
         });
-        actionArrowUi.setSrc("images/mobile/arrow-down-grey.png");
         actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());

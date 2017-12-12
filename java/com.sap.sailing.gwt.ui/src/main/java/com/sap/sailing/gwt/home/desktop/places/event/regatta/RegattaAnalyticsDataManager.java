@@ -5,6 +5,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboar
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
@@ -32,9 +33,12 @@ public class RegattaAnalyticsDataManager {
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Timer timer;
+    private final FlagImageResolver flagImageResolver;
     
     public RegattaAnalyticsDataManager(final SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter) {
+            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter,
+            FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -56,7 +60,8 @@ public class RegattaAnalyticsDataManager {
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
-                    /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true,new ClassicLeaderboardStyle());
+                    /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true,
+                    new ClassicLeaderboardStyle(), flagImageResolver);
         }
         return leaderboardPanel;
     }
