@@ -518,6 +518,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     private UserDTO createUserDTOFromUser(User user) {
+        return createUserDTOFromUser(user, new HashMap<>(), new HashMap<>());
+    }
+    
+    private UserDTO createUserDTOFromUser(User user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser) {
         UserDTO userDTO;
         Map<AccountType, Account> accounts = user.getAllAccounts();
         List<AccountDTO> accountDTOs = new ArrayList<>();
@@ -539,8 +543,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), user.getDefaultTenant(),
+                accountDTOs, user.getRoles(), /* default tenant filled in later */ null,
                 user.getPermissions());
+        fromOriginalToStrippedDownUser.put(user, userDTO);
+        userDTO.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser));
         return userDTO;
     }
 

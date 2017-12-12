@@ -696,12 +696,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userStore.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
+        final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
+        if (userStore.getTenantByName(defaultTenantNameForUsername) != null) {
+            throw new UserManagementException(UserManagementException.TENANT_ALREADY_EXISTS);
+        }
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        Tenant tenant = createTenant(UUID.randomUUID(), username + "-tenant");
+        Tenant tenant = createTenant(UUID.randomUUID(), defaultTenantNameForUsername);
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
@@ -730,6 +734,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }.start();
         }
         return result;
+    }
+
+    private String getDefaultTenantNameForUsername(final String username) {
+        return username + "-tenant";
     }
 
     @Override
@@ -986,7 +994,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userStore.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        Tenant tenant = createTenant(UUID.randomUUID(), name + "-tenant");
+        Tenant tenant = createTenant(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
         SecurityUser result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant, socialUserAccount);
         accessControlStore.createOwnership(tenant.getId().toString(), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);
