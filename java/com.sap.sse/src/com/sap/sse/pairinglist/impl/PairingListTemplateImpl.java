@@ -125,8 +125,13 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     protected int[][] createPairingListTemplate(int flightCount, int groupCount, int competitorCount) {
         int[][] bestPLT = new int[flightCount * groupCount][competitorCount / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
-        
-        int equals=3;
+        int equals=0;
+        //TODO how to calc equals
+        if(flightCount>=10){
+            equals=3;
+        }else{
+            equals=-1;
+        }
         int[][] allSeeds=new int[iterations][flightCount];
         for(int i=0;i<iterations;i++){
             allSeeds[i]=this.generateSeeds(flightCount, competitorCount,flightCount);
@@ -164,7 +169,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return bestPLT;
     }
     /**
-     * Divides the allSeeds array into parts with seed combinations that start with the same seeds.  
+     * Divides the allSeeds array into parts with seed combinations that start with the same seeds. If there are to less flights this method cuts the Seeds into 4000 parts
+     * to avoid to less Tasks.   
      * @param equalSeeds number of equal seeds at the beginning of seed combinations which should be grouped. Attention: If this number is to big there will be very many little parts.
      * @param allSeeds array with seed combinations, which should be divided
      * @return an Arraylist, that contains parts of allSeeds.
@@ -172,6 +178,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private ArrayList<int[][]> divideSeeds(int equalSeeds,int[][] allSeeds) {
         int cut=0;
         ArrayList<int[][]> output=new ArrayList<>();
+        if(equalSeeds>-1){
         for(int z=1;z<allSeeds.length;z++){
             int[] temp1=Arrays.copyOfRange(allSeeds[z-1], 0, equalSeeds);
             int[] temp2=Arrays.copyOfRange(allSeeds[z], 0, equalSeeds);
@@ -183,6 +190,15 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
         }
         return output;
+        }else{
+            int step = allSeeds.length/4000;
+            for(int x=0;x<allSeeds.length;x+=step){
+                output.add(Arrays.copyOfRange(allSeeds, cut, x+1));
+                cut=x+1;
+            }
+            output.add(Arrays.copyOfRange(allSeeds, cut, allSeeds.length));
+            return output;
+        }
     }
     /**
      * Fast sorting algorithm to sort a huge amount of seeds in max <code>n*log(n)</code> time. Uses counting sort.
