@@ -6,7 +6,7 @@ import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 /**
  * This {@link FlushableSortedCellTableWithStylableHeaders} provides the
  * {@link FlushableSortedCellTableWithStylableHeaders#flush()}-method for the {@link SelectionCheckboxColumn}. So the
- * {@link SelectionCheckboxColumn} can ensure that the selection state is displayed correct.
+ * {@link SelectionCheckboxColumn} can ensure that the selection state is displayed correctly.
  * 
  * @author D064976
  * @param <T>
