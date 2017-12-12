@@ -307,7 +307,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
         boolean forceLayout = false;
-        if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission())) {
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
             if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPassingsSplitter.getToggleButton().setVisible(true);
             }
@@ -318,7 +318,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 markPassingsSplitter.getToggleButton().setVisible(false);
             }
         }
-        if (user != null && user.hasPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission())) {
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_POSITIONS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
             if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPositionSplitter.getToggleButton().setVisible(true);
             }

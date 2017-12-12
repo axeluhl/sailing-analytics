@@ -441,7 +441,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      */
     private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
         for (Permission requiredStringPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
-            WildcardPermission requiredPermission = new WildcardPermission(requiredStringPermission.getStringPermission());
+            WildcardPermission requiredPermission = requiredStringPermission.getPermission();
             // TODO use PermissionChecker instead of enumerating all permissions
             for (WildcardPermission userPermission : user.getAllPermissions()) {
                 if (requiredPermission.implies(userPermission) || userPermission.implies(requiredPermission)) {

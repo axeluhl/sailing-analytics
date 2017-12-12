@@ -170,7 +170,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
         if (usersO != null) {
             for (Object o : usersO) {
-                users.add(usersByName.get((String) o));
+                final UserImpl user = usersByName.get((String) o);
+                if (user != null) {
+                    users.add(user);
+                }
             }
         }
         UserGroup result = new UserGroupImpl(id, name, users);

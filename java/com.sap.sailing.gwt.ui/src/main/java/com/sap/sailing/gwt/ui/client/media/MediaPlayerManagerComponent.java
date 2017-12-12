@@ -489,7 +489,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         final VideoSynchPlayer videoPlayer;
         final UserDTO currentUser = userService.getCurrentUser();
         boolean showSynchControls = currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission());
+                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getPermission(), /* TODO race ownership */ null, /* TODO race ACL */ null);
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
@@ -673,7 +673,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public boolean allowsEditing() {
         UserDTO currentUser = userService.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission());
+                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getPermission(), /* TODO race ownership */ null, /* TODO race ACL */ null);
     }
 
     @Override

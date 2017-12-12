@@ -14,7 +14,7 @@ public class AuthenticationContextImpl implements AuthenticationContext {
 
     private final UserDTO currentUser;
     private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", null, false, new ArrayList<AccountDTO>(),
-            new ArrayList<Role>(), /* default tenant */ null, new ArrayList<WildcardPermission>());
+            new ArrayList<Role>(), /* default tenant */ null, new ArrayList<WildcardPermission>(), /* groups */ null);
 
     /**
      * Creating an {@link AuthenticationContextImpl} containing an anonymous {@link UserDTO} object.

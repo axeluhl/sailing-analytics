@@ -55,6 +55,7 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.TenantImpl;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
@@ -100,13 +101,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }.start();
     }
 
-    private SecurityUser createUserDTOFromUser(SecurityUser user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser) {
+    private SecurityUser createUserDTOFromUser(SecurityUser user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
         SecurityUser result = fromOriginalToStrippedDownUser.get(user);
         if (result == null) {
             final SecurityUserImpl preResult = new SecurityUserImpl(user.getName(), /* default tenant to be set later: */ null);
             result = preResult;
             fromOriginalToStrippedDownUser.put(user, result);
-            preResult.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser));
+            preResult.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         }
         return result;
     }
@@ -125,10 +127,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
      * as will for tenants.
      */
     private Tenant createTenantDTOFromTenant(Tenant tenant) {
-        return createTenantDTOFromTenant(tenant, new HashMap<>(), new HashMap<>());
+        return createTenantDTOFromTenant(tenant, new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
     
-    private Tenant createTenantDTOFromTenant(Tenant tenant, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser) {
+    private Tenant createTenantDTOFromTenant(Tenant tenant, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
+            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
         final Tenant result;
         if (tenant == null) {
             result = null;
@@ -138,7 +142,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             result = new TenantImpl(tenant.getId(), tenant.getName());
             fromOriginalToStrippedDownTenant.put(tenant, result);
             for (final SecurityUser user : tenant.getUsers()) {
-                result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser));
+                result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser,
+                        fromOriginalToStrippedDownUserGroup));
             }
         }
         return result;
@@ -261,10 +266,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("tenant:delete:" + tenantIdAsString)) {
             try {
                 UUID tenantId = UUID.fromString(tenantIdAsString);
-                getSecurityService().deleteTenant(getSecurityService().getTenant(tenantId));
+                final Tenant tenant = getSecurityService().getTenant(tenantId);
+                getSecurityService().deleteTenant(tenant);
                 getSecurityService().deleteACL(tenantIdAsString);
                 getSecurityService().deleteOwnership(tenantIdAsString);
-                return new SuccessInfo(true, "Deleted tenant: " + tenantIdAsString + ".", /* redirectURL */ null, null);
+                return new SuccessInfo(true, "Deleted tenant: " + tenant.getName() + ".", /* redirectURL */ null, null);
             } catch (UserGroupManagementException e) {
                 return new SuccessInfo(false, "Could not delete tenant.", /* redirectURL */ null, null);
             }
@@ -518,10 +524,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     private UserDTO createUserDTOFromUser(User user) {
-        return createUserDTOFromUser(user, new HashMap<>(), new HashMap<>());
+        return createUserDTOFromUser(user, new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
     
-    private UserDTO createUserDTOFromUser(User user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser) {
+    private UserDTO createUserDTOFromUser(User user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
         UserDTO userDTO;
         Map<AccountType, Account> accounts = user.getAllAccounts();
         List<AccountDTO> accountDTOs = new ArrayList<>();
@@ -544,10 +551,48 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
                 accountDTOs, user.getRoles(), /* default tenant filled in later */ null,
-                user.getPermissions());
+                user.getPermissions(),
+                createUserGroupDTOsFromUserGroups(getSecurityService().getUserGroupsOfUser(user),
+                        fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser,
+                        fromOriginalToStrippedDownUserGroup));
         fromOriginalToStrippedDownUser.put(user, userDTO);
-        userDTO.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser));
+        userDTO.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant,
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         return userDTO;
+    }
+
+    private Iterable<UserGroup> createUserGroupDTOsFromUserGroups(Iterable<UserGroup> userGroups,
+            Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
+            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+        final List<UserGroup> result;
+        if (userGroups == null) {
+            result = null;
+        } else {
+            result = new ArrayList<>();
+            for (final UserGroup userGroup : userGroups) {
+                result.add(createUserDTOFromUserGroup(userGroup, fromOriginalToStrippedDownTenant,
+                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+            }
+        }
+        return result;
+    }
+
+    private UserGroup createUserDTOFromUserGroup(UserGroup userGroup,
+            Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
+            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+        final UserGroup result;
+        if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
+            result = fromOriginalToStrippedDownUserGroup.get(userGroup);
+        } else {
+            result = new UserGroupImpl(userGroup.getId(), userGroup.getName());
+            fromOriginalToStrippedDownUserGroup.put(userGroup, result);
+            for (final SecurityUser user : userGroup.getUsers()) {
+                result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+            }
+        }
+        return result;
     }
 
     @Override

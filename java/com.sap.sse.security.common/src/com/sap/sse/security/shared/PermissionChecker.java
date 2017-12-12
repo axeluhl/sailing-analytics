@@ -27,9 +27,14 @@ public class PermissionChecker {
     }
     
     /**
-     * @param permission Permission of the form "data_object_type:action:instance_id".
-     *          The instance id can be omitted when a general permission for the data
-     *          object type is asked after (e.g. "event:create").
+     * @param permission
+     *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
+     *            general permission for the data object type is asked after (e.g. "event:create").
+     * @param ownership
+     *            may be {@code null}, causing user- or tenant-parameterized roles and no user ownership override to be
+     *            applied
+     * @param acl
+     *            may be {@code null} in which case no ACL-specific checks are performed
      */
     public static boolean isPermitted(WildcardPermission permission, SecurityUser user, Iterable<UserGroup> groupsOfWhichUserIsMember,
             Iterable<Role> roles, Ownership ownership,

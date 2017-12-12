@@ -10,7 +10,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
@@ -26,6 +25,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     private String locale;
     private List<AccountDTO> accounts;
     private boolean emailValidated;
+    private List<UserGroup> groups;
 
     // for GWT serialization only
     @Deprecated
@@ -33,8 +33,12 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         super();
     }
 
+    /**
+     * @param groups may be {@code null} which is equivalent to passing an empty groups collection
+     */
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<Role> roles, Tenant defaultTenant, Iterable<WildcardPermission> permissions) {
+            List<AccountDTO> accounts, Iterable<Role> roles, Tenant defaultTenant, Iterable<WildcardPermission> permissions,
+            Iterable<UserGroup> groups) {
         super(name, roles, defaultTenant, permissions);
         this.email = email;
         this.fullName = fullName;
@@ -42,6 +46,8 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         this.locale = locale;
         this.emailValidated = emailValidated;
         this.accounts = accounts;
+        this.groups = new ArrayList<>();
+        Util.addAll(groups, this.groups);
     }
 
     public String getFullName() {
@@ -105,20 +111,16 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         return result;
     }
     
+    public List<UserGroup> getUserGroups() {
+        return groups;
+    }
+    
     public boolean hasPermission(String permission) {
         return hasPermission(new WildcardPermission(permission));
     }
-    
-    public boolean hasPermission(String permission, AccessControlList acl, Ownership ownership) {
-        return hasPermission(new WildcardPermission(permission), acl, ownership);
-    }
-    
-    public boolean hasPermission(WildcardPermission permission, AccessControlList acl, Ownership ownership) {
-        ArrayList<UserGroup> groupsTheUserBelongsTo = new ArrayList<>();
-        if (acl != null) {
-            groupsTheUserBelongsTo = new ArrayList<>(acl.getActionsByUserGroup().keySet());
-        }
-        return PermissionChecker.isPermitted(permission, this, groupsTheUserBelongsTo, getRoles(), ownership, acl);
+
+    public boolean hasPermission(WildcardPermission permission, Ownership ownership, AccessControlList acl) {
+        return hasPermission(permission, ownership, getUserGroups(), acl);
     }
     
     public List<AccountDTO> getAccounts() {

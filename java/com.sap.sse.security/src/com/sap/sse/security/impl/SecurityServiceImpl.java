@@ -491,6 +491,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user) {
+        return userStore.getUserGroupsOfUser(user);
+    }
+
+    @Override
     public Iterable<Tenant> getTenants() {
         return userStore.getTenants();
     }
@@ -552,7 +557,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException {
         for (Ownership ownership : accessControlStore.getOwnerships()) {
-            if (ownership.getTenantOwner().equals(tenant)) {
+            if (!Util.equalsWithNull(ownership.getIdOfOwnedObjectAsString(), tenant.getId().toString()) &&
+                    Util.equalsWithNull(ownership.getTenantOwner(), tenant)) {
                 throw new TenantManagementException("The tenant "+tenant.getName()+
                         " is still used as tenant owner and therefore cannot be removed");
             }
@@ -620,7 +626,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalDeleteUserGroup(UUID groupId) throws UserGroupManagementException {
-        userStore.deleteUserGroup(getUserGroup(groupId));
+        final UserGroup userGroup = getUserGroup(groupId);
+        if (userGroup == null) {
+            logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
+        } else {
+            userStore.deleteUserGroup(userGroup);
+        }
         return null;
     }
 

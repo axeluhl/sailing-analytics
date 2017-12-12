@@ -72,7 +72,9 @@ public class UserStoreImpl implements UserStore {
     
     /**
      * Protects access to the two maps {@link #userGroupsContainingUser} and {@link #usersInUserGroups} which implement
-     * an efficient lookup for the m:n association between {@link UserGroup#getUsers()} and {@link SecurityUser}.
+     * an efficient lookup for the m:n association between {@link UserGroup#getUsers()} and {@link SecurityUser}. The
+     * collections also contain the relationships for the specialized {@link Tenant} objects which are not part of
+     * {@link #userGroups} but of {@link #tenants}.
      */
     private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock("User Groups Cache", /* fair */ false);
     private final ConcurrentHashMap<SecurityUser, Set<UserGroup>> userGroupsContainingUser;

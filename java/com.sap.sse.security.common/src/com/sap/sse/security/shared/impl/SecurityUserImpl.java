@@ -5,9 +5,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class SecurityUserImpl implements SecurityUser {
@@ -76,9 +80,20 @@ public class SecurityUserImpl implements SecurityUser {
     
     @Override
     public boolean hasPermission(WildcardPermission permission) {
-        return permissions.contains(permission);
+        return hasPermission(permission, /* ownership */ null);
     }
     
+    @Override
+    public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
+        return hasPermission(permission, ownership, /* user groups */ null, /* ACL */ null);
+    }
+
+    @Override
+    public boolean hasPermission(WildcardPermission permission, Ownership ownership,
+            Iterable<UserGroup> groupsThisUserIsPartOf, AccessControlList acl) {
+        return PermissionChecker.isPermitted(permission, this, groupsThisUserIsPartOf, getRoles(), ownership, acl);
+    }
+
     public void addRole(Role role) {
         roles.add(role);
     }

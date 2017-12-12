@@ -104,6 +104,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getUserGroup(UUID id);
 
     UserGroup getUserGroupByName(String name);
+    
+    Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user);
 
     Iterable<Tenant> getTenants();
 

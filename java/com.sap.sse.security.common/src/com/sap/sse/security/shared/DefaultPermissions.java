@@ -28,6 +28,11 @@ public enum DefaultPermissions implements Permission {
         return result;
     }
     
+    @Override
+    public WildcardPermission getPermission(Mode... modes) {
+        return new WildcardPermission(getStringPermission(modes));
+    }
+
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     public String getStringPermissionForObjects(Mode mode, String... objectIdentifiers) {
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
@@ -46,5 +51,11 @@ public enum DefaultPermissions implements Permission {
         return result.toString();
     }
     
+    @Override
+    public WildcardPermission getPermissionForObjects(Mode mode, String... objectIdentifiers) {
+        return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
+    }
+
     private final String stringPermission;
 }
+

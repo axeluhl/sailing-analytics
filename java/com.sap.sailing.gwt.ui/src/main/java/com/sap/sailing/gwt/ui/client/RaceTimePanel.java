@@ -60,7 +60,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         @Override
         public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
             RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
-                    Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission());
+                    Permission.CAN_REPLAY_DURING_LIVE_RACES.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null);
         }
     };
 

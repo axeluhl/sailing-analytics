@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.common.security;
 
-
-
+import com.sap.sse.security.shared.WildcardPermission;
 
 public enum Permission implements com.sap.sse.security.shared.Permission {
     // AdminConsole permissions
@@ -63,6 +62,11 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
         return result;
     }
 
+    @Override
+    public WildcardPermission getPermission(com.sap.sse.security.shared.Permission.Mode... modes) {
+        return new WildcardPermission(getStringPermission(modes));
+    }
+
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
     public String getStringPermissionForObjects(com.sap.sse.security.shared.Permission.Mode mode, String... objectIdentifiers) {
@@ -82,6 +86,11 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
         return result.toString();
     }
     
+    @Override
+    public WildcardPermission getPermissionForObjects(com.sap.sse.security.shared.Permission.Mode mode, String... objectIdentifiers) {
+        return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
+    }
+
     /**
      * The mode of interaction with a resource; used as the second element of a wildcard permission
      * 

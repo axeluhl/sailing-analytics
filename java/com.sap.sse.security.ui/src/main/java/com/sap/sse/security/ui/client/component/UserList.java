@@ -5,6 +5,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -28,7 +29,7 @@ public class UserList extends CellList<UserDTO> {
             sb.appendHtmlConstant("</td>");
             sb.appendHtmlConstant("<td>");
             sb.appendHtmlConstant("<div>");
-            sb.appendEscaped(value.getName());
+            sb.appendEscaped(value.getName()+" ("+Util.join(", ", value.getUserGroups())+")");
             sb.appendHtmlConstant("</div>");
             sb.appendHtmlConstant("</td>");
             sb.appendHtmlConstant("</tr>");
