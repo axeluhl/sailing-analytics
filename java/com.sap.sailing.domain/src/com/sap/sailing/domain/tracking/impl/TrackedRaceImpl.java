@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -120,7 +121,6 @@ import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
-import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
@@ -299,11 +299,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private final ConcurrentMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
     /**
-     * Mapping of {@link Competitor} to generic {@link DynamicTrack} implementation. Because the same competitor could
+     * Mapping of {@link Competitor} to generic {@link DynamicSensorFixTrack} implementation. Because the same competitor could
      * be mapped to several different tracks, a combined key of competitor object and track name identifier string is
      * used. This identifier is usually defined within the track interface (e.g. see {@link BravoFixTrack#TRACK_NAME}).
      */
-    private final Map<Pair<Competitor, String>, DynamicTrack<?>> sensorTracks;
+    private final Map<Pair<Competitor, String>, DynamicSensorFixTrack<Competitor, ?>> sensorTracks;
     
     private final Map<String, Sideline> courseSidelines;
 
@@ -631,6 +631,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
         getRace().getCourse().addCourseListener(this);
+        for (DynamicSensorFixTrack<Competitor, ?> sensorTrack : sensorTracks.values()) {
+            sensorTrack.addedToTrackedRace(this);
+        }
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         attachedRegattaLogs = new ConcurrentHashMap<>();
@@ -3624,40 +3627,54 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        Optional<Runnable> executeAfterReleasingLock = Optional.empty();
+        TrackT result;
         LockUtil.lockForWrite(sensorTracksLock);
         try {
-            TrackT result = getTrackInternal(key);
+            result = getTrackInternal(key);
             if (result == null && tracks.containsKey(competitor)) {
                 // A track is only added if the given Competitor is known to participate in this race
                 result = newTrackFactory.get();
-                addSensorTrackInternal(key, result);
+                executeAfterReleasingLock = addSensorTrackInternal(key, result);
             }
-            return result;
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+        executeAfterReleasingLock.ifPresent(r->r.run());
+        return result;
     }
     
     protected void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        Optional<Runnable> executeAfterReleasingLock = Optional.empty();
         LockUtil.lockForWrite(sensorTracksLock);
         try {
-            if(getTrackInternal(key) != null) {
+            if (getTrackInternal(key) != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.WARNING)) {
                     logger.warning(SensorFixTrack.class.getName() + " already exists for competitor: "
                             + competitor.getName() + "; trackName: " + trackName);
                 }
             } else {
-                this.addSensorTrackInternal(key, track);
+                executeAfterReleasingLock = this.addSensorTrackInternal(key, track);
             }
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+        executeAfterReleasingLock.ifPresent(r->r.run());
     }
     
-    protected <FixT extends SensorFix> void addSensorTrackInternal(Pair<Competitor, String> key,
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #sensorTracksLock}.
+     * Optionally, the method may return a {@link Runnable} to execute after the lock has been released.
+     * This may, e.g., be a routine that notifies listeners. Callers are responsible for invoking this
+     * {@link Runnable} <em>after</em> releasing the write lock.
+     */
+    protected <FixT extends SensorFix> Optional<Runnable> addSensorTrackInternal(Pair<Competitor, String> key,
             DynamicSensorFixTrack<Competitor, FixT> track) {
+        assert sensorTracksLock.isWriteLockedByCurrentThread();
         sensorTracks.put(key, track);
+        track.addedToTrackedRace(this);
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")

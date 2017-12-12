@@ -14,7 +14,6 @@ public interface VideoResources extends ClientBundle {
         String videoitem();
         String playbutton();
         String info();
-        String playicon();
         String videoplaceholder();
         String videoplaceholder_image();
         String video();

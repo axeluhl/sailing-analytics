@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.resource.SharedAuthenticationResources;
 
 public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
     
@@ -40,7 +41,7 @@ public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserI
     
     @Override
     public void setUserInfo(AuthenticationContext userManagementContext) {
-        userImageUi.getStyle().setBackgroundImage("url('images/home/userdefault.svg')");
+        userImageUi.getStyle().setBackgroundImage("url('" + SharedAuthenticationResources.INSTANCE.userdefault().getSafeUri().asString() + "')");
         
         userRealnameUi.setInnerText(userManagementContext.getUserTitle());
         userUsernameUi.setInnerText(userManagementContext.getUserSubtitle());

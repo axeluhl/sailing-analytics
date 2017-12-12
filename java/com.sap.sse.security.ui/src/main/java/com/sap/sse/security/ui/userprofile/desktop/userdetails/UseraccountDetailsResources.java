@@ -1,10 +1,10 @@
 package com.sap.sse.security.ui.userprofile.desktop.userdetails;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sse.security.ui.authentication.resource.SharedAuthenticationResources;
 
-public interface UseraccountDetailsResources extends ClientBundle {
+public interface UseraccountDetailsResources extends SharedAuthenticationResources {
     public static final UseraccountDetailsResources INSTANCE = GWT.create(UseraccountDetailsResources.class);
 
     @Source("UseraccountDetails.gss")

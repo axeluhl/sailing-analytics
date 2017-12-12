@@ -9,12 +9,16 @@ import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class MiniLeaderboardActivity extends AbstractEventActivity<MiniLeaderboardPlace> implements Presenter {
 
-    public MiniLeaderboardActivity(MiniLeaderboardPlace place, EventViewDTO eventDTO, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+    private final FlagImageResolver flagImageResolver;
+
+    public MiniLeaderboardActivity(MiniLeaderboardPlace place, EventViewDTO eventDTO, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory, FlagImageResolver flagImageResolver) {
         super(place, eventDTO, clientFactory);
+        this.flagImageResolver = flagImageResolver;
         initNavigationPath(navigationPathDisplay);
     }
     
@@ -27,7 +31,7 @@ public class MiniLeaderboardActivity extends AbstractEventActivity<MiniLeaderboa
 
     @Override
     protected EventViewBase initView() {
-        final MiniLeaderboardView view = new MiniLeaderboardViewImpl(this);
+        final MiniLeaderboardView view = new MiniLeaderboardViewImpl(this, flagImageResolver);
         initQuickfinder(view, true);
         return view;
     }

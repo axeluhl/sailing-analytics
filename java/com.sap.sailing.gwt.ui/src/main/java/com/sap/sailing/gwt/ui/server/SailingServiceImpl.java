@@ -4815,7 +4815,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     URL base = createBaseUrl(urlAsString);
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     serverAddress = createUrl(base, path, query);
-                    connection = HttpUrlConnectionHelper.redirectConnection(serverAddress);
+                    // the response can take a very long time for MDI that include foiling data or such
+                    connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_HOUR.times(2));
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, 
                             DataImportSubProgress.CONNECTION_ESTABLISH, 0.5);
                     if (compress) {

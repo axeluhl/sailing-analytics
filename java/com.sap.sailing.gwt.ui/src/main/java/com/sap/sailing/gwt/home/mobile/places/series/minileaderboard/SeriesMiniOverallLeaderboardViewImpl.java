@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements SeriesMiniOverallLeaderboardView {
@@ -33,9 +34,9 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
     @UiField(provided = true)
     MinileaderboardBox minileaderboardUi;
 
-    public SeriesMiniOverallLeaderboardViewImpl(Presenter presenter) {
+    public SeriesMiniOverallLeaderboardViewImpl(Presenter presenter, FlagImageResolver flagImageResolver) {
         this.currentPresenter = presenter;
-        minileaderboardUi = new MinileaderboardBox(true);
+        minileaderboardUi = new MinileaderboardBox(true, flagImageResolver);
         eventHeaderUi = new SeriesHeader(presenter.getSeriesDTO(), presenter.getSeriesNavigation());
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
