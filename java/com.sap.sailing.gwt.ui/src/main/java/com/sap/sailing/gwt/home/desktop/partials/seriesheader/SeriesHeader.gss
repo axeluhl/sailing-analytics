@@ -18,25 +18,6 @@
   font-weight: 600;
   padding: 0.666666666666667em 0;
 }
-.eventheader_breadcrumbback {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 1.333333333333333em;
-  border-right: 1px solid #cfcfcf;
-  background-color: #dedede;
-  background-image: url("images/home/breadcrumb-arrow__back.png");
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 50%;
-  -webkit-transition: background-color 0.2s, border-color 0.2s;
-     -moz-transition: background-color 0.2s, border-color 0.2s;
-          transition: background-color 0.2s, border-color 0.2s;
-}
-.eventheader_breadcrumbback:hover {
-  background-color: #cfcfcf;
-}
 .eventheader_intro {
   padding-left: 6em;
   margin: 0.666666666666667em 0;

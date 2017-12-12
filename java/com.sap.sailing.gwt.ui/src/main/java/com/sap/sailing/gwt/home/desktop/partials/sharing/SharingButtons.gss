@@ -13,7 +13,7 @@
 }
 .eventheader_sharing_itememail {
   background-color: #f0ab00;
-  background-image: url("images/home/email-icon.png");
+  background-image: resourceUrl("email");
 }
 .eventheader_sharing_itememail:hover,
 .eventheader_sharing_itememail:focus {
@@ -21,15 +21,28 @@
 }
 .eventheader_sharing_itemtwitter {
   background-color: #32b5e2;
-  background-image: url("images/home/twitter-icon.png");
+  background-image: resourceUrl("twitter");
+  background-size: 20px auto;
 }
 .eventheader_sharing_itemtwitter:hover,
 .eventheader_sharing_itemtwitter:focus {
   background-color: #1faada;
 }
 .eventheader_sharing_itemfacebook {
+  position: relative;
   background-color: #3b5998;
-  background-image: url("images/home/facebook-icon.png");
+}
+.eventheader_sharing_itemfacebook:after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background-image: resourceUrl("facebook");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .eventheader_sharing_itemfacebook:hover,
 .eventheader_sharing_itemfacebook:focus {

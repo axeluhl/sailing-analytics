@@ -20,11 +20,10 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -32,14 +31,15 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
+import com.sap.sse.gwt.client.controls.datetime.DateInput;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstrap<DeviceMappingDTO> {
+public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
-    protected final BetterDateTimeBox from;
-    protected final BetterDateTimeBox to;
+    protected final DateInput from;
+    protected final DateInput to;
     protected final ListBox deviceType;
     protected final TextBox deviceId;
     protected final DeviceMappingQRCodeWidget qrWidget;
@@ -83,9 +83,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
-        from = createDateTimeBox(new Date());
+        from = createDateBox(new Date());
         from.setValue(null);
-        to = createDateTimeBox(new Date());
+        to = createDateBox(new Date());
         to.setValue(null);
 
         deviceType = createListBox(false);

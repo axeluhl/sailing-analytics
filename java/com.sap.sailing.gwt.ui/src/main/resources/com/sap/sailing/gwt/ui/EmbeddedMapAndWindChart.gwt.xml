@@ -18,10 +18,6 @@
     <!-- Highcharts API -->
     <inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
 
-    <!--  Bootstrap API -->
-    <inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-    <inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-
     <!-- Specify the app entry point class.                         -->
         <entry-point class='com.sap.sailing.gwt.ui.raceboard.EmbeddedMapAndWindChartEntryPoint'/>
     

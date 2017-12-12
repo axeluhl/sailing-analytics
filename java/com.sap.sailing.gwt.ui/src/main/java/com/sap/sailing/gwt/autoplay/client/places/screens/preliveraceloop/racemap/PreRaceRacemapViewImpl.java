@@ -10,8 +10,8 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistic.PreRaceStatisticsBox;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistic.PreRaceStatisticsBoxResources;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
-import com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
@@ -53,23 +53,23 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
         racemap.onResize();
         
         statistics.clear();
-        statistics.addItem(PreRaceStatisticsBox.ICON_COMPETITORS, StringMessages.INSTANCE.competitors(),
+        statistics.addItem(PreRaceStatisticsBoxResources.INSTANCE.competitors(), StringMessages.INSTANCE.competitors(),
                 result.getCompetitors());
-        statistics.addItem(StatisticsBoxConstants.ICON_WIND_FIX, StringMessages.INSTANCE.wind(), windSpeed);
-        statistics.addItem(PreRaceStatisticsBox.ICON_WIND, StringMessages.INSTANCE.averageDirection(), windDegree);
-        statistics.addItem(PreRaceStatisticsBox.ICON_LEGS, StringMessages.INSTANCE.legs(), result.getLegs());
+        statistics.addItem(PreRaceStatisticsBoxResources.INSTANCE.strongestWind(), StringMessages.INSTANCE.wind(), windSpeed);
+        statistics.addItem(PreRaceStatisticsBoxResources.INSTANCE.wind(), StringMessages.INSTANCE.averageDirection(), windDegree);
+        statistics.addItem(PreRaceStatisticsBoxResources.INSTANCE.legs(), StringMessages.INSTANCE.legs(), result.getLegs());
         try {
-            statistics.addItem(StatisticsBoxConstants.ICON_SUM_MILES, StringMessages.INSTANCE.estimatedDistance(),
+            statistics.addItem(PreRaceStatisticsBoxResources.INSTANCE.sumMiles(), StringMessages.INSTANCE.estimatedDistance(),
                     compactFormat.format(result.getDistance().getSeaMiles()) + " "
                             + StringMessages.INSTANCE.seaMiles());
         } catch (Exception e) {
         }
         try {
-            statistics.addItem(PreRaceStatisticsBox.ICON_TIME, StringMessages.INSTANCE.estimatedTime(),
+            statistics.addItem(PreRaceStatisticsBoxResources.INSTANCE.time(), StringMessages.INSTANCE.estimatedTime(),
                     compactFormat.format(result.getDuration().asMinutes()) + " " + StringMessages.INSTANCE.minutes());
         } catch (Exception e) {
         }
-        statistics.addQRItem(PreRaceStatisticsBox.ICON_RACEVIEWER, StringMessages.INSTANCE.raceViewer(), url);
+        statistics.addQRItem(PreRaceStatisticsBoxResources.INSTANCE.raceviewer(), StringMessages.INSTANCE.raceViewer(), url);
     }
 
     @Override

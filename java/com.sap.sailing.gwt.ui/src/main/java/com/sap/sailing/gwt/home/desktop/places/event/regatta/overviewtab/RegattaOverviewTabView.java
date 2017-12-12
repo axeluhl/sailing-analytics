@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
@@ -51,8 +52,10 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @UiField(provided = true) StandingsList standingsUi;
     @UiField(provided = true) EventStatisticsBox statisticsBoxUi;
     @UiField RaceOfficeSection raceOfficeSectionUi;
+    private final FlagImageResolver flagImageResolver;
 
-    public RegattaOverviewTabView() {
+    public RegattaOverviewTabView(FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
     }
 
     @Override
@@ -71,7 +74,9 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         stageUi = new EventOverviewStage(currentPresenter);
         statisticsBoxUi = new EventStatisticsBox(false, new DesktopStatisticsBoxView());
         final HasRegattaMetadata regattaMetadata = currentPresenter.getRegattaMetadata();
-        standingsUi = new StandingsList(regattaMetadata != null && regattaMetadata.getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()));
+        standingsUi = new StandingsList(regattaMetadata != null && regattaMetadata.getState() == RegattaState.FINISHED,
+                currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()),
+                flagImageResolver);
         initWidget(ourUiBinder.createAndBindUi(this));
 
         if (!currentPresenter.showRegattaMetadata()) {

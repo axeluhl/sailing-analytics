@@ -133,7 +133,7 @@ img.header_logo_image {
 	background: none;
 }
 .header_navigation_nav_sublist_item:before {
-	background: url('images/home/arrow-down-grey.png');
+	background: resourceUrl('arrowDownGrey');
     display: block;
     height: 25px;
     background-position: center;
@@ -155,12 +155,12 @@ img.header_logo_image {
           transform: translate(-50%, -50%);
   width: 1em;
   height: 1.333333333333333em;
-  background-image: url("images/mobile/navigation-icon.svg");
+  background-image: resourceUrl("navigation");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center center;
 }
 .header_navigation_iconsignedin {
   width: 1.666666666666667em;
-  background-image: url("images/mobile/navigation-icon-signedin.svg");
+  background-image: resourceUrl("navigationSignedin");
 }

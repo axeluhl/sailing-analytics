@@ -1,0 +1,30 @@
+.quickfinder {
+    font-size: 1rem;
+    text-align: center;
+    padding: 0.666666666666667em;
+}
+.quickfinder_select::-ms-expand {
+    display: none;
+}
+.quickfinder_select {
+    font-weight: 600;
+    width: 100%;
+    height: auto;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    border: none;
+    border-radius: 0;
+    padding: 0.666666666666667em 0.666666666666667em 0.666666666666667em 1em;
+     /* @alternate */
+    background: transparent;
+    background: resourceUrl("arrow") 100% no-repeat #ffffff;
+    background-size: 3em 3em;
+}
+
+.quickfinder:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #0a0a0a;
+}
