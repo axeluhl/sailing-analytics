@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.player.Timer;
 
 public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynchPlayer, RequiresResize {
     private VideoJSPlayer videoJsDelegate;
-    
+
     private EditFlag editFlag;
     private final TimePoint raceStartTime;
     private final Timer raceTimer;
@@ -52,10 +52,10 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
     public double getCurrentMediaTime() {
         return videoJsDelegate.getCurrentTime();
     }
-    
+
     @Override
     public long getCurrentMediaTimeMillis() {
-        return (long) (getCurrentMediaTime()*1000);
+        return (long) (getCurrentMediaTime() * 1000);
     }
 
     public void setCurrentMediaTime(double mediaTime) {
@@ -106,7 +106,8 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
 
     @Override
     public void updateOffset() {
-        getMediaTrack().startTime = new MillisecondsTimePoint(raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
+        getMediaTrack().startTime = new MillisecondsTimePoint(
+                raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
 
     }
 
@@ -114,14 +115,14 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
     protected void alignTime() {
         if (!isEditing()) {
             super.alignTime();
-        } 
+        }
     }
-    
+
     @Override
     public void setEditFlag(EditFlag editFlag) {
         this.editFlag = editFlag;
     }
-    
+
     private boolean isEditing() {
         return editFlag != null && editFlag.isEditing();
     }

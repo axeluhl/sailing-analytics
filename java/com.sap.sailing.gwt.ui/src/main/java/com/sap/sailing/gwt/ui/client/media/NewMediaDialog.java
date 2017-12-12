@@ -71,7 +71,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     final private RegattaAndRaceIdentifier raceIdentifier;
 
-    private MediaServiceAsync mediaService;
+    final private MediaServiceAsync mediaService;
 
     private boolean remoteMp4WasStarted;
     private boolean remoteMp4WasFinished;
@@ -138,14 +138,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     native void addLoadMetadataHandler(MediaElement mediaElement) /*-{
-                                                                  var that = this;
-                                                                  mediaElement
-                                                                  .addEventListener(
-                                                                  'loadedmetadata',
-                                                                  function() {
-                                                                  that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
-                                                                  });
-                                                                  }-*/;
+		var that = this;
+		mediaElement
+				.addEventListener(
+						'loadedmetadata',
+						function() {
+							that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
+						});
+    }-*/;
 
     public void loadedmetadata(MediaElement mediaElement) {
         mediaTrack.startTime = this.defaultStartTime;
@@ -252,14 +252,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     private native void registerNativeMethods() /*-{
-                                                var that = this;
-                                                window.youtubeMetadataCallback = function(metadata) {
-                                                var title = metadata.entry.media$group.media$title.$t;
-                                                var duration = metadata.entry.media$group.yt$duration.seconds;
-                                                var description = metadata.entry.media$group.media$description.$t;
-                                                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
-                                                }
-                                                }-*/;
+		var that = this;
+		window.youtubeMetadataCallback = function(metadata) {
+			var title = metadata.entry.media$group.media$title.$t;
+			var duration = metadata.entry.media$group.yt$duration.seconds;
+			var description = metadata.entry.media$group.media$description.$t;
+			that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
+		}
+    }-*/;
 
     /**
      * Inspired by https://developers.google.com/web-toolkit/doc/latest/tutorial/Xsite
@@ -267,36 +267,36 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
      * @param youtubeId
      */
     public native void loadYoutubeMetadata(String youtubeId) /*-{
-                                                             var that = this;
-                                                             
-                                                             //Create temporary script element.
-                                                             window.youtubeMetadataCallbackScript = document.createElement("script");
-                                                             window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
-                                                             + youtubeId
-                                                             + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
-                                                             document.body.appendChild(window.youtubeMetadataCallbackScript);
-                                                             
-                                                             // Cancel meta data capturing after has 2-seconds timeout.
-                                                             setTimeout(
-                                                             function() {
-                                                             //Remove temporary script element.
-                                                             if (window != null
-                                                             && window.youtubeMetadataCallbackScript != null) {
-                                                             document.body
-                                                             .removeChild(window.youtubeMetadataCallbackScript);
-                                                             
-                                                             delete window.youtubeMetadataCallbackScript;
-                                                             }
-                                                             that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
-                                                             }, 2000);
-                                                             
-                                                             }-*/;
+		var that = this;
+
+		//Create temporary script element.
+		window.youtubeMetadataCallbackScript = document.createElement("script");
+		window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
+				+ youtubeId
+				+ "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
+		document.body.appendChild(window.youtubeMetadataCallbackScript);
+
+		// Cancel meta data capturing after has 2-seconds timeout.
+		setTimeout(
+				function() {
+					//Remove temporary script element.
+					if (window != null && window.youtubeMetadataCallbackScript != null) {
+					    document.body
+							.removeChild(window.youtubeMetadataCallbackScript);
+							
+					    delete window.youtubeMetadataCallbackScript;
+					}
+					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
+				}, 2000);
+
+    }-*/;
 
     public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
         setUiEnabled(true);
         mediaTrack.title = title;
         try {
-            long duration = (long) Math.round(1000 * Double.valueOf(durationInSeconds));
+            long duration = (long) Math.round(1000 * Double
+                    .valueOf(durationInSeconds));
             if (duration > 0) {
                 mediaTrack.duration = new MillisecondsDurationImpl(duration);
             } else {
@@ -328,7 +328,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             }
         }
-        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime;
+        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
         String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());
 
         startTimeBox.setText(startTimeText);

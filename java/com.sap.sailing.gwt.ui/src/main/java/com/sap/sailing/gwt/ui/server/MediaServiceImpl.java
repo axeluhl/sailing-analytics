@@ -49,12 +49,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private RacingEventService racingEventService() {
         return racingEventServiceTracker.getService();
     }
-
+    
     @Override
     public Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
     }
-
+    
     @Override
     public Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
@@ -102,7 +102,6 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     @Override
     public void updateRace(MediaTrack mediaTrack) {
         racingEventService().mediaTrackAssignedRacesChanged(mediaTrack);
-
     }
 
     @Override
@@ -145,5 +144,4 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         }
         return new VideoMetadataDTO(canDownload, spherical, recordStartedTimer, message);
     }
-
 }

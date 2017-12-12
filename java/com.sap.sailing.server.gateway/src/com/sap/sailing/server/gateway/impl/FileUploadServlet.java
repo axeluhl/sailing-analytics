@@ -38,7 +38,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
     /**
      * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
      */
-    private static final long MAX_SIZE_IN_MB = 5000;
+    private static final int MAX_SIZE_IN_MB = 500;
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, IOException {

@@ -9,7 +9,7 @@ public interface MediaServiceAsync {
 
     void getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
             AsyncCallback<Iterable<MediaTrack>> callback);
-    
+
     void getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
             AsyncCallback<Iterable<MediaTrack>> callback);
 
@@ -26,9 +26,9 @@ public interface MediaServiceAsync {
     void updateStartTime(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 
     void updateDuration(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-    
+
     void updateRace(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-    
+
     void checkMetadata(String url, AsyncCallback<VideoMetadataDTO> asyncCallback);
 
 }

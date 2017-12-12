@@ -30,9 +30,9 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
     private AssignRacesToMediaDialog racesForMediaDialog;
 
-    public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService,TimePoint defaultStartTime, StringMessages stringMessages,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
-            Set<RegattasDisplayer> regattasDisplayers,
+    public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime,
+            StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            RegattaRefresher regattaRefresher, Set<RegattasDisplayer> regattasDisplayers,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<MediaTrack> dialogCallback) {
         super(mediaService, defaultStartTime, stringMessages, null, dialogCallback);
         this.sailingService = sailingService;

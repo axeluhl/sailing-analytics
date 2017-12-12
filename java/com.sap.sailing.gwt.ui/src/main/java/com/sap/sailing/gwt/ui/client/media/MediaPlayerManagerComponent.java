@@ -195,7 +195,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private MediaTrack getDefaultVideo() {
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType != null && MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+            if (mediaTrack.mimeType != null && MediaType.video.equals(mediaTrack.mimeType.mediaType)
+                    && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
             }
         }
@@ -487,11 +488,11 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 closeFloatingVideo(videoTrack);
             }
         };
+        final VideoSynchPlayer videoPlayer;
         final UserDTO currentUser = userService.getCurrentUser();
         boolean showSynchControls = currentUser != null
                 && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
                         SailingPermissionsForRoleProvider.INSTANCE);
-        VideoSynchPlayer videoPlayer;
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
@@ -607,8 +608,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public void addMediaTrack() {
         TimePoint raceStartTime = getRaceStartTime();
         TimePoint defaultStartTime = raceStartTime;
-        NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime, MediaPlayerManagerComponent.this.stringMessages,
-                this.getCurrentRace(), new DialogCallback<MediaTrack>() {
+        NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
+                MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
+                new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {

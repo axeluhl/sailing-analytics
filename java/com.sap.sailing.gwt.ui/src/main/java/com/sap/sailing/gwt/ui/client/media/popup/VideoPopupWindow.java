@@ -21,6 +21,7 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
 
         String title = Window.Location.getParameter("title");
         Window.setTitle(title);
+
         String videoUrl = Window.Location.getParameter("url");
         String mimeType = Window.Location.getParameter("mimetype");
         isDebug = Window.Location.getParameter("gwt.codesvr") != null;
@@ -105,7 +106,7 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
     protected boolean hasVideoSizes() {
         return videoJSDelegate != null;
     }
-    
+
     @Override
     protected int getVideoWidth() {
         return videoJSDelegate.getVideoWidth();

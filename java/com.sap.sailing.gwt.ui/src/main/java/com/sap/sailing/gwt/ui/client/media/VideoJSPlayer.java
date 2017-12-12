@@ -20,7 +20,7 @@ import com.sap.sse.common.media.MimeType;
 /**
  * video.js (http://videojs.com/) wrapper as GWT widget.
  */
-public class VideoJSPlayer extends Widget implements RequiresResize{
+public class VideoJSPlayer extends Widget implements RequiresResize {
     private static VideoJSPlayerUiBinder uiBinder = GWT.create(VideoJSPlayerUiBinder.class);
     private static final int RESIZE_CHECK = 250;
 
@@ -34,9 +34,6 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
     private boolean autoplay;
 
     private Boolean panorama;
-
-    private Timer resizeToDivtimer;
-
     private Timer resizeChecker;
 
     public HandlerRegistration addPlayHandler(PlayEvent.Handler handler) {
@@ -55,9 +52,9 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
             videoElement.addClassName("video-js-fullscreen");
         }
         videoElement.setAttribute("controls", "");
-        
+
         resizeChecker = new com.google.gwt.user.client.Timer() {
-            
+
             @Override
             public void run() {
                 onResize();
@@ -67,7 +64,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
 
     public void setVideo(MimeType mimeType, String source) {
         this.panorama = mimeType.isPanorama();
-        if(isAttached()){
+        if (isAttached()) {
             _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
             resizeChecker.scheduleRepeating(RESIZE_CHECK);
         }
@@ -93,9 +90,9 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
     @Override
     protected void onLoad() {
         super.onLoad();
-        if(panorama != null){
-                _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
-                resizeChecker.scheduleRepeating(RESIZE_CHECK);
+        if (panorama != null) {
+            _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
+            resizeChecker.scheduleRepeating(RESIZE_CHECK);
         }
     }
     
@@ -103,13 +100,13 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
         return videoElement;
     }
     
-   public int getDuration(){
+    public int getDuration() {
         if (player == null) {
             return 0;
         } else {
             return getNativeDuration();
         }
-   }
+    }
     
     /**
      * Get the length in time of the video in seconds
@@ -150,7 +147,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
             setNativeCurrentTime(currentTime);
         }
     }
-    
+
     @Override
     protected void onDetach() {
         super.onDetach();
@@ -161,10 +158,10 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
     }-*/;
     
-    public void play(){
-        if(player == null){
+    public void play() {
+        if (player == null) {
             autoplay = true;
-        }else{
+        } else {
             nativePlay();
         }
     }
@@ -200,7 +197,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
     private void onPlay() {
         fireEvent(new PlayEvent());
     }
-    
+
     private void onPause() {
         fireEvent(new PauseEvent());
     }
@@ -284,7 +281,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
     }
 
     public void setVolume(float volume) {
-        if(player != null){
+        if (player != null) {
             setVolumeNative(volume);
         }
     }
@@ -311,7 +308,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize{
     }
 
     public void disposeIf2D() {
-        if(!panorama){
+        if (!panorama) {
             _onUnload();
         }
     }
