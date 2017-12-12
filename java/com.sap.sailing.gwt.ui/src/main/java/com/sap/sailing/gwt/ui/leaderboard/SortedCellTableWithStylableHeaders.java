@@ -27,7 +27,6 @@ public class SortedCellTableWithStylableHeaders<T> extends SortedCellTable<T> {
     public SortedCellTableWithStylableHeaders(int pageSize, LeaderboardTableResources resources) {
         super(pageSize, resources);
         setTableBuilder(new DefaultCellTableBuilder<T>(this) {
-
             @Override
             public void buildRowImpl(T arg0, int arg1) {
                 super.buildRowImpl(arg0, arg1);
