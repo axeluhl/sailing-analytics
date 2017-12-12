@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sse.gwt.client.celltable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -14,8 +14,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.common.InvertibleComparator;
 
 public class SortedCellTable<T> extends BaseCelltable<T> {
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sse.gwt.client.celltable;
 
 import java.util.List;
 
@@ -8,12 +8,12 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.view.client.SelectionModel;
-import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 
 /**
- * Uses {@link LeaderboardSortableColumnWithMinMax#getHeaderStyle()} to optionally add a custom CSS style to the &lt;th&gt; table
+ * Uses {@link SortableColumn#getHeaderStyle()} to optionally add a custom CSS style to the &lt;th&gt; table
  * header cell for the respective column.<p>
  * 
  * The implementation works by overriding {@link #renderRowValues(SafeHtmlBuilder, List, int, SelectionModel)} which
@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
  * @author Axel Uhl (D043530)
  */
 public class SortedCellTableWithStylableHeaders<T> extends SortedCellTable<T> {
-    public SortedCellTableWithStylableHeaders(int pageSize, LeaderboardTableResources resources) {
+    public SortedCellTableWithStylableHeaders(int pageSize, CellTable.Resources resources) {
         super(pageSize, resources);
         setTableBuilder(new DefaultCellTableBuilder<T>(this) {
             @Override

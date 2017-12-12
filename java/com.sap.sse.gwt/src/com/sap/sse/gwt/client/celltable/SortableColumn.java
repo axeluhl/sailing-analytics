@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.ui.client.shared.controls;
+package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
 
 public abstract class SortableColumn<T, C> extends Column<T, C> {
     private SortingOrder preferredSortingOrder;

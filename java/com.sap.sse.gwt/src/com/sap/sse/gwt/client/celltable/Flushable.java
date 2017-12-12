@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls;
+package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.view.client.HasData;

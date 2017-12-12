@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls;
+package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.dom.client.BrowserEvents;
@@ -13,11 +13,10 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 
 /**
  * A column to be used in a {@link CellTable} that controls and reflects a table's selection model using stylable

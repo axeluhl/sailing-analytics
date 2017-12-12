@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import java.util.Comparator;
 
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 
 public abstract class InvertibleComparatorWrapper<T, C> extends InvertibleComparatorAdapter<T> {
 

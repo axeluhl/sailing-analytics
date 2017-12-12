@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
-import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sse.common.InvertibleComparator;
 
 /**
  * An adapter for an invertible comparator.

@@ -12,16 +12,16 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.shared.partials.filter.UserSettingsByKeyTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 
 /**
  * Implementation of {@link UserSettingsView} where users can change their preferred selections and notifications.

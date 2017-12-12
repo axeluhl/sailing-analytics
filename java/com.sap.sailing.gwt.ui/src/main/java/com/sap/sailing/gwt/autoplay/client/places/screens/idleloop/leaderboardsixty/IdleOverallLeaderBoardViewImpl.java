@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
 import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements IdleOverallLeaderBoardView {

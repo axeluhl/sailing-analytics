@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sse.gwt.adminconsole;
 
 import com.google.gwt.user.cellview.client.CellTable;
 

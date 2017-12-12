@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.client.shared.controls;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ProvidesKey;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.Flushable;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 
 /**
  * This {@link FlushableCellTable} provides the {@link FlushableCellTable#flush()}-method for the
