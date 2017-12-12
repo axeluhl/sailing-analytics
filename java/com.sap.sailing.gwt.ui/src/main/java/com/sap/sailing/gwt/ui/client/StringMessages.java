@@ -232,7 +232,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noSelection();
     String raceIsKnownToStartUpwind();
     String events();
+    String pairingList();
     String pairingLists();
+    String pairingListCreationInfo();
     String applyToRacelog();
     String csvExport();
     String printView();

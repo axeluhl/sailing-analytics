@@ -2,9 +2,12 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
@@ -53,6 +56,16 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     @Override
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
+        
+        CaptionPanel infoPanel = new CaptionPanel();
+        infoPanel.setCaptionText("Info");
+        panel.add(infoPanel);
+              
+        ScrollPanel infoScrollPanel = new ScrollPanel();
+        infoScrollPanel.setPixelSize((Window.getClientWidth() / 4), 150);
+        infoScrollPanel.add(new Label(stringMessages.pairingListCreationInfo()));
+        
+        infoPanel.add(infoScrollPanel);
         
         Grid formGrid = new Grid(4, 2);
         panel.add(formGrid);
