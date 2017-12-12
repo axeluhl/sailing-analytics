@@ -4,9 +4,11 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -109,10 +111,14 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {
                     try {
                         importer.importFixes(in, new Callback() {
+                            Set<UUID> knownDevices = new HashSet<>();
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                                 storeFix(fix, device);
-                                jsonResult.add(device);
+                                if(!knownDevices.contains(device.getId())){
+                                    knownDevices.add(device.getId());
+                                    jsonResult.addDevice(device);
+                                }
                             }
                         }, true, fileName);
                         succeeded = true;

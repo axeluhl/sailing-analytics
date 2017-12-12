@@ -48,13 +48,14 @@ public class JsonHolder {
             return jsonExceptionObj;
         }
 
-        public void add(TrackFileImportDeviceIdentifier mapping) {
+        public void addDevice(TrackFileImportDeviceIdentifier mapping) {
             String stringRep = mapping.getId().toString();
             jsonUuidObj.add(stringRep);
         }
-
+        
         public void writeJSONString(HttpServletResponse resp) throws IOException {
             resp.setContentType("text/html");
             jsonResponseObj.writeJSONString(resp.getWriter());
         }
+
     }
