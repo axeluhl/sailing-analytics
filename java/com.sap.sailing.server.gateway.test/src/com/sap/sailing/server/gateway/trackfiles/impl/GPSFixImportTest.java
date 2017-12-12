@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 import org.apache.commons.fileupload.FileItem;
 import org.junit.Test;
@@ -152,7 +153,8 @@ public class GPSFixImportTest {
             public void delete() {
             }
         };
-        servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", fi)), new AlwaysFailingGPSFixImporter(-1));
+        JsonHolder holder = new JsonHolder(Logger.getLogger(GPSFixImportTest.class.getName()));
+        servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", fi)), holder, new AlwaysFailingGPSFixImporter(-1));
         // getting to here without errors is good enough
     }
 }

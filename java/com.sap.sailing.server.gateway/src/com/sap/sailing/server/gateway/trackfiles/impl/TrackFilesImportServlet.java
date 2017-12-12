@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,9 +79,8 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
         return result;
     }
 
-    protected Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files,
-            GPSFixImporter preferredImporter) throws IOException {
-        final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
+    protected void importFiles(Iterable<Pair<String, FileItem>> files,
+            JsonHolder jsonResult, GPSFixImporter preferredImporter) throws IOException {
         for (Pair<String, FileItem> pair : files) {
             final String fileName = pair.getA();
             final FileItem fileItem = pair.getB();
@@ -113,14 +111,15 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
                         importer.importFixes(in, new Callback() {
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
-                                deviceIds.add(device);
                                 storeFix(fix, device);
+                                jsonResult.add(device);
                             }
                         }, true, fileName);
                         succeeded = true;
                     } catch (Exception e) {
                         logger.log(Level.INFO, "Failed with " + e.getClass().getSimpleName()
                                 + " while importing file using " + importer.getType());
+                        jsonResult.add(importer.getClass().getName(), fileName, e);
                     }
                 }
                 if (succeeded) {
@@ -129,35 +128,36 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
                 }
             }
         }
-        return deviceIds;
     }
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String prefImporterType = null;
-        List<Pair<String, FileItem>> files = new ArrayList<>();
-        for (FileItem item : fileItems) {
-            if (!item.isFormField())
-                files.add(new Pair<String, FileItem>(item.getName(), item));
-            else {
-                if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
-                    prefImporterType = item.getString();
+        JsonHolder jsonResult = new JsonHolder(logger);
+        try {
+            String prefImporterType = null;
+            List<Pair<String, FileItem>> files = new ArrayList<>();
+            for (FileItem item : fileItems) {
+                if (!item.isFormField())
+                    files.add(new Pair<String, FileItem>(item.getName(), item));
+                else {
+                    if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
+                        prefImporterType = item.getString();
+                    }
                 }
             }
-        }
-        GPSFixImporter preferredImporter = null;
-        if (prefImporterType != null && !prefImporterType.isEmpty()) {
-            preferredImporter = getServiceFinderFactory().createServiceFinder(GPSFixImporter.class)
-                    .findService(prefImporterType);
-        }
-        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files, preferredImporter);
-        // setJsonResponseHeader(resp);
-        // DO NOT set a JSON response header. This causes the browser to wrap the response in a
-        // <pre> tag when uploading from GWT, as this is an AJAX-request inside an iFrame.
-        resp.setContentType("text/html");
-        for (TrackFileImportDeviceIdentifier mapping : mappingList) {
-            String stringRep = mapping.getId().toString();
-            resp.getWriter().println(stringRep);
+            GPSFixImporter preferredImporter = null;
+            if (prefImporterType != null && !prefImporterType.isEmpty()) {
+                preferredImporter = getServiceFinderFactory().createServiceFinder(GPSFixImporter.class)
+                        .findService(prefImporterType);
+            }
+            importFiles(files, jsonResult, preferredImporter);
+            // setJsonResponseHeader(resp);
+            // DO NOT set a JSON response header. This causes the browser to wrap the response in a
+            // <pre> tag when uploading from GWT, as this is an AJAX-request inside an iFrame.
+        } catch (Exception e) {
+            jsonResult.add(e);
+        } finally {
+            jsonResult.writeJSONString(resp);
         }
     }
 }
