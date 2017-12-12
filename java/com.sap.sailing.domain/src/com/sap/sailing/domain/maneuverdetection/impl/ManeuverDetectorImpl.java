@@ -40,7 +40,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -581,47 +580,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         SpeedWithBearingStepsIterable stepsToAnalyze = track.getSpeedWithBearingSteps(timePointBeforeManeuver,
                 timePointAfterManeuver);
         return stepsToAnalyze;
-    }
-
-    /**
-     * Gets a normalized interval for retrieval of speed with bearing steps such that it appears as:
-     * <p>
-     * {@code ((x * 1000) %
-     * normalizedIntervalMillis == 0 && normalizedIntervalMillis <= 1000 && normalizedIntervalMillis >= 100) with
-     * {@code x} element of any integer
-     * </p>
-     * The purpose is to prevent cache misses in getEstimatedSpeed() within track.getSpeedWithBearingSteps() calls, as
-     * well as to apply minimum and maximum limits to the interval. The maximal interval limit of {@code 1 second}
-     * prevents the maneuver detection from too coarse-grained step analysis which otherwise could result in inaccurate
-     * and too wide/short predicted maneuver boundaries. The minimal interval limit of {@code 100 milliseconds} prevents
-     * maneuver detection from too fine-grained step computation in order to not waist CPU-resources by assuming that
-     * within 100 milliseconds time range no relevant data for maneuver detection can be derived.
-     */
-    public Duration getNormlizedIntervalForSpeedWithBearingSteps(Duration approximatedInterval) {
-        long targetIntervalMillis = approximatedInterval.asMillis();
-        Duration intervalBetweenSteps;
-        if (targetIntervalMillis >= 1000) {
-            intervalBetweenSteps = Duration.ONE_SECOND;
-        } else {
-            long[] possibleDivisors = { 2, 4, 5, 10 };
-            final long referenceIntervalValue = 1000;
-            long upperPossibleIntervalMillis;
-            long lowerPossibleIntervalMillis;
-            int i;
-            for (i = 0, upperPossibleIntervalMillis = referenceIntervalValue, lowerPossibleIntervalMillis = referenceIntervalValue
-                    / possibleDivisors[0]; targetIntervalMillis < lowerPossibleIntervalMillis
-                            && i < possibleDivisors.length
-                                    - 1; upperPossibleIntervalMillis = lowerPossibleIntervalMillis, lowerPossibleIntervalMillis = referenceIntervalValue
-                                            / possibleDivisors[++i])
-                ;
-            if (upperPossibleIntervalMillis - targetIntervalMillis <= targetIntervalMillis - lowerPossibleIntervalMillis
-                    || lowerPossibleIntervalMillis == 0) {
-                intervalBetweenSteps = new MillisecondsDurationImpl(upperPossibleIntervalMillis);
-            } else {
-                intervalBetweenSteps = new MillisecondsDurationImpl(lowerPossibleIntervalMillis);
-            }
-        }
-        return intervalBetweenSteps;
     }
 
     /**
