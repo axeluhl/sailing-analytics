@@ -289,7 +289,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     if (i < courseAreasCount) {
                         builder.appendHtmlConstant(",&nbsp;");
                         // not more than  4 course areas per line
-                        if(i % 4 == 0) {
+                        if (i % 4 == 0) {
                             builder.appendHtmlConstant("<br>");
                         }
                     }
