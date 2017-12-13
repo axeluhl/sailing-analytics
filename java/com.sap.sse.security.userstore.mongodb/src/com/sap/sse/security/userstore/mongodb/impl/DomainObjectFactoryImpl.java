@@ -16,12 +16,14 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
@@ -122,13 +124,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private Role loadRole(DBObject roleDBObject) {
+        final Role result;
         final String id = (String) roleDBObject.get(FieldNames.Role.ID.name());
-        final String displayName = (String) roleDBObject.get(FieldNames.Role.NAME.name());
-        final Set<WildcardPermission> permissions = new HashSet<>();
-        for (Object o : (BasicDBList) roleDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
-            permissions.add(new WildcardPermission(o.toString(), true));
+        if (Util.equalsWithNull(id, AdminRole.getInstance().getId())) {
+            result = AdminRole.getInstance();
+        } else {
+            final String displayName = (String) roleDBObject.get(FieldNames.Role.NAME.name());
+            final Set<WildcardPermission> permissions = new HashSet<>();
+            for (Object o : (BasicDBList) roleDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
+                permissions.add(new WildcardPermission(o.toString(), true));
+            }
+            result = new RoleImpl(UUID.fromString(id), displayName, permissions);
         }
-        Role result = new RoleImpl(UUID.fromString(id), displayName, permissions);
         return result;
     }
     

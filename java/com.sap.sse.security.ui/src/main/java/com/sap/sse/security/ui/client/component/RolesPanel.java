@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -30,6 +31,7 @@ import com.sap.sse.gwt.client.celltable.FlushableSortedCellTableWithStylableHead
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -81,10 +83,13 @@ public class RolesPanel extends VerticalPanel {
         rolesTable = createRolesTable(tableResources);
         rolesTable.ensureDebugId("RolesCellTable");
         filterablePanelRoles.setTable(rolesTable);
+        addButton.addClickHandler(e->createRole());
         refreshableRoleMultiSelectionModel = (RefreshableMultiSelectionModel<? super Role>) rolesTable.getSelectionModel();
         removeButton.addClickHandler(e->{
-            final Set<Role> selectedRoles = new HashSet<Role>(getSelectedRoles());
-            filterablePanelRoles.removeAll(selectedRoles);
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(String.join(", ", Util.map(getSelectedRoles(), r->r.getName()))))) {
+                final Set<Role> selectedRoles = new HashSet<Role>(getSelectedRoles());
+                filterablePanelRoles.removeAll(selectedRoles);
+            }
         });
         refreshButton.addClickHandler(e->updateRoles());
         final HorizontalPanel buttonPanel = new HorizontalPanel();
@@ -97,6 +102,31 @@ public class RolesPanel extends VerticalPanel {
         updateRoles();
     }
     
+    private void createRole() {
+        new RoleCreationDialog(stringMessages, getAllPermissions(), allRoles, new DialogCallback<Role>() {
+            @Override
+            public void ok(Role editedObject) {
+                userManagementService.createRole(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<Role>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorCreatingRole(editedObject.getName(), caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Role result) {
+                        // no-op
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+                // TODO Auto-generated method stub
+                
+            }
+        }).show();
+    }
+
     private Set<Role> getSelectedRoles() {
         @SuppressWarnings("unchecked")
         final Set<Role> result = (Set<Role>) refreshableRoleMultiSelectionModel.getSelectedSet();
@@ -183,13 +213,56 @@ public class RolesPanel extends VerticalPanel {
     }
 
     private void removeRole(Role role) {
-        // TODO Auto-generated method stub
-        Window.alert("Remove "+role);
+        userManagementService.deleteRole(role.getId().toString(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorTryingToDeleteRole(role.getName(), caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                updateRoles();
+            }
+        });
     }
 
     private void editRole(Role role) {
-        // TODO Auto-generated method stub
-        Window.alert("Edit "+role);
+        final Set<Role> allOtherRoles = getAllOtherRoles(role);
+        Set<WildcardPermission> allPermissionsAsStrings = getAllPermissions();
+        new RoleEditDialog(role, stringMessages, allPermissionsAsStrings, allOtherRoles, new DialogCallback<Role>() {
+                    @Override
+                    public void ok(Role editedObject) {
+                        userManagementService.updateRole(editedObject, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorUpdatingRoles(editedObject.getName(), caught.getMessage()));
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                // no-op
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
+    }
+
+    private Set<WildcardPermission> getAllPermissions() {
+        Set<WildcardPermission> allPermissionsAsStrings = new HashSet<>();
+        for (final Role roleFromAllRoles : allRoles) {
+            Util.addAll(roleFromAllRoles.getPermissions(), allPermissionsAsStrings);
+        }
+        return allPermissionsAsStrings;
+    }
+
+    private Set<Role> getAllOtherRoles(Role role) {
+        final Set<Role> allOtherRoles = new HashSet<>(allRoles);
+        allOtherRoles.remove(role);
+        return allOtherRoles;
     }
 
     public void updateRoles() {

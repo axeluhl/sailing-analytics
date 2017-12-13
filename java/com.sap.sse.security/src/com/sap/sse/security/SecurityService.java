@@ -168,6 +168,25 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void deleteUser(String username) throws UserManagementException;
 
+    /**
+     * Creates a new role with initially empty {@link Role#getPermissions() permissions}.
+     */
+    Role createRole(UUID id, String name);
+    
+    /**
+     * Deletes the {@code role} from this service persistently.
+     */
+    void deleteRole(Role role);
+    
+    /**
+     * The {@code roleWithNewProperties} object represents an updated version, maybe a duplicate, of what we would get
+     * when asking {@link #getRole(UUID) this.getRole(roleWithNewProperties.getId())}. It may have changed compared to
+     * what this service has in store. This service's representation (if not the same) and in particular the persistent
+     * representation that this service will load upon its next start-up will be updated to match
+     * {@code roleWithNewProperties}'s state.
+     */
+    void updateRole(Role roleWithNewProperties);
+    
     Iterable<Role> getRoles();
 
     Role getRole(UUID idOfRole);

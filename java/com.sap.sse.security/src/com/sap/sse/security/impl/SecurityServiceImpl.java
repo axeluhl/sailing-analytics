@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -896,6 +897,44 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     protected String hashPassword(String password, Object salt) {
         return new Sha256Hash(password, salt, 1024).toBase64();
+    }
+
+    @Override
+    public Role createRole(UUID roleId, String name) {
+        return apply(s->s.internalCreateRole(roleId, name));
+    }
+
+    @Override
+    public Role internalCreateRole(UUID roleId, String name) {
+        return userStore.createRole(roleId, name, Collections.emptySet());
+    }
+    
+    @Override
+    public void deleteRole(Role role) {
+        final UUID roleId = role.getId();
+        apply(s->s.internalDeleteRole(roleId));
+    }
+
+    @Override
+    public Void internalDeleteRole(UUID roleId) {
+        final Role role = userStore.getRole(roleId);
+        userStore.removeRole(role);
+        return null;
+    }
+
+    @Override
+    public void updateRole(Role roleWithNewProperties) {
+        apply(s->s.internalUpdateRole(roleWithNewProperties));
+    }
+
+    @Override
+    public Void internalUpdateRole(Role roleWithNewProperties) {
+        final Role role = userStore.getRole(roleWithNewProperties.getId());
+        role.setName(roleWithNewProperties.getName());
+        userStore.setRoleDisplayName(roleWithNewProperties.getId(), role.getName());
+        role.setPermissions(roleWithNewProperties.getPermissions());
+        userStore.setRolePermissions(role.getId(), role.getPermissions());
+        return null;
     }
 
     @Override

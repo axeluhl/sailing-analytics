@@ -99,7 +99,7 @@ public interface UserStore extends Named {
     void addRolePermission(UUID roleId, WildcardPermission permission);
     void removeRolePermission(UUID roleId, WildcardPermission permission);
     void setRoleDisplayName(UUID roleId, String displayName);
-    void removeRole(UUID roleId);
+    void removeRole(Role role);
 
     /**
      * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}

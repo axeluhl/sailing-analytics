@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Renamable;
+import com.sap.sse.common.Renamable;
 
 public class RenamableImpl implements Renamable {
     private static final long serialVersionUID = -4815125282671451300L;

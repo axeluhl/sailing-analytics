@@ -343,11 +343,10 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void removeRole(UUID roleId) {
-        mongoObjectFactory.deleteRole(roles.get(roleId));
-        roles.remove(roleId);
+    public void removeRole(Role role) {
+        mongoObjectFactory.deleteRole(role);
+        roles.remove(role.getId());
     }
-
 
     @Override
     public boolean setAccessToken(String username, String accessToken) {

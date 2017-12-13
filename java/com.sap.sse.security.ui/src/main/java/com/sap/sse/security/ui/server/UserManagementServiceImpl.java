@@ -114,6 +114,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
+    public Role createRole(String roleIdAsString, String name) {
+        return getSecurityService().createRole(UUID.fromString(roleIdAsString), name);
+    }
+
+    @Override
+    public void deleteRole(String roleIdAsString) {
+        getSecurityService().deleteRole(getSecurityService().getRole(UUID.fromString(roleIdAsString)));
+    }
+
+    @Override
+    public void updateRole(Role roleWithNewProperties) {
+        getSecurityService().updateRole(roleWithNewProperties);
+    }
+
+    @Override
     public ArrayList<Role> getRoles() {
         final ArrayList<Role> result = new ArrayList<>();
         Util.addAll(getSecurityService().getRoles(), result);

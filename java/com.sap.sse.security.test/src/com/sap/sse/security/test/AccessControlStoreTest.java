@@ -17,6 +17,7 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -103,8 +104,8 @@ public class AccessControlStoreTest {
     
     @Test
     public void testDeleteRole() {
-        userStore.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
-        userStore.removeRole(testRoleId);
+        final Role role = userStore.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
+        userStore.removeRole(role);
         assertNull(userStore.getRole(testRoleId));
 
         newStores();

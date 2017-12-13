@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -78,5 +79,11 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException;
 
     Void internalDeleteUser(String username) throws UserManagementException;
+
+    Role internalCreateRole(UUID roleId, String name);
+    
+    Void internalDeleteRole(UUID roleId);
+    
+    Void internalUpdateRole(Role roleWithNewProperties);
 
 }

@@ -45,8 +45,19 @@ public class RoleImpl implements Role {
     }
 
     @Override
+    public void setName(String newName) {
+        this.name = newName;
+    }
+    
+    @Override
     public Set<WildcardPermission> getPermissions() {
         return Collections.unmodifiableSet(permissions);
+    }
+
+    @Override
+    public void setPermissions(Iterable<WildcardPermission> permissions) {
+        this.permissions = new HashSet<>();
+        Util.addAll(permissions, this.permissions);
     }
 
     @Override

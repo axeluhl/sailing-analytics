@@ -44,6 +44,12 @@ public interface UserManagementService extends RemoteService {
 
     Collection<UserDTO> getUserList() throws UnauthorizedException;
 
+    Role createRole(String roleIdAsString, String name);
+    
+    void deleteRole(String roleIdAsString);
+    
+    void updateRole(Role roleWithNewProperties);
+    
     ArrayList<Role> getRoles();
 
     Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException;
