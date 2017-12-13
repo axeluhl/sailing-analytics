@@ -169,18 +169,15 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
     
     /**
      * Gets a list of bearings between the provided time range (inclusive the boundaries). The bearings are retrieved by
-     * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)} with the provided interval duration between each
-     * bearing step. The last bearing step will be always sampled at provided {@code toTimePoint} irrespective of the
-     * sampling rate, even if {@code fromTimePoint} is after {@code toTimePoint}. The idea of this concept is to produce
-     * at least two bearing steps as result, in order to provide the caller at least one
-     * {@code totalCourseChangeAngleInDegrees > 0} between the given time range.
+     * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)}. The first and last bearing steps will be always
+     * sampled at provided {@code fromTimePoint} and {@code toTimePoint}, whereas the steps between are sampled at time
+     * points of non-raw GPS fixes. The idea of this concept is to produce at least two bearing steps as result, in
+     * order to provide the caller at least a {@code totalCourseChangeAngleInDegrees > 0} between the given time range.
      * 
      * @param fromTimePoint
      *            The from time point (inclusive) for resulting bearing steps
      * @param toTimePoint
      *            The to time point (inclusive) for resulting bearing steps
-     * @param intervalBetweenBearingSteps
-     *            Time distance between bearing steps
      * @return The list of bearings between the provided time range
      */
     SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint);
