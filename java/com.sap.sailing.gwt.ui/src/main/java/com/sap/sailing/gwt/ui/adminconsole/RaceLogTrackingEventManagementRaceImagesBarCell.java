@@ -7,8 +7,9 @@ import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 
 public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCell {
     public final static String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";
@@ -48,7 +49,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
             result.add(new ImageSpec(ACTION_DEFINE_COURSE, stringMessages.defineCourse(), makeImagePrototype(resources.defineCourse())));
             result.add(new ImageSpec(ACTION_COPY, stringMessages.copyCourseAndCompetitors(), makeImagePrototype(resources.copy())));
         }
-        result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));
+        result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(IconResources.INSTANCE.editIcon())));
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
         result.add(new ImageSpec(ACTION_SET_FINISHING_AND_FINISH_TIME, stringMessages.setFinishingAndFinishTime(), makeImagePrototype(resources.blueSmall())));

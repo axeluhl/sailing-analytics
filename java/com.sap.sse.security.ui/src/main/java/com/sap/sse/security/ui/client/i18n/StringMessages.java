@@ -115,4 +115,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String id();
     String displayName();
     String tenants();
+    String errorTryingToLoadRoles(String message);
+    String filterRoles();
+    String actions();
+    String actionEdit();
+    String actionRemove();
+    String doYouReallyWantToRemoveRole(String name);
 }

@@ -10,4 +10,7 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/remove.png")
     ImageResource removeIcon();
+    
+    @Source("images/edit.png")
+    ImageResource editIcon();
 }

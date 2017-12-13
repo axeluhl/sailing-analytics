@@ -34,7 +34,4 @@ public interface IconResources extends ClientBundle {
     
     @Source("images/status_grey.png")
     ImageResource statusGrey();
-    
-    @Source("images/delete.png")
-    ImageResource delete();
 }

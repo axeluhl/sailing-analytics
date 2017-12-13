@@ -2,16 +2,14 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Arrays;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 
 public class EventConfigImagesBarCell extends ImagesBarCell {
     private final StringMessages stringMessages;
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public EventConfigImagesBarCell(StringMessages stringMessages) {
         super();
@@ -26,8 +24,8 @@ public class EventConfigImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(
-                new ImageSpec(DefaultActions.EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                new ImageSpec(DefaultActions.REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon()))
+                new ImageSpec(DefaultActions.EDIT.name(), stringMessages.actionEdit(), makeImagePrototype(IconResources.INSTANCE.editIcon())),
+                new ImageSpec(DefaultActions.REMOVE.name(), stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon()))
                 );
     }
 }

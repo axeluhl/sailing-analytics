@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls;
+package com.sap.sse.gwt.client.celltable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,6 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.sap.sse.security.shared.PermissionBuilder.Action;
 
 /**
  * A cell type for use in a {@link CellTable} which renders a horizontal sequence of images. Use by subclassing and
@@ -41,9 +40,6 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
         private final AbstractImagePrototype imagePrototype;
         private final String actionName;
         private final String tooltip;
-        public ImageSpec(Action action, String tooltip, AbstractImagePrototype imagePrototype) {
-            this(action.name(), tooltip, imagePrototype);
-        }
         public ImageSpec(String actionName, String tooltip, AbstractImagePrototype imagePrototype) {
             super();
             this.imagePrototype = imagePrototype;

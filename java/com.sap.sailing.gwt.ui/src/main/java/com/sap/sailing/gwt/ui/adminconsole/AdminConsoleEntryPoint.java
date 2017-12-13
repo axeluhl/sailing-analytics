@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.ReplicationPanel;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -48,6 +49,8 @@ import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
+    private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+
     private Set<RegattasDisplayer> regattasDisplayers;
     private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
@@ -280,7 +283,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 getStringMessages().localServer(), Permission.MANAGE_LOCAL_SERVER_INSTANCE);
 
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
-                Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()), this);
+                Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()), this, tableResources);
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel) {
                     @Override

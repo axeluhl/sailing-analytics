@@ -1,9 +1,11 @@
 package com.sap.sse.gwt.adminconsole;
 
 import com.google.gwt.user.cellview.client.CellTable;
+import com.sap.sse.security.ui.client.SecurityTableResources;
+import com.sap.sse.security.ui.client.SecurityTableStyle;
 
-public interface AdminConsoleTableResources extends CellTable.Resources {
-    interface AdminConsoleTableStyle extends CellTable.Style {
+public interface AdminConsoleTableResources extends SecurityTableResources, CellTable.Resources {
+    interface AdminConsoleTableStyle extends SecurityTableStyle, CellTable.Style {
         /**
          * Applied to header cells of race columns
          */

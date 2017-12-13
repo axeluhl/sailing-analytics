@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 
 public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
     public static final String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";

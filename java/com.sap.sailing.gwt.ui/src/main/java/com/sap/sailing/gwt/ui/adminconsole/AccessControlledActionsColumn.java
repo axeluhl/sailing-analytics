@@ -2,7 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.security.shared.PermissionBuilder.Action;
 
 public abstract class AccessControlledActionsColumn<T, S extends ImagesBarCell> extends ImagesBarColumn<T, S> {

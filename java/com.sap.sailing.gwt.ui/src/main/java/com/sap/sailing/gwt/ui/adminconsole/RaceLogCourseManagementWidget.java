@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RaceLogCourseManagementWidget extends CourseManagementWidget {

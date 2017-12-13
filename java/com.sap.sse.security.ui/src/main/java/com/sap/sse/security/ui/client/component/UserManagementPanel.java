@@ -29,6 +29,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.ui.client.SecurityTableResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -38,23 +39,26 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementPanel extends DockPanel {
     
-    private List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
+    private final List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
     
-    private List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
+    private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
     
-    private SingleSelectionModel<AccessControlList> aclSingleSelectionModel;
-    private AccessControlListListDataProvider aclListDataProvider;
+    private final SingleSelectionModel<AccessControlList> aclSingleSelectionModel;
+    private final AccessControlListListDataProvider aclListDataProvider;
     
-    private SingleSelectionModel<UserDTO> singleSelectionModel;
+    private final SingleSelectionModel<UserDTO> singleSelectionModel;
 
-    private UserListDataProvider userListDataProvider;
+    private final UserListDataProvider userListDataProvider;
     
-    public UserManagementPanel(final UserService userService, final StringMessages stringMessages, ErrorReporter errorReporter) {
-        this(userService, stringMessages, Collections.<Permission>emptySet(), errorReporter);
+    private final RolesPanel rolesPanel;
+    
+    public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
+            ErrorReporter errorReporter, SecurityTableResources tableResources) {
+        this(userService, stringMessages, Collections.<Permission>emptySet(), errorReporter, tableResources);
     }
     
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
-            Iterable<Permission> additionalPermissions, ErrorReporter errorReporter) {
+            Iterable<Permission> additionalPermissions, ErrorReporter errorReporter, SecurityTableResources tableResources) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();
@@ -133,13 +137,16 @@ public class UserManagementPanel extends DockPanel {
         west.add(aclPager);
         west.add(aclPanel);
         
+        rolesPanel = new RolesPanel(stringMessages, userManagementService, tableResources, errorReporter);
+        add(rolesPanel, DockPanel.CENTER);
+        
         final UserList userList = new UserList();
         userList.setSelectionModel(singleSelectionModel);
         TextBox filterBox = new TextBox();
         userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
         final UserDetailsView userDetailsView = new UserDetailsView(userService,
                 singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, additionalPermissions, errorReporter);
-        add(userDetailsView, DockPanel.CENTER);
+        add(userDetailsView, DockPanel.EAST);
         userDetailsView.addUserChangeEventHandler(new UserChangeEventHandler() {
             @Override
             public void onUserChange(UserDTO user) {
@@ -199,6 +206,7 @@ public class UserManagementPanel extends DockPanel {
     public void updateUsersAndACLs() {
         userListDataProvider.updateDisplays();
         aclListDataProvider.updateDisplays();
+        rolesPanel.updateRoles();
     }
 
     public void addUserCreatedEventHandler(UserCreatedEventHandler handler){

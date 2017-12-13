@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 
 public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     public final static String ACTION_REMOVE = "ACTION_REMOVE";
@@ -31,7 +31,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         List<ImageSpec> result = new ArrayList<ImageSpec>();
-        result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));
+        result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(IconResources.INSTANCE.editIcon())));
         result.add(new ImageSpec(ACTION_UNLINK, stringMessages.actionRaceUnlink(), makeImagePrototype(resources.unlinkIcon())));
         StrippedLeaderboardDTO selectedLeaderboard = selectedLeaderboardProvider.getSelectedLeaderboard();
         if (selectedLeaderboard != null && !selectedLeaderboard.type.isRegattaLeaderboard()) {

@@ -1,7 +1,6 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.user.cellview.client.Column;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 
 public class ImagesBarColumn<T, S extends ImagesBarCell> extends Column<T, String> {
     public ImagesBarColumn(S imagesBarCell) {

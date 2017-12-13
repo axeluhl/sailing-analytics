@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.usermanagement;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -8,6 +9,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.sap.sse.security.ui.client.AbstractSecurityEntryPoint;
 import com.sap.sse.security.ui.client.Resources;
+import com.sap.sse.security.ui.client.SecurityTableResources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.SettingsPanel;
 import com.sap.sse.security.ui.client.component.UserManagementPanel;
@@ -15,6 +17,8 @@ import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
+    private final SecurityTableResources tableResources = GWT.create(SecurityTableResources.class);
+
     private TabLayoutPanel center;
 
     @Override
@@ -26,7 +30,7 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
             }
         });
-        UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), getStringMessages(), this);
+        UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), getStringMessages(), this, tableResources);
         center.add(new ScrollPanel(userManagementPanel), getStringMessages().users());
         final SettingsPanel settingsPanel = new SettingsPanel(getUserManagementService(), getStringMessages());
         center.add(new ScrollPanel(settingsPanel), getStringMessages().settings());

@@ -173,7 +173,7 @@ public class SettingsPanel extends LayoutPanel {
         
         flexTable.setWidget(row, 2, statusGreen);
         
-        final ImageResource deleteImageResource = IconResources.INSTANCE.delete();
+        final ImageResource deleteImageResource = com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon();
         HTML delete = new HTML(renderer.render(deleteImageResource));
         delete.addClickHandler(new ClickHandler() {
             
@@ -283,7 +283,7 @@ public class SettingsPanel extends LayoutPanel {
         
         flexTable.setWidget(row, 3, statusGreen);
         
-        final ImageResource deleteImageResource = IconResources.INSTANCE.delete();
+        final ImageResource deleteImageResource = com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon();
         HTML delete = new HTML(renderer.render(deleteImageResource));
         delete.addClickHandler(new ClickHandler() {
             
