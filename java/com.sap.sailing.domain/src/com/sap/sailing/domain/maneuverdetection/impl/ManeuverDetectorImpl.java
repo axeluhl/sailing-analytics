@@ -52,18 +52,22 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private static final Logger logger = Logger.getLogger(ManeuverDetectorImpl.class.getName());
 
     /**
-     * Used in maneuver detection algorithm to approximate the start and end time of maneuver performance. It defines
-     * the maximal absolute course change velocity in degrees per second that shall be regarded as a stable course.
+     * Defines the maximal absolute course change velocity in degrees per second that shall be regarded as a stable
+     * course.
      */
     private static final double MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS = 2;
 
     /**
-     * Used in maneuver detection algorithm to approximate the start and end time of maneuver main curve performance. It
-     * defines the absolute course change in degrees between bearing steps to ignore in order shorten the approximated
-     * span between start and end time of maneuver main curve.
+     * Defines the absolute course change in degrees between bearing steps to ignore in order to shorten the
+     * approximated span between start and end time of maneuver main curve.
      */
     private static final double MIN_ANGULAR_VELOCITY_FOR_MAIN_CURVE_BOUNDARIES_IN_DEGREES_PER_SECOND = 0.2;
 
+    /**
+     * Defines the course change limit toward opposite direction related to the direction of maneuver main curve. If
+     * speed maxima or stable bearing analysis produce a curve extension which exceeds this limit, the extension gets
+     * rejected.
+     */
     private static final double MAX_COURSE_CHANGE_TOWARD_MANEUVER_OPPOSITE_DIRECTION_FOR_CURVE_EXTENSION_IN_DEGREES = 15.0;
 
     /**
