@@ -281,13 +281,23 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
                 Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()), this);
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel),
-                getStringMessages().userManagement(), Permission.MANAGE_USERS);
-        
+        panel.addToTabPanel(advancedTabPanel,
+                new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        userManagementPanel.updateUsersAndACLs();
+                    }
+                }, getStringMessages().userManagement(), Permission.MANAGE_USERS);
+
         final TenantManagementPanel tenantManagementPanel = new TenantManagementPanel(getUserService(), StringMessages.INSTANCE);
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<TenantManagementPanel>(tenantManagementPanel),
-                getStringMessages().tenantManagement(), Permission.MANAGE_USERS);
-        
+        panel.addToTabPanel(advancedTabPanel,
+                new DefaultRefreshableAdminConsolePanel<TenantManagementPanel>(tenantManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        tenantManagementPanel.updateTenantsAndUsers();
+                    }
+                }, getStringMessages().tenantManagement(), Permission.MANAGE_USERS);
+
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(sailingService, this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
                 getStringMessages().fileStorage(), Permission.MANAGE_FILE_STORAGE);

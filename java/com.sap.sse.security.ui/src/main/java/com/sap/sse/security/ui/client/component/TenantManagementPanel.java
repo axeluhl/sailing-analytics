@@ -38,8 +38,7 @@ public class TenantManagementPanel extends DockPanel {
         buttonPanel.add(new Button(stringMessages.refresh(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                tenantListDataProvider.updateDisplays();
-                tenantDetailPanel.updateLists();
+                updateTenantsAndUsers();
             }
         }));
         buttonPanel.add(new Button(stringMessages.createTenant(), new ClickHandler() {
@@ -110,5 +109,10 @@ public class TenantManagementPanel extends DockPanel {
         listsWrapper.add(userListCaption);
         west.add(listsWrapper);
         add(west, DockPanel.WEST);
+    }
+
+    public void updateTenantsAndUsers() {
+        tenantListDataProvider.updateDisplays();
+        tenantDetailPanel.updateLists();
     }
 }
