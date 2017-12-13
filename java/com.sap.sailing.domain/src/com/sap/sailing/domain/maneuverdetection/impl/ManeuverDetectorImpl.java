@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.common.impl.CourseChangeImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -73,7 +75,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     /**
      * Tracked race whose tracks are being processed for maneuver detection.
      */
-    private final TrackedRace trackedRace;
+    protected final TrackedRace trackedRace;
 
     /**
      * Constructs maneuver detector which is supposed to be used for maneuver detection within the provided tracked
@@ -85,14 +87,108 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     public ManeuverDetectorImpl(TrackedRace trackedRace) {
         this.trackedRace = trackedRace;
     }
-
+    
     @Override
-    public List<Maneuver> detectManeuvers(Competitor competitor, TimePoint from, TimePoint to,
+    public List<Maneuver> detectManeuvers(Competitor competitor) throws NoWindException, NoFixesException {
+        Pair<TimePoint,TimePoint> startAndEndTimePoints = getTrackingStartAndEndTimePoints(competitor);
+        if(startAndEndTimePoints != null) {
+            return detectManeuvers(competitor, startAndEndTimePoints.getA(), startAndEndTimePoints.getB());
+        }
+        throw new NoFixesException();
+    }
+    
+    protected Pair<TimePoint, TimePoint> getTrackingStartAndEndTimePoints(Competitor competitor) {
+        NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+        TimePoint earliestTrackRecord = null;
+        MarkPassing crossedFinishLine = null;
+        // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid
+        // deadlocks
+        final Waypoint lastWaypoint = trackedRace.getRace().getCourse().getLastWaypoint();
+        if (lastWaypoint != null) {
+            trackedRace.lockForRead(markPassings);
+            try {
+                if (markPassings != null && !markPassings.isEmpty()) {
+                    earliestTrackRecord = markPassings.iterator().next().getTimePoint();
+                    crossedFinishLine = trackedRace.getMarkPassing(competitor, lastWaypoint);
+                }
+            } finally {
+                trackedRace.unlockAfterRead(markPassings);
+            }
+        }
+        if (earliestTrackRecord == null) {
+            GPSFixMoving firstRawFix = trackedRace.getTrack(competitor).getFirstRawFix();
+            if (firstRawFix != null) {
+                earliestTrackRecord = firstRawFix.getTimePoint();
+            }
+        }
+        if (earliestTrackRecord != null) {
+            TimePoint latestTrackRecord;
+            if (crossedFinishLine != null) {
+                latestTrackRecord = crossedFinishLine.getTimePoint();
+            } else {
+                final GPSFixMoving lastRawFix = trackedRace.getTrack(competitor).getLastRawFix();
+                if (lastRawFix != null) {
+                    latestTrackRecord = lastRawFix.getTimePoint();
+                } else {
+                    latestTrackRecord = null;
+                }
+            }
+            if (latestTrackRecord != null) {
+                return new Pair<TimePoint, TimePoint>(earliestTrackRecord, latestTrackRecord);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * @see #detectManeuvers(Competitor, TimePoint, TimePoint, boolean)
+     */
+    protected List<Maneuver> detectManeuvers(Competitor competitor, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
+        return detectManeuvers(competitor, earliestManeuverStart, latestManeuverEnd, false);
+    }
+
+    /**
+     * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
+     * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * <p>
+     * 
+     * The time period assumed for a maneuver duration is taken from the
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
+     * list is returned. Maneuvers can only be expected to be detected if at least three fixes are provided in
+     * <code>approximatedFixesToAnalyze</code>. For the inner approximating fixes (all except the first and the last
+     * approximating fix), their course changes according to the approximated path (and not the underlying actual
+     * tracked fixes) are computed. Subsequent course changes to the same direction are then grouped. Those in closer
+     * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
+     * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
+     * @param competitor
+     *            The competitor, whose maneuvers shall be discovered
+     * @param earliestManeuverStart
+     *            maneuver start will not be before this time point; if a maneuver is found whose time point is at or
+     *            after this time point, no matter how close it is, its start regarding speed and course into the
+     *            maneuver and the leg before the maneuver is not taken from an earlier time point, even if half the
+     *            maneuver duration before the maneuver time point were before this time point.
+     * @param latestManeuverEnd
+     *            maneuver end will not be after this time point; if a maneuver is found whose time point is at or
+     *            before this time point, no matter how close it is, its end regarding speed and course out of the
+     *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
+     *            maneuver duration after the maneuver time point were after this time point.
+     * @param ignoreMarkPassings
+     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
+     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
+     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
+     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
+     *            passing.
+     * 
+     * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
+     *         <code>to</code>, or else the list of maneuvers detected.
+     */
+    protected List<Maneuver> detectManeuvers(Competitor competitor, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd,
             boolean ignoreMarkPassings) throws NoWindException {
         return detectManeuvers(competitor,
                 trackedRace.approximate(competitor,
-                        competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(), from, to),
-                ignoreMarkPassings, from, to);
+                        competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(), earliestManeuverStart, latestManeuverEnd),
+                ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd);
     }
 
     protected List<Maneuver> detectManeuvers(Competitor competitor, Iterable<GPSFixMoving> approximatingFixesToAnalyze,

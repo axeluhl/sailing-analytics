@@ -111,6 +111,7 @@ import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -290,7 +291,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * computed. Clients wanting to know maneuvers for the competitor outside of this time interval need to (re-)compute
      * them.
      */
-    private transient SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
+    private transient SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> maneuverCache;
     
     private transient ConcurrentMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
@@ -687,14 +688,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public synchronized void waitForLoadingToFinish() throws InterruptedException {
     }
 
-    private SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
-        return new SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>(
-                new AbstractCacheUpdater<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>() {
-                    
+    private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
+        return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
+                new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
                     @Override
-                    public com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
+                    public List<Maneuver> computeCacheUpdate(Competitor competitor,
                             EmptyUpdateInterval updateInterval) throws NoWindException {
-                        return computeManeuvers(competitor);
+                        List<Maneuver> maneuvers = computeManeuvers(competitor);
+                        return maneuvers;
                     }
                 }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
     }
@@ -2642,66 +2643,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
-    private com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
+    private List<Maneuver> computeManeuvers(Competitor competitor) throws NoWindException {
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
         ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(this);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
-        com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
-        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        TimePoint extendedFrom = null;
-        MarkPassing crossedFinishLine = null;
-        // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid
-        // deadlocks
-        final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
-        if (lastWaypoint != null) {
-            lockForRead(markPassings);
-            try {
-                if (markPassings != null && !markPassings.isEmpty()) {
-                    extendedFrom = markPassings.iterator().next().getTimePoint();
-                    crossedFinishLine = getMarkPassing(competitor, lastWaypoint);
-                }
-            } finally {
-                unlockAfterRead(markPassings);
-            }
+        List<Maneuver> result = null;
+        try {
+            result = maneuverDetector.detectManeuvers(competitor);
+        } catch (NoWindException ex) {
+            // Catching the NoWindException here without letting it propagate thru other handlers.
+            // This is mainly to avoid having logs flooded with stack traces. It is safe to catch
+            // it here because we can assume that this exception does not hide any severe problem
+            // other than that there is no wind. Because maneuvers are mostly computed using a
+            // future cache and need wind (like getTack) they will often fail before the wind has been
+            // loaded from database. We can safely return null here because we can be sure that
+            // cache will be updated when new fixes are fed into the stream therefore leading to a
+            // recomputation.
+            logger.fine("NoWindException during computation of maneuvers for " + competitor.getName());
+        } catch (NoFixesException ex) {
+            logger.fine("NoFixesException during computation of maneuvers for " + competitor.getName());
         }
-        if (extendedFrom == null) {
-            GPSFixMoving firstRawFix = getTrack(competitor).getFirstRawFix();
-            if (firstRawFix != null) {
-                extendedFrom = firstRawFix.getTimePoint();
-            }
-        }
-        if (extendedFrom != null) {
-            TimePoint extendedTo;
-            if (crossedFinishLine != null) {
-                extendedTo = crossedFinishLine.getTimePoint();
-            } else {
-                final GPSFixMoving lastRawFix = getTrack(competitor).getLastRawFix();
-                if (lastRawFix != null) {
-                    extendedTo = lastRawFix.getTimePoint();
-                } else {
-                    extendedTo = null;
-                }
-            }
-            if (extendedTo != null) {
-                try {
-                    List<Maneuver> extendedResultForCache = maneuverDetector.detectManeuvers(competitor, extendedFrom, extendedTo, /* ignoreMarkPassings */
-                            false);
-                    result = new com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom,
-                            extendedTo, extendedResultForCache);
-                } catch (NoWindException ex) {
-                    // Catching the NoWindException here without letting it propagate thru other handlers.
-                    // This is mainly to avoid having logs flooded with stack traces. It is safe to catch
-                    // it here because we can assume that this exception does not hide any severe problem
-                    // other than that there is no wind. Because maneuvers are mostly computed using a
-                    // future cache and need wind (like getTack) they will often fail before the wind has been
-                    // loaded from database. We can safely return null here because we can be sure that
-                    // cache will be updated when new fixes are fed into the stream therefore leading to a
-                    // recomputation.
-                    logger.fine("NoWindException during computation of maneuvers for " + competitor.getName());
-                }
-            }
-        } // else competitor has no fixes to consider; remove any maneuver cache entry
+        // else competitor has no fixes to consider; remove any maneuver cache entry
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
@@ -2721,12 +2684,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
-        com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
+        List<Maneuver> allManeuvers = maneuverCache.get(competitor, waitForLatest);
         List<Maneuver> result;
         if (allManeuvers == null) {
             result = Collections.emptyList();
         } else {
-            result = extractInterval(from, to, allManeuvers.getC());
+            result = extractInterval(from, to, allManeuvers);
         }
         return result;
     }

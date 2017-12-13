@@ -4,10 +4,8 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sse.common.TimePoint;
 
 /**
  * Determines maneuvers performed within a tracked race.
@@ -31,29 +29,13 @@ public interface ManeuverDetector {
      * tracked fixes) are computed. Subsequent course changes to the same direction are then grouped. Those in closer
      * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
      * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
+     * 
      * @param competitor
      *            The competitor, whose maneuvers shall be discovered
-     * @param earliestManeuverStart
-     *            maneuver start will not be before this time point; if a maneuver is found whose time point is at or
-     *            after this time point, no matter how close it is, its start regarding speed and course into the
-     *            maneuver and the leg before the maneuver is not taken from an earlier time point, even if half the
-     *            maneuver duration before the maneuver time point were before this time point.
-     * @param latestManeuverEnd
-     *            maneuver end will not be after this time point; if a maneuver is found whose time point is at or
-     *            before this time point, no matter how close it is, its end regarding speed and course out of the
-     *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
-     *            maneuver duration after the maneuver time point were after this time point.
-     * @param ignoreMarkPassings
-     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
-     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
-     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
-     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
-     *            passing.
      * 
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
      */
-    List<Maneuver> detectManeuvers(Competitor competitor, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd,
-            boolean ignoreMarkPassings) throws NoWindException;
+    List<Maneuver> detectManeuvers(Competitor competitor) throws NoWindException, NoFixesException;
 
 }
