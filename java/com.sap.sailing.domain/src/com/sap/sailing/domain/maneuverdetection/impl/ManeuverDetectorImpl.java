@@ -92,7 +92,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     public List<Maneuver> detectManeuvers(Competitor competitor) throws NoWindException, NoFixesException {
         Pair<TimePoint,TimePoint> startAndEndTimePoints = getTrackingStartAndEndTimePoints(competitor);
         if(startAndEndTimePoints != null) {
-            return detectManeuvers(competitor, startAndEndTimePoints.getA(), startAndEndTimePoints.getB());
+            return detectManeuvers(competitor, startAndEndTimePoints.getA(), startAndEndTimePoints.getB(), false);
         }
         throw new NoFixesException();
     }
@@ -141,13 +141,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
     
     /**
-     * @see #detectManeuvers(Competitor, TimePoint, TimePoint, boolean)
-     */
-    protected List<Maneuver> detectManeuvers(Competitor competitor, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
-        return detectManeuvers(competitor, earliestManeuverStart, latestManeuverEnd, false);
-    }
-
-    /**
      * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
      * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
      * bearing the boat had at the time of the approximating fix which is taken from the original track.
@@ -188,11 +181,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         return detectManeuvers(competitor,
                 trackedRace.approximate(competitor,
                         competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(), earliestManeuverStart, latestManeuverEnd),
-                ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd);
+                earliestManeuverStart, latestManeuverEnd, ignoreMarkPassings);
     }
 
     protected List<Maneuver> detectManeuvers(Competitor competitor, Iterable<GPSFixMoving> approximatingFixesToAnalyze,
-            boolean ignoreMarkPassings, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
+            TimePoint earliestManeuverStart, TimePoint latestManeuverEnd, boolean ignoreMarkPassings)
             throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         if (Util.size(approximatingFixesToAnalyze) > 2) {
