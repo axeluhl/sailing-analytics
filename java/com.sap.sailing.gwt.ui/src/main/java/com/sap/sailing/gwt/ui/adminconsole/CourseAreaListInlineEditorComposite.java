@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sse.common.Util;

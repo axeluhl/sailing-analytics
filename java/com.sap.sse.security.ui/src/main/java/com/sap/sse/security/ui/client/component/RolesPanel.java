@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -57,7 +56,6 @@ public class RolesPanel extends VerticalPanel {
     private final ErrorReporter errorReporter;
     private final UserManagementServiceAsync userManagementService;
     private final ListDataProvider<Role> rolesListDataProvider;
-    private final List<Role> allRoles;
     private final StringMessages stringMessages;
     private final LabeledAbstractFilterablePanel<Role> filterablePanelRoles;
     private RefreshableMultiSelectionModel<? super Role> refreshableRoleMultiSelectionModel;
@@ -70,9 +68,8 @@ public class RolesPanel extends VerticalPanel {
         this.addButton = new Button(stringMessages.add());
         this.removeButton = new Button(stringMessages.remove());
         this.refreshButton = new Button(stringMessages.refresh());
-        this.allRoles = new ArrayList<>();
         rolesListDataProvider = new ListDataProvider<Role>();
-        filterablePanelRoles = new LabeledAbstractFilterablePanel<Role>(new Label(stringMessages.filterRoles()), allRoles,
+        filterablePanelRoles = new LabeledAbstractFilterablePanel<Role>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
                 new CellTable<Role>(), rolesListDataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(Role role) {
@@ -103,7 +100,7 @@ public class RolesPanel extends VerticalPanel {
     }
     
     private void createRole() {
-        new RoleCreationDialog(stringMessages, getAllPermissions(), allRoles, new DialogCallback<Role>() {
+        new RoleCreationDialog(stringMessages, getAllPermissions(), getAllRoles(), new DialogCallback<Role>() {
             @Override
             public void ok(Role editedObject) {
                 userManagementService.createRole(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<Role>() {
@@ -114,15 +111,14 @@ public class RolesPanel extends VerticalPanel {
 
                     @Override
                     public void onSuccess(Role result) {
-                        // no-op
+                        updateRoles();
                     }
                 });
             }
 
             @Override
             public void cancel() {
-                // TODO Auto-generated method stub
-                
+                //no-op
             }
         }).show();
     }
@@ -240,7 +236,7 @@ public class RolesPanel extends VerticalPanel {
 
                             @Override
                             public void onSuccess(Void result) {
-                                // no-op
+                                updateRoles();
                             }
                         });
                     }
@@ -253,15 +249,21 @@ public class RolesPanel extends VerticalPanel {
 
     private Set<WildcardPermission> getAllPermissions() {
         Set<WildcardPermission> allPermissionsAsStrings = new HashSet<>();
-        for (final Role roleFromAllRoles : allRoles) {
+        for (final Role roleFromAllRoles : getAllRoles()) {
             Util.addAll(roleFromAllRoles.getPermissions(), allPermissionsAsStrings);
         }
         return allPermissionsAsStrings;
     }
 
     private Set<Role> getAllOtherRoles(Role role) {
-        final Set<Role> allOtherRoles = new HashSet<>(allRoles);
+        final Set<Role> allOtherRoles = getAllRoles();
         allOtherRoles.remove(role);
+        return allOtherRoles;
+    }
+
+    private Set<Role> getAllRoles() {
+        final Set<Role> allOtherRoles = new HashSet<>();
+        Util.addAll(filterablePanelRoles.getAll(), allOtherRoles);
         return allOtherRoles;
     }
 

@@ -76,6 +76,7 @@ public abstract class AbstractRoleDialog extends DataEntryDialog<Role> {
                         return value.toString();
                     }
         };
+        permissionsList.addValueChangeHandler(e->validateAndUpdate());
     }
 
     @Override
