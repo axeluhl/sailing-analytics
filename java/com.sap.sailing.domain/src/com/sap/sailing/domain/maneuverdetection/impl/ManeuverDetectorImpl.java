@@ -95,8 +95,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 ignoreMarkPassings, from, to);
     }
 
-    @Override
-    public List<Maneuver> detectManeuvers(Competitor competitor, Iterable<GPSFixMoving> approximatingFixesToAnalyze,
+    protected List<Maneuver> detectManeuvers(Competitor competitor, Iterable<GPSFixMoving> approximatingFixesToAnalyze,
             boolean ignoreMarkPassings, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
             throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
