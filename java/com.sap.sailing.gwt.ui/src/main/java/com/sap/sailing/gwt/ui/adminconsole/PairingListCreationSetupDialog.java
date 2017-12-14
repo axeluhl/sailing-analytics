@@ -94,7 +94,13 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         }
         
         dto.setFlightCount(flightCount);
-        dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
+        
+        if (this.flightMultiplierCheckBox.getValue()) {
+            dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
+        } else {
+            dto.setFlightMultiplier(1);
+        }
+        
         return dto; 
     }
     

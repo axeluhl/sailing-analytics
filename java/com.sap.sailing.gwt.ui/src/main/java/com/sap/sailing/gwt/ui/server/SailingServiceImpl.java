@@ -6808,7 +6808,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
 
-        int groupCount = (int) (template.getPairingListTemplate().length / flightCount * flightMultiplier);
+        int groupCount = (int) (template.getPairingListTemplate().length / flightCount);
         return new PairingListTemplateDTO(flightCount, groupCount, 
                 competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality());
     }
