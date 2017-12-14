@@ -126,4 +126,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editRoles();
     String otherRoleWithNameAlreadyExists(String name);
     String errorCreatingRole(String name, String message);
+    String errorEditingRoles(String rolename, String message);
 }

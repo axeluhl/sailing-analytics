@@ -230,7 +230,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
-                roles.add(rolesById.get((UUID) o));
+                final Role role = rolesById.get((UUID) o);
+                if (role != null) {
+                    roles.add(role);
+                } else {
+                    logger.warning("Role with ID "+o+" that used to be assigned to user "+name+" not found");
+                }
             }
         } else {
             // migration of old name-based, non-entity roles:

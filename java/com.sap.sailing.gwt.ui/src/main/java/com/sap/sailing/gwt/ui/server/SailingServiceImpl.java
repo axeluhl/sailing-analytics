@@ -503,6 +503,10 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.ShiroPermissionBuilderImpl;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.ui.server.SecurityDTOFactory;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -3947,8 +3951,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, withStatisticalData));
         }
-        eventDTO.setAcl(getSecurityService().getAccessControlList(event.getId().toString()));
-        eventDTO.setOwnership(getSecurityService().getOwnership(event.getId().toString()));
+        final SecurityDTOFactory securityDTOFactory = new SecurityDTOFactory();
+        final Map<Tenant, Tenant> fromOriginalToStrippedDownTenant = new HashMap<>();
+        final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
+        final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        eventDTO.setAcl(securityDTOFactory.createAccessControlListDTO(getSecurityService().getAccessControlList(event.getId().toString()),
+                fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+        eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(getSecurityService().getOwnership(event.getId().toString()),
+                fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         return eventDTO;
     }
     

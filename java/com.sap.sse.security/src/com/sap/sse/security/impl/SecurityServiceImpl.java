@@ -217,8 +217,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private void initEmptyStore() {
         final Role adminRole;
         AdminRole adminRolePrototype = AdminRole.getInstance();
-        if (Util.isEmpty(userStore.getRoles())) {
-            logger.info("No roles found. Creating default role \"admin\" with permission \"*\"");
+        if (!Util.contains(userStore.getRoles(), adminRolePrototype)) {
+            logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+
+                    AdminRole.getInstance().getPermissions()+"\"");
             Set<String> adminPermissions = new HashSet<>();
             adminPermissions.add("*");
             adminRole = userStore.createRole((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());

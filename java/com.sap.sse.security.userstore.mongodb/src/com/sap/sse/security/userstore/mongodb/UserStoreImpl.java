@@ -304,7 +304,12 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public Role createRole(UUID roleId, String displayName, Iterable<WildcardPermission> permissions) {
-        Role role = new RoleImpl(roleId, displayName, permissions);
+        final Role role;
+        if (Util.equalsWithNull(roleId, AdminRole.getInstance().getId())) {
+            role = AdminRole.getInstance();
+        } else {
+            role = new RoleImpl(roleId, displayName, permissions);
+        }
         roles.put(roleId, role);
         mongoObjectFactory.storeRole(role);
         return role;

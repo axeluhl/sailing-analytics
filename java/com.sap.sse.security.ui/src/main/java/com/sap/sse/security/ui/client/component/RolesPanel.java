@@ -231,7 +231,7 @@ public class RolesPanel extends VerticalPanel {
                         userManagementService.updateRole(editedObject, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                errorReporter.reportError(stringMessages.errorUpdatingRoles(editedObject.getName(), caught.getMessage()));
+                                errorReporter.reportError(stringMessages.errorEditingRoles(editedObject.getName(), caught.getMessage()));
                             }
 
                             @Override

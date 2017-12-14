@@ -35,15 +35,9 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.Social;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
@@ -51,19 +45,12 @@ import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.SecurityUserImpl;
-import com.sap.sse.security.shared.impl.TenantImpl;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
-import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
-import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
     private static final long serialVersionUID = 4458564336368629101L;
@@ -72,9 +59,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
+    final SecurityDTOFactory securityDTOFactory;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
+        securityDTOFactory = new SecurityDTOFactory();
         final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context, SecurityService.class, /* customizer */ null);
         tracker.open();
         securityService = new FutureTask<SecurityService>(new Callable<SecurityService>() {
@@ -101,18 +90,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }.start();
     }
 
-    private SecurityUser createUserDTOFromUser(SecurityUser user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        SecurityUser result = fromOriginalToStrippedDownUser.get(user);
-        if (result == null) {
-            final SecurityUserImpl preResult = new SecurityUserImpl(user.getName(), /* default tenant to be set later: */ null);
-            result = preResult;
-            fromOriginalToStrippedDownUser.put(user, result);
-            preResult.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        }
-        return result;
-    }
-    
     @Override
     public Role createRole(String roleIdAsString, String name) {
         return getSecurityService().createRole(UUID.fromString(roleIdAsString), name);
@@ -135,41 +112,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return result;
     }
 
-    /**
-     * Produces a stripped-down {@link Tenant} object that has stripped-down {@link User} objects
-     * with their default tenants stripped down and mapped by this same method recursively where
-     * for a single {@link User} object only a single stripped-down user object will be created,
-     * as will for tenants.
-     */
-    private Tenant createTenantDTOFromTenant(Tenant tenant) {
-        return createTenantDTOFromTenant(tenant, new HashMap<>(), new HashMap<>(), new HashMap<>());
-    }
-    
-    private Tenant createTenantDTOFromTenant(Tenant tenant, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
-            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        final Tenant result;
-        if (tenant == null) {
-            result = null;
-        } else if (fromOriginalToStrippedDownTenant.containsKey(tenant)) {
-            result = fromOriginalToStrippedDownTenant.get(tenant);
-        } else {
-            result = new TenantImpl(tenant.getId(), tenant.getName());
-            fromOriginalToStrippedDownTenant.put(tenant, result);
-            for (final SecurityUser user : tenant.getUsers()) {
-                result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser,
-                        fromOriginalToStrippedDownUserGroup));
-            }
-        }
-        return result;
-    }
-
     @Override
     public Collection<AccessControlList> getAccessControlListList() throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("access_control:manage")) {
             List<AccessControlList> acls = new ArrayList<>();
             for (AccessControlList acl : getSecurityService().getAccessControlListList()) {
-                acls.add(acl);
+                acls.add(securityDTOFactory.createAccessControlListDTO(acl));
             }
             return acls;
         } else {
@@ -179,7 +127,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString) {
-        return getSecurityService().getAccessControlList(idOfAccessControlledObjectAsString);
+        return securityDTOFactory.createAccessControlListDTO(getSecurityService().getAccessControlList(idOfAccessControlledObjectAsString));
     }
 
     @Override
@@ -189,7 +137,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             for (String group : permissionStrings.keySet()) {
                 permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
             }
-            return getSecurityService().updateACL(idOfAccessControlledObjectAsString, permissionMap);
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService().updateACL(idOfAccessControlledObjectAsString, permissionMap));
         } else {
             throw new UnauthorizedException("Not permitted to grant and revoke permissions for user");
         }
@@ -199,7 +147,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public AccessControlList addToACL(String idAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission:" + groupOrTenantIdAsString)) {
             UserGroup userGroup = getTenantOrUserGroup(groupOrTenantIdAsString);
-            return getSecurityService().addToACL(idAsString, userGroup, action);
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToACL(idAsString, userGroup, action));
         } else {
             throw new UnauthorizedException("Not permitted to grant permission for user");
         }
@@ -218,7 +166,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public AccessControlList removeFromACL(String idAsString, String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + groupOrTenantIdAsString)) {
             UserGroup userGroup = getTenantOrUserGroup(groupOrTenantIdAsString);
-            return getSecurityService().removeFromACL(idAsString, userGroup, permission);
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService().removeFromACL(idAsString, userGroup, permission));
         } else {
             throw new UnauthorizedException("Not permitted to revoke permission for user");
         }
@@ -229,7 +177,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("tenants:manage")) {
             List<Tenant> tenants = new ArrayList<>();
             for (Tenant t : getSecurityService().getTenants()) {
-                Tenant tenantDTO = createTenantDTOFromTenant(t);
+                Tenant tenantDTO = securityDTOFactory.createTenantDTOFromTenant(t);
                 tenants.add(tenantDTO);
             }
             return tenants;
@@ -250,7 +198,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
             getSecurityService().createOwnership(newTenantId.toString(),
                     getSecurityService().getCurrentUser(), getSecurityService().getTenantByName(tenantOwner), name);
-            return createTenantDTOFromTenant(tenant);
+            return securityDTOFactory.createTenantDTOFromTenant(tenant);
         } else {
             throw new UnauthorizedException("Not permitted to create tenants");
         }
@@ -299,7 +247,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("users:manage")) {
             List<UserDTO> users = new ArrayList<>();
             for (UserImpl u : getSecurityService().getUserList()) {
-                UserDTO userDTO = createUserDTOFromUser(u);
+                UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
                 users.add(userDTO);
             }
             return users;
@@ -316,7 +264,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return null;
         }
         if (SecurityUtils.getSubject().isPermitted("user:view:" + user.getName())) {
-            return createUserDTOFromUser(user);
+            return securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         } else {
             throw new UnauthorizedException("Not permitted to view current user");
         }
@@ -327,7 +275,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         try {
             String redirectURL = getSecurityService().login(username, password);
             return new SuccessInfo(true, "Success. Redirecting to "+redirectURL, redirectURL,
-                    createUserDTOFromUser(getSecurityService().getUserByName(username)));
+                    securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username), getSecurityService()));
         } catch (UserManagementException | AuthenticationException e) {
             return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }
@@ -361,7 +309,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             if (u == null) {
                 return null;
             }
-            return createUserDTOFromUser(u);
+            return securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
         } else {
             throw new UnauthorizedException("Not permitted to create user");
         }
@@ -442,10 +390,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             for (UserImpl u : getSecurityService().getUserList()) {
                 if (filter != null && filter.isEmpty()) {
                     if (u.getName().contains(filter)) {
-                        users.add(createUserDTOFromUser(u));
+                        users.add(securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
                     }
                 } else {
-                    users.add(createUserDTOFromUser(u));
+                    users.add(securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
                 }
             }
             Collections.sort(users, new Comparator<UserDTO>() {
@@ -485,7 +433,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 getSecurityService().addRoleForUser(u, roleToAdd);
             }
             return new SuccessInfo(true, "Set roles " + idsOfRolesToSet + " for user " + username, /* redirectURL */null,
-                    createUserDTOFromUser(u));
+                    securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
         } else {
             throw new UnauthorizedException("Not permitted to grant permissions to user");
         }
@@ -511,7 +459,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 getSecurityService().addPermissionForUser(username, permissionToAdd);
             }
             return new SuccessInfo(true, "Set roles " + permissions + " for user " + username, /* redirectURL */null,
-                    createUserDTOFromUser(u));
+                    securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
         } else {
             throw new UnauthorizedException("Not permitted to grant or revoke permissions for user");
         }
@@ -531,83 +479,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         } else {
             throw new UnauthorizedException("Not permitted to delete user");
         }
-    }
-
-    private Role createRoleDTOFromRole(Role role) {
-        // TODO strip down the role object graph to what the client needs...
-        return new RoleImpl(role.getId(), role.getName(), role.getPermissions());
-    }
-
-    private UserDTO createUserDTOFromUser(User user) {
-        return createUserDTOFromUser(user, new HashMap<>(), new HashMap<>(), new HashMap<>());
-    }
-    
-    private UserDTO createUserDTOFromUser(User user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        UserDTO userDTO;
-        Map<AccountType, Account> accounts = user.getAllAccounts();
-        List<AccountDTO> accountDTOs = new ArrayList<>();
-        for (Account a : accounts.values()){
-            switch (a.getAccountType()) {
-            case SOCIAL_USER:
-                accountDTOs.add(createSocialUserDTO((SocialUserAccount) a));
-                break;
-
-            default:
-                UsernamePasswordAccount upa = (UsernamePasswordAccount) a;
-                accountDTOs.add(new UsernamePasswordAccountDTO(upa.getName(), upa.getSaltedPassword(), upa.getSalt()));
-                break;
-            }
-        }
-        HashMap<UUID, Role> roleMap = new HashMap<>();
-        for (Role role : getSecurityService().getRoles()) {
-            roleMap.put((UUID) role.getId(), createRoleDTOFromRole(role));
-        }
-        userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
-                user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), /* default tenant filled in later */ null,
-                user.getPermissions(),
-                createUserGroupDTOsFromUserGroups(getSecurityService().getUserGroupsOfUser(user),
-                        fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser,
-                        fromOriginalToStrippedDownUserGroup));
-        fromOriginalToStrippedDownUser.put(user, userDTO);
-        userDTO.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant,
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        return userDTO;
-    }
-
-    private Iterable<UserGroup> createUserGroupDTOsFromUserGroups(Iterable<UserGroup> userGroups,
-            Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
-            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        final List<UserGroup> result;
-        if (userGroups == null) {
-            result = null;
-        } else {
-            result = new ArrayList<>();
-            for (final UserGroup userGroup : userGroups) {
-                result.add(createUserDTOFromUserGroup(userGroup, fromOriginalToStrippedDownTenant,
-                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-            }
-        }
-        return result;
-    }
-
-    private UserGroup createUserDTOFromUserGroup(UserGroup userGroup,
-            Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
-            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        final UserGroup result;
-        if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
-            result = fromOriginalToStrippedDownUserGroup.get(userGroup);
-        } else {
-            result = new UserGroupImpl(userGroup.getId(), userGroup.getName());
-            fromOriginalToStrippedDownUserGroup.put(userGroup, result);
-            for (final SecurityUser user : userGroup.getUsers()) {
-                result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-            }
-        }
-        return result;
     }
 
     @Override
@@ -664,7 +535,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         } catch (UserManagementException e) {
             e.printStackTrace();
         }
-        return createUserDTOFromUser(user);
+        return securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
     }
 
     private HttpSession getHttpSession() {
@@ -685,16 +556,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return credential;
     }
     
-    private SocialUserDTO createSocialUserDTO(SocialUserAccount socialUser){
-        SocialUserDTO socialUserDTO = new SocialUserDTO(socialUser.getProperty(Social.PROVIDER.name()));
-        socialUserDTO.setSessionId(socialUser.getSessionId());
-        
-        for (Social s : Social.values()){
-            socialUserDTO.setProperty(s.name(), socialUser.getProperty(s.name()));
-        }
-        return socialUserDTO;
-    }
-
     @Override
     public void addSetting(String key, String clazz, String setting) {
         try {
@@ -716,7 +577,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         getSecurityService().refreshSecurityConfig(getServletContext());
     }
 
-    private SecurityService getSecurityService() {
+    SecurityService getSecurityService() {
         try {
             return securityService.get();
         } catch (InterruptedException | ExecutionException e) {
