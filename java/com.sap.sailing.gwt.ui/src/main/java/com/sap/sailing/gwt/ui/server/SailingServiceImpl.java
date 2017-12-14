@@ -6927,6 +6927,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             groupCount = 0;
             for (Fleet fleet : raceColumn.getFleets()) {
+                
+                raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
+
                 Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>();
                 List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList().get(flightCount).get(groupCount);
                 for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
