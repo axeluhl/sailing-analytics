@@ -163,7 +163,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
                     if (competitorAndBoatPair.getA().getName() == null) {
-                        // TODO set empty elements
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(stringmessages.empty()));
                         pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());

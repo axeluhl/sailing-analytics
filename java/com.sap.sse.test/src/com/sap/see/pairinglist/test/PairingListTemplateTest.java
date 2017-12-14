@@ -19,7 +19,7 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
     @Test
     public void testArrayCopy() {
 
-        int[][] flightColumn = { { 0, 1, 2, 3, 4, 5}, { 6, 7, 8, 9, 10, 11 }, { 12, 13, 14, 15, 16, 17} };
+        int[][] flightColumn = { { 0, 1, 2, 3, 4, 5 }, { 6, 7, 8, 9, 10, 11 }, { 12, 13, 14, 15, 16, 17 } };
 
         int[][][] associationRow = new int[3][5][18];
         int[][] currentAssociations = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
@@ -89,14 +89,14 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         for (int i = 0; i < tests; i++) {
             sum += a[i];
         }
-        double average = sum / tests+1;
-        
+        double average = sum / tests + 1;
+
         System.out.println("Average Time: " + (average / 1000) + "s");
         if (average > 10000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
         }
     }
-    
+
     @Test
     public void testAverageQualityForSingleCase() {
         final int count = 20;
@@ -108,29 +108,29 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
             System.out.println(Arrays.deepToString(template));
         }
         double sum = 0;
-        for (double quality: results) {
+        for (double quality : results) {
             sum += quality;
         }
-        Assert.assertEquals(0.574, sum/count, 0.01);
+        Assert.assertEquals(0.574, sum / count, 0.01);
     }
-    
+
     @Test
     public void testIncrementAndDecrementAssociations() {
         int[][] associations = new int[18][18];
         int[][] flight = this.createFlight(3, 18, associations, 5);
-        
+
         associations = this.incrementAssociations(flight, associations);
         associations = this.decrementAssociations(flight, associations);
-        
-        for (int[] key: associations) {
-            for (int value: key) {
+
+        for (int[] key : associations) {
+            for (int value : key) {
                 if (value > 0) {
                     Assert.fail("Associations array should only have values 0 and -1!");
                 }
             }
         }
     }
-    
+
     @Test
     public void testStandardDevCalc() {
         int[][] givenPairingList = { { 0, 15, 17, 14, 16, 8 }, { 13, 1, 10, 9, 12, 11 }, { 3, 5, 2, 4, 6, 7 },
@@ -148,30 +148,23 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         Assert.assertEquals(0.5998846486579744,
                 calcStandardDev(incrementAssociations(givenPairingList, new int[18][18])), 0.0);
         int[][] testPairingList = { { 0, 1, 2, 3, 4 }, { 5, 6, 7, 8, 9 } };
-        Assert.assertEquals(0.4967673,
-                (calcStandardDev(incrementAssociations(testPairingList, new int[10][10]))), 0.01);
+        Assert.assertEquals(0.4967673, (calcStandardDev(incrementAssociations(testPairingList, new int[10][10]))),
+                0.01);
     }
-    
+
     @Test
     public void assignmentTest() {
         this.createPairingListTemplate(15, 3, 18);
         System.out.println(calcStandardDev(getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6])));
     }
+
     @Test
-    public void testSort(){
-        int[][] allSeeds={
-                {0,0,0,0,7,5},
-                {17,12,14,16,3,4},
-                {0,0,0,0,0,0},
-                {3,4,5,6,7,8},
-                {3,4,5,6,7,9}
-                        };
-        allSeeds=radixSort(allSeeds, 18);
-        int[][] expectedResult={{0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 7, 5}, {3, 4, 5, 6, 7, 8}, {3, 4, 5, 6, 7, 9}, {17, 12, 14, 16, 3, 4}};
+    public void testSort() {
+        int[][] allSeeds = { { 0, 0, 0, 0, 7, 5 }, { 17, 12, 14, 16, 3, 4 }, { 0, 0, 0, 0, 0, 0 }, { 3, 4, 5, 6, 7, 8 },
+                { 3, 4, 5, 6, 7, 9 } };
+        allSeeds = radixSort(allSeeds, 18);
+        int[][] expectedResult = { { 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 7, 5 }, { 3, 4, 5, 6, 7, 8 },
+                { 3, 4, 5, 6, 7, 9 }, { 17, 12, 14, 16, 3, 4 } };
         assertArrayEquals(allSeeds, expectedResult);
-        }
     }
-
-    
-   
-
+}

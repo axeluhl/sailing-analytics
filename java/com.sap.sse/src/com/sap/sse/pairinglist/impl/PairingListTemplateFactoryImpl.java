@@ -44,7 +44,16 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
       * @param pairingFrameProvider
       * @return new PariningListTemplate object
       */
-    protected PairingListTemplate generatePairingList(PairingFrameProvider pairingFrameProvider,int flightMultiplier) {
-        return new PairingListTemplateImpl(pairingFrameProvider,100000,flightMultiplier);
+    protected PairingListTemplate generatePairingList(PairingFrameProvider pairingFrameProvider, int iterations,
+            int flightMultiplier) {
+        return new PairingListTemplateImpl(pairingFrameProvider, iterations, flightMultiplier);
+    }
+
+    protected PairingListTemplate generatePairingList(PairingFrameProvider pairingFrameProvider, int flightMultiplier) {
+        return this.generatePairingList(pairingFrameProvider, 100000, flightMultiplier);
+    }
+    
+    protected PairingListTemplate generatePairingList(PairingFrameProvider pairingFrameProvider) {
+        return this.generatePairingList(pairingFrameProvider, 100000, 0);
     }
 }
