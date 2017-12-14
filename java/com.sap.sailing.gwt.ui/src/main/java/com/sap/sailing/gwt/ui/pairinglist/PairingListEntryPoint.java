@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.pairinglist;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style;
@@ -11,9 +10,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -44,9 +43,10 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createUI() {
-        VerticalPanel mainPanel = new VerticalPanel();
-        RootLayoutPanel.get().add(new ScrollPanel(mainPanel));
-
+        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+        ScrollPanel scrollPanel = new ScrollPanel();
+        RootLayoutPanel.get().add(mainPanel);
+        
         mainPanel.setWidth("100%");
         mainPanel.setHeight("100%");
 
@@ -56,30 +56,29 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(
                 pairingListContextDefinition.getLeaderboardName());
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-        // mainPanel.addNorth(header, 75);
-        mainPanel.add(header);
+        mainPanel.addNorth(header, 75);
 
         Button btn = new Button("Print");
 
-        HorizontalPanel btnPanel = new HorizontalPanel();
-        btnPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        btnPanel.add(btn);
-        btnPanel.setWidth("100%");
-        btnPanel.getElement().getStyle().setProperty("marginTop", "15px");
-        btnPanel.getElement().getStyle().setProperty("marginBottom", "15px");
-        mainPanel.add(btnPanel);
+        VerticalPanel contentPanel = new VerticalPanel();
+        contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        contentPanel.add(btn);
+        contentPanel.setWidth("100%");
+        contentPanel.getElement().getStyle().setProperty("marginTop", "15px");
+        contentPanel.getElement().getStyle().setProperty("marginBottom", "15px");
+        scrollPanel.add(contentPanel);
 
         sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(), new AsyncCallback<PairingListDTO>() {
 
                     @Override
                     public void onSuccess(PairingListDTO result) {
                         VerticalPanel pairingListPanel = createPairingListPanel(result);
-                        mainPanel.add(pairingListPanel);
+                        contentPanel.add(pairingListPanel);
                         btn.addClickHandler(new ClickHandler() {
                             @Override
                             public void onClick(ClickEvent event) {
-                                printPairingListGrid(/* header.asWidget().getElement().getInnerHTML() + */
-                                        pairingListPanel.asWidget().getElement().getInnerHTML());
+                                printPairingListGrid("<h2>" + pairingListContextDefinition.getLeaderboardName()
+                                        + "</h2>" + pairingListPanel.asWidget().getElement().getInnerHTML());
                             }
                         });
                     }
@@ -93,16 +92,10 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                         }
                     }
                 });
+        mainPanel.add(scrollPanel);
     }
 
     private VerticalPanel createPairingListPanel(PairingListDTO pairingListDTO) {
-        VerticalPanel pairingListPanel = new VerticalPanel();
-        pairingListPanel.ensureDebugId("PairingListPanel");
-        pairingListPanel.setWidth("100%");
-        pairingListPanel.setHeight("100%");
-        pairingListPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        pairingListPanel.getElement().getStyle().setProperty("marginBottom", "15px");
-        
         final List<BoatDTO> boats = pairingListDTO.getBoats();
 
         final int flightCount = pairingListDTO.getPairingList().size();
@@ -193,39 +186,46 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             }
             flightIndexInGrid++;
         }
+                
+        VerticalPanel pairingListPanel = new VerticalPanel();
+        pairingListPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        pairingListPanel.add(pairingListGrid);
+        pairingListPanel.setWidth("100%");
+        pairingListPanel.ensureDebugId("PairingListPanel");
+        pairingListPanel.getElement().getStyle().setProperty("marginTop", "15px");
 
         ScrollPanel result = new ScrollPanel();
         result.add(pairingListPanel);
-        pairingListPanel.add(pairingListGrid);
-
+        
         return pairingListPanel;
     }
+    
+    private native void printPairingListGrid(String pageHTMLContent) /*-{
+        var frame = $doc.getElementById('__gwt_historyFrame');
+	frame = frame.contentWindow;
+	var doc = frame.document;
+	doc.open();
+	doc.write(pageHTMLContent);
 
-    public native void printPairingListGrid(String html) /*-{
-		var frame = $doc.getElementById('__gwt_historyFrame');
-		frame = frame.contentWindow;
-		var doc = frame.document;
-		doc.open();
-		doc.write(html);
+	//adding style to doc
+	var css = "body { background: #fff; font-family: 'Open Sans', Arial, Verdana, sans-serif;"
+	    + "line-height: 1; font-weight: 400; border: 0}"
+	    + "h2 { text-align: center }"
+	    + "table { border-collapse: collapse; border: 1px solid black; margin: auto}"
+	    + "td { font-size: 15px; }"
+	    head = doc.head || doc.getElementsByTagName('head')[0], 
+	    style = doc.createElement('style');
+	style.type = 'text/css';
+	if (style.styleSheet) {
+	    style.styleSheet.cssText = css;
+	} else {
+	    style.appendChild(doc.createTextNode(css));
+	}
+	head.appendChild(style);
 
-		//adding style to doc
-		var css = "body { background: #fff; font-family: 'Open Sans', Arial, Verdana, sans-serif;"
-				+ "line-height: 1; font-weight: 400; margin: 0; }"
-				+ "table { border-collapse: collapse; border: 0}"
-				+ "td { font-size: 15px; }", head = doc.head
-				|| doc.getElementsByTagName('head')[0], style = doc
-				.createElement('style');
-		style.type = 'text/css';
-		if (style.styleSheet) {
-			style.styleSheet.cssText = css;
-		} else {
-			style.appendChild(doc.createTextNode(css));
-		}
-		head.appendChild(style);
-
-		doc.close();
-		frame.focus();
-		frame.print();
+	doc.close();
+	frame.focus();
+	frame.print();
     }-*/;
 
 }
