@@ -320,7 +320,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 if (!remoteMp4WasStarted) {
                     processMp4(mediaTrack);
                 } else if (remoteMp4WasFinished) {
-                    infoLabel.setWidget(new Label(mediaTrack.mimeType.name()));
+                    manualMimeTypeSelection(null, mediaTrack);
                 } else {
                     infoLabel.setWidget(new Label(stringMessages.processingMP4()));
                 }
