@@ -98,7 +98,6 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
             throws IOException {
         JsonHolder jsonResult = new JsonHolder(logger);
         boolean enableDownsampler = false;
-        ;
         try {
             String importerName = null;
             for (FileItem fi : fileItems) {
