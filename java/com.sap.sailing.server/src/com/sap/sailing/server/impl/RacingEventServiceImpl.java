@@ -4197,6 +4197,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
+        List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
+        Collections.shuffle(competitors);
+        
         PairingList<RaceColumn, Fleet, Competitor> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
 
             @Override
@@ -4206,7 +4209,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
             @Override
             public Iterable<Competitor> getCompetitors() {
-                return (Iterable<Competitor>) leaderboard.getAllCompetitors();
+                return competitors;
             }
 
             @Override
