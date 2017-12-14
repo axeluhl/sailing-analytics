@@ -390,6 +390,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
             }
         });
+        mimeTypeListBox.setSelectedIndex(MimeType.mp4.equals(mediaTrack.mimeType)?0:1);
         fp.add(mimeTypeListBox);
         infoLabel.setWidget(fp);
     }
