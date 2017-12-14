@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
-import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -183,6 +182,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         if (Util.size(approximatingFixesToAnalyze) > 2) {
+            final Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
+            final long approximatedManeuverDurationMillis = getApproximateManeuverDuration(competitor).asMillis();
             List<GPSFixMoving> courseChangeSequenceInSameDirection = new ArrayList<GPSFixMoving>();
             Iterator<GPSFixMoving> approximationPointsIter = approximatingFixesToAnalyze.iterator();
             GPSFixMoving previous = approximationPointsIter.next();
@@ -202,14 +203,22 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 }
                 Bearing courseChangeOnOriginalFixes = getCourseChange(competitor,
                         fromTimePointForOriginalFixesCourseChangeInvestigation, next.getTimePoint());
-                if (!courseChangeSequenceInSameDirection.isEmpty() && Math.signum(lastCourseChange.getDegrees()) != Math
-                        .signum(courseChangeOnOriginalFixes.getDegrees())) {
+                // Split douglas peucker fixes groups by maneuver direction, or by distance > 3 hull lengths and time
+                // difference > getApproximatedManeuverDuration()
+                if (!courseChangeSequenceInSameDirection.isEmpty()
+                        && (Math.signum(
+                                lastCourseChange.getDegrees()) != Math.signum(courseChangeOnOriginalFixes.getDegrees())
+                                || current.getTimePoint().asMillis()
+                                        - previous.getTimePoint()
+                                                .asMillis() > approximatedManeuverDurationMillis
+                                        && current.getPosition().getDistance(previous.getPosition())
+                                                .compareTo(threeHullLengths) > 0)) {
                     // course change in different direction; cluster the course changes in same direction so far, then
                     // start new list
-                    List<Maneuver> maneuvers = groupChangesInSameDirectionIntoManeuvers(competitor,
+                    Iterable<Maneuver> maneuvers = createManeuverFromGroupOfCourseChanges(competitor,
                             courseChangeSequenceInSameDirection, getNauticalSide(lastCourseChange),
                             earliestManeuverStart, latestManeuverEnd);
-                    result.addAll(maneuvers);
+                    Util.addAll(maneuvers, result);
                     courseChangeSequenceInSameDirection.clear();
                 }
                 courseChangeSequenceInSameDirection.add(current);
@@ -218,8 +227,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 lastCourseChange = courseChangeOnOriginalFixes;
             } while (approximationPointsIter.hasNext());
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
-                result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor, courseChangeSequenceInSameDirection,
-                        getNauticalSide(lastCourseChange), earliestManeuverStart, latestManeuverEnd));
+                Iterable<Maneuver> maneuvers = createManeuverFromGroupOfCourseChanges(competitor, courseChangeSequenceInSameDirection,
+                        getNauticalSide(lastCourseChange), earliestManeuverStart, latestManeuverEnd);
+                Util.addAll(maneuvers, result);
             }
         }
         return result;
@@ -242,67 +252,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             totalCourseChangeInDegrees += step.getCourseChangeInDegrees();
         }
         return new DegreeBearingImpl(totalCourseChangeInDegrees);
-    }
-
-    /**
-     * Groups the {@link CourseChange} sequence into groups where the times of the fixes at which the course changes
-     * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds and
-     * where the distances of those course changes are less than three hull lengths apart. For those, a single
-     * {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the direction changes of
-     * the individual {@link CourseChange} objects. This can result in direction changes of more than 180 degrees in one
-     * direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
-     * the average time point of the course changes that went into the maneuver construction is used.
-     * <p>
-     * 
-     * @param courseChangeSequenceInSameDirection
-     *            all expected to have equal {@link CourseChange#to()} values
-     * @param earliestManeuverStart
-     *            maneuver start will not be before this time point; if a maneuver is found whose time point is at or
-     *            after this time point, no matter how close it is, its start regarding speed and course into the
-     *            maneuver and the leg before the maneuver is not taken from an earlier time point, even if half the
-     *            maneuver duration before the maneuver time point were before this time point.
-     * @param latestManeuverEnd
-     *            maneuver end will not be after this time point; if a maneuver is found whose time point is at or
-     *            before this time point, no matter how close it is, its end regarding speed and course out of the
-     *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
-     *            maneuver duration after the maneuver time point were after this time point.
-     * 
-     * @return a non-<code>null</code> list
-     */
-    private List<Maneuver> groupChangesInSameDirectionIntoManeuvers(Competitor competitor,
-            List<GPSFixMoving> courseChangeSequenceInSameDirection, NauticalSide maneuverDirection,
-            TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
-        List<Maneuver> result = new ArrayList<Maneuver>();
-        List<GPSFixMoving> group = new ArrayList<GPSFixMoving>();
-        if (!courseChangeSequenceInSameDirection.isEmpty()) {
-            Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
-            Iterator<GPSFixMoving> iter = courseChangeSequenceInSameDirection.iterator();
-            do {
-                GPSFixMoving currentFixAndCourseChange = iter.next();
-                if (!group.isEmpty()
-                        // TODO use different maneuver times for upwind / reaching / downwind / cross-leg (mark passing)
-                        // group contains complete maneuver if the next fix is too late or too far away to belong to the
-                        // same maneuver
-                        && currentFixAndCourseChange.getTimePoint().asMillis() - group.get(group.size() - 1)
-                                .getTimePoint().asMillis() > getApproximateManeuverDuration(competitor).asMillis()
-                        && currentFixAndCourseChange.getPosition()
-                                .getDistance(group.get(group.size() - 1).getPosition())
-                                .compareTo(threeHullLengths) > 0) {
-                    // if next is more than approximate maneuver duration later and further apart than three hull
-                    // lengths, turn the current group into a maneuver and add to result
-                    Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, group, maneuverDirection,
-                            earliestManeuverStart, latestManeuverEnd), result);
-                    group.clear();
-                }
-                group.add(currentFixAndCourseChange);
-                // change
-            } while (iter.hasNext());
-            if (!group.isEmpty()) {
-                Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, group, maneuverDirection,
-                        earliestManeuverStart, latestManeuverEnd), result);
-            }
-        }
-        return result;
     }
 
     /**
@@ -1073,7 +1022,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     /**
      * Gets the approximated duration of the maneuver main curve considering the boat class of the competitor.
      */
-    private Duration getApproximateManeuverDuration(Competitor competitor) {
+    protected Duration getApproximateManeuverDuration(Competitor competitor) {
         return competitor.getBoat().getBoatClass().getApproximateManeuverDuration();
     }
 

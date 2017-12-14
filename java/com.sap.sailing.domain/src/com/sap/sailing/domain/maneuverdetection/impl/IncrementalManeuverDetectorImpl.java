@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
@@ -25,7 +26,6 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
 
     @Override
     public List<Maneuver> detectManeuvers(Competitor competitor) throws NoWindException, NoFixesException {
-        //TODO generate ManeuverSpots, check the unused ignoreMarkPassings flag
         Pair<TimePoint,TimePoint> startAndEndTimePoints = getTrackingStartAndEndTimePoints(competitor);
         if(startAndEndTimePoints != null) {
             TimePoint earliestManeuverStart = startAndEndTimePoints.getA();
@@ -56,7 +56,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
                             }
                             previouslyDetectedManeuverSpotWithSameBeginning = null;
                         } else if(iteratedButNotProcessedNewDouglasPeuckerFixes.size() > 1) {
-                            if(checkWhetherDouglasPeuckerFixesCanBeGroupedTogether(iteratedButNotProcessedNewDouglasPeuckerFixes.get(iteratedButNotProcessedNewDouglasPeuckerFixes.size() - 2), newDouglasPeuckerFix)) {
+                            if(checkWhetherDouglasPeuckerFixesCanBeGroupedTogether(competitor, iteratedButNotProcessedNewDouglasPeuckerFixes.get(iteratedButNotProcessedNewDouglasPeuckerFixes.size() - 2), newDouglasPeuckerFix)) {
                                 douglasPeuckerFixesGroupIsNearlySame = false;
                             } else {
                                 iteratedButNotProcessedNewDouglasPeuckerFixes.remove(iteratedButNotProcessedNewDouglasPeuckerFixes.size() - 1);
@@ -117,10 +117,18 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
         throw new NoFixesException();
     }
 
-    private boolean checkWhetherDouglasPeuckerFixesCanBeGroupedTogether(GPSFixMoving gpsFixMoving,
+    private boolean checkWhetherDouglasPeuckerFixesCanBeGroupedTogether(Competitor competitor, GPSFixMoving gpsFixMoving,
             GPSFixMoving newDouglasPeuckerFix) {
-        // TODO Auto-generated method stub
-        return false;
+        Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
+        if(newDouglasPeuckerFix.getTimePoint().asMillis() - gpsFixMoving
+                            .getTimePoint().asMillis() > getApproximateManeuverDuration(competitor).asMillis()
+                    && newDouglasPeuckerFix.getPosition()
+                            .getDistance(gpsFixMoving.getPosition())
+                            .compareTo(threeHullLengths) > 0) {
+            return false;
+        }
+        //TODO check direction
+        return true;
     }
 
     private boolean checkManeuverSpotWindsNearlySame(ManeuverSpot maneuverSpot) {

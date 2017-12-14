@@ -691,10 +691,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
+                    private int count = 0;
+                    private long msTaken = 0;
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor,
                             EmptyUpdateInterval updateInterval) throws NoWindException {
+                        long startAt = System.currentTimeMillis();
                         List<Maneuver> maneuvers = computeManeuvers(competitor);
+                        synchronized(this) {
+                            msTaken += System.currentTimeMillis() - startAt;
+                            ++count;
+                            System.out.println(getRace().getName() + "Performance measurement: "+count+"x calls with "+msTaken+" ms execution time");
+                        }
                         return maneuvers;
                     }
                 }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
