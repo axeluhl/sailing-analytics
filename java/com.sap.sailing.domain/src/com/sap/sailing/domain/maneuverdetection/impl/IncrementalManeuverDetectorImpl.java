@@ -33,7 +33,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
             Iterable<GPSFixMoving> douglasPeuckerFixes = trackedRace.approximate(competitor,
                     competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(), earliestManeuverStart, latestManeuverEnd);
             if(douglasPeuckerFixesGroupes == null) {
-                return detectManeuvers(competitor, douglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd, false);
+                return detectManeuvers(competitor, douglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd);
             } else {
                 List<Maneuver> result = new ArrayList<>();
                 ManeuverSpot previouslyDetectedManeuverSpotWithSameBeginning = null;
@@ -60,7 +60,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
                                 douglasPeuckerFixesGroupIsNearlySame = false;
                             } else {
                                 iteratedButNotProcessedNewDouglasPeuckerFixes.remove(iteratedButNotProcessedNewDouglasPeuckerFixes.size() - 1);
-                                result.addAll(detectManeuvers(competitor, iteratedButNotProcessedNewDouglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd, false));
+                                result.addAll(detectManeuvers(competitor, iteratedButNotProcessedNewDouglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd));
                                 iteratedButNotProcessedNewDouglasPeuckerFixes.clear();
                                 iteratedButNotProcessedNewDouglasPeuckerFixes.add(newDouglasPeuckerFix);
                             }
@@ -110,7 +110,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
                         result.add(maneuver);
                     }
                 } else if(!iteratedButNotProcessedNewDouglasPeuckerFixes.isEmpty()) {
-                    result.addAll(detectManeuvers(competitor, iteratedButNotProcessedNewDouglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd, false));
+                    result.addAll(detectManeuvers(competitor, iteratedButNotProcessedNewDouglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd));
                 }
             }
         }
