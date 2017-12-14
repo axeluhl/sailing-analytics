@@ -4,11 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +53,8 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @throws IOException
      */
-    private void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> files) throws IOException {
+    private void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> files)
+            throws IOException {
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
         for (Pair<String, FileItem> file : files) {
@@ -78,14 +76,10 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                 final String filename = fi.getName();
                 try {
                     importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
-                        Set<UUID> knownDevices = new HashSet<>();
                         @Override
                         public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
                             storeFixes(fixes, device);
-                            if(!knownDevices.contains(device.getId())){
-                                knownDevices.add(device.getId());
-                                jsonResult.addDevice(device);
-                            }
+                            jsonResult.addDeviceIndentifier(device);
                         }
                     }, filename, requestedImporterName, enableDownsampler);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
@@ -103,7 +97,8 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         JsonHolder jsonResult = new JsonHolder(logger);
-        boolean enableDownsampler = false;;
+        boolean enableDownsampler = false;
+        ;
         try {
             String importerName = null;
             for (FileItem fi : fileItems) {

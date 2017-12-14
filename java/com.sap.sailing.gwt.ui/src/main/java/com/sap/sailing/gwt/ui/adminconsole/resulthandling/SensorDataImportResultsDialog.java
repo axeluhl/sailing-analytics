@@ -10,6 +10,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SensorDataImportResultsDialog {
     public static void showResults(SensorDataImportResponse response) {
+        if (!response.hasErrors()) {
+            return;
+        }
         List<ErrorMessage> errorMessages = response.getErrors();
         SafeHtmlBuilder shb = new SafeHtmlBuilder();
         shb.appendHtmlConstant("<div style='margin:40px;'>");

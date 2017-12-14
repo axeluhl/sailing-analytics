@@ -4,11 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -61,15 +59,15 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
         }
     }
-    
+
     Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
         List<GPSFixImporter> result = new ArrayList<>();
         Collection<ServiceReference<GPSFixImporter>> refs;
         try {
             Filter filter = null;
             if (fileExtension != null) {
-                filter = getContext().createFilter(String.format("(%s=%s)",
-                        GPSFixImporter.FILE_EXTENSION_PROPERTY, fileExtension));
+                filter = getContext()
+                        .createFilter(String.format("(%s=%s)", GPSFixImporter.FILE_EXTENSION_PROPERTY, fileExtension));
             }
             refs = getContext().getServiceReferences(GPSFixImporter.class, filter == null ? null : filter.toString());
             for (ServiceReference<GPSFixImporter> ref : refs) {
@@ -81,8 +79,8 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
         return result;
     }
 
-    protected void importFiles(Iterable<Pair<String, FileItem>> files,
-            JsonHolder jsonResult, GPSFixImporter preferredImporter) throws IOException {
+    protected void importFiles(Iterable<Pair<String, FileItem>> files, JsonHolder jsonResult,
+            GPSFixImporter preferredImporter) throws IOException {
         for (Pair<String, FileItem> pair : files) {
             final String fileName = pair.getA();
             final FileItem fileItem = pair.getB();
@@ -90,35 +88,24 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
             if (fileName.contains(".")) {
                 fileExt = fileName.substring(fileName.lastIndexOf(".") + 1);
             }
-            
             Set<GPSFixImporter> importersToTry = new LinkedHashSet<>();
             if (preferredImporter != null) {
                 importersToTry.add(preferredImporter);
             }
             importersToTry.addAll(getGPSFixImporters(fileExt));
             importersToTry.addAll(getGPSFixImporters(null));
-
-            logger.log(Level.INFO, 
-                    "System knows " + 
-                            importersToTry.size() + 
-                            " importers: "+
-                            importersToTry.stream().map(i -> i.getType()).collect(Collectors.joining(", "))
-                    );
-            
+            logger.log(Level.INFO, "System knows " + importersToTry.size() + " importers: "
+                    + importersToTry.stream().map(i -> i.getType()).collect(Collectors.joining(", ")));
             parsersLoop: for (GPSFixImporter importer : importersToTry) {
                 boolean succeeded = false;
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {
                     try {
                         importer.importFixes(in, new Callback() {
-                            Set<UUID> knownDevices = new HashSet<>();
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                                 storeFix(fix, device);
-                                if(!knownDevices.contains(device.getId())){
-                                    knownDevices.add(device.getId());
-                                    jsonResult.addDevice(device);
-                                }
+                                jsonResult.addDeviceIndentifier(device);
                             }
                         }, true, fileName);
                         succeeded = true;
@@ -137,7 +124,8 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
     }
 
     @Override
-    protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         JsonHolder jsonResult = new JsonHolder(logger);
         try {
             String prefImporterType = null;
