@@ -69,4 +69,11 @@ public class JsonHolder {
         resp.setContentType("text/html");
         jsonResponseObj.writeJSONString(resp.getWriter());
     }
+
+    public void noImporterSucceeded(String filename) {
+        JSONObject jsonExceptionObj = new JSONObject();
+        jsonErrorObj.add(jsonExceptionObj);
+        jsonExceptionObj.put("filename", filename);
+        jsonExceptionObj.put("message", "No importer succeeded to process file");
+    }
 }

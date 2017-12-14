@@ -16,7 +16,6 @@ public class SensorDataImportResultsDialog {
         List<ErrorMessage> errorMessages = response.getErrors();
         SafeHtmlBuilder shb = new SafeHtmlBuilder();
         shb.appendHtmlConstant("<div style='margin:40px;'>");
-
         if (response.didSucceedImportingAnyFile()) {
             shb.appendHtmlConstant("<p>Succesful uploads</p>");
             shb.appendHtmlConstant("<ul>");
@@ -27,17 +26,20 @@ public class SensorDataImportResultsDialog {
         } else {
             shb.appendHtmlConstant("<p>No succesful upload</p>");
         }
-
         if (response.hasErrors()) {
             shb.appendHtmlConstant("<p>Error messages</p>");
             for (ErrorMessage errorMsg : errorMessages) {
                 shb.appendHtmlConstant("<div style='font-weight:bold;'>").appendEscaped(errorMsg.getMessage())
                         .appendHtmlConstant("</div>");
                 shb.appendHtmlConstant("<ul>");
-                shb.appendHtmlConstant(" <li>ServerLog UUID: ").appendEscaped(errorMsg.getExUUID())
-                        .appendHtmlConstant("</li>");
-                shb.appendHtmlConstant(" <li>Exception Classname: ").appendEscaped(errorMsg.getClassName())
-                        .appendHtmlConstant("</li>");
+                if (!isNullOrEmpty(errorMsg.getExUUID())) {
+                    shb.appendHtmlConstant(" <li>ServerLog UUID: ").appendEscaped(errorMsg.getExUUID())
+                            .appendHtmlConstant("</li>");
+                }
+                if (!isNullOrEmpty(errorMsg.getClassName())) {
+                    shb.appendHtmlConstant(" <li>Exception Classname: ").appendEscaped(errorMsg.getClassName())
+                            .appendHtmlConstant("</li>");
+                }
                 if (!isNullOrEmpty(errorMsg.getFilename())) {
                     shb.appendHtmlConstant(" <li>Filename: ").appendEscaped(errorMsg.getFilename())
                             .appendHtmlConstant("</li>");

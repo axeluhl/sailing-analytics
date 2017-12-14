@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -96,20 +97,25 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
             importersToTry.addAll(getGPSFixImporters(null));
             logger.log(Level.INFO, "System knows " + importersToTry.size() + " importers: "
                     + importersToTry.stream().map(i -> i.getType()).collect(Collectors.joining(", ")));
-
+            AtomicBoolean succeeded = new AtomicBoolean(false);
             parsersLoop: for (GPSFixImporter importer : importersToTry) {
-                boolean succeeded = false;
+
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {
                     try {
-                        succeeded = importer.importFixes(in, new Callback() {
+                        boolean ok = importer.importFixes(in, new Callback() {
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                                 storeFix(fix, device);
                                 jsonResult.addDeviceIndentifier(device);
                             }
                         }, true, fileName);
-
+                        if (ok) {
+                            succeeded.set(ok);
+                        } else {
+                            logger.log(Level.FINE,
+                                    "Importer " + importer.getType() + " did not succesfully import fixes");
+                        }
                     } catch (Exception e) {
                         logger.log(Level.INFO, "Failed with " + e.getClass().getSimpleName()
                                 + " while importing file using " + importer.getType());
@@ -118,10 +124,13 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
                         }
                     }
                 }
-                if (succeeded) {
+                if (succeeded.get()) {
                     logger.log(Level.INFO, "Successfully imported file " + fileName + " using " + importer.getType());
                     break parsersLoop;
                 }
+            }
+            if (!succeeded.get()) {
+                jsonResult.noImporterSucceeded(fileName);
             }
         }
     }
