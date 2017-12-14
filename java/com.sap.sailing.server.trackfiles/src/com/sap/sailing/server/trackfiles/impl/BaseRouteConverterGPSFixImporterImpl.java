@@ -7,7 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
+
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
+import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
 import slash.common.type.CompactCalendar;
 import slash.navigation.base.BaseNavigationPosition;
@@ -15,12 +20,6 @@ import slash.navigation.base.BaseRoute;
 import slash.navigation.base.NavigationFormat;
 import slash.navigation.base.NavigationFormatParser;
 import slash.navigation.base.ParserResult;
-
-import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
-import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
-import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
 public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImporterImpl {    
     public BaseRouteConverterGPSFixImporterImpl(List<Class<? extends NavigationFormat<?>>> supportedFormats) {
