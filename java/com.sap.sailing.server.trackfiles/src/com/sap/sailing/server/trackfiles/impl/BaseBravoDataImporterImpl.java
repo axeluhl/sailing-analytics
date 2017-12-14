@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,7 +66,7 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
      *            if {@code true}, fixes will be down-sampled to a 1Hz frequency before being emitted to the
      *            {@code callback}. Otherwise, all fixes read will be forwarded straight to the {@link Callback}.
      */
-    public void importFixes(InputStream inputStream, Callback callback, final String filename, String sourceName,
+    public boolean importFixes(InputStream inputStream, Callback callback, final String filename, String sourceName,
             boolean downsample) throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
@@ -86,7 +87,7 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
             String headerCandidate = buffer.readLine();
             lineNr.incrementAndGet();
             if (headerCandidate == null) {
-                throw new RuntimeException("Missing required header in file " + filename);
+                throw new FormatNotSupportedException("Missing required header in file " + filename);
             }
             if (headerCandidate.startsWith(BOF)) {
                 LOG.fine("Found header");
@@ -100,11 +101,14 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
                 : fix -> callback.addFixes(
                         Collections.singleton(new DoubleVectorFixImpl(fix.getTimepoint(), fix.getFix())),
                         trackIdentifier);
+        final AtomicBoolean importedFixes = new AtomicBoolean(false);
         buffer.lines().forEach(line -> {
             lineNr.incrementAndGet();
             downsampler.accept(parseLine(lineNr.get(), filename, line, colIndices));
+            importedFixes.set(true);
         });
         downsampler.finish();
+        return importedFixes.get();
     }
 
     /**

@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -25,14 +27,17 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
     private static final String LON_COLUMN_HEADING = ExpeditionExtendedDataImporterImpl.COL_NAME_LON;
     private static final String COG_COLUMN_HEADING = "Cog";
     private static final String SOG_COLUMN_HEADING = "Sog";
+
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, final String sourceName)
+    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
+            final String sourceName)
             throws FormatNotSupportedException, IOException {
         TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         final String headerLine = br.readLine();
         final Map<String, Integer> columnDefinitions = ExpeditionExtendedDataImporterImpl.parseHeader(headerLine);
         final AtomicInteger lineNr = new AtomicInteger(0);
+        final AtomicBoolean importedFixes = new AtomicBoolean(false);
         br.lines().forEach(line->{
             if (!line.trim().isEmpty()) {
                 ExpeditionExtendedDataImporterImpl.parseLine(lineNr.incrementAndGet(), sourceName, line, columnDefinitions,
@@ -44,9 +49,11 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
                             final GPSFixMoving fix = new GPSFixMovingImpl(new DegreePosition(latDeg, lonDeg), timePoint,
                                     new KnotSpeedWithBearingImpl(sogKnots, new DegreeBearingImpl(cogDeg)));
                             callback.addFix(fix, device);
+                            importedFixes.set(true);
                         });
             }
         });
+        return importedFixes.get();
     }
 
     @Override

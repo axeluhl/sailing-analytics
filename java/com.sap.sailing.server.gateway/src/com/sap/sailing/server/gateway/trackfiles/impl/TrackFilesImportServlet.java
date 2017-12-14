@@ -96,23 +96,26 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
             importersToTry.addAll(getGPSFixImporters(null));
             logger.log(Level.INFO, "System knows " + importersToTry.size() + " importers: "
                     + importersToTry.stream().map(i -> i.getType()).collect(Collectors.joining(", ")));
+
             parsersLoop: for (GPSFixImporter importer : importersToTry) {
                 boolean succeeded = false;
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {
                     try {
-                        importer.importFixes(in, new Callback() {
+                        succeeded = importer.importFixes(in, new Callback() {
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                                 storeFix(fix, device);
                                 jsonResult.addDeviceIndentifier(device);
                             }
                         }, true, fileName);
-                        succeeded = true;
+
                     } catch (Exception e) {
                         logger.log(Level.INFO, "Failed with " + e.getClass().getSimpleName()
                                 + " while importing file using " + importer.getType());
-                        jsonResult.add(importer.getClass().getName(), fileName, e);
+                        if (importer == preferredImporter) {
+                            jsonResult.add(importer.getClass().getName(), fileName, e);
+                        }
                     }
                 }
                 if (succeeded) {
