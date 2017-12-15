@@ -64,18 +64,25 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
         Grid formGrid = new Grid(5, 2);
         dataPanel.add(formGrid);
-
+        Label flights =new Label(String.valueOf(this.template.getFlightCount()));
+        flights.ensureDebugId("FlightCountLabel");
+        Label groups =new Label(String.valueOf(this.template.getGroupCount()));
+        groups.ensureDebugId("GroupCountLabel");
+        Label competitors =new Label(String.valueOf(this.template.getCompetitorCount()));
+        competitors.ensureDebugId("CompetitorCountLabel");
         formGrid.setWidget(0, 0, new Label("Number of Flights:"));
-        formGrid.setWidget(0, 1, new Label(String.valueOf(this.template.getFlightCount())));
+        formGrid.setWidget(0, 1, flights);
         formGrid.setWidget(1, 0, new Label("Number of Groups:"));
-        formGrid.setWidget(1, 1, new Label(String.valueOf(this.template.getGroupCount())));
+        formGrid.setWidget(1, 1, groups);
         formGrid.setWidget(2, 0, new Label("Number of competitors:"));
-        formGrid.setWidget(2, 1, new Label(String.valueOf(this.template.getCompetitorCount())));
+        formGrid.setWidget(2, 1, competitors);
         formGrid.setWidget(3, 0, new Label("Quality:"));
         formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
         if (this.template.getFlightMultiplier() > 1) {
+            Label flightMultiplierLabel = new Label(String.valueOf(this.template.getFlightMultiplier())); 
             formGrid.setWidget(4, 0, new Label("Flight Multiplier:"));
-            formGrid.setWidget(4, 1, new Label(String.valueOf(this.template.getFlightMultiplier())));
+            formGrid.setWidget(4, 1, flightMultiplierLabel);
+            flightMultiplierLabel.ensureDebugId("FlightMultiplierCountLabel");
         }
 
         formGrid.setCellSpacing(10);
