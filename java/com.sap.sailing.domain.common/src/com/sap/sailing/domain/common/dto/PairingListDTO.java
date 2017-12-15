@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sse.common.Util.Pair;
@@ -8,10 +9,8 @@ import com.sap.sse.common.Util.Pair;
 public class PairingListDTO implements Serializable{
     
     private static final long serialVersionUID = 102220422437194196L;
-    // TODO set Pair of competitors and boats
+
     private List<List<List<Pair<CompetitorDTO, BoatDTO>>>> pairingList;
-    
-    //private int maxCompetitorsPerFleet;
     
     public PairingListDTO() { }
     
@@ -23,9 +22,17 @@ public class PairingListDTO implements Serializable{
         return pairingList;
     }
     
-    /*
-    public int getMaxCompetitorsPerFleet() {
-        return maxCompetitorsPerFleet;
+    public List<BoatDTO> getBoats() {
+        List<BoatDTO> boats = new ArrayList<>();
+
+        for (List<Pair<CompetitorDTO, BoatDTO>> fleet : this.pairingList.get(0)) {
+            for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : fleet) {
+                if (!boats.contains(competitorAndBoatPair.getB())) {
+                    boats.add(competitorAndBoatPair.getB());
+                }
+            }
+        }
+        
+        return boats;
     }
-    */
 }

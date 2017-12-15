@@ -6808,7 +6808,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
 
-        int groupCount = (int) (template.getPairingListTemplate().length / flightCount * flightMultiplier);
+        int groupCount = (int) (template.getPairingListTemplate().length / flightCount);
         return new PairingListTemplateDTO(flightCount, groupCount, 
                 competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality());
     }
@@ -6820,6 +6820,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         PairingListTemplate pairingListTemplate = getService().createPairingListFromRegatta(leaderboardName, 
                 Util.size(leaderboard.getCompetitors()), flightMultiplier);
+        
         PairingList<RaceColumn, Fleet, Competitor> pairingList = 
                 getService().getPairingListFromTemplate(pairingListTemplate, leaderboardName);
         
@@ -6834,7 +6835,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceColumn.isMedalRace()) {
                 continue;
             }
-            //TODO change flights to fleets
             List<List<Pair<CompetitorDTO, BoatDTO>>> flights = new ArrayList<>();
             for (Fleet fleetElement : raceColumn.getFleets()) {
                 List<Pair<CompetitorDTO, BoatDTO>> fleets = new ArrayList<>();
@@ -6845,6 +6845,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         competitorDTO = new CompetitorDTOImpl();
                         if (boats.size() <= boatIndex) {
                             // TODO change competitor name to competitor shorthand symbol (bug2822)
+                            // TODO fetch boats from regatta, if there are none, create new boats (bug2822)
                             BoatDTO boatDTO = new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID());
                             boatDTO.setColor(colorMap.getColorByID(boatDTO));
                             boats.add(boatDTO);
@@ -6870,23 +6871,78 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public PairingListDTO getPairingListFromRaceLogs(String leaderboardName) throws NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        
+        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
+        
+        ColorMap<BoatDTO> colorMap = new ColorMapImpl<BoatDTO>();
+        
+        List<BoatDTO> boats = new ArrayList<>();
+        int boatIndex;
+        
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (raceColumn.isMedalRace()) {
+                continue;
+            }
+            List<List<Pair<CompetitorDTO, BoatDTO>>> flights = new ArrayList<>();
+            for (Fleet fleetElement : raceColumn.getFleets()) {
+                boatIndex = 0;
+
+                List<Pair<CompetitorDTO, BoatDTO>> fleets = new ArrayList<>();
+                
+                // TODO fetch Pair of competitor and boat from race log (bug2822)
+                for (CompetitorDTO competitorDTO : this.getCompetitorRegistrationsInRaceLog(leaderboardName, 
+                        raceColumn.getName(), fleetElement.getName())) {
+                    if (boats.size() <= boatIndex) {
+                        // TODO change competitor name to competitor shorthand symbol (bug2822)
+                        BoatDTO boatDTO = new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID());
+                        boatDTO.setColor(colorMap.getColorByID(boatDTO));
+                        boats.add(boatDTO);
+                    }
+                    
+                    fleets.add(new Pair<CompetitorDTO, BoatDTO>(competitorDTO, boats.get(boatIndex)));
+                    
+                    boatIndex++;
+                }
+                flights.add(fleets);
+            }
+            result.add(flights);
+        }
+        
+        return new PairingListDTO(result);
+    }
+    
+    @Override
     public void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO,
             final String leaderboardName) throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
-        PairingListTemplate pairingListTemplate = getService().createPairingListFromRegatta(leaderboardName, 
-                pairingListTemplateDTO.getCompetitorCount(), pairingListTemplateDTO.getFlightMultiplier());
+        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, pairingListTemplateDTO.getFlightMultiplier());
         
-        PairingList<RaceColumn, Fleet, Competitor> pairingList = getService().getPairingListFromTemplate(pairingListTemplate, leaderboardName);
+        int flightCount = 0;
+        int groupCount = 0;
         
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            groupCount = 0;
             for (Fleet fleet : raceColumn.getFleets()) {
-                // TODO set boat and competitors in race logs
-                Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>(this.convertToCompetitorDTOs(pairingList.getCompetitors(raceColumn, fleet)));
+                
+                raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
+
+                Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>();
+                List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList().get(flightCount).get(groupCount);
+                for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
+                    if (competitorAndBoatPair.getA() != null && competitorAndBoatPair.getA().getName() != null) {
+                        competitors.add(competitorAndBoatPair.getA());
+                    }
+                }
+                // TODO set boat and competitors in race logs (bug2822)
                 this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(), fleet.getName(), 
                         competitors);
+                groupCount++;
             }
+            flightCount++;
         }
     }
 }

@@ -703,6 +703,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier)
             throws NotFoundException;
     
+    PairingListDTO getPairingListFromRaceLogs(final String leaderboardName)
+            throws NotFoundException;
+    
     void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO, final String leaderboardName) 
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;
 }

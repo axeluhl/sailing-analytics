@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.pairinglist;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style;
@@ -9,15 +10,16 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
@@ -41,9 +43,10 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createUI() {
-        VerticalPanel mainPanel = new VerticalPanel();
-        RootLayoutPanel.get().add(new ScrollPanel(mainPanel));
-
+        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+        ScrollPanel scrollPanel = new ScrollPanel();
+        RootLayoutPanel.get().add(mainPanel);
+        
         mainPanel.setWidth("100%");
         mainPanel.setHeight("100%");
 
@@ -53,31 +56,29 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(
                 pairingListContextDefinition.getLeaderboardName());
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-        // mainPanel.addNorth(header, 75);
-        mainPanel.add(header);
+        mainPanel.addNorth(header, 75);
 
         Button btn = new Button("Print");
 
-        HorizontalPanel btnPanel = new HorizontalPanel();
-        btnPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        btnPanel.add(btn);
-        btnPanel.setWidth("100%");
-        btnPanel.getElement().getStyle().setProperty("marginTop", "15px");
-        btnPanel.getElement().getStyle().setProperty("marginBottom", "15px");
-        mainPanel.add(btnPanel);
+        VerticalPanel contentPanel = new VerticalPanel();
+        contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        contentPanel.add(btn);
+        contentPanel.setWidth("100%");
+        contentPanel.getElement().getStyle().setProperty("marginTop", "15px");
+        contentPanel.getElement().getStyle().setProperty("marginBottom", "15px");
+        scrollPanel.add(contentPanel);
 
-        sailingService.getPairingListFromTemplate(pairingListContextDefinition.getLeaderboardName(),
-                pairingListContextDefinition.getFlightMultiplier(), new AsyncCallback<PairingListDTO>() {
+        sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(), new AsyncCallback<PairingListDTO>() {
 
                     @Override
                     public void onSuccess(PairingListDTO result) {
                         VerticalPanel pairingListPanel = createPairingListPanel(result);
-                        mainPanel.add(pairingListPanel);
+                        contentPanel.add(pairingListPanel);
                         btn.addClickHandler(new ClickHandler() {
                             @Override
                             public void onClick(ClickEvent event) {
-                                printPairingListGrid(/* header.asWidget().getElement().getInnerHTML() + */
-                                        pairingListPanel.asWidget().getElement().getInnerHTML());
+                                printPairingListGrid("<h2>" + pairingListContextDefinition.getLeaderboardName()
+                                        + "</h2>" + pairingListPanel.asWidget().getElement().getInnerHTML());
                             }
                         });
                     }
@@ -91,36 +92,33 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                         }
                     }
                 });
+        mainPanel.add(scrollPanel);
     }
 
     private VerticalPanel createPairingListPanel(PairingListDTO pairingListDTO) {
-        VerticalPanel pairingListPanel = new VerticalPanel();
-        pairingListPanel.ensureDebugId("PairingListPanel");
-        pairingListPanel.setWidth("100%");
-        pairingListPanel.setHeight("100%");
-        pairingListPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        pairingListPanel.getElement().getStyle().setProperty("marginBottom", "15px");
+        final List<BoatDTO> boats = pairingListDTO.getBoats();
 
         final int flightCount = pairingListDTO.getPairingList().size();
         final int groupCount = pairingListDTO.getPairingList().get(0).size();
-        final int boatCount = pairingListDTO.getPairingList().get(0).get(0).size();
-
+        final int boatCount = boats.size();
+        
         Grid pairingListGrid = new Grid(flightCount * groupCount + 1, (boatCount + 2));
         pairingListGrid.getElement().setId("grid");
         pairingListGrid.setCellPadding(15);
 
-        int flightCounter = 1;
-        int groupCounter = 1;
-        int boatCounter = 1;
-
-        for (int i = 1; i <= boatCount; i++) {
-            pairingListGrid.setWidget(0, i + 1, new Label(getStringMessages().boat() + " " + String.valueOf(i)));
-            pairingListGrid.getCellFormatter().getElement(0, i + 1).getStyle().setTextAlign(TextAlign.CENTER);
-            pairingListGrid.getCellFormatter().getElement(0, i + 1).getStyle().setPadding(10, Unit.PX);
-            pairingListGrid.getCellFormatter().getElement(0, i + 1).getStyle().setBackgroundColor(
-                    pairingListDTO.getPairingList().get(0).get(0).get(i - 1).getB().getColor().getAsHtml());
+        int flightIndexInGrid = 1;
+        int groupIndex = 1;
+        int boatIndex = 0;
+        
+        for (BoatDTO boat : boats) {
+            pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()));
+            pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setTextAlign(TextAlign.CENTER);
+            pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setPadding(10, Unit.PX);
+            pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
+                    boat.getColor().getAsHtml());
+            boatIndex++;
         }
-
+        
         String color = "";
 
         pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor("#cecece");
@@ -131,9 +129,9 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             color = (color.equals("none") ? "#cecece" : "none");
 
             // setting up race
-            int currentRaceInGridCells = (((flightCounter - 1) * groupCount) + 1);
+            int currentRaceInGridCells = (((flightIndexInGrid - 1) * groupCount) + 1);
             pairingListGrid.setWidget(currentRaceInGridCells, 0,
-                    new Label(getStringMessages().race() + " " + String.valueOf(flightCounter)));
+                    new Label(getStringMessages().race() + " " + String.valueOf(flightIndexInGrid)));
 
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle().setPadding(5, Unit.PX);
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle()
@@ -141,77 +139,92 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
             for (List<Pair<CompetitorDTO, BoatDTO>> group : flight) {
                 // setting up fleet
+                pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setPadding(3, Unit.PX);
+                pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
 
-                pairingListGrid.getCellFormatter().getElement(groupCounter, 0).getStyle().setPadding(3, Unit.PX);
-                pairingListGrid.getCellFormatter().getElement(groupCounter, 0).getStyle().setBackgroundColor(color);
-
-                pairingListGrid.setWidget(groupCounter, 1,
-                        new Label(getStringMessages().fleet() + " " + String.valueOf(groupCounter)));
+                pairingListGrid.setWidget(groupIndex, 1,
+                        new Label(getStringMessages().fleet() + " " + String.valueOf(groupIndex)));
 
                 // setting up fleets style
-                pairingListGrid.getCellFormatter().getElement(groupCounter, 1).getStyle().setPadding(3, Unit.PX);
-                pairingListGrid.getCellFormatter().getElement(groupCounter, 1).getStyle().setBackgroundColor(color);
-
-                boatCounter = 1;
-
+                pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setPadding(3, Unit.PX);
+                pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
+                
+                if (group.size() < boatCount) {
+                    List<BoatDTO> boatsToRemove = new ArrayList<>(boats);
+                    for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
+                        boatsToRemove.remove(competitorAndBoatPair.getB());
+                    }
+                    for (BoatDTO boat : boatsToRemove) {
+                        group.add(new Pair<CompetitorDTO, BoatDTO>(new CompetitorDTOImpl(), boat));
+                    }
+                }
+                
+                
                 for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
+                    int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
                     if (competitorAndBoatPair.getA().getName() == null) {
-                        pairingListGrid.setWidget(groupCounter, boatCounter + 1, new Label(stringmessages.empty()));
-                        pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter + 1).getStyle()
+                        pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(stringmessages.empty()));
+                        pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());
                     } else {
                         // TODO change competitor name to competitor shorthand symbol
-                        pairingListGrid.setWidget(groupCounter, boatCounter + 1,
-                                new Label(competitorAndBoatPair.getA().getSailID()));
+                        pairingListGrid.setWidget(groupIndex, boatIndexInGrid,
+                                new Label(competitorAndBoatPair.getA().getName()));
                     }
-                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter + 1).getStyle()
+                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setFontWeight(Style.FontWeight.BOLD);
-                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter + 1).getStyle()
+                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setTextAlign(TextAlign.CENTER);
-                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter + 1).getStyle()
+                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setPadding(5, Unit.PX);
-                    pairingListGrid.getCellFormatter().getElement(groupCounter, boatCounter + 1).getStyle()
+                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setBackgroundColor(color);
-
-                    boatCounter++;
                 }
-                groupCounter++;
+                
+                groupIndex++;
             }
-            flightCounter++;
+            flightIndexInGrid++;
         }
+                
+        VerticalPanel pairingListPanel = new VerticalPanel();
+        pairingListPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        pairingListPanel.add(pairingListGrid);
+        pairingListPanel.setWidth("100%");
+        pairingListPanel.ensureDebugId("PairingListPanel");
+        pairingListPanel.getElement().getStyle().setProperty("marginTop", "15px");
 
         ScrollPanel result = new ScrollPanel();
         result.add(pairingListPanel);
-        pairingListPanel.add(pairingListGrid);
-
+        
         return pairingListPanel;
     }
+    
+    private native void printPairingListGrid(String pageHTMLContent) /*-{
+        var frame = $doc.getElementById('__gwt_historyFrame');
+	frame = frame.contentWindow;
+	var doc = frame.document;
+	doc.open();
+	doc.write(pageHTMLContent);
 
-    public native void printPairingListGrid(String html) /*-{
-		var frame = $doc.getElementById('__gwt_historyFrame');
-		frame = frame.contentWindow;
-		var doc = frame.document;
-		doc.open();
-		doc.write(html);
+	//adding style to doc
+	var css = "body { background: #fff; font-family: 'Open Sans', Arial, Verdana, sans-serif;"
+	    + "line-height: 1; font-weight: 400; border: 0}"
+	    + "h2 { text-align: center }"
+	    + "table { border-collapse: collapse; border: 1px solid black; margin: auto}"
+	    + "td { font-size: 15px; }"
+	    head = doc.head || doc.getElementsByTagName('head')[0], 
+	    style = doc.createElement('style');
+	style.type = 'text/css';
+	if (style.styleSheet) {
+	    style.styleSheet.cssText = css;
+	} else {
+	    style.appendChild(doc.createTextNode(css));
+	}
+	head.appendChild(style);
 
-		//adding style to doc
-		var css = "body { background: #fff; font-family: 'Open Sans', Arial, Verdana, sans-serif;"
-				+ "line-height: 1; font-weight: 400; margin: 0; }"
-				+ "table { border-collapse: collapse; border: 0}"
-				+ "td { font-size: 15px; }", head = doc.head
-				|| doc.getElementsByTagName('head')[0], style = doc
-				.createElement('style');
-		style.type = 'text/css';
-		if (style.styleSheet) {
-			style.styleSheet.cssText = css;
-		} else {
-			style.appendChild(doc.createTextNode(css));
-		}
-		head.appendChild(style);
-
-		doc.close();
-		frame.focus();
-		frame.print();
+	doc.close();
+	frame.focus();
+	frame.print();
     }-*/;
 
 }

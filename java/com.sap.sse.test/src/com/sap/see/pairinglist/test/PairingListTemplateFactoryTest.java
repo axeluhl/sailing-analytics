@@ -36,10 +36,34 @@ public class PairingListTemplateFactoryTest {
         Assert.assertNotNull(plTemplate);
         for (int[] group : plTemplate) {
             for (int competitorNumber : group) {
-                if (competitorNumber < 0 && competitorNumber <= competitors) {
-                    Assert.fail("Values of Pairing List Template must not be smaller 0!");
+                if (competitorNumber < 0 && competitorNumber < competitors) {
+                    Assert.fail("Values of Pairing List Template must not be smaller 0, when there are no dummies!");
                 }
             }
+        }
+        
+        int[][] plTemplate2 = factoryImpl
+                .getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors + 1),0)
+                .getPairingListTemplate();
+        
+        int dummyCount = 0;
+
+        Assert.assertNotNull(plTemplate2);
+        for (int[] group : plTemplate2) {
+            for (int competitorNumber : group) {
+                
+                if (competitorNumber == -1) {
+                    dummyCount++;
+                }
+                
+                if (competitorNumber < -1 && competitorNumber < competitors) {
+                    Assert.fail("Values of Pairing List Template must not be smaller -1, when there are dummies!");
+                }
+            }
+        }
+        
+        if (dummyCount != (groups - 1) * flights) {
+            Assert.fail("There are not as much dummies as there should be!");
         }
     }
     /**
@@ -79,12 +103,6 @@ public class PairingListTemplateFactoryTest {
         assertArrayEquals(example4.getPairingListTemplate(), example5.getPairingListTemplate());
         System.out.println(Arrays.deepToString(example1.getPairingListTemplate()));
         System.out.println(example2.getQuality());
-        /*
-        for(int[] row : example1.getPairingListTemplate()) {
-            System.out.println(Arrays.toString(row));
-        }
-        System.out.println(example1.getQuality());
-        */
     }
     
     @Test
