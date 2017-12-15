@@ -6914,8 +6914,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO,
-            final String leaderboardName) throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
+    public void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier) 
+            throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
