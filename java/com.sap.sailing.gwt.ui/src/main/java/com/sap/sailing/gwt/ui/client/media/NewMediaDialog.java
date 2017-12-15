@@ -344,7 +344,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         this.setUiEnabled(false);
         remoteMp4WasStarted = true;
         remoteMp4WasFinished = false;
-        infoLabel.setWidget(new Label("TODO Please wait, analyzing"));
+        infoLabel.setWidget(new Label(stringMessages.processingMP4()));
         mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
 
             @Override
