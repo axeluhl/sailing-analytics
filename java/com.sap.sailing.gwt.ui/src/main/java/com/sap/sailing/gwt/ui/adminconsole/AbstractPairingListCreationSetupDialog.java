@@ -18,7 +18,6 @@ public abstract class AbstractPairingListCreationSetupDialog<T> extends DataEntr
         this.stringMessages = stringMessages;
         this.leaderboardDTO = leaderboardDTO;
         
-        
     }
     
     @Override

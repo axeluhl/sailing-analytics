@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -134,6 +135,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         getRightButtonPannel().add(applyToRacelogButton);
         getRightButtonPannel().add(cSVExportButton);
         getRightButtonPannel().add(printViewButton);
+        getRightButtonPannel().add(new HTML("Prints the applied version"));
         if(!applyToRacelogButton.isEnabled()){
             Label label=new Label("Registered Competitors are unequal to Competitors from Pairinglist!");
             label.getElement().getStyle().setColor("red");
@@ -143,8 +145,9 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.fillRaceLogsFromPairingListTemplate(template, leaderboardDTO.getName(), new AsyncCallback<Void>() {
-                    
+                sailingService.fillRaceLogsFromPairingListTemplate(template, leaderboardDTO.getName(),
+                        template.getSelectedFlightNames(), new AsyncCallback<Void>() {
+     
                     @Override
                     public void onSuccess(Void result) {
                         System.out.println("it worked ;-)");
@@ -206,6 +209,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         Map<String, String> result = new HashMap<>();
         result.put("leaderboardName", leaderboardDTO.getName());
         result.put("flightMultiplier", String.valueOf(template.getFlightMultiplier()));
+        result.put("selectedFlights", String.join(",", template.getSelectedFlightNames()));
         return result;
     }
 

@@ -4152,9 +4152,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return anniversaryRaceDeterminator;
     }
     
+    //TODO filter flights by selected flights
     @Override
     public PairingListTemplate createPairingListFromRegatta(final String leaderboardName, int competitorsCount, 
-            int flightMultiplier) {
+            final int flightMultiplier, final int flightsCount) {
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
@@ -4167,17 +4168,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                             return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
                         }
 
+                        // TODO set count of selected flights
                         @Override
                         public int getFlightsCount() {
-                            int flightCount = 0;
-                            
-                            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                                if (!raceColumn.isMedalRace()) {
-                                    flightCount++;
-                                }
-                            }
-                            
-                            return flightCount;
+                            return flightsCount;
                         }
 
                         @Override
@@ -4193,7 +4187,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
-            final String leaderboardName) {
+            final String leaderboardName, final Iterable<RaceColumn> selectedFlights) {
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
@@ -4204,7 +4198,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
             @Override
             public Iterable<RaceColumn> getFlights() {
-                return leaderboard.getRaceColumns();
+                return selectedFlights;
             }
 
             @Override

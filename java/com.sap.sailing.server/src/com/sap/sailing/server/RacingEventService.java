@@ -825,8 +825,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param flightMultiplier
      * @return calculated {@link PairingListTemplate}
      */
-    PairingListTemplate createPairingListFromRegatta(final String leaderboardName, final int competitorsCount, final int flightMultiplier);
+    PairingListTemplate createPairingListFromRegatta(final String leaderboardName, final int competitorsCount,
+            final int flightMultiplier, final int flightsCount);
     
     PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
-            final String leaderboardName);
+            final String leaderboardName, final Iterable<RaceColumn> selectedFlights);
 }

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1028,12 +1028,13 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
                 try{
-                sailingService.calculatePairingList(leaderboardDTO.getName(), editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
+                sailingService.calculatePairingList(leaderboardDTO.getName(), editedObject.getSelectedFlightNames(), editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
                         new AsyncCallback<PairingListTemplateDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
                         busyDialog.hide();
+                        System.out.println(caught);
                     }
 
                     @Override
