@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.desktop.partials.old.AbstractLeaderboardFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard.OldLeaderboardDelegate;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
 public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardFullscreenViewer
         implements OldLeaderboardDelegate {
@@ -22,7 +23,7 @@ public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardF
     private static OldLeaderboardDelegateFullscreenViewerUiBinder uiBinder = GWT
             .create(OldLeaderboardDelegateFullscreenViewerUiBinder.class);
 
-    private final Image showLiveRacesControl = new Image("images/home/liveraces.svg");
+    private final Image showLiveRacesControl = new Image(SharedDesktopResources.INSTANCE.liveraces().getSafeUri());
     private final Label hasLiveRace = new Label();
     private final Widget headerWidget;
     private final ContentLayout contentLayout = new ContentLayout();

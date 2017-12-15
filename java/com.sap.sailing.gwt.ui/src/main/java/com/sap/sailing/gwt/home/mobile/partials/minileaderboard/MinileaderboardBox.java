@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.BigButton;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 
@@ -38,9 +39,12 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     private PlaceNavigation<?> placeNavigation = null;
 
     private boolean isOverall;
+
+    private final FlagImageResolver flagImageResolver;
     
-    public MinileaderboardBox(boolean isOverall) {
+    public MinileaderboardBox(boolean isOverall, FlagImageResolver flagImageResolver) {
         this.isOverall = isOverall;
+        this.flagImageResolver = flagImageResolver;
         initWidget(uiBinder.createAndBindUi(this));
     }
     
@@ -78,7 +82,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         }
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
-            itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));
+            itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts, flagImageResolver));
         }
         if (showRaceCounts) {
             itemContainerUi.addContent(new MinileaderboardBoxItemLegend());

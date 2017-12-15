@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
 /**
@@ -29,7 +30,7 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
     
     private final EventNavigationHandler eventNavigationHandler;
     private final Anchor eventLinkControl = new Anchor();
-    private final Image autoRefreshControl = new Image("images/home/reload.svg");
+    private final Image autoRefreshControl = new Image(SharedHomeResources.INSTANCE.reload().getSafeUri());
     private SailingGalleryPlayer player = null;
 
     /**

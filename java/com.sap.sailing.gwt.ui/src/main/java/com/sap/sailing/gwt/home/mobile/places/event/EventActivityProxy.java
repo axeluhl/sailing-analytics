@@ -1,6 +1,11 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
@@ -19,6 +24,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.overview.regatta.RegattaActi
 import com.sap.sailing.gwt.home.mobile.places.event.races.RacesActivity;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplicationClientFactory> {
 
@@ -35,16 +41,31 @@ public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplica
                 if (place instanceof MultiregattaOverviewPlace || place instanceof MultiregattaRegattasPlace) {
                     super.onSuccess(new MultiRegattaActivity(place, event, getNavigationPathDisplay(), clientFactory));
                 } else if (place instanceof RegattaOverviewPlace) {
-                    super.onSuccess(new RegattaActivity((RegattaOverviewPlace) place, event, getNavigationPathDisplay(), clientFactory));
+                    withFlagImageResolver(flagImageResolver -> new RegattaActivity((RegattaOverviewPlace) place, event, getNavigationPathDisplay(), clientFactory, flagImageResolver));
                 } else if (place instanceof RegattaRacesPlace) {
                     super.onSuccess(new RacesActivity((RegattaRacesPlace) place, event, getNavigationPathDisplay(), clientFactory));
                 } else if (place instanceof MiniLeaderboardPlace) {
-                    super.onSuccess(new MiniLeaderboardActivity((MiniLeaderboardPlace) place, event, getNavigationPathDisplay(), clientFactory));
+                    withFlagImageResolver(flagImageResolver -> new MiniLeaderboardActivity((MiniLeaderboardPlace) place, event, getNavigationPathDisplay(), clientFactory, flagImageResolver));
                 } else if (place instanceof LatestNewsPlace) {
                     super.onSuccess(new LatestNewsActivity((LatestNewsPlace) place, event, getNavigationPathDisplay(), clientFactory));
                 } else if (place instanceof RegattaMediaPlace || place instanceof MultiregattaMediaPlace) {
                     super.onSuccess(new MediaActivity(place, event, getNavigationPathDisplay(), clientFactory));
                 }
+            }
+            
+            private void withFlagImageResolver(final Function<FlagImageResolver, Activity> activityFactory) {
+                final Consumer<Activity> onSuccess = super::onSuccess;
+                final Consumer<Throwable> onFailure = super::onFailure;
+                FlagImageResolver.get(new AsyncCallback<FlagImageResolver>() {
+                    @Override
+                    public void onSuccess(FlagImageResolver result) {
+                        onSuccess.accept(activityFactory.apply(result));
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        onFailure.accept(caught);
+                    }
+                });
             }
         });
     }

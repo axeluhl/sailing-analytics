@@ -26,4 +26,4 @@ In 2012, a mobile application to support the race committees in their functions 
 
 The remainder of this document explains the key architectural principles on which the SAP Sailing Analytics have been developed. It is to be considered a snapshot of the status quo, as documented by the time stamp in the document's header.
 
-See also this [[presentation|https://git.wdf.sap.corp:50000/git/?p=SAPSail/sapsailingcapture.git;a=blob;f=doc/SAPSailingAnalyticsArchitecture.pptx;h=f304746a0092410f0bf625292a7ae363d6d05f15;hb=8010ce3ebcd0df0d3fcd1651f87d79724f667377]] that provides an overview of the project's architecture and history.
+See also this [[presentation|https://git.wdf.sap.corp/gitweb?p=SAPSail/sapsailingcapture.git;a=blob;f=doc/SAPSailingAnalyticsArchitecture.pptx;h=26e0746e2d6a660cc2885fc47c0e817ab2dc8709;hb=refs/heads/master]] that provides an overview of the project's architecture and history.
