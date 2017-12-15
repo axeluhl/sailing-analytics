@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -53,12 +54,19 @@ public interface Maneuver extends GPSFix {
     Tack getNewTack();
 
     /**
-     * Gets the the maneuver loss of this maneuver which is the distance projected onto the average course between
-     * entering and exiting the maneuver that the boat lost compared to not having maneuvered. The maneuver loss is
-     * calculated considering the maneuver curve, which was performed between {@link #getTimePointBefore()} and
+     * Gets the maneuver loss of this maneuver which is the distance projected onto the average course between entering
+     * and exiting the maneuver that the boat lost compared to not having maneuvered. The maneuver loss is calculated
+     * considering the maneuver curve, which was performed between {@link #getTimePointBefore()} and
      * {@link #getTimePointAfter()}.
      */
     Distance getManeuverLoss();
+
+    /**
+     * Gets the wind which was used for determination of this maneuver.
+     * 
+     * @return The wind sampled at time point and position of the maneuver during detection of this maneuver
+     */
+    Wind getWind();
 
     /**
      * Gets the time point of the corresponding maneuver. The time point refers to a point within the main curve of

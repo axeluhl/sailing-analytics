@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sse.common.TimePoint;
@@ -29,11 +30,12 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private final TimePoint timePointAfterMainCurve;
     private final double directionChangeWithinMainCurveInDegrees;
     private final double maxAngularVelocityInDegreesPerSecond;
+    private final Wind wind;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             TimePoint timePointBefore, TimePoint timePointAfter, SpeedWithBearing speedWithBearingBefore,
             SpeedWithBearing speedWithBearingAfter, double directionChangeInDegrees, TimePoint timePointBeforeMainCurve,
-            TimePoint timePointAfterMainCurve, double directionChangeWithinMainCurveInDegrees, double maxAngularVelocityInDegreesPerSecond) {
+            TimePoint timePointAfterMainCurve, double directionChangeWithinMainCurveInDegrees, double maxAngularVelocityInDegreesPerSecond, Wind wind) {
         super();
         this.type = type;
         this.newTack = newTack;
@@ -49,6 +51,7 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
         this.timePointAfterMainCurve = timePointAfterMainCurve;
         this.directionChangeWithinMainCurveInDegrees = directionChangeWithinMainCurveInDegrees;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
+        this.wind = wind;
     }
 
     @Override
@@ -89,6 +92,11 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     @Override
     public Distance getManeuverLoss() {
         return maneuverLoss;
+    }
+    
+    @Override
+    public Wind getWind() {
+        return wind;
     }
 
     @Override

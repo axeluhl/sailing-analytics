@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sse.common.TimePoint;
 
@@ -19,10 +20,10 @@ public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassing
             TimePoint timePoint, TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
             double directionChangeInDegrees, TimePoint timePointBeforeMainCurve, TimePoint timePointAfterMainCurve,
-            double directionChangeWithinMainCurveInDegrees, double maxAngularVelocityInDegreesPerSecond, Waypoint waypointPassed, NauticalSide side) {
+            double directionChangeWithinMainCurveInDegrees, double maxAngularVelocityInDegreesPerSecond, Wind wind, Waypoint waypointPassed, NauticalSide side) {
         super(type, newTack, position, maneuverLoss, timePoint, timePointBefore, timePointAfter, speedWithBearingBefore,
                 speedWithBearingAfter, directionChangeInDegrees, timePointBeforeMainCurve, timePointAfterMainCurve,
-                directionChangeWithinMainCurveInDegrees, maxAngularVelocityInDegreesPerSecond);
+                directionChangeWithinMainCurveInDegrees, maxAngularVelocityInDegreesPerSecond, wind);
         this.waypointPassed = waypointPassed;
         this.side = side;
     }
