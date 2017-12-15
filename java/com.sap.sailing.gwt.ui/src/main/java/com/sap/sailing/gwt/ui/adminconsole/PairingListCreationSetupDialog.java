@@ -37,10 +37,13 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
                 callback);
         this.groupCount = Util.size(leaderboardDTO.getRaceList().get(0).getFleets());
         this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
+        this.competitorCountTextBox.ensureDebugId("CompetitorCountBox");
         this.flightMultiplierTextBox = createIntegerBox(0, 2);
         this.flightMultiplierTextBox.setEnabled(false);
         this.flightMultiplierTextBox.setValue(1);
+        this.flightMultiplierTextBox.ensureDebugId("FlightMultiplierIntegerBox");
         this.flightMultiplierCheckBox = createCheckbox("Flight Multiplier");
+        this.ensureDebugId("PairingListCreationSetupDialog");
         
         this.flightMultiplierCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             
@@ -50,7 +53,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
             }
         });
         
-        this.flightMultiplierCheckBox.ensureDebugId("CompetitorCountTextBox");
+        this.flightMultiplierCheckBox.ensureDebugId("FlightMultiplierCheckBox");
     }
     
     @Override
