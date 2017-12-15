@@ -24,7 +24,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     
     private final IntegerBox competitorCountTextBox;
     private final IntegerBox flightMultiplierTextBox;
-    private final CheckBox flightMultiplierCheckbox;
+    private final CheckBox flightMultiplierCheckBox;
     private Iterable<CheckBox> selectedSeriesCheckboxes;
     private final int groupCount;
     
@@ -39,20 +39,25 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         
         super(leaderboardDTO, stringMessages.pairingLists(), stringMessages, new PairingListParameterValidator(stringMessages), 
                 callback);
-        groupCount = Util.size(leaderboardDTO.getRaceList().get(0).getFleets());
-        competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
-        flightMultiplierTextBox = createIntegerBox(0, 2);
-        flightMultiplierTextBox.setEnabled(false);
-        flightMultiplierTextBox.setValue(1);
-        flightMultiplierCheckbox = createCheckbox("Flight Multiplier");
-        flightMultiplierCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+        this.groupCount = Util.size(leaderboardDTO.getRaceList().get(0).getFleets());
+        this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
+        this.competitorCountTextBox.ensureDebugId("CompetitorCountBox");
+        this.flightMultiplierTextBox = createIntegerBox(0, 2);
+        this.flightMultiplierTextBox.setEnabled(false);
+        this.flightMultiplierTextBox.setValue(1);
+        this.flightMultiplierTextBox.ensureDebugId("FlightMultiplierIntegerBox");
+        this.flightMultiplierCheckBox = createCheckbox("Flight Multiplier");
+        this.ensureDebugId("PairingListCreationSetupDialog");
+        
+        this.flightMultiplierCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 flightMultiplierTextBox.setEnabled(event.getValue());
             }
         });
-        flightMultiplierCheckbox.ensureDebugId("CompetitorCountTextBox");
+        flightMultiplierCheckBox.ensureDebugId("CompetitorCountTextBox");
         
         List<CheckBox> checkboxes = new ArrayList<CheckBox>();
         for(String seriesName : getSeriesNamesFromAllRaces(leaderboardDTO.getRaceList())) {
@@ -75,6 +80,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
             checkboxes.add(current);
         }
         selectedSeriesCheckboxes = checkboxes;
+        this.flightMultiplierCheckBox.ensureDebugId("FlightMultiplierCheckBox");
     }
     
     @Override
@@ -97,7 +103,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         //TODO add stringMessages
         formGrid.setWidget(0, 0, new Label("Please set the competitors count:"));
         formGrid.setWidget(0, 1, this.competitorCountTextBox);
-        formGrid.setWidget(1, 0, this.flightMultiplierCheckbox);
+        formGrid.setWidget(1, 0, this.flightMultiplierCheckBox);
         formGrid.setWidget(1, 1, this.flightMultiplierTextBox);
         
         formGrid.setWidget(2, 0, new Label("Please select one or more series that should be in a PairingList:"));
@@ -125,7 +131,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         
         dto.setFlightCount(flightCount);
 
-        if (this.flightMultiplierCheckbox.getValue()) {
+        if (this.flightMultiplierCheckBox.getValue()) {
             dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
         } else {
             dto.setFlightMultiplier(1);

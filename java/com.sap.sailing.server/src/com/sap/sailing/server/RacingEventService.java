@@ -820,14 +820,21 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Returns a calculated {@link PairingListTemplate}, specified by flights, groups and competitors.
      *
-     * @param regattaIdentifier {@link RegattaIdentifier} that specifies the flights and groups
-     * @param competitorsCount count of competitor that is given by a dialog
-     * @param flightMultiplier
+     * @param leaderboardName the name of the leaderboard
+     * @param competitorsCount count of competitor
+     * @param flightMultiplier specifies how often the flights will be cloned
      * @return calculated {@link PairingListTemplate}
      */
     PairingListTemplate createPairingListFromRegatta(final String leaderboardName, final int competitorsCount,
             final int flightMultiplier, final int flightsCount);
     
+    /**
+     * Matches the competitors of a leaderboard to the {@link PairingList}
+     * 
+     * @param pairingListTemplate the returned {@link PairingList} is based upon it 
+     * @param leaderboardName name of the leaderboard
+     * @return {@link PairingList} that contains competitor objects matched to {@link RaceColumn}s and {@link Fleet}s
+     */
     PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
             final String leaderboardName, final Iterable<RaceColumn> selectedFlights);
 }

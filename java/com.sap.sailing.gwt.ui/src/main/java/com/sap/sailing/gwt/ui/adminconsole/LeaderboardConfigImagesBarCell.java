@@ -42,6 +42,6 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
                 new ImageSpec(ACTION_EXPORT_XML, stringMessages.actionExportXML(), makeImagePrototype(resources.exportXMLIcon())),
                 new ImageSpec(ACTION_OPEN_COACH_DASHBOARD, stringMessages.actionOpenDashboard(), makeImagePrototype(resources.openCoachDashboard())),
                 new ImageSpec(ACTION_SHOW_REGATTA_LOG, stringMessages.regattaLog(), makeImagePrototype(resources.flagIcon())),
-                new ImageSpec(ACTION_CREATE_PAIRINGLIST, stringMessages.pairingLists(), makeImagePrototype(resources.help())));
+                new ImageSpec(ACTION_CREATE_PAIRINGLIST, stringMessages.pairingLists(), makeImagePrototype(resources.pairingList())));
     }
 }

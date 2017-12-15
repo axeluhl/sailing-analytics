@@ -6930,23 +6930,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void fillRaceLogsFromPairingListTemplate(PairingListTemplateDTO pairingListTemplateDTO,
-            final String leaderboardName, final Iterable<String> selectedFlightNames)
+    public void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier, final Iterable<String> selectedFlightNames)
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
-
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-
-        /*
-        List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
-        for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if(Util.contains(selectedFlightNames, raceColumn)) {
-                selectedRaces.add(raceColumn);
-            }
-        }
-        */
         
-        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, pairingListTemplateDTO.getFlightMultiplier(), 
-                selectedFlightNames);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+       
+        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, flightMultiplier, selectedFlightNames);
         
         int flightCount = 0;
         int groupCount = 0;
