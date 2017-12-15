@@ -6919,7 +6919,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
-        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, pairingListTemplateDTO.getFlightMultiplier());
+        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, flightMultiplier);
         
         int flightCount = 0;
         int groupCount = 0;
