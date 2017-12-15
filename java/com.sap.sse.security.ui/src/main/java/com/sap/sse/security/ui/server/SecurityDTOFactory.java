@@ -154,10 +154,16 @@ public class SecurityDTOFactory {
     public Ownership createOwnershipDTO(Ownership ownership, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
             Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
             Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        return new OwnershipImpl(ownership.getIdOfOwnedObjectAsString(),
-                createUserDTOFromUser(ownership.getUserOwner(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
-                createTenantDTOFromTenant(ownership.getTenantOwner(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
-                ownership.getDisplayNameOfOwnedObject());
+        final Ownership result;
+        if (ownership == null) {
+            result = null;
+        } else {
+            result = new OwnershipImpl(ownership.getIdOfOwnedObjectAsString(),
+                    createUserDTOFromUser(ownership.getUserOwner(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                    createTenantDTOFromTenant(ownership.getTenantOwner(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                    ownership.getDisplayNameOfOwnedObject());
+        }
+        return result;
     }
     
     public AccessControlList createAccessControlListDTO(AccessControlList acl) {
@@ -168,14 +174,20 @@ public class SecurityDTOFactory {
             Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
             Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
             Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        Map<UserGroup, Set<String>> permissionMapDTO = new HashMap<>();
-        for (final Entry<UserGroup, Set<String>> actionForGroup : acl.getActionsByUserGroup().entrySet()) {
-            permissionMapDTO.put(
-                    createUserGroupDTOFromUserGroup(actionForGroup.getKey(), fromOriginalToStrippedDownTenant,
-                            fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
-                    actionForGroup.getValue());
+        final AccessControlList result;
+        if (acl == null) {
+            result = null;
+        } else {
+            Map<UserGroup, Set<String>> permissionMapDTO = new HashMap<>();
+            for (final Entry<UserGroup, Set<String>> actionForGroup : acl.getActionsByUserGroup().entrySet()) {
+                permissionMapDTO.put(
+                        createUserGroupDTOFromUserGroup(actionForGroup.getKey(), fromOriginalToStrippedDownTenant,
+                                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                        actionForGroup.getValue());
+            }
+            result = new AccessControlListImpl(acl.getIdOfAccessControlledObjectAsString(),
+                    acl.getDisplayNameOfAccessControlledObject(), permissionMapDTO);
         }
-        return new AccessControlListImpl(acl.getIdOfAccessControlledObjectAsString(),
-                acl.getDisplayNameOfAccessControlledObject(), permissionMapDTO);
+        return result;
     }
 }
