@@ -94,9 +94,7 @@ public class TrackedRaceStatisticsCalculator {
         if (calculateMaxSpeed) {
             Pair<GPSFixMoving, Speed> competitorMaxSpeed = competitorTrack.getMaximumSpeedOverGround(from, to);
             if (competitorMaxSpeed != null
-                    && (maxSpeed == null || competitorMaxSpeed.getB().compareTo(maxSpeed.getB()) > 0)
-                    // only accept "reasonable" max speeds
-                    && competitorMaxSpeed.getB().compareTo(GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING) <= 0) {
+                    && (maxSpeed == null || competitorMaxSpeed.getB().compareTo(maxSpeed.getB()) > 0)) {
                 maxSpeed = new Triple<>(competitor, competitorMaxSpeed.getB(),
                         competitorMaxSpeed.getA().getTimePoint());
             }
