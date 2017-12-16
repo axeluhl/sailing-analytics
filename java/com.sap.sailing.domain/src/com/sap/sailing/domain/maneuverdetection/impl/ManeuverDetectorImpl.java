@@ -198,32 +198,30 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             Iterator<GPSFixMoving> approximationPointsIter = approximatingFixesToAnalyze.iterator();
             GPSFixMoving previous = approximationPointsIter.next();
             GPSFixMoving current = approximationPointsIter.next();
-            // the bearings in these variables are between approximation points
-            Bearing lastCourseChange = null;
+            NauticalSide lastCourseChangeDirection = null;
             do {
                 GPSFixMoving next = approximationPointsIter.next();
                 // Split douglas peucker fixes groups to identify maneuver spots
-                Bearing courseChangeOnOriginalFixes = getCourseChangeAroundFix(competitor, previous.getTimePoint(),
-                        current, next.getTimePoint());
-                if (!fixesGroupForManeuverSpotAnalysis.isEmpty()
-                        && !checkWhetherDouglasPeuckerFixesCanBeGroupedTogether(competitor, lastCourseChange,
-                                courseChangeOnOriginalFixes, previous, current)) {
+                NauticalSide courseChangeDirectionOnOriginalFixes = getCourseChangeDirectionAroundFix(competitor,
+                        previous.getTimePoint(), current, next.getTimePoint());
+                if (!fixesGroupForManeuverSpotAnalysis.isEmpty() && !checkDouglasPeuckerFixesGroupable(competitor,
+                        lastCourseChangeDirection, courseChangeDirectionOnOriginalFixes, previous, current)) {
                     // current fix does not belong to the existing fixes group; determine maneuvers of recent fixes
                     // group, then start a new list
                     ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(competitor,
-                            fixesGroupForManeuverSpotAnalysis, getDirectionOfCourseChange(lastCourseChange),
-                            earliestManeuverStart, latestManeuverEnd);
+                            fixesGroupForManeuverSpotAnalysis, lastCourseChangeDirection, earliestManeuverStart,
+                            latestManeuverEnd);
                     result.add(maneuverSpot);
                     fixesGroupForManeuverSpotAnalysis.clear();
                 }
                 fixesGroupForManeuverSpotAnalysis.add(current);
                 previous = current;
                 current = next;
-                lastCourseChange = courseChangeOnOriginalFixes;
+                lastCourseChangeDirection = courseChangeDirectionOnOriginalFixes;
             } while (approximationPointsIter.hasNext());
             if (!fixesGroupForManeuverSpotAnalysis.isEmpty()) {
                 ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(competitor, fixesGroupForManeuverSpotAnalysis,
-                        getDirectionOfCourseChange(lastCourseChange), earliestManeuverStart, latestManeuverEnd);
+                        lastCourseChangeDirection, earliestManeuverStart, latestManeuverEnd);
                 result.add(maneuverSpot);
             }
         }
@@ -231,7 +229,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     }
 
-    private NauticalSide getDirectionOfCourseChange(Bearing courseChange) {
+    protected NauticalSide getDirectionOfCourseChange(Bearing courseChange) {
         return courseChange.getDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
     }
 
@@ -251,31 +249,22 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The fix which is checked for grouping
      * @return {@code false} if fixes must not be grouped together, otherwise {@code true}
      */
-    protected boolean checkWhetherDouglasPeuckerFixesCanBeGroupedTogether(Competitor competitor,
-            Bearing lastCourseChange, Bearing newCourseChange, GPSFixMoving previousFix, GPSFixMoving currentFix) {
+    protected boolean checkDouglasPeuckerFixesGroupable(Competitor competitor, NauticalSide lastCourseChangeDirection,
+            NauticalSide newCourseChangeDirection, GPSFixMoving previousFix, GPSFixMoving currentFix) {
+        if (lastCourseChangeDirection != newCourseChangeDirection) {
+            return false;
+        }
         Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
         if (currentFix.getTimePoint().asMillis()
                 - previousFix.getTimePoint().asMillis() > getApproximateManeuverDuration(competitor).asMillis()
                 && currentFix.getPosition().getDistance(previousFix.getPosition()).compareTo(threeHullLengths) > 0) {
             return false;
         }
-
-        if (Math.signum(lastCourseChange.getDegrees()) != Math.signum(newCourseChange.getDegrees())) {
-            return false;
-        }
         return true;
     }
 
-    /**
-     * 
-     * @param competitor
-     * @param earliestCourseChangeAnalysisStart
-     * @param fix
-     * @param latestCourseChangeAnalysisEnd
-     * @return
-     */
-    protected Bearing getCourseChangeAroundFix(Competitor competitor, TimePoint earliestCourseChangeAnalysisStart,
-            GPSFixMoving fix, TimePoint latestCourseChangeAnalysisEnd) {
+    protected NauticalSide getCourseChangeDirectionAroundFix(Competitor competitor,
+            TimePoint earliestCourseChangeAnalysisStart, GPSFixMoving fix, TimePoint latestCourseChangeAnalysisEnd) {
         TimePoint fromTimePointForCourseChangeAnalysis = earliestCourseChangeAnalysisStart;
         Duration durationFromEarliestStartToFix = fromTimePointForCourseChangeAnalysis.until(fix.getTimePoint());
         Duration maxDurationForOriginalFixesCourseChangeInvestigation = getApproximateManeuverDuration(competitor)
@@ -292,7 +281,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         }
         Bearing courseChangeOnOriginalFixes = getCourseChange(competitor, fromTimePointForCourseChangeAnalysis,
                 toTimePointForCourseChangeAnalysis);
-        return courseChangeOnOriginalFixes;
+        return getDirectionOfCourseChange(courseChangeOnOriginalFixes);
     }
 
     /**
@@ -346,7 +335,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @see #groupChangesInSameDirectionIntoManeuvers(Competitor, List, boolean, TimePoint, TimePoint)
      * @see #computeManeuverDetails(Competitor, CurveDetailsWithBearingSteps, TimePoint, TimePoint)
      */
-    private ManeuverSpot createManeuverFromFixesGroup(Competitor competitor,
+    protected ManeuverSpot createManeuverFromFixesGroup(Competitor competitor,
             List<GPSFixMoving> douglasPeuckerFixesGroup, NauticalSide maneuverDirection,
             TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> maneuvers = new ArrayList<>();
@@ -367,7 +356,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         CurveDetailsWithBearingSteps maneuverMainCurveDetails = computeManeuverMainCurveDetails(competitor,
                 earliestTimePointBeforeManeuver, latestTimePointAfterManeuver, maneuverDirection);
         if (maneuverMainCurveDetails == null) {
-            return new ManeuverSpot(douglasPeuckerFixesGroup, maneuverDirection, maneuvers);
+            return new ManeuverSpot(douglasPeuckerFixesGroup, maneuverDirection, maneuvers, null);
         }
         CurveDetails maneuverDetails = computeManeuverDetails(competitor, maneuverMainCurveDetails,
                 earliestManeuverStart, latestManeuverEnd);
@@ -408,7 +397,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(),
                     maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
                     maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
-                    maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), wind, waypointPassed,
+                    maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), waypointPassed,
                     sideToWhichWaypointWasPassed));
         } else {
             markPassingTimePoint = null;
@@ -490,7 +479,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         refinedPenaltyMainCurveDetails.getTimePointBefore(),
                         refinedPenaltyMainCurveDetails.getTimePointAfter(),
                         refinedPenaltyMainCurveDetails.getTotalCourseChangeInDegrees(),
-                        refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), wind);
+                        refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 maneuvers.add(maneuver);
                 // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes
                 // remain
@@ -540,11 +529,12 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(),
                         maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
                         maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
-                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), wind);
+                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 maneuvers.add(maneuver);
             }
         }
-        return new ManeuverSpot(douglasPeuckerFixesGroup, maneuverDirection, maneuvers);
+        return new ManeuverSpot(douglasPeuckerFixesGroup, maneuverDirection, maneuvers,
+                new WindMeasurement(maneuverDetails.getTimePoint(), maneuverPosition, wind == null ? null : wind.getBearing()));
     }
 
     protected Duration getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(Duration approximateManeuverDuration) {
@@ -750,7 +740,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis);
         CurveBoundaryExtension maneuverStart = findSpeedMaximum(stepsToAnalyze, true,
                 timePointSinceGlobalMaximumSearch);
-        if (checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverStart)) {
+        if (isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverStart)) {
             maneuverStart = null;
         }
         TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
@@ -762,7 +752,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         CurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze,
                 true, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         if (stableBearingExtension != null
-                && !checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
+                && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
             maneuverStart = stableBearingExtension;
             courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
                     .getCourseChangeInDegreesWithinExtensionArea();
@@ -776,8 +766,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0);
     }
 
-    private boolean checkCourseChangeLimitExceededForCurveExtension(
-            CurveDetailsWithBearingSteps maneuverMainCurveDetails, CurveBoundaryExtension curveBoundaryExtension) {
+    private boolean isCourseChangeLimitExceededForCurveExtension(CurveDetailsWithBearingSteps maneuverMainCurveDetails,
+            CurveBoundaryExtension curveBoundaryExtension) {
         if (curveBoundaryExtension == null) {
             return false;
         }
@@ -830,7 +820,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(competitor,
                 earliestTimePointForSpeedTrendAnalysis, latestTimePointForSpeedTrendAnalysis);
         CurveBoundaryExtension maneuverEnd = findSpeedMaximum(stepsToAnalyze, false, timePointBeforeLocalMaximumSearch);
-        if (checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverEnd)) {
+        if (isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverEnd)) {
             maneuverEnd = null;
         }
         TimePoint stableBearingAnalysisFrom = maneuverEnd == null ? maneuverMainCurveDetails.getTimePointAfter()
@@ -842,7 +832,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         CurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze,
                 false, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         if (stableBearingExtension != null
-                && !checkCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
+                && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
             maneuverEnd = stableBearingExtension;
             courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
                     .getCourseChangeInDegreesWithinExtensionArea();
