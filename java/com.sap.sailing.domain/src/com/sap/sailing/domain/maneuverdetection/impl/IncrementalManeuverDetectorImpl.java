@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,22 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
 
     public IncrementalManeuverDetectorImpl(TrackedRace trackedRace) {
         super(trackedRace);
+    }
+    
+    public List<Maneuver> getAlreadyDetectedManeuvers(Competitor competitor) {
+        ManeuverDetectionResult lastManeuverDetectionResult = existingManeuverSpotsPerCompetitor.get(competitor);
+        if(lastManeuverDetectionResult != null) {
+            return getAllManeuversFromManeuverSpots(lastManeuverDetectionResult.getManeuverSpots());
+        }
+        return Collections.emptyList();
+    }
+    
+    public void clearState(Competitor competitor) {
+        existingManeuverSpotsPerCompetitor.remove(competitor);
+    }
+    
+    public void clearState() {
+        existingManeuverSpotsPerCompetitor.clear();
     }
 
     @Override
