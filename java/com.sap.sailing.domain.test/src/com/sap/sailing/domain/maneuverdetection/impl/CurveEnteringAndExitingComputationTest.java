@@ -39,7 +39,7 @@ public class CurveEnteringAndExitingComputationTest {
 
     @Test
     public void testMainCurveSearch() {
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null, null);
         // Test that bearing steps with continuous course change into the target direction wraps the whole time range of
         // analyzed steps.
         SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
@@ -148,7 +148,7 @@ public class CurveEnteringAndExitingComputationTest {
 
     @Test
     public void testSpeedMaximaSearch() {
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null, null);
         // Test with time forward call that speed steps with continuous speed increase wraps the whole time range of
         // analyzed steps.
         SpeedWithBearingStepsIterable steps = constructStepsWithSpeeds(0, 1, 3, 9, 10, 12);
@@ -209,7 +209,7 @@ public class CurveEnteringAndExitingComputationTest {
 
     @Test
     public void testStableBearingSearch() {
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null);
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null, null);
         // Test time forward
         SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 2, 5, 4, 10, 12);
         CurveBoundaryExtension extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false,

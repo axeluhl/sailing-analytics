@@ -2,13 +2,28 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import java.util.List;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.Maneuver;
 
+/**
+ * An extension of {@link ManeuverDetector} which supports incremental maneuver detection within calls of
+ * {@link #detectManeuvers()}. The purpose of this implementation is to save performance for maneuver detection during
+ * live races with continuously new incoming fixes. The implementations must take care of concurrency, when state is
+ * introduced.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public interface IncrementalManeuverDetector extends ManeuverDetector {
 
-    List<Maneuver> getAlreadyDetectedManeuvers(Competitor competitor);
+    /**
+     * Gets the detected maneuvers during previous calls of {@link #detectManeuvers()}
+     */
+    List<Maneuver> getAlreadyDetectedManeuvers();
 
+    /**
+     * Clears the whole state of the detector, which is used for incremental maneuver detection. The following calls of
+     * {@link #detectManeuvers()} will cause the maneuver analysis to perform from scratch to detect maneuvers.
+     */
     void clearState();
 
 }

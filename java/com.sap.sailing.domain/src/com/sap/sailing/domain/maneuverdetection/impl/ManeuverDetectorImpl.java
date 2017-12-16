@@ -79,11 +79,14 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     protected final Competitor competitor;
 
+    /**
+     * The track of competitor
+     */
     protected GPSFixTrack<Competitor, GPSFixMoving> track;
 
     /**
      * Constructs maneuver detector which is supposed to be used for maneuver detection within the provided tracked
-     * race.
+     * race for provided competitor.
      * 
      * @param trackedRace
      *            The tracked race whose maneuvers are supposed to be detected
@@ -98,7 +101,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     @Override
     public List<Maneuver> detectManeuvers() throws NoWindException, NoFixesException {
-        TrackTimeInfo startAndEndTimePoints = getTrackingStartAndEndTimePoints();
+        TrackTimeInfo startAndEndTimePoints = getTrackTimeInfo();
         if (startAndEndTimePoints != null) {
             List<ManeuverSpot> maneuverSpots = detectManeuvers(startAndEndTimePoints.getTrackStartTimePoint(),
                     startAndEndTimePoints.getTrackEndTimePoint());
@@ -107,7 +110,12 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         throw new NoFixesException();
     }
 
-    protected TrackTimeInfo getTrackingStartAndEndTimePoints() {
+    /**
+     * Gets track's start time point, end time point and the time point of last raw fix.
+     * 
+     * @return {@code null} when there are no appropriate fixes contained within the analyzed track
+     */
+    protected TrackTimeInfo getTrackTimeInfo() {
         NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
         TimePoint earliestTrackRecord = null;
         TimePoint latestRawFixTimePoint = null;
@@ -186,8 +194,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
      *            maneuver duration after the maneuver time point were after this time point.
      * 
-     * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
-     *         <code>to</code>, or else the list of maneuvers detected.
+     * @return an empty list if no maneuver spots are detected for <code>competitor</code> between <code>from</code> and
+     *         <code>to</code>, or else the list of maneuver spots with corresponding maneuvers detected.
      */
     protected List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
             throws NoWindException {
@@ -196,6 +204,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 latestManeuverEnd), earliestManeuverStart, latestManeuverEnd);
     }
 
+    /**
+     * Uses the provided {@code approximatingFixesToAnalyze} as douglas peucker fixes to detect maneuver spots with
+     * corresponding maneuvers.
+     */
     protected List<ManeuverSpot> detectManeuvers(Iterable<GPSFixMoving> approximatingFixesToAnalyze,
             TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<ManeuverSpot> result = new ArrayList<>();
@@ -235,18 +247,24 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     }
 
+    /**
+     * Maps the provided {@code courseChange} from {@link Bearing} to {@link NauticalSide}.
+     */
     protected NauticalSide getDirectionOfCourseChange(Bearing courseChange) {
         return courseChange.getDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
     }
 
     /**
-     * Checks whether {@code currentFix} may be grouped together with the previous fixes in order to be coherently
-     * regarded as a single maneuver spot. For this, the maneuver direction within the provided three fixes must match
-     * the direction of provided {@code lastCourse}. Additionally, the distance from {@code previousFix} to
-     * {@code currentFix} must be <= 3 hull lengths, or the time difference <= getApproximatedManeuverDuration().
+     * Checks whether {@code currentFix} can be grouped together with the previous fixes in order to be regarded as a
+     * single maneuver spot. For this, the {@code newCourseChangeDirection must match the direction of provided
+     * {@code lastCourseChangeDirection}. Additionally, the distance from {@code previousFix} to {@code currentFix} must
+     * be <= 3 hull lengths, or the time difference <= getApproximatedManeuverDuration().
      * 
-     * @param lastCourseChange
+     * @param lastCourseChangeDirection
      *            The last course within previous three fixes counting from {@code currentFix}
+     * @param mewCourseChangeDirection
+     *            The current course within {@code previousFix}, {@code currentFix} and the fix which is following after
+     *            {@code currentFix}
      * @param previousFix
      *            The fix before {@code currentFix}
      * @param currentFix
@@ -267,6 +285,16 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         return true;
     }
 
+    /**
+     * Determines course change direction around the provided {@code fix} by means of
+     * {@link #getSpeedWithBearingSteps(TimePoint, TimePoint)}. The course change analysis considers fixes within
+     * duration of maximally {@code getApproximateManeuverDuration()} before and after maneuver. More precisely, the
+     * duration between analysis start and time point of the provided {@code fix}, as well as between the time point of
+     * the provided {@code fix} and analysis end time point can be maximally
+     * {@code getApproximateManeuverDuration().divide(2.0)} and minimally
+     * {@code earliestCourseChangeAnalysisStart.until(fix.getTimePoint())} and
+     * {@code latestCourseChangeAnalysisEnd.until(fix.getTimePoint())}
+     */
     protected NauticalSide getCourseChangeDirectionAroundFix(TimePoint earliestCourseChangeAnalysisStart,
             GPSFixMoving fix, TimePoint latestCourseChangeAnalysisEnd) {
         TimePoint fromTimePointForCourseChangeAnalysis = earliestCourseChangeAnalysisStart;
@@ -329,7 +357,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            before this time point, no matter how close it is, its end regarding speed and course out of the
      *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
      *            maneuver duration after the maneuver time point were after this time point.
-     * @return The derived list maneuvers. The maneuvers count {@code x} may be {@code x >= 0}.
+     * @return The derived list maneuver spots with corresponding maneuvers. The maneuver spot count {@code >= 0}.
      * @throws NoWindException
      *             When no wind information during maneuver performance is available
      * @see #groupChangesInSameDirectionIntoManeuvers(Competitor, List, boolean, TimePoint, TimePoint)
@@ -918,10 +946,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * Finds a first section within the provided {@code stepsToAnalyze} where the bearing starts to change with a
      * maximal rate of {@code maxCourseChangeInDegreesPerSecond}.
      * 
-     * @param stepsToAnalyze
-     * @param timeBackwardSearch
-     * @param maxCourseChangeInDegreesPerSecond
-     * @return
      * @param stepsToAnalyze
      *            Steps which are used for stable bearing search. Must be in chronological order (forward in time).
      * @param timeBackwardSearch

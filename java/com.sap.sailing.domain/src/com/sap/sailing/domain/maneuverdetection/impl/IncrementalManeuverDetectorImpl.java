@@ -20,19 +20,47 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
+/**
+ * @author Vladislav Chumak (D069712)
+ * @see IncrementalManeuverDetector
+ *
+ */
 public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implements IncrementalManeuverDetector {
 
-    private static final double WIND_TOLERANCE_TO_IGNORE_FOR_MANEUVER_REUSE = 5.0;
-    private static final double DOUGLAS_PEUCKER_FIXES_TIME_POINT_TOLERANCE_TO_IGNORE_FOR_MANEUVER_REUSE = 1;
+    /**
+     * The wind course tolerance in degrees which defines the maximal acceptable deviation of wind measurement between
+     * last maneuver spot wind record and the current recorded wind at the same maneuver spot. If the tolerance limit is
+     * exceeded, the maneuvers for the analysed maneuver spot get recalculated.
+     */
+    private static final double WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_MANEUVER_REUSE = 5.0;
 
+    /**
+     * Defines the tolerance in seconds between last time points of douglas peucker fixes within a maneuver spot and the
+     * time points of currently analysed douglas peucker fixes. If the tolerance limit is exceeded, the existing
+     * maneuver spot gets discarded.
+     */
+    private static final double DOUGLAS_PEUCKER_FIXES_TIME_POINT_TOLERANCE_IN_SECONDS_TO_IGNORE_FOR_MANEUVER_REUSE = 1;
+
+    /**
+     * The result of previous maneuver detection, or {@code null} if not performed until yet
+     */
     private volatile ManeuverDetectionResult lastManeuverDetectionResult = null;
 
+    /**
+     * Constructs incremental maneuver detector which is supposed to be used for maneuver detection within the provided
+     * tracked race for provided competitor.
+     * 
+     * @param trackedRace
+     *            The tracked race whose maneuvers are supposed to be detected
+     * @param competitor
+     *            The competitor, whose maneuvers shall be discovered
+     */
     public IncrementalManeuverDetectorImpl(TrackedRace trackedRace, Competitor competitor) {
         super(trackedRace, competitor);
     }
 
     @Override
-    public List<Maneuver> getAlreadyDetectedManeuvers(Competitor competitor) {
+    public List<Maneuver> getAlreadyDetectedManeuvers() {
         ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
         if (lastManeuverDetectionResult != null) {
             return getAllManeuversFromManeuverSpots(lastManeuverDetectionResult.getManeuverSpots());
@@ -47,7 +75,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
     @Override
     public List<Maneuver> detectManeuvers() throws NoWindException, NoFixesException {
-        TrackTimeInfo trackTimeInfo = getTrackingStartAndEndTimePoints();
+        TrackTimeInfo trackTimeInfo = getTrackTimeInfo();
         if (trackTimeInfo != null) {
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
             TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
@@ -204,6 +232,10 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return result;
     }
 
+    /**
+     * Checks whether the provided maneuver spot is too close to {@code latestRawFixTimePoint}, so that recalculation of
+     * the maneuver boundaries is needed, because the boundaries may get extended by new incoming fixes.
+     */
     private boolean checkManeuverSpotFarEnoughFromLatestRawFix(TimePoint latestRawFixTimePoint,
             long maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis,
             TimePoint latestRawFixTimePointOfPreviousManeuverDetectionIteration,
@@ -222,6 +254,10 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return true;
     }
 
+    /**
+     * Gets the max duration by which the maneuver boundary can be extended after the latest douglas peucker fix of
+     * provided maneuver spot.
+     */
     private Duration getMaxDurationForDouglasPeuckerFixExtensionInManeuverAnalysis() {
         Duration approximateManeuverDuration = getApproximateManeuverDuration();
         return getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(approximateManeuverDuration)
@@ -240,7 +276,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 return false;
             }
             double bearingInDegrees = lastWindCourse.getDifferenceTo(currentWind.getBearing()).getDegrees();
-            if (bearingInDegrees > WIND_TOLERANCE_TO_IGNORE_FOR_MANEUVER_REUSE) {
+            if (bearingInDegrees > WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_MANEUVER_REUSE) {
                 return false;
             }
         }
@@ -252,12 +288,32 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             GPSFixMoving newDouglasPeuckerFix) {
         double secondsDifference = existingDouglasPeuckerFix.getTimePoint().until(newDouglasPeuckerFix.getTimePoint())
                 .asSeconds();
-        if (Math.abs(secondsDifference) > DOUGLAS_PEUCKER_FIXES_TIME_POINT_TOLERANCE_TO_IGNORE_FOR_MANEUVER_REUSE) {
+        if (Math.abs(
+                secondsDifference) > DOUGLAS_PEUCKER_FIXES_TIME_POINT_TOLERANCE_IN_SECONDS_TO_IGNORE_FOR_MANEUVER_REUSE) {
             return false;
         }
         return true;
     }
 
+    /**
+     * Tries to get an already processed maneuver spot from previous calls of {@link #detectManeuvers()} which starts
+     * with a douglas peucker fix similar to the provided {@code newDouglasPeuckerFix}. This method was designed to run
+     * within loops of {@link #detectManeuversIncrementally(TrackTimeInfo, Iterable, ManeuverDetectionResult)}. In order
+     * to prevent log(n) iteration complexity, the method returns a {@code ListIterator} which is supposed to be used to
+     * retrieve the located existing maneuver spot, as well as to provide the same iterator for the following call of
+     * this method within following iterations, in order to resume the search iteration from the position of the
+     * previously retrieved maneuver spot.
+     * 
+     * @param lastManeuverDetectionResult
+     *            The result of previously performed maneuver detection, which contains the maneuver spots to look up
+     * @param lastIteratorUsed
+     *            {@code ListIterator}, which was returned by previous call of this method, or {@code null} which causes
+     *            iteration of existing maneuver spots start from scratch
+     * @param newDouglasPeuckerFix
+     *            The beginning douglas peucker fix of maneuver spot to find
+     * @return {@code null} if no corresponding maneuver spot could be found, otherwise a {@code ListIterator} which
+     *         points to the matched maneuver spot in its first {@code next()} call.
+     */
     private ListIterator<ManeuverSpot> getExistingManeuverSpotByFirstDouglasPeuckerFix(
             ManeuverDetectionResult lastManeuverDetectionResult, ListIterator<ManeuverSpot> lastIteratorUsed,
             GPSFixMoving newDouglasPeuckerFix) {
