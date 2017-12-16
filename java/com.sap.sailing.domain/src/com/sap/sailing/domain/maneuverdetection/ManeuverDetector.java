@@ -3,7 +3,6 @@ package com.sap.sailing.domain.maneuverdetection;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.Maneuver;
 
@@ -30,12 +29,9 @@ public interface ManeuverDetector {
      * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
      * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
      * 
-     * @param competitor
-     *            The competitor, whose maneuvers shall be discovered
-     * 
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
      */
-    List<Maneuver> detectManeuvers(Competitor competitor) throws NoWindException, NoFixesException;
+    List<Maneuver> detectManeuvers() throws NoWindException, NoFixesException;
 
 }

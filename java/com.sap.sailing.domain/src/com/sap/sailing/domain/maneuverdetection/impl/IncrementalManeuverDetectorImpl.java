@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
@@ -26,15 +24,16 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
     private static final double WIND_TOLERANCE_TO_IGNORE_FOR_MANEUVER_REUSE = 5.0;
     private static final double DOUGLAS_PEUCKER_FIXES_TIME_POINT_TOLERANCE_TO_IGNORE_FOR_MANEUVER_REUSE = 1;
-    private Map<Competitor, ManeuverDetectionResult> existingManeuverSpotsPerCompetitor = new ConcurrentHashMap<>();
 
-    public IncrementalManeuverDetectorImpl(TrackedRace trackedRace) {
-        super(trackedRace);
+    private volatile ManeuverDetectionResult lastManeuverDetectionResult = null;
+
+    public IncrementalManeuverDetectorImpl(TrackedRace trackedRace, Competitor competitor) {
+        super(trackedRace, competitor);
     }
 
     @Override
     public List<Maneuver> getAlreadyDetectedManeuvers(Competitor competitor) {
-        ManeuverDetectionResult lastManeuverDetectionResult = existingManeuverSpotsPerCompetitor.get(competitor);
+        ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
         if (lastManeuverDetectionResult != null) {
             return getAllManeuversFromManeuverSpots(lastManeuverDetectionResult.getManeuverSpots());
         }
@@ -42,22 +41,13 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     }
 
     @Override
-    public void clearState(Competitor competitor) {
-        existingManeuverSpotsPerCompetitor.remove(competitor);
-    }
-
-    @Override
     public void clearState() {
-        existingManeuverSpotsPerCompetitor.clear();
+        lastManeuverDetectionResult = null;
     }
 
     @Override
-    public List<Maneuver> detectManeuvers(Competitor competitor) throws NoWindException, NoFixesException {
-        // TODO approximated points need to have previous, current and next
-        // TODO iteratedButNotAnalysedPoints handling
-        // TODO Caching von ManeuverDetector attribut in TrackedRaceImpl?
-        // TODO Tests
-        TrackTimeInfo trackTimeInfo = getTrackingStartAndEndTimePoints(competitor);
+    public List<Maneuver> detectManeuvers() throws NoWindException, NoFixesException {
+        TrackTimeInfo trackTimeInfo = getTrackingStartAndEndTimePoints();
         if (trackTimeInfo != null) {
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
             TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
@@ -65,30 +55,28 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             Iterable<GPSFixMoving> douglasPeuckerFixes = trackedRace.approximate(competitor,
                     competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(),
                     earliestManeuverStart, latestManeuverEnd);
-            ManeuverDetectionResult lastManeuverDetectionResult = existingManeuverSpotsPerCompetitor.get(competitor);
+            ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
             List<ManeuverSpot> maneuverSpots;
             if (lastManeuverDetectionResult == null) {
-                maneuverSpots = detectManeuvers(competitor, douglasPeuckerFixes, earliestManeuverStart,
-                        latestManeuverEnd);
+                maneuverSpots = detectManeuvers(douglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd);
             } else {
-                maneuverSpots = detectManeuversIncrementally(competitor, trackTimeInfo, douglasPeuckerFixes,
+                maneuverSpots = detectManeuversIncrementally(trackTimeInfo, douglasPeuckerFixes,
                         lastManeuverDetectionResult);
             }
-            existingManeuverSpotsPerCompetitor.put(competitor,
-                    new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots));
+            this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots);
             return getAllManeuversFromManeuverSpots(maneuverSpots);
         }
         throw new NoFixesException();
     }
 
-    private List<ManeuverSpot> detectManeuversIncrementally(Competitor competitor, TrackTimeInfo trackTimeInfo,
+    private List<ManeuverSpot> detectManeuversIncrementally(TrackTimeInfo trackTimeInfo,
             Iterable<GPSFixMoving> approximatingFixesToAnalyze, ManeuverDetectionResult lastManeuverDetectionResult)
             throws NoWindException {
         TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
         TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
         TimePoint latestRawFixTimePoint = trackTimeInfo.getLatestRawFixTimePoint();
-        long maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis = getMaxDurationForDouglasPeuckerFixExtensionInManeuverAnalysis(
-                competitor).asMillis();
+        long maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis = getMaxDurationForDouglasPeuckerFixExtensionInManeuverAnalysis()
+                .asMillis();
         TimePoint latestRawFixTimePointOfPreviousManeuverDetectionIteration = lastManeuverDetectionResult
                 .getLatestRawFixTimePoint();
         List<ManeuverSpot> result = new ArrayList<>();
@@ -131,7 +119,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                             } else {
                                 // New wind information has been received which considerably differs from previous
                                 // maneuver spot calculation => recalculate existing maneuver spot maneuvers
-                                ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(competitor,
+                                ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(
                                         fixesGroupForManeuverSpotAnalysis,
                                         matchingManeuverSpotFromState.getManeuverSpotDirection(), earliestManeuverStart,
                                         latestManeuverEnd);
@@ -150,15 +138,15 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 // ManeuverDetectorImpl does
                 if (matchingManeuverSpotFromState == null) {
                     // Split douglas peucker fixes groups to identify maneuver spots
-                    NauticalSide courseChangeDirectionOnOriginalFixes = getCourseChangeDirectionAroundFix(competitor,
+                    NauticalSide courseChangeDirectionOnOriginalFixes = getCourseChangeDirectionAroundFix(
                             previous.getTimePoint(), current, next.getTimePoint());
-                    if (!fixesGroupForManeuverSpotAnalysis.isEmpty() && !checkDouglasPeuckerFixesGroupable(competitor,
-                            lastCourseChangeDirection, courseChangeDirectionOnOriginalFixes, previous, current)) {
+                    if (!fixesGroupForManeuverSpotAnalysis.isEmpty()
+                            && !checkDouglasPeuckerFixesGroupable(lastCourseChangeDirection,
+                                    courseChangeDirectionOnOriginalFixes, previous, current)) {
                         // current fix does not belong to the existing fixes group; determine maneuvers of recent fixes
                         // group, then start a new list
-                        ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(competitor,
-                                fixesGroupForManeuverSpotAnalysis, lastCourseChangeDirection, earliestManeuverStart,
-                                latestManeuverEnd);
+                        ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(fixesGroupForManeuverSpotAnalysis,
+                                lastCourseChangeDirection, earliestManeuverStart, latestManeuverEnd);
                         result.add(maneuverSpot);
                         fixesGroupForManeuverSpotAnalysis.clear();
                     }
@@ -208,7 +196,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 current = next;
             } while (approximationPointsIter.hasNext());
             if (!fixesGroupForManeuverSpotAnalysis.isEmpty()) {
-                ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(competitor, fixesGroupForManeuverSpotAnalysis,
+                ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(fixesGroupForManeuverSpotAnalysis,
                         lastCourseChangeDirection, earliestManeuverStart, latestManeuverEnd);
                 result.add(maneuverSpot);
             }
@@ -234,8 +222,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return true;
     }
 
-    private Duration getMaxDurationForDouglasPeuckerFixExtensionInManeuverAnalysis(Competitor competitor) {
-        Duration approximateManeuverDuration = getApproximateManeuverDuration(competitor);
+    private Duration getMaxDurationForDouglasPeuckerFixExtensionInManeuverAnalysis() {
+        Duration approximateManeuverDuration = getApproximateManeuverDuration();
         return getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(approximateManeuverDuration)
                 .plus(getMaxDurationForAfterManeuverSectionExtension(approximateManeuverDuration));
     }

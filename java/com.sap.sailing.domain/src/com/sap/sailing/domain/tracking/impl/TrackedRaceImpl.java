@@ -2645,12 +2645,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private List<Maneuver> computeManeuvers(Competitor competitor) throws NoWindException {
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
-        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(this);
+        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(this, competitor);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         List<Maneuver> result = null;
         try {
-            result = maneuverDetector.detectManeuvers(competitor);
+            result = maneuverDetector.detectManeuvers();
         } catch (NoWindException ex) {
             // Catching the NoWindException here without letting it propagate thru other handlers.
             // This is mainly to avoid having logs flooded with stack traces. It is safe to catch

@@ -9,8 +9,6 @@ public interface IncrementalManeuverDetector extends ManeuverDetector {
 
     List<Maneuver> getAlreadyDetectedManeuvers(Competitor competitor);
 
-    void clearState(Competitor competitor);
-
     void clearState();
 
 }
