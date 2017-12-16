@@ -10,13 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
-public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl {
+public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implements IncrementalManeuverDetector {
 
     private Map<Competitor, ManeuverDetectionResult> existingManeuverSpotsPerCompetitor = new ConcurrentHashMap<>();
 
