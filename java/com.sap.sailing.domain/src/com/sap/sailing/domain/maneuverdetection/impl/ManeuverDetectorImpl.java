@@ -139,8 +139,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     final GPSFixMoving lastRawFix = trackedRace.getTrack(competitor).getLastRawFix();
                     if (lastRawFix != null) {
                         latestRawFixTimePoint = lastRawFix.getTimePoint();
-                        return new TrackTimeInfo(earliestTrackRecord, latestTrackRecord, latestRawFixTimePoint);
                     }
+                }
+                if (latestRawFixTimePoint != null) {
+                    return new TrackTimeInfo(earliestTrackRecord, latestTrackRecord, latestRawFixTimePoint);
                 }
             }
         }
@@ -815,7 +817,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             CurveDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint latestManeuverEnd) {
         Duration approximateManeuverDuration = getApproximateManeuverDuration(competitor);
         Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration;
-        Duration maxDurationForSpeedTrendAnalysis = getMaxDurationForAfterManeuverSectionExtension(approximateManeuverDuration);
+        Duration maxDurationForSpeedTrendAnalysis = getMaxDurationForAfterManeuverSectionExtension(
+                approximateManeuverDuration);
         TimePoint earliestTimePointForSpeedTrendAnalysis = maneuverMainCurveDetails.getTimePointAfter();
         TimePoint latestTimePointForSpeedTrendAnalysis = earliestTimePointForSpeedTrendAnalysis
                 .plus(maxDurationForSpeedTrendAnalysis);
