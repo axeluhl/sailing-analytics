@@ -141,12 +141,14 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                     } else {
                         // check if the existing group is followed by an existing group, otherwise discard the existing
                         // maneuver spot, because it can possibly be extended by the next fix. Ignore this check if next
-                        // fix is the last fix. First and last fix never get to a maneuver spot.
+                        // fix is the last fix. First and last fix never get added to a maneuver spot.
                         ListIterator<ManeuverSpot> maneuverSpotIterator = getExistingManeuverSpotByFirstDouglasPeuckerFix(
                                 lastManeuverDetectionResult, lastManeuverSpotIteratorUsed, current);
                         if (maneuverSpotIterator != null || !approximationPointsIter.hasNext()) {
-                            nextExistingSpot = maneuverSpotIterator.next();
-                            lastManeuverSpotIteratorUsed = maneuverSpotIterator;
+                            if(maneuverSpotIterator != null) {
+                                nextExistingSpot = maneuverSpotIterator.next();
+                                lastManeuverSpotIteratorUsed = maneuverSpotIterator;
+                            }
                             if (checkManeuverSpotWindNearlySame(matchingManeuverSpotFromState)) {
                                 // We found an existing maneuver spot with similar fixes and estimated winds => reuse
                                 // existing maneuver spot
