@@ -87,9 +87,11 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
             TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
             TimePoint latestRawFixTimePoint = trackTimeInfo.getLatestRawFixTimePoint();
+            long startedAt = System.currentTimeMillis();
             Iterable<GPSFixMoving> douglasPeuckerFixes = trackedRace.approximate(competitor,
                     competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(),
                     earliestManeuverStart, latestManeuverEnd);
+            System.out.println((System.currentTimeMillis() - startedAt) + " ms for douglas peucker");
             ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
             List<ManeuverSpot> maneuverSpots;
             if (lastManeuverDetectionResult == null) {
@@ -123,20 +125,20 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             NauticalSide lastCourseChangeDirection = null;
             ManeuverSpot matchingManeuverSpotFromState = null;
             Iterator<GPSFixMoving> matchingFixesGroupFromStateIterator = null;
-            ListIterator<ManeuverSpot> lastManeuverSpotIteratorUsed = null;
+            ListIterator<ManeuverSpot> lastManeuverSpotIteratorUsed = getExistingManeuverSpotByFirstDouglasPeuckerFix(
+                    lastManeuverDetectionResult, null, current);
+            ManeuverSpot nextExistingSpot = lastManeuverSpotIteratorUsed != null ? lastManeuverSpotIteratorUsed.next() : null;
             do {
                 GPSFixMoving next = approximationPointsIter.next();
-                ManeuverSpot nextExistingSpot = null;
                 // check if we have previously found a similar fixes group from state
                 if (matchingManeuverSpotFromState != null) {
-                    boolean resetMatchingFixesGroup = false;
                     if (matchingFixesGroupFromStateIterator.hasNext()) {
                         GPSFixMoving existingDouglasPeuckerFix = matchingFixesGroupFromStateIterator.next();
                         if (!checkDouglasPeuckerFixesNearlySame(existingDouglasPeuckerFix, current)) {
                             // existing maneuver spot does not match with the fixes sequence in this run => discard
                             // existing maneuver spot and process fixesGroupForManeuverSpotAnalysis normally like in
                             // ManeuverDetectorImpl
-                            resetMatchingFixesGroup = true;
+                            matchingManeuverSpotFromState = null;
                         }
                     } else {
                         // check if the existing group is followed by an existing group, otherwise discard the existing
@@ -164,16 +166,12 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                             }
                             fixesGroupForManeuverSpotAnalysis.clear();
                         }
-                        resetMatchingFixesGroup = true;
-                    }
-                    if (resetMatchingFixesGroup) {
-                        lastCourseChangeDirection = matchingManeuverSpotFromState.getManeuverSpotDirection();
                         matchingManeuverSpotFromState = null;
                     }
                 }
                 // If we are not matching the fixes with existing fixes group, analyze fixes grouping normally like
                 // ManeuverDetectorImpl does
-                if (matchingManeuverSpotFromState == null) {
+                if (matchingManeuverSpotFromState == null && nextExistingSpot == null) {
                     // Split douglas peucker fixes groups to identify maneuver spots
                     NauticalSide courseChangeDirectionOnOriginalFixes = getCourseChangeDirectionAroundFix(
                             previous.getTimePoint(), current, next.getTimePoint());
@@ -227,6 +225,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                             // call => move iteration cursor to next
                             matchingFixesGroupFromStateIterator.next();
                         }
+                        lastCourseChangeDirection = maneuverSpot.getManeuverSpotDirection();
                     }
                 }
                 previous = current;

@@ -110,9 +110,10 @@ import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
+import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -691,10 +692,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
+                    private Map<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitor = new ConcurrentHashMap<>();
+
                     @Override
-                    public List<Maneuver> computeCacheUpdate(Competitor competitor,
-                            EmptyUpdateInterval updateInterval) throws NoWindException {
-                        List<Maneuver> maneuvers = computeManeuvers(competitor);
+                    public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
+                            throws NoWindException {
+                        IncrementalManeuverDetector maneuverDetector = maneuverDetectorPerCompetitor.get(competitor);
+                        if (maneuverDetector == null) {
+                            maneuverDetector = new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor);
+                            maneuverDetectorPerCompetitor.put(competitor, maneuverDetector);
+                        }
+                        List<Maneuver> maneuvers = computeManeuvers(competitor, maneuverDetector);
                         return maneuvers;
                     }
                 }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
@@ -2643,9 +2651,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
-    private List<Maneuver> computeManeuvers(Competitor competitor) throws NoWindException {
+    private List<Maneuver> computeManeuvers(Competitor competitor, ManeuverDetector maneuverDetector) throws NoWindException {
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
-        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(this, competitor);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         List<Maneuver> result = null;

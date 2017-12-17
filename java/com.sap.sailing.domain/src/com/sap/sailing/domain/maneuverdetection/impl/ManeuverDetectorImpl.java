@@ -393,7 +393,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         CurveDetailsWithBearingSteps maneuverMainCurveDetails = computeManeuverMainCurveDetails(
                 earliestTimePointBeforeManeuver, latestTimePointAfterManeuver, maneuverDirection);
         if (maneuverMainCurveDetails == null) {
-            return new ManeuverSpot(douglasPeuckerFixesGroup, maneuverDirection, maneuvers, null);
+            return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers, null);
         }
         CurveDetails maneuverDetails = computeManeuverDetails(maneuverMainCurveDetails, earliestManeuverStart,
                 latestManeuverEnd);
@@ -569,7 +569,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuvers.add(maneuver);
             }
         }
-        return new ManeuverSpot(douglasPeuckerFixesGroup, maneuverDirection, maneuvers, new WindMeasurement(
+        return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers, new WindMeasurement(
                 maneuverDetails.getTimePoint(), maneuverPosition, wind == null ? null : wind.getBearing()));
     }
 
