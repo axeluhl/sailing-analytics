@@ -39,7 +39,7 @@ public class CurveEnteringAndExitingComputationTest {
 
     @Test
     public void testMainCurveSearch() {
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null, null);
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl();
         // Test that bearing steps with continuous course change into the target direction wraps the whole time range of
         // analyzed steps.
         SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
@@ -148,7 +148,7 @@ public class CurveEnteringAndExitingComputationTest {
 
     @Test
     public void testSpeedMaximaSearch() {
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null, null);
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl();
         // Test with time forward call that speed steps with continuous speed increase wraps the whole time range of
         // analyzed steps.
         SpeedWithBearingStepsIterable steps = constructStepsWithSpeeds(0, 1, 3, 9, 10, 12);
@@ -209,7 +209,7 @@ public class CurveEnteringAndExitingComputationTest {
 
     @Test
     public void testStableBearingSearch() {
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(null, null);
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl();
         // Test time forward
         SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 2, 5, 4, 10, 12);
         CurveBoundaryExtension extension = maneuverDetector.findStableBearingWithMaxAbsCourseChangeSpeed(steps, false,
@@ -249,7 +249,7 @@ public class CurveEnteringAndExitingComputationTest {
         assertEquals(constructTimePoint(0), extension.getExtensionTimePoint());
         assertEquals(0, extension.getCourseChangeInDegreesWithinExtensionArea(), maxDeltaForDouble);
     }
-    
+
     private SpeedWithBearingStepsIterable constructStepsWithBearings(double... bearingsInDegrees) {
         List<SpeedWithBearingStep> steps = new ArrayList<>(bearingsInDegrees.length);
         SpeedWithBearingStep previousStep = null;

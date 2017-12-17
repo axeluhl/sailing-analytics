@@ -45,6 +45,13 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * The result of previous maneuver detection, or {@code null} if not performed until yet
      */
     private volatile ManeuverDetectionResult lastManeuverDetectionResult = null;
+    
+    /**
+     * Constructor for unit tests only.
+     */
+    public IncrementalManeuverDetectorImpl() {
+        super();
+    }
 
     /**
      * Constructs incremental maneuver detector which is supposed to be used for maneuver detection within the provided

@@ -82,11 +82,20 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     /**
      * The track of competitor
      */
-    protected GPSFixTrack<Competitor, GPSFixMoving> track;
+    protected final GPSFixTrack<Competitor, GPSFixMoving> track;
 
     /**
-     * Constructs maneuver detector which is supposed to be used for maneuver detection within the provided tracked
-     * race for provided competitor.
+     * Constructor for unit tests only.
+     */
+    public ManeuverDetectorImpl() {
+        trackedRace = null;
+        competitor = null;
+        track = null;
+    }
+
+    /**
+     * Constructs maneuver detector which is supposed to be used for maneuver detection within the provided tracked race
+     * for provided competitor.
      * 
      * @param trackedRace
      *            The tracked race whose maneuvers are supposed to be detected
