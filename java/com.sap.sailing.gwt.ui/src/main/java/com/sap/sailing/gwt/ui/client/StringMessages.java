@@ -253,6 +253,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pairingListTemplate();
     String printHint();
     String blockedApplyButton();
+    String multiplierInfo();
     String settingsForComponent(String localizedComponentName);
     String noEventsFound();
     String noEventSelected();
