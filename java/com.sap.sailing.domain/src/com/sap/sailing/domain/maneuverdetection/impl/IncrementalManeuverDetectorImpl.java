@@ -45,7 +45,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * The result of previous maneuver detection, or {@code null} if not performed until yet
      */
     private volatile ManeuverDetectionResult lastManeuverDetectionResult = null;
-    
+
     /**
      * Constructor for unit tests only.
      */
@@ -127,7 +127,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             Iterator<GPSFixMoving> matchingFixesGroupFromStateIterator = null;
             ListIterator<ManeuverSpot> lastManeuverSpotIteratorUsed = getExistingManeuverSpotByFirstDouglasPeuckerFix(
                     lastManeuverDetectionResult, null, current);
-            ManeuverSpot nextExistingSpot = lastManeuverSpotIteratorUsed != null ? lastManeuverSpotIteratorUsed.next() : null;
+            ManeuverSpot nextExistingSpot = lastManeuverSpotIteratorUsed != null ? lastManeuverSpotIteratorUsed.next()
+                    : null;
             do {
                 GPSFixMoving next = approximationPointsIter.next();
                 // check if we have previously found a similar fixes group from state
@@ -142,12 +143,11 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                         }
                     } else {
                         // check if the existing group is followed by an existing group, otherwise discard the existing
-                        // maneuver spot, because it can possibly be extended by the next fix. Ignore this check if next
-                        // fix is the last fix. First and last fix never get added to a maneuver spot.
+                        // maneuver spot, because it can possibly be extended by the next fix.
                         ListIterator<ManeuverSpot> maneuverSpotIterator = getExistingManeuverSpotByFirstDouglasPeuckerFix(
                                 lastManeuverDetectionResult, lastManeuverSpotIteratorUsed, current);
-                        if (maneuverSpotIterator != null || !approximationPointsIter.hasNext()) {
-                            if(maneuverSpotIterator != null) {
+                        if (maneuverSpotIterator != null) {
+                            if (maneuverSpotIterator != null) {
                                 nextExistingSpot = maneuverSpotIterator.next();
                                 lastManeuverSpotIteratorUsed = maneuverSpotIterator;
                             }
@@ -307,8 +307,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * Tries to get an already processed maneuver spot from previous calls of {@link #detectManeuvers()} which starts
      * with a douglas peucker fix similar to the provided {@code newDouglasPeuckerFix}. This method was designed to run
      * within loops of {@link #detectManeuversIncrementally(TrackTimeInfo, Iterable, ManeuverDetectionResult)}. In order
-     * to prevent log(n) iteration complexity, the method returns a {@code ListIterator} which is supposed to be used to
-     * retrieve the located existing maneuver spot, as well as to provide the same iterator for the following call of
+     * to prevent squared iteration complexity, the method returns a {@code ListIterator} which is supposed to be used
+     * to retrieve the located existing maneuver spot, as well as to provide the same iterator for the following call of
      * this method within following iterations, in order to resume the search iteration from the position of the
      * previously retrieved maneuver spot.
      * 
