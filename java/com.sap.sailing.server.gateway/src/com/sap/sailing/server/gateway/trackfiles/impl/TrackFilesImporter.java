@@ -51,10 +51,10 @@ public class TrackFilesImporter {
             preferredImporter = serviceFinderFactory.createServiceFinder(GPSFixImporter.class)
                     .findService(prefImporterType);
         }
-        importFiles(files, jsonResult, preferredImporter);
+        importFilesWithPreferredImporter(files, jsonResult, preferredImporter);
     }
 
-    void importFiles(Iterable<Pair<String, FileItem>> files, ImportResultDTO jsonResult,
+    void importFilesWithPreferredImporter(Iterable<Pair<String, FileItem>> files, ImportResultDTO jsonResult,
             GPSFixImporter preferredImporter) throws IOException {
         for (Pair<String, FileItem> pair : files) {
             final String fileName = pair.getA();

@@ -163,7 +163,7 @@ public class GPSFixImportTest {
             }
         };
         //The preferred importer will fail, however the default importer should succeed after
-        importer.importFiles(Arrays.asList(new Pair<>("test.gpx", fi)), holder, new AlwaysFailingGPSFixImporter(-1));
+        importer.importFilesWithPreferredImporter(Arrays.asList(new Pair<>("test.gpx", fi)), holder, new AlwaysFailingGPSFixImporter(-1));
         assertFalse(failed.get());
     }
 }
