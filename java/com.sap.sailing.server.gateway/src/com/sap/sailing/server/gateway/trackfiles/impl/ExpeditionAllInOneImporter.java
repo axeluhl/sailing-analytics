@@ -1,9 +1,12 @@
 package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -26,15 +29,20 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
+import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
+import com.sap.sailing.server.gateway.windimport.expedition.WindImporter;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
@@ -80,6 +88,8 @@ public class ExpeditionAllInOneImporter {
         // TODO provide boat class suggest in the UI?
         Double buoyZoneRadiusInHullLengths = 3.0;
         String boatClassName = null;
+        // TODO proper id
+        String windSourceId = filename;
 
         // TODO guess venue based on the reverse geocoder?
         String venueName = filename;
@@ -153,14 +163,17 @@ public class ExpeditionAllInOneImporter {
             // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
             raceHandle.getRace();
 
-            TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+            DynamicTrackedRace trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
             
-            // TODO import wind here!
+            WindImportResult windImportResult = new AbstractWindImporter.WindImportResult();
+            WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceId);
+            Map<InputStream, String> streamsWithFilenames = new HashMap<>();
+            streamsWithFilenames.put(fileItem.getInputStream(), filename);
+            new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, Arrays.asList(trackedRace), streamsWithFilenames);
 
             return new ImporterResult(event.getId(), regattaNameAndleaderboardName, trackedRace.getRaceIdentifier());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 }
