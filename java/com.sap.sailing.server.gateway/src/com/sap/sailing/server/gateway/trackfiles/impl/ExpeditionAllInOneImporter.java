@@ -49,10 +49,10 @@ public class ExpeditionAllInOneImporter {
     private final BundleContext context;
 
     public static class ImporterResult {
-        private final UUID eventId;
-        private final String leaderboardName;
-        private final String regattaName;
-        private final String raceName;
+        final UUID eventId;
+        final String leaderboardName;
+        final String regattaName;
+        final String raceName;
 
         public ImporterResult(UUID eventId, String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
             this.eventId = eventId;
