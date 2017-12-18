@@ -57,6 +57,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
+import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -89,7 +90,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS = "boatClass";
 
-    private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition-full-import";
+    private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
@@ -450,6 +451,14 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         formPanel.setMethod(FormPanel.METHOD_POST);
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT);
+        formPanel.addSubmitCompleteHandler(event -> {
+            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
+            Window.alert(response.getEventId() + "-" + response.getLeaderboardName() + "-" + response.getRegattaName()
+                    + "-" + response.getRaceName());
+            new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
+                    response.getLeaderboardName(), Collections.emptyList(), Collections.emptyList(), "", sailingService,
+                    errorReporter, stringMessages);
+        });
         rootPanel.add(formPanel);
         final VerticalPanel contentPanel = new VerticalPanel();
         formPanel.add(contentPanel);
