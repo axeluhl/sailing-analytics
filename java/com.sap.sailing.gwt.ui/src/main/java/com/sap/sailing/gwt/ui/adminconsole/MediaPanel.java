@@ -475,9 +475,9 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     }
 
     private void addUrlMediaTrack() {
-        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(getDefaultStartTime(),
-                stringMessages, sailingService, errorReporter, regattaRefresher, regattasDisplayers,
-                new DialogCallback<MediaTrack>() {
+        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaService,
+                getDefaultStartTime(), stringMessages, sailingService, errorReporter, regattaRefresher,
+                regattasDisplayers, new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {

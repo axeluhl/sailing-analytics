@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
-import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.popup.VideoJSWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
@@ -194,7 +194,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private MediaTrack getDefaultVideo() {
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+            if (mediaTrack.mimeType != null && MediaType.video.equals(mediaTrack.mimeType.mediaType)
+                    && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
             }
         }
@@ -480,7 +481,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 if (videoTrack.isYoutube()) {
                     videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
                 } else {
-                    videoContainer = new VideoWindowPlayer(videoTrack, playerCloseListener);
+                    videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener);
                 }
                 playerCloseListener.setVideoContainer(videoContainer);
                 closeFloatingVideo(videoTrack);
@@ -493,7 +494,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
-            videoPlayer = new VideoHtmlPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
+            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer);
         }
         return videoContainerFactory.createVideoContainer(videoPlayer, showSynchControls, getMediaService(), errorReporter,
                 playerCloseListener, popoutListener);
@@ -529,17 +530,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         VideoContainer removedVideoContainer = activeVideoContainers.remove(videoTrack);
         if (removedVideoContainer != null) {
             removedVideoContainer.shutDown();
-            if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) { // in case this video
-                                                                                                // has been the sound
-                                                                                                // source, replace the
-                                                                                                // video player with a
-                                                                                                // dedicated audio
-                                                                                                // player
-                if (videoTrack.isYoutube()) {
-                    assignNewAudioPlayer(null);
-                } else {
-                    assignNewAudioPlayer(videoTrack);
-                }
+            if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) {
+                assignNewAudioPlayer(null);
             }
             notifyStateChange();
         } else {
@@ -614,8 +606,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public void addMediaTrack() {
         TimePoint raceStartTime = getRaceStartTime();
         TimePoint defaultStartTime = raceStartTime;
-        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaPlayerManagerComponent.this.stringMessages,
-                this.getCurrentRace(), new DialogCallback<MediaTrack>() {
+        NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
+                MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
+                new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {
