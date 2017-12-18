@@ -2008,4 +2008,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String totalDistanceFoiledInMeters();
     String totalDurationFoiledInSecondsTooltip();
     String totalDistanceFoiledInMetersTooltip();
+    String threeSixtyVideoHint();
+    String processingMP4();
+    String resetStartTimeToDefault();
 }

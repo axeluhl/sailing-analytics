@@ -33,7 +33,8 @@ public interface BaseDoubleVectorFixImporter {
      * @throws IOException
      *             if there is a problem while reading the file
      */
-    void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName, boolean downsample)
+    boolean importFixes(InputStream inputStream, Callback callback, String filename, String sourceName,
+            boolean downsample)
             throws FormatNotSupportedException, IOException;
 
     /**

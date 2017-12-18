@@ -9,7 +9,10 @@ import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
@@ -17,8 +20,9 @@ import com.sap.sse.common.media.MimeType;
 /**
  * video.js (http://videojs.com/) wrapper as GWT widget.
  */
-public class VideoJSPlayer extends Widget {
+public class VideoJSPlayer extends Widget implements RequiresResize {
     private static VideoJSPlayerUiBinder uiBinder = GWT.create(VideoJSPlayerUiBinder.class);
+    private static final int RESIZE_CHECK = 250;
 
     interface VideoJSPlayerUiBinder extends UiBinder<Element, VideoJSPlayer> {
     }
@@ -29,9 +33,8 @@ public class VideoJSPlayer extends Widget {
     private JavaScriptObject player;
     private boolean autoplay;
 
-    public VideoJSPlayer() {
-        this(true, false);
-    }
+    private Boolean panorama;
+    private Timer resizeChecker;
 
     public HandlerRegistration addPlayHandler(PlayEvent.Handler handler) {
         return addHandler(handler, PlayEvent.getType());
@@ -49,9 +52,25 @@ public class VideoJSPlayer extends Widget {
             videoElement.addClassName("video-js-fullscreen");
         }
         videoElement.setAttribute("controls", "");
+
+        resizeChecker = new com.google.gwt.user.client.Timer() {
+
+            @Override
+            public void run() {
+                onResize();
+            }
+        };
     }
 
     public void setVideo(MimeType mimeType, String source) {
+        this.panorama = mimeType.isPanorama();
+        if (this.panorama) {
+            videoElement.setAttribute("crossorigin", "anonymous");
+        }
+        if (isAttached()) {
+            _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
+            resizeChecker.scheduleRepeating(RESIZE_CHECK);
+        }
         if (mimeType == null || mimeType.mediaType != MediaType.video) {
             return;
         }
@@ -71,22 +90,35 @@ public class VideoJSPlayer extends Widget {
         }
     }
     
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        if (panorama != null) {
+            _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
+            resizeChecker.scheduleRepeating(RESIZE_CHECK);
+        }
+    }
+    
     public VideoElement getVideoElement() {
         return videoElement;
     }
     
-    @Override
-    protected void onLoad() {
-        _onLoad(autoplay);
+    public int getDuration() {
+        if (player == null) {
+            return 0;
+        } else {
+            return getNativeDuration();
+        }
     }
-
+    
     /**
      * Get the length in time of the video in seconds
      *
      * @return duration in seconds
      */
-    public native int getDuration() /*-{
-        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.duration();
+    private native int getNativeDuration() /*-{
+        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
+        return player.duration();
     }-*/;
 
     /**
@@ -94,7 +126,15 @@ public class VideoJSPlayer extends Widget {
      * 
      * @return duration in seconds
      */
-    public native int getCurrentTime() /*-{
+    public int getCurrentTime() {
+        if (player == null) {
+            return 0;
+        } else {
+            return getNativeCurrentTime();
+        }
+    }
+    
+    private native int getNativeCurrentTime() /*-{
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime();
     }-*/;
 
@@ -103,11 +143,33 @@ public class VideoJSPlayer extends Widget {
      * 
      * @return duration in seconds
      */
-    public native void setCurrentTime(int currentTime) /*-{
+    public void setCurrentTime(int currentTime) {
+        if (player == null) {
+            return;
+        } else {
+            setNativeCurrentTime(currentTime);
+        }
+    }
+
+    @Override
+    protected void onDetach() {
+        super.onDetach();
+        resizeChecker.cancel();
+    }
+    
+    private native void setNativeCurrentTime(int currentTime) /*-{
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
     }-*/;
     
-    public native void play() /*-{
+    public void play() {
+        if (player == null) {
+            autoplay = true;
+        } else {
+            nativePlay();
+        }
+    }
+    
+    private native void nativePlay() /*-{
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.play();
     }-*/;
     
@@ -138,7 +200,7 @@ public class VideoJSPlayer extends Widget {
     private void onPlay() {
         fireEvent(new PlayEvent());
     }
-    
+
     private void onPause() {
         fireEvent(new PauseEvent());
     }
@@ -148,13 +210,13 @@ public class VideoJSPlayer extends Widget {
      *
      * @param uniqueId
      */
-    native void _onLoad(boolean autoplay) /*-{
+    native void _onLoad(boolean autoplay, boolean withPanorama, String messageThreeSixty) /*-{
         var that = this;
+        var elemid = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId;
+        
         var player = $wnd.videojs(
-            this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId,
+            elemid,
             {
-                "width" : "auto",
-                "height" : "auto",
                 "playsInline" : true,
                 "customControlsOnMobile" : true
             }).ready(function() {
@@ -170,6 +232,18 @@ public class VideoJSPlayer extends Widget {
                     this.play();
                 }
             });
+       if(withPanorama){     
+           player.panorama({
+              showNotice:true,
+              autoMobileOrientation: true,
+              clickAndDrag: true,
+              clickToToggle: false,
+              NoticeMessage: messageThreeSixty,
+              backToVerticalCenter: false,
+              backToHorizonCenter: false,
+            });
+        }
+        
         this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
     }-*/;
     
@@ -177,4 +251,69 @@ public class VideoJSPlayer extends Widget {
        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
        player.dispose();     
     }-*/;
+
+    private native void handleResize() /*-{
+        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
+        var canvas = player.getChild('Canvas');
+        if(canvas){
+            canvas.handleResize();
+        }
+    }-*/;
+    
+    public native void pause() /*-{
+        if(this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
+            return;
+        }
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.pause();
+    }-*/;
+
+    public int getVideoWidth() {
+        return -1;
+    }
+
+    public int getVideoHeight() {
+        return -1;
+    }
+
+    public void setMuted(boolean muted) {
+        if (muted) {
+            setVolume(0f);
+        } else {
+            setVolume(1f);
+        }
+    }
+
+    public void setVolume(float volume) {
+        if (player != null) {
+            setVolumeNative(volume);
+        }
+    }
+    
+    private native void setVolumeNative(float volume) /*-{
+        this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.volume(volume);
+    }-*/;
+
+    public void setPlaybackRate(double newPlaySpeedFactor) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setControllsVisible(boolean isVisible) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onResize() {
+        if (player != null) {
+            handleResize();
+        }
+    }
+
+    public void disposeIf2D() {
+        if (!panorama) {
+            _onUnload();
+        }
+    }
+
 }

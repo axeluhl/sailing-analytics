@@ -1,4 +1,4 @@
-﻿# Welcome to the SAP Sailing Wiki
+﻿﻿# Welcome to the SAP Sailing Wiki
 
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
@@ -114,6 +114,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Setup
 
 * [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
+* [[Setup local webserver to serve 360° videos|wiki/howto/setup/webserver/chrome-webserver]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
 ### Miscellaneous
