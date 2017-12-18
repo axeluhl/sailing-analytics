@@ -233,9 +233,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         for (int z = 1; z < count.length; z++) {
             count[z] += count[z - 1];
         }
+        //TODO change to for each
         for (int z = allSeeds.length - 1; z >= 0; z--) {
-            output[count[allSeeds[z][i]] - 1] = allSeeds[z];
-            count[allSeeds[z][i]]--;
+            output[--count[allSeeds[z][i]]] = allSeeds[z];
         }
         return output;
     }

@@ -140,32 +140,24 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             getRightButtonPannel().add(label);
         }
         applyToRacelogButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 sailingService.fillRaceLogsFromPairingListTemplate(leaderboardDTO.getName(),
                         template.getFlightMultiplier(), template.getSelectedFlightNames(), new AsyncCallback<Void>() {
-
                             @Override
-                            public void onSuccess(Void result) {
-                                System.out.println("it worked ;-)");
-                            }
-
+                            public void onSuccess(Void result) { /*TODO: log successfull*/}
                             @Override
                             public void onFailure(Throwable caught) {
                                 caught.printStackTrace();
                             }
                         });
             }
-
         });
         cSVExportButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 downloadPairingListTemplate(getCSVFromPairingListTemplate(getResult().getPairingListTemplate()));
             }
-
         });
         printViewButton.addClickHandler(new ClickHandler() {
 
@@ -178,6 +170,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         });
     }
 
+    //TODO set Anchor link to Button (see link with settings under configure url)
     private native void downloadPairingListTemplate(String pairingListCSV)/*-{
 		var dummy = document.createElement('a');
 		dummy.setAttribute('href', 'data:text/plain;charset=utf-8,'

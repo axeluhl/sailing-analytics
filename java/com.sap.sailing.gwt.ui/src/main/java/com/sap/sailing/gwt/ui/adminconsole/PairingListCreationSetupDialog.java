@@ -166,15 +166,14 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         return dto;
     }
 
-    public void setDefaultCompetitorCount(int competitorCount) {
+    public void setDefaultCompetitorCount(final int competitorCount) {
         if (this.competitorCountTextBox.getValue() == 0) {
             this.competitorCountTextBox.setValue(competitorCount);
             this.validateAndUpdate();
         }
     }
 
-    // filter medal race
-    private Iterable<String> getSeriesNamesFromAllRaces(Iterable<RaceColumnDTO> raceColumns) {
+    private Iterable<String> getSeriesNamesFromAllRaces(final Iterable<RaceColumnDTO> raceColumns) {
         List<String> result = new ArrayList<>();
         for (RaceColumnDTO raceColumn : raceColumns) {
             if (raceColumn.isMedalRace()) {
@@ -190,7 +189,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         return result;
     }
 
-    private RaceColumnDTO getOneRaceFromSeriesName(String seriesName, Iterable<RaceColumnDTO> raceColumns) {
+    private RaceColumnDTO getOneRaceFromSeriesName(final String seriesName, final Iterable<RaceColumnDTO> raceColumns) {
         for (RaceColumnDTO raceColumn : raceColumns) {
             if (!raceColumn.isMedalRace() && seriesName.equals(raceColumn.getSeriesName())) {
                 return raceColumn;
@@ -199,7 +198,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         return null;
     }
 
-    private List<String> getRaceColumnNamesFromSeriesName(String seriesName, Iterable<RaceColumnDTO> raceColumns) {
+    private List<String> getRaceColumnNamesFromSeriesName(final String seriesName, final Iterable<RaceColumnDTO> raceColumns) {
         List<String> result = new ArrayList<>();
         for (RaceColumnDTO raceColumn : raceColumns) {
             if (!raceColumn.isMedalRace() && seriesName.equals(raceColumn.getSeriesName())) {
@@ -219,7 +218,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         return result;
     }
 
-    private void disableSelectedSeriesCheckBoxes(StrippedLeaderboardDTO leaderboardDTO) {
+    private void disableSelectedSeriesCheckBoxes(final StrippedLeaderboardDTO leaderboardDTO) {
         Iterable<CheckBox> boxes = getCheckedSelectedCheckBoxes();
         if (Util.size(boxes) > 1) {
 

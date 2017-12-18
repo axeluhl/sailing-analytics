@@ -6827,7 +6827,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Iterable<String> selectedFlightNames) 
             throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
         List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
         for (String flightName : selectedFlightNames) {
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -6836,20 +6835,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        
         PairingListTemplate pairingListTemplate = getService().createPairingListFromRegatta(leaderboardName, 
                 Util.size(leaderboard.getCompetitors()), flightMultiplier, Util.size(selectedRaces));
-
         PairingList<RaceColumn, Fleet, Competitor> pairingList = 
                 getService().getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
-        
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
-        
         ColorMap<BoatDTO> colorMap = new ColorMapImpl<BoatDTO>();
-        
         List<BoatDTO> boats = new ArrayList<>();
         int boatIndex;
-        
         for (RaceColumn raceColumn : selectedRaces) {
             //TODO change flights to fleets
             List<List<Pair<CompetitorDTO, BoatDTO>>>  flights = new ArrayList<>();
@@ -6888,7 +6881,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public PairingListDTO getPairingListFromRaceLogs(String leaderboardName) throws NotFoundException {
+    public PairingListDTO getPairingListFromRaceLogs(final String leaderboardName) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
@@ -6948,21 +6941,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier, final Iterable<String> selectedFlightNames)
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
-        
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-       
         PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, flightMultiplier, selectedFlightNames);
-        
         int flightCount = 0;
         int groupCount = 0;
-
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (Util.contains(selectedFlightNames, raceColumn.getName())) {
                 groupCount = 0;
                 for (Fleet fleet : raceColumn.getFleets()) {
-
                     raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
-
                     Set<CompetitorDTO> competitors = new HashSet<>();
                     List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
                             .get(flightCount).get(groupCount);
@@ -6972,6 +6959,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                     }
                     // TODO set boat and competitors in race logs (bug2822)
+                    //TODO add Javadoc to setCompetitorRegistrationsInRacelog
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), competitors);
                     groupCount++;

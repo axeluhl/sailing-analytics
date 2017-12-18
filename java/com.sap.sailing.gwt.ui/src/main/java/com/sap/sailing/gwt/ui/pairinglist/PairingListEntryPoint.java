@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.pairinglist;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
@@ -78,6 +79,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                         btn.addClickHandler(new ClickHandler() {
                             @Override
                             public void onClick(ClickEvent event) {
+                                //TODO use safe html encoding
                                 printPairingListGrid("<h2>" + pairingListContextDefinition.getLeaderboardName()
                                         + "</h2>" + pairingListPanel.asWidget().getElement().getInnerHTML());
                             }
@@ -119,33 +121,25 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                     boat.getColor().getAsHtml());
             boatIndex++;
         }
-        
         String color = "";
-
         pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor("#cecece");
         pairingListGrid.getCellFormatter().getElement(0, 1).getStyle().setBackgroundColor("#cecece");
-
         for (List<List<Pair<CompetitorDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
-
             color = (color.equals("none") ? "#cecece" : "none");
-
             // setting up race
             int currentRaceInGridCells = (((flightIndexInGrid - 1) * groupCount) + 1);
             pairingListGrid.setWidget(currentRaceInGridCells, 0,
                     new Label(pairingListDTO.getRaceColumnNames().get(flightIndexInGrid - 1)));
-
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle().setPadding(5, Unit.PX);
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle()
                     .setBackgroundColor(color);
-
             for (List<Pair<CompetitorDTO, BoatDTO>> group : flight) {
                 // setting up fleet
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
-
+                //TODO add column for race 1-45 (default)
                 pairingListGrid.setWidget(groupIndex, 1,
                         new Label(getStringMessages().fleet() + " " + String.valueOf(groupIndex)));
-
                 // setting up fleets style
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
@@ -199,8 +193,16 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
         return pairingListPanel;
     }
-
+    
+    
+    
+    private void m() {
+        Document.
+    }
+    
+    //TODO search for gwt API (Window, Document)
     private native void printPairingListGrid(String pageHTMLContent) /*-{
+		
 		var frame = $doc.getElementById('__gwt_historyFrame');
 		frame = frame.contentWindow;
 		var doc = frame.document;

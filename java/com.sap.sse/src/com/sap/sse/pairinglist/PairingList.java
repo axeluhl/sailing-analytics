@@ -6,6 +6,7 @@ package com.sap.sse.pairinglist;
  * <code>CompetitonFormat</code>.
  */
 public interface PairingList<Flight, Group, Competitor> {
+    //TODO specify Javadoc for Boat-Competitor association
     /**
      * Returns the Competitor objects in a group of a specific flight
      * 
