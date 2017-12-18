@@ -6888,7 +6888,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public PairingListDTO getPairingListFromRaceLogs(String leaderboardName) throws NotFoundException {
+    public PairingListDTO getPairingListFromRaceLogs(String leaderboardName, final Iterable<String> selectedFlightNames) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
@@ -6899,7 +6899,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         int boatIndex;
         
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if (raceColumn.isMedalRace()) {
+            if (raceColumn.isMedalRace() || !Util.contains(selectedFlightNames, raceColumn.getName())) {
                 continue;
             }
             List<List<Pair<CompetitorDTO, BoatDTO>>> flights = new ArrayList<>();
@@ -6948,7 +6948,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                     raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
 
-                    Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>();
+                    Set<CompetitorDTO> competitors = new HashSet<>();
                     List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
                             .get(flightCount).get(groupCount);
                     for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
@@ -6962,6 +6962,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     groupCount++;
                 }
                 flightCount++;
+            } else {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
+                            fleet.getName(), new HashSet<CompetitorDTO>());
+                }
             }
         }
     }

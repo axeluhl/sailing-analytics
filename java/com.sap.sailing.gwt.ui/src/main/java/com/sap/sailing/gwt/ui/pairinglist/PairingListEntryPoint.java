@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthenticat
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
@@ -68,7 +69,8 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         contentPanel.getElement().getStyle().setProperty("marginBottom", "15px");
         scrollPanel.add(contentPanel);
 
-        sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(), new AsyncCallback<PairingListDTO>() {
+        sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(), 
+                pairingListContextDefinition.getSelectedFlightNames(), new AsyncCallback<PairingListDTO>() {
 
         /*
         sailingService.getPairingListFromTemplate(pairingListContextDefinition.getLeaderboardName(),
@@ -137,7 +139,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             // setting up race
             int currentRaceInGridCells = (((flightIndexInGrid - 1) * groupCount) + 1);
             pairingListGrid.setWidget(currentRaceInGridCells, 0,
-                    new Label(getStringMessages().race() + " " + String.valueOf(flightIndexInGrid)));
+                    new Label(Util.get(pairingListContextDefinition.getSelectedFlightNames(), flightIndexInGrid - 1)));
 
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle().setPadding(5, Unit.PX);
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle()
