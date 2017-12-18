@@ -48,7 +48,6 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         this.autoplay = autoplay;
         setElement(uiBinder.createAndBindUi(this));
         videoElement.setId(elementId = "videojs_" + Document.get().createUniqueId());
-        videoElement.setAttribute("crossorigin", "anonymous");
         if (fullHeightWidth) {
             videoElement.addClassName("video-js-fullscreen");
         }
@@ -65,6 +64,9 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
 
     public void setVideo(MimeType mimeType, String source) {
         this.panorama = mimeType.isPanorama();
+        if (this.panorama) {
+            videoElement.setAttribute("crossorigin", "anonymous");
+        }
         if (isAttached()) {
             _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
             resizeChecker.scheduleRepeating(RESIZE_CHECK);
