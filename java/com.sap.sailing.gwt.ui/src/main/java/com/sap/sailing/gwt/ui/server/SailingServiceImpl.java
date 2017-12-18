@@ -6888,18 +6888,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public PairingListDTO getPairingListFromRaceLogs(String leaderboardName, final Iterable<String> selectedFlightNames) throws NotFoundException {
+    public PairingListDTO getPairingListFromRaceLogs(String leaderboardName) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         
         ColorMap<BoatDTO> colorMap = new ColorMapImpl<BoatDTO>();
         
+        List<String> raceColumnNames = new ArrayList<>();
+        
         List<BoatDTO> boats = new ArrayList<>();
         int boatIndex;
         
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if (raceColumn.isMedalRace() || !Util.contains(selectedFlightNames, raceColumn.getName())) {
+            if (raceColumn.isMedalRace()) {
                 continue;
             }
             List<List<Pair<CompetitorDTO, BoatDTO>>> flights = new ArrayList<>();
@@ -6908,26 +6910,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                 List<Pair<CompetitorDTO, BoatDTO>> fleets = new ArrayList<>();
                 
-                // TODO fetch Pair of competitor and boat from race log (bug2822)
-                for (CompetitorDTO competitorDTO : this.getCompetitorRegistrationsInRaceLog(leaderboardName, 
-                        raceColumn.getName(), fleetElement.getName())) {
-                    if (boats.size() <= boatIndex) {
-                        // TODO change competitor name to competitor shorthand symbol (bug2822)
-                        BoatDTO boatDTO = new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID());
-                        boatDTO.setColor(colorMap.getColorByID(boatDTO));
-                        boats.add(boatDTO);
+                Collection<CompetitorDTO> competitorsInRaceLog = this.getCompetitorRegistrationsInRaceLog(leaderboardName, 
+                        raceColumn.getName(), fleetElement.getName());
+                
+                if (competitorsInRaceLog.size() > 0) {
+                
+                    // TODO fetch Pair of competitor and boat from race log (bug2822)
+                    for (CompetitorDTO competitorDTO : competitorsInRaceLog) {
+                        if (boats.size() <= boatIndex) {
+                            // TODO change competitor name to competitor shorthand symbol (bug2822)
+                            BoatDTO boatDTO = new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID());
+                            boatDTO.setColor(colorMap.getColorByID(boatDTO));
+                            boats.add(boatDTO);
+                        }
+                        
+                        fleets.add(new Pair<CompetitorDTO, BoatDTO>(competitorDTO, boats.get(boatIndex)));
+                        
+                        boatIndex++;
                     }
-                    
-                    fleets.add(new Pair<CompetitorDTO, BoatDTO>(competitorDTO, boats.get(boatIndex)));
-                    
-                    boatIndex++;
+                    flights.add(fleets);
+                } else {
+                    break;
                 }
-                flights.add(fleets);
             }
-            result.add(flights);
+            if (flights.size() > 0) {
+                result.add(flights);
+                
+                if (!raceColumnNames.contains(raceColumn.getName())) {
+                    raceColumnNames.add(raceColumn.getName());
+                }
+            }
         }
         
-        return new PairingListDTO(result);
+        return new PairingListDTO(result, raceColumnNames);
     }
     
     @Override

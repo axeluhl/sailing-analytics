@@ -12,10 +12,17 @@ public class PairingListDTO implements Serializable{
 
     private List<List<List<Pair<CompetitorDTO, BoatDTO>>>> pairingList;
     
+    private List<String> raceColumnNames;
+    
     public PairingListDTO() { }
     
     public PairingListDTO(List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result) {
+        this(result, null);
+    }
+    
+    public PairingListDTO(List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result, List<String> raceColumnNames) {
         this.pairingList = result;
+        this.raceColumnNames = raceColumnNames;
     }
 
     public List<List<List<Pair<CompetitorDTO, BoatDTO>>>> getPairingList() {
@@ -34,5 +41,9 @@ public class PairingListDTO implements Serializable{
         }
         
         return boats;
+    }
+    
+    public List<String> getRaceColumnNames() {
+        return raceColumnNames;
     }
 }
