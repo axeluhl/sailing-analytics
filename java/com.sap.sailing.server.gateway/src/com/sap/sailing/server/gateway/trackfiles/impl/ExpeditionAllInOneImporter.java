@@ -49,6 +49,7 @@ import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImpor
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
 import com.sap.sailing.server.gateway.windimport.expedition.WindImporter;
+import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
@@ -113,15 +114,17 @@ public class ExpeditionAllInOneImporter {
                 venueName, true, UUID.randomUUID());
         service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
 
-        Series series = new SeriesImpl(Series.DEFAULT_NAME, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
+        String seriesName = Series.DEFAULT_NAME;
+        Series series = new SeriesImpl(seriesName, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 Collections.singleton(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
-                Collections.singleton(raceColumnName), /* trackedRegattaRegistry */ service);
+                Collections.emptySet(), /* trackedRegattaRegistry */ service);
         ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
         RankingMetricConstructor rankingMetricConstructor = RankingMetricsFactory
                 .getRankingMetricConstructor(rankingMetric);
         service.createRegatta(regattaNameAndleaderboardName, boatClassName, null, null, UUID.randomUUID(),
                 Collections.singleton(series), true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
                 false, rankingMetricConstructor);
+        service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
         RegattaLeaderboard regattaLeaderboard = service.addRegattaLeaderboard(regattaIdentifier, null,
                 discardThresholds);
 
