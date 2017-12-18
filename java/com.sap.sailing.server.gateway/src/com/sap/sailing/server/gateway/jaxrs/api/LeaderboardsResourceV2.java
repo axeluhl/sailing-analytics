@@ -117,18 +117,40 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
         ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
         Integer maxCompetitorsCount = timePointAndResultStateAndMaxCompetitorsCount.getC();       
-      
+
+        
         JSONObject jsonLeaderboard = new JSONObject();
               
         writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, resultTimePoint, maxCompetitorsCount);
-     
+
+        Map<String, Map<String, Map<CompetitorDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
+        for (String raceColumnName : raceColumnsToShow) {
+            List<CompetitorDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
+            Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
+            for (CompetitorDTO competitor: competitorsFromBestToWorst) {
+                LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
+                LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);                
+                FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
+                if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
+                    Map<CompetitorDTO, Integer> competitorsOfFleet = competitorsOrderedByFleets.get(fleetOfCompetitor.getName());
+                    if (competitorsOfFleet == null) {
+                        competitorsOfFleet = new HashMap<>();
+                        competitorsOrderedByFleets.put(fleetOfCompetitor.getName(), competitorsOfFleet);
+                    }
+                    competitorsOfFleet.put(competitor, competitorsOfFleet.size() + 1);
+                }
+            }
+            competitorRanksPerRaceColumnsAndFleets.put(raceColumnName, competitorsOrderedByFleets);
+        }
+            
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
-        int counter = 1;
+        int competitorCounter = 1;
+        // Remark: leaderboardDTO.competitors are ordered by total rank
         for (CompetitorDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
 
-            if (maxCompetitorsCount != null && counter > maxCompetitorsCount) {
+            if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {
                 break;
             }
             JSONObject jsonCompetitor = new JSONObject();
@@ -140,7 +162,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
             jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
 
-            jsonCompetitor.put("rank", counter);
+            jsonCompetitor.put("rank", competitorCounter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
             
@@ -153,7 +175,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumnName, jsonEntry);
                 LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
-
+                
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
                 
@@ -165,28 +187,48 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 jsonEntry.put("isDiscarded", leaderboardEntry.discarded);
                 jsonEntry.put("isCorrected", leaderboardEntry.hasScoreCorrection());
 
-                jsonEntry.put("rank", leaderboardEntry.trackedRank > 0 ? leaderboardEntry.trackedRank : null);
-                jsonEntry.put("trackedRank", null);
+                // if we have no fleet information there is no way to know in which fleet the competitor was racing
+                if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
+                    Map<String, Map<CompetitorDTO, Integer>> rcMap = competitorRanksPerRaceColumnsAndFleets.get(raceColumnName);
+                    Map<CompetitorDTO, Integer> rankMap = rcMap.get(fleetOfCompetitor.getName());
+                    Integer rank = rankMap.get(competitor);
+                    jsonEntry.put("rank", rank);
+                } else {
+                    jsonEntry.put("rank", null);
+                }
+
+                LegEntryDTO detailsOfLastAvailableLeg =  getDetailsOfLastAvailableLeg(leaderboardEntry);
+                jsonEntry.put("trackedRank", detailsOfLastAvailableLeg != null ? detailsOfLastAvailableLeg.rank : null);
+//                jsonEntry.put("trackedRank", leaderboardEntry.trackedRank > 0 ? leaderboardEntry.trackedRank : null);
 
                 boolean finished = false;
-                LegEntryDTO detailsOfLastLeg = getDetailsOfLastLeg(leaderboardEntry);
-                if (detailsOfLastLeg != null) {
-                    finished = detailsOfLastLeg.finished;
+                LegEntryDTO detailsOfLastCourseLeg = getDetailsOfLastCourseLeg(leaderboardEntry);
+                if (detailsOfLastCourseLeg != null) {
+                    finished = detailsOfLastCourseLeg.finished;
                 }
                 jsonEntry.put("finished", finished);
                 
                 if (!raceDetailsToShow.isEmpty() && leaderboardEntry.race != null) {
+                    LegEntryDTO currentLegEntry = null;
+                    int currentLegNumber = leaderboardEntry.getOneBasedCurrentLegNumber();
+                    if (leaderboardEntry.legDetails != null && currentLegNumber > 0 && currentLegNumber <= leaderboardEntry.legDetails.size()) {
+                        currentLegEntry = leaderboardEntry.legDetails.get(currentLegNumber-1);
+                        if (currentLegEntry != null) {
+                            jsonEntry.put("trackedRank", currentLegEntry.rank);
+                        }
+                    }
+                    
                     JSONObject jsonRaceDetails = new JSONObject();
                     jsonEntry.put("data", jsonRaceDetails);
                     for (DetailType type: raceDetailsToShow) {
-                        Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardEntry);
+                        Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardEntry, currentLegEntry);
                         if (valueForRaceDetailType.getB() != null) {
                             jsonRaceDetails.put(valueForRaceDetailType.getA(),  valueForRaceDetailType.getB());
                         }
                     }                    
                 }
             }
-            counter++;
+            competitorCounter++;
         }
         return jsonLeaderboard;
     }
@@ -229,10 +271,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL };
     }
     
-    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardEntryDTO entry) {
+    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry) {
         String name;
         Object value = null;
-        int currentLegNumber = entry.getOneBasedCurrentLegNumber();
         switch (type) {
             case RACE_GAP_TO_LEADER_IN_SECONDS:
                 name = "gapToLeader-s";
@@ -263,11 +304,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             case RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START:
                 name = "distanceTraveledConsideringGateStart-m";
-                if (entry.legDetails != null && currentLegNumber > 0) {
-                    LegEntryDTO legEntryDTO = entry.legDetails.get(currentLegNumber-1);
-                    if (legEntryDTO != null) {
-                        value = roundDouble(legEntryDTO.distanceTraveledIncludingGateStartInMeters, 2);
-                    }
+                if (currentLegEntry != null) {
+                    value = roundDouble(currentLegEntry.distanceTraveledIncludingGateStartInMeters, 2);
                 }
                 break;
             case RACE_TIME_TRAVELED:
@@ -285,11 +323,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 name = "currentSpeedOverGround-kts";
-                if (entry.legDetails != null && currentLegNumber > 0) {
-                    LegEntryDTO legEntryDTO = entry.legDetails.get(currentLegNumber-1);
-                    if (legEntryDTO != null) {
-                        value = roundDouble(legEntryDTO.currentSpeedOverGroundInKnots, 2);
-                    }
+                if (currentLegEntry != null) {
+                    value = roundDouble(currentLegEntry.currentSpeedOverGroundInKnots, 2);
                 }
                 break;
             case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
@@ -303,9 +338,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             case NUMBER_OF_MANEUVERS:
                 name = "numberOfManeuvers";
-                Double numberOfManeuvers = null;
-                Map<ManeuverType, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(entry);
-                for (Double maneuverCount : tacksJibesAndPenalties.values()) {
+                Integer numberOfManeuvers = null;
+                Map<ManeuverType, Integer> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(entry);
+                for (Integer maneuverCount : tacksJibesAndPenalties.values()) {
                     if (maneuverCount != null) {
                         if (numberOfManeuvers == null) {
                             numberOfManeuvers = maneuverCount;
@@ -318,6 +353,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             case CURRENT_LEG:
                 name = "currentLeg";
+                int currentLegNumber = entry.getOneBasedCurrentLegNumber();
                 if (currentLegNumber > 0) {
                     value = currentLegNumber;
                 }
@@ -341,7 +377,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return new Pair<String, Object>(name, value);
     }
 
-    private LegEntryDTO getDetailsOfLastLeg(LeaderboardEntryDTO entry) {
+    private LegEntryDTO getDetailsOfLastCourseLeg(LeaderboardEntryDTO entry) {
         LegEntryDTO lastLegDetail = null;
         if (entry != null && entry.legDetails != null) {
             int lastLegIndex = entry.legDetails.size() - 1;
@@ -351,11 +387,24 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         }
         return lastLegDetail;
     }
-    
-    private Map<ManeuverType, Double> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardEntryDTO entry) {
-        Map<ManeuverType, Double> totalNumberOfManeuvers = new HashMap<ManeuverType, Double>();
+
+    private LegEntryDTO getDetailsOfLastAvailableLeg(LeaderboardEntryDTO entry) {
+        LegEntryDTO lastAvailableLegDetail = null;
+        if (entry != null && entry.legDetails != null) {
+            for (int i = entry.legDetails.size() - 1; i >= 0; i--) {
+                lastAvailableLegDetail = entry.legDetails.get(i);
+                if (lastAvailableLegDetail != null) {
+                    break;
+                }
+            }
+        }
+        return lastAvailableLegDetail;
+    }
+
+    private Map<ManeuverType, Integer> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardEntryDTO entry) {
+        Map<ManeuverType, Integer> totalNumberOfManeuvers = new HashMap<>();
         for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
-            totalNumberOfManeuvers.put(maneuverType, 0.0);
+            totalNumberOfManeuvers.put(maneuverType, 0);
         }
         if (entry.legDetails != null) {
             for (LegEntryDTO legDetail : entry.legDetails) {
@@ -363,7 +412,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
                         if (legDetail.numberOfManeuvers != null && legDetail.numberOfManeuvers.get(maneuverType) != null) {
                             totalNumberOfManeuvers.put(maneuverType,
-                                    totalNumberOfManeuvers.get(maneuverType) + (double) legDetail.numberOfManeuvers.get(maneuverType));
+                                    totalNumberOfManeuvers.get(maneuverType) + legDetail.numberOfManeuvers.get(maneuverType));
                         }
                     }
                 }
