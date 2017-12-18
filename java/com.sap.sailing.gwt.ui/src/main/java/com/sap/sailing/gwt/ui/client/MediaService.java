@@ -2,12 +2,13 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 
 public interface MediaService extends RemoteService {
 
     Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
-    
+
     Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Iterable<MediaTrack> getAllMediaTracks();
@@ -23,7 +24,9 @@ public interface MediaService extends RemoteService {
     void updateStartTime(MediaTrack mediaTrack);
 
     void updateDuration(MediaTrack mediaTrack);
-    
+
     void updateRace(MediaTrack mediaTrack);
+
+    VideoMetadataDTO checkMetadata(String url);
 
 }
