@@ -3,10 +3,12 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,12 +84,14 @@ public class ExpeditionAllInOneImporter {
     }
 
     public ImporterResult importFiles(String filename, FileItem fileItem) {
+        String importTimeString = DateTimeFormatter.ISO_INSTANT.format(LocalDateTime.now(ZoneOffset.UTC));
+        String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         // TODO prevent duplicate event/leaderboard names
-        String eventName = filename;
-        String description = MessageFormat.format("Event imported from expedition file '{0}' on {1,date,yyyy-MM-dd'T'HH:mm'Z'}", filename, new Date());
-        String leaderboardGroupName = filename;
-        String regattaNameAndleaderboardName = filename;
-        RegattaIdentifier regattaIdentifier = new RegattaName(regattaNameAndleaderboardName);
+        String eventName = filenameWithDateTimeSuffix;
+        String description = MessageFormat.format("Event imported from expedition file '{0}' on {1}", filename, importTimeString);
+        String leaderboardGroupName = filenameWithDateTimeSuffix;
+        String regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
+        RegattaIdentifier regattaIdentifier = new RegattaName(filenameWithDateTimeSuffix);
         String raceColumnName = filename;
         String courseAreaName = "Default";
         UUID courseAreaId = UUID.randomUUID();
@@ -95,7 +99,7 @@ public class ExpeditionAllInOneImporter {
         Double buoyZoneRadiusInHullLengths = 3.0;
         String boatClassName = null;
         // TODO proper id
-        String windSourceId = filename;
+        String windSourceId = filenameWithDateTimeSuffix;
 
         // TODO guess venue based on the reverse geocoder?
         String venueName = filename;
