@@ -129,7 +129,7 @@ public class ExpeditionAllInOneImporter {
         // TODO these are just the defaults used in the UI
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Shore", 4);
         
-        JsonHolder jsonHolderForGpsFixImport = new JsonHolder(logger);
+        ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
         List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filename, fileItem));
         try {
             new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, /* TODO preferred importer */ null, filesForGpsFixImport);
@@ -138,7 +138,7 @@ public class ExpeditionAllInOneImporter {
             e1.printStackTrace();
         }
 
-        JsonHolder jsonHolderForSensorFixImport = new JsonHolder(logger);
+        ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
         Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays.asList(new Pair<>(filename, fileItem));
         try {
             new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
