@@ -68,9 +68,7 @@ public class GPSFixImportTest {
     
     @Test
     public void testReusingImportStream() throws IOException {
-        TrackFilesImportServlet servlet = new TrackFilesImportServlet() {
-            private static final long serialVersionUID = -7636477441858728847L;
-
+        TrackFilesImporter importer = new TrackFilesImporter(null, null, null) {
             @Override
             public Collection<GPSFixImporter> getGPSFixImporters(String type) {
                 return Arrays.asList((GPSFixImporter) RouteConverterGPSFixImporterFactory.INSTANCE
@@ -165,7 +163,7 @@ public class GPSFixImportTest {
             }
         };
         //The preferred importer will fail, however the default importer should succeed after
-        servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", fi)), holder, new AlwaysFailingGPSFixImporter(-1));
+        importer.importFiles(Arrays.asList(new Pair<>("test.gpx", fi)), holder, new AlwaysFailingGPSFixImporter(-1));
         assertFalse(failed.get());
     }
 }
