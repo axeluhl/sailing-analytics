@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,9 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
 
@@ -41,7 +44,7 @@ public class TrackFilesImporter {
         this.context = context;
     }
 
-    public void importFixes(JsonHolder jsonResult, String prefImporterType, List<Pair<String, FileItem>> files)
+    public void importFixes(ImportResultDTO jsonResult, String prefImporterType, List<Pair<String, FileItem>> files)
             throws IOException {
         GPSFixImporter preferredImporter = null;
         if (prefImporterType != null && !prefImporterType.isEmpty()) {
@@ -51,7 +54,7 @@ public class TrackFilesImporter {
         importFiles(files, jsonResult, preferredImporter);
     }
 
-    void importFiles(Iterable<Pair<String, FileItem>> files, JsonHolder jsonResult,
+    void importFiles(Iterable<Pair<String, FileItem>> files, ImportResultDTO jsonResult,
             GPSFixImporter preferredImporter) throws IOException {
         for (Pair<String, FileItem> pair : files) {
             final String fileName = pair.getA();
@@ -71,6 +74,7 @@ public class TrackFilesImporter {
             AtomicBoolean succeeded = new AtomicBoolean(false);
             parsersLoop: for (GPSFixImporter importer : importersToTry) {
 
+                HashSet<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {
                     try {
@@ -78,7 +82,7 @@ public class TrackFilesImporter {
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                                 storeFix(fix, device);
-                                jsonResult.addDeviceIndentifier(device);
+                                deviceIds.add(device);
                             }
                         }, true, fileName);
                         if (ok) {
@@ -94,6 +98,11 @@ public class TrackFilesImporter {
                             jsonResult.add(importer.getClass().getName(), fileName, e);
                         }
                     }
+                }
+                for (TrackFileImportDeviceIdentifier device : deviceIds) {
+                    TimeRange range = service.getSensorFixStore().getTimeRangeCoveredByFixes(device);
+                    long amount = service.getSensorFixStore().getNumberOfFixes(device);
+                    jsonResult.addTrackData(new TrackImportDTO(device.getId(), range, amount));
                 }
                 if (succeeded.get()) {
                     logger.log(Level.INFO, "Successfully imported file " + fileName + " using " + importer.getType());

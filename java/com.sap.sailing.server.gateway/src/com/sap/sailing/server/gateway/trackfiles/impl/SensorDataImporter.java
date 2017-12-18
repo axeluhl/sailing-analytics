@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,7 +21,9 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
 
 public class SensorDataImporter {
@@ -43,10 +46,11 @@ public class SensorDataImporter {
      *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
      *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
      *            importer is selected on a per-file basis.
+     * @return 
      * 
      * @throws IOException
      */
-    public void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> importerNamesAndFiles)
+    public void importFiles(boolean enableDownsampler, ImportResultDTO result, Iterable<Pair<String, FileItem>> importerNamesAndFiles)
             throws IOException {
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
@@ -65,6 +69,8 @@ public class SensorDataImporter {
             }
             logger.log(Level.INFO,
                     "Going to import sensor data file  with importer " + importerToUse.getClass().getSimpleName());
+            
+            HashSet<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
             try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
                 final String filename = fi.getName();
                 try {
@@ -72,13 +78,18 @@ public class SensorDataImporter {
                         @Override
                         public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
                             storeFixes(fixes, device);
-                            jsonResult.addDeviceIndentifier(device);
+                            deviceIds.add(device);
                         }
                     }, filename, requestedImporterName, enableDownsampler);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
                 } catch (FormatNotSupportedException e) {
-                    jsonResult.add(requestedImporterName, filename, e);
+                    result.add(requestedImporterName, filename, e);
                 }
+            }
+            for (TrackFileImportDeviceIdentifier device : deviceIds) {
+                TimeRange range = service.getSensorFixStore().getTimeRangeCoveredByFixes(device);
+                long amount = service.getSensorFixStore().getNumberOfFixes(device);
+                result.addTrackData(new TrackImportDTO(device.getId(), range, amount));
             }
         }
     }

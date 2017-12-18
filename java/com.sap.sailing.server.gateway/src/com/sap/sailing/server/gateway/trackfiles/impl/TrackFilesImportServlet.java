@@ -41,7 +41,7 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        JsonHolder jsonResult = new JsonHolder(logger);
+        ImportResultDTO importResult = new ImportResultDTO(logger);
         try {
             String prefImporterType = null;
             List<Pair<String, FileItem>> files = new ArrayList<>();
@@ -54,15 +54,15 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
                     }
                 }
             }
-            new TrackFilesImporter(getService(), getServiceFinderFactory(), getContext()).importFixes(jsonResult,
+            new TrackFilesImporter(getService(), getServiceFinderFactory(), getContext()).importFixes(importResult,
                     prefImporterType, files);
             // setJsonResponseHeader(resp);
             // DO NOT set a JSON response header. This causes the browser to wrap the response in a
             // <pre> tag when uploading from GWT, as this is an AJAX-request inside an iFrame.
         } catch (Exception e) {
-            jsonResult.add(e);
+            importResult.add(e);
         } finally {
-            jsonResult.writeJSONString(resp);
+            new ImportResultSerializer(importResult).writeJSONString(resp);
         }
     }
 }

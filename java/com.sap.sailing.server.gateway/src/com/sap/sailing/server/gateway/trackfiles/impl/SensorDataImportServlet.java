@@ -27,7 +27,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        JsonHolder jsonResult = new JsonHolder(logger);
+        ImportResultDTO importResult = new ImportResultDTO(logger);
         boolean enableDownsampler = false;
         try {
             String importerName = null;
@@ -47,11 +47,11 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                     filesAndImporterNames.add(new Pair<>(importerName, fi));
                 }
             }
-            new SensorDataImporter(getService(), getContext()).importFiles(enableDownsampler, jsonResult, filesAndImporterNames);
+            new SensorDataImporter(getService(), getContext()).importFiles(enableDownsampler, importResult, filesAndImporterNames);
         } catch (Exception e) {
-            jsonResult.add(e);
+            importResult.add(e);
         } finally {
-            jsonResult.writeJSONString(resp);
+            new ImportResultSerializer(importResult).writeJSONString(resp);
         }
     }
 }

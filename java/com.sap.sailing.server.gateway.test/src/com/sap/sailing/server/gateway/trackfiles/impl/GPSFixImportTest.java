@@ -154,7 +154,7 @@ public class GPSFixImportTest {
             }
         };
         AtomicBoolean failed = new AtomicBoolean(false);
-        JsonHolder holder = new JsonHolder(Logger.getLogger(GPSFixImportTest.class.getName())){
+        ImportResultDTO holder = new ImportResultDTO(Logger.getLogger(GPSFixImportTest.class.getName())){
             
             @Override
             public void add(Exception exception) {
