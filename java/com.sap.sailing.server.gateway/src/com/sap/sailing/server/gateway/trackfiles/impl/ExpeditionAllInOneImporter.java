@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
 import com.sap.sailing.server.gateway.windimport.expedition.WindImporter;
@@ -150,8 +152,24 @@ public class ExpeditionAllInOneImporter {
         // TODO how to map fixes to a competitor? Just return the IDs to the user and let him do the mapping?
 
         // TODO determine from imported file
+        
+        
         TimePoint startOfTracking = null;
         TimePoint endOfTracking = null;
+        ArrayList<TrackImportDTO> allData = new ArrayList<>();
+        allData.addAll(jsonHolderForGpsFixImport.getImportResult());
+        allData.addAll(jsonHolderForSensorFixImport.getImportResult());
+        
+        for(TrackImportDTO result:allData){
+            TimePoint deviceTrackStart = result.getRange().from();
+            TimePoint deviceTrackEnd = result.getRange().to();
+            if(startOfTracking == null || deviceTrackStart.before(startOfTracking)){
+                startOfTracking = deviceTrackStart;
+            }
+            if(endOfTracking == null || deviceTrackEnd.after(endOfTracking)){
+                endOfTracking = deviceTrackEnd;
+            }
+        }
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
         // TODO explicitly set startOfRace?
