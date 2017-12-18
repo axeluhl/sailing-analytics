@@ -43,6 +43,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
+import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.server.RacingEventService;
@@ -146,7 +147,7 @@ public class ExpeditionAllInOneImporter {
         ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
         List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filename, fileItem));
         try {
-            new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, /* TODO preferred importer */ null, filesForGpsFixImport);
+            new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();

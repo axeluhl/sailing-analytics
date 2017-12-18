@@ -62,6 +62,6 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
 
     @Override
     public String getType() {
-        return "Expedition";
+        return GPSFixImporter.EXPEDITION_TYPE;
     }
 }
