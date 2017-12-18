@@ -1,28 +1,16 @@
 package com.sap.sailing.server.gateway.trackfiles.impl;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
-import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
-import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -32,63 +20,6 @@ import com.sap.sse.common.Util.Pair;
 public class SensorDataImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(SensorDataImportServlet.class.getName());
-
-    public void storeFixes(Iterable<DoubleVectorFix> fixes, DeviceIdentifier deviceIdentifier) {
-        try {
-            getService().getSensorFixStore().storeFixes(deviceIdentifier, fixes);
-        } catch (NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
-        }
-    }
-
-    /**
-     * Searches the requested importer in the importers provided by the OSGi registry and imports the priovided sensor
-     * data file.
-     * 
-     * @param importerNamesAndFiles
-     *            the file items together with the names of the importer to use for importing the respective file's
-     *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
-     *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
-     *            importer is selected on a per-file basis.
-     * 
-     * @throws IOException
-     */
-    private void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> importerNamesAndFiles)
-            throws IOException {
-        final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
-        availableImporters.addAll(getOSGiRegisteredImporters());
-        for (Pair<String, FileItem> file : importerNamesAndFiles) {
-            final String requestedImporterName = file.getA();
-            final FileItem fi = file.getB();
-            DoubleVectorFixImporter importerToUse = null;
-            for (DoubleVectorFixImporter candidate : availableImporters) {
-                if (candidate.getType().equals(requestedImporterName)) {
-                    importerToUse = candidate;
-                    break;
-                }
-            }
-            if (importerToUse == null) {
-                throw new RuntimeException("Sensor importer not found: " + requestedImporterName);
-            }
-            logger.log(Level.INFO,
-                    "Going to import sensor data file  with importer " + importerToUse.getClass().getSimpleName());
-            try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
-                final String filename = fi.getName();
-                try {
-                    importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
-                        @Override
-                        public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
-                            storeFixes(fixes, device);
-                            jsonResult.addDeviceIndentifier(device);
-                        }
-                    }, filename, requestedImporterName, enableDownsampler);
-                    logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
-                } catch (FormatNotSupportedException e) {
-                    jsonResult.add(requestedImporterName, filename, e);
-                }
-            }
-        }
-    }
 
     /**
      * Process the uploaded file items.
@@ -116,30 +47,11 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                     filesAndImporterNames.add(new Pair<>(importerName, fi));
                 }
             }
-            importFiles(enableDownsampler, jsonResult, filesAndImporterNames);
+            new SensorDataImporter(getService(), getContext()).importFiles(enableDownsampler, jsonResult, filesAndImporterNames);
         } catch (Exception e) {
             jsonResult.add(e);
         } finally {
             jsonResult.writeJSONString(resp);
         }
-    }
-
-    /**
-     * Finds all {@link DoubleVectorFixImporter} service references in the OSGi context.
-     * 
-     * @return
-     */
-    private Collection<DoubleVectorFixImporter> getOSGiRegisteredImporters() {
-        List<DoubleVectorFixImporter> result = new ArrayList<>();
-        Collection<ServiceReference<DoubleVectorFixImporter>> refs;
-        try {
-            refs = getContext().getServiceReferences(DoubleVectorFixImporter.class, null);
-            for (ServiceReference<DoubleVectorFixImporter> ref : refs) {
-                result.add(getContext().getService(ref));
-            }
-        } catch (InvalidSyntaxException e) {
-            logger.log(Level.WARNING, "Could not create OSGi filter");
-        }
-        return result;
     }
 }
