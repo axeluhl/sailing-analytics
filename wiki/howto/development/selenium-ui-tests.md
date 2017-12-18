@@ -8,7 +8,7 @@ There are two ways to run the Selenium tests locally on your computer. Either, y
 
 ### Firefox Prerequisites
 
-!Since old Firefox version do not work with WindowScaling, ensure that in windows the Font Scaling is set to 100%, else Firefox will not be able to click buttons!
+!Since old Firefox version do not work with WindowScaling, ensure that in windows the Font Scaling is set to 100%, else Firefox will not be able to click buttons. You can find this setting at "Settings>Display Settings>Change the size of text, apps and other items"!
 
 You have to ensure that your Firefox browser has a profile called "Selenium" and that in this profile the latest version of the GWT plugin is installed. To ensure this, launch the server by choosing the "Sailing Server (Proxy)" or "Sailing Server (No Proxy)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode. Afterwards you can launch Firefox from the command line with the -p option. On Windows machines, you can do this by pressing the Windows key, then typing "firefox.exe -p". In the profile manager create a profile called Selenium and start Firefow with that profile. Hit the entry page of the AdminConsole by entering `http://127.0.0.1:8888/gwt/AdminConsole.html?gwt.codesvr=127.0.0.1:9997` into the address bar. This will ask you to install the GWT plugin into your Selenium profile. When done, exit the browser. You may use the profile manager again to set your default profile to your original profile.
 
@@ -16,7 +16,7 @@ You have to ensure that your Firefox browser has a profile called "Selenium" and
 
 Launch the server by choosing the "Sailing Server (Proxy, winddbTest)" or "Sailing Server (No Proxy, winddbTest)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode.
 
-When the GWT development mode has finished its initialization as indicated by the "Development Mode" view showing the entry point URLs, launch the "com.sap.sailing.senelium.test (Proxy, GWT Codesvr)" or "com.sap.sailing.senelium.test (No Proxy, GWT Codesvr)" launch. This will then pop up Firefox windows using the "Selenium" profile and run the tests.
+When the GWT development mode has finished its initialization as indicated by the "Development Mode" view showing the entry point URLs, launch the "com.sap.sailing.senelium.test (Proxy)" or "com.sap.sailing.senelium.test (No Proxy)" launch. This will then pop up Firefox windows using the "Selenium" profile and run the tests.
 
 ### Running the tests after a successful local GWT compile
 
