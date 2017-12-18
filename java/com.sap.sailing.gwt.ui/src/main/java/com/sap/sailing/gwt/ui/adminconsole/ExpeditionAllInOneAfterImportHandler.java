@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -26,9 +27,15 @@ public class ExpeditionAllInOneAfterImportHandler {
     protected EventDTO event;
     private RegattaDTO regatta;
     private StrippedLeaderboardDTO leaderboard;
+    private List<TrackFileImportDeviceIdentifierDTO> gpsFixesDeviceIDs;
+    private List<TrackFileImportDeviceIdentifierDTO> sensorFixesDeviceIDs;
+    private final String sensorImporterType;
 
-    public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName, final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
+            List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
+        this.sensorImporterType = sensorImporterType;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -57,7 +64,33 @@ public class ExpeditionAllInOneAfterImportHandler {
                             @Override
                             public void onSuccess(StrippedLeaderboardDTO result) {
                                 leaderboard = result;
-                                showCompetitorRegistration();
+                                sailingService.getTrackFileImportDeviceIds(gpsDeviceIds,
+                                        new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                                            @Override
+                                            public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                                                gpsFixesDeviceIDs = result;
+
+                                                sailingService.getTrackFileImportDeviceIds(sensorDeviceIds,
+                                                        new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                                                            @Override
+                                                            public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                                                                sensorFixesDeviceIDs = result;
+
+                                                                showCompetitorRegistration();
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(Throwable caught) {
+                                                                // TODO Auto-generated method stub
+                                                            }
+                                                        });
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                // TODO Auto-generated method stub
+                                            }
+                                        });
                             }
                             
                             @Override
@@ -98,14 +131,14 @@ public class ExpeditionAllInOneAfterImportHandler {
             
             final String leaderboardName = leaderboard.getName();
             new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages,
-                    leaderboardName, /* TODO: Device IDs */ Collections.emptySet(),
-                    /* TODO: importer type */ null, new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
+                    leaderboardName, sensorFixesDeviceIDs,
+                    sensorImporterType, new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
 
                 @Override
                 public void ok(Collection<TypedDeviceMappingDTO> mappings) {
                     new AddTypedDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
                         new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
-                                leaderboardName, /* TODO: Device IDs */ Collections.emptySet(),
+                                leaderboardName, gpsFixesDeviceIDs,
                                 new DialogCallback<Collection<DeviceMappingDTO>>() {
 
                             @Override
