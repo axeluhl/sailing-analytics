@@ -4152,7 +4152,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return anniversaryRaceDeterminator;
     }
     
-    //TODO filter flights by selected flights
     @Override
     public PairingListTemplate createPairingListFromRegatta(final String leaderboardName, int competitorsCount, 
             final int flightMultiplier, final int flightsCount) {

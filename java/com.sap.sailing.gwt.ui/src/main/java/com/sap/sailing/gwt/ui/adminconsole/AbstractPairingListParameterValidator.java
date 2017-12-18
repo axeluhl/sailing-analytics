@@ -15,17 +15,18 @@ public class AbstractPairingListParameterValidator implements Validator<PairingL
     @Override
     public String getErrorMessage(PairingListTemplateDTO valueToValidate) {
         String errorMessage = null;
-        
+
         if (valueToValidate.getCompetitorCount() < valueToValidate.getGroupCount()) {
             errorMessage = "Invalid competitor count";
         } else if (valueToValidate.getFlightMultiplier() < 1) {
             errorMessage = "Invalid flight multiplier";
-        } else if(valueToValidate.getFlightCount()%valueToValidate.getFlightMultiplier()!=0 &&valueToValidate.getFlightMultiplier()>0){
-            errorMessage= "Flightcount has to be a multiple of Flightmultiplier!";
-        } else if(Util.size(valueToValidate.getSelectedFlightNames())<1) {
-            errorMessage= "Invalid series selection";
+        } else if (valueToValidate.getFlightCount() % valueToValidate.getFlightMultiplier() != 0
+                && valueToValidate.getFlightMultiplier() > 0) {
+            errorMessage = "Flightcount has to be a multiple of Flightmultiplier!";
+        } else if (Util.size(valueToValidate.getSelectedFlightNames()) < 1) {
+            errorMessage = "Invalid series selection";
         }
-        
+
         return errorMessage;
     }
 
