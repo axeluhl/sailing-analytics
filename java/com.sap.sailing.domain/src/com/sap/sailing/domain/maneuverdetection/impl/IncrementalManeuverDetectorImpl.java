@@ -87,11 +87,9 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
             TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
             TimePoint latestRawFixTimePoint = trackTimeInfo.getLatestRawFixTimePoint();
-            long startedAt = System.currentTimeMillis();
             Iterable<GPSFixMoving> douglasPeuckerFixes = trackedRace.approximate(competitor,
                     competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(),
                     earliestManeuverStart, latestManeuverEnd);
-            System.out.println((System.currentTimeMillis() - startedAt) + " ms for douglas peucker");
             ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
             List<ManeuverSpot> maneuverSpots;
             if (lastManeuverDetectionResult == null) {
