@@ -163,14 +163,14 @@ public class ExpeditionAllInOneImporter {
         ArrayList<TrackImportDTO> allData = new ArrayList<>();
         allData.addAll(jsonHolderForGpsFixImport.getImportResult());
         allData.addAll(jsonHolderForSensorFixImport.getImportResult());
-        
-        for(TrackImportDTO result:allData){
+
+        for (TrackImportDTO result : allData) {
             TimePoint deviceTrackStart = result.getRange().from();
             TimePoint deviceTrackEnd = result.getRange().to();
-            if(startOfTracking == null || deviceTrackStart.before(startOfTracking)){
+            if (startOfTracking == null || deviceTrackStart.before(startOfTracking)) {
                 startOfTracking = deviceTrackStart;
             }
-            if(endOfTracking == null || deviceTrackEnd.after(endOfTracking)){
+            if (endOfTracking == null || deviceTrackEnd.after(endOfTracking)) {
                 endOfTracking = deviceTrackEnd;
             }
         }
