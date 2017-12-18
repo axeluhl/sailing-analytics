@@ -42,6 +42,7 @@ public class PairinglistTest extends AbstractSeleniumTest {
         clearState(getContextRoot());
         super.setUp();
     }
+
     @Test
     public void createEventAndTestPOForCalculation() {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
@@ -69,7 +70,8 @@ public class PairinglistTest extends AbstractSeleniumTest {
             editSeriesMedals.pressOk();
             LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsolePage
                     .goToLeaderboardConfiguration();
-            LeaderboardEntryPO leaderboardEntryPO=leaderboardConfigurationPanelPO.getLeaderboardTable().getEntry(REGATTA_49ER_WITH_SUFFIX);
+            LeaderboardEntryPO leaderboardEntryPO = leaderboardConfigurationPanelPO.getLeaderboardTable()
+                    .getEntry(REGATTA_49ER_WITH_SUFFIX);
             PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
             Assert.assertTrue(!dialog.isOkButtonEnabled());
             dialog.setCompetitorsCount("1");
@@ -82,32 +84,33 @@ public class PairinglistTest extends AbstractSeleniumTest {
             dialog.setCompetitorsCount("18");
             Assert.assertTrue(dialog.isOkButtonEnabled());
             PairinfListCreationDialogPO dialog2 = dialog.pressOk();
-            Assert.assertEquals("12",dialog2.getValueOfFlightsLabel());
+            Assert.assertEquals("12", dialog2.getValueOfFlightsLabel());
             Assert.assertEquals("1", dialog2.getValueOfGroupsLabel());
             Assert.assertEquals("18", dialog2.getValueOfCompetitorsLabel());
-            dialog2.pressClose();    
+            dialog2.pressClose();
         }
         {
-        AdminConsolePage adminConsolePage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsolePage
-                .goToLeaderboardConfiguration();
-        LeaderboardEntryPO leaderboardEntryPO=leaderboardConfigurationPanelPO.getLeaderboardTable().getEntry(REGATTA_49ER_WITH_SUFFIX);
-        PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
-        dialog.setCompetitorsCount("18");
-        Assert.assertTrue(!dialog.isFlightMultiplierBoxEnabled());
-        dialog.clickFlightMultiplierCheckBox();
-        Assert.assertTrue(dialog.isFlightMultiplierBoxEnabled());
-        dialog.setFlightMultiplier("0");
-        Assert.assertTrue(!dialog.isOkButtonEnabled());
-        dialog.setFlightMultiplier("2");
-        dialog.clickFlightCheckBox();
-        Assert.assertTrue(dialog.isOkButtonEnabled());
-        PairinfListCreationDialogPO dialog2 = dialog.pressOk();
-        Assert.assertEquals("12",dialog2.getValueOfFlightsLabel());
-        Assert.assertEquals("1", dialog2.getValueOfGroupsLabel());
-        Assert.assertEquals("18", dialog2.getValueOfCompetitorsLabel());
-        Assert.assertEquals("2", dialog2.getValueOfMultiplerLabel());
-        dialog2.pressClose();    
-    }
+            AdminConsolePage adminConsolePage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+            LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsolePage
+                    .goToLeaderboardConfiguration();
+            LeaderboardEntryPO leaderboardEntryPO = leaderboardConfigurationPanelPO.getLeaderboardTable()
+                    .getEntry(REGATTA_49ER_WITH_SUFFIX);
+            PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
+            dialog.setCompetitorsCount("18");
+            Assert.assertTrue(!dialog.isFlightMultiplierBoxEnabled());
+            dialog.clickFlightMultiplierCheckBox();
+            Assert.assertTrue(dialog.isFlightMultiplierBoxEnabled());
+            dialog.setFlightMultiplier("0");
+            Assert.assertTrue(!dialog.isOkButtonEnabled());
+            dialog.setFlightMultiplier("2");
+            dialog.clickFlightCheckBox();
+            Assert.assertTrue(dialog.isOkButtonEnabled());
+            PairinfListCreationDialogPO dialog2 = dialog.pressOk();
+            Assert.assertEquals("12", dialog2.getValueOfFlightsLabel());
+            Assert.assertEquals("1", dialog2.getValueOfGroupsLabel());
+            Assert.assertEquals("18", dialog2.getValueOfCompetitorsLabel());
+            Assert.assertEquals("2", dialog2.getValueOfMultiplerLabel());
+            dialog2.pressClose();
+        }
     }
 }
