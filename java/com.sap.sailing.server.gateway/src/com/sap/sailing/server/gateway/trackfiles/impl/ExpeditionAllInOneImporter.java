@@ -2,9 +2,11 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +84,8 @@ public class ExpeditionAllInOneImporter {
     public ImporterResult importFiles(String filename, FileItem fileItem) {
         // TODO prevent duplicate event/leaderboard names
         String eventName = filename;
+        String description = MessageFormat.format("Event imported from expedition file '{0}' on {1,date,yyyy-MM-dd'T'HH:mm'Z'}", filename, new Date());
+        String leaderboardGroupName = filename;
         String regattaNameAndleaderboardName = filename;
         RegattaIdentifier regattaIdentifier = new RegattaName(regattaNameAndleaderboardName);
         String raceColumnName = filename;
@@ -101,7 +105,7 @@ public class ExpeditionAllInOneImporter {
         RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         int[] discardThresholds = new int[0];
 
-        Event event = service.addEvent(eventName, null, new MillisecondsTimePoint(0), MillisecondsTimePoint.now(),
+        Event event = service.addEvent(eventName, description, new MillisecondsTimePoint(0), MillisecondsTimePoint.now(),
                 venueName, true, UUID.randomUUID());
         service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
 
@@ -117,7 +121,7 @@ public class ExpeditionAllInOneImporter {
         RegattaLeaderboard regattaLeaderboard = service.addRegattaLeaderboard(regattaIdentifier, null,
                 discardThresholds);
 
-        LeaderboardGroup leaderboardGroup = service.addLeaderboardGroup(UUID.randomUUID(), eventName, null, null, false,
+        LeaderboardGroup leaderboardGroup = service.addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName, description, null, false,
                 Collections.singletonList(regattaNameAndleaderboardName), null, null);
         service.updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
