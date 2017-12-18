@@ -1,9 +1,14 @@
 package com.sap.sailing.server.gateway.trackfiles.impl;
 
-import java.io.InputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.logging.Logger;
+
+import org.apache.commons.fileupload.FileItem;
+import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -31,24 +36,40 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ExpeditionAllInOneImporter {
+    private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImporter.class.getName());
+
+    private final RacingEventService service;
+    private final RaceLogTrackingAdapter adapter;
+    private final TypeBasedServiceFinderFactory serviceFinderFactory;
+    private final BundleContext context;
 
     public static class ImporterResult {
-        private final UUID eventId;
-        private final String leaderboardName;
-        private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
+        final UUID eventId;
+        final String leaderboardName;
+        final String regattaName;
+        final String raceName;
 
         public ImporterResult(UUID eventId, String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
-            this.regattaAndRaceIdentifier = regattaAndRaceIdentifier;
+            this.regattaName = regattaAndRaceIdentifier.getRegattaName();
+            this.raceName = regattaAndRaceIdentifier.getRaceName();
         }
     }
+    
+    public ExpeditionAllInOneImporter(RacingEventService service, RaceLogTrackingAdapter adapter, TypeBasedServiceFinderFactory serviceFinderFactory, BundleContext context) {
+        this.service = service;
+        this.adapter = adapter;
+        this.serviceFinderFactory = serviceFinderFactory;
+        this.context = context;
+    }
 
-    public ImporterResult importFiles(RacingEventService service, RaceLogTrackingAdapter adapter, String filename,
-            Supplier<InputStream> streamSupplier) {
+    public ImporterResult importFiles(String filename, FileItem fileItem) {
         // TODO prevent duplicate event/leaderboard names
         String eventName = filename;
         String regattaNameAndleaderboardName = filename;
@@ -98,6 +119,23 @@ public class ExpeditionAllInOneImporter {
         // TODO these are just the defaults used in the UI
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Shore", 4);
         
+        JsonHolder jsonHolderForGpsFixImport = new JsonHolder(logger);
+        List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filename, fileItem));
+        try {
+            new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, /* TODO preferred importer */ null, filesForGpsFixImport);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        JsonHolder jsonHolderForSensorFixImport = new JsonHolder(logger);
+        Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays.asList(new Pair<>(filename, fileItem));
+        try {
+            new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         // TODO import GPS and extended fixes here to determin start/endOfTracking
         // TODO how to map fixes to a competitor? Just return the IDs to the user and let him do the mapping?
 
