@@ -28,10 +28,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final PairingListTemplateDTO template;
     private final SailingServiceAsync sailingService;
     private final StrippedLeaderboardDTO leaderboardDTO;
-    /*
-     * private final FlowPanel panelForAdditionalWidget; private final DockPanel buttonPanel; private final FlowPanel
-     * rightButtonPanel; private final FlowPanel leftButtonPanel;
-     */
+    private final StringMessages stringMessages;
 
     private final Button applyToRacelogButton;
     private final Button cSVExportButton;
@@ -39,7 +36,8 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
             PairingListTemplateDTO template, SailingServiceAsync sailingService) {
-        super("Pairing List", null, stringMessages.close(), null, null, null);
+        super(stringMessages.pairingList(), null, stringMessages.close(), null, null, null);
+        this.stringMessages = stringMessages;
         this.template = template;
         this.sailingService = sailingService;
         this.leaderboardDTO = leaderboardDTO;
@@ -48,7 +46,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
         cSVExportButton = new Button(stringMessages.csvExport());
         printViewButton = new Button(stringMessages.printView());
-        
+
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogs();
         }
@@ -61,27 +59,27 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         /* DATA PANEL */
 
         CaptionPanel dataPanel = new CaptionPanel();
-        dataPanel.setCaptionText("Pairing List Data");
+        dataPanel.setCaptionText(stringMessages.dataOfPairingList());
 
         Grid formGrid = new Grid(5, 2);
         dataPanel.add(formGrid);
-        Label flights =new Label(String.valueOf(this.template.getFlightCount()));
+        Label flights = new Label(String.valueOf(this.template.getFlightCount()));
         flights.ensureDebugId("FlightCountLabel");
-        Label groups =new Label(String.valueOf(this.template.getGroupCount()));
+        Label groups = new Label(String.valueOf(this.template.getGroupCount()));
         groups.ensureDebugId("GroupCountLabel");
-        Label competitors =new Label(String.valueOf(this.template.getCompetitorCount()));
+        Label competitors = new Label(String.valueOf(this.template.getCompetitorCount()));
         competitors.ensureDebugId("CompetitorCountLabel");
-        formGrid.setWidget(0, 0, new Label("Number of Flights:"));
+        formGrid.setWidget(0, 0, new Label(stringMessages.numberOfFlights()));
         formGrid.setWidget(0, 1, flights);
-        formGrid.setWidget(1, 0, new Label("Number of Groups:"));
+        formGrid.setWidget(1, 0, new Label(stringMessages.numberOfGroups()));
         formGrid.setWidget(1, 1, groups);
-        formGrid.setWidget(2, 0, new Label("Number of competitors:"));
+        formGrid.setWidget(2, 0, new Label(stringMessages.numberOfCompetitors()));
         formGrid.setWidget(2, 1, competitors);
-        formGrid.setWidget(3, 0, new Label("Quality:"));
+        formGrid.setWidget(3, 0, new Label(stringMessages.quality()));
         formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
         if (this.template.getFlightMultiplier() > 1) {
-            Label flightMultiplierLabel = new Label(String.valueOf(this.template.getFlightMultiplier())); 
-            formGrid.setWidget(4, 0, new Label("Flight Multiplier:"));
+            Label flightMultiplierLabel = new Label(String.valueOf(this.template.getFlightMultiplier()));
+            formGrid.setWidget(4, 0, new Label(stringMessages.flightMultiplier()));
             formGrid.setWidget(4, 1, flightMultiplierLabel);
             flightMultiplierLabel.ensureDebugId("FlightMultiplierCountLabel");
         }
@@ -93,7 +91,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         /* PAIRING LIST TEMPLATE PANEL */
 
         CaptionPanel pairingListTemplatePanel = new CaptionPanel();
-        pairingListTemplatePanel.setCaptionText("Pairing List Template");
+        pairingListTemplatePanel.setCaptionText(stringMessages.pairingListTemplate());
 
         Grid pairingListGrid = new Grid(this.template.getPairingListTemplate().length,
                 this.template.getPairingListTemplate()[0].length);
@@ -120,13 +118,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         return panel;
     }
 
-    /*
-     * public void show() { Widget additionalWidget = getAdditionalWidget(); if (additionalWidget != null) {
-     * panelForAdditionalWidget.add(additionalWidget); } validateAndUpdate(); dateEntryDialog.center(); final
-     * FocusWidget focusWidget = getInitialFocusWidget(); if (focusWidget != null) { Scheduler.get().scheduleFinally(new
-     * ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }}); } }
-     */
-
     protected PairingListTemplateDTO getResult() {
         return this.template;
     }
@@ -142,9 +133,9 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         getRightButtonPannel().add(applyToRacelogButton);
         getRightButtonPannel().add(cSVExportButton);
         getRightButtonPannel().add(printViewButton);
-        getRightButtonPannel().add(new HTML("Prints the applied version"));
-        if(!applyToRacelogButton.isEnabled()){
-            Label label=new Label("Registered Competitors are unequal to Competitors from Pairinglist!");
+        getRightButtonPannel().add(new HTML(stringMessages.printHint()));
+        if (!applyToRacelogButton.isEnabled()) {
+            Label label = new Label(stringMessages.blockedApplyButton());
             label.getElement().getStyle().setColor("red");
             getRightButtonPannel().add(label);
         }
@@ -152,19 +143,19 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.fillRaceLogsFromPairingListTemplate(leaderboardDTO.getName(), template.getFlightMultiplier(),
-                        template.getSelectedFlightNames(), new AsyncCallback<Void>() {
+                sailingService.fillRaceLogsFromPairingListTemplate(leaderboardDTO.getName(),
+                        template.getFlightMultiplier(), template.getSelectedFlightNames(), new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        System.out.println("it worked ;-)");
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        caught.printStackTrace();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                System.out.println("it worked ;-)");
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                caught.printStackTrace();
+                            }
+                        });
             }
 
         });
@@ -177,10 +168,10 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
         });
         printViewButton.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
-                
+
                 String link = EntryPointLinkFactory.createPairingListLink(createLinkParameters());
                 Window.open(link, "", "");
             }
@@ -207,11 +198,11 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         }
         return result.toString();
     }
-    
+
     private void disableApplyToRacelogs() {
         this.applyToRacelogButton.setEnabled(false);
     }
-    
+
     private Map<String, String> createLinkParameters() {
         Map<String, String> result = new HashMap<>();
         result.put("leaderboardName", leaderboardDTO.getName());

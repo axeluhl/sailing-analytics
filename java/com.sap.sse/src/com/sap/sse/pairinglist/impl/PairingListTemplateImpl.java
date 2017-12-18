@@ -327,15 +327,10 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             Arrays.fill(group, -1);
         }
         boolean[] contains = new boolean[competitorCount];
-        // LinkedList<Integer> competitors=new LinkedList<>();
-        // for(int competitor=0;competitor<competitorCount;competitor++){
-        // competitors.add(competitor);
-        // }
         if (groupCount > 1) {
             int[] associationHigh = new int[groupCount - 1];
             flightColumn[0][0] = seed;
             contains[seed] = true;
-            // competitors.remove((Integer)seed);
             int[] sumsOf3rdDemension = new int[competitorCount];
             System.arraycopy(currentAssociations[seed], 0, sumsOf3rdDemension, 0, competitorCount);
             int[] maxValues = new int[competitorCount];
@@ -343,7 +338,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
                 int associationSum = Integer.MAX_VALUE;
                 associationHigh[0] = Integer.MAX_VALUE;
-                // for(int competitorIndex:competitors) {
                 for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
                     if (sumsOf3rdDemension[competitorIndex] <= associationSum && !contains[competitorIndex]
                             && maxValues[competitorIndex] <= associationHigh[0]) {
@@ -354,7 +348,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     }
                 }
                 contains[flightColumn[0][assignmentIndex]] = true;
-                // competitors.remove((Integer)flightColumn[0][assignmentIndex]);
                 for (int competitor = 0; competitor < competitorCount; competitor++) {
                     if (flightColumn[0][assignmentIndex] != competitor) {
                         sumsOf3rdDemension[competitor] += currentAssociations[flightColumn[0][assignmentIndex]][competitor];
@@ -365,8 +358,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 }
             }
             for (int groupIndex = 1; groupIndex < groupCount - 1; groupIndex++) {
-                // flightColumn[groupIndex][0]=competitors.get(0);
-                // competitors.remove(0);
                 for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
                     if (!contains[competitorIndex]) {
                         flightColumn[groupIndex][0] = competitorIndex;
@@ -383,7 +374,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[groupIndex] = Integer.MAX_VALUE;
 
-                    // for (int competitorIndex:competitors) {
                     for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
                         if (sumsOf3rdDemension[competitorIndex] <= associationSum && !contains[competitorIndex]
                                 && maxValues[competitorIndex] <= associationHigh[groupIndex]) {
@@ -392,7 +382,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                             associationHigh[groupIndex] = maxValues[competitorIndex];
                         }
                     }
-                    // competitors.remove((Integer)flightColumn[groupIndex][assignmentIndex]);
                     contains[flightColumn[groupIndex][assignmentIndex]] = true;
                     for (int competitor = 0; competitor < competitorCount; competitor++) {
                         if (flightColumn[groupIndex][assignmentIndex] != competitor) {
@@ -405,16 +394,13 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 }
             }
         }
-        // last Flight
         for (int assignmentIndex = 0; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
-            // for (int competitorIndex:competitors) {
             for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
                 if (!contains[competitorIndex]) {
                     flightColumn[groupCount - 1][assignmentIndex] = competitorIndex;
                 }
             }
             contains[flightColumn[groupCount - 1][assignmentIndex]] = true;
-            // competitors.remove((Integer)flightColumn[groupCount - 1][assignmentIndex]);
         }
         return flightColumn;
     }
@@ -563,7 +549,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return the improved pairingListTemplate
      */
     private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
-        int boatChanges[] = new int[flights-1];
+        int boatChanges[] = new int[flights - 1];
 
         for (int i = 1; i < flights; i++) {
             int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
@@ -584,9 +570,10 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 int[] temp = new int[pairingList[0].length];
                 System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
 
-                System.arraycopy(pairingList[i * pairingList.length / flights+ bestMatchesIndex], 0,
-                        pairingList[i * pairingList.length / flights ], 0, groupNext.length);
-                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0, temp.length);
+                System.arraycopy(pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
+                        pairingList[i * pairingList.length / flights], 0, groupNext.length);
+                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
+                        temp.length);
             }
 
             boatChanges[i - 1] = groupNext.length - bestMatch;
@@ -597,7 +584,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private int getMatches(int[] arr1, int[] arr2) {
         int matches = 0;
 
-        for (int value: arr1) {
+        for (int value : arr1) {
             if (this.contains(arr2, value)) {
                 matches++;
             }
@@ -605,14 +592,15 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         return matches;
     }
-    
+
     private int[][] multiplyFlights(int[][] bestPLT, int flightCount, int groupCount, int competitorCount) {
-        int[][] result = new int[((flightCount*flightMultiplier) * groupCount)][competitorCount / groupCount];
-       
+        int[][] result = new int[((flightCount * flightMultiplier) * groupCount)][competitorCount / groupCount];
+
         for (int flightIndex = 0; flightIndex < flightCount; flightIndex++) {
             for (int x = 0; x < flightMultiplier; x++) {
                 for (int groupIndex = 0; groupIndex < groupCount; groupIndex++) {
-                    result[(flightIndex * groupCount * (flightMultiplier) + groupIndex) + x * groupCount] = bestPLT[flightIndex * groupCount + groupIndex];
+                    result[(flightIndex * groupCount * (flightMultiplier) + groupIndex)
+                            + x * groupCount] = bestPLT[flightIndex * groupCount + groupIndex];
                 }
             }
         }
@@ -641,14 +629,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return worstValuePos;
     }
-
-    protected int[][][] copyInto3rdDimension(int competitors, int[][] currentAssociations, int[][][] associationRow,
-            int[][] flightColumn, int zGroups, int fleet) {
-        System.arraycopy(currentAssociations[flightColumn[fleet][zGroups - 1]], 0, associationRow[fleet][zGroups - 1], 
-                0, competitors);
-        return associationRow;
-    }
-
     
     private boolean contains(int[] arr, int value) {
         for (int i = 0; i < arr.length; i++) {
@@ -768,7 +748,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
         return standardDev;
     }
-
+    /**
+     * This Method replaces the given number of dummy competitors with -1, so they are not longer valid and could not be read on client side.
+     * @param bestPLT actual pairinglist, which should be modified
+     * @return the modified pairinglist
+     */
     private int[][] resetDummies(int[][] bestPLT, int competitorCount) {
         if (dummies > 0) {
             int[] dummyCompetitors = new int[dummies];
