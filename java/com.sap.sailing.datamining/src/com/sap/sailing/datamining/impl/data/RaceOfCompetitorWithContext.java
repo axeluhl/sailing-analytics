@@ -217,9 +217,23 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     private int getNumberOf(ManeuverType maneuverType) {
         TrackedRace trackedRace = getTrackedRace();
         int number = 0;
-        for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), trackedRace.getStartOfRace(), trackedRace.getEndOfTracking(), false)) {
-            if (maneuver.getType() == maneuverType) {
-                number++;
+        if (trackedRace != null && trackedRace.getStartOfRace() != null) {
+            final TimePoint end;
+            final TimePoint endOfTracking = trackedRace.getEndOfTracking();
+            if (trackedRace.getEndOfRace() != null) {
+                end = trackedRace.getEndOfRace();
+            } else {
+                final TimePoint now = MillisecondsTimePoint.now();
+                if (endOfTracking != null && endOfTracking.before(now)) {
+                    end = endOfTracking;
+                } else {
+                    end = now;
+                }
+            }
+            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), trackedRace.getStartOfRace(), end, false)) {
+                if (maneuver.getType() == maneuverType) {
+                    number++;
+                }
             }
         }
         return number;
