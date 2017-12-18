@@ -224,6 +224,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return allSeeds;
     }
 
+    //TODO use comparator 
     private int[][] countSort(int[][] allSeeds, int i, int competitorCount) {
         int[][] output = new int[allSeeds.length][allSeeds[0].length];
         int[] count = new int[competitorCount];
