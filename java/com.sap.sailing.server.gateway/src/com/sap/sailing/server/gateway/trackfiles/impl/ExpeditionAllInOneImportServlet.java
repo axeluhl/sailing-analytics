@@ -2,12 +2,12 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter.ImporterResult;
@@ -18,7 +18,7 @@ import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter
  */
 public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
-    private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImportServlet.class.getName());
+    // private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImportServlet.class.getName());
 
     /**
      * Process the uploaded file items.
@@ -26,7 +26,6 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        JsonHolder jsonResult = new JsonHolder(logger);
         try {
             String fileName = null;
             FileItem fileItem = null;
@@ -39,11 +38,21 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             if (fileItem == null) {
                 throw new RuntimeException("No file to import");
             }
-            ImporterResult importerResult = new ExpeditionAllInOneImporter(getService(), /* TODO */ null, getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem);
+            final ImporterResult importerResult = new ExpeditionAllInOneImporter(getService(), /* TODO */ null,
+                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem);
+            resp.setContentType("text/html;charset=UTF-8");
+            this.toJSON(importerResult).writeJSONString(resp.getWriter());
         } catch (Exception e) {
-            jsonResult.add(e);
-        } finally {
-            jsonResult.writeJSONString(resp);
+            new JSONObject().writeJSONString(resp.getWriter());
         }
+    }
+
+    private JSONObject toJSON(ImporterResult importerResult) {
+        final JSONObject json = new JSONObject();
+        json.put("eventId", importerResult.eventId);
+        json.put("leaderboardName", importerResult.leaderboardName);
+        json.put("regattaName", importerResult.regattaName);
+        json.put("raceName", importerResult.raceName);
+        return json;
     }
 }
