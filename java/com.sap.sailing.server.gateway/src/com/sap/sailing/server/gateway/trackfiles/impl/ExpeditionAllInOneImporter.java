@@ -51,12 +51,14 @@ public class ExpeditionAllInOneImporter {
     public static class ImporterResult {
         private final UUID eventId;
         private final String leaderboardName;
-        private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
+        private final String regattaName;
+        private final String raceName;
 
         public ImporterResult(UUID eventId, String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
-            this.regattaAndRaceIdentifier = regattaAndRaceIdentifier;
+            this.regattaName = regattaAndRaceIdentifier.getRegattaName();
+            this.raceName = regattaAndRaceIdentifier.getRaceName();
         }
     }
     
