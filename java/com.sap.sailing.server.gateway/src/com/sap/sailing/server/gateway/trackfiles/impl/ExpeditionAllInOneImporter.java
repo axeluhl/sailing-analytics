@@ -84,7 +84,7 @@ public class ExpeditionAllInOneImporter {
     }
 
     public ImporterResult importFiles(String filename, FileItem fileItem) {
-        String importTimeString = DateTimeFormatter.ISO_INSTANT.format(LocalDateTime.now(ZoneOffset.UTC));
+        String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         // TODO prevent duplicate event/leaderboard names
         String eventName = filenameWithDateTimeSuffix;
