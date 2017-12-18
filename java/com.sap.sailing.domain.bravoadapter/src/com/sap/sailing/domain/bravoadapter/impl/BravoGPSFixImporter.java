@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -21,8 +22,9 @@ import com.sap.sailing.server.trackfiles.impl.BravoExtendedDataImporterImpl;
 
 public class BravoGPSFixImporter implements GPSFixImporter {
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, final String filename)
+    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, final String filename)
             throws FormatNotSupportedException, IOException {
+        final AtomicBoolean importedFixes = new AtomicBoolean(false);
         TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(filename, getType() + "@" + new Date());
         new BravoExtendedDataImporterImpl().importFixes(inputStream,
                 (Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier deviceIdentifier)->{
@@ -34,8 +36,10 @@ public class BravoGPSFixImporter implements GPSFixImporter {
                                 new KnotSpeedWithBearingImpl(fix.get(BravoExtendedSensorDataMetadata.SOG.getColumnIndex()),
                                         new DegreeBearingImpl(fix.get(BravoExtendedSensorDataMetadata.COG.getColumnIndex()))));
                         callback.addFix(gpsFix, device);
+                        importedFixes.set(true);
                     }
                 }, filename, /* sourceName */ getType(), /* downsample */ false);
+        return importedFixes.get();
     }
 
     @Override
