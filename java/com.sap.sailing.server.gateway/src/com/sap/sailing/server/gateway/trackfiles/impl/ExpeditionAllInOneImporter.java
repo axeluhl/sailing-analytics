@@ -161,11 +161,6 @@ public class ExpeditionAllInOneImporter {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-        // TODO import GPS and extended fixes here to determin start/endOfTracking
-        // TODO how to map fixes to a competitor? Just return the IDs to the user and let him do the mapping?
-
-        // TODO determine from imported file
-        
         
         TimePoint startOfTracking = null;
         TimePoint endOfTracking = null;
