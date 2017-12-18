@@ -45,7 +45,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * Searches the requested importer in the importers provided by the OSGi registry and imports the priovided sensor
      * data file.
      * 
-     * @param files
+     * @param importerNamesAndFiles
      *            the file items together with the names of the importer to use for importing the respective file's
      *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
      *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
@@ -53,11 +53,11 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @throws IOException
      */
-    private void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> files)
+    private void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> importerNamesAndFiles)
             throws IOException {
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
-        for (Pair<String, FileItem> file : files) {
+        for (Pair<String, FileItem> file : importerNamesAndFiles) {
             final String requestedImporterName = file.getA();
             final FileItem fi = file.getB();
             DoubleVectorFixImporter importerToUse = null;
