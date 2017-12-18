@@ -44,7 +44,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixImporter
         implements DoubleVectorFixImporter {
-    public static final String EXPEDITION_EXTENDED_TYPE = "EXPEDITION_EXTENDED";
     private static final Logger logger = Logger.getLogger(ExpeditionExtendedDataImporterImpl.class.getName());
     private static final String ORIGINAL_POSITION_HEADER = "Pos[ddd.dd]";
     public static final String COL_NAME_LAT = "Lat";
@@ -64,7 +63,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private final int trackColumnCount;
 
     public ExpeditionExtendedDataImporterImpl() {
-        super(EXPEDITION_EXTENDED_TYPE);
+        super(DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE);
         columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = ExpeditionExtendedSensorDataMetadata
                 .getColumnNamesToIndexInDoubleFix();
         trackColumnCount = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.values().stream()

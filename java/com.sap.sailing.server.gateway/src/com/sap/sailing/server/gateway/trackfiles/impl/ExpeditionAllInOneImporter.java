@@ -42,6 +42,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
+import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.server.RacingEventService;
@@ -152,7 +153,7 @@ public class ExpeditionAllInOneImporter {
         }
 
         ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
-        Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays.asList(new Pair<>(filename, fileItem));
+        Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays.asList(new Pair<>(DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE, fileItem));
         try {
             new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
         } catch (IOException e1) {
