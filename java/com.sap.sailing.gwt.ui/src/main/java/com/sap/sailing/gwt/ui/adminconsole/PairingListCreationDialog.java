@@ -206,8 +206,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private Map<String, String> createLinkParameters() {
         Map<String, String> result = new HashMap<>();
         result.put("leaderboardName", leaderboardDTO.getName());
-        result.put("flightMultiplier", String.valueOf(template.getFlightMultiplier()));
-        result.put("selectedFlights", String.join(",", template.getSelectedFlightNames()));
         return result;
     }
 

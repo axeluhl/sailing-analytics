@@ -916,8 +916,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param callback
      *            returns a {@link PairingListDTO}
      */
-    void getPairingListFromRaceLogs(final String leaderboardName, final Iterable<String> selectedFlightNames, 
-            AsyncCallback<PairingListDTO> callback);
+    void getPairingListFromRaceLogs(final String leaderboardName, AsyncCallback<PairingListDTO> callback);
 
     /**
      * Registers all competitors of a {@link PairingList} in the respective {@link RaceColumn}s and {@link Fleet}s.
