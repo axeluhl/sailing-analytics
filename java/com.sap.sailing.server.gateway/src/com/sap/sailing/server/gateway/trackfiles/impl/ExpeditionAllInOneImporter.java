@@ -92,11 +92,12 @@ public class ExpeditionAllInOneImporter {
             errorList.add(new ErrorImportDTO(null, exception.getClass().getName(), exception.getMessage(), null, null));
             sensorFixImporterType = "";
         }
-        
+
         private ImporterResult(final UUID eventId, final String leaderboardName, String leaderboardGroupName,
                 final RegattaAndRaceIdentifier regattaAndRaceIdentifier, final String raceColumnName,
                 final String fleetName, final List<TrackImportDTO> importGpsFixData,
-                final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType, List<ErrorImportDTO> errors) {
+                final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType,
+                List<ErrorImportDTO> errors) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
             this.leaderboardGroupName = leaderboardGroupName;
@@ -110,20 +111,33 @@ public class ExpeditionAllInOneImporter {
             this.errorList = errors;
         }
     }
-    
-    public ExpeditionAllInOneImporter(final RacingEventService service, RaceLogTrackingAdapter adapter, final TypeBasedServiceFinderFactory serviceFinderFactory, final BundleContext context) {
+
+    public ExpeditionAllInOneImporter(final RacingEventService service, RaceLogTrackingAdapter adapter,
+            final TypeBasedServiceFinderFactory serviceFinderFactory, final BundleContext context) {
         this.service = service;
         this.adapter = adapter;
         this.serviceFinderFactory = serviceFinderFactory;
         this.context = context;
     }
 
-    public ImporterResult importFiles(final String filename, final FileItem fileItem, final String boatClassName) throws AllinOneImportException {
+    public ImporterResult importFiles(final String filenameWithSuffix, final FileItem fileItem,
+            final String boatClassName) throws AllinOneImportException {
         List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
+
+        final String filename;
+        if (filenameWithSuffix.toLowerCase().contains(".csv")) {
+            String tempFilename = filenameWithSuffix.replace(filenameWithSuffix, ".csv");
+            tempFilename = tempFilename.replace(filenameWithSuffix, ".CSV");
+            filename = tempFilename;
+        } else {
+            filename = filenameWithSuffix;
+        }
+
         final String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         final String eventName = filenameWithDateTimeSuffix;
-        final String description = MessageFormat.format("Event imported from expedition file '{0}' on {1}", filename, importTimeString);
+        final String description = MessageFormat.format("Event imported from expedition file '{0}' on {1}", filename,
+                importTimeString);
         final String leaderboardGroupName = filenameWithDateTimeSuffix;
         final String regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
         final RegattaIdentifier regattaIdentifier = new RegattaName(filenameWithDateTimeSuffix);
@@ -137,7 +151,7 @@ public class ExpeditionAllInOneImporter {
 
         // TODO guess venue based on the reverse geocoder?
         final String venueName = filename;
-        
+
         final String fleetName = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
         final String seriesName = Series.DEFAULT_NAME;
 
@@ -149,11 +163,12 @@ public class ExpeditionAllInOneImporter {
         // TODO These are the defaults also used by the UI
         final String raceLogEventAuthorName = "Shore";
         final int raceLogEventPriority = 4;
-        
+
         final ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
-        final List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filename, fileItem));
+        final List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filenameWithSuffix, fileItem));
         try {
-            new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
+            new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport,
+                    GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
         } catch (IOException e1) {
             errors.addAll(jsonHolderForGpsFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
@@ -165,13 +180,14 @@ public class ExpeditionAllInOneImporter {
         final Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays
                 .asList(new Pair<>(sensorFixImporterType, fileItem));
         try {
-            new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
+            new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport,
+                    importerNamesAndFilesForSensorFixImport);
         } catch (IOException e1) {
             errors.addAll(jsonHolderForSensorFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
         }
         errors.addAll(jsonHolderForSensorFixImport.getErrorList());
-        
+
         TimePoint firstFixAt = null;
         TimePoint lastFixAt = null;
         final ArrayList<TrackImportDTO> allData = new ArrayList<>();
@@ -188,17 +204,17 @@ public class ExpeditionAllInOneImporter {
                 lastFixAt = deviceTrackEnd;
             }
         }
-        
+
         final TimePoint eventStartDate = firstFixAt;
         final TimePoint eventEndDate = lastFixAt;
 
-        final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate,
-                venueName, true, UUID.randomUUID());
+        final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, venueName, true,
+                UUID.randomUUID());
         service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
 
         final Series series = new SeriesImpl(seriesName, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
-                Collections.singleton(new FleetImpl(fleetName)),
-                Collections.emptySet(), /* trackedRegattaRegistry */ service);
+                Collections.singleton(new FleetImpl(fleetName)), Collections.emptySet(),
+                /* trackedRegattaRegistry */ service);
         final ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
         final RankingMetricConstructor rankingMetricConstructor = RankingMetricsFactory
                 .getRankingMetricConstructor(rankingMetric);
@@ -209,8 +225,8 @@ public class ExpeditionAllInOneImporter {
         final RegattaLeaderboard regattaLeaderboard = service.addRegattaLeaderboard(regattaIdentifier, null,
                 discardThresholds);
 
-        final LeaderboardGroup leaderboardGroup = service.addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName, description, null, false,
-                Collections.singletonList(regattaNameAndleaderboardName), null, null);
+        final LeaderboardGroup leaderboardGroup = service.addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName,
+                description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null);
         service.updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
                 Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
@@ -222,7 +238,7 @@ public class ExpeditionAllInOneImporter {
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
         // TODO these are just the defaults used in the UI
         final LogEventAuthorImpl author = new LogEventAuthorImpl(raceLogEventAuthorName, raceLogEventPriority);
-        
+
         final TimePoint startOfTracking = firstFixAt;
         final TimePoint endOfTracking = lastFixAt;
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
@@ -231,18 +247,21 @@ public class ExpeditionAllInOneImporter {
 
         try {
             adapter.denoteRaceForRaceLogTracking(service, regattaLeaderboard, raceColumn, fleet, null);
-            final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet, true, true);
-            
+            final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet, true,
+                    true);
+
             // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
             raceHandle.getRace();
 
             final DynamicTrackedRace trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
-            
+
             final WindImportResult windImportResult = new AbstractWindImporter.WindImportResult();
-            final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceId);
+            final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION,
+                    windSourceId);
             final Map<InputStream, String> streamsWithFilenames = new HashMap<>();
-            streamsWithFilenames.put(fileItem.getInputStream(), filename);
-            new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, Arrays.asList(trackedRace), streamsWithFilenames);
+            streamsWithFilenames.put(fileItem.getInputStream(), filenameWithSuffix);
+            new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource,
+                    Arrays.asList(trackedRace), streamsWithFilenames);
 
             return new ImporterResult(event.getId(), regattaNameAndleaderboardName, leaderboardGroupName,
                     trackedRace.getRaceIdentifier(), raceColumnName, fleetName,
