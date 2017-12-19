@@ -18,6 +18,31 @@ class AbstractDataImportResponse extends JavaScriptObject {
     private static final Logger logger = Logger.getLogger(AbstractDataImportResponse.class.getName());
 
     /**
+     * Extracts {@link ErrorMessage}s contained in this {@link JavaScriptObject JavaScript object}'s <i>errors</i>
+     * field.
+     * 
+     * @return the {@link List} of contained {@link ErrorMessage}s or an empty list if the <i>errors</i> field is
+     *         <code>undefined</code> or empty
+     * 
+     * @see #getJsObjectList(String)
+     */
+    public final List<ErrorMessage> getErrors() {
+        return getJsObjectList("errors");
+    }
+
+    /**
+     * Checks if this {@link JavaScriptObject JavaScript object} contained errors.
+     * 
+     * @return <code>true</code> if the {@link #getErrors() error list} is neither <code>null</code> nor empty,
+     *         <code>false</code> otherwise
+     * @see #getErrors()
+     */
+    public final boolean hasErrors() {
+        final List<ErrorMessage> errors = getErrors();
+        return errors != null && !errors.isEmpty();
+    }
+
+    /**
      * {@link JSONParser#parseStrict(String) Strictly parses} the provided {@link String} representation into JSON and
      * {@link JavaScriptObject#cast() casts} it to the desired type.
      * 

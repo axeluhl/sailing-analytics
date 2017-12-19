@@ -15,17 +15,9 @@ public class SensorDataImportResponse extends AbstractDataImportResponse {
         return getStringList("uploads");
     }
 
-    public final List<ErrorMessage> getErrors() {
-        return getJsObjectList("errors");
-    }
-
     public final boolean didSucceedImportingAnyFile() {
         return getUploads() != null && !getUploads().isEmpty();
     }
 
-    public final boolean hasErrors() {
-        final List<ErrorMessage> errors = getErrors();
-        return errors != null && !errors.isEmpty();
-    }
 }
 
