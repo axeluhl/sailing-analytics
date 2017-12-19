@@ -456,8 +456,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             Window.alert(response.getEventId() + "-" + response.getLeaderboardName() + "-" + response.getRegattaName()
                     + "-" + response.getRaceName());
             new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                    response.getLeaderboardName(), Collections.emptyList(), Collections.emptyList(), "", sailingService,
-                    errorReporter, stringMessages);
+                    response.getLeaderboardName(), response.getRaceName(), Collections.emptyList(),
+                    Collections.emptyList(), "", sailingService, errorReporter, stringMessages);
         });
         rootPanel.add(formPanel);
         final VerticalPanel contentPanel = new VerticalPanel();

@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,6 +26,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
+    private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     protected EventDTO event;
     private RegattaDTO regatta;
     private StrippedLeaderboardDTO leaderboard;
@@ -32,13 +35,14 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            String raceName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.sensorImporterType = sensorImporterType;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        regattaAndRaceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
                 
         sailingService.getEventById(eventId, false, new AsyncCallback<EventDTO>() {
             @Override
