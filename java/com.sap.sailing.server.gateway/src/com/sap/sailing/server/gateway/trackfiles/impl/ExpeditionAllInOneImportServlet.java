@@ -68,7 +68,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
 
     private JSONObject toJSON(ImporterResult importerResult) {
         final JSONObject json = new JSONObject();
-        json.put("eventId", importerResult.eventId);
+        json.put("eventId", importerResult.eventId.toString());
         json.put("leaderboardName", importerResult.leaderboardName);
         json.put("regattaName", importerResult.regattaName);
         json.put("raceName", importerResult.raceName);
