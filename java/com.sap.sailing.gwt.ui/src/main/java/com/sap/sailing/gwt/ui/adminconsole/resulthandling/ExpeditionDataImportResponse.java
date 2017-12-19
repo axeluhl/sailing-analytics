@@ -13,7 +13,8 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     }
 
     public final UUID getEventId() {
-        return UUID.fromString(getString("eventId"));
+        String eventId = getString("eventId");
+        return eventId == null ? null : UUID.fromString(eventId);
     }
 
     public final native String getLeaderboardGroupName() /*-{
