@@ -27,6 +27,8 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
+    private final String raceColumnName;
+    private final String fleetName;
     protected EventDTO event;
     private RegattaDTO regatta;
     private StrippedLeaderboardDTO leaderboard;
@@ -35,14 +37,16 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            String raceName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            String raceName, String raceColumnName, String fleetName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
+        this.raceColumnName = raceColumnName;
+        this.fleetName = fleetName;
         this.sensorImporterType = sensorImporterType;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        regattaAndRaceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
+        this.regattaAndRaceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
                 
         sailingService.getEventById(eventId, false, new AsyncCallback<EventDTO>() {
             @Override
