@@ -57,7 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -6795,31 +6794,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public PairingListTemplateDTO calculatePairingList(final String leaderboardName, Iterable<String> selectedFlightNames, int competitorsCount, 
-            int flightMultiplier) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
-        for (String flightName : selectedFlightNames) {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                if (flightName.equalsIgnoreCase(raceColumn.getName())) {
-                    selectedRaces.add(raceColumn);
-                }
-            }
-        }
+    public PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount,
+            final int competitorCount, final int flightMultiplier) {
         
-        PairingListTemplate template = getService().createPairingListFromRegatta(leaderboardName, competitorsCount, 
-                flightMultiplier, Util.size(selectedRaces));
+        PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
+                flightMultiplier);
         
-        int flightCount = 0;
-        
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if (Util.contains(selectedFlightNames, raceColumn.getName())) {
-                flightCount++;
-            }
-        }
-        int groupCount = (int) (template.getPairingListTemplate().length / flightCount);
-        return new PairingListTemplateDTO(flightCount, groupCount, 
-                competitorsCount, flightMultiplier, template.getPairingListTemplate(), template.getQuality(), selectedFlightNames);
+        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, 
+                template.getPairingListTemplate(), template.getQuality());
     }
     
     @Override
@@ -6878,7 +6860,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 new BoatDTO(competitorAndBoatPair.getB().getName(), competitorAndBoatPair.getB().getSailID(), 
                                         competitorAndBoatPair.getB().getColor())));
                     }
-                    raceColumnList.add(fleetList);
+                    if (fleetList.size() > 0) {
+                        raceColumnList.add(fleetList);
+                    }
                 }
                 if (raceColumnList.size() > 0) {
                     result.add(raceColumnList);
@@ -6915,7 +6899,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                     }
                     // TODO set boat and competitors in race logs (bug2822)
-                    //TODO add Javadoc to setCompetitorRegistrationsInRacelog
+                    // TODO add Javadoc to setCompetitorRegistrationsInRacelog
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), competitors);
                     groupCount++;

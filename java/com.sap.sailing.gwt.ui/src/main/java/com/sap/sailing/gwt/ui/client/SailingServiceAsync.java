@@ -892,8 +892,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *             is thrown if the leaderboard is not found by name
      * @throws IllegalArgumentException
      */
-    void calculatePairingList(final String leaderboardName, final Iterable<String> selectedFlightNames,
-            int competitorCount, int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback)
+    void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
+            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback)
             throws NotFoundException, IllegalArgumentException;
 
     /**

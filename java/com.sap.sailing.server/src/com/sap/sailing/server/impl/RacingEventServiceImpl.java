@@ -120,7 +120,6 @@ import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -267,7 +266,6 @@ import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
-import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -4158,35 +4156,29 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public PairingListTemplate createPairingListFromRegatta(final String leaderboardName, int competitorsCount, 
-            final int flightMultiplier, final int flightsCount) {
+    public PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount, 
+            final int competitorsCount, final int flightMultiplier) {
         
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
-        if (leaderboard != null) {
-            PairingListTemplate template = pairingListTemplateFactory
-                    .createPairingListTemplate(new PairingFrameProvider() {
+        PairingListTemplate template = pairingListTemplateFactory
+                .createPairingListTemplate(new PairingFrameProvider() {
 
-                        @Override
-                        public int getGroupsCount() {
-                            return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
-                        }
+                    @Override
+                    public int getGroupsCount() {
+                        return groupsCount;
+                    }
 
-                        // TODO set count of selected flights
-                        @Override
-                        public int getFlightsCount() {
-                            return flightsCount;
-                        }
+                    // TODO set count of selected flights
+                    @Override
+                    public int getFlightsCount() {
+                        return flightsCount;
+                    }
 
-                        @Override
-                        public int getCompetitorsCount() {
-                            return competitorsCount;
-                        }
-                    }, flightMultiplier);
-            return template;
-        } else {
-            return null;
-        }
+                    @Override
+                    public int getCompetitorsCount() {
+                        return competitorsCount;
+                    }
+                }, flightMultiplier);
+        return template;
     }
     
     @Override

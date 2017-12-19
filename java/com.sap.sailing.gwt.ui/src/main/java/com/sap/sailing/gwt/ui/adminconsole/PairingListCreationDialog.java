@@ -145,9 +145,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             @Override
             public void onClick(ClickEvent event) {
                 sailingService.fillRaceLogsFromPairingListTemplate(leaderboardDTO.getName(),
-                        template.getFlightMultiplier(), template.getSelectedFlightNames(),template, new AsyncCallback<Void>() {
+                        template.getFlightMultiplier(), template.getSelectedFlightNames(), template,
+                        new AsyncCallback<Void>() {
                             @Override
-                            public void onSuccess(Void result) { /*TODO: log successfull*/}
+                            public void onSuccess(Void result) {
+                                /* TODO: log successfull */}
+
                             @Override
                             public void onFailure(Throwable caught) {
                                 caught.printStackTrace();
@@ -171,16 +174,16 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             }
         });
         refreshButton.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
                 getDialogBox().hide();
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
                 try {
-                    sailingService.calculatePairingList(leaderboardDTO.getName(),
-                            template.getSelectedFlightNames(), template.getCompetitorCount(),
-                            template.getFlightMultiplier(), new AsyncCallback<PairingListTemplateDTO>() {
+                    sailingService.calculatePairingListTemplate(template.getFlightCount(), template.getGroupCount(),
+                            template.getCompetitorCount(), template.getFlightMultiplier(),
+                            new AsyncCallback<PairingListTemplateDTO>() {
 
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -191,7 +194,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                                 @Override
                                 public void onSuccess(PairingListTemplateDTO result) {
                                     busyDialog.hide();
-                                    PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, 
+                                    PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO,
                                             stringMessages, result, sailingService);
                                     dialog.show();
                                 }
@@ -204,7 +207,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         });
     }
 
-    //TODO set Anchor link to Button (see link with settings under configure url)
+    // TODO set Anchor link to Button (see link with settings under configure url)
     private native void downloadPairingListTemplate(String pairingListCSV)/*-{
 		var dummy = document.createElement('a');
 		dummy.setAttribute('href', 'data:text/plain;charset=utf-8,'
