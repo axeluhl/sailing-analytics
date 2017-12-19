@@ -69,12 +69,25 @@ public class ExpeditionAllInOneImporter {
         final String leaderboardName;
         final String regattaName;
         final String raceName;
+        final String raceColumnName;
+        final String fleetName;
+        final List<TrackImportDTO> importGpsFixData;
+        final List<TrackImportDTO> importSensorFixData;
+        final String sensorFixImporterType;
 
-        public ImporterResult(final UUID eventId, final String leaderboardName, final RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        private ImporterResult(final UUID eventId, final String leaderboardName,
+                final RegattaAndRaceIdentifier regattaAndRaceIdentifier, final String raceColumnName,
+                final String fleetName, final List<TrackImportDTO> importGpsFixData,
+                final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
             this.regattaName = regattaAndRaceIdentifier.getRegattaName();
             this.raceName = regattaAndRaceIdentifier.getRaceName();
+            this.raceColumnName = raceColumnName;
+            this.fleetName = fleetName;
+            this.importGpsFixData = importGpsFixData;
+            this.importSensorFixData = importSensorFixData;
+            this.sensorFixImporterType = sensorFixImporterType;
         }
     }
     
@@ -126,7 +139,9 @@ public class ExpeditionAllInOneImporter {
         }
 
         final ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
-        final Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays.asList(new Pair<>(DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE, fileItem));
+        final String sensorFixImporterType = DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE;
+        final Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays
+                .asList(new Pair<>(sensorFixImporterType, fileItem));
         try {
             new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
         } catch (IOException e1) {
@@ -206,7 +221,9 @@ public class ExpeditionAllInOneImporter {
             streamsWithFilenames.put(fileItem.getInputStream(), filename);
             new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, Arrays.asList(trackedRace), streamsWithFilenames);
 
-            return new ImporterResult(event.getId(), regattaNameAndleaderboardName, trackedRace.getRaceIdentifier());
+            return new ImporterResult(event.getId(), regattaNameAndleaderboardName, trackedRace.getRaceIdentifier(),
+                    raceColumnName, fleetName, jsonHolderForGpsFixImport.getImportResult(),
+                    jsonHolderForSensorFixImport.getImportResult(), sensorFixImporterType);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

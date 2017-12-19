@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -27,6 +30,8 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
+    private final String raceColumnName;
+    private final String fleetName;
     protected EventDTO event;
     private RegattaDTO regatta;
     private StrippedLeaderboardDTO leaderboard;
@@ -35,14 +40,16 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            String raceName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            String raceName, String raceColumnName, String fleetName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
+        this.raceColumnName = raceColumnName;
+        this.fleetName = fleetName;
         this.sensorImporterType = sensorImporterType;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        regattaAndRaceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
+        this.regattaAndRaceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
                 
         sailingService.getEventById(eventId, false, new AsyncCallback<EventDTO>() {
             @Override
@@ -140,7 +147,6 @@ public class ExpeditionAllInOneAfterImportHandler {
                 // TODO Auto-generated method stub
             }}).show();
     }
-    
 
     private final void continueWithRegisteredCompetitors() {
         // TODO check competitor count vs imported device ID count
@@ -161,7 +167,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                         @Override
                         public void ok(Collection<DeviceMappingDTO> mappings) {
                             new AddDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
-                                // TODO show dialog with links to event and RaceBoard
+                                continueWithMappedDevices();
                             });
                         }
 
@@ -180,6 +186,35 @@ public class ExpeditionAllInOneAfterImportHandler {
             }}).show();
     }
     
+    private final void continueWithMappedDevices() {
+        List<RegattaAndRaceIdentifier> racesToStopAndStartTrackingFor = new ArrayList<>();
+        racesToStopAndStartTrackingFor.add(regattaAndRaceIdentifier);
+        sailingService.stopTrackingRaces(racesToStopAndStartTrackingFor, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                final List<Triple<String, String, String>> leaderboardRaceColumnFleetNames = new ArrayList<>();
+                leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
+                sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ true, /* TODO correctWindByDeclination */ true,
+                        new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        // TODO show dialog with links to event and RaceBoard
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorStartingTracking(Util.toStringOrNull(leaderboardRaceColumnFleetNames),caught.getMessage()));
+                    }
+                });
+            }
+        });
+    }
 
     private class AddTypedDeviceMappingsToRegattaLog {
         private int callCount = 0;
