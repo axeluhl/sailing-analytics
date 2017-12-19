@@ -116,8 +116,13 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()));
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setTextAlign(TextAlign.CENTER);
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setPadding(10, Unit.PX);
-            pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
-                    boat.getColor().getAsHtml());
+            if (boat.getColor() != null) {
+                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
+                        boat.getColor().getAsHtml());
+            } else {
+                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
+                        "#cecece");
+            }
             boatIndex++;
         }
         String color = "";
