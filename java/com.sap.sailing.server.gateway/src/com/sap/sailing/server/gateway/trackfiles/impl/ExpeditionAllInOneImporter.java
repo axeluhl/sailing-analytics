@@ -69,17 +69,22 @@ public class ExpeditionAllInOneImporter {
         final String leaderboardName;
         final String regattaName;
         final String raceName;
+        final String raceColumnName;
+        final String fleetName;
         final List<TrackImportDTO> importGpsFixData;
         final List<TrackImportDTO> importSensorFixData;
         final String sensorFixImporterType;
 
         private ImporterResult(final UUID eventId, final String leaderboardName,
-                final RegattaAndRaceIdentifier regattaAndRaceIdentifier, final List<TrackImportDTO> importGpsFixData,
+                final RegattaAndRaceIdentifier regattaAndRaceIdentifier, final String raceColumnName,
+                final String fleetName, final List<TrackImportDTO> importGpsFixData,
                 final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
             this.regattaName = regattaAndRaceIdentifier.getRegattaName();
             this.raceName = regattaAndRaceIdentifier.getRaceName();
+            this.raceColumnName = raceColumnName;
+            this.fleetName = fleetName;
             this.importGpsFixData = importGpsFixData;
             this.importSensorFixData = importSensorFixData;
             this.sensorFixImporterType = sensorFixImporterType;
@@ -217,8 +222,8 @@ public class ExpeditionAllInOneImporter {
             new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, Arrays.asList(trackedRace), streamsWithFilenames);
 
             return new ImporterResult(event.getId(), regattaNameAndleaderboardName, trackedRace.getRaceIdentifier(),
-                    jsonHolderForGpsFixImport.getImportResult(), jsonHolderForSensorFixImport.getImportResult(),
-                    sensorFixImporterType);
+                    raceColumnName, fleetName, jsonHolderForGpsFixImport.getImportResult(),
+                    jsonHolderForSensorFixImport.getImportResult(), sensorFixImporterType);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
