@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,6 +26,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
+    private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     protected EventDTO event;
     private RegattaDTO regatta;
     private StrippedLeaderboardDTO leaderboard;
@@ -32,13 +35,14 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            String raceName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.sensorImporterType = sensorImporterType;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        regattaAndRaceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
                 
         sailingService.getEventById(eventId, false, new AsyncCallback<EventDTO>() {
             @Override
@@ -112,7 +116,23 @@ public class ExpeditionAllInOneAfterImportHandler {
                 new DialogCallback<Set<CompetitorDTO>>() {
             @Override
             public void ok(final Set<CompetitorDTO> competitors) {
-                continueWithCompetitors(competitors);
+                if (competitors.isEmpty()) {
+                    Window.alert("TODO: no competitor added -> cancelling import");
+                } else {
+                    sailingService.setCompetitorRegistrationsInRegattaLog(leaderboard.getName(),
+                        competitors, new AsyncCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                continueWithRegisteredCompetitors();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                // TODO Auto-generated method stub
+                                
+                            }
+                        });
+                }
             }
 
             @Override
@@ -122,46 +142,42 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
     
 
-    private final void continueWithCompetitors(final Set<CompetitorDTO> competitors) {
-        if (competitors.isEmpty()) {
-            Window.alert("TODO: no competitor added -> cancelling import");
-        } else {
-            // TODO check competitor count vs imported device ID count
-            // TODO if there is exactly one competitor and one device ID, we could auto-map those
-            
-            final String leaderboardName = leaderboard.getName();
-            new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages,
-                    leaderboardName, sensorFixesDeviceIDs,
-                    sensorImporterType, new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
+    private final void continueWithRegisteredCompetitors() {
+        // TODO check competitor count vs imported device ID count
+        // TODO if there is exactly one competitor and one device ID, we could auto-map those
+        
+        final String leaderboardName = leaderboard.getName();
+        new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages,
+                leaderboardName, sensorFixesDeviceIDs,
+                sensorImporterType, new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
 
-                @Override
-                public void ok(Collection<TypedDeviceMappingDTO> mappings) {
-                    new AddTypedDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
-                        new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
-                                leaderboardName, gpsFixesDeviceIDs,
-                                new DialogCallback<Collection<DeviceMappingDTO>>() {
+            @Override
+            public void ok(Collection<TypedDeviceMappingDTO> mappings) {
+                new AddTypedDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
+                    new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
+                            leaderboardName, gpsFixesDeviceIDs,
+                            new DialogCallback<Collection<DeviceMappingDTO>>() {
 
-                            @Override
-                            public void ok(Collection<DeviceMappingDTO> mappings) {
-                                new AddDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
-                                    // TODO show dialog with links to event and RaceBoard
-                                });
-                            }
+                        @Override
+                        public void ok(Collection<DeviceMappingDTO> mappings) {
+                            new AddDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
+                                // TODO show dialog with links to event and RaceBoard
+                            });
+                        }
 
-                            @Override
-                            public void cancel() {
-                                // TODO Auto-generated method stub
-                                
-                            }}).show();
-                    });
-                }
+                        @Override
+                        public void cancel() {
+                            // TODO Auto-generated method stub
+                            
+                        }}).show();
+                });
+            }
 
-                @Override
-                public void cancel() {
-                    // TODO Auto-generated method stub
-                    
-                }}).show();
-        }
+            @Override
+            public void cancel() {
+                // TODO Auto-generated method stub
+                
+            }}).show();
     }
     
 
