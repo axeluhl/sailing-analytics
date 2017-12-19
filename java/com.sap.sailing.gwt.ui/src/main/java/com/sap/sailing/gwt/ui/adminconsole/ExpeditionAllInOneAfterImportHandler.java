@@ -96,7 +96,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             @Override
             public void ok(final Set<CompetitorDTO> competitors) {
                 if (competitors.isEmpty()) {
-                    Window.alert("TODO: no competitor added -> cancelling import");
+                    Window.alert(stringMessages.importCanceledNoCompetitorAdded());
                 } else {
                     sailingService.setCompetitorRegistrationsInRegattaLog(leaderboard.getName(),
                         competitors, new AsyncCallback<Void>() {
@@ -243,7 +243,7 @@ public class ExpeditionAllInOneAfterImportHandler {
 
         @Override
         public final void cancel() {
-            Window.alert("Canceling import ...");
+            Window.alert(stringMessages.importCanceledByUser());
         }
     }
 }
