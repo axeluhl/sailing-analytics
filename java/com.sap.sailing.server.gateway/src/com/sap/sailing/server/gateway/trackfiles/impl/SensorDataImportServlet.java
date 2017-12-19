@@ -51,6 +51,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
         } catch (Exception e) {
             importResult.add(e);
         } finally {
+            resp.setContentType("text/html;charset=UTF-8");
             ImportResultSerializer.serializeImportResult(importResult).writeJSONString(resp.getWriter());
         }
     }
