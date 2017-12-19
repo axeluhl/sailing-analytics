@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
+import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -459,13 +460,15 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         formPanel.addSubmitCompleteHandler(event -> {
         	uploadButton.setEnabled(true);        	   
             final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
-            Window.alert(response.getEventId() + "-" + response.getLeaderboardName() + "-" + response.getRegattaName()
-                    + "-" + response.getRaceName());
-            new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                    response.getLeaderboardGroupName(), response.getLeaderboardName(), response.getRaceName(),
-                    response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
-                    response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService, errorReporter,
-                    stringMessages);
+            if (response.hasEventId()) {
+                new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
+                        response.getLeaderboardGroupName(), response.getLeaderboardName(), response.getRaceName(),
+                        response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
+                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
+                        errorReporter, stringMessages);
+            } else {
+                ExpeditionDataImportResultsDialog.showResults(response);
+            }
         });
         rootPanel.add(formPanel);
         final VerticalPanel contentPanel = new VerticalPanel();
