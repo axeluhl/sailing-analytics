@@ -147,7 +147,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = sensorFixesDeviceIDs.iterator().next();
             final CompetitorDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorSensorFixMapping(Collections.singleton(new TypedDeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null, sensorImporterType)));
-        } else {
+        } else if (sensorFixesDeviceIDs.size() > 0) {
             new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboard.getName(),
                     sensorFixesDeviceIDs, sensorImporterType,
                     new CancelImportDialogCallback<Collection<TypedDeviceMappingDTO>>() {
@@ -157,6 +157,9 @@ public class ExpeditionAllInOneAfterImportHandler {
                     saveCompetitorSensorFixMapping(mappings);
                 }
             }).show();
+        } else {
+            // there can be zero sensor fix devices -> skipping the mapping step
+            continueWithMappedDevices();
         }
     }
     
