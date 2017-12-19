@@ -72,8 +72,4 @@ class AbstractDataImportResponse extends JavaScriptObject {
         }
     }
     
-    protected final native <T> T[] array(String fieldName) /*-{
-        return this[fieldName];
-    }-*/;
-
 }
