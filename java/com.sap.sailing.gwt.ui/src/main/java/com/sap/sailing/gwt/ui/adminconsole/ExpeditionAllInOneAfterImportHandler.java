@@ -53,63 +53,34 @@ public class ExpeditionAllInOneAfterImportHandler {
         this.stringMessages = stringMessages;
         this.regattaAndRaceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
                 
-        sailingService.getEventById(eventId, false, new AsyncCallback<EventDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
-            }
-
+        sailingService.getEventById(eventId, false, new DataLoadingCallback<EventDTO>() {
             @Override
             public void onSuccess(EventDTO result) {
                 event = result;
-                sailingService.getRegattaByName(regattaName, new AsyncCallback<RegattaDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-                        
-                    }
-
+                sailingService.getRegattaByName(regattaName, new DataLoadingCallback<RegattaDTO>() {
                     @Override
                     public void onSuccess(RegattaDTO result) {
                         regatta = result;
-                        sailingService.getLeaderboard(leaderboardName, new AsyncCallback<StrippedLeaderboardDTO>() {
+                        sailingService.getLeaderboard(leaderboardName,
+                                new DataLoadingCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onSuccess(StrippedLeaderboardDTO result) {
                                 leaderboard = result;
                                 sailingService.getTrackFileImportDeviceIds(gpsDeviceIds,
-                                        new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
-                                            @Override
-                                            public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
-                                                gpsFixesDeviceIDs = result;
-
-                                                sailingService.getTrackFileImportDeviceIds(sensorDeviceIds,
-                                                        new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
-                                                            @Override
-                                                            public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
-                                                                sensorFixesDeviceIDs = result;
-
-                                                                showCompetitorRegistration();
-                                                            }
-
-                                                            @Override
-                                                            public void onFailure(Throwable caught) {
-                                                                // TODO Auto-generated method stub
-                                                            }
-                                                        });
-                                            }
-
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                // TODO Auto-generated method stub
-                                            }
-                                        });
-                            }
-                            
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                // TODO Auto-generated method stub
-                                
+                                    new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                                        @Override
+                                        public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                                            gpsFixesDeviceIDs = result;
+                                            sailingService.getTrackFileImportDeviceIds(sensorDeviceIds,
+                                                        new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                                                @Override
+                                                public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                                                    sensorFixesDeviceIDs = result;
+                                                    showCompetitorRegistration();
+                                                }
+                                            });
+                                        }
+                                    });
                             }
                         });
                     }
@@ -119,10 +90,9 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
 
     private void showCompetitorRegistration() {
-        new RegattaLogCompetitorRegistrationDialog(
-                regatta.boatClass == null ? null : regatta.boatClass.getName(), sailingService,
-                stringMessages, errorReporter, true, leaderboard.getName(),
-                new DialogCallback<Set<CompetitorDTO>>() {
+        new RegattaLogCompetitorRegistrationDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
+                sailingService, stringMessages, errorReporter, true, leaderboard.getName(),
+                new CancelImportDialogCallback<Set<CompetitorDTO>>() {
             @Override
             public void ok(final Set<CompetitorDTO> competitors) {
                 if (competitors.isEmpty()) {
@@ -137,17 +107,12 @@ public class ExpeditionAllInOneAfterImportHandler {
 
                             @Override
                             public void onFailure(Throwable caught) {
-                                // TODO Auto-generated method stub
-                                
+                                errorReporter.reportError("Failed to register competitors!");
                             }
                         });
                 }
             }
-
-            @Override
-            public void cancel() {
-                // TODO Auto-generated method stub
-            }}).show();
+        }).show();
     }
 
     private final void continueWithRegisteredCompetitors() {
@@ -155,16 +120,16 @@ public class ExpeditionAllInOneAfterImportHandler {
         // TODO if there is exactly one competitor and one device ID, we could auto-map those
         
         final String leaderboardName = leaderboard.getName();
-        new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages,
-                leaderboardName, sensorFixesDeviceIDs,
-                sensorImporterType, new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
+        new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+                sensorFixesDeviceIDs, sensorImporterType,
+                new CancelImportDialogCallback<Collection<TypedDeviceMappingDTO>>() {
 
             @Override
             public void ok(Collection<TypedDeviceMappingDTO> mappings) {
                 new AddTypedDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
                     new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
                             leaderboardName, gpsFixesDeviceIDs,
-                            new DialogCallback<Collection<DeviceMappingDTO>>() {
+                            new CancelImportDialogCallback<Collection<DeviceMappingDTO>>() {
 
                         @Override
                         public void ok(Collection<DeviceMappingDTO> mappings) {
@@ -172,20 +137,10 @@ public class ExpeditionAllInOneAfterImportHandler {
                                 continueWithMappedDevices();
                             });
                         }
-
-                        @Override
-                        public void cancel() {
-                            // TODO Auto-generated method stub
-                            
-                        }}).show();
+                    }).show();
                 });
             }
-
-            @Override
-            public void cancel() {
-                // TODO Auto-generated method stub
-                
-            }}).show();
+        }).show();
     }
     
     private final void continueWithMappedDevices() {
@@ -194,16 +149,15 @@ public class ExpeditionAllInOneAfterImportHandler {
         sailingService.removeAndUntrackRaces(racesToStopAndStartTrackingFor, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
+                errorReporter.reportError("Failed to track race after import!");
             }
 
             @Override
             public void onSuccess(Void result) {
                 final List<Triple<String, String, String>> leaderboardRaceColumnFleetNames = new ArrayList<>();
                 leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
-                sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ true, /* TODO correctWindByDeclination */ true,
-                        new AsyncCallback<Void>() {
+                sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ true,
+                        /* TODO correctWindByDeclination */ true, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
@@ -211,11 +165,12 @@ public class ExpeditionAllInOneAfterImportHandler {
                                         leaderboardGroupName).show();
                             }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorStartingTracking(Util.toStringOrNull(leaderboardRaceColumnFleetNames),caught.getMessage()));
-                    }
-                });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorStartingTracking(
+                                        Util.toStringOrNull(leaderboardRaceColumnFleetNames), caught.getMessage()));
+                            }
+                        });
             }
         });
     }
@@ -236,7 +191,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                     
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(caught.getMessage());
+                        errorReporter.reportError("Failed to add device mappings!");
                     }
                 });
             }
@@ -264,7 +219,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                     
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(caught.getMessage());
+                        errorReporter.reportError("Failed to add device mappings!");
                     }
                 });
             }
@@ -273,6 +228,22 @@ public class ExpeditionAllInOneAfterImportHandler {
             if (callCount == 0) {
                 callback.run();
             }
+        }
+    }
+
+    private abstract class DataLoadingCallback<T> implements AsyncCallback<T> {
+
+        @Override
+        public final void onFailure(Throwable caught) {
+            errorReporter.reportError("Failed loading importer data from server!");
+        }
+    }
+
+    private abstract class CancelImportDialogCallback<T> implements DialogCallback<T> {
+
+        @Override
+        public final void cancel() {
+            Window.alert("Canceling import ...");
         }
     }
 }
