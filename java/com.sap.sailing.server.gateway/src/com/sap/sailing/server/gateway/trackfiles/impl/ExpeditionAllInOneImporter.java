@@ -55,7 +55,6 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ExpeditionAllInOneImporter {
     private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImporter.class.getName());
@@ -111,8 +110,46 @@ public class ExpeditionAllInOneImporter {
         ScoringSchemeType scoringSchemeType = ScoringSchemeType.HIGH_POINT;
         RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         int[] discardThresholds = new int[0];
+        
+        ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
+        List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filename, fileItem));
+        try {
+            new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
 
-        Event event = service.addEvent(eventName, description, new MillisecondsTimePoint(0), MillisecondsTimePoint.now(),
+        ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
+        Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays.asList(new Pair<>(DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE, fileItem));
+        try {
+            new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        
+        TimePoint firstFixAt = null;
+        TimePoint lastFixAt = null;
+        ArrayList<TrackImportDTO> allData = new ArrayList<>();
+        allData.addAll(jsonHolderForGpsFixImport.getImportResult());
+        allData.addAll(jsonHolderForSensorFixImport.getImportResult());
+
+        for (TrackImportDTO result : allData) {
+            TimePoint deviceTrackStart = result.getRange().from();
+            TimePoint deviceTrackEnd = result.getRange().to();
+            if (firstFixAt == null || deviceTrackStart.before(firstFixAt)) {
+                firstFixAt = deviceTrackStart;
+            }
+            if (lastFixAt == null || deviceTrackEnd.after(lastFixAt)) {
+                lastFixAt = deviceTrackEnd;
+            }
+        }
+        
+        TimePoint eventStartDate = firstFixAt;
+        TimePoint eventEndDate = lastFixAt;
+
+        Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate,
                 venueName, true, UUID.randomUUID());
         service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
 
@@ -144,40 +181,8 @@ public class ExpeditionAllInOneImporter {
         // TODO these are just the defaults used in the UI
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Shore", 4);
         
-        ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
-        List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filename, fileItem));
-        try {
-            new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-
-        ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
-        Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays.asList(new Pair<>(DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE, fileItem));
-        try {
-            new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        
-        TimePoint startOfTracking = null;
-        TimePoint endOfTracking = null;
-        ArrayList<TrackImportDTO> allData = new ArrayList<>();
-        allData.addAll(jsonHolderForGpsFixImport.getImportResult());
-        allData.addAll(jsonHolderForSensorFixImport.getImportResult());
-
-        for (TrackImportDTO result : allData) {
-            TimePoint deviceTrackStart = result.getRange().from();
-            TimePoint deviceTrackEnd = result.getRange().to();
-            if (startOfTracking == null || deviceTrackStart.before(startOfTracking)) {
-                startOfTracking = deviceTrackStart;
-            }
-            if (endOfTracking == null || deviceTrackEnd.after(endOfTracking)) {
-                endOfTracking = deviceTrackEnd;
-            }
-        }
+        TimePoint startOfTracking = firstFixAt;
+        TimePoint endOfTracking = lastFixAt;
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
         // TODO explicitly set startOfRace?
