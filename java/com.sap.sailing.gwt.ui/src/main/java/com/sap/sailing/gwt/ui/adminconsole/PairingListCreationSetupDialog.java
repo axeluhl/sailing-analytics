@@ -140,7 +140,6 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         if (Util.size(this.getCheckedSelectedCheckBoxes()) > 0) {
             String seriesName = Util.get(this.getCheckedSelectedCheckBoxes(), 0).getText();
             dto.setGroupCount(this.getOneRaceFromSeriesName(seriesName, leaderboardDTO.getRaceList()).getFleets().size());
-            dto.setFlightCount(this.getRaceColumnNamesFromSeriesName(seriesName, leaderboardDTO.getRaceList()).size());
         } else {
             dto.setGroupCount(0);
         }
@@ -157,6 +156,8 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         }
 
         dto.setSelectedFlightNames(selectedFlightNames);
+        
+        dto.setFlightCount(selectedFlightNames.size());
 
         return dto;
     }
