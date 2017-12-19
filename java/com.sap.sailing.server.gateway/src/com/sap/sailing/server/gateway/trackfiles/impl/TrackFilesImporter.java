@@ -20,6 +20,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
@@ -100,9 +101,7 @@ public class TrackFilesImporter {
                     }
                 }
                 for (TrackFileImportDeviceIdentifier device : deviceIds) {
-                    TimeRange range = service.getSensorFixStore().getTimeRangeCoveredByFixes(device);
-                    long amount = service.getSensorFixStore().getNumberOfFixes(device);
-                    jsonResult.addTrackData(new TrackImportDTO(device.getId(), range, amount));
+                    additionalDataExtractor(jsonResult, device);
                 }
                 if (succeeded.get()) {
                     logger.log(Level.INFO, "Successfully imported file " + fileName + " using " + importer.getType());
@@ -114,6 +113,14 @@ public class TrackFilesImporter {
             }
         }
     }
+
+    protected void additionalDataExtractor(ImportResultDTO jsonResult, TrackFileImportDeviceIdentifier device)
+            throws TransformationException {
+        TimeRange range = service.getSensorFixStore().getTimeRangeCoveredByFixes(device);
+        long amount = service.getSensorFixStore().getNumberOfFixes(device);
+        jsonResult.addTrackData(new TrackImportDTO(device.getId(), range, amount));
+    }
+    
 
     void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
         try {
