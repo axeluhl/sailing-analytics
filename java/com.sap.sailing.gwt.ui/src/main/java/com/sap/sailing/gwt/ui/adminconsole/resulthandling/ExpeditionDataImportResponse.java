@@ -19,6 +19,10 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     private final native String eventId() /*-{
         return this.eventId;
     }-*/;
+    
+    public final native String getLeaderboardGroupName() /*-{
+        return this.leaderboardGroupName;
+    }-*/;
 
     public final native String getLeaderboardName() /*-{
         return this.leaderboardName;
@@ -48,10 +52,6 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
         return asList(array("sensorDeviceIds"));
     }
     
-    private final native String[] array(String fieldName) /*-{
-        return this[fieldName];
-    }-*/;
-
     public final native String getSensorFixImporterType() /*-{
         return this.sensorFixImporterType;
     }-*/;

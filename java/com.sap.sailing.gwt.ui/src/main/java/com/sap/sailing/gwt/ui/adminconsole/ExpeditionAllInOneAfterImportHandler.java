@@ -30,6 +30,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
+    private final String leaderboardGroupName;
     private final String raceColumnName;
     private final String fleetName;
     protected EventDTO event;
@@ -40,9 +41,11 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            String raceName, String raceColumnName, String fleetName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            String leaderboardGroupName, String raceName, String raceColumnName, String fleetName,
+            List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
+        this.leaderboardGroupName = leaderboardGroupName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         this.sensorImporterType = sensorImporterType;
@@ -202,12 +205,12 @@ public class ExpeditionAllInOneAfterImportHandler {
                 leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
                 sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ true, /* TODO correctWindByDeclination */ true,
                         new AsyncCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
-                                regattaAndRaceIdentifier.getRaceName(), leaderboard.getName(),
-                                /* TODO leaderboardGroupName */ null).show();
-                    }
+                            @Override
+                            public void onSuccess(Void result) {
+                                new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
+                                        regattaAndRaceIdentifier.getRaceName(), leaderboard.getName(),
+                                        leaderboardGroupName).show();
+                            }
 
                     @Override
                     public void onFailure(Throwable caught) {
