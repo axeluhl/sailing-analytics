@@ -39,6 +39,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
         try {
             String fileName = null;
             FileItem fileItem = null;
@@ -59,7 +60,6 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             final ImporterResult importerResult = new ExpeditionAllInOneImporter(getService(),
                     raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
                     getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName);
-            resp.setContentType("text/html;charset=UTF-8");
             this.toJSON(importerResult).writeJSONString(resp.getWriter());
         } catch (Exception e) {
             new JSONObject().writeJSONString(resp.getWriter());
