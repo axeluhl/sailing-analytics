@@ -47,6 +47,7 @@ import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
@@ -74,12 +75,28 @@ public class ExpeditionAllInOneImporter {
         final String fleetName;
         final List<TrackImportDTO> importGpsFixData;
         final List<TrackImportDTO> importSensorFixData;
+        final List<ErrorImportDTO> errorList;
         final String sensorFixImporterType;
 
+        public ImporterResult(Throwable exception, List<ErrorImportDTO> additionalErrors) {
+            eventId = null;
+            this.leaderboardName = "";
+            this.leaderboardGroupName = "";
+            this.regattaName = "";
+            this.raceName = "";
+            this.raceColumnName = "";
+            this.fleetName = "";
+            this.importGpsFixData = Collections.emptyList();
+            this.importSensorFixData = Collections.emptyList();
+            this.errorList = additionalErrors;
+            errorList.add(new ErrorImportDTO(null, exception.getClass().getName(), exception.getMessage(), null, null));
+            sensorFixImporterType = "";
+        }
+        
         private ImporterResult(final UUID eventId, final String leaderboardName, String leaderboardGroupName,
                 final RegattaAndRaceIdentifier regattaAndRaceIdentifier, final String raceColumnName,
                 final String fleetName, final List<TrackImportDTO> importGpsFixData,
-                final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType) {
+                final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType, List<ErrorImportDTO> errors) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
             this.leaderboardGroupName = leaderboardGroupName;
@@ -90,6 +107,7 @@ public class ExpeditionAllInOneImporter {
             this.importGpsFixData = importGpsFixData;
             this.importSensorFixData = importSensorFixData;
             this.sensorFixImporterType = sensorFixImporterType;
+            this.errorList = errors;
         }
     }
     
@@ -100,7 +118,8 @@ public class ExpeditionAllInOneImporter {
         this.context = context;
     }
 
-    public ImporterResult importFiles(final String filename, final FileItem fileItem, final String boatClassName) {
+    public ImporterResult importFiles(final String filename, final FileItem fileItem, final String boatClassName) throws AllinOneImportException {
+        List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         final String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         final String eventName = filenameWithDateTimeSuffix;
@@ -136,9 +155,10 @@ public class ExpeditionAllInOneImporter {
         try {
             new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport, GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            errors.addAll(jsonHolderForGpsFixImport.getErrorList());
+            throw new AllinOneImportException(e1, errors);
         }
+        errors.addAll(jsonHolderForGpsFixImport.getErrorList());
 
         final ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
         final String sensorFixImporterType = DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE;
@@ -147,9 +167,10 @@ public class ExpeditionAllInOneImporter {
         try {
             new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport, importerNamesAndFilesForSensorFixImport);
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            errors.addAll(jsonHolderForSensorFixImport.getErrorList());
+            throw new AllinOneImportException(e1, errors);
         }
+        errors.addAll(jsonHolderForSensorFixImport.getErrorList());
         
         TimePoint firstFixAt = null;
         TimePoint lastFixAt = null;
@@ -226,9 +247,9 @@ public class ExpeditionAllInOneImporter {
             return new ImporterResult(event.getId(), regattaNameAndleaderboardName, leaderboardGroupName,
                     trackedRace.getRaceIdentifier(), raceColumnName, fleetName,
                     jsonHolderForGpsFixImport.getImportResult(), jsonHolderForSensorFixImport.getImportResult(),
-                    sensorFixImporterType);
+                    sensorFixImporterType, errors);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new AllinOneImportException(e, errors);
         }
     }
 }

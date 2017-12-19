@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -25,7 +26,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
     // private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImportServlet.class.getName());
     private ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
-    
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
@@ -40,6 +41,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         resp.setContentType("text/html;charset=UTF-8");
+        ImporterResult importerResult = null;
         try {
             String fileName = null;
             FileItem fileItem = null;
@@ -57,12 +59,15 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             if (fileItem == null) {
                 throw new RuntimeException("No file to import");
             }
-            final ImporterResult importerResult = new ExpeditionAllInOneImporter(getService(),
+            importerResult = new ExpeditionAllInOneImporter(getService(),
                     raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
                     getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName);
+        } catch (AllinOneImportException e) {
+            importerResult = new ImporterResult(e, e.additionalErrors);
+        } catch (Throwable t) {
+            importerResult = new ImporterResult(t, Collections.emptyList());
+        } finally {
             this.toJSON(importerResult).writeJSONString(resp.getWriter());
-        } catch (Exception e) {
-            new JSONObject().writeJSONString(resp.getWriter());
         }
     }
 
