@@ -85,7 +85,7 @@ public class ExpeditionAllInOneImporter {
         this.context = context;
     }
 
-    public ImporterResult importFiles(final String filename, final FileItem fileItem) {
+    public ImporterResult importFiles(final String filename, final FileItem fileItem, final String boatClassName) {
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         final String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         final String eventName = filenameWithDateTimeSuffix;
@@ -96,9 +96,8 @@ public class ExpeditionAllInOneImporter {
         final String raceColumnName = filename;
         final String courseAreaName = "Default";
         final UUID courseAreaId = UUID.randomUUID();
-        // TODO provide boat class suggest in the UI?
+        // This is just the default used in the UI
         final Double buoyZoneRadiusInHullLengths = 3.0;
-        final String boatClassName = null;
         // TODO proper id
         final String windSourceId = filenameWithDateTimeSuffix;
 

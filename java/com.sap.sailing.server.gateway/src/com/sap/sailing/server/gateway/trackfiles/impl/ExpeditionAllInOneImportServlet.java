@@ -42,10 +42,15 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
         try {
             String fileName = null;
             FileItem fileItem = null;
+            String boatClassName = null;
             for (FileItem fi : fileItems) {
                 if (!fi.isFormField()) {
                     fileName = fi.getName();
                     fileItem = fi;
+                } else if (fi.getFieldName() != null) {
+                    if ("boatClass".equals(fi.getFieldName())) {
+                        boatClassName = fi.getString();
+                    }
                 }
             }
             if (fileItem == null) {
@@ -53,7 +58,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             }
             final ImporterResult importerResult = new ExpeditionAllInOneImporter(getService(),
                     raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
-                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem);
+                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName);
             resp.setContentType("text/html;charset=UTF-8");
             this.toJSON(importerResult).writeJSONString(resp.getWriter());
         } catch (Exception e) {
