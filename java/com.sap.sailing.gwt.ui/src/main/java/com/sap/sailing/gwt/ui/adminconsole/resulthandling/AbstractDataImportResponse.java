@@ -106,7 +106,7 @@ class AbstractDataImportResponse extends JavaScriptObject {
         return this[fieldName];
     }-*/;
 
-    class ErrorMessage extends JavaScriptObject {
+    static class ErrorMessage extends JavaScriptObject {
 
         protected ErrorMessage() {
         }
