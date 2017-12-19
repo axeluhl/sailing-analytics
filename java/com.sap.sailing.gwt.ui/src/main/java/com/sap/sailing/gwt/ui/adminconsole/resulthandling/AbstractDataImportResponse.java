@@ -19,19 +19,19 @@ class AbstractDataImportResponse extends JavaScriptObject {
 
     /**
      * {@link JSONParser#parseStrict(String) Strictly parses} the provided {@link String} representation into JSON and
-     * {@link JavaScriptObject#cast() casts} it to the provided {@link Class type class}.
+     * {@link JavaScriptObject#cast() casts} it to the desired type.
      * 
      * @param json
      *            {@link String} representation to parse into JSON
-     * @param clazz
-     *            {@link Class type class} to cast parse result to
+     * @param typeString
+     *            {@link String} name of the actually desired type
      * @return the parsed and casted object or <code>null</code> if any {@link Exception exception} occurs
      */
-    protected static final <T extends AbstractDataImportResponse> T parse(String json, Class<T> clazz) {
+    protected static final <T extends AbstractDataImportResponse> T parse(String json, String typeString) {
         try {
             return JSONParser.parseStrict(json).isObject().getJavaScriptObject().cast();
         } catch (Exception e) {
-            logger.severe(() -> "Failed to parse import " + clazz.getSimpleName());
+            logger.severe(() -> "Failed to parse import response to type " + typeString);
             return null;
         }
     }

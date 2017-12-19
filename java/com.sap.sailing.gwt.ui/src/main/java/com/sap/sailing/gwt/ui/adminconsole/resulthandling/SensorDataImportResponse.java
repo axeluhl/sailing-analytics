@@ -7,7 +7,7 @@ import com.google.gwt.core.client.JsArray;
 public class SensorDataImportResponse extends AbstractDataImportResponse {
 
     public static final SensorDataImportResponse parse(String json) {
-        return AbstractDataImportResponse.parse(json, SensorDataImportResponse.class);
+        return AbstractDataImportResponse.parse(json, "SensorDataImportResponse");
     }
 
     protected SensorDataImportResponse() {

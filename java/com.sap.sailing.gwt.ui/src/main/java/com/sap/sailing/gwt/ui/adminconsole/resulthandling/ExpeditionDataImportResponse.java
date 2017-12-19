@@ -5,7 +5,7 @@ import java.util.UUID;
 public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
 
     public static final ExpeditionDataImportResponse parse(String json) {
-        return AbstractDataImportResponse.parse(json, ExpeditionDataImportResponse.class);
+        return AbstractDataImportResponse.parse(json, "ExpeditionDataImportResponse");
     }
 
     protected ExpeditionDataImportResponse() {
