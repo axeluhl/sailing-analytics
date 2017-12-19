@@ -26,7 +26,6 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     private final IntegerBox flightMultiplierTextBox;
     private final CheckBox flightMultiplierCheckBox;
     private Iterable<CheckBox> selectedSeriesCheckboxes;
-    private final int groupCount;
 
     protected static class PairingListParameterValidator extends AbstractPairingListParameterValidator {
         public PairingListParameterValidator(StringMessages stringMessages) {
@@ -40,7 +39,6 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         super(leaderboardDTO, stringMessages.pairingLists(), stringMessages,
                 new PairingListParameterValidator(stringMessages), callback);
 
-        this.groupCount = Util.size(leaderboardDTO.getRaceList().get(0).getFleets());
         this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
         this.competitorCountTextBox.ensureDebugId("CompetitorCountBox");
         this.flightMultiplierTextBox = createIntegerBox(0, 2);
@@ -138,17 +136,13 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     protected PairingListTemplateDTO getResult() {
         PairingListTemplateDTO dto = new PairingListTemplateDTO(this.competitorCountTextBox.getValue(),
                 this.flightMultiplierTextBox.getValue());
-        dto.setGroupCount(this.groupCount);
-
-        int flightCount = 0;
-
-        for (RaceColumnDTO raceColumn : leaderboardDTO.getRaceList()) {
-            if (!raceColumn.isMedalRace()) {
-                flightCount++;
-            }
+        
+        if (Util.size(this.getCheckedSelectedCheckBoxes()) > 0) {
+            String seriesName = Util.get(this.getCheckedSelectedCheckBoxes(), 0).getText();
+            dto.setGroupCount(this.getOneRaceFromSeriesName(seriesName, leaderboardDTO.getRaceList()).getFleets().size());
+        } else {
+            dto.setGroupCount(0);
         }
-
-        dto.setFlightCount(flightCount);
 
         if (this.flightMultiplierCheckBox.getValue()) {
             dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
@@ -162,6 +156,8 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         }
 
         dto.setSelectedFlightNames(selectedFlightNames);
+        
+        dto.setFlightCount(selectedFlightNames.size());
 
         return dto;
     }

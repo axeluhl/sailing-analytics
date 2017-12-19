@@ -1028,9 +1028,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
                 try {
-                    sailingService.calculatePairingList(leaderboardDTO.getName(),
-                            editedObject.getSelectedFlightNames(), editedObject.getCompetitorCount(),
-                            editedObject.getFlightMultiplier(), new AsyncCallback<PairingListTemplateDTO>() {
+                    sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
+                            editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
+                            new AsyncCallback<PairingListTemplateDTO>() {
 
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -1041,6 +1041,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                                 @Override
                                 public void onSuccess(PairingListTemplateDTO result) {
                                     busyDialog.hide();
+                                    result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
                                     openPairingListCreationDialog(leaderboardDTO, result);
                                 }
 
