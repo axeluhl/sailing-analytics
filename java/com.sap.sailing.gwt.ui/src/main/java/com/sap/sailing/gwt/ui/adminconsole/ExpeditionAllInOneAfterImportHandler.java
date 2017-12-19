@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -102,7 +103,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                         competitors, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
-                                continueWithRegisteredCompetitors();
+                                mapCompetitorsToGPSFixDeviceIds(competitors);
                             }
 
                             @Override
@@ -114,35 +115,57 @@ public class ExpeditionAllInOneAfterImportHandler {
             }
         }).show();
     }
+    
+    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
+        if (gpsFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
+            // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
+            final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = gpsFixesDeviceIDs.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
+            saveCompetitorGPSMapping(mappedCompetitors, Collections.singleton(new DeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null)));
+        } else {
+            new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
+                    leaderboard.getName(), gpsFixesDeviceIDs,
+                    new CancelImportDialogCallback<Collection<DeviceMappingDTO>>() {
+                
+                @Override
+                public void ok(Collection<DeviceMappingDTO> mappings) {
+                    saveCompetitorGPSMapping(mappedCompetitors, mappings);
+                }
+            }).show();
+        }
+    }
 
-    private final void continueWithRegisteredCompetitors() {
-        // TODO check competitor count vs imported device ID count
-        // TODO if there is exactly one competitor and one device ID, we could auto-map those
-        
-        final String leaderboardName = leaderboard.getName();
-        new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
-                sensorFixesDeviceIDs, sensorImporterType,
-                new CancelImportDialogCallback<Collection<TypedDeviceMappingDTO>>() {
+    private void saveCompetitorGPSMapping(final Set<CompetitorDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
+        new AddDeviceMappingsToRegattaLog(leaderboard.getName(), mappings, () -> {
+            mapCompetitorsToSensorFixDeviceIds(mappedCompetitors);
+        });
+    }
 
-            @Override
-            public void ok(Collection<TypedDeviceMappingDTO> mappings) {
-                new AddTypedDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
-                    new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
-                            leaderboardName, gpsFixesDeviceIDs,
-                            new CancelImportDialogCallback<Collection<DeviceMappingDTO>>() {
-
-                        @Override
-                        public void ok(Collection<DeviceMappingDTO> mappings) {
-                            new AddDeviceMappingsToRegattaLog(leaderboardName, mappings, () -> {
-                                continueWithMappedDevices();
-                            });
-                        }
-                    }).show();
-                });
-            }
-        }).show();
+    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
+        if (sensorFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
+            // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
+            final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = sensorFixesDeviceIDs.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
+            saveCompetitorSensorFixMapping(Collections.singleton(new TypedDeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null, sensorImporterType)));
+        } else {
+            new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboard.getName(),
+                    sensorFixesDeviceIDs, sensorImporterType,
+                    new CancelImportDialogCallback<Collection<TypedDeviceMappingDTO>>() {
+    
+                @Override
+                public void ok(Collection<TypedDeviceMappingDTO> mappings) {
+                    saveCompetitorSensorFixMapping(mappings);
+                }
+            }).show();
+        }
     }
     
+    private void saveCompetitorSensorFixMapping(final Collection<TypedDeviceMappingDTO> mappings) {
+        new AddTypedDeviceMappingsToRegattaLog(leaderboard.getName(), mappings, () -> {
+            continueWithMappedDevices();
+        });
+    }
+
     private final void continueWithMappedDevices() {
         List<RegattaNameAndRaceName> racesToStopAndStartTrackingFor = new ArrayList<>();
         racesToStopAndStartTrackingFor.add(regattaAndRaceIdentifier);
