@@ -1,22 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole.resulthandling;
 
 import java.util.UUID;
-import java.util.logging.Logger;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONParser;
-
-public class ExpeditionDataImportResponse extends JavaScriptObject {
-
-    private static final Logger logger = Logger.getLogger(ExpeditionDataImportResponse.class.getName());
+public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
 
     public static final ExpeditionDataImportResponse parse(String json) {
-        try {
-            return (ExpeditionDataImportResponse) JSONParser.parseStrict(json).isObject().getJavaScriptObject();
-        } catch (Exception e) {
-            logger.severe("Failed to parse ExpeditionDataImportResponse object!");
-            return null;
-        }
+        return AbstractDataImportResponse.parse(json, ExpeditionDataImportResponse.class);
     }
 
     protected ExpeditionDataImportResponse() {
