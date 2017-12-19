@@ -462,7 +462,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         return trackedRegatta;
     }
 
-    public static Object createID(URL paramURL, URI liveURI, URI storedURI) {
+    public static Object createID(URL paramURL, final URI liveURI, final URI storedURI) {
+        URL paramURLStrippedOfRandomParam = getParamURLStrippedOfRandomParam(paramURL);
+        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
+    }
+
+    public static URL getParamURLStrippedOfRandomParam(URL paramURL) {
         URL paramURLStrippedOfRandomParam;
         if (paramURL == null) {
             paramURLStrippedOfRandomParam = null;
@@ -498,7 +503,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 }
             }
         }
-        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
+        return paramURLStrippedOfRandomParam;
     }
     
     @Override
