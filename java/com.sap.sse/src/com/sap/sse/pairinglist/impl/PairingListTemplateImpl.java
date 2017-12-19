@@ -66,6 +66,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     + "be greater than 1; count of competitors has to be greater than count of groups");
         }
     }
+    //Used to convert a TemplateDTO to PairingListTemplate
+    public PairingListTemplateImpl(int[][] template,int competitorsCount,int flightMultiplier) {
+       this.pairingListTemplate=template;
+       this.standardDev=this.calcStandardDev(incrementAssociations(template, new int[competitorsCount][competitorsCount]));
+       this.iterations=100000;
+       this.flightMultiplier=flightMultiplier;
+       this.dummies=0;
+    }
 
     @Override
     public double getQuality() {
@@ -73,9 +81,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     @Override
-    public <Flight, Group, Competitor> PairingList<Flight, Group, Competitor> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor> competitionFormat) {
-        return new PairingListImpl<>(this, competitionFormat);
+    public <Flight, Group, Competitor,Boat> PairingList<Flight, Group, Competitor,Boat> createPairingList(
+            CompetitionFormat<Flight, Group, Competitor> competitionFormat,ArrayList<Boat> boats) {
+        return new PairingListImpl<>(this, competitionFormat,boats);
     }
 
     @Override

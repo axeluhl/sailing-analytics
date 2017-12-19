@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.pairinglist;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
@@ -192,12 +191,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         result.add(pairingListPanel);
 
         return pairingListPanel;
-    }
-    
-    
-    
-    private void m() {
-        Document.
     }
     
     //TODO search for gwt API (Window, Document)

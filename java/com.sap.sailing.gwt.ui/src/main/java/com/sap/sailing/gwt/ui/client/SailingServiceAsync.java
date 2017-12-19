@@ -906,7 +906,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param callback
      */
     void getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames, AsyncCallback<PairingListDTO> callback);
+            final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO, AsyncCallback<PairingListDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} that is based on the competitors in the race logs of a leaderboard.
@@ -928,5 +928,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param callback
      */
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames, AsyncCallback<Void> callback);
+            final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO, AsyncCallback<Void> callback);
 }

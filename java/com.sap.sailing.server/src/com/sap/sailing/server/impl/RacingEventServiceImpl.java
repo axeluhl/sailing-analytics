@@ -65,6 +65,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -92,6 +93,8 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -4185,15 +4188,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public PairingList<RaceColumn, Fleet, Competitor> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
+    public PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
             final String leaderboardName, final Iterable<RaceColumn> selectedFlights) {
         
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);
-        
-        PairingList<RaceColumn, Fleet, Competitor> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
+        //TODO (bug2822) get Boats of Regatta
+        ArrayList<Boat> boats=new ArrayList<>();
+        for(int slot=0;slot<pairingListTemplate.getPairingListTemplate()[0].length;slot++){
+            boats.add(new BoatImpl("Boat "+(slot+1), new BoatClassImpl("49er", true), "DE"+slot));
+        }
+        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
 
             @Override
             public Iterable<RaceColumn> getFlights() {
@@ -4215,7 +4222,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             public int getGroupsCount() {
                 return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
             }
-        });
+        },boats);
         return pairingList;
     }
 

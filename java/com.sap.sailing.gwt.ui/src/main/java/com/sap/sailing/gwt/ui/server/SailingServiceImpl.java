@@ -499,6 +499,7 @@ import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
@@ -6824,7 +6825,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames) 
+            final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO) 
             throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
@@ -6835,48 +6836,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        PairingListTemplate pairingListTemplate = getService().createPairingListFromRegatta(leaderboardName, 
-                Util.size(leaderboard.getCompetitors()), flightMultiplier, Util.size(selectedRaces));
-        PairingList<RaceColumn, Fleet, Competitor> pairingList = 
+        PairingListTemplate pairingListTemplate = new PairingListTemplateImpl(templateDTO.getPairingListTemplate(), templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
+        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = 
                 getService().getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
-        ColorMap<BoatDTO> colorMap = new ColorMapImpl<BoatDTO>();
-        List<BoatDTO> boats = new ArrayList<>();
-        int boatIndex;
         for (RaceColumn raceColumn : selectedRaces) {
             //TODO change flights to fleets
             List<List<Pair<CompetitorDTO, BoatDTO>>>  flights = new ArrayList<>();
-            for (Fleet fleetElement : raceColumn.getFleets()) {
-                List<Pair<CompetitorDTO, BoatDTO>> fleets = new ArrayList<>();
-                boatIndex = 0;
-                for (Competitor competitor : pairingList.getCompetitors(raceColumn, fleetElement)) {
-                    CompetitorDTO competitorDTO;
-                    if (competitor == null) {
-                        competitorDTO = new CompetitorDTOImpl();
-                        if (boats.size() <= boatIndex) {
-                            // TODO change competitor name to competitor shorthand symbol (bug2822)
-                            // TODO fetch boats from regatta, if there are none, create new boats (bug2822)
-                            BoatDTO boatDTO = new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID());
-                            boatDTO.setColor(colorMap.getColorByID(boatDTO));
-                            boats.add(boatDTO);
-                        }
-                    } else {
-                        competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                        if (boats.size() <= boatIndex) {
-                            // TODO change competitor name to competitor shorthand symbol (bug2822)
-                            BoatDTO boatDTO = new BoatDTO("Boat " + String.valueOf(boatIndex + 1), competitorDTO.getSailID());
-                            boatDTO.setColor(colorMap.getColorByID(boatDTO));
-                            boats.add(boatDTO);
-                        }
-                    }
-                    fleets.add(new Pair<CompetitorDTO, BoatDTO>(competitorDTO, boats.get(boatIndex)));
-                    boatIndex++;
-                }
-                flights.add(fleets);
-            }
-            result.add(flights);
-        }
-        
+                for (Fleet fleetElement : raceColumn.getFleets()) {
+                    List<Pair<CompetitorDTO, BoatDTO>> fleets=new ArrayList<>();
+                   for(Pair<Competitor,Boat> pair: pairingList.getCompetitors(raceColumn, fleetElement)){
+                       if(pair.getA()!=null){
+                       fleets.add(new Pair<CompetitorDTO,BoatDTO>(baseDomainFactory.convertToCompetitorDTO(pair.getA()),new BoatDTO(pair.getB().getName(),pair.getB().getSailID())));
+                       }else{
+                       fleets.add(new Pair<CompetitorDTO,BoatDTO>(new CompetitorDTOImpl(),new BoatDTO(pair.getB().getName(),pair.getB().getSailID())));
+                       }
+                   }
+                   flights.add(fleets);
+                } 
+                result.add(flights);
+            }  
         return new PairingListDTO(result);
     }
     
@@ -6939,10 +6918,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier, final Iterable<String> selectedFlightNames)
+    public void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
+            final Iterable<String> selectedFlightNames, final PairingListTemplateDTO templateDTO)
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, flightMultiplier, selectedFlightNames);
+        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, flightMultiplier, selectedFlightNames,templateDTO);
         int flightCount = 0;
         int groupCount = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {

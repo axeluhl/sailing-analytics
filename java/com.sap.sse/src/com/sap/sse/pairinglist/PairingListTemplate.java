@@ -1,5 +1,7 @@
 package com.sap.sse.pairinglist;
 
+import java.util.ArrayList;
+
 /**
  * Unfortunately there is no systematic way creating a pairing list, so our solution is 
  * based on the "trial and error" principle. We generate about 100.000 pairing lists, comparing
@@ -14,8 +16,8 @@ package com.sap.sse.pairinglist;
  */
 
 public interface PairingListTemplate {
-    <Flight, Group, Competitor> PairingList<Flight, Group, Competitor> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor> competitionFormat);
+    <Flight, Group, Competitor,Boat> PairingList<Flight, Group, Competitor,Boat> createPairingList(
+            CompetitionFormat<Flight, Group, Competitor> competitionFormat,ArrayList<Boat> boats);
     
     /**
      * The value corresponds to the quality of a pairing list template. The quality is calculated by the 
