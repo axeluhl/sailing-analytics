@@ -126,10 +126,8 @@ public class ExpeditionAllInOneImporter {
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
 
         final String filename;
-        if (filenameWithSuffix.toLowerCase().contains(".csv")) {
-            String tempFilename = filenameWithSuffix.replace(filenameWithSuffix, ".csv");
-            tempFilename = tempFilename.replace(filenameWithSuffix, ".CSV");
-            filename = tempFilename;
+        if (filenameWithSuffix.toLowerCase().endsWith(".csv")) {
+            filename = filenameWithSuffix.substring(0, filenameWithSuffix.length()-4);
         } else {
             filename = filenameWithSuffix;
         }
