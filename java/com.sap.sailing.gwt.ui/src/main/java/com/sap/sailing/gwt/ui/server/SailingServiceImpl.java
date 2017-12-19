@@ -84,6 +84,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
@@ -6912,5 +6913,47 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
+    }
+    
+    public List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName,List<String> raceColumnNames) throws NotFoundException{
+        Leaderboard leaderboard=this.getLeaderboardByName(leaderboardName);
+        List<String> result=new ArrayList<>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if(raceColumn.hasTrackedRaces()){
+                if (raceColumnNames.contains(raceColumn.getName())) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        if(raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null){
+                        result.add(raceColumn.getTrackedRace(fleet).getRaceIdentifier().getRaceName());
+                        }
+                    }
+                }
+            }else{
+                break;
+            }
+        }
+        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
+            return result;
+        }
+        result.clear();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
+                for(Fleet fleet: raceColumn.getFleets()){
+                    NavigableSet<RaceLogEvent> set=raceColumn.getRaceLog(fleet).getUnrevokedEvents();
+                    for (RaceLogEvent raceLogEvent : set) {
+                        if(raceLogEvent instanceof RaceLogDenoteForTrackingEvent){
+                            RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
+                            result.add(denoteEvent.getRaceName());
+                            break;
+                        }
+                    }
+                }
+        }
+        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
+            return result;
+        }
+        result.clear();
+        for(int count=1;count<=raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets());count++){
+            result.add("Race "+count);
+        }
+        return result;
     }
 }

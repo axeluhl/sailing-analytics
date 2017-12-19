@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -32,14 +33,29 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
     private PairingListContextDefinition pairingListContextDefinition;
+    private StrippedLeaderboardDTO strippedLeaderboardDTO;
 
     private StringMessages stringmessages = StringMessages.INSTANCE;
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        pairingListContextDefinition = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new PairingListContextDefinition());
+        this.sailingService.getLeaderboard(pairingListContextDefinition.getLeaderboardName(), new AsyncCallback<StrippedLeaderboardDTO>() {
 
-        this.createUI();
+            @Override
+            public void onFailure(Throwable caught) {
+                strippedLeaderboardDTO=null;
+                
+            }
+
+            @Override
+            public void onSuccess(StrippedLeaderboardDTO result) {
+                strippedLeaderboardDTO=result; 
+                createUI();
+            }
+        });
     }
 
     private void createUI() {
@@ -49,9 +65,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
         mainPanel.setWidth("100%");
         mainPanel.setHeight("100%");
-
-        pairingListContextDefinition = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new PairingListContextDefinition());
 
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(
                 pairingListContextDefinition.getLeaderboardName());
@@ -73,18 +86,33 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
                     @Override
                     public void onSuccess(PairingListDTO result) {
-                        VerticalPanel pairingListPanel = createPairingListPanel(result);
-                        contentPanel.add(pairingListPanel);
-                        btn.addClickHandler(new ClickHandler() {
+                        if(strippedLeaderboardDTO!=null){
+                        sailingService.getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(), result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
+
                             @Override
-                            public void onClick(ClickEvent event) {
-                                //TODO use safe html encoding
-                                printPairingListGrid("<h2>" + pairingListContextDefinition.getLeaderboardName()
-                                        + "</h2>" + pairingListPanel.asWidget().getElement().getInnerHTML());
+                            public void onFailure(Throwable caught) {
+                                // TODO Auto-generated method stub
+                                
+                            }
+
+                            @Override
+                            public void onSuccess(List<String> names) {
+                                VerticalPanel pairingListPanel = createPairingListPanel(result,names);
+                                contentPanel.add(pairingListPanel);
+                                btn.addClickHandler(new ClickHandler() {
+                                    @Override
+                                    public void onClick(ClickEvent event) {
+                                        //TODO use safe html encoding
+                                        printPairingListGrid("<h2>" + pairingListContextDefinition.getLeaderboardName()
+                                                + "</h2>" + pairingListPanel.asWidget().getElement().getInnerHTML());
+                                    }
+                                });
+                            
                             }
                         });
-                    }
-
+                        }                   
+                     }
+                        
                     @Override
                     public void onFailure(Throwable caught) {
                         try {
@@ -97,7 +125,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         mainPanel.add(scrollPanel);
     }
 
-    private VerticalPanel createPairingListPanel(PairingListDTO pairingListDTO) {
+    private VerticalPanel createPairingListPanel(PairingListDTO pairingListDTO, final List<String> fleetnames) {
         final List<BoatDTO> boats = pairingListDTO.getBoats();
 
         final int flightCount = pairingListDTO.getPairingList().size();
@@ -143,7 +171,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
                 //TODO add column for race 1-45 (default)
                 pairingListGrid.setWidget(groupIndex, 1,
-                        new Label(getStringMessages().fleet() + " " + String.valueOf(groupIndex)));
+                        new Label(fleetnames.get(groupIndex-1)));
                 // setting up fleets style
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
