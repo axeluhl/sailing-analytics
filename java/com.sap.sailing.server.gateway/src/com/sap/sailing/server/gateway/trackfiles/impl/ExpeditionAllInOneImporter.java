@@ -88,7 +88,6 @@ public class ExpeditionAllInOneImporter {
     public ImporterResult importFiles(final String filename, final FileItem fileItem) {
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         final String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
-        // TODO prevent duplicate event/leaderboard names
         final String eventName = filenameWithDateTimeSuffix;
         final String description = MessageFormat.format("Event imported from expedition file '{0}' on {1}", filename, importTimeString);
         final String leaderboardGroupName = filenameWithDateTimeSuffix;
