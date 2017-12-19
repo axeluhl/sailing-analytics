@@ -9,7 +9,7 @@ import com.sap.sse.pairinglist.AbstractPairingFrameProvider;
 public class PairingFrameProviderTest extends AbstractPairingFrameProvider {
 
     private int flights, groups, competitors;
-    
+
     public PairingFrameProviderTest(int flights, int groups, int competitors) {
         this.flights = flights;
         this.groups = groups;

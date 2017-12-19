@@ -6825,7 +6825,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO) 
+            final Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO) 
             throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
@@ -6836,26 +6836,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        PairingListTemplate pairingListTemplate = new PairingListTemplateImpl(templateDTO.getPairingListTemplate(), templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
-        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = 
-                getService().getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
+        PairingListTemplate pairingListTemplate = new PairingListTemplateImpl(templateDTO.getPairingListTemplate(),
+                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
+        PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = getService()
+                .getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         for (RaceColumn raceColumn : selectedRaces) {
-            //TODO change flights to fleets
-            List<List<Pair<CompetitorDTO, BoatDTO>>>  flights = new ArrayList<>();
-                for (Fleet fleetElement : raceColumn.getFleets()) {
-                    List<Pair<CompetitorDTO, BoatDTO>> fleets=new ArrayList<>();
-                   for(Pair<Competitor,Boat> pair: pairingList.getCompetitors(raceColumn, fleetElement)){
-                       if(pair.getA()!=null){
-                       fleets.add(new Pair<CompetitorDTO,BoatDTO>(baseDomainFactory.convertToCompetitorDTO(pair.getA()),new BoatDTO(pair.getB().getName(),pair.getB().getSailID())));
-                       }else{
-                       fleets.add(new Pair<CompetitorDTO,BoatDTO>(new CompetitorDTOImpl(),new BoatDTO(pair.getB().getName(),pair.getB().getSailID())));
-                       }
-                   }
-                   flights.add(fleets);
-                } 
-                result.add(flights);
-            }  
+            // TODO change flights to fleets
+            List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumns = new ArrayList<>();
+            for (Fleet fleetElement : raceColumn.getFleets()) {
+                List<Pair<CompetitorDTO, BoatDTO>> fleets = new ArrayList<>();
+                for (Pair<Competitor, Boat> pair : pairingList.getCompetitors(raceColumn, fleetElement)) {
+                    if (pair.getA() != null) {
+                        fleets.add(new Pair<CompetitorDTO, BoatDTO>(baseDomainFactory.convertToCompetitorDTO(pair.getA()),
+                                   new BoatDTO(pair.getB().getName(), pair.getB().getSailID())));
+                    } else {
+                        fleets.add(new Pair<CompetitorDTO, BoatDTO>(new CompetitorDTOImpl(),
+                                   new BoatDTO(pair.getB().getName(), pair.getB().getSailID())));
+                    }
+                }
+                raceColumns.add(fleets);
+            }
+            result.add(raceColumns);
+        }
         return new PairingListDTO(result);
     }
     

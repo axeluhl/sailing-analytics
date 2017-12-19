@@ -30,9 +30,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final StrippedLeaderboardDTO leaderboardDTO;
     private final StringMessages stringMessages;
 
-    private final Button applyToRacelogButton;
-    private final Button cSVExportButton;
-    private final Button printViewButton;
+    private final Button applyToRacelogButton, cSVExportButton, printViewButton, refreshButton;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
             PairingListTemplateDTO template, SailingServiceAsync sailingService) {
@@ -46,6 +44,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
         cSVExportButton = new Button(stringMessages.csvExport());
         printViewButton = new Button(stringMessages.printView());
+        refreshButton = new Button(stringMessages.refresh());
 
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogs();
@@ -130,9 +129,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         cSVExportButton.ensureDebugId("CSVExportButton");
         printViewButton.getElement().getStyle().setMargin(3, Unit.PX);
         printViewButton.ensureDebugId("printViewButton");
+        refreshButton.getElement().getStyle().setMargin(3, Unit.PX);
+        refreshButton.ensureDebugId("printViewButton");
         getRightButtonPannel().add(applyToRacelogButton);
         getRightButtonPannel().add(cSVExportButton);
         getRightButtonPannel().add(printViewButton);
+        getRightButtonPannel().add(refreshButton);
         getRightButtonPannel().add(new HTML(stringMessages.printHint()));
         if (!applyToRacelogButton.isEnabled()) {
             Label label = new Label(stringMessages.blockedApplyButton());
@@ -166,6 +168,38 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
                 String link = EntryPointLinkFactory.createPairingListLink(createLinkParameters());
                 Window.open(link, "", "");
+            }
+        });
+        refreshButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                getDialogBox().hide();
+                BusyDialog busyDialog = new BusyDialog();
+                busyDialog.show();
+                try {
+                    sailingService.calculatePairingList(leaderboardDTO.getName(),
+                            template.getSelectedFlightNames(), template.getCompetitorCount(),
+                            template.getFlightMultiplier(), new AsyncCallback<PairingListTemplateDTO>() {
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    busyDialog.hide();
+                                    System.out.println(caught);
+                                }
+
+                                @Override
+                                public void onSuccess(PairingListTemplateDTO result) {
+                                    busyDialog.hide();
+                                    PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, 
+                                            stringMessages, result, sailingService);
+                                    dialog.show();
+                                }
+
+                            });
+                } catch (Exception exception) {
+                    // TODO show error somehow
+                }
             }
         });
     }

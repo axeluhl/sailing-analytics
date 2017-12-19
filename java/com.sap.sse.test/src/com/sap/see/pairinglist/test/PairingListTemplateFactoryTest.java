@@ -1,7 +1,7 @@
 package com.sap.see.pairinglist.test;
 
-import static org.junit.Assert.assertNotNull; 
-import static org.junit.Assert.assertArrayEquals; 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertArrayEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -17,7 +17,7 @@ import junit.framework.Assert;
 public class PairingListTemplateFactoryTest {
 
     public PairingListTemplateFactoryImpl factoryImpl;
-    
+
     @Before
     public void testSetup() {
         factoryImpl = new PairingListTemplateFactoryImpl();
@@ -30,7 +30,7 @@ public class PairingListTemplateFactoryTest {
         final int competitors = 18;
 
         int[][] plTemplate = factoryImpl
-                .getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors),0)
+                .createPairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors))
                 .getPairingListTemplate();
 
         Assert.assertNotNull(plTemplate);
@@ -41,45 +41,39 @@ public class PairingListTemplateFactoryTest {
                 }
             }
         }
-        
+
         int[][] plTemplate2 = factoryImpl
-                .getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors + 1),0)
+                .createPairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors + 1))
                 .getPairingListTemplate();
-        
+
         int dummyCount = 0;
 
         Assert.assertNotNull(plTemplate2);
         for (int[] group : plTemplate2) {
             for (int competitorNumber : group) {
-                
+
                 if (competitorNumber == -1) {
                     dummyCount++;
                 }
-                
+
                 if (competitorNumber < -1 && competitorNumber < competitors) {
                     Assert.fail("Values of Pairing List Template must not be smaller -1, when there are dummies!");
                 }
             }
         }
-        
+
         if (dummyCount != (groups - 1) * flights) {
             Assert.fail("There are not as much dummies as there should be!");
         }
     }
-    /**
-     * Checks if the Factory returns the same PairingListTemplate if one exists
-     */
+    
     @Test
-    public void testGetOrCreate() {
-        final int flights = 15;
-        final int groups = 3;
-        final int competitors = 18;
-        
-        PairingFrameProviderTest frameProviderTest1 = new PairingFrameProviderTest(flights, groups, competitors);
-        PairingFrameProviderTest frameProviderTest2 = new PairingFrameProviderTest(flights, groups, competitors);
-        PairingListTemplate list1 = factoryImpl.getOrCreatePairingListTemplate(frameProviderTest1,0);
-        PairingListTemplate list2 = factoryImpl.getOrCreatePairingListTemplate(frameProviderTest2,0);     
-        Assert.assertSame(list1,list2);
+    public void testCreatePairingListTemplate() {
+        PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
+        PairingListTemplate template1 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
+        PairingListTemplate template2 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
+
+        Assert.assertFalse(Arrays.equals(template1.getPairingListTemplate(), template2.getPairingListTemplate()));
     }
     
     /**
@@ -88,85 +82,87 @@ public class PairingListTemplateFactoryTest {
     @Test
     public void testGeneration() {
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
-        PairingListTemplate example1 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18),0);
-        PairingListTemplate example6 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 14),0);
-        PairingListTemplate example2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(100, 6, 18),0);
-        PairingListTemplate example3 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30),0);
-        PairingListTemplate example4 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3);
-        PairingListTemplate example5 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3);
+        PairingListTemplate example1 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
+        PairingListTemplate example6 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(15, 3, 14));
+        PairingListTemplate example2 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(100, 6, 18));
+        PairingListTemplate example3 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(10, 3, 30));
+        PairingListTemplate example4 = factoryImpl
+                .createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3);
+        PairingListTemplate example5 = factoryImpl
+                .createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18), 3);
         assertNotNull(example1);
         assertNotNull(example2);
         assertNotNull(example3);
         assertNotNull(example4);
         assertNotNull(example5);
         assertNotNull(example6);
-        assertArrayEquals(example4.getPairingListTemplate(), example5.getPairingListTemplate());
-        System.out.println(Arrays.deepToString(example1.getPairingListTemplate()));
-        System.out.println(example2.getQuality());
     }
-    
+
     @Test
     public void testMultiplyFlights() {
         final int flightCount = 14;
         final int groupCount = 3;
-        final int competitorCount = 18;                
+        final int competitorCount = 18;
         final int multiplier = 2;
-        
+
         PairingListTemplateFactoryImpl factoryImpl = new PairingListTemplateFactoryImpl();
-        PairingListTemplate example = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flightCount, groupCount, competitorCount), multiplier);
-        
-        for (int groupIndex = 0; groupIndex < flightCount * groupCount; groupIndex = groupIndex + (groupCount * (multiplier))) {
-            assertArrayEquals(example.getPairingListTemplate()[groupIndex], example.getPairingListTemplate()[groupIndex + groupCount]);
+        PairingListTemplate example = factoryImpl.createPairingListTemplate(
+                new PairingFrameProviderTest(flightCount, groupCount, competitorCount), multiplier);
+
+        for (int groupIndex = 0; groupIndex < flightCount * groupCount; groupIndex = groupIndex
+                + (groupCount * (multiplier))) {
+            assertArrayEquals(example.getPairingListTemplate()[groupIndex],
+                    example.getPairingListTemplate()[groupIndex + groupCount]);
         }
     }
-   
-    
+
     @Test
-    public void qualityCheck(){
-        PairingListTemplate template = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(15, 3, 18),0);
+    public void qualityCheck() {
+        PairingListTemplate template = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(15, 3, 18));
         System.out.println(Arrays.deepToString(template.getPairingListTemplate()));
         System.out.println(template.getQuality());
-        if(template.getQuality()>=0.7) {
+        if (template.getQuality() >= 0.7) {
             Assert.fail("Quality of Pairinglist is worse than usual!");
         }
-        
-        PairingListTemplate template2 = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(10, 3, 30),0);
+
+        PairingListTemplate template2 = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(10, 3, 30));
         System.out.println(Arrays.deepToString(template2.getPairingListTemplate()));
         System.out.println(template2.getQuality());
-        if(template2.getQuality()>=1.2) {
+        if (template2.getQuality() >= 1.2) {
             Assert.fail("Quality of Pairinglist is worse than usual!");
         }
     }
-    
+
     /**
-     * Checks if the competitors of all single flights are divided up correctly (e.g. multiple competitors, absenced competitors)
-     * flights, groups and competitors can be variable.
+     * Checks if the competitors of all single flights are divided up correctly (e.g. multiple competitors, absenced
+     * competitors) flights, groups and competitors can be variable.
      */
     @Test
     public void checkFlights() {
         final int flights = 15;
         final int groups = 3;
         final int competitors = 18;
-        
+
         ArrayList<Integer> availableCompetitors = new ArrayList<>();
-        
-        int[][] copy = factoryImpl.getOrCreatePairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors),0).getPairingListTemplate();
-        
-        for(int i = 0; i < flights; i++) {
-            
+
+        int[][] copy = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors))
+                .getPairingListTemplate();
+
+        for (int i = 0; i < flights; i++) {
+
             IntStream.range(0, competitors - 1).forEach(competitor -> {
                 availableCompetitors.add(competitor);
             });
-            
-            for(int j = 0; j < groups; j++) {
-                for(int k = 0; k < competitors/groups; k++) {
-                    if(availableCompetitors.contains(copy[i*groups+j][k])) {
-                        availableCompetitors.remove(new Integer(copy[i*groups+j][k]));
+
+            for (int j = 0; j < groups; j++) {
+                for (int k = 0; k < competitors / groups; k++) {
+                    if (availableCompetitors.contains(copy[i * groups + j][k])) {
+                        availableCompetitors.remove(new Integer(copy[i * groups + j][k]));
                     }
                 }
             }
-            
-            if(availableCompetitors.isEmpty()) {
+
+            if (availableCompetitors.isEmpty()) {
                 continue;
             } else {
                 Assert.fail("The competitors are not divided up correctly!");

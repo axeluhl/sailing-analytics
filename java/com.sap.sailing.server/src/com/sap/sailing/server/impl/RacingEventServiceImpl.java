@@ -120,6 +120,7 @@ import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -265,6 +266,7 @@ import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
@@ -489,7 +491,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
-    private final PairingListTemplateFactoryImpl pairingListTemplateFactory = new PairingListTemplateFactoryImpl(); 
+    private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
     
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -4163,7 +4165,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         
         if (leaderboard != null) {
             PairingListTemplate template = pairingListTemplateFactory
-                    .getOrCreatePairingListTemplate(new PairingFrameProvider() {
+                    .createPairingListTemplate(new PairingFrameProvider() {
 
                         @Override
                         public int getGroupsCount() {
@@ -4195,12 +4197,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);
-        //TODO (bug2822) get Boats of Regatta
-        ArrayList<Boat> boats=new ArrayList<>();
-        for(int slot=0;slot<pairingListTemplate.getPairingListTemplate()[0].length;slot++){
-            boats.add(new BoatImpl("Boat "+(slot+1), new BoatClassImpl("49er", true), "DE"+slot));
+        //TODO (bug2822) get Boats of Regatta/Leaderboard
+        
+        List<Boat> boats = new ArrayList<>();
+        
+        for (int slot = 0; slot < pairingListTemplate.getPairingListTemplate()[0].length; slot++) {
+            boats.add(new BoatImpl("Boat " + (slot + 1), new BoatClassImpl("49er", true), "DE" + slot));
         }
-        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
+        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
 
             @Override
             public Iterable<RaceColumn> getFlights() {
@@ -4222,7 +4226,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             public int getGroupsCount() {
                 return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
             }
-        },boats);
+            
+            @Override
+            public Iterable<Boat> getCompetitorAllocation() {
+                return boats;
+            }
+        });
         return pairingList;
     }
 

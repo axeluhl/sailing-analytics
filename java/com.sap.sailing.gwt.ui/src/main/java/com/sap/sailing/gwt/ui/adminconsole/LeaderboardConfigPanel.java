@@ -1027,25 +1027,26 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             public void ok(PairingListTemplateDTO editedObject) {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
-                try{
-                sailingService.calculatePairingList(leaderboardDTO.getName(), editedObject.getSelectedFlightNames(), editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
-                        new AsyncCallback<PairingListTemplateDTO>() {
+                try {
+                    sailingService.calculatePairingList(leaderboardDTO.getName(),
+                            editedObject.getSelectedFlightNames(), editedObject.getCompetitorCount(),
+                            editedObject.getFlightMultiplier(), new AsyncCallback<PairingListTemplateDTO>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        busyDialog.hide();
-                        System.out.println(caught);
-                    }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    busyDialog.hide();
+                                    System.out.println(caught);
+                                }
 
-                    @Override
-                    public void onSuccess(PairingListTemplateDTO result) {
-                        busyDialog.hide();
-                        openPairingListCreationDialog(leaderboardDTO, result);
-                    }
-                    
-                });
-                }catch(Exception exception){
-                    //TODO show error somehow
+                                @Override
+                                public void onSuccess(PairingListTemplateDTO result) {
+                                    busyDialog.hide();
+                                    openPairingListCreationDialog(leaderboardDTO, result);
+                                }
+
+                            });
+                } catch (Exception exception) {
+                    // TODO show error somehow
                 }
             }
 
