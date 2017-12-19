@@ -929,4 +929,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO, AsyncCallback<Void> callback);
+    
+    void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
 }
