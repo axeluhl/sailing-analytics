@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
+// TODO shouldn't these be part of the Sailing domain and not of SSE?
 public enum AbstractRoles {
     spectator(UUID.fromString("244cb84c-2b8a-4557-b175-db963072cfbc"), "spectator", Collections.<String>emptyList()),
     moderator(UUID.fromString("91c88a11-c977-4c24-b0a6-15bac0525764"), "moderator", asList("race:live_replay")),

@@ -17,7 +17,7 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -95,20 +95,19 @@ public class AccessControlStoreTest {
     
     @Test
     public void testCreateRole() {
-        userStore.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
-        assertNotNull(userStore.getRole(testRoleId));
+        userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
+        assertNotNull(userStore.getRoleDefinition(testRoleId));
 
         newStores();
-        assertNotNull(userStore.getRole(testRoleId));
+        assertNotNull(userStore.getRoleDefinition(testRoleId));
     }
     
     @Test
     public void testDeleteRole() {
-        final Role role = userStore.createRole(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
-        userStore.removeRole(role);
-        assertNull(userStore.getRole(testRoleId));
-
+        final RoleDefinition role = userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
+        userStore.removeRoleDefinition(role);
+        assertNull(userStore.getRoleDefinition(testRoleId));
         newStores();
-        assertNull(userStore.getRole(testRoleId));
+        assertNull(userStore.getRoleDefinition(testRoleId));
     }
 }

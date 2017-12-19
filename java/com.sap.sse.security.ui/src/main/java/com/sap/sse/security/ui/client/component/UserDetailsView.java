@@ -27,13 +27,15 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.Permission;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.IconResources;
@@ -60,7 +62,7 @@ public class UserDetailsView extends FlowPanel {
     private final ListBox allPermissionsList;
     private UserDTO user;
     private final ErrorReporter errorReporter;
-    private final Map<String, Role> serverRoles;
+    private final Map<String, RoleDefinition> serverRoleDefinitionsByName;
 
     private final FlowPanel rolesEditorWrapper;
 
@@ -71,7 +73,7 @@ public class UserDetailsView extends FlowPanel {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.user = user;
-        serverRoles = new HashMap<>();
+        serverRoleDefinitionsByName = new HashMap<>();
         addStyleName("userDetailsView");
         List<String> defaultPermissionNames = new ArrayList<>();
         for (DefaultPermissions defaultPermission : DefaultPermissions.values()) {
@@ -165,14 +167,14 @@ public class UserDetailsView extends FlowPanel {
     }
 
     /**
-     * Assumes {@link #serverRoles} to be up to date; ideally called from an onSuccess callback after
+     * Assumes {@link #serverRoleDefinitionsByName} to be up to date; ideally called from an onSuccess callback after
      * retrieving a fresh roles copy from the server
      */
     private void setRolesEditor(UserManagementServiceAsync userManagementService,
             UserService userService, UserListDataProvider userListDataProvider) {
         final StringListEditorComposite result = new StringListEditorComposite(
                 user == null ? Collections.<String> emptySet() : user.getStringRoles(), stringMessages,
-                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), serverRoles.keySet(),
+                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), serverRoleDefinitionsByName.keySet(),
                 stringMessages.enterRoleName());
         result.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
@@ -180,12 +182,16 @@ public class UserDetailsView extends FlowPanel {
                 final ArrayList<UUID> newRoleIds = new ArrayList<>();
                 final UserDTO selectedUser = UserDetailsView.this.user;
                 for (String roleName : event.getValue()) {
-                    Role role = serverRoles.get(roleName);
-                    if (role != null) {
-                        newRoleIds.add(role.getId());
+                    RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(roleName);
+                    if (roleDefinition != null) {
+                        newRoleIds.add(roleDefinition.getId());
                     }    
                 }
-                userManagementService.setRolesForUser(selectedUser.getName(), newRoleIds, new MarkedAsyncCallback<SuccessInfo>(
+                userManagementService.setRolesForUser(selectedUser.getName(),
+                        // TODO need to allow for tenant / user qualifiying role parameters
+                        Util.map(newRoleIds, roleDefinitionId->new Triple<>(
+                                roleDefinitionId, /* qualifying tenant ID */ null, /* qualifying user name */ null)),
+                                new MarkedAsyncCallback<SuccessInfo>(
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -214,16 +220,16 @@ public class UserDetailsView extends FlowPanel {
     }
 
     private void updateRoles(final UserManagementServiceAsync userManagementService, UserService userService, UserListDataProvider userListDataProvider) {
-        userManagementService.getRoles(new AsyncCallback<ArrayList<Role>>() {
+        userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinition>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
             @Override
-            public void onSuccess(ArrayList<Role> roles) {
-                serverRoles.clear();
-                for (final Role role : roles) {
-                    serverRoles.put(role.getName(), role);
+            public void onSuccess(ArrayList<RoleDefinition> roleDefinitions) {
+                serverRoleDefinitionsByName.clear();
+                for (final RoleDefinition roleDefinition : roleDefinitions) {
+                    serverRoleDefinitionsByName.put(roleDefinition.getName(), roleDefinition);
                 }
                 setRolesEditor(userManagementService, userService, userListDataProvider);
             }

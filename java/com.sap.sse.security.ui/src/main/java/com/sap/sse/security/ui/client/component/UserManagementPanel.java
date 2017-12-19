@@ -50,7 +50,7 @@ public class UserManagementPanel extends DockPanel {
 
     private final UserListDataProvider userListDataProvider;
     
-    private final RolesPanel rolesPanel;
+    private final RoleDefinitionsPanel rolesPanel;
     
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, SecurityTableResources tableResources) {
@@ -137,7 +137,7 @@ public class UserManagementPanel extends DockPanel {
         west.add(aclPager);
         west.add(aclPanel);
         
-        rolesPanel = new RolesPanel(stringMessages, userManagementService, tableResources, errorReporter);
+        rolesPanel = new RoleDefinitionsPanel(stringMessages, userManagementService, tableResources, errorReporter);
         add(rolesPanel, DockPanel.CENTER);
         
         final UserList userList = new UserList();
@@ -206,7 +206,7 @@ public class UserManagementPanel extends DockPanel {
     public void updateUsersAndACLs() {
         userListDataProvider.updateDisplays();
         aclListDataProvider.updateDisplays();
-        rolesPanel.updateRoles();
+        rolesPanel.updateRoleDefinitions();
     }
 
     public void addUserCreatedEventHandler(UserCreatedEventHandler handler){

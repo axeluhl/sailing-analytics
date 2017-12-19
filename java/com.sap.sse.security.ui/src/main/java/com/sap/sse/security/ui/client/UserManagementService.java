@@ -8,9 +8,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
@@ -44,13 +45,13 @@ public interface UserManagementService extends RemoteService {
 
     Collection<UserDTO> getUserList() throws UnauthorizedException;
 
-    Role createRole(String roleIdAsString, String name);
+    RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name);
     
-    void deleteRole(String roleIdAsString);
+    void deleteRoleDefinition(String roleIdAsString);
     
-    void updateRole(Role roleWithNewProperties);
+    void updateRoleDefinition(RoleDefinition roleWithNewProperties);
     
-    ArrayList<Role> getRoles();
+    ArrayList<RoleDefinition> getRoleDefinitions();
 
     Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException;
 
@@ -78,7 +79,9 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo logout();
 
-    SuccessInfo setRolesForUser(String username, Iterable<UUID> roleIds) throws UnauthorizedException;
+    SuccessInfo setRolesForUser(String username,
+            Iterable<Triple<UUID, UUID, String>> roleDefinitionIdAndTenantQualifierIdAndUsernames)
+            throws UnauthorizedException;
 
     SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException;
 

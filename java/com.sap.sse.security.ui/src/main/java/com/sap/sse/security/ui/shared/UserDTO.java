@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
@@ -62,19 +61,10 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         return locale;
     }
 
-    public UUID getRoleIdByName(String name) {
-        for (Role role : getRoles()) {
-            if (name.equals(role.getName())) {
-                return (UUID) role.getId();
-            }
-        }
-        return null;
-    }
-    
     public Iterable<String> getStringRoles() {
         ArrayList<String> result = new ArrayList<>();
         for (Role role : getRoles()) {
-            result.add(role.getName());
+            result.add(role.toString());
         }
         return result;
     }

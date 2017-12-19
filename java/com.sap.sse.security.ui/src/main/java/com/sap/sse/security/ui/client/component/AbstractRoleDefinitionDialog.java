@@ -14,27 +14,27 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public abstract class AbstractRoleDialog extends DataEntryDialog<Role> {
-    private static class RoleValidator implements DataEntryDialog.Validator<Role> {
+public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleDefinition> {
+    private static class RoleValidator implements DataEntryDialog.Validator<RoleDefinition> {
         private final StringMessages stringMessages;
-        private final Map<String, Role> allOtherRoles;
+        private final Map<String, RoleDefinition> allOtherRoles;
 
-        public RoleValidator(StringMessages stringMessages, Iterable<Role> allOtherRoles) {
+        public RoleValidator(StringMessages stringMessages, Iterable<RoleDefinition> allOtherRoles) {
             super();
             this.stringMessages = stringMessages;
             this.allOtherRoles = new HashMap<>();
-            for (final Role role : allOtherRoles) {
+            for (final RoleDefinition role : allOtherRoles) {
                 this.allOtherRoles.put(role.getName(), role);
             }
         }
 
         @Override
-        public String getErrorMessage(Role valueToValidate) {
+        public String getErrorMessage(RoleDefinition valueToValidate) {
             final String result;
             if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                 result = stringMessages.pleaseEnterARoleName();
@@ -47,17 +47,17 @@ public abstract class AbstractRoleDialog extends DataEntryDialog<Role> {
         }
     }
 
-    protected final TextBox roleNameField;
+    protected final TextBox roleDefinitionNameField;
     protected final GenericStringListInlineEditorComposite<WildcardPermission> permissionsList;
     private final StringMessages stringMessages;
 
-    public AbstractRoleDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
-            Iterable<Role> allOtherRoles,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Role> callback) {
+    public AbstractRoleDefinitionDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
+            Iterable<RoleDefinition> allOtherRoles,
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<RoleDefinition> callback) {
         super(stringMessages.roles(), stringMessages.editRoles(), stringMessages.ok(), stringMessages.cancel(),
                 new RoleValidator(stringMessages, allOtherRoles), /* animationEnabled */ true, callback);
         this.stringMessages = stringMessages;
-        roleNameField = createTextBox("", /* visible length */ 20);
+        roleDefinitionNameField = createTextBox("", /* visible length */ 20);
         permissionsList = new GenericStringListInlineEditorComposite<WildcardPermission>(Collections.emptySet(),
                 stringMessages, IconResources.INSTANCE.removeIcon(), Util.map(allExistingPermissions, p->p.toString()),
                 /* text box size */ 20) {
@@ -83,20 +83,20 @@ public abstract class AbstractRoleDialog extends DataEntryDialog<Role> {
     protected Widget getAdditionalWidget() {
         final Grid result = new Grid(2, 2);
         result.setWidget(0,  0, new Label(stringMessages.name()));
-        result.setWidget(0, 1, roleNameField);
+        result.setWidget(0, 1, roleDefinitionNameField);
         result.setWidget(1, 0, new Label(stringMessages.permissions()));
         result.setWidget(1, 1, permissionsList);
         return result;
     }
 
     @Override
-    protected Role getResult() {
-        final String newName = roleNameField.getText();
+    protected RoleDefinition getResult() {
+        final String newName = roleDefinitionNameField.getText();
         final List<WildcardPermission> permissions = permissionsList.getValue();
-        final Role result = new RoleImpl(getRoleId(), newName);
+        final RoleDefinition result = new RoleDefinitionImpl(getRoleDefinitionId(), newName);
         result.setPermissions(permissions);
         return result;
     }
     
-    protected abstract UUID getRoleId();
+    protected abstract UUID getRoleDefinitionId();
 }

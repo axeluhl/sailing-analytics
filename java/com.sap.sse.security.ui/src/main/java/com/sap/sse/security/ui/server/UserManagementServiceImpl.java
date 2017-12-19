@@ -31,6 +31,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.Credential;
@@ -38,6 +39,8 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
@@ -91,24 +94,24 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Role createRole(String roleIdAsString, String name) {
-        return getSecurityService().createRole(UUID.fromString(roleIdAsString), name);
+    public RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name) {
+        return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), name);
     }
 
     @Override
-    public void deleteRole(String roleIdAsString) {
-        getSecurityService().deleteRole(getSecurityService().getRole(UUID.fromString(roleIdAsString)));
+    public void deleteRoleDefinition(String roleIdAsString) {
+        getSecurityService().deleteRoleDefinition(getSecurityService().getRoleDefinition(UUID.fromString(roleIdAsString)));
     }
 
     @Override
-    public void updateRole(Role roleWithNewProperties) {
-        getSecurityService().updateRole(roleWithNewProperties);
+    public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+        getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
 
     @Override
-    public ArrayList<Role> getRoles() {
-        final ArrayList<Role> result = new ArrayList<>();
-        Util.addAll(getSecurityService().getRoles(), result);
+    public ArrayList<RoleDefinition> getRoleDefinitions() {
+        final ArrayList<RoleDefinition> result = new ArrayList<>();
+        Util.addAll(getSecurityService().getRoleDefinitions(), result);
         return result;
     }
 
@@ -410,20 +413,24 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public SuccessInfo setRolesForUser(String username, Iterable<UUID> idsOfRolesToSet) throws UnauthorizedException {
+    public SuccessInfo setRolesForUser(String username,
+            Iterable<Triple<UUID, UUID, String>> roleDefinitionIdAndTenantQualifierIdAndUsernames)
+            throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("user:grant_permission,revoke_permission:" + username)) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
             }
             Set<Role> rolesToSet = new HashSet<>();
-            for (final UUID idOfRoleToSet : idsOfRolesToSet) {
-                rolesToSet.add(getSecurityService().getRole(idOfRoleToSet));
+            for (final Triple<UUID, UUID, String> roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierIdAndUsernames) {
+                rolesToSet.add(createRoleFromIDs(roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet.getA(),
+                        roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet.getB(),
+                        roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet.getC()));
             }
-            Set<Role> rolesToRemove = new HashSet<>();
-            Util.addAll(u.getRoles(), rolesToRemove);
-            Util.removeAll(rolesToSet, rolesToRemove);
-            for (Role roleToRemove : rolesToRemove) {
+            Set<Role> roleDefinitionsToRemove = new HashSet<>();
+            Util.addAll(u.getRoles(), roleDefinitionsToRemove);
+            Util.removeAll(rolesToSet, roleDefinitionsToRemove);
+            for (Role roleToRemove : roleDefinitionsToRemove) {
                 getSecurityService().removeRoleFromUser(u, roleToRemove);
             }
             Set<Role> rolesToAdd = new HashSet<>();
@@ -432,11 +439,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             for (Role roleToAdd : rolesToAdd) {
                 getSecurityService().addRoleForUser(u, roleToAdd);
             }
-            return new SuccessInfo(true, "Set roles " + idsOfRolesToSet + " for user " + username, /* redirectURL */null,
+            logger.info("Set roles "+roleDefinitionIdAndTenantQualifierIdAndUsernames+" for user "+username);
+            return new SuccessInfo(true, "Set roles " + roleDefinitionIdAndTenantQualifierIdAndUsernames + " for user " + username, /* redirectURL */null,
                     securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
         } else {
             throw new UnauthorizedException("Not permitted to grant permissions to user");
         }
+    }
+    
+    private Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername) {
+        return new RoleImpl(
+                getSecurityService().getRoleDefinition(roleDefinitionId),
+                qualifyingTenantId == null ? null : getSecurityService().getTenant(qualifyingTenantId),
+                        qualifyingUsername == null ? null : getSecurityService().getUserByName(qualifyingUsername));
     }
 
     @Override

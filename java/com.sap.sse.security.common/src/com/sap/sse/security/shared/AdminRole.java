@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class AdminRole implements Role {    
+public class AdminRole implements RoleDefinition {    
     private static final long serialVersionUID = 3291793984984443193L;
     
     private static final AdminRole INSTANCE = new AdminRole();

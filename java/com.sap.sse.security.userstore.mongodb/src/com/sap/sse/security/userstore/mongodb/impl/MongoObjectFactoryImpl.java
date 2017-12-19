@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
@@ -90,7 +91,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeRole(Role role) {
+    public void storeRoleDefinition(RoleDefinition role) {
         DBCollection roleCollection = db.getCollection(CollectionNames.ROLES.name());
         roleCollection.createIndex(new BasicDBObject(FieldNames.Role.ID.name(), 1));
         DBObject dbRole = new BasicDBObject();
@@ -106,11 +107,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void deleteRole(Role role) {
+    public void deleteRoleDefinition(RoleDefinition role) {
         DBCollection roleCollection = db.getCollection(CollectionNames.ROLES.name());
         DBObject dbRole = new BasicDBObject();
         dbRole.put(FieldNames.Role.ID.name(), role.getId().toString());
         roleCollection.remove(dbRole);
+    }
+    
+    private DBObject storeRole(Role role) {
+        final DBObject result = new BasicDBObject();
+        result.put(FieldNames.Role.ID.name(), role.getRoleDefinition().getId());
+        result.put(FieldNames.Role.NAME.name(), role.getRoleDefinition().getName()); // for human readability only
+        result.put(FieldNames.Role.QUALIFYING_TENANT_ID.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getId());
+        result.put(FieldNames.Role.QUALIFYING_TENANT_NAME.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getName());
+        result.put(FieldNames.Role.QUALIFYING_USERNAME.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForUser().getName());
+        return result;
     }
     
     @Override
@@ -172,7 +183,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
         BasicDBList dbRoles = new BasicDBList();
         for (Role role : user.getRoles()) {
-            dbRoles.add(role.getId());
+            dbRoles.add(storeRole(role));
         }
         dbUser.put(FieldNames.User.ROLE_IDS.name(), dbRoles);
         BasicDBList dbPermissions = new BasicDBList();

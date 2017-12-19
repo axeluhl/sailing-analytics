@@ -146,8 +146,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public Ownership getOwnership(String idAsString) {
-        return ownerships.get(idAsString);
+    public Ownership getOwnership(String idOfOwnedObjectAsString) {
+        return ownerships.get(idOfOwnedObjectAsString);
     }
     
     @Override 

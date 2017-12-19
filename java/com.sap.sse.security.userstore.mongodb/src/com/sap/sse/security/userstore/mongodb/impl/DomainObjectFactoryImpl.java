@@ -18,19 +18,18 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.impl.AccessControlListImpl;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
-import com.sap.sse.security.shared.impl.TenantImpl;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -38,6 +37,11 @@ import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlListImpl;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.SecurityUserImpl;
+import com.sap.sse.security.shared.impl.TenantImpl;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
@@ -45,8 +49,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private final DB db;
 
-    public DomainObjectFactoryImpl(DB db) {
+    /**
+     * During the migration process from the old name-based to the new entity/ID-based role
+     * model, a default tenant can be provided to a server which is then recognized while loading
+     * user roles and object ownerships from the DB. When set to a non-null {@link Tenant}, and
+     * no {@link Tenant} can be determined from the current database content for an object ownership
+     * or a user's {@link SecurityUser#getDefaultTenant() default tenant} or for a {@link Role}'s
+     * {@link Role#getQualifiedForTenant() tenant qualification}, this attribute's value will be
+     * used.
+     */
+    private final Tenant defaultTenant;
+
+    public DomainObjectFactoryImpl(DB db, Tenant defaultTenant) {
         this.db = db;
+        this.defaultTenant = defaultTenant;
     }
     
     @Override
@@ -109,32 +125,32 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Role> loadAllRoles() {
-        ArrayList<Role> result = new ArrayList<>();
+    public Iterable<RoleDefinition> loadAllRoleDefinitions() {
+        ArrayList<RoleDefinition> result = new ArrayList<>();
         DBCollection roleCollection = db.getCollection(CollectionNames.ROLES.name());
         try {
             for (DBObject o : roleCollection.find()) {
-                result.add(loadRole(o));
+                result.add(loadRoleDefinition(o));
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load roles.");
-            logger.log(Level.SEVERE, "loadAllRoles", e);
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load role definitions.");
+            logger.log(Level.SEVERE, "loadAllRoleDefinitions", e);
         }
         return result;
     }
     
-    private Role loadRole(DBObject roleDBObject) {
-        final Role result;
-        final String id = (String) roleDBObject.get(FieldNames.Role.ID.name());
+    private RoleDefinition loadRoleDefinition(DBObject roleDefinitionDBObject) {
+        final RoleDefinition result;
+        final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
         if (Util.equalsWithNull(id, AdminRole.getInstance().getId())) {
             result = AdminRole.getInstance();
         } else {
-            final String displayName = (String) roleDBObject.get(FieldNames.Role.NAME.name());
+            final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
             final Set<WildcardPermission> permissions = new HashSet<>();
-            for (Object o : (BasicDBList) roleDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
+            for (Object o : (BasicDBList) roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
                 permissions.add(new WildcardPermission(o.toString(), true));
             }
-            result = new RoleImpl(UUID.fromString(id), displayName, permissions);
+            result = new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions);
         }
         return result;
     }
@@ -194,12 +210,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         is their {@link Tenant#getId() ID} field.
      */
     @Override
-    public Iterable<UserImpl> loadAllUsers(Map<UUID, Role> rolesById) {
+    public Iterable<UserImpl> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById) {
         ArrayList<UserImpl> result = new ArrayList<>();
         DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
             for (DBObject o : userCollection.find()) {
-                result.add(loadUser(o, rolesById));
+                result.add(loadUser(o, roleDefinitionsById));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load users.");
@@ -214,7 +230,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects
      *         is their {@link Tenant#getId() ID} field.
      */
-    private UserImpl loadUser(DBObject userDBObject, Map<UUID, Role> rolesById) {
+    private UserImpl loadUser(DBObject userDBObject, Map<UUID, RoleDefinition> roleDefinitionsById) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
@@ -230,7 +246,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
-                final Role role = rolesById.get((UUID) o);
+                final Role role = loadRole((DBObject) rolesO, roleDefinitionsById);
                 if (role != null) {
                     roles.add(role);
                 } else {
@@ -239,14 +255,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         } else {
             // migration of old name-based, non-entity roles:
-            // qualify role with default tenant of server instance; if no such default tenant is known,
-            // try to find an equal-named role in the set of roles known so far
+            // try to find an equal-named role in the set of role definitions and create a role
+            // that is qualified by the default tenant; for this a default tenant must exist because
+            // otherwise a user would obtain global rights by means of migration which must not happen.
             BasicDBList roleNames = (BasicDBList) userDBObject.get("ROLES");
             if (roleNames != null) {
+                if (getDefaultTenant() == null) {
+                    throw new IllegalStateException(
+                            "For role migration a valid default tenant is required. Set system property "
+                                    + SecurityService.DEFAULT_TENANT_NAME_PROPERTY_NAME+" or provide a server name");
+                }
                 for (Object o : roleNames) {
-                    for (final Role role : rolesById.values()) {
-                        if (role.getName().equals(o.toString())) {
-                            roles.add(role);
+                    for (final RoleDefinition roleDefinition : roleDefinitionsById.values()) {
+                        if (roleDefinition.getName().equals(o.toString())) {
+                            roles.add(new RoleImpl(roleDefinition, getDefaultTenant(), /* user qualification */ null));
                             rolesMigrated = true;
                         }
                     }
@@ -280,6 +302,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             new MongoObjectFactoryImpl(db).storeUser(result);
         }
         return result;
+    }
+
+    /**
+     * When a server instance is migrated from the old name-based role model to the new entity / ID based role model
+     * where roles can be qualified with a tenant and/or user object that needs to act as the tenant/user owner of the
+     * object to which the role's permissions then apply, a default tenant is expected to be provided to this factory,
+     * e.g., originating from a system property read upon server start.
+     */
+    private Tenant getDefaultTenant() {
+        return defaultTenant;
+    }
+
+    private Role loadRole(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById) {
+        final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
+        final Tenant qualifyingTenant = rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name()) == null ? null
+                : new TenantImpl((UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name()),
+                        (String) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_NAME.name()));
+        final SecurityUser qualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
+                : new SecurityUserImpl((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()), /* default tenant */ null);
+        return new RoleImpl(roleDefinition, qualifyingTenant, qualifyingUser);
     }
 
     private Map<AccountType, Account> createAccountMapFromdDBObject(DBObject accountsMap) {

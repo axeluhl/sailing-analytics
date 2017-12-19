@@ -21,7 +21,8 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.TenantImpl;
@@ -75,7 +76,8 @@ public class LoginTest {
     @Test
     public void rolesTest() throws UserManagementException {
         userStore.createUser("me", "me@sap.com", new TenantImpl(UUID.randomUUID(), "me-tenant"));
-        Role testRole = userStore.createRole(UUID.randomUUID(), "testRole", Collections.emptySet());
+        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
+        final RoleImpl testRole = new RoleImpl(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));

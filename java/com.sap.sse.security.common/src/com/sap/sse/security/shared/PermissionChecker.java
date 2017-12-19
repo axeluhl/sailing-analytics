@@ -87,7 +87,7 @@ public class PermissionChecker {
      *            "tw2016".
      * @param permission
      *            E.g. "regatta:edit:tw2016-dyas" (would return true if "tw2016-dyas" would have "tw2016" as the tenant
-     *            owner)
+     *            owner in case the role is qualified with the "tw2016" tenant)
      * @param ownership
      *            Ownership of the data object for which the {@code permission} is requested
      */

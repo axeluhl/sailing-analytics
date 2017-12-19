@@ -9,6 +9,7 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
@@ -18,7 +19,7 @@ public interface DomainObjectFactory {
     
     Iterable<Ownership> loadAllOwnerships(UserStore userStore);
     
-    Iterable<Role> loadAllRoles();
+    Iterable<RoleDefinition> loadAllRoleDefinitions();
     
     /**
      * {@link Tenant}s are special {@link UserGroup}s whose content is stored in the same DB collection as the
@@ -35,11 +36,15 @@ public interface DomainObjectFactory {
     
     /**
      * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
-     *         tenant} attribute which need to be replaced by the caller once the {@link Tenant} objects have been
-     *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects
-     *         is their {@link Tenant#getId() ID} field.
+     *         tenant} and for their {@link SecurityUser#getRoles() roles} attribute which need to be replaced by the
+     *         caller once the {@link Tenant} objects and all user objects have been loaded from the DB. The only field
+     *         that is set correctly in those dummy {@link Tenant} objects is their {@link Tenant#getId() ID} field.
+     *         The {@link Role} objects returned from the {@link SecurityUser#getRoles()} method can be expected to have
+     *         valid {@link Role#getRoleDefinition() role definitions} attached; for the {@link Role#getQualifiedForTenant()}
+     *         and {@link Role#getQualifiedForUser()} fields callers can only expect valid IDs to be set; those objects need
+     *         to be resolved against the full set of tenants and users loaded at a later point in time.
      */
-    Iterable<UserImpl> loadAllUsers(Map<UUID, Role> rolesById);
+    Iterable<UserImpl> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById);
     
     Map<String, Object> loadSettings();
     

@@ -10,7 +10,7 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
     private final MongoObjectFactory defaultMongoObjectFactory;
     
     public PersistenceFactoryImpl() {
-        this.defaultDomainObjectFactory = new DomainObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
+        this.defaultDomainObjectFactory = new DomainObjectFactoryImpl(MongoDBService.INSTANCE.getDB(), defaultTenant);
         this.defaultMongoObjectFactory = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
     }
 
@@ -26,7 +26,7 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
 
     @Override
     public DomainObjectFactory getDomainObjectFactory(MongoDBService mongoDBService) {
-        return new DomainObjectFactoryImpl(mongoDBService.getDB());
+        return new DomainObjectFactoryImpl(mongoDBService.getDB(), defaultTenant);
     }
 
     @Override

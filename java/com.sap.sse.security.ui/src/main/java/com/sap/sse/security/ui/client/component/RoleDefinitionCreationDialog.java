@@ -1,0 +1,23 @@
+package com.sap.sse.security.ui.client.component;
+
+import java.util.UUID;
+
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
+
+public class RoleDefinitionCreationDialog extends AbstractRoleDefinitionDialog {
+    private final UUID newRoleDefinitionId;
+    
+    public RoleDefinitionCreationDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
+            Iterable<RoleDefinition> allOtherRoles, com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<RoleDefinition> callback) {
+        super(stringMessages, allExistingPermissions, allOtherRoles, callback);
+        newRoleDefinitionId = UUID.randomUUID();
+    }
+
+    @Override
+    protected UUID getRoleDefinitionId() {
+        return newRoleDefinitionId;
+    }
+
+}

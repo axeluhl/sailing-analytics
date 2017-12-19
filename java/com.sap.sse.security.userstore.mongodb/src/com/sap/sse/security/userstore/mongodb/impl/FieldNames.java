@@ -23,7 +23,10 @@ public class FieldNames {
     public static enum Role {
         ID,
         NAME,
-        PERMISSIONS
+        PERMISSIONS,
+        QUALIFYING_TENANT_ID,
+        QUALIFYING_TENANT_NAME, // for human readability only
+        QUALIFYING_USERNAME
     }
     
     public static enum Tenant {

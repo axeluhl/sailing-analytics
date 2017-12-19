@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -92,14 +93,14 @@ public interface UserStore extends Named {
 
     void deleteUser(String username) throws UserManagementException;
 
-    Iterable<Role> getRoles();
-    Role getRole(UUID roleId);
-    Role createRole(UUID roleId, String displayName, Iterable<WildcardPermission> permissions);
-    void setRolePermissions(UUID roleId, Set<WildcardPermission> permissions);
-    void addRolePermission(UUID roleId, WildcardPermission permission);
-    void removeRolePermission(UUID roleId, WildcardPermission permission);
-    void setRoleDisplayName(UUID roleId, String displayName);
-    void removeRole(Role role);
+    Iterable<RoleDefinition> getRoleDefinitions();
+    RoleDefinition getRoleDefinition(UUID roleDefinitionId);
+    RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName, Iterable<WildcardPermission> permissions);
+    void setRoleDefinitionPermissions(UUID roleDefinitionId, Set<WildcardPermission> permissions);
+    void addRoleDefinitionPermission(UUID roleDefinitionId, WildcardPermission permission);
+    void removeRoleDefinitionPermission(UUID roleDefinitionId, WildcardPermission permission);
+    void setRoleDefinitionDisplayName(UUID roleDefinitionId, String displayName);
+    void removeRoleDefinition(RoleDefinition roleDefinition);
 
     /**
      * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}

@@ -1,10 +1,11 @@
 package com.sap.sailing.server.security;
 
+import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.security.BearerTokenOrBasicOrFormAuthenticationFilter;
 
 public class BearerTokenOrBasicOrFormAuthenticationFilterSAPSailing extends
         BearerTokenOrBasicOrFormAuthenticationFilter {
     public BearerTokenOrBasicOrFormAuthenticationFilterSAPSailing() {
-        super("SAP Sailing Analytics ("+/* application name */ System.getProperty("com.sap.sailing.server.name", "unknown server name")+")");
+        super("SAP Sailing Analytics ("+/* application name */ ServerStartupConstants.SERVER_NAME+")");
     }
 }

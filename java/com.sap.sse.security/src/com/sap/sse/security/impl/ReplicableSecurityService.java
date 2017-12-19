@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -70,9 +70,9 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalAddSetting(String key, Class<?> clazz);
 
-    Void internalAddRoleForUser(String username, UUID role) throws UserManagementException;
+    Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
 
-    Void internalRemoveRoleFromUser(String username, UUID role) throws UserManagementException;
+    Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
 
     Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException;
 
@@ -80,10 +80,10 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalDeleteUser(String username) throws UserManagementException;
 
-    Role internalCreateRole(UUID roleId, String name);
+    RoleDefinition internalCreateRoleDefinition(UUID roleDefinitionId, String name);
     
-    Void internalDeleteRole(UUID roleId);
+    Void internalDeleteRoleDefinition(UUID roleDefinitionId);
     
-    Void internalUpdateRole(Role roleWithNewProperties);
+    Void internalUpdateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties);
 
 }

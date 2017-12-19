@@ -29,7 +29,8 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -82,7 +83,7 @@ public class UserStoreImpl implements UserStore {
     
     private final ConcurrentHashMap<String, UserImpl> users;
     private final ConcurrentHashMap<String, Set<UserImpl>> usersByEmail;
-    private final ConcurrentHashMap<UUID, Role> roles;
+    private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
 
     private final ConcurrentHashMap<String, User> usersByAccessToken;
     private final ConcurrentHashMap<String, String> emailForUsername;
@@ -129,7 +130,7 @@ public class UserStoreImpl implements UserStore {
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         tenants = new ConcurrentHashMap<>();
         tenantsByName = new ConcurrentHashMap<>();
-        roles = new ConcurrentHashMap<>();
+        roleDefinitions = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
         userGroupsByName = new ConcurrentHashMap<>();
         userGroupsContainingUser = new ConcurrentHashMap<>();
@@ -163,10 +164,10 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storeSettingTypes(settingTypes);
                 mongoObjectFactory.storeSettings(settings);
             }
-            for (Role role : domainObjectFactory.loadAllRoles()) {
-                roles.put(UUID.fromString(role.getId().toString()), role);
+            for (RoleDefinition roleDefinition : domainObjectFactory.loadAllRoleDefinitions()) {
+                roleDefinitions.put(UUID.fromString(roleDefinition.getId().toString()), roleDefinition);
             }
-            for (UserImpl u : domainObjectFactory.loadAllUsers(roles)) {
+            for (UserImpl u : domainObjectFactory.loadAllUsers(roleDefinitions)) {
                 users.put(u.getName(), u);
                 addToUsersByEmail(u);
             }
@@ -183,6 +184,19 @@ public class UserStoreImpl implements UserStore {
             for (final User userWithDummyDefaultTenant : users.values()) {
                 if (userWithDummyDefaultTenant.getDefaultTenant() != null) {
                     userWithDummyDefaultTenant.setDefaultTenant(getTenant(userWithDummyDefaultTenant.getDefaultTenant().getId()));
+                }
+            }
+            // furthermore, the users loaded only had dummy Role objects associated with them where
+            // the qualifying tenant and qualifying user were represented only by dummies that had only
+            // their keys set correctly; those need to be resolved and replaced by the original objects now:
+            for (final User userWithDummyRoles : users.values()) {
+                final Set<Role> dummyRoles = new HashSet<>();
+                Util.addAll(userWithDummyRoles.getRoles(), dummyRoles); // clone to avoid concurrent modification exceptions
+                for (final Role dummyRole : dummyRoles) {
+                    userWithDummyRoles.removeRole(dummyRole);
+                    if (userWithDummyRoles.getDefaultTenant() != null) {
+                        userWithDummyRoles.setDefaultTenant(getTenant(userWithDummyRoles.getDefaultTenant().getId()));
+                    }
                 }
             }
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
@@ -232,7 +246,7 @@ public class UserStoreImpl implements UserStore {
         settings.clear();
         settingTypes.clear();
         users.clear();
-        roles.clear();
+        roleDefinitions.clear();
         usersByEmail.clear();
         usersByAccessToken.clear();
     }
@@ -271,8 +285,8 @@ public class UserStoreImpl implements UserStore {
         } finally {
             LockUtil.unlockAfterWrite(userGroupsUserCacheLock);
         }
-        for (Role role : newUserStore.getRoles()) {
-            roles.put(role.getId(), role);
+        for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
+            roleDefinitions.put(roleDefinition.getId(), roleDefinition);
         }
         for (UserImpl user : newUserStore.getUsers()) {
             users.put(user.getName(), user);
@@ -293,64 +307,64 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<Role> getRoles() {
-        return new ArrayList<>(roles.values());
+    public Iterable<RoleDefinition> getRoleDefinitions() {
+        return new ArrayList<>(roleDefinitions.values());
     }
 
     @Override
-    public Role getRole(UUID roleId) {
-        return roles.get(roleId);
+    public RoleDefinition getRoleDefinition(UUID roleId) {
+        return roleDefinitions.get(roleId);
     }
 
     @Override
-    public Role createRole(UUID roleId, String displayName, Iterable<WildcardPermission> permissions) {
-        final Role role;
-        if (Util.equalsWithNull(roleId, AdminRole.getInstance().getId())) {
+    public RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName, Iterable<WildcardPermission> permissions) {
+        final RoleDefinition role;
+        if (Util.equalsWithNull(roleDefinitionId, AdminRole.getInstance().getId())) {
             role = AdminRole.getInstance();
         } else {
-            role = new RoleImpl(roleId, displayName, permissions);
+            role = new RoleDefinitionImpl(roleDefinitionId, displayName, permissions);
         }
-        roles.put(roleId, role);
-        mongoObjectFactory.storeRole(role);
+        roleDefinitions.put(roleDefinitionId, role);
+        mongoObjectFactory.storeRoleDefinition(role);
         return role;
     }
 
     @Override
-    public void setRolePermissions(UUID roleId, Set<WildcardPermission> permissions) {
-        Role role = roles.get(roleId);
-        role = new RoleImpl(roleId, role.getName(), permissions);
-        mongoObjectFactory.storeRole(role);
+    public void setRoleDefinitionPermissions(UUID roleDefinitionId, Set<WildcardPermission> permissions) {
+        RoleDefinition roleDefinition = roleDefinitions.get(roleDefinitionId);
+        roleDefinition = new RoleDefinitionImpl(roleDefinitionId, roleDefinition.getName(), permissions);
+        mongoObjectFactory.storeRoleDefinition(roleDefinition);
     }
 
     @Override
-    public void addRolePermission(UUID roleId, WildcardPermission permission) {
-        Role role = roles.get(roleId);
-        Set<WildcardPermission> permissions = role.getPermissions();
+    public void addRoleDefinitionPermission(UUID roleId, WildcardPermission permission) {
+        RoleDefinition roleDefinition = roleDefinitions.get(roleId);
+        Set<WildcardPermission> permissions = roleDefinition.getPermissions();
         permissions.add(permission);
-        role = new RoleImpl(roleId, role.getName(), permissions);
-        mongoObjectFactory.storeRole(role);
+        roleDefinition = new RoleDefinitionImpl(roleId, roleDefinition.getName(), permissions);
+        mongoObjectFactory.storeRoleDefinition(roleDefinition);
     }
 
     @Override
-    public void removeRolePermission(UUID roleId, WildcardPermission permission) {
-        Role role = roles.get(roleId);
-        Set<WildcardPermission> permissions = role.getPermissions();
+    public void removeRoleDefinitionPermission(UUID roleId, WildcardPermission permission) {
+        RoleDefinition roleDefinition = roleDefinitions.get(roleId);
+        Set<WildcardPermission> permissions = roleDefinition.getPermissions();
         permissions.remove(permission);
-        role = new RoleImpl(roleId, role.getName(), permissions);
-        mongoObjectFactory.storeRole(role);
+        roleDefinition = new RoleDefinitionImpl(roleId, roleDefinition.getName(), permissions);
+        mongoObjectFactory.storeRoleDefinition(roleDefinition);
     }
 
     @Override
-    public void setRoleDisplayName(UUID roleId, String displayName) {
-        Role role = roles.get(roleId);
-        role = new RoleImpl(roleId, displayName, role.getPermissions());
-        mongoObjectFactory.storeRole(role);
+    public void setRoleDefinitionDisplayName(UUID roleId, String displayName) {
+        RoleDefinition roleDefinition = roleDefinitions.get(roleId);
+        roleDefinition = new RoleDefinitionImpl(roleId, displayName, roleDefinition.getPermissions());
+        mongoObjectFactory.storeRoleDefinition(roleDefinition);
     }
 
     @Override
-    public void removeRole(Role role) {
-        mongoObjectFactory.deleteRole(role);
-        roles.remove(role.getId());
+    public void removeRoleDefinition(RoleDefinition roleDefinition) {
+        mongoObjectFactory.deleteRoleDefinition(roleDefinition);
+        roleDefinitions.remove(roleDefinition.getId());
     }
 
     @Override

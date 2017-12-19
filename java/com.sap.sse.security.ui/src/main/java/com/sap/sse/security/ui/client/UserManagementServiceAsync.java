@@ -8,8 +8,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -58,15 +59,15 @@ public interface UserManagementServiceAsync {
 
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
-    void createRole(String roleIdAsString, String name, AsyncCallback<Role> callback);
+    void createRoleDefinition(String roleDefinitionIdAsString, String name, AsyncCallback<RoleDefinition> callback);
 
-    void deleteRole(String roleIdAsString, AsyncCallback<Void> callback);
+    void deleteRoleDefinition(String roleDefinitionIdAsString, AsyncCallback<Void> callback);
 
-    void updateRole(Role roleWithNewProperties, AsyncCallback<Void> callback);
+    void updateRoleDefinition(RoleDefinition roleWithNewProperties, AsyncCallback<Void> callback);
 
-    void getRoles(AsyncCallback<ArrayList<Role>> callback);
+    void getRoleDefinitions(AsyncCallback<ArrayList<RoleDefinition>> callback);
 
-    void setRolesForUser(String username, Iterable<UUID> roleIds, AsyncCallback<SuccessInfo> callback);
+    void setRolesForUser(String username, Iterable<Triple<UUID, UUID, String>> roleDefinitionIdAndTenantQualifierIdAndUsernames, AsyncCallback<SuccessInfo> callback);
 
     void setPermissionsForUser(String username, Iterable<String> permissions, AsyncCallback<SuccessInfo> callback);
 

@@ -33,6 +33,7 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.SecurityTableResources;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -48,19 +49,19 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * @author Axel Uhl (d043530)
  *
  */
-public class RolesPanel extends VerticalPanel {
+public class RoleDefinitionsPanel extends VerticalPanel {
     private final Button addButton;
     private final Button removeButton;
     private final Button refreshButton;
-    private final FlushableSortedCellTableWithStylableHeaders<Role> rolesTable;
+    private final FlushableSortedCellTableWithStylableHeaders<RoleDefinition> roleDefinitionsTable;
     private final ErrorReporter errorReporter;
     private final UserManagementServiceAsync userManagementService;
-    private final ListDataProvider<Role> rolesListDataProvider;
+    private final ListDataProvider<RoleDefinition> rolesListDataProvider;
     private final StringMessages stringMessages;
-    private final LabeledAbstractFilterablePanel<Role> filterablePanelRoles;
-    private RefreshableMultiSelectionModel<? super Role> refreshableRoleMultiSelectionModel;
+    private final LabeledAbstractFilterablePanel<RoleDefinition> filterablePanelRoleDefinitions;
+    private RefreshableMultiSelectionModel<? super RoleDefinition> refreshableRoleDefinitionMultiSelectionModel;
     
-    public RolesPanel(StringMessages stringMessages, UserManagementServiceAsync userManagementService, SecurityTableResources tableResources,
+    public RoleDefinitionsPanel(StringMessages stringMessages, UserManagementServiceAsync userManagementService, SecurityTableResources tableResources,
             ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -68,50 +69,50 @@ public class RolesPanel extends VerticalPanel {
         this.addButton = new Button(stringMessages.add());
         this.removeButton = new Button(stringMessages.remove());
         this.refreshButton = new Button(stringMessages.refresh());
-        rolesListDataProvider = new ListDataProvider<Role>();
-        filterablePanelRoles = new LabeledAbstractFilterablePanel<Role>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
-                new CellTable<Role>(), rolesListDataProvider) {
+        rolesListDataProvider = new ListDataProvider<RoleDefinition>();
+        filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinition>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
+                new CellTable<RoleDefinition>(), rolesListDataProvider) {
             @Override
-            public Iterable<String> getSearchableStrings(Role role) {
-                return Arrays.asList(role.getName(), role.getId().toString(), role.getPermissions().toString());
+            public Iterable<String> getSearchableStrings(RoleDefinition roleDefinition) {
+                return Arrays.asList(roleDefinition.getName(), roleDefinition.getId().toString(), roleDefinition.getPermissions().toString());
             }
         };
-        filterablePanelRoles.getTextBox().ensureDebugId("RolesFilterTextBox");
-        rolesTable = createRolesTable(tableResources);
-        rolesTable.ensureDebugId("RolesCellTable");
-        filterablePanelRoles.setTable(rolesTable);
-        addButton.addClickHandler(e->createRole());
-        refreshableRoleMultiSelectionModel = (RefreshableMultiSelectionModel<? super Role>) rolesTable.getSelectionModel();
+        filterablePanelRoleDefinitions.getTextBox().ensureDebugId("RolesFilterTextBox");
+        roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
+        roleDefinitionsTable.ensureDebugId("RolesCellTable");
+        filterablePanelRoleDefinitions.setTable(roleDefinitionsTable);
+        addButton.addClickHandler(e->createRoleDefinition());
+        refreshableRoleDefinitionMultiSelectionModel = (RefreshableMultiSelectionModel<? super RoleDefinition>) roleDefinitionsTable.getSelectionModel();
         removeButton.addClickHandler(e->{
-            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(String.join(", ", Util.map(getSelectedRoles(), r->r.getName()))))) {
-                final Set<Role> selectedRoles = new HashSet<Role>(getSelectedRoles());
-                filterablePanelRoles.removeAll(selectedRoles);
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(String.join(", ", Util.map(getSelectedRoleDefinitions(), r->r.getName()))))) {
+                final Set<RoleDefinition> selectedRoles = new HashSet<>(getSelectedRoleDefinitions());
+                filterablePanelRoleDefinitions.removeAll(selectedRoles);
             }
         });
-        refreshButton.addClickHandler(e->updateRoles());
+        refreshButton.addClickHandler(e->updateRoleDefinitions());
         final HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.add(refreshButton);
         buttonPanel.add(addButton);
         buttonPanel.add(removeButton);
         add(buttonPanel);
-        add(filterablePanelRoles);
-        add(rolesTable);
-        updateRoles();
+        add(filterablePanelRoleDefinitions);
+        add(roleDefinitionsTable);
+        updateRoleDefinitions();
     }
     
-    private void createRole() {
-        new RoleCreationDialog(stringMessages, getAllPermissions(), getAllRoles(), new DialogCallback<Role>() {
+    private void createRoleDefinition() {
+        new RoleDefinitionCreationDialog(stringMessages, getAllPermissions(), getAllRoleDefinitions(), new DialogCallback<RoleDefinition>() {
             @Override
-            public void ok(Role editedObject) {
-                userManagementService.createRole(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<Role>() {
+            public void ok(RoleDefinition editedObject) {
+                userManagementService.createRoleDefinition(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<RoleDefinition>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorCreatingRole(editedObject.getName(), caught.getMessage()));
                     }
 
                     @Override
-                    public void onSuccess(Role result) {
-                        updateRoles();
+                    public void onSuccess(RoleDefinition result) {
+                        updateRoleDefinitions();
                     }
                 });
             }
@@ -123,50 +124,50 @@ public class RolesPanel extends VerticalPanel {
         }).show();
     }
 
-    private Set<Role> getSelectedRoles() {
+    private Set<RoleDefinition> getSelectedRoleDefinitions() {
         @SuppressWarnings("unchecked")
-        final Set<Role> result = (Set<Role>) refreshableRoleMultiSelectionModel.getSelectedSet();
+        final Set<RoleDefinition> result = (Set<RoleDefinition>) refreshableRoleDefinitionMultiSelectionModel.getSelectedSet();
         return result;
     }
     
-    private FlushableSortedCellTableWithStylableHeaders<Role> createRolesTable(SecurityTableResources tableResources) {
-        final FlushableSortedCellTableWithStylableHeaders<Role> table = new FlushableSortedCellTableWithStylableHeaders<>(/* pageSize */ 50, tableResources);
+    private FlushableSortedCellTableWithStylableHeaders<RoleDefinition> createRoleDefinitionsTable(SecurityTableResources tableResources) {
+        final FlushableSortedCellTableWithStylableHeaders<RoleDefinition> table = new FlushableSortedCellTableWithStylableHeaders<>(/* pageSize */ 50, tableResources);
         rolesListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
-        SelectionCheckboxColumn<Role> roleSelectionCheckboxColumn = new SelectionCheckboxColumn<Role>(
+        SelectionCheckboxColumn<RoleDefinition> roleSelectionCheckboxColumn = new SelectionCheckboxColumn<RoleDefinition>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
-                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<Role>() {
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<RoleDefinition>() {
                     @Override
-                    public boolean representSameEntity(Role role1, Role role2) {
-                        return role1.getId().equals(role2.getId());
+                    public boolean representSameEntity(RoleDefinition roleDefinition1, RoleDefinition roleDefinition2) {
+                        return roleDefinition1.getId().equals(roleDefinition2.getId());
                     }
                     @Override
-                    public int hashCode(Role t) {
+                    public int hashCode(RoleDefinition t) {
                         return t.getId().hashCode();
                     }
-                }, filterablePanelRoles.getAllListDataProvider(), table);
-        ListHandler<Role> columnSortHandler = new ListHandler<>(rolesListDataProvider.getList());
+                }, filterablePanelRoleDefinitions.getAllListDataProvider(), table);
+        ListHandler<RoleDefinition> columnSortHandler = new ListHandler<>(rolesListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getComparator());
 
-        TextColumn<Role> roleNameColumn = new TextColumn<Role>() {
+        TextColumn<RoleDefinition> roleDefinitionNameColumn = new TextColumn<RoleDefinition>() {
             @Override
-            public String getValue(Role role) {
+            public String getValue(RoleDefinition role) {
                 return role.getName();
             }
         };
-        roleNameColumn.setSortable(true);
-        columnSortHandler.setComparator(roleNameColumn, new Comparator<Role>() {
+        roleDefinitionNameColumn.setSortable(true);
+        columnSortHandler.setComparator(roleDefinitionNameColumn, new Comparator<RoleDefinition>() {
             @Override
-            public int compare(Role r1, Role r2) {
+            public int compare(RoleDefinition r1, RoleDefinition r2) {
                 return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
 
-        Column<Role, SafeHtml> permissionsColumn = new Column<Role, SafeHtml>(new SafeHtmlCell()) {
+        Column<RoleDefinition, SafeHtml> permissionsColumn = new Column<RoleDefinition, SafeHtml>(new SafeHtmlCell()) {
             @Override
-            public SafeHtml getValue(Role role) {
+            public SafeHtml getValue(RoleDefinition role) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 for (Iterator<WildcardPermission> permissionIter=role.getPermissions().iterator(); permissionIter.hasNext(); ) {
                     final WildcardPermission permission = permissionIter.next();
@@ -179,56 +180,56 @@ public class RolesPanel extends VerticalPanel {
             }
         };
         permissionsColumn.setSortable(true);
-        columnSortHandler.setComparator(permissionsColumn, new Comparator<Role>() {
+        columnSortHandler.setComparator(permissionsColumn, new Comparator<RoleDefinition>() {
             @Override
-            public int compare(Role r1, Role r2) {
+            public int compare(RoleDefinition r1, RoleDefinition r2) {
                 return new NaturalComparator().compare(r1.getPermissions().toString(), r2.getPermissions().toString());
             }
         });
-        ImagesBarColumn<Role, RoleImagesBarCell> regattaActionColumn = new ImagesBarColumn<Role, RoleImagesBarCell>(
+        ImagesBarColumn<RoleDefinition, RoleImagesBarCell> regattaActionColumn = new ImagesBarColumn<RoleDefinition, RoleImagesBarCell>(
                 new RoleImagesBarCell(stringMessages));
-        regattaActionColumn.setFieldUpdater(new FieldUpdater<Role, String>() {
+        regattaActionColumn.setFieldUpdater(new FieldUpdater<RoleDefinition, String>() {
             @Override
-            public void update(int index, Role role, String value) {
+            public void update(int index, RoleDefinition roleDefinition, String value) {
                 if (RoleImagesBarCell.ACTION_EDIT.equals(value)) {
-                    editRole(role);
+                    editRole(roleDefinition);
                 } else if (RoleImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(role.getName()))) {
-                        removeRole(role);
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roleDefinition.getName()))) {
+                        removeRole(roleDefinition);
                     }
                 }
             }
         });
 
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
-        table.addColumn(roleNameColumn, stringMessages.name());
+        table.addColumn(roleDefinitionNameColumn, stringMessages.name());
         table.addColumn(permissionsColumn, stringMessages.permissions());
         table.addColumn(regattaActionColumn, stringMessages.actions());
         table.setSelectionModel(roleSelectionCheckboxColumn.getSelectionModel(), roleSelectionCheckboxColumn.getSelectionManager());
         return table;
     }
 
-    private void removeRole(Role role) {
-        userManagementService.deleteRole(role.getId().toString(), new AsyncCallback<Void>() {
+    private void removeRole(RoleDefinition roleDefinition) {
+        userManagementService.deleteRoleDefinition(roleDefinition.getId().toString(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorTryingToDeleteRole(role.getName(), caught.getMessage()));
+                errorReporter.reportError(stringMessages.errorTryingToDeleteRole(roleDefinition.getName(), caught.getMessage()));
             }
 
             @Override
             public void onSuccess(Void result) {
-                updateRoles();
+                updateRoleDefinitions();
             }
         });
     }
 
-    private void editRole(Role role) {
-        final Set<Role> allOtherRoles = getAllOtherRoles(role);
+    private void editRole(RoleDefinition role) {
+        final Set<RoleDefinition> allOtherRoles = getAllOtherRoles(role);
         Set<WildcardPermission> allPermissionsAsStrings = getAllPermissions();
-        new RoleEditDialog(role, stringMessages, allPermissionsAsStrings, allOtherRoles, new DialogCallback<Role>() {
+        new RoleDefinitionEditDialog(role, stringMessages, allPermissionsAsStrings, allOtherRoles, new DialogCallback<RoleDefinition>() {
                     @Override
-                    public void ok(Role editedObject) {
-                        userManagementService.updateRole(editedObject, new AsyncCallback<Void>() {
+                    public void ok(RoleDefinition editedObject) {
+                        userManagementService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(stringMessages.errorEditingRoles(editedObject.getName(), caught.getMessage()));
@@ -236,7 +237,7 @@ public class RolesPanel extends VerticalPanel {
 
                             @Override
                             public void onSuccess(Void result) {
-                                updateRoles();
+                                updateRoleDefinitions();
                             }
                         });
                     }
@@ -249,29 +250,29 @@ public class RolesPanel extends VerticalPanel {
 
     private Set<WildcardPermission> getAllPermissions() {
         Set<WildcardPermission> allPermissionsAsStrings = new HashSet<>();
-        for (final Role roleFromAllRoles : getAllRoles()) {
+        for (final RoleDefinition roleFromAllRoles : getAllRoleDefinitions()) {
             Util.addAll(roleFromAllRoles.getPermissions(), allPermissionsAsStrings);
         }
         return allPermissionsAsStrings;
     }
 
-    private Set<Role> getAllOtherRoles(Role role) {
-        final Set<Role> allOtherRoles = getAllRoles();
+    private Set<RoleDefinition> getAllOtherRoles(RoleDefinition role) {
+        final Set<RoleDefinition> allOtherRoles = getAllRoleDefinitions();
         allOtherRoles.remove(role);
         return allOtherRoles;
     }
 
-    private Set<Role> getAllRoles() {
-        final Set<Role> allOtherRoles = new HashSet<>();
-        Util.addAll(filterablePanelRoles.getAll(), allOtherRoles);
+    private Set<RoleDefinition> getAllRoleDefinitions() {
+        final Set<RoleDefinition> allOtherRoles = new HashSet<>();
+        Util.addAll(filterablePanelRoleDefinitions.getAll(), allOtherRoles);
         return allOtherRoles;
     }
 
-    public void updateRoles() {
-        userManagementService.getRoles(new AsyncCallback<ArrayList<Role>>() {
+    public void updateRoleDefinitions() {
+        userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinition>>() {
             @Override
-            public void onSuccess(ArrayList<Role> allRoles) {
-                filterablePanelRoles.updateAll(allRoles);
+            public void onSuccess(ArrayList<RoleDefinition> allRoles) {
+                filterablePanelRoleDefinitions.updateAll(allRoles);
             }
             
             @Override

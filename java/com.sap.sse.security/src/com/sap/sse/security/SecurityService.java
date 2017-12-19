@@ -19,6 +19,7 @@ import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
@@ -38,6 +39,11 @@ import com.sap.sse.security.shared.WildcardPermission;
  *
  */
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
+    /**
+     * An instance of the bundle hosting this service may have a default tenant. If so, the default tenant's name is
+     * read from a system property whose name is provided by this constant.
+     */
+    String DEFAULT_TENANT_NAME_PROPERTY_NAME = "security.defaultTenantName";
 
     SecurityManager getSecurityManager();
 
@@ -169,27 +175,27 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void deleteUser(String username) throws UserManagementException;
 
     /**
-     * Creates a new role with initially empty {@link Role#getPermissions() permissions}.
+     * Creates a new role with initially empty {@link RoleDefinition#getPermissions() permissions}.
      */
-    Role createRole(UUID id, String name);
+    RoleDefinition createRoleDefinition(UUID id, String name);
     
     /**
-     * Deletes the {@code role} from this service persistently.
+     * Deletes the {@code roleDefinition} from this service persistently.
      */
-    void deleteRole(Role role);
+    void deleteRoleDefinition(RoleDefinition roleDefinition);
     
     /**
-     * The {@code roleWithNewProperties} object represents an updated version, maybe a duplicate, of what we would get
-     * when asking {@link #getRole(UUID) this.getRole(roleWithNewProperties.getId())}. It may have changed compared to
+     * The {@code roleDefinitionWithNewProperties} object represents an updated version, maybe a duplicate, of what we would get
+     * when asking {@link #getRoleDefinition(UUID) this.getRole(roleWithNewProperties.getId())}. It may have changed compared to
      * what this service has in store. This service's representation (if not the same) and in particular the persistent
      * representation that this service will load upon its next start-up will be updated to match
-     * {@code roleWithNewProperties}'s state.
+     * {@code roleDefinitionWithNewProperties}'s state.
      */
-    void updateRole(Role roleWithNewProperties);
+    void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties);
     
-    Iterable<Role> getRoles();
+    Iterable<RoleDefinition> getRoleDefinitions();
 
-    Role getRole(UUID idOfRole);
+    RoleDefinition getRoleDefinition(UUID idOfRoleDefinition);
     
     void addRoleForUser(SecurityUser user, Role role);
 

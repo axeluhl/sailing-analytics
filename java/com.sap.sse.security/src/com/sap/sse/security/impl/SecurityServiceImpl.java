@@ -95,6 +95,8 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
@@ -215,23 +217,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * is empty.
      */
     private void initEmptyStore() {
-        final Role adminRole;
+        final RoleDefinition adminRoleDefinition;
         AdminRole adminRolePrototype = AdminRole.getInstance();
-        if (!Util.contains(userStore.getRoles(), adminRolePrototype)) {
+        if (!Util.contains(userStore.getRoleDefinitions(), adminRolePrototype)) {
             logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+
                     AdminRole.getInstance().getPermissions()+"\"");
             Set<String> adminPermissions = new HashSet<>();
             adminPermissions.add("*");
-            adminRole = userStore.createRole((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
+            adminRoleDefinition = userStore.createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
             for (final AbstractRoles otherPredefinedRole : AbstractRoles.values()) {
                 final Set<WildcardPermission> permissions = new HashSet<>();
                 for (final String stringPermission : otherPredefinedRole.getPermissions()) {
                     permissions.add(new WildcardPermission(stringPermission));
                 }
-                userStore.createRole(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
+                userStore.createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
             }
         } else {
-            adminRole = userStore.getRole(adminRolePrototype.getId());
+            adminRoleDefinition = userStore.getRoleDefinition(adminRolePrototype.getId());
         }
         try {
             final SecurityUser adminUser;
@@ -243,7 +245,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 adminUser = userStore.getUserByName(ADMIN_USERNAME);
             }
             createOwnership(ADMIN_USERNAME, adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
-            addRoleForUser(adminUser, adminRole);
+            addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE, "Exception while creating default admin user", e);
         }
@@ -318,8 +320,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Ownership getOwnership(String idAsString) {
-        return accessControlStore.getOwnership(idAsString);
+    public Ownership getOwnership(String idOfOwnedObjectAsString) {
+        return accessControlStore.getOwnership(idOfOwnedObjectAsString);
     }
 
     @Override
@@ -335,8 +337,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Role getRole(UUID idOfRole) {
-        return userStore.getRole(idOfRole);
+    public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
+        return userStore.getRoleDefinition(idOfRoleDefinition);
     }
 
     @Override
@@ -901,46 +903,46 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Role createRole(UUID roleId, String name) {
-        return apply(s->s.internalCreateRole(roleId, name));
+    public RoleDefinition createRoleDefinition(UUID roleId, String name) {
+        return apply(s->s.internalCreateRoleDefinition(roleId, name));
     }
 
     @Override
-    public Role internalCreateRole(UUID roleId, String name) {
-        return userStore.createRole(roleId, name, Collections.emptySet());
+    public RoleDefinition internalCreateRoleDefinition(UUID roleId, String name) {
+        return userStore.createRoleDefinition(roleId, name, Collections.emptySet());
     }
     
     @Override
-    public void deleteRole(Role role) {
-        final UUID roleId = role.getId();
-        apply(s->s.internalDeleteRole(roleId));
+    public void deleteRoleDefinition(RoleDefinition roleDefinition) {
+        final UUID roleId = roleDefinition.getId();
+        apply(s->s.internalDeleteRoleDefinition(roleId));
     }
 
     @Override
-    public Void internalDeleteRole(UUID roleId) {
-        final Role role = userStore.getRole(roleId);
-        userStore.removeRole(role);
+    public Void internalDeleteRoleDefinition(UUID roleId) {
+        final RoleDefinition role = userStore.getRoleDefinition(roleId);
+        userStore.removeRoleDefinition(role);
         return null;
     }
 
     @Override
-    public void updateRole(Role roleWithNewProperties) {
-        apply(s->s.internalUpdateRole(roleWithNewProperties));
+    public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+        apply(s->s.internalUpdateRoleDefinition(roleDefinitionWithNewProperties));
     }
 
     @Override
-    public Void internalUpdateRole(Role roleWithNewProperties) {
-        final Role role = userStore.getRole(roleWithNewProperties.getId());
+    public Void internalUpdateRoleDefinition(RoleDefinition roleWithNewProperties) {
+        final RoleDefinition role = userStore.getRoleDefinition(roleWithNewProperties.getId());
         role.setName(roleWithNewProperties.getName());
-        userStore.setRoleDisplayName(roleWithNewProperties.getId(), role.getName());
+        userStore.setRoleDefinitionDisplayName(roleWithNewProperties.getId(), role.getName());
         role.setPermissions(roleWithNewProperties.getPermissions());
-        userStore.setRolePermissions(role.getId(), role.getPermissions());
+        userStore.setRoleDefinitionPermissions(role.getId(), role.getPermissions());
         return null;
     }
 
     @Override
-    public Iterable<Role> getRoles() {
-        return userStore.getRoles();
+    public Iterable<RoleDefinition> getRoleDefinitions() {
+        return userStore.getRoleDefinitions();
     }
 
     @Override
@@ -950,13 +952,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void addRoleForUser(String username, Role role) {
-        final UUID roleId = role.getId();
-        apply(s->s.internalAddRoleForUser(username, roleId));
+        final UUID roleDefinitionId = role.getRoleDefinition().getId();
+        final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
+        final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
+        apply(s->s.internalAddRoleForUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
     }
 
     @Override
-    public Void internalAddRoleForUser(String username, UUID roleId) throws UserManagementException {
-        userStore.addRoleForUser(username, getRole(roleId));
+    public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
+            String nameOfUserQualifyingRole) throws UserManagementException {
+        userStore.addRoleForUser(username, new RoleImpl(getRoleDefinition(roleDefinitionId),
+                getTenant(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
 
@@ -967,13 +973,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void removeRoleFromUser(String username, Role role) {
-        final UUID roleId = role.getId();
-        apply(s->s.internalRemoveRoleFromUser(username, roleId));
+        final UUID roleDefinitionId = role.getRoleDefinition().getId();
+        final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
+        final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
+        apply(s->s.internalRemoveRoleFromUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
     }
 
     @Override
-    public Void internalRemoveRoleFromUser(String username, UUID roleId) throws UserManagementException {
-        userStore.removeRoleFromUser(username, userStore.getRole(roleId));
+    public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
+            String nameOfUserQualifyingRole) throws UserManagementException {
+        userStore.removeRoleFromUser(username, new RoleImpl(getRoleDefinition(roleDefinitionId),
+                getTenant(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
 
