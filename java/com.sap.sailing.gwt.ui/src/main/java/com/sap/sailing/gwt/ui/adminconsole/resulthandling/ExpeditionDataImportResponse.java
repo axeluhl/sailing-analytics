@@ -45,12 +45,20 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     }-*/;
     
     public final List<String> getGpsDeviceIds() {
-        return asList(array("gpsDeviceIds"));
+        return asList(gpsDeviceIds());
     }
     
+    private final native String[] gpsDeviceIds() /*-{
+        return this.gpsDeviceIds;
+    }-*/;
+    
     public final List<String> getSensorDeviceIds() {
-        return asList(array("sensorDeviceIds"));
+        return asList(sensorDeviceIds());
     }
+    
+    private final native String[] sensorDeviceIds() /*-{
+        return this.sensorDeviceIds;
+    }-*/;
     
     public final native String getSensorFixImporterType() /*-{
         return this.sensorFixImporterType;
