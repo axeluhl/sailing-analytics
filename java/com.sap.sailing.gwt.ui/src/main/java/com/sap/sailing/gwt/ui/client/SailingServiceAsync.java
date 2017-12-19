@@ -668,6 +668,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Boolean> callback);
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
+    
+    void denoteForRaceLogTracking(String leaderboardName,String prefix, AsyncCallback<Void> callback);
 
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
             boolean correctWindByDeclination, AsyncCallback<Void> callback);

@@ -5426,10 +5426,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
-        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard);
+        denoteForRaceLogTracking(leaderboardName, null);
     }
     
+    @Override
+    public void denoteForRaceLogTracking(String leaderboardName,String prefix) throws Exception {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
+        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard,prefix);
+    }
     /**
      * @param triple leaderboard and racecolumn and fleet names
      * @return

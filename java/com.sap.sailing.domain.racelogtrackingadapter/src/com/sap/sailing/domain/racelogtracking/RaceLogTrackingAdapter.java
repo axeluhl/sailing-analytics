@@ -75,7 +75,7 @@ public interface RaceLogTrackingAdapter {
      * {@link #denoteRaceForRaceLogTracking(RacingEventService, Leaderboard, RaceColumn, Fleet, String)} method for each
      * {@link RaceLog}.
      */
-    void denoteAllRacesForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
+    void denoteAllRacesForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, String prefix)
             throws NotDenotableForRaceLogTrackingException;
 
     /**
