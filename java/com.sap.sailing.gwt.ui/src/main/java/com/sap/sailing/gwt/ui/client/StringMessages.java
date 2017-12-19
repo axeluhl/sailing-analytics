@@ -1989,8 +1989,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String threeSixtyVideoHint();
     String processingMP4();
     String resetStartTimeToDefault();
-
     String importFullExpeditionData();
+    String importCanceledNoCompetitorAdded();
+    String importCanceledByUser();
     String importFinished();
     String importFinishedMessage();
     String importFinishedGotoRaceboard();

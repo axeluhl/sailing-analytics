@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole.resulthandling;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.json.client.JSONParser;
 
 /**
@@ -40,36 +40,95 @@ class AbstractDataImportResponse extends JavaScriptObject {
     }
 
     /**
-     * Maps an array containing element of any type into a {@link List list} of the same type by keeping their order.
+     * Extracts the field with the provided name representing a {@link JsArrayString JavaScript array of strings} from
+     * this {@link JavaScriptObject JavaScript object} and maps the contained {@link String string} elements into a
+     * {@link List list} by keeping their order.
      * 
-     * @param array
-     *            the array which should be mapped
-     * @return the {@link List list} containing the array's elements or an empty list if the array is <code>null</code>
-     *         or empty
+     * @param fieldName
+     *            the {@String name} of the field representing a {@link JsArrayString JavaScript array of strings}
+     * @return the {@link List list} containing {@link String string} elements or an empty list if the field is
+     *         <code>undefined</code> or empty
      */
-    protected final <T> List<T> asList(T[] array) {
-        return (array == null || array.length == 0) ? Collections.emptyList() : Arrays.asList(array);
-    }
-
-    /**
-     * Maps a {@link JsArray JavaScript array} containing any type of {@link JavaScriptObject JavaScript objects} into a
-     * {@link List list} of the same type by keeping their order.
-     * 
-     * @param array
-     *            the {@link JsArray JavaScript array} which should be mapped
-     * @return the {@link List list} containing the array's elements or an empty list if the array is <code>null</code>
-     *         or empty
-     */
-    protected final <T extends JavaScriptObject> List<T> asList(JsArray<T> array) {
+    protected final List<String> getStringList(final String fieldName) {
+        final JsArrayString array = arrayString(fieldName);
         if (array == null || array.length() == 0) {
             return Collections.emptyList();
         } else {
-            final List<T> list = new ArrayList<T>(array.length());
+            final List<String> list = new ArrayList<>(array.length());
             for (int index = 0; index < array.length(); index++) {
                 list.add(array.get(index));
             }
             return list;
         }
     }
+
+    /**
+     * Extracts the field with the provided name representing a {@link JsArray JavaScript array} containing any type of
+     * {@link JavaScriptObject JavaScript object}s from this {@link JavaScriptObject JavaScript object} and maps the
+     * contained elements into a {@link List list} of the same type by keeping their order.
+     * 
+     * @param fieldName
+     *            the {@String name} of the field representing a {@link JsArray JavaScript array} containing any type of
+     *            {@link JavaScriptObject JavaScript object}s
+     * @return the {@link List list} containing {@link String string} elements or an empty list if the field is
+     *         <code>undefined</code> or empty
+     */
+    protected final <T extends JavaScriptObject> List<T> getJsObjectList(final String fieldName) {
+        final JsArray<T> array = arrayJsObject(fieldName);
+        if (array == null || array.length() == 0) {
+            return Collections.emptyList();
+        } else {
+            final List<T> list = new ArrayList<>(array.length());
+            for (int index = 0; index < array.length(); index++) {
+                list.add(array.get(index));
+            }
+            return list;
+        }
+    }
+
+    private final native <T extends JavaScriptObject> JsArray<T> arrayJsObject(String fieldName) /*-{
+        return this[fieldName];
+    }-*/;
     
+    private final native JsArrayString arrayString(String fieldName) /*-{
+        return this[fieldName];
+    }-*/;
+
+    /**
+     * Extracts the field with the provided name representing a {@link String string} from this {@link JavaScriptObject
+     * JavaScript object}.
+     * 
+     * @param fieldName
+     *            the {@String name} of the field representing a {@link String string}
+     * @return the {@link String string} or <code>null</code> if the field is <code>undefined</code>
+     */
+    protected final native String getString(String fieldName) /*-{
+        return this[fieldName];
+    }-*/;
+
+    class ErrorMessage extends JavaScriptObject {
+
+        protected ErrorMessage() {
+        }
+
+        public final native String getExUUID() /*-{
+            return this.exUUID;
+        }-*/;
+
+        public final native String getFilename() /*-{
+            return this.filename;
+        }-*/;
+
+        public final native String getRequestedImporter() /*-{
+            return this.requestedImporter;
+        }-*/;
+
+        public final native String getClassName() /*-{
+            return this.className;
+        }-*/;
+
+        public final native String getMessage() /*-{
+            return this.message;
+        }-*/;
+    }
 }
