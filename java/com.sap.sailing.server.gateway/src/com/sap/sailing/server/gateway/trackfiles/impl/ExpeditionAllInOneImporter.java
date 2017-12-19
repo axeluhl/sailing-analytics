@@ -106,12 +106,17 @@ public class ExpeditionAllInOneImporter {
         // TODO guess venue based on the reverse geocoder?
         final String venueName = filename;
         
+        final String fleetName = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
         final String seriesName = Series.DEFAULT_NAME;
 
         // TODO wild guess...
         final ScoringSchemeType scoringSchemeType = ScoringSchemeType.HIGH_POINT;
         final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         final int[] discardThresholds = new int[0];
+
+        // TODO These are the defaults also used by the UI
+        final String raceLogEventAuthorName = "Shore";
+        final int raceLogEventPriority = 4;
         
         final ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
         final List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filename, fileItem));
@@ -156,7 +161,7 @@ public class ExpeditionAllInOneImporter {
         service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
 
         final Series series = new SeriesImpl(seriesName, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
-                Collections.singleton(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
+                Collections.singleton(new FleetImpl(fleetName)),
                 Collections.emptySet(), /* trackedRegattaRegistry */ service);
         final ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
         final RankingMetricConstructor rankingMetricConstructor = RankingMetricsFactory
@@ -180,7 +185,7 @@ public class ExpeditionAllInOneImporter {
 
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
         // TODO these are just the defaults used in the UI
-        final LogEventAuthorImpl author = new LogEventAuthorImpl("Shore", 4);
+        final LogEventAuthorImpl author = new LogEventAuthorImpl(raceLogEventAuthorName, raceLogEventPriority);
         
         final TimePoint startOfTracking = firstFixAt;
         final TimePoint endOfTracking = lastFixAt;
