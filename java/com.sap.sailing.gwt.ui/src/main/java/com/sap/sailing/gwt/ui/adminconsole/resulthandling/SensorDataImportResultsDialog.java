@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.adminconsole.resulthandling.AbstractDataImportResponse.ErrorMessage;
 
 public class SensorDataImportResultsDialog {
     public static void showResults(SensorDataImportResponse response) {

@@ -13,13 +13,9 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     }
     
     public final UUID getEventId() {
-        return UUID.fromString(this.eventId());
+        return UUID.fromString(getString("eventId"));
     }
 
-    private final native String eventId() /*-{
-        return this.eventId;
-    }-*/;
-    
     public final native String getLeaderboardGroupName() /*-{
         return this.leaderboardGroupName;
     }-*/;
@@ -45,20 +41,12 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     }-*/;
     
     public final List<String> getGpsDeviceIds() {
-        return asList(gpsDeviceIds());
+        return getStringList("gpsDeviceIds");
     }
-    
-    private final native String[] gpsDeviceIds() /*-{
-        return this.gpsDeviceIds;
-    }-*/;
     
     public final List<String> getSensorDeviceIds() {
-        return asList(sensorDeviceIds());
+        return getStringList("sensorDeviceIds");
     }
-    
-    private final native String[] sensorDeviceIds() /*-{
-        return this.sensorDeviceIds;
-    }-*/;
     
     public final native String getSensorFixImporterType() /*-{
         return this.sensorFixImporterType;
