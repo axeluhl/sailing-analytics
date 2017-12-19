@@ -28,7 +28,7 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     }-*/;
 
     public final native String getRaceName() /*-{
-        return this.racName;
+        return this.raceName;
     }-*/;
 
 }
