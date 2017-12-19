@@ -204,7 +204,9 @@ public class ExpeditionAllInOneAfterImportHandler {
                         new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        // TODO show dialog with links to event and RaceBoard
+                        new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
+                                regattaAndRaceIdentifier.getRaceName(), leaderboard.getName(),
+                                /* TODO leaderboardGroupName */ null).show();
                     }
 
                     @Override
