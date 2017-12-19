@@ -1991,4 +1991,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resetStartTimeToDefault();
 
     String importFullExpeditionData();
+    String importFinished();
+    String importFinishedMessage();
+    String importFinishedGotoRaceboard();
+    String importFinishedGotoEvent();
 }

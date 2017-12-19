@@ -13,34 +13,43 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class ExpeditionAllInOneImportResultDialog extends DataEntryDialog<Void> {
 
-    private final VerticalPanel verticalPanel;
+	private final VerticalPanel verticalPanel;
 
-    public ExpeditionAllInOneImportResultDialog(UUID eventId, String regattaName, String raceName,
-            String leaderboardName, String leaderboardGroupName) {
-        super("TODO: title", "TODO Message", StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(),
-                /* validator */ null, new DialogCallback<Void>() {
-                    @Override
-                    public void ok(Void editedObject) {
-                    }
+	public ExpeditionAllInOneImportResultDialog(UUID eventId, String regattaName, String raceName,
+			String leaderboardName, String leaderboardGroupName) {
+		super(StringMessages.INSTANCE.importFinished(), StringMessages.INSTANCE.importFinishedMessage(),
+				StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), /* validator */ null,
+				new DialogCallback<Void>() {
+					@Override
+					public void ok(Void editedObject) {
+					}
 
-                    @Override
-                    public void cancel() {
-                    }
-                });
-        verticalPanel = new VerticalPanel();
-        verticalPanel.add(new Anchor("TODO open RaceBoard",
-                EntryPointWithSettingsLinkFactory.createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName, leaderboardGroupName, regattaName, raceName)));
-        verticalPanel.add(new Anchor("TODO open Event",
-                EntryPointLinkFactory.createEventPlaceLink(eventId.toString(), Collections.emptyMap())));
-    }
+					@Override
+					public void cancel() {
+					}
+				});
 
-    @Override
-    protected Widget getAdditionalWidget() {
-        return verticalPanel;
-    }
+		verticalPanel = new VerticalPanel();
+		verticalPanel.setSpacing(20);
+		Anchor raceboardAnchor = new Anchor(StringMessages.INSTANCE.importFinishedGotoRaceboard(),
+				EntryPointWithSettingsLinkFactory.createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName,
+						leaderboardGroupName, regattaName, raceName));
+		raceboardAnchor.setTarget("_blank");
+		verticalPanel.add(raceboardAnchor);
+		Anchor eventAnchor = new Anchor(StringMessages.INSTANCE.importFinishedGotoEvent(),
+				EntryPointLinkFactory.createEventPlaceLink(eventId.toString(), Collections.emptyMap()));
+		eventAnchor.setTarget("_blank");
+		verticalPanel.add(eventAnchor);
+		
+	}
 
-    @Override
-    protected Void getResult() {
-        return null;
-    }
+	@Override
+	protected Widget getAdditionalWidget() {
+		return verticalPanel;
+	}
+
+	@Override
+	protected Void getResult() {
+		return null;
+	}
 }
