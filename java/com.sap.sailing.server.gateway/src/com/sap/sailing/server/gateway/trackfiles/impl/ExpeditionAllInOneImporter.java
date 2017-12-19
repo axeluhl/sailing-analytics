@@ -167,6 +167,9 @@ public class ExpeditionAllInOneImporter {
         try {
             new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport,
                     GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
+            if (!jsonHolderForGpsFixImport.getErrorList().isEmpty()) {
+                throw new AllinOneImportException((String) null, jsonHolderForGpsFixImport.getErrorList());
+            }
         } catch (IOException e1) {
             errors.addAll(jsonHolderForGpsFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
@@ -180,6 +183,9 @@ public class ExpeditionAllInOneImporter {
         try {
             new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport,
                     importerNamesAndFilesForSensorFixImport);
+            if (!jsonHolderForSensorFixImport.getErrorList().isEmpty()) {
+                throw new AllinOneImportException((String) null, jsonHolderForSensorFixImport.getErrorList());
+            }
         } catch (IOException e1) {
             errors.addAll(jsonHolderForSensorFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
