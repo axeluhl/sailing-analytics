@@ -144,7 +144,7 @@ public class ExpeditionAllInOneImporter {
         final UUID courseAreaId = UUID.randomUUID();
         // This is just the default used in the UI
         final Double buoyZoneRadiusInHullLengths = 3.0;
-        // TODO proper id
+        // TODO is this a proper id for the WindSource used here?
         final String windSourceId = filenameWithDateTimeSuffix;
 
         // TODO guess venue based on the reverse geocoder?
@@ -161,6 +161,7 @@ public class ExpeditionAllInOneImporter {
         // TODO These are the defaults also used by the UI
         final String raceLogEventAuthorName = "Shore";
         final int raceLogEventPriority = 4;
+        final boolean correctWindDirectionByMagneticDeclination = true;
 
         final ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
         final List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filenameWithSuffix, fileItem));
@@ -240,7 +241,6 @@ public class ExpeditionAllInOneImporter {
         final Fleet fleet = raceColumn.getFleets().iterator().next();
 
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        // TODO these are just the defaults used in the UI
         final LogEventAuthorImpl author = new LogEventAuthorImpl(raceLogEventAuthorName, raceLogEventPriority);
 
         final TimePoint startOfTracking = firstFixAt;
@@ -252,7 +252,7 @@ public class ExpeditionAllInOneImporter {
         try {
             adapter.denoteRaceForRaceLogTracking(service, regattaLeaderboard, raceColumn, fleet, null);
             final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet, true,
-                    true);
+                    correctWindDirectionByMagneticDeclination);
 
             // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
             raceHandle.getRace();
