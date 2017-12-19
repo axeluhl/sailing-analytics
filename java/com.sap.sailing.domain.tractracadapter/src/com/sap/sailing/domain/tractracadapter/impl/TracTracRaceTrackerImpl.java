@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -263,7 +262,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, connectivityParams, timeoutInMilliseconds);
     }
@@ -285,7 +284,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     TracTracRaceTrackerImpl(final Regatta regatta, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
         final URI liveURI = connectivityParams.getLiveURI();
@@ -388,7 +387,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // removeRace may detach the domain regatta from the domain factory if that
         // removed the last race; therefore, it's important to getOrCreate the
         // domain regatta *after* calling removeRace
-        domainFactory.removeRace(tractracRace.getEvent(), tractracRace, trackedRegattaRegistry);
+        final RaceDefinition raceDefinition = domainFactory.removeRace(tractracRace.getEvent(), tractracRace, effectiveRegatta, trackedRegattaRegistry);
+        if (raceDefinition != null) {
+            trackedRegattaRegistry.removeRace(effectiveRegatta, raceDefinition);
+        }
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found;
         // in this case, create a default regatta based on the TracTrac event data

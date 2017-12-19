@@ -1620,7 +1620,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 DBObject key = new BasicDBObject();
                 key.putAll(paramsPersistenceService.getKey(params));
                 DBObject dbObject = new BasicDBObject();
-                dbObject.putAll(paramsPersistenceService.mapFrom(params));
+                dbObject.putAll(paramsPersistenceService.mapFrom(params)); // TODO bug 4402: should we use the Tracker ID as key here to avoid duplicates?
                 collection.update(key, dbObject, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
             } catch (NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
