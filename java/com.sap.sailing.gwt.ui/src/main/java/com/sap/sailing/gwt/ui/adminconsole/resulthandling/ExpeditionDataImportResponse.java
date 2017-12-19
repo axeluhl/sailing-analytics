@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole.resulthandling;
 
+import java.util.List;
 import java.util.UUID;
 
 public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
@@ -18,6 +19,10 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     private final native String eventId() /*-{
         return this.eventId;
     }-*/;
+    
+    public final native String getLeaderboardGroupName() /*-{
+        return this.leaderboardGroupName;
+    }-*/;
 
     public final native String getLeaderboardName() /*-{
         return this.leaderboardName;
@@ -29,6 +34,26 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
 
     public final native String getRaceName() /*-{
         return this.raceName;
+    }-*/;
+
+    public final native String getRaceColumnName() /*-{
+        return this.raceColumnName;
+    }-*/;
+
+    public final native String getFleetName() /*-{
+        return this.fleetName;
+    }-*/;
+    
+    public final List<String> getGpsDeviceIds() {
+        return asList(array("gpsDeviceIds"));
+    }
+    
+    public final List<String> getSensorDeviceIds() {
+        return asList(array("sensorDeviceIds"));
+    }
+    
+    public final native String getSensorFixImporterType() /*-{
+        return this.sensorFixImporterType;
     }-*/;
 
 }

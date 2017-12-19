@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -29,7 +28,8 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final RegattaAndRaceIdentifier regattaAndRaceIdentifier;
+    private final RegattaNameAndRaceName regattaAndRaceIdentifier;
+    private final String leaderboardGroupName;
     private final String raceColumnName;
     private final String fleetName;
     protected EventDTO event;
@@ -40,9 +40,11 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            String raceName, String raceColumnName, String fleetName, List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            String leaderboardGroupName, String raceName, String raceColumnName, String fleetName,
+            List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
+        this.leaderboardGroupName = leaderboardGroupName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         this.sensorImporterType = sensorImporterType;
@@ -187,9 +189,9 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
     
     private final void continueWithMappedDevices() {
-        List<RegattaAndRaceIdentifier> racesToStopAndStartTrackingFor = new ArrayList<>();
+        List<RegattaNameAndRaceName> racesToStopAndStartTrackingFor = new ArrayList<>();
         racesToStopAndStartTrackingFor.add(regattaAndRaceIdentifier);
-        sailingService.stopTrackingRaces(racesToStopAndStartTrackingFor, new AsyncCallback<Void>() {
+        sailingService.removeAndUntrackRaces(racesToStopAndStartTrackingFor, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO Auto-generated method stub
@@ -202,10 +204,12 @@ public class ExpeditionAllInOneAfterImportHandler {
                 leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
                 sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ true, /* TODO correctWindByDeclination */ true,
                         new AsyncCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        // TODO show dialog with links to event and RaceBoard
-                    }
+                            @Override
+                            public void onSuccess(Void result) {
+                                new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
+                                        regattaAndRaceIdentifier.getRaceName(), leaderboard.getName(),
+                                        leaderboardGroupName).show();
+                            }
 
                     @Override
                     public void onFailure(Throwable caught) {

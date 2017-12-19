@@ -67,6 +67,7 @@ public class ExpeditionAllInOneImporter {
     public static class ImporterResult {
         final UUID eventId;
         final String leaderboardName;
+        final String leaderboardGroupName;
         final String regattaName;
         final String raceName;
         final String raceColumnName;
@@ -75,12 +76,13 @@ public class ExpeditionAllInOneImporter {
         final List<TrackImportDTO> importSensorFixData;
         final String sensorFixImporterType;
 
-        private ImporterResult(final UUID eventId, final String leaderboardName,
+        private ImporterResult(final UUID eventId, final String leaderboardName, String leaderboardGroupName,
                 final RegattaAndRaceIdentifier regattaAndRaceIdentifier, final String raceColumnName,
                 final String fleetName, final List<TrackImportDTO> importGpsFixData,
                 final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
+            this.leaderboardGroupName = leaderboardGroupName;
             this.regattaName = regattaAndRaceIdentifier.getRegattaName();
             this.raceName = regattaAndRaceIdentifier.getRaceName();
             this.raceColumnName = raceColumnName;
@@ -221,9 +223,10 @@ public class ExpeditionAllInOneImporter {
             streamsWithFilenames.put(fileItem.getInputStream(), filename);
             new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, Arrays.asList(trackedRace), streamsWithFilenames);
 
-            return new ImporterResult(event.getId(), regattaNameAndleaderboardName, trackedRace.getRaceIdentifier(),
-                    raceColumnName, fleetName, jsonHolderForGpsFixImport.getImportResult(),
-                    jsonHolderForSensorFixImport.getImportResult(), sensorFixImporterType);
+            return new ImporterResult(event.getId(), regattaNameAndleaderboardName, leaderboardGroupName,
+                    trackedRace.getRaceIdentifier(), raceColumnName, fleetName,
+                    jsonHolderForGpsFixImport.getImportResult(), jsonHolderForSensorFixImport.getImportResult(),
+                    sensorFixImporterType);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
