@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -36,7 +37,8 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    private final Button applyToRacelogButton, cSVExportButton, printPreViewButton, refreshButton;
+    private final Button applyToRacelogButton, printPreViewButton, refreshButton;
+    private final Anchor cSVExportAnchor;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
             PairingListTemplateDTO template, SailingServiceAsync sailingService) {
@@ -47,9 +49,13 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         this.leaderboardDTO = leaderboardDTO;
         this.ensureDebugId("PairingListCreationDialog");
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
-        cSVExportButton = new Button(stringMessages.csvExport());
         printPreViewButton = new Button(stringMessages.printView());
         refreshButton = new Button(stringMessages.reload());
+        cSVExportAnchor = new Anchor(stringMessages.csvExport());
+        cSVExportAnchor.ensureDebugId("CSVExportAnchor");
+        cSVExportAnchor.getElement().setAttribute("href",
+                "data:text/plain;charset=utf-8," + getCSVFromPairingListTemplate(getResult().getPairingListTemplate()));
+        cSVExportAnchor.getElement().setAttribute("download", "pairingListTemplate.csv");
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogs();
         }
@@ -142,16 +148,14 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         getRightButtonPannel().remove(getCancelButton());
         applyToRacelogButton.getElement().getStyle().setMargin(3, Unit.PX);
         applyToRacelogButton.ensureDebugId("ApplyToRacelogButton");
-        cSVExportButton.getElement().getStyle().setMargin(3, Unit.PX);
-        cSVExportButton.ensureDebugId("CSVExportButton");
         printPreViewButton.getElement().getStyle().setMargin(3, Unit.PX);
         printPreViewButton.ensureDebugId("printViewButton");
         refreshButton.getElement().getStyle().setMargin(3, Unit.PX);
         refreshButton.ensureDebugId("printViewButton");
         getRightButtonPannel().add(applyToRacelogButton);
-        getRightButtonPannel().add(cSVExportButton);
         getRightButtonPannel().add(printPreViewButton);
         getRightButtonPannel().add(refreshButton);
+        getRightButtonPannel().add(cSVExportAnchor);
         getRightButtonPannel().add(new HTML(stringMessages.printHint()));
         if (!applyToRacelogButton.isEnabled()) {
             Label label = new Label(stringMessages.blockedApplyButton());
@@ -176,14 +180,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                         });
             }
         });
-        cSVExportButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                downloadPairingListTemplate(getCSVFromPairingListTemplate(getResult().getPairingListTemplate()));
-            }
-        });
         printPreViewButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 sailingService.getRaceDisplayNamesFromLeaderboard(leaderboardDTO.getName(),
@@ -238,17 +235,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             }
         });
     }
-
-    // TODO set Anchor link to Button (see link with settings under configure url)
-    private native void downloadPairingListTemplate(String pairingListCSV)/*-{
-		var dummy = document.createElement('a');
-		dummy.setAttribute('href', 'data:text/plain;charset=utf-8,'
-				+ encodeURIComponent(pairingListCSV));
-		dummy.setAttribute('download', "pairingListTemplate.csv");
-		document.body.appendChild(dummy);
-		dummy.click();
-		document.body.removeChild(dummy);
-    }-*/;
 
     private String getCSVFromPairingListTemplate(int[][] pairingListTemplate) {
         StringBuilder result = new StringBuilder();
