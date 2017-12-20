@@ -80,7 +80,6 @@ public class RaceTrackerTest {
         RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained race: "+race);
         assertNotNull(race);
-        // TODO the following assertion fails; this suggests that the race obtained above hasn't properly been entered into the regatta. Why???
         assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
     }
     

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -1590,7 +1591,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
+    public void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) throws MalformedURLException {
         if (raceTrackingConnectivityParamsServiceFinder != null) {
             final String typeIdentifier = params.getTypeIdentifier();
             final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
@@ -1625,6 +1626,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             } catch (NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
                         ". Couldn't store race "+params.getTrackerID()+" for restoring.", e);
+            } catch (MalformedURLException e) {
+                logger.log(Level.WARNING, "Issue with reading a URL from the tracking params for tracker "+params.getTrackerID()+" for restoring.", e);
             }
         }
     }

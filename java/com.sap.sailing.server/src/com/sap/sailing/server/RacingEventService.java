@@ -29,7 +29,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
@@ -173,27 +172,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param willBeRemoved TODO
      */
     void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
-
-    /**
-     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}
-     * from this service. If it was the last {@link RaceDefinition} in its {@link Regatta} and the regatta
-     * {@link Regatta#isPersistent() is not stored persistently}, the <code>regatta</code> is removed as well and will no
-     * longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for <code>race</code>.
-     * <p>
-     * 
-     * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
-     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop(boolean) stopped}.
-     * 
-     * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
-     * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
-     * {@link RaceColumn#getTrackedRace(Fleet)}.
-     * 
-     * @param regatta
-     *            the regatta from which to remove the race
-     * @param race
-     *            the race to remove
-     */
-    void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
 
     /**
      * @param port
