@@ -5,10 +5,10 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Renamable;
 
 /**
  * A leaderboard that allows its clients to flexibly modify the race columns arranged in this leaderboard without the
