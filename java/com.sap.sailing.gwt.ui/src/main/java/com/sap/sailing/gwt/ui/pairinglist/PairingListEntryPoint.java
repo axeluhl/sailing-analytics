@@ -24,7 +24,6 @@ import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
@@ -34,8 +33,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
     private PairingListContextDefinition pairingListContextDefinition;
     private StrippedLeaderboardDTO strippedLeaderboardDTO;
-
-    private StringMessages stringmessages = StringMessages.INSTANCE;
 
     @Override
     protected void doOnModuleLoad() {
@@ -65,6 +62,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 pairingListContextDefinition.getLeaderboardName());
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         mainPanel.addNorth(header, 75);
+
         Button btn = new Button(getStringMessages().print());
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -182,7 +180,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
                     if (competitorAndBoatPair.getA().getName() == null) {
-                        pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(stringmessages.empty()));
+                        pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(getStringMessages().empty()));
                         pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());
                     } else {

@@ -23,9 +23,9 @@ public class ChooseNameDenoteEventDialog extends AbstractChooseNameDenoteEventDi
     public ChooseNameDenoteEventDialog(StringMessages stringMessages,StrippedLeaderboardDTO leaderboard,DialogCallback<String> callback){
         super("Choose a name", stringMessages, null, callback);
         this.strippedLeaderboardDTO=leaderboard;
-        this.defaultName=createCheckbox("Default Name");
+        this.defaultName=createCheckbox(stringMessages.defaultName());
         this.defaultName.setValue(true);
-        this.ownPrefix=createCheckbox("Own Prefix");
+        this.ownPrefix=createCheckbox(stringMessages.ownPrefix());
         this.name=createTextBox("R", 5);
         this.name.setEnabled(false);
         this.example=new Label();
@@ -61,9 +61,9 @@ public class ChooseNameDenoteEventDialog extends AbstractChooseNameDenoteEventDi
     }
     protected void updateExample() {
        if(this.defaultName.getValue()){
-           this.example.setText("Your names looks like: "+strippedLeaderboardDTO.getName()+" "+ strippedLeaderboardDTO.getRaceList().get(0).getName()+" "+strippedLeaderboardDTO.getRaceList().get(0).getFleets().get(0).getName());
+           this.example.setText(stringMessages.exampleTextForName()+" "+strippedLeaderboardDTO.getName()+" "+ strippedLeaderboardDTO.getRaceList().get(0).getName()+" "+strippedLeaderboardDTO.getRaceList().get(0).getFleets().get(0).getName());
        }else if(this.ownPrefix.getValue()){
-           this.example.setText("Your names looks like: "+name.getValue()+" "+1);
+           this.example.setText(stringMessages.exampleTextForName()+" "+name.getValue()+" "+1);
        }
         
     }
