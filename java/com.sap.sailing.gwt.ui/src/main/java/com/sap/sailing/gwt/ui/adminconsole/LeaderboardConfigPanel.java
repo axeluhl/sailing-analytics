@@ -333,6 +333,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     showRegattaLog();
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST.equals(value)) {
                     createPairingListTemplate(leaderboardDTO);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST.equals(value)) {
+                    openPairingListEntryPoint(leaderboardDTO);
                 }
             }
         });
@@ -1062,5 +1064,12 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private void openPairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, PairingListTemplateDTO template) {
         PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template, sailingService);
         dialog.show();
+    }
+    
+    private void openPairingListEntryPoint(StrippedLeaderboardDTO leaderboardDTO) {
+        Map<String, String> result = new HashMap<>();
+        result.put("leaderboardName", leaderboardDTO.getName());
+        String link = EntryPointLinkFactory.createPairingListLink(result); 
+        Window.open(link,  "", "");
     }
 }

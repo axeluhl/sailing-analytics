@@ -6849,7 +6849,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             result.add(raceColumnList);
         }
-        return new PairingListDTO(result);
+        return new PairingListDTO(result, Util.asList(selectedRaceColumnNames));
     }
     
     @Override
@@ -6888,10 +6888,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames, final PairingListTemplateDTO templateDTO)
+            final Iterable<String> selectedFlightNames, final PairingListDTO pairingListDTO)
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        PairingListDTO pairingListDTO = this.getPairingListFromTemplate(leaderboardName, flightMultiplier, selectedFlightNames,templateDTO);
         int flightCount = 0;
         int groupCount = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -18,11 +17,12 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PairingListCreationDialog extends DataEntryDialog<PairingListTemplateDTO> {
@@ -31,10 +31,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final SailingServiceAsync sailingService;
     private final StrippedLeaderboardDTO leaderboardDTO;
     private final StringMessages stringMessages;
-    
+
+    private PairingListDTO pairingListDTO;
+
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    private final Button applyToRacelogButton, cSVExportButton, printViewButton, refreshButton;
+    private final Button applyToRacelogButton, cSVExportButton, printPreViewButton, refreshButton;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
             PairingListTemplateDTO template, SailingServiceAsync sailingService) {
@@ -46,11 +48,24 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         this.ensureDebugId("PairingListCreationDialog");
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
         cSVExportButton = new Button(stringMessages.csvExport());
-        printViewButton = new Button(stringMessages.printView());
+        printPreViewButton = new Button(stringMessages.printView());
         refreshButton = new Button(stringMessages.reload());
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogs();
         }
+
+        sailingService.getPairingListFromTemplate(this.leaderboardDTO.getName(), this.template.getFlightMultiplier(),
+                this.template.getSelectedFlightNames(), this.template, new AsyncCallback<PairingListDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        pairingListDTO = null;
+                    }
+
+                    @Override
+                    public void onSuccess(PairingListDTO result) {
+                        pairingListDTO = result;
+                    }
+                });
     }
 
     @Override
@@ -81,7 +96,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         qualityPanel.add(qualityHelpImage);
         qualityHelpImage.getElement().getStyle().setMarginLeft(10, Unit.PX);
         qualityHelpImage.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 Window.open("http://wiki.sapsailing.com/Pairinglist/", "", "");
@@ -130,13 +144,13 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         applyToRacelogButton.ensureDebugId("ApplyToRacelogButton");
         cSVExportButton.getElement().getStyle().setMargin(3, Unit.PX);
         cSVExportButton.ensureDebugId("CSVExportButton");
-        printViewButton.getElement().getStyle().setMargin(3, Unit.PX);
-        printViewButton.ensureDebugId("printViewButton");
+        printPreViewButton.getElement().getStyle().setMargin(3, Unit.PX);
+        printPreViewButton.ensureDebugId("printViewButton");
         refreshButton.getElement().getStyle().setMargin(3, Unit.PX);
         refreshButton.ensureDebugId("printViewButton");
         getRightButtonPannel().add(applyToRacelogButton);
         getRightButtonPannel().add(cSVExportButton);
-        getRightButtonPannel().add(printViewButton);
+        getRightButtonPannel().add(printPreViewButton);
         getRightButtonPannel().add(refreshButton);
         getRightButtonPannel().add(new HTML(stringMessages.printHint()));
         if (!applyToRacelogButton.isEnabled()) {
@@ -148,11 +162,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             @Override
             public void onClick(ClickEvent event) {
                 sailingService.fillRaceLogsFromPairingListTemplate(leaderboardDTO.getName(),
-                        template.getFlightMultiplier(), template.getSelectedFlightNames(), template,
+                        template.getFlightMultiplier(), template.getSelectedFlightNames(), pairingListDTO,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
-                                /* TODO: log successfull */}
+                                /* TODO: log successfull */
+                            }
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -167,13 +182,27 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                 downloadPairingListTemplate(getCSVFromPairingListTemplate(getResult().getPairingListTemplate()));
             }
         });
-        printViewButton.addClickHandler(new ClickHandler() {
+        printPreViewButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
+                sailingService.getRaceDisplayNamesFromLeaderboard(leaderboardDTO.getName(),
+                        Util.asList(template.getSelectedFlightNames()), new AsyncCallback<List<String>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                try {
+                                    throw caught;
+                                } catch (Throwable e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
+                            }
 
-                String link = EntryPointLinkFactory.createPairingListLink(createLinkParameters());
-                Window.open(link, "", "");
+                            public void onSuccess(List<String> result) {
+                                PairingListPreviewDialog dialog = new PairingListPreviewDialog(pairingListDTO, result, stringMessages);
+                                dialog.show();
+                            };
+                        });
             }
         });
         refreshButton.addClickHandler(new ClickHandler() {
@@ -234,12 +263,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
     private void disableApplyToRacelogs() {
         this.applyToRacelogButton.setEnabled(false);
-    }
-
-    private Map<String, String> createLinkParameters() {
-        Map<String, String> result = new HashMap<>();
-        result.put("leaderboardName", leaderboardDTO.getName());
-        return result;
     }
 
 }
