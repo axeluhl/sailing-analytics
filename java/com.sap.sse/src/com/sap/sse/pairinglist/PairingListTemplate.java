@@ -1,7 +1,5 @@
 package com.sap.sse.pairinglist;
 
-import java.util.ArrayList;
-
 /**
  * Unfortunately there is no systematic way creating a pairing list, so our solution is 
  * based on the "trial and error" principle. We generate about 100.000 pairing lists, comparing
