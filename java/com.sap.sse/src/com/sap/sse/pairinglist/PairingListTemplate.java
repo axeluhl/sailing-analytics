@@ -16,8 +16,8 @@ import java.util.ArrayList;
  */
 
 public interface PairingListTemplate {
-    <Flight, Group, Competitor,Boat> PairingList<Flight, Group, Competitor,Boat> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor> competitionFormat,ArrayList<Boat> boats);
+    <Flight, Group, Competitor, CompetitorAllocation> PairingList<Flight, Group, Competitor, CompetitorAllocation> createPairingList(
+            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat);
     
     /**
      * The value corresponds to the quality of a pairing list template. The quality is calculated by the 

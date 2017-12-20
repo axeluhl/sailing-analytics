@@ -826,8 +826,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param flightMultiplier specifies how often the flights will be cloned
      * @return calculated {@link PairingListTemplate}
      */
-    PairingListTemplate createPairingListFromRegatta(final String leaderboardName, final int competitorsCount,
-            final int flightMultiplier, final int flightsCount);
+    PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount,
+            final int competitorsCount, final int flightMultiplier);
     
     /**
      * Matches the competitors of a leaderboard to the {@link PairingList}

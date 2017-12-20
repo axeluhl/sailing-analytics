@@ -265,7 +265,7 @@ import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
-import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
+import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -489,7 +489,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
-    private final PairingListTemplateFactoryImpl pairingListTemplateFactory = new PairingListTemplateFactoryImpl(); 
+    private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
     
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -4156,73 +4156,66 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public PairingListTemplate createPairingListFromRegatta(final String leaderboardName, int competitorsCount, 
-            final int flightMultiplier, final int flightsCount) {
+    public PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount, 
+            final int competitorsCount, final int flightMultiplier) {
         
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
-        if (leaderboard != null) {
-            PairingListTemplate template = pairingListTemplateFactory
-                    .getOrCreatePairingListTemplate(new PairingFrameProvider() {
+        PairingListTemplate template = pairingListTemplateFactory
+                .createPairingListTemplate(new PairingFrameProvider() {
 
-                        @Override
-                        public int getGroupsCount() {
-                            return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
-                        }
+                    @Override
+                    public int getGroupsCount() {
+                        return groupsCount;
+                    }
 
-                        // TODO set count of selected flights
-                        @Override
-                        public int getFlightsCount() {
-                            return flightsCount;
-                        }
+                    // TODO set count of selected flights
+                    @Override
+                    public int getFlightsCount() {
+                        return flightsCount;
+                    }
 
-                        @Override
-                        public int getCompetitorsCount() {
-                            return competitorsCount;
-                        }
-                    }, flightMultiplier);
-            return template;
-        } else {
-            return null;
-        }
+                    @Override
+                    public int getCompetitorsCount() {
+                        return competitorsCount;
+                    }
+                }, flightMultiplier);
+        return template;
     }
     
     @Override
     public PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
-            final String leaderboardName, final Iterable<RaceColumn> selectedFlights) {
-        
+            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumn) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);
-        //TODO (bug2822) get Boats of Regatta
-        ArrayList<Boat> boats=new ArrayList<>();
-        for(int slot=0;slot<pairingListTemplate.getPairingListTemplate()[0].length;slot++){
-            boats.add(new BoatImpl("Boat "+(slot+1), new BoatClassImpl("49er", true), "DE"+slot));
+        //TODO (bug4403) get Boats of Regatta/Leaderboard
+        List<Boat> boats = new ArrayList<>();
+        for (int slot = 0; slot < pairingListTemplate.getPairingListTemplate()[0].length; slot++) {
+            boats.add(new BoatImpl("Boat " + (slot + 1), new BoatClassImpl("49er", true), "DE" + slot));
         }
-        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor>() {
-
+        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(
+                new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
             @Override
             public Iterable<RaceColumn> getFlights() {
-                return selectedFlights;
+                return selectedRaceColumn;
             }
-
             @Override
             public Iterable<Competitor> getCompetitors() {
                 return competitors;
             }
-
             @Override
             public Iterable<Fleet> getGroups(RaceColumn flight) {
                 // FIXME
                 return (Iterable<Fleet>) leaderboard.getRaceColumnByName(flight.getName()).getFleets();
             }
-
             @Override
             public int getGroupsCount() {
                 return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
             }
-        },boats);
+            @Override
+            public Iterable<Boat> getCompetitorAllocation() {
+                return boats;
+            }
+        });
         return pairingList;
     }
 

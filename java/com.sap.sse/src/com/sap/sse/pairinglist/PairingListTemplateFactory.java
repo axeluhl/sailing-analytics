@@ -6,12 +6,10 @@ public interface PairingListTemplateFactory {
     static PairingListTemplateFactory INSTANCE = new PairingListTemplateFactoryImpl();
 
     /**
-     * Returns new pairing list template if there is no existing pairing list template with 
-     * the same parameters.
+     * Returns a new {@link PairingListTemplate}
      * 
      * @param pairingFrameProvider 
-     * @return PairingListTemplate Object
+     * @return PairingListTemplate correlates with the new {@link PairingListTemplate}
      */
-    PairingListTemplate getOrCreatePairingListTemplate(PairingFrameProvider pairingFrameProvider,int flightMultiplier);
-   
+    PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int flightCount);
 }

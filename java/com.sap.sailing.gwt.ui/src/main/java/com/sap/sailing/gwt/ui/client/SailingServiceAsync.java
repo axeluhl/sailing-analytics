@@ -668,6 +668,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Boolean> callback);
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
+    
+    void denoteForRaceLogTracking(String leaderboardName,String prefix, AsyncCallback<Void> callback);
 
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
             boolean correctWindByDeclination, AsyncCallback<Void> callback);
@@ -892,8 +894,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *             is thrown if the leaderboard is not found by name
      * @throws IllegalArgumentException
      */
-    void calculatePairingList(final String leaderboardName, final Iterable<String> selectedFlightNames,
-            int competitorCount, int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback)
+    void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
+            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback)
             throws NotFoundException, IllegalArgumentException;
 
     /**
@@ -929,4 +931,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO, AsyncCallback<Void> callback);
+    
+    void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
 }

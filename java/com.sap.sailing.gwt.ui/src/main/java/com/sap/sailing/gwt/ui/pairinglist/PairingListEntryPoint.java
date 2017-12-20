@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -35,32 +36,38 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
     private PairingListContextDefinition pairingListContextDefinition;
 
     private StringMessages stringmessages = StringMessages.INSTANCE;
-    
+    private StrippedLeaderboardDTO strippedLeaderboardDTO;
+
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-
-        this.createUI();
+        pairingListContextDefinition = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new PairingListContextDefinition());
+        this.sailingService.getLeaderboard(pairingListContextDefinition.getLeaderboardName(), new AsyncCallback<StrippedLeaderboardDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                strippedLeaderboardDTO=null;
+            }
+            @Override
+            public void onSuccess(StrippedLeaderboardDTO result) {
+                strippedLeaderboardDTO=result; 
+                createUI();
+            }
+        });
     }
 
     private void createUI() {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         ScrollPanel scrollPanel = new ScrollPanel();
         RootLayoutPanel.get().add(mainPanel);
-
         mainPanel.setWidth("100%");
         mainPanel.setHeight("100%");
-
-        pairingListContextDefinition = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new PairingListContextDefinition());
-
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(
                 pairingListContextDefinition.getLeaderboardName());
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         mainPanel.addNorth(header, 75);
 
-        Button btn = new Button("Print");
-        
+        Button btn = new Button(getStringMessages().print());
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         contentPanel.add(btn);
@@ -68,41 +75,52 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         contentPanel.getElement().getStyle().setProperty("marginTop", "15px");
         contentPanel.getElement().getStyle().setProperty("marginBottom", "15px");
         scrollPanel.add(contentPanel);
-        
         sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(), 
                 new AsyncCallback<PairingListDTO>() {
 
-                    @Override
-                    public void onSuccess(PairingListDTO result) {
-                        VerticalPanel pairingListPanel = createPairingListPanel(result);
-                        contentPanel.add(pairingListPanel);                       
-                        
-                        btn.addClickHandler(new ClickHandler() {
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                printPairingListGrid("<div class='printHeader'><img src='images/home/logo-small@2x.png' </img>"
-                                        + "<b class='title'>"
-                                        + SafeHtmlUtils.fromString(pairingListContextDefinition.getLeaderboardName())
-                                                .asString()
-                                        + "</b></div>" + pairingListPanel.asWidget().getElement().getInnerHTML());
-                                 
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        try {
-                            throw caught;
-                        } catch (Throwable e) {
-                            e.printStackTrace();
+            @Override
+            public void onSuccess(PairingListDTO result) {
+                if (strippedLeaderboardDTO != null) {
+                    sailingService.getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
+                            result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
                         }
-                    }
-                });
+
+                        @Override
+                        public void onSuccess(List<String> names) {
+                            VerticalPanel pairingListPanel = createPairingListPanel(result, names);
+                            contentPanel.add(pairingListPanel);
+                            btn.addClickHandler(new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    printPairingListGrid("<div class='printHeader'><img src='images/home/logo-small@2x.png' </img>"
+                                            + "<b class='title'>"
+                                            + SafeHtmlUtils.fromString(pairingListContextDefinition.getLeaderboardName())
+                                            .asString()
+                                            + "</b></div>" + pairingListPanel.asWidget().getElement().getInnerHTML());
+                                }
+                            });
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                try {
+                    throw caught;
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+
+            } 
+        });
         mainPanel.add(scrollPanel);
     }
 
-    private VerticalPanel createPairingListPanel(PairingListDTO pairingListDTO) {
+    private VerticalPanel createPairingListPanel(PairingListDTO pairingListDTO, final List<String> fleetnames) {
         final List<BoatDTO> boats = pairingListDTO.getBoats();
 
         final int flightCount = pairingListDTO.getPairingList().size();
@@ -121,8 +139,13 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()));
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setTextAlign(TextAlign.CENTER);
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setPadding(10, Unit.PX);
-            pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
-                    boat.getColor().getAsHtml());
+            if (boat.getColor() != null) {
+                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
+                        boat.getColor().getAsHtml());
+            } else {
+                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
+                        "#cecece");
+            }
             boatIndex++;
         }
         String color = "";
@@ -143,7 +166,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
                 //TODO add column for race 1-45 (default)
                 pairingListGrid.setWidget(groupIndex, 1,
-                        new Label(getStringMessages().fleet() + " " + String.valueOf(groupIndex)));
+                        new Label(fleetnames.get(groupIndex-1)));
                 // setting up fleets style
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
@@ -162,7 +185,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
                     if (competitorAndBoatPair.getA().getName() == null) {
-                        pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(stringmessages.empty()));
+                        pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(getStringMessages().empty()));
                         pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());
                     } else {
@@ -217,7 +240,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 				+ ".printHeader { font-size: 1rem; background: #333; border-bottom: 0.333333333333333em solid #f0ab00;"
 				+ "height: 3.333333333333333em; line-height: 3em; width: 100%; overflow: hidden;}"
 				+ "table { border-collapse: collapse; border: 1px solid black; margin: auto; width: 100%}"
-				+ "td { font-size: 1em; }"
+				+ "td { font-size: 13px; }"
 		head = document.head || document.getElementsByTagName('head')[0];
 		style = document.createElement('style');
 		style.type = 'text/css';

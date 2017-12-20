@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -12,7 +13,9 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,11 +32,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final SailingServiceAsync sailingService;
     private final StrippedLeaderboardDTO leaderboardDTO;
     private final StringMessages stringMessages;
-
-    private final Button applyToRacelogButton;
-    private final Button printViewButton;
-    private final Anchor cSVExportAnchor;
     
+    private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+
+    private final Button applyToRacelogButton, printViewButton, refreshButton;
+    private final Anchor cSVExportAnchor;
+
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
             PairingListTemplateDTO template, SailingServiceAsync sailingService) {
         super(stringMessages.pairingList(), null, stringMessages.close(), null, null, null);
@@ -42,15 +46,14 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         this.sailingService = sailingService;
         this.leaderboardDTO = leaderboardDTO;
         this.ensureDebugId("PairingListCreationDialog");
-
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
         printViewButton = new Button(stringMessages.printView());
+        refreshButton = new Button(stringMessages.reload());
         cSVExportAnchor = new Anchor(stringMessages.csvExport());
         cSVExportAnchor.ensureDebugId("CSVExportAnchor");
         cSVExportAnchor.getElement().setAttribute("href",
                 "data:text/plain;charset=utf-8," + getCSVFromPairingListTemplate(getResult().getPairingListTemplate()));
         cSVExportAnchor.getElement().setAttribute("download", "pairingListTemplate.csv");
-
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogs();
         }
@@ -64,7 +67,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
         CaptionPanel dataPanel = new CaptionPanel();
         dataPanel.setCaptionText(stringMessages.dataOfPairingList());
-
         Grid formGrid = new Grid(5, 2);
         dataPanel.add(formGrid);
         Label flights = new Label(String.valueOf(this.template.getFlightCount()));
@@ -79,7 +81,19 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         formGrid.setWidget(1, 1, groups);
         formGrid.setWidget(2, 0, new Label(stringMessages.numberOfCompetitors()));
         formGrid.setWidget(2, 1, competitors);
-        formGrid.setWidget(3, 0, new Label(stringMessages.quality()));
+        HorizontalPanel qualityPanel = new HorizontalPanel();
+        qualityPanel.add(new Label(stringMessages.quality()));
+        Image qualityHelpImage = new Image(resources.help());
+        qualityPanel.add(qualityHelpImage);
+        qualityHelpImage.getElement().getStyle().setMarginLeft(10, Unit.PX);
+        qualityHelpImage.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open("http://wiki.sapsailing.com/Pairinglist/", "", "");
+            }
+        });
+        formGrid.setWidget(3, 0, qualityPanel);
         formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
         if (this.template.getFlightMultiplier() > 1) {
             Label flightMultiplierLabel = new Label(String.valueOf(this.template.getFlightMultiplier()));
@@ -87,36 +101,26 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             formGrid.setWidget(4, 1, flightMultiplierLabel);
             flightMultiplierLabel.ensureDebugId("FlightMultiplierCountLabel");
         }
-
         formGrid.setCellSpacing(10);
-
         panel.add(dataPanel);
 
         /* PAIRING LIST TEMPLATE PANEL */
-
         CaptionPanel pairingListTemplatePanel = new CaptionPanel();
         pairingListTemplatePanel.setCaptionText(stringMessages.pairingListTemplate());
-
         Grid pairingListGrid = new Grid(this.template.getPairingListTemplate().length,
                 this.template.getPairingListTemplate()[0].length);
         pairingListGrid.setCellSpacing(5);
-
         ScrollPanel scrollPanel = new ScrollPanel(pairingListGrid);
         scrollPanel.setPixelSize((Window.getClientWidth() / 4), (Window.getClientHeight() / 3));
         pairingListTemplatePanel.add(scrollPanel);
-
         for (int groupIndex = 0; groupIndex < this.template.getPairingListTemplate().length; groupIndex++) {
-
             for (int boatIndex = 0; boatIndex < this.template.getPairingListTemplate()[0].length; boatIndex++) {
                 pairingListGrid.setWidget(groupIndex, boatIndex,
                         new Label(String.valueOf(this.template.getPairingListTemplate()[groupIndex][boatIndex] + 1)));
-
                 pairingListGrid.getCellFormatter().setWidth(groupIndex, boatIndex, "50px");
             }
         }
-
         panel.add(pairingListTemplatePanel);
-
         configButtons();
 
         return panel;
@@ -132,11 +136,13 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         applyToRacelogButton.ensureDebugId("ApplyToRacelogButton");
         printViewButton.getElement().getStyle().setMargin(3, Unit.PX);
         printViewButton.ensureDebugId("printViewButton");
+        refreshButton.getElement().getStyle().setMargin(3, Unit.PX);
+        refreshButton.ensureDebugId("printViewButton");
         getRightButtonPannel().add(applyToRacelogButton);
+        getRightButtonPannel().add(refreshButton);
         getRightButtonPannel().add(printViewButton);
         getRightButtonPannel().add(cSVExportAnchor);
-        //TODO add info to UI
-        // getRightButtonPannel().add(new HTML(stringMessages.printHint()));
+        getRightButtonPannel().add(new HTML(stringMessages.printHint()));
         if (!applyToRacelogButton.isEnabled()) {
             Label label = new Label(stringMessages.blockedApplyButton());
             label.getElement().getStyle().setColor("red");
@@ -164,6 +170,38 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             public void onClick(ClickEvent event) {
                 String link = EntryPointLinkFactory.createPairingListLink(createLinkParameters());
                 Window.open(link, "", "");
+            }
+        });
+        refreshButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                getDialogBox().hide();
+                BusyDialog busyDialog = new BusyDialog();
+                busyDialog.show();
+                try {
+                    sailingService.calculatePairingListTemplate(template.getFlightCount(), template.getGroupCount(),
+                            template.getCompetitorCount(), template.getFlightMultiplier(),
+                            new AsyncCallback<PairingListTemplateDTO>() {
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    busyDialog.hide();
+                                    System.out.println(caught);
+                                }
+
+                                @Override
+                                public void onSuccess(PairingListTemplateDTO result) {
+                                    busyDialog.hide();
+                                    PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO,
+                                            stringMessages, result, sailingService);
+                                    dialog.show();
+                                }
+
+                            });
+                } catch (Exception exception) {
+                    // TODO show error somehow
+                }
             }
         });
     }

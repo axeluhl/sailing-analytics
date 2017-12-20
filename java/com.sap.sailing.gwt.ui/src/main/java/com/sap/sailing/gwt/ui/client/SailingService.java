@@ -484,6 +484,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void denoteForRaceLogTracking(String leaderboardName) throws Exception;
     
+    void denoteForRaceLogTracking(String leaderboardName,String prefix) throws Exception;
+    
     /**
      * Performs all the necessary steps to start tracking the race.
      * The {@code RaceLog} needs to be denoted for racelog-tracking beforehand.
@@ -697,14 +699,18 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
     
-    PairingListTemplateDTO calculatePairingList(final String leaderboardName, Iterable<String> selectedSeriesNames, int competitorsCount, int flightMultiplier) 
-            throws NotFoundException,IllegalArgumentException;
-    
-    PairingListDTO getPairingListFromTemplate(String leaderboardName, int flightMultiplier, Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO)
-            throws NotFoundException;
-    
+    PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
+            final int flightMultiplier)
+            throws NotFoundException, IllegalArgumentException;
+
+    PairingListDTO getPairingListFromTemplate(String leaderboardName, int flightMultiplier,
+            Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO) throws NotFoundException;
+
     PairingListDTO getPairingListFromRaceLogs(String leaderboardName) throws NotFoundException;
-    
-    void fillRaceLogsFromPairingListTemplate(String leaderboardName, int flightMultiplier, Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO) 
+
+    void fillRaceLogsFromPairingListTemplate(String leaderboardName, int flightMultiplier,
+            Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO)
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;
+    
+    List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
 }

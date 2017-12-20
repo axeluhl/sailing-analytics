@@ -241,6 +241,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String applyToRacelog();
     String csvExport();
     String printView();
+    String print();
     String invalidCompetitorCount();
     String invalidFlightMultiplier();
     String invalidSeriesSelection();
@@ -1520,6 +1521,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String copyCourse();
     String copyCompetitors();
     String smartphoneTracking();
+    String titelOfChooseNameDialog();
+    String ownPrefix();
+    String defaultName();
+    String exampleTextForName();
     String flightsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String viewQueryDefinition();
     String queryDefinitionViewer();

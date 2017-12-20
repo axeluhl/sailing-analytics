@@ -66,13 +66,32 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     + "be greater than 1; count of competitors has to be greater than count of groups");
         }
     }
-    //Used to convert a TemplateDTO to PairingListTemplate
-    public PairingListTemplateImpl(int[][] template,int competitorsCount,int flightMultiplier) {
-       this.pairingListTemplate=template;
-       this.standardDev=this.calcStandardDev(incrementAssociations(template, new int[competitorsCount][competitorsCount]));
-       this.iterations=100000;
-       this.flightMultiplier=flightMultiplier;
-       this.dummies=0;
+    // Used to convert a TemplateDTO to PairingListTemplate
+    public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier) {
+        this.pairingListTemplate = template;
+        int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length + 1);
+        this.dummies = groupCount - (competitorsCount % groupCount);
+        
+        int dummyIndex = 0;
+        
+        for (int[] group : this.pairingListTemplate) {
+            for (int competitorNumber = 0; competitorNumber < group.length; competitorNumber++) {
+                if (group[competitorNumber] < 0) {
+                    group[competitorNumber] = competitorsCount + dummyIndex;
+                    dummyIndex++;
+                    if (dummyIndex >= dummies) {
+                        dummyIndex = 0;
+                    }
+                }
+                
+            }
+        }
+        
+        this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate, 
+                new int[competitorsCount + this.dummies][competitorsCount + this.dummies]));
+        this.resetDummies(this.pairingListTemplate, competitorsCount + this.dummies);
+        this.iterations = 100000;
+        this.flightMultiplier = flightMultiplier;
     }
 
     @Override
@@ -81,9 +100,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     @Override
-    public <Flight, Group, Competitor,Boat> PairingList<Flight, Group, Competitor,Boat> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor> competitionFormat,ArrayList<Boat> boats) {
-        return new PairingListImpl<>(this, competitionFormat,boats);
+    public <Flight, Group, Competitor, CompetitorAllocation> PairingList<Flight, Group, Competitor, CompetitorAllocation> createPairingList(
+            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) {
+        return new PairingListImpl<>(this, competitionFormat);
     }
 
     @Override

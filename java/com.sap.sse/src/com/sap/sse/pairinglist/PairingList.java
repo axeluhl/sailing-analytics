@@ -8,12 +8,12 @@ import com.sap.sse.common.Util.Pair;
  * which contains specific Competitor objects for a specific flight. Because of this it has to depend on a
  * <code>CompetitonFormat</code>.
  */
-public interface PairingList<Flight, Group, Competitor,Boat> {
+public interface PairingList<Flight, Group, Competitor, CompetitorAllocation> {
     //TODO specify Javadoc for Boat-Competitor association
     /**
      * Returns the Competitor objects in a group of a specific flight
      * 
      * @return <code>Iterable</code> with competitors
      */
-    Iterable<Pair<Competitor,Boat>> getCompetitors(Flight flight, Group group);
+    Iterable<Pair<Competitor, CompetitorAllocation>> getCompetitors(Flight flight, Group group);
 }
