@@ -101,7 +101,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
         final Map<String, Object> result = new HashMap<>();
         result.put(TypeBasedServiceFinder.TYPE, params.getTypeIdentifier());
-        result.put(PARAM_URL, TracTracRaceTrackerImpl.getParamURLStrippedOfRandomParam(new URL(ttParams.getParamURL().toString())));
+        result.put(PARAM_URL, TracTracRaceTrackerImpl.getParamURLStrippedOfRandomParam(new URL(ttParams.getParamURL().toString())).toString());
         return result;
     }
 }
