@@ -484,6 +484,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void denoteForRaceLogTracking(String leaderboardName) throws Exception;
     
+    void denoteForRaceLogTracking(String leaderboardName,String prefix) throws Exception;
+    
     /**
      * Performs all the necessary steps to start tracking the race.
      * The {@code RaceLog} needs to be denoted for racelog-tracking beforehand.
