@@ -202,7 +202,6 @@ public class IncrementalApproximatedFixesCalculatorImpl implements IncrementalAp
                 List<LegFixes> newLegFixesListAfter = groupApproximatedFixesToLegFixes(newApproximatedFixesAfter);
                 if (!newLegFixesListAfter.isEmpty()) {
                     // first fix is always the fix of the previous leg which was reused, when this method is called
-                    newLegFixesListAfter.remove(0);
                     int lastExistingLegNumber = newLegFixesListAfter.remove(0).getLegNumber();
                     List<LegFixes> newExistingLegFixesList = new ArrayList<>();
                     for (LegFixes legFixes : existingLegFixesList) {
