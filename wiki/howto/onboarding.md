@@ -45,9 +45,9 @@ Be aware hat the installation may take several minutes depending on your Interne
 #### Accounts
 
 1. Git Account
+The primary Git repository for the project is hosted on sapsailing.com. It is mirrored on an hourly basis into SAP's internal Git/Gerrit repository, but branches from the external Git end up under the remote ``sapsailing.com`` in the internal repository, thus do not automatically merge into their branch counterparts. Conversely, commits pushed onto branches of the SAP-internal Gerrit will not by themselves end up on the external Git at sapsailing.com.
   * For access to the external git at ssh://trac@sapsailing.com/home/trac/git please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead.
-  * Register yourself as a Git user in the SAP-Git under: https://git.wdf.sap.corp:8080/
-  * Ask the Git administrator (Axel Uhl) to get on the list of enabled committers
+  * Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: https://git.wdf.sap.corp:8080/; ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 2. Bugzilla
   * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
   * Bugzilla url: http://bugzilla.sapsailing.com/bugzilla/

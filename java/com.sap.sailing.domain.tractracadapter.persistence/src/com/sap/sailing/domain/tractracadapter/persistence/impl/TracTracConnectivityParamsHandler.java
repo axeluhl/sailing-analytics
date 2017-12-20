@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracRaceTrackerImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -52,7 +54,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     }
 
     @Override
-    public Map<String, Object> mapFrom(RaceTrackingConnectivityParameters params) {
+    public Map<String, Object> mapFrom(RaceTrackingConnectivityParameters params) throws MalformedURLException {
         assert params instanceof RaceTrackingConnectivityParametersImpl;
         final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
         final Map<String, Object> result = getKey(params);
@@ -94,12 +96,12 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     }
 
     @Override
-    public Map<String, Object> getKey(RaceTrackingConnectivityParameters params) {
+    public Map<String, Object> getKey(RaceTrackingConnectivityParameters params) throws MalformedURLException {
         assert params instanceof RaceTrackingConnectivityParametersImpl;
         final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
         final Map<String, Object> result = new HashMap<>();
         result.put(TypeBasedServiceFinder.TYPE, params.getTypeIdentifier());
-        result.put(PARAM_URL, ttParams.getParamURL().toString());
+        result.put(PARAM_URL, TracTracRaceTrackerImpl.getParamURLStrippedOfRandomParam(new URL(ttParams.getParamURL().toString())).toString());
         return result;
     }
 }

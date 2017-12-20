@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSel
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.NotificationCallback;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
@@ -39,9 +40,9 @@ public class UserPreferences extends Composite implements UserPreferencesView {
     @UiField(provided = true) SuggestedMultiSelection<BoatClassDTO> favoriteBoatClassesSelctionUi;
     @UiField DivElement notificationsTextUi;
 
-    public UserPreferences(UserPreferencesView.Presenter presenter) {
+    public UserPreferences(UserPreferencesView.Presenter presenter, FlagImageResolver flagImageResolver) {
         favoriteCompetitorsSelctionUi = new CompetitorDisplayImpl(
-                presenter.getFavoriteCompetitorsDataProvider()).selectionUi;
+                presenter.getFavoriteCompetitorsDataProvider(), flagImageResolver).selectionUi;
         favoriteBoatClassesSelctionUi = new BoatClassDisplayImpl(
                 presenter.getFavoriteBoatClassesDataProvider()).selectionUi;
         initWidget(uiBinder.createAndBindUi(this));
@@ -59,8 +60,8 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         private final SuggestedMultiSelection<SimpleCompetitorWithIdDTO> selectionUi;
         private final HasEnabled notifyAboutResultsUi;
         
-        private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider) {
-            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favoriteCompetitors());
+        private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider, FlagImageResolver flagImageResolver) {
+            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favoriteCompetitors(), flagImageResolver);
             notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {

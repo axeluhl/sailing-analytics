@@ -403,18 +403,21 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private FlowPanel informationPanel;
 
+    private FlagImageResolver flagImageResolver;
+
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style,
+            FlagImageResolver flagImageResolver) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, false, 
-                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, showRaceDetails,style);
+                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, showRaceDetails,style, flagImageResolver);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
-            final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style) {
+            final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider,
                 new Timer(
@@ -425,7 +428,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false,style);
+                /* enableSyncScroller */ false, style, flagImageResolver);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
@@ -434,7 +437,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             final StringMessages stringMessages, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller,LeaderBoardStyle style) {
+            boolean showCompetitorFilterStatus, boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
         super(parent, context);
         this.style = style;
         this.showSelectionCheckbox = showSelectionCheckbox;
@@ -453,6 +456,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         this.enableSyncedScroller = enableSyncScroller;
         this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
+        this.flagImageResolver = flagImageResolver;
         this.timer = timer;RACE_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumnHeader();
@@ -894,9 +898,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
-                    nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                    nationalityFlagImageResource = flagImageResolver.getEmptyFlagImageResource();
                 } else {
-                    nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    nationalityFlagImageResource = flagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (nationalityFlagImageResource != null) {
                     style.renderNationalityFlag(nationalityFlagImageResource,sb);
@@ -1097,7 +1101,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         public SortableExpandableColumnHeader getHeader() {
             SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
                     /* title */race.getRaceColumnName(),
-                    /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this,
+                    /* iconURL */race.isMedalRace() ? style.getResources().medalSmall().getSafeUri() : null, LeaderboardPanel.this, this,
                     stringMessages);
             return header;
         }

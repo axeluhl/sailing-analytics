@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicatorResources;
@@ -16,8 +17,8 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 public abstract class AbstractLeaderboardFullscreenViewer extends FullscreenContainer<Widget> implements
         LeaderboardDelegate {
 
-    protected final Image autoRefreshControl = new Image("images/home/reload.svg");
-    protected final Image settingsControl = new Image("images/home/settings.svg");
+    protected final Image autoRefreshControl = new Image(SharedHomeResources.INSTANCE.reload().getSafeUri());
+    protected final Image settingsControl = new Image(SharedHomeResources.INSTANCE.settings().getSafeUri());
 
     private final static BusyIndicatorResources RESOURCES = GWT.create(BusyIndicatorResources.class);
 

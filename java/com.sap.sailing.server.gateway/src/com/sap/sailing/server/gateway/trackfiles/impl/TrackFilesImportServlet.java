@@ -4,10 +4,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -60,15 +60,15 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
         }
     }
-    
+
     Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
         List<GPSFixImporter> result = new ArrayList<>();
         Collection<ServiceReference<GPSFixImporter>> refs;
         try {
             Filter filter = null;
             if (fileExtension != null) {
-                filter = getContext().createFilter(String.format("(%s=%s)",
-                        GPSFixImporter.FILE_EXTENSION_PROPERTY, fileExtension));
+                filter = getContext()
+                        .createFilter(String.format("(%s=%s)", GPSFixImporter.FILE_EXTENSION_PROPERTY, fileExtension));
             }
             refs = getContext().getServiceReferences(GPSFixImporter.class, filter == null ? null : filter.toString());
             for (ServiceReference<GPSFixImporter> ref : refs) {
@@ -80,9 +80,8 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
         return result;
     }
 
-    protected Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files,
+    protected void importFiles(Iterable<Pair<String, FileItem>> files, JsonHolder jsonResult,
             GPSFixImporter preferredImporter) throws IOException {
-        final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         for (Pair<String, FileItem> pair : files) {
             final String fileName = pair.getA();
             final FileItem fileItem = pair.getB();
@@ -90,74 +89,81 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
             if (fileName.contains(".")) {
                 fileExt = fileName.substring(fileName.lastIndexOf(".") + 1);
             }
-            
             Set<GPSFixImporter> importersToTry = new LinkedHashSet<>();
             if (preferredImporter != null) {
                 importersToTry.add(preferredImporter);
             }
             importersToTry.addAll(getGPSFixImporters(fileExt));
             importersToTry.addAll(getGPSFixImporters(null));
-
-            logger.log(Level.INFO, 
-                    "System knows " + 
-                            importersToTry.size() + 
-                            " importers: "+
-                            importersToTry.stream().map(i -> i.getType()).collect(Collectors.joining(", "))
-                    );
-            
+            logger.log(Level.INFO, "System knows " + importersToTry.size() + " importers: "
+                    + importersToTry.stream().map(i -> i.getType()).collect(Collectors.joining(", ")));
+            AtomicBoolean succeeded = new AtomicBoolean(false);
             parsersLoop: for (GPSFixImporter importer : importersToTry) {
-                boolean succeeded = false;
+
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {
                     try {
-                        importer.importFixes(in, new Callback() {
+                        boolean ok = importer.importFixes(in, new Callback() {
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
-                                deviceIds.add(device);
                                 storeFix(fix, device);
+                                jsonResult.addDeviceIndentifier(device);
                             }
                         }, true, fileName);
-                        succeeded = true;
+                        if (ok) {
+                            succeeded.set(ok);
+                        } else {
+                            logger.log(Level.FINE,
+                                    "Importer " + importer.getType() + " did not succesfully import fixes");
+                        }
                     } catch (Exception e) {
                         logger.log(Level.INFO, "Failed with " + e.getClass().getSimpleName()
                                 + " while importing file using " + importer.getType());
+                        if (importer == preferredImporter) {
+                            jsonResult.add(importer.getClass().getName(), fileName, e);
+                        }
                     }
                 }
-                if (succeeded) {
+                if (succeeded.get()) {
                     logger.log(Level.INFO, "Successfully imported file " + fileName + " using " + importer.getType());
                     break parsersLoop;
                 }
             }
+            if (!succeeded.get()) {
+                jsonResult.noImporterSucceeded(fileName);
+            }
         }
-        return deviceIds;
     }
 
     @Override
-    protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String prefImporterType = null;
-        List<Pair<String, FileItem>> files = new ArrayList<>();
-        for (FileItem item : fileItems) {
-            if (!item.isFormField())
-                files.add(new Pair<String, FileItem>(item.getName(), item));
-            else {
-                if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
-                    prefImporterType = item.getString();
+    protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        JsonHolder jsonResult = new JsonHolder(logger);
+        try {
+            String prefImporterType = null;
+            List<Pair<String, FileItem>> files = new ArrayList<>();
+            for (FileItem item : fileItems) {
+                if (!item.isFormField())
+                    files.add(new Pair<String, FileItem>(item.getName(), item));
+                else {
+                    if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
+                        prefImporterType = item.getString();
+                    }
                 }
             }
-        }
-        GPSFixImporter preferredImporter = null;
-        if (prefImporterType != null && !prefImporterType.isEmpty()) {
-            preferredImporter = getServiceFinderFactory().createServiceFinder(GPSFixImporter.class)
-                    .findService(prefImporterType);
-        }
-        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files, preferredImporter);
-        // setJsonResponseHeader(resp);
-        // DO NOT set a JSON response header. This causes the browser to wrap the response in a
-        // <pre> tag when uploading from GWT, as this is an AJAX-request inside an iFrame.
-        resp.setContentType("text/html");
-        for (TrackFileImportDeviceIdentifier mapping : mappingList) {
-            String stringRep = mapping.getId().toString();
-            resp.getWriter().println(stringRep);
+            GPSFixImporter preferredImporter = null;
+            if (prefImporterType != null && !prefImporterType.isEmpty()) {
+                preferredImporter = getServiceFinderFactory().createServiceFinder(GPSFixImporter.class)
+                        .findService(prefImporterType);
+            }
+            importFiles(files, jsonResult, preferredImporter);
+            // setJsonResponseHeader(resp);
+            // DO NOT set a JSON response header. This causes the browser to wrap the response in a
+            // <pre> tag when uploading from GWT, as this is an AJAX-request inside an iFrame.
+        } catch (Exception e) {
+            jsonResult.add(e);
+        } finally {
+            jsonResult.writeJSONString(resp);
         }
     }
 }

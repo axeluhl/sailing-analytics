@@ -8,13 +8,15 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetFinishingAndFinishedTimeDialog extends SetTimeDialog<RaceLogSetFinishingAndFinishTimeDTO> {
-    private BetterDateTimeBox finishTimeBox;
+    private DateAndTimeInput finishTimeBox;
     private Label currentFinishTimeLabel;
 
     public SetFinishingAndFinishedTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName,
@@ -65,7 +67,7 @@ public class SetFinishingAndFinishedTimeDialog extends SetTimeDialog<RaceLogSetF
                 });
     }
     
-    void setDate(Date date, Label currentValueLabel, BetterDateTimeBox dateTimeBox) {
+    void setDate(Date date, Label currentValueLabel, DateTimeInput dateTimeBox) {
         if (date == null) {
             currentValueLabel.setText(stringMessages.unknown());
         } else {
@@ -115,8 +117,7 @@ public class SetFinishingAndFinishedTimeDialog extends SetTimeDialog<RaceLogSetF
 
     @Override
     protected void additionalInput(Grid content) {
-        finishTimeBox = createDateTimeBox(new Date());
-        finishTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
+        finishTimeBox = createDateTimeBox(new Date(), Accuracy.SECONDS);
         finishTimeBox.ensureDebugId("FinishTimeBox");
         content.setWidget(1, 0, createLabel(stringMessages.finishTimeString()));
         content.setWidget(1, 1, finishTimeBox);

@@ -1,0 +1,33 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:g2="urn:import:com.google.gwt.user.datepicker.client">
+	<ui:style>
+	.datebox {
+		height: 2em;
+		line-height: 2em;
+		box-sizing: border-box;
+		padding: 1px;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		border-top: 1px solid #999;
+		vertical-align: baseline;
+		font: 14px 'Open Sans', Arial, Verdana, sans-serif;
+	}
+	
+	.timebox {
+		height: 2em;
+		line-height: 2em;
+		box-sizing: border-box;
+		padding: 1px;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		border-top: 1px solid #999;
+		vertical-align: baseline;
+		font: 14px 'Open Sans', Arial, Verdana, sans-serif;
+	}
+	</ui:style>
+	<g:HTMLPanel>
+		<g2:DateBox addStyleNames="{style.datebox}" ui:field="datebox"/>
+		<input type="time" class="{style.timebox}" ui:field="timebox"/>
+	</g:HTMLPanel>
+</ui:UiBinder> 

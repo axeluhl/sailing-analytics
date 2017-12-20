@@ -107,7 +107,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
@@ -246,6 +245,7 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -2415,19 +2415,27 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         TrackedRace trackedRace = getExistingTrackedRace(regatta, race);
         if (trackedRace != null) {
             TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
-            final boolean isTrackedRacesEmpty;
+            final boolean isTrackedRacesBecameEmpty;
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForWrite();
+                // The following fixes bug 202: when tracking of multiple races of the same event has been started, this may not
+                // remove any race; however, the event may already have been created by another tracker whose race hasn't
+                // arrived yet and therefore the races list is still empty; therefore, only remove the event if its
+                // race list became empty by the removal performed here.
+                final int oldSizeOfTrackedRaces;
+                final int newSizeOfTrackedRaces;
+                oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
                 try {
                     trackedRegatta.removeTrackedRace(trackedRace);
-                    isTrackedRacesEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
+                    newSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                    isTrackedRacesBecameEmpty = (oldSizeOfTrackedRaces > 0 && newSizeOfTrackedRaces == 0);
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterWrite();
                 }
             } else {
-                isTrackedRacesEmpty = false;
+                isTrackedRacesBecameEmpty = false;
             }
-            if (isTrackedRacesEmpty) {
+            if (isTrackedRacesBecameEmpty) {
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta

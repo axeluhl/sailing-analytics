@@ -209,6 +209,7 @@
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
+		<module>org.mp4parser.isoparser</module>
         <!--
         com.sap.sailing.targetplatform.base
         left out on purpose: only invoke maven manually to build target platform
@@ -500,6 +501,7 @@
         <execution>
           <configuration>
             <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+             <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>
           -->
