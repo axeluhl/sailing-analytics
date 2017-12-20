@@ -100,6 +100,21 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return t.getColor();
             }
         });
+        boatColorColumn.setSortable(true);
+        boatColumnListHandler.setComparator(boatColorColumn, new Comparator<BoatDTO>() {
+            @Override
+            public int compare(BoatDTO o1, BoatDTO o2) {
+                if (o1.getColor() == null) {
+                    if (o2.getColor() == null) {
+                        return 0;
+                    }
+                    return -1;
+                } else if (o2.getColor() == null) {
+                    return 1;
+                }
+                return o1.getColor().getAsHtml().compareTo(o2.getColor().getAsHtml());
+            }
+        });
         
         TextColumn<BoatDTO> boatIdColumn = new TextColumn<BoatDTO>() {
             @Override
