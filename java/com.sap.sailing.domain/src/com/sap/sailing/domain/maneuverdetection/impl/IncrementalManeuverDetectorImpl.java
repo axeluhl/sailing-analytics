@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.maneuverdetection.IncrementalApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -46,11 +47,14 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      */
     private volatile ManeuverDetectionResult lastManeuverDetectionResult = null;
 
+    private final IncrementalApproximatedFixesCalculator incrementalApproximatedFixesCalculator;
+
     /**
      * Constructor for unit tests only.
      */
     public IncrementalManeuverDetectorImpl() {
         super();
+        this.incrementalApproximatedFixesCalculator = null;
     }
 
     /**
@@ -64,6 +68,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      */
     public IncrementalManeuverDetectorImpl(TrackedRace trackedRace, Competitor competitor) {
         super(trackedRace, competitor);
+        this.incrementalApproximatedFixesCalculator = new IncrementalApproximatedFixesCalculatorImpl(trackedRace,
+                competitor);
     }
 
     @Override
@@ -87,9 +93,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
             TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
             TimePoint latestRawFixTimePoint = trackTimeInfo.getLatestRawFixTimePoint();
-            Iterable<GPSFixMoving> douglasPeuckerFixes = trackedRace.approximate(competitor,
-                    competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(),
-                    earliestManeuverStart, latestManeuverEnd);
+            Iterable<GPSFixMoving> douglasPeuckerFixes = incrementalApproximatedFixesCalculator
+                    .approximate(earliestManeuverStart, latestManeuverEnd);
             ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
             List<ManeuverSpot> maneuverSpots;
             if (lastManeuverDetectionResult == null) {
