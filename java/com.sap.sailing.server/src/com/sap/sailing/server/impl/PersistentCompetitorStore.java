@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
@@ -44,6 +46,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     private static final long serialVersionUID = 9205956018421790908L;
     private transient MongoObjectFactory storeTo;
     private transient DomainObjectFactory loadFrom;
+    private static final Logger logger = Logger.getLogger(PersistentCompetitorStore.class.getName());
     
     /**
      * @param clearCompetitorsAndBaots
@@ -90,6 +93,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
                 CompetitorWithBoat newCompetitorWithBoat = new CompetitorWithBoatImpl((Competitor) competitorWithBoat, newBoat);
                 newCompetitors.add(newCompetitorWithBoat);
             }
+            logger.log(Level.INFO, "Bug2822 DB-Migration: Store migrated competitors and boats.");
             storeTo.storeCompetitors(newCompetitors);
             storeTo.storeBoats(newBoats);
         }
@@ -118,6 +122,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
 
     @Override
     public Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
+        logger.log(Level.INFO, "Bug2822 DB-Migration: Migrate competitor " + competitorWithBoat.toString() + " to have a separate boat"); 
         Competitor migratedCompetitor = super.migrateToCompetitorWithoutBoat(competitorWithBoat);
         storeTo.storeCompetitor(migratedCompetitor);
         return migratedCompetitor; 

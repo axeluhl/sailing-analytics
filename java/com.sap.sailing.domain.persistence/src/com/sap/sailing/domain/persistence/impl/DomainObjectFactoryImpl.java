@@ -2379,10 +2379,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 Object boatObject = oneCompetitorDbObject.get(CompetitorJsonConstants.FIELD_BOAT);
                 // only in case such a boat object exist we need a migration, because the new type stores only a boatID or no boat at all 
                 if (boatObject != null) {
+                    logger.log(Level.INFO, "Bug2822 DB-Migration: Rename COMPETITORS collection to COMPETITORS_BAK.");
                     competitorsById = new HashMap<>();
                     orginalCompetitorCollection.rename(CollectionNames.COMPETITORS_BAK.name(), /* dropTarget */ true);
                     DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_BAK.name());
                     try {
+                        logger.log(Level.INFO, "Bug2822 DB-Migration: Load old competitors with embedded boats from COMPETITORS_BAK.");
                         for (DBObject o : collection.find()) {
                             JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
                             CompetitorWithBoat c = legacyCompetitorWithBoatDeserializer.deserialize(json);
@@ -2392,8 +2394,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             }
                         }
                     } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-                        logger.log(Level.SEVERE, "renameCompetitorsCollectionAndloadAllLegacyCompetitors", e);
+                        logger.log(Level.SEVERE, "Bug2822 DB-Migration: Error connecting to MongoDB, unable to load competitors.");
+                        logger.log(Level.SEVERE, "Bug2822 DB-Migration: renameCompetitorsCollectionAndloadAllLegacyCompetitors", e);
                     }
                 }
             }                
