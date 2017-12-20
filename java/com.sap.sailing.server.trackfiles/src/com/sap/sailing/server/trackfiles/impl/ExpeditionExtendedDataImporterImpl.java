@@ -205,10 +205,15 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             final String date;
             final String dateFormatPattern;
                          
-            final String boatToken = lineContentTokens[columnsInFileFromHeader.get(BOAT_COL)];
-            if (!BOAT_CHECK_PATTERN.matcher(boatToken).matches()) {
-                logger.warning("Error, skipping line nr " + lineNr + " in file " + filename + ", not a boat id: " + boatToken);
-                return;
+            final Integer boatColumnIndex = columnsInFileFromHeader.get(BOAT_COL);
+            if (boatColumnIndex != null) {
+                // Not all file types contain a boat column.
+                // We only saw broken data in files having a boat column.
+                final String boatToken = lineContentTokens[boatColumnIndex];
+                if (!BOAT_CHECK_PATTERN.matcher(boatToken).matches()) {
+                    logger.warning("Error, skipping line nr " + lineNr + " in file " + filename + ", not a boat id: " + boatToken);
+                    return;
+                }
             }
 
             if (columnsInFileFromHeader.containsKey(UTC_COLUMN)) {
