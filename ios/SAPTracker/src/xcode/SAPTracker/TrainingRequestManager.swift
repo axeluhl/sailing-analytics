@@ -382,7 +382,43 @@ class TrainingRequestManager: NSObject {
         logError(name: "\(#function)", error: error)
         failure(error, stringForError(error))
     }
-    
+
+    // MARK: - LeaderboardGroups
+
+    func getRaceName(
+        regattaName: String,
+        raceName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/races/\(encodedRaceName)/course"
+        manager.get(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            print(responseObject)
+        }) { (requestOperation, error) in
+            print(error)
+        }
+    }
+
+    // MARK: - RegattaRaceCourse
+
+    func getRegattaRaceCourse(
+        regattaName: String,
+        raceName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/races/\(encodedRaceName)/course"
+        manager.get(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            print(responseObject)
+        }) { (requestOperation, error) in
+            print(error)
+        }
+    }
+
     // MARK: - LeaderboardAutoCourse
     
     func postLeaderboardAutoCourse(

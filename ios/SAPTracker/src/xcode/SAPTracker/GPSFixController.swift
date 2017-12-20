@@ -12,10 +12,15 @@ class GPSFixController: NSObject {
     
     struct NotificationType {
         static let ModeChanged = "GPSFixController.ModeChanged"
+        static let SentGPSFixes = "GPSFixController.SentGPSFixes"
     }
     
     struct UserInfo {
         static let Mode = "Mode"
+        static let Sent = "Sent"
+        struct SentKey {
+            static let Count = "Count"
+        }
     }
     
     struct GPSFixSending {
@@ -129,6 +134,7 @@ class GPSFixController: NSObject {
         DispatchQueue.main.async(execute: {
             self.log(info: "Sending \(gpsFixes.count) GPS fixes was successful")
             self.postModeChangedNotification(mode: BatteryManager.sharedManager.batterySaving ? .BatterySaving : .Online)
+            self.postSentGPSFixes(count: gpsFixes.count)
             self.coreDataManager.deleteObjects(objects: gpsFixes)
             self.coreDataManager.saveContext()
             self.log(info: "\(gpsFixes.count) GPS fixes deleted")
@@ -153,9 +159,15 @@ class GPSFixController: NSObject {
     fileprivate func postModeChangedNotification(mode: Mode) {
         let userInfo = [UserInfo.Mode: mode.rawValue]
         let notification = Notification(name: Notification.Name(rawValue: NotificationType.ModeChanged), object: self, userInfo: userInfo)
-        NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
+        NotificationQueue.default.enqueue(notification, postingStyle: .asap)
     }
-    
+
+    fileprivate func postSentGPSFixes(count: Int) {
+        let userInfo = [UserInfo.Sent: [UserInfo.SentKey.Count: count]]
+        let notification = Notification(name: Notification.Name(rawValue: NotificationType.SentGPSFixes), object: self, userInfo: userInfo)
+        NotificationQueue.default.enqueue(notification, postingStyle: .asap)
+    }
+
     // MARK: - Properties
     
     fileprivate lazy var checkInRequestManager: CheckInRequestManager = {

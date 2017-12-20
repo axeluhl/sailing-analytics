@@ -18,13 +18,39 @@ class TrainingController: NSObject {
     fileprivate unowned let coreDataManager: CoreDataManager
     
     fileprivate let trainingRequestManager: TrainingRequestManager
-    
+
+    fileprivate var sentGPSFixesCount = 0
+
     init(coreDataManager: CoreDataManager, baseURLString: String) {
         self.coreDataManager = coreDataManager
         trainingRequestManager = TrainingRequestManager(baseURLString: baseURLString)
         super.init()
     }
-    
+
+    // MARK: - Notifications
+
+    fileprivate func subscribeForNotifications() {
+        sentGPSFixesCount = 0
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(gpsFixControllerSentGPSFixes),
+            name: NSNotification.Name(rawValue: GPSFixController.NotificationType.SentGPSFixes),
+            object: nil
+        )
+    }
+
+    fileprivate func unsubscribeFromNotifications() {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc fileprivate func gpsFixControllerSentGPSFixes(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
+            guard let sentDict = notification.userInfo?[GPSFixController.UserInfo.Sent] as? [String: Any] else { return }
+            guard let count = sentDict[GPSFixController.UserInfo.SentKey.Count] as? NSNumber else { return }
+            self.sentGPSFixesCount += count.intValue
+        })
+    }
+
     // MARK: - CreateTraining
     
     func createTraining(
@@ -169,6 +195,7 @@ class TrainingController: NSObject {
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
+        self.unsubscribeFromNotifications()
         self.stopActiveRace_SetStopTrackingTime(forTrainingRaceData: trainingRaceData, success: {
             success()
         }) { (error) in
@@ -228,6 +255,7 @@ class TrainingController: NSObject {
                             fleetName: fleetName
                         )
                     )
+                    self.subscribeForNotifications()
                 }, failure: { (error, message) in
                     failure(error)
                 })
