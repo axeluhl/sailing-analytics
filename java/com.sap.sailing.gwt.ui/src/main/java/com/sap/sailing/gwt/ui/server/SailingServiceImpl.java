@@ -6926,8 +6926,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if(raceColumn.hasTrackedRaces()){
                 if (raceColumnNames.contains(raceColumn.getName())) {
                     for (Fleet fleet : raceColumn.getFleets()) {
-                        if(raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null){
-                        result.add(raceColumn.getTrackedRace(fleet).getRaceIdentifier().getRaceName());
+                        if(raceColumn.getTrackedRace(fleet) != null && raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null){
+                            result.add(raceColumn.getTrackedRace(fleet).getRaceIdentifier().getRaceName());
                         }
                     }
                 }
