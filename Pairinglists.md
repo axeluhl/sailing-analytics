@@ -22,3 +22,5 @@ If you want to use a csv-file to export a pairinglist into excel you have to dow
 10. Back in the "Import Data" window, click "OK".
 
 Your data should be imported. You can adjust the columns to get good formatting.                
+
+###Print View
