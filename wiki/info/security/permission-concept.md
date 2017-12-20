@@ -1,23 +1,4 @@
-**Table of Contents**
-
-* [Introduction](#introduction)
-* [Access Control Concepts](#access-control-concepts)
-* [Initial Idea](#initial-idea)
-* [Ownership](#ownership)
-  * [Users or Tenants as Owners](#users-or-tenants-as-owners)
-  * [Subtenants](#subtenants)
-  * [Administration of Authorization](#administration-of-authorization)
-  * [Implementation of Ownership](#implementation-of-ownership)
-  * [Implementation of Sharing Data Objects with Public](#implementation-of-sharing-data-objects-with-public)
-* [Permissions in Frontend](#permissions-in-frontend)
-* [Permission Defaults](#permission-defaults)
-* [Implementation of Roles](#implementation-of-roles)
-* [Constraints](#constraints)
-* [Use Cases](#use cases)
-* [Algorithm for Composite Realm](#algorithm-bool-haspermission-wildcardpermission-permission-for-composite-realm)
-* [Migration](#migration)
-* [Implementation Details](#implementation-details)
-* [TODOs](#todos)
+[[_TOC_]]
 
 ## Introduction
 
@@ -103,7 +84,11 @@ Another challenge after having a concept for ownership is the delegation of powe
 
 ### Implementation of Ownership
 
-Ownership is modeled as an explicit association between exactly one user and data objects and exactly one tenant and data objects. Owning a data object implies having all permissions on that object, as ownership is regarded as the source of authority. In order to change ownership one has to be either owning user or tenant owner. If the user only changes the tenant owner he may remain owning user. If the user only changes the owning user he may remain owning tenant.
+Ownership is modeled as an explicit association between exactly one user and data objects and exactly one tenant and data objects. Defaults may exist; a server may specify a default tenant owner for all its objects. User ownership for objects that were created before ownerships were introduced may default to ``null`` as their owner.
+
+Owning a data object implies having all permissions on that object, as ownership is regarded as the source of authority. Technically, this means that a logged-on user is granted all permissions on all objects for which he/she is the owning user.
+
+Tenant ownership has implications only for the application of roles that are qualified for a specific tenant. When a user logs on, the tenant to use as tenant owner for objects that the user creates in this session has to be specified. The user account may remember the tenant that was used last as the default. If not set, the server's default tenant that is used as the default tenant owner for all server objects without explicit ownership information may be used instead.
 
 ### Implementation of Sharing Data Objects with Public
 
