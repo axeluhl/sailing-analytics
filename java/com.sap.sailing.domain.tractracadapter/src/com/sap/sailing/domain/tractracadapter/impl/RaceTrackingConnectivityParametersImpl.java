@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -116,9 +115,10 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException,
-            CreateModelException, SubscriberInitializationException {
-        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws URISyntaxException,
+            CreateModelException, SubscriberInitializationException, IOException, InterruptedException {
+        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore,
+                trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
         return tracker;
     }
 
