@@ -56,9 +56,10 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         };
         boatNameColumn.setSortable(true);
         boatColumnListHandler.setComparator(boatNameColumn, new Comparator<BoatDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(BoatDTO o1, BoatDTO o2) {
-                return o1.getName().compareTo(o2.getName());
+                return comparator.compare(o1.getName(), o2.getName());
             }
         });
 
