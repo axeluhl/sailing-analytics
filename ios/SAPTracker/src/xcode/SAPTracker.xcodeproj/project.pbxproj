@@ -347,6 +347,7 @@
 		C87A74E81F504EBB003DE396 /* CreateEventData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E71F504EBB003DE396 /* CreateEventData.swift */; };
 		C87A74EA1F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */; };
 		C87A74EC1F5068D0003DE396 /* CreateTrainingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */; };
+		C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
@@ -761,6 +762,7 @@
 		C87A74E71F504EBB003DE396 /* CreateEventData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateEventData.swift; sourceTree = "<group>"; };
 		C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCompetitorCreateAndAddData.swift; sourceTree = "<group>"; };
 		C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingData.swift; sourceTree = "<group>"; };
+		C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardAutoCourseData.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
@@ -1359,6 +1361,7 @@
 				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
 				C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */,
 				C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */,
+				C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -2057,6 +2060,7 @@
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
 				C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */,
 				C843D4911EC0A93600250F01 /* CoreData1-3.xcmappingmodel in Sources */,
+				C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */,
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
 				C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EDC1D8691F700826DE4 /* AFHTTPSessionManager.m in Sources */,

@@ -19,6 +19,7 @@ class TrainingController: NSObject {
     
     fileprivate let trainingRequestManager: TrainingRequestManager
 
+    fileprivate var trainingRaceData: TrainingRaceData?
     fileprivate var sentGPSFixesCount = 0
 
     init(coreDataManager: CoreDataManager, baseURLString: String) {
@@ -48,6 +49,13 @@ class TrainingController: NSObject {
             guard let sentDict = notification.userInfo?[GPSFixController.UserInfo.Sent] as? [String: Any] else { return }
             guard let count = sentDict[GPSFixController.UserInfo.SentKey.Count] as? NSNumber else { return }
             self.sentGPSFixesCount += count.intValue
+            if (self.sentGPSFixesCount > 1) {
+                if let trainingRaceData = self.trainingRaceData {
+                    self.autoCourseRace(forTrainingRaceData: trainingRaceData, completion: {
+
+                    })
+                }
+            }
         })
     }
 
@@ -247,14 +255,14 @@ class TrainingController: NSObject {
             let fleetName = regattaRaceColumnAddData.fleetName
             self.trainingRequestManager.postLeaderboardRaceSetStartTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
                 self.trainingRequestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-                    success(
-                        TrainingRaceData(
-                            leaderboardName: leaderboardName,
-                            regattaName: regattaName,
-                            raceColumnName: raceColumnName,
-                            fleetName: fleetName
-                        )
+                    let trainingRaceData = TrainingRaceData(
+                        leaderboardName: leaderboardName,
+                        regattaName: regattaName,
+                        raceColumnName: raceColumnName,
+                        fleetName: fleetName
                     )
+                    success(trainingRaceData)
+                    self.trainingRaceData = trainingRaceData
                     self.subscribeForNotifications()
                 }, failure: { (error, message) in
                     failure(error)
@@ -266,7 +274,7 @@ class TrainingController: NSObject {
             failure(error)
         }
     }
-    
+
     // MARK: - AutoCourseRace
     
     func autoCourseRace(
@@ -287,7 +295,7 @@ class TrainingController: NSObject {
         fleetName: String,
         completion: @escaping () -> Void)
     {
-        trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+        trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: { (leaderboardAutoCourseData) in
             completion()
         }) { (error, message) in
             completion()

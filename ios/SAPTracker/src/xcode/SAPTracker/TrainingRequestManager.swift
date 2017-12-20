@@ -425,7 +425,7 @@ class TrainingRequestManager: NSObject {
         leaderboardName: String,
         raceColumnName: String,
         fleetName: String,
-        success: @escaping () -> Void,
+        success: @escaping (_ leaderboardAutoCourseData: LeaderboardAutoCourseData) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -433,17 +433,30 @@ class TrainingRequestManager: NSObject {
         let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/autocourse?race_column=\(encodedRaceColumnName)&fleet=\(encodedFleetName)"
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
-            self.postLeaderboardAutoCourseSuccess(responseObject: responseObject, success: success)
+            self.postLeaderboardAutoCourseSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
             self.postLeaderboardAutoCourseFailure(error: error, failure: failure)
         }
     }
     
-    fileprivate func postLeaderboardAutoCourseSuccess(responseObject: Any?, success: @escaping () -> Void) {
-        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
-        success()
+    fileprivate func postLeaderboardAutoCourseSuccess(
+        responseObject: Any?,
+        success: @escaping (_ leaderboardAutoCourseData: LeaderboardAutoCourseData) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let data = responseObject as? Data {
+            do {
+                let jsonObject = try JSONSerialization.jsonObject(with: data)
+                logInfo(name: "\(#function)", info: jsonObject as? String ?? "")
+                success(LeaderboardAutoCourseData(dictionary: (jsonObject as? [AnyObject])?.first as? [String: AnyObject]))
+            } catch {
+                failure(error, nil)
+            }
+        } else {
+            failure(TrainingRequestManagerError.invalidResponse, nil)
+        }
     }
-    
+
     fileprivate func postLeaderboardAutoCourseFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
         failure(error, stringForError(error))
