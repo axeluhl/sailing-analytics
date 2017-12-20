@@ -71,7 +71,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         mainPanel.addNorth(header, 75);
 
-        Button btn = new Button("Print");
+        Button btn = new Button(stringmessages.print());
 
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
