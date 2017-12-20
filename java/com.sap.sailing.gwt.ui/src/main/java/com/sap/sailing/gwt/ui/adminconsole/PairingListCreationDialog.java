@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,6 +31,8 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final SailingServiceAsync sailingService;
     private final StrippedLeaderboardDTO leaderboardDTO;
     private final StringMessages stringMessages;
+    
+    private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     private final Button applyToRacelogButton, cSVExportButton, printViewButton, refreshButton;
 
@@ -71,7 +75,19 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         formGrid.setWidget(1, 1, groups);
         formGrid.setWidget(2, 0, new Label(stringMessages.numberOfCompetitors()));
         formGrid.setWidget(2, 1, competitors);
-        formGrid.setWidget(3, 0, new Label(stringMessages.quality()));
+        HorizontalPanel qualityPanel = new HorizontalPanel();
+        qualityPanel.add(new Label(stringMessages.quality()));
+        Image qualityHelpImage = new Image(resources.help());
+        qualityPanel.add(qualityHelpImage);
+        qualityHelpImage.getElement().getStyle().setMarginLeft(10, Unit.PX);
+        qualityHelpImage.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open("http://wiki.sapsailing.com/Pairinglist/", "", "");
+            }
+        });
+        formGrid.setWidget(3, 0, qualityPanel);
         formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
         if (this.template.getFlightMultiplier() > 1) {
             Label flightMultiplierLabel = new Label(String.valueOf(this.template.getFlightMultiplier()));
