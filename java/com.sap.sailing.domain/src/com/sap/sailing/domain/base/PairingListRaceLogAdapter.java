@@ -12,7 +12,7 @@ public class PairingListRaceLogAdapter implements PairingList<RaceColumn, Fleet,
     
     @Override
     public Iterable<Pair<Competitor, Boat>> getCompetitors(RaceColumn raceColumn, Fleet fleet) {
-        // TODO add boat to return value (bug2822)
+        // TODO add boat to return value (bug4403)
         List<Pair<Competitor, Boat>> result = new ArrayList<>();
         int boatIndex = 0;
         for (Competitor competitor : raceColumn.getCompetitorsRegisteredInRacelog(fleet)) {

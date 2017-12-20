@@ -6903,7 +6903,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             competitors.add(competitorAndBoatPair.getA());
                         }
                     }
-                    // TODO set boat and competitors in race logs (bug2822)
+                    // TODO set boat and competitors in race logs (bug4403)
                     // TODO add Javadoc to setCompetitorRegistrationsInRacelog
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), competitors);

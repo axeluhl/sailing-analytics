@@ -4189,7 +4189,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);
-        //TODO (bug2822) get Boats of Regatta/Leaderboard
+        //TODO (bug4403) get Boats of Regatta/Leaderboard
         
         List<Boat> boats = new ArrayList<>();
         
