@@ -12,7 +12,7 @@ public interface CompetitionFormat<Flight, Group, Competitor, CompetitorAllocati
         return Util.size(getFlights());
     }
 
-    Iterable<Group> getGroups(Flight flight);
+    Iterable<? extends Group> getGroups(Flight flight);
 
     Iterable<Competitor> getCompetitors();
 

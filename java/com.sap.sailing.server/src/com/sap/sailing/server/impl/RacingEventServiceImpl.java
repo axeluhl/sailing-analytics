@@ -4211,9 +4211,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 return competitors;
             }
             @Override
-            public Iterable<Fleet> getGroups(RaceColumn flight) {
-                // FIXME
-                return (Iterable<Fleet>) leaderboard.getRaceColumnByName(flight.getName()).getFleets();
+            public Iterable<? extends Fleet> getGroups(RaceColumn flight) {
+                return leaderboard.getRaceColumnByName(flight.getName()).getFleets();
             }
             @Override
             public int getGroupsCount() {
