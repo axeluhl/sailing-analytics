@@ -140,9 +140,15 @@ There currently are only a few hardcoded global roles. These shall be usable in 
 2. Create Tenant (Users that manage events and servers)
 3. Media Admin
 
-Roles may declare formal parameters. For now we see tenant and user as possible parameter types. Such roles are then instantiated by adding actual values for the tenant / user parameter(s). When the role's permissions are then inferred, if the role instance has a tenant parameter then the role's permissions are only implied if the object's tenant owner matches the role's tenant parameter; similarly, if the role instance has a user parameter then the role's permissions are only implied if the object's user owner matches the role's user parameter. If both, a user and tenant parameter are declared for a role then both have to match in order for the role's permissions to be implied.
+Roles have a definition and an instantiation. The role's definition has a UUID, defines a name and specifies the set of permissions a user will obtain by being assigned a role instantiated from this definition. A role instantiation references a role definition and "inherits" the definition's name. The instantiation can furthermore optionally constrain the role by a tenant and/or user qualifier. In this case the permissions the role definition specifies will be granted to a user in that role only if requested for an object whose tenant/user owner matches that of the tenant/user qualifier provided by the role instantiation, respectively.
 
-Roles with a tenant parameter are applied in the form "<rolename>:<tenantname>". Examples:
+With this it is possible, for example, to have an ``admin`` role definition with permission "*". An instantiation of this role can then optionally restrict the tenant that must be an object's tenant owner for the role's permissions to be applied to permission checks for that object. If a user has role ``admin:server-A`` and requests permission for an object, the "*" permission from the ``admin`` role definition is granted if and only if the object's tenant owner is ``server-A``.
+
+Similarly, if a role instantiation provides a user qualifier, the object for which a permission is checked must be owned by the user specified by the qualifier in order for the role's permissions to be granted to a user with this role.
+
+If both, a user and tenant parameter are declared for a role instantiation then both have to match in order for the role's permissions to be implied.
+
+Roles with a tenant qualifier are displayed in the form "<rolename>:<tenantname>". Roles with tenant and user qualifier are displayed as "<rolename>:<tenantname>:<username>", and role instantiations with only a user qualifier are shown as "<rolename>::<username>". Examples:
 
 1. Tenant Owner "owner:tw2018" (Can delete the tenant, in addition to everything the tenant admin can do)
 2. Tenant Admin "admin:kw2018" (Has (almost) every permission in his tenant)
@@ -150,7 +156,7 @@ Roles with a tenant parameter are applied in the form "<rolename>:<tenantname>".
 4. Racemanager "racemanager:KYC"
 5. Editor "editor:BYC"
 6. Resultservice "resultservice:swc2018-miami"
-7. User "user:johndoe" (A role that every user should have for himself/herself; grants permissions to modify the respective
+7. User "user::johndoe" (A role that every user should have for himself/herself; grants permissions to modify the respective user object properties such as company affiliation, password and full name
 
 ## Constraints
 
@@ -211,9 +217,9 @@ The above describes the data model that is relevant to the composite realm that 
 ## Migration
 With such an extensive existing system as the Sailing Analytics Suite, migration is a big concern. The existing RBAC system is easily extended to support ACLs. However, implementing permission checking in the whole system will be a long process, because probably almost every service request will have to be edited.
 
-Another challenge besides the code changes is the data migration. For every existing data object an ACL has to be created and filled with the right permissions so the users do not notice a big change.
+Another challenge besides the code changes is the data migration. We don't want to have to create ACLs and ownerships explicitly for each and every object. Instead, reasonable defaults are required. We assume that each server has a server name which is usually provided by the ``SERVER_NAME`` environment variable during server startup and is passed through to the ``com.sap.sailing.server.name`` system property. These names are expected to be unique across the landscape and shall serve as the name for the default tenant assumed to be the tenant owner for all objects in that server. Of course, ownerships can explicity be defined for new objects or adjusted for existing ones.
 
-Besides creating an ACL for every data objects that is access controlled, an owner has to be defined for each existing data object, so that in combination with the ACLs no user loses permissions they need to have. In order to do this, where will have to be a script that associates all data objects on a server with a tenant and a specific user as owner (e.g. on the archive all data objects are associated with the tenant “archive” and owned by the user “Axel”). Thereafter, the users on the server are assigned their respective role.
+As default user owner we will not provide a default value, leaving it with a ``null`` value. This means that by default no user automatically obtains ownership permissions on any object. This seems a backward-compatible approach because so far there is no user ownership at all, hence no permissions have been implied through such an ownership.
 
 **Role Migration**
 
@@ -247,6 +253,8 @@ Following roles have to be migrated to dynamic roles. Beforehand they were hard 
   * "manage_media"
 * moderator
   * "can_replay_during_live_races"
+
+During role migration again the server's default tenant derived from the server name comes into play. If a user had the ``admin`` role assigned on a server, this role must be qualified now to limit its scope to what the user was effectively granted permissions to, namely the objects in the current server. This can be achieved by qualifying the ``admin`` role with the default tenant derived from the server name and by making this tenant also the default tenant for all users in the server. With this, new objects will be created by all users with this default tenant as the tenant owner, so users with the migrated role ``admin:the-default-tenant`` will still have full administration privileges for all objects created on that server.
 
 ## Implementation Details
 
