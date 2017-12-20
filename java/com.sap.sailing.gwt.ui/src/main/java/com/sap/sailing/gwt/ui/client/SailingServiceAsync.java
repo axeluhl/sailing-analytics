@@ -843,6 +843,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
 
+    void getCompetitorAndBoatRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Map<CompetitorDTO, BoatDTO>> callback);
+
     void getCompetitorRegistrationsForLeaderboard(String leaderboardName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
 

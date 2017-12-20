@@ -1112,6 +1112,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    /**
+     * Converts the {@link Boat} objects passed as {@code iterable} to {@link BoatDTO} objects.
+     * The iteration order in the result matches that of the {@code iterable} passed.
+     */
     private List<BoatDTO> convertToBoatDTOs(Iterable<? extends Boat> iterable) {
         List<BoatDTO> result = new ArrayList<BoatDTO>();
         for (Boat b : iterable) {
@@ -6595,6 +6599,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
         return convertToCompetitorDTOs(raceColumn.getCompetitorsRegisteredInRacelog(fleet).keySet());
+    }
+    
+    @Override
+    public Map<CompetitorDTO, BoatDTO> getCompetitorAndBoatRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName) throws NotFoundException {
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        Map<Competitor, Boat> competitorsAndBoatsRegisteredInRacelog = raceColumn.getCompetitorsRegisteredInRacelog(fleet);
+        return baseDomainFactory.convertToCompetitorAndBoatDTOs(competitorsAndBoatsRegisteredInRacelog);
     }
 
     @Override

@@ -174,7 +174,6 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
 
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
-                getFilteredCompetitors(result);
                 refreshCompetitorList(result);
             }
         };
