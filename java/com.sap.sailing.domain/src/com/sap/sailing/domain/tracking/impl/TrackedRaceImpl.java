@@ -1341,22 +1341,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at) {
-        NavigableSet<MarkPassing> roundings = getMarkPassings(competitor);
-        lockForRead(roundings);
-        try {
-            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<>(roundings.size(),
-                    new TimedComparator());
-            localRoundings.addAll(roundings);
-        } finally {
-            unlockAfterRead(roundings);
-        }
         TrackedLegOfCompetitor result = null;
+        NavigableSet<MarkPassing> roundings = getMarkPassings(competitor);
         if (roundings != null) {
+            NavigableSet<MarkPassing> localRoundings;
+            lockForRead(roundings);
+            try {
+                localRoundings = new ArrayListNavigableSet<>(roundings.size(), new TimedComparator());
+                localRoundings.addAll(roundings);
+            } finally {
+                unlockAfterRead(roundings);
+            }
             TrackedLeg trackedLeg;
             // obtain last waypoint before obtaining mark passings monitor because obtaining the last waypoint
             // obtains the read lock for the course
             final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
-            MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
+            MarkPassing lastBeforeOrAt = localRoundings.floor(new DummyMarkPassingWithTimePointOnly(at));
             // already finished the race?
             if (lastBeforeOrAt != null) {
                 // and not at or after last mark passing
@@ -1364,7 +1364,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
                 } else {
                     // exactly *at* last mark passing?
-                    if (!roundings.isEmpty() && at.equals(roundings.last().getTimePoint())) {
+                    if (!localRoundings.isEmpty() && at.equals(localRoundings.last().getTimePoint())) {
                         // exactly at finish line; return last leg
                         trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
                     } else {
