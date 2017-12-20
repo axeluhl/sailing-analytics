@@ -40,12 +40,10 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         this.sailingService = sailingService;
         this.leaderboardDTO = leaderboardDTO;
         this.ensureDebugId("PairingListCreationDialog");
-
         applyToRacelogButton = new Button(stringMessages.applyToRacelog());
         cSVExportButton = new Button(stringMessages.csvExport());
         printViewButton = new Button(stringMessages.printView());
-        refreshButton = new Button(stringMessages.refresh());
-
+        refreshButton = new Button(stringMessages.reload());
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogs();
         }
@@ -59,7 +57,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
         CaptionPanel dataPanel = new CaptionPanel();
         dataPanel.setCaptionText(stringMessages.dataOfPairingList());
-
         Grid formGrid = new Grid(5, 2);
         dataPanel.add(formGrid);
         Label flights = new Label(String.valueOf(this.template.getFlightCount()));
@@ -82,36 +79,26 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
             formGrid.setWidget(4, 1, flightMultiplierLabel);
             flightMultiplierLabel.ensureDebugId("FlightMultiplierCountLabel");
         }
-
         formGrid.setCellSpacing(10);
-
         panel.add(dataPanel);
 
         /* PAIRING LIST TEMPLATE PANEL */
-
         CaptionPanel pairingListTemplatePanel = new CaptionPanel();
         pairingListTemplatePanel.setCaptionText(stringMessages.pairingListTemplate());
-
         Grid pairingListGrid = new Grid(this.template.getPairingListTemplate().length,
                 this.template.getPairingListTemplate()[0].length);
         pairingListGrid.setCellSpacing(5);
-
         ScrollPanel scrollPanel = new ScrollPanel(pairingListGrid);
         scrollPanel.setPixelSize((Window.getClientWidth() / 4), (Window.getClientHeight() / 3));
         pairingListTemplatePanel.add(scrollPanel);
-
         for (int groupIndex = 0; groupIndex < this.template.getPairingListTemplate().length; groupIndex++) {
-
             for (int boatIndex = 0; boatIndex < this.template.getPairingListTemplate()[0].length; boatIndex++) {
                 pairingListGrid.setWidget(groupIndex, boatIndex,
                         new Label(String.valueOf(this.template.getPairingListTemplate()[groupIndex][boatIndex] + 1)));
-
                 pairingListGrid.getCellFormatter().setWidth(groupIndex, boatIndex, "50px");
             }
         }
-
         panel.add(pairingListTemplatePanel);
-
         configButtons();
 
         return panel;
