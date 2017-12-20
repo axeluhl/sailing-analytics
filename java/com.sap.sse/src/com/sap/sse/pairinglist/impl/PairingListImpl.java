@@ -33,17 +33,16 @@ public class PairingListImpl<Flight, Group, Competitor,Boat> implements PairingL
         final int groupIndex = Util.indexOf(competitionFormat.getGroups(flight), group);
         final int groupCount =Util.size(competitionFormat.getGroups(flight));
         final ArrayList<Integer> competitorIndicesInRace = new ArrayList<>();
-        
         for (Integer integer : competitorIndices[flightIndex*groupCount+groupIndex]) {
             competitorIndicesInRace.add(integer);
         }
-        
-        final List<Pair<Competitor,Boat>> result = new ArrayList<>();
-        for(int slot=0;slot<competitorIndicesInRace.size();slot++){
-            if(competitorIndicesInRace.get(slot)>=0){
-            result.add(new Pair<Competitor, Boat>(competitors.get(competitorIndicesInRace.get(slot)), boats.get(slot)));
-            }else{
-            result.add(new Pair<Competitor, Boat>(null, boats.get(slot)));
+        final List<Pair<Competitor, Boat>> result = new ArrayList<>();
+        for (int boatSlotInRace = 0; boatSlotInRace < competitorIndicesInRace.size(); boatSlotInRace++) {
+            if (competitorIndicesInRace.get(boatSlotInRace) >= 0) {
+                result.add(new Pair<Competitor, Boat>(competitors.get(competitorIndicesInRace.get(boatSlotInRace)),
+                        boats.get(boatSlotInRace)));
+            } else {
+                result.add(new Pair<Competitor, Boat>(null, boats.get(boatSlotInRace)));
             }
         }
         return result;

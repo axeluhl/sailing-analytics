@@ -61,6 +61,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
                         enableOrDisableAllSelectedSeriesCheckBoxes(false, true);
                     }
                 } else {
+                    flightMultiplierTextBox.setText("1");
                     enableOrDisableAllSelectedSeriesCheckBoxes(true, false);
                 }
             }
@@ -72,35 +73,15 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
             current.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if(event.getValue()) {
-                        disableSelectedSeriesCheckBoxes(leaderboardDTO);
-                        if (flightMultiplierCheckBox.getValue()) {
-                            if (Util.size(getCheckedSelectedCheckBoxes()) > 0) {
-                                enableOrDisableAllSelectedSeriesCheckBoxes(false, true);
-                            }
-                        } else {
-                            if (Util.size(getCheckedSelectedCheckBoxes()) > 1) {
-                                flightMultiplierCheckBox.setEnabled(false);
-                            } else {
-                                flightMultiplierCheckBox.setEnabled(true);
-                            }
-                        }
-                    } else {
-                        if(Util.size(getCheckedSelectedCheckBoxes()) > 0) {
-                            
-                        } else {
-                            enableOrDisableAllSelectedSeriesCheckBoxes(true, false);
-                        }
-                        if(Util.size(getCheckedSelectedCheckBoxes()) < 2) {
-                            flightMultiplierCheckBox.setEnabled(true);
-                        }
-                    }
+                    validateCheckboxes(event.getValue());
                 }
             });
             current.ensureDebugId("SelectedFlightsCheckbox: " + seriesName);
             checkboxes.add(current);
         }
         selectedSeriesCheckboxes = checkboxes;
+        Util.get(selectedSeriesCheckboxes, 0).setValue(true);
+        validateCheckboxes(true);
     }
 
     @Override
@@ -170,6 +151,32 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         if (this.competitorCountTextBox.getValue() == 0) {
             this.competitorCountTextBox.setValue(competitorCount);
             this.validateAndUpdate();
+        }
+    }
+    
+    private void validateCheckboxes(boolean enabled) {
+        if(enabled) {
+            disableSelectedSeriesCheckBoxes(leaderboardDTO);
+            if (flightMultiplierCheckBox.getValue()) {
+                if (Util.size(getCheckedSelectedCheckBoxes()) > 0) {
+                    enableOrDisableAllSelectedSeriesCheckBoxes(false, true);
+                }
+            } else {
+                if (Util.size(getCheckedSelectedCheckBoxes()) > 1) {
+                    flightMultiplierCheckBox.setEnabled(false);
+                } else {
+                    flightMultiplierCheckBox.setEnabled(true);
+                }
+            }
+        } else {
+            if(Util.size(getCheckedSelectedCheckBoxes()) > 0) {
+                
+            } else {
+                enableOrDisableAllSelectedSeriesCheckBoxes(true, false);
+            }
+            if(Util.size(getCheckedSelectedCheckBoxes()) < 2) {
+                flightMultiplierCheckBox.setEnabled(true);
+            }
         }
     }
 
@@ -245,6 +252,9 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
                 box.setEnabled(enabled);
             }
         } else {
+            if(Util.size(getCheckedSelectedCheckBoxes())>0) {
+                return;
+            }
             for (CheckBox box : selectedSeriesCheckboxes) {
                 box.setEnabled(enabled);
             }
