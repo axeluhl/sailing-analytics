@@ -53,7 +53,7 @@ public class RoleImpl implements Role {
     public String toString() {
         return getName()+((getQualifiedForTenant()!=null || getQualifiedForUser()!= null)?":":"")+
                 (getQualifiedForTenant()!=null?getQualifiedForTenant().getName():"")+
-                        getQualifiedForUser()!=null?(":"+getQualifiedForUser().getName()):"";
+                        (getQualifiedForUser()!=null?(":"+getQualifiedForUser().getName()):"");
     }
 
     @Override
