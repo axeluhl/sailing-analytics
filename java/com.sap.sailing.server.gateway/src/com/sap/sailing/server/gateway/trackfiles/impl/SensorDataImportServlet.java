@@ -4,12 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +23,6 @@ import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -58,11 +53,8 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @throws IOException
      */
-    private Iterable<TrackFileImportDeviceIdentifier> importFiles(boolean enableDownsampler,
-            Iterable<Pair<String, FileItem>> files) throws IOException {
-        final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
-        final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
-        final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
+    private void importFiles(boolean enableDownsampler, JsonHolder jsonResult, Iterable<Pair<String, FileItem>> files)
+            throws IOException {
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
         for (Pair<String, FileItem> file : files) {
@@ -76,40 +68,26 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                 }
             }
             if (importerToUse == null) {
-                throw new RuntimeException("Sensor importer not found");
+                throw new RuntimeException("Sensor importer not found: " + requestedImporterName);
             }
             logger.log(Level.INFO,
                     "Going to import sensor data file  with importer " + importerToUse.getClass().getSimpleName());
             try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
+                final String filename = fi.getName();
                 try {
                     importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
                         @Override
                         public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
-                            deviceIds.add(device);
                             storeFixes(fixes, device);
-                            TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
-                            TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
-                            for (DoubleVectorFix fix : fixes) {
-                                if (earliestFixSoFarFromCurrentDevice == null
-                                        || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
-                                    earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                    from.put(device, earliestFixSoFarFromCurrentDevice);
-                                }
-                                if (latestFixSoFarFromCurrentDevice == null
-                                        || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
-                                    latestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                    to.put(device, latestFixSoFarFromCurrentDevice);
-                                }
-                            }
+                            jsonResult.addDeviceIndentifier(device);
                         }
-                    }, fi.getName(), requestedImporterName, enableDownsampler);
+                    }, filename, requestedImporterName, enableDownsampler);
                     logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
                 } catch (FormatNotSupportedException e) {
-                    logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
+                    jsonResult.add(requestedImporterName, filename, e);
                 }
             }
         }
-        return deviceIds;
     }
 
     /**
@@ -118,32 +96,31 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        String importerName = null;
+        JsonHolder jsonResult = new JsonHolder(logger);
         boolean enableDownsampler = false;
-        for (FileItem fi : fileItems) {
-            if (fi.isFormField()) {
+        try {
+            String importerName = null;
+            for (FileItem fi : fileItems) {
                 if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
                     importerName = fi.getString();
                 } else if ("downsample".equalsIgnoreCase(fi.getFieldName())) {
                     enableDownsampler = "on".equalsIgnoreCase(fi.getString());
                 }
             }
-        }
-        if (importerName == null) {
-            throw new RuntimeException("Missing preferred importer");
-        }
-        List<Pair<String, FileItem>> filesAndImporterNames = new ArrayList<>();
-        for (FileItem fi : fileItems) {
-            if ("file".equalsIgnoreCase(fi.getFieldName())) {
-                filesAndImporterNames.add(new Pair<>(importerName, fi));
+            if (importerName == null) {
+                throw new RuntimeException("Missing preferred importer");
             }
-        }
-        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(enableDownsampler,
-                filesAndImporterNames);
-        resp.setContentType("text/html");
-        for (TrackFileImportDeviceIdentifier mapping : mappingList) {
-            String stringRep = mapping.getId().toString();
-            resp.getWriter().println(stringRep);
+            List<Pair<String, FileItem>> filesAndImporterNames = new ArrayList<>();
+            for (FileItem fi : fileItems) {
+                if ("file".equalsIgnoreCase(fi.getFieldName())) {
+                    filesAndImporterNames.add(new Pair<>(importerName, fi));
+                }
+            }
+            importFiles(enableDownsampler, jsonResult, filesAndImporterNames);
+        } catch (Exception e) {
+            jsonResult.add(e);
+        } finally {
+            jsonResult.writeJSONString(resp);
         }
     }
 

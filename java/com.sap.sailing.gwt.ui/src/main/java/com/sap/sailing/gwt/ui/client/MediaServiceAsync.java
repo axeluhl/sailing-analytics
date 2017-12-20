@@ -2,13 +2,14 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 
 public interface MediaServiceAsync {
 
     void getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
             AsyncCallback<Iterable<MediaTrack>> callback);
-    
+
     void getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
             AsyncCallback<Iterable<MediaTrack>> callback);
 
@@ -25,7 +26,9 @@ public interface MediaServiceAsync {
     void updateStartTime(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 
     void updateDuration(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
-    
+
     void updateRace(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
+
+    void checkMetadata(String url, AsyncCallback<VideoMetadataDTO> asyncCallback);
 
 }

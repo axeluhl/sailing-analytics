@@ -252,7 +252,11 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
                 update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
             }
             try {
-                trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
+                final Course course = trackedRace.getRace().getCourse();
+                course.update(update, params.getDomainFactory());
+                if (base.getName() != null) {
+                    course.setName(base.getName());
+                }
             } catch (PatchFailedException e) {
                 logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
             }
@@ -277,7 +281,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             courseBase = new CourseDataImpl("Default course for " + raceName);
             logger.log(Level.FINE, "Using empty course in creation of race " + raceName);
         }
-        final Course course = new CourseImpl(raceName + " course", courseBase.getWaypoints());
+        final Course course = new CourseImpl(courseBase.getName() == null ? raceName + " course" : courseBase.getName(), courseBase.getWaypoints());
         if (raceColumn.getTrackedRace(fleet) != null) {
             if (event != null) {
                 try {

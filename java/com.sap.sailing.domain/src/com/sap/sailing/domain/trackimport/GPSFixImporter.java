@@ -43,16 +43,20 @@ public interface GPSFixImporter {
     }
 
     /**
-     * Retrieves the fixes from the {@code inputStream}, and calls the
-     * {@code callback} with every new fix.
-     * @param inferSpeedAndBearing Should speed and bearing be inferred by looking
-     * at the previous fix, if that data is not directly present within the file?
-     * @throws FormatNotSupportedException If the input format cannot be read. The import process
-     * might then decide to try attempt importing fixes using the next suitable importer.
+     * Retrieves the fixes from the {@code inputStream}, and calls the {@code callback} with every new fix.
      * 
-     * @param sourceName some name that identifies the source, e.g. the file name if a file
+     * @param inferSpeedAndBearing
+     *            Should speed and bearing be inferred by looking at the previous fix, if that data is not directly
+     *            present within the file?
+     * @throws FormatNotSupportedException
+     *             If the input format cannot be read. The import process might then decide to try attempt importing
+     *             fixes using the next suitable importer.
+     * 
+     * @param sourceName
+     *            some name that identifies the source, e.g. the file name if a file
+     * @return returns if import was succesful or not
      */
-    void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
+    boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
             String sourceName)
             throws FormatNotSupportedException, IOException;
 
