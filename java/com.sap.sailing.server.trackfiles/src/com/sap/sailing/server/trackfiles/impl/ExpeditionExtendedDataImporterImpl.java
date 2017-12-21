@@ -57,7 +57,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private static final String DATE_COLUMN_2_PATTERN = "MM/dd/yy";
     private static final String TIME_COLUMN = "hhmmss";
     private static final String GPS_TIME_COLUMN = "GPS Time";
-    private static final Pattern BOAT_CHECK_PATTERN = Pattern.compile("[0123456789]+");
+    private static final Pattern BOAT_CHECK_PATTERN = Pattern.compile("[1-9]?[0-9]");
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     /**
      * The maximum index into the double vector fix from the
