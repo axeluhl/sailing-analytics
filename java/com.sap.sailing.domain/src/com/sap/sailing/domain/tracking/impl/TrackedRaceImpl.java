@@ -113,6 +113,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
+import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -692,16 +693,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-                    private Map<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitor = new ConcurrentHashMap<>();
+                    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
+                            10000, competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor));
 
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {
-                        IncrementalManeuverDetector maneuverDetector = maneuverDetectorPerCompetitor.get(competitor);
-                        if (maneuverDetector == null) {
-                            maneuverDetector = new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor);
-                            maneuverDetectorPerCompetitor.put(competitor, maneuverDetector);
-                        }
+                        IncrementalManeuverDetector maneuverDetector = maneuverDetectorPerCompetitorCache
+                                .getValue(competitor);
                         List<Maneuver> maneuvers = computeManeuvers(competitor, maneuverDetector);
                         return maneuvers;
                     }
