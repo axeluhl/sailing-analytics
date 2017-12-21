@@ -74,6 +74,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -449,9 +451,11 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private CaptionPanel createExpeditionAllInOneImportPanel() {
         final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
         final FormPanel formPanel = new FormPanel();
+        final BusyIndicator busyIndicator = new SimpleBusyIndicator();
         final Button uploadButton = new Button(stringMessages.upload());
         uploadButton.addClickHandler(event -> {
             uploadButton.setEnabled(false);
+            busyIndicator.setBusy(true);
             formPanel.submit();
         });
         formPanel.setMethod(FormPanel.METHOD_POST);
@@ -459,6 +463,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         formPanel.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT);
         formPanel.addSubmitCompleteHandler(event -> {
             uploadButton.setEnabled(true);
+            busyIndicator.setBusy(false);
             final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
             if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
@@ -486,7 +491,11 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         boatClassInput.getValueBox().setName(EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS);
         boatClassPanel.add(boatClassInput);
         boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
-        contentPanel.add(uploadButton);
+        final HorizontalPanel controlPanel = new HorizontalPanel();
+        controlPanel.setSpacing(5);
+        controlPanel.add(uploadButton);
+        controlPanel.add(busyIndicator);
+        contentPanel.add(controlPanel);
         final Runnable validation = () -> {
             final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
             final boolean fileValid = filename != null && !filename.trim().isEmpty();
