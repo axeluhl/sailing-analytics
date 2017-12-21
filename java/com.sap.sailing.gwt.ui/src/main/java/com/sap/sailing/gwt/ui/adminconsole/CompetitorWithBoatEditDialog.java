@@ -36,18 +36,18 @@ public class CompetitorWithBoatEditDialog extends AbstractCompetitorWithBoatDial
     protected BoatDTO getBoat() {
         BoatDTO result = null;
         Color boatColor;
-        if (boatDisplayColorTextBox.getText() == null || boatDisplayColorTextBox.getText().isEmpty()) {
+        if (boatDisplayColorTextBox.getValue() == null || boatDisplayColorTextBox.getValue().isEmpty()) {
             boatColor = null;
         } else {
             try {
-                boatColor = new RGBColor(boatDisplayColorTextBox.getText());
+                boatColor = new RGBColor(boatDisplayColorTextBox.getValue());
             } catch (IllegalArgumentException iae) {
                 boatColor = new InvalidColor(iae);
             }
         }
 
         BoatClassDTO boatClass = new BoatClassDTO(boatClassNameTextBox.getValue(), Distance.NULL, Distance.NULL);
-        result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getName(), boatClass, sailIdTextBox.getText(), boatColor);
+        result = new BoatDTO(getCompetitorToEdit().getBoat().getIdAsString(), boatNameTextBox.getValue(), boatClass, sailIdTextBox.getValue(), boatColor);
         return result;
     }
     

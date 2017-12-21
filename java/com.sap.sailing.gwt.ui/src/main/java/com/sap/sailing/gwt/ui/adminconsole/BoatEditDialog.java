@@ -118,7 +118,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     @Override
     protected BoatDTO getResult() {
         Color color;
-        if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
+        if (displayColorTextBox.getValue() == null || displayColorTextBox.getValue().isEmpty()) {
             color = null;
         } else {
             try {
@@ -128,7 +128,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
             }
         }
         BoatClassDTO boatClass = new BoatClassDTO(boatClassNameBox.getValue(), Distance.NULL, Distance.NULL);
-        BoatDTO boat = new BoatDTO(boatToEdit.getIdAsString(), nameTextBox.getText(), boatClass, sailIdTextBox.getText(), color);
+        BoatDTO boat = new BoatDTO(boatToEdit.getIdAsString(), nameTextBox.getValue(), boatClass, sailIdTextBox.getValue(), color);
         return boat;
     }
 
