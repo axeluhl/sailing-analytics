@@ -12,18 +12,18 @@ First of all you need a regatta with at least one series with fleets and races t
 Now follow these steps:  
 **Open Adminconsole > Select 'Leaderboards' on the left menu > Enter your leaderboard name in the Leaderboards tab > Click on the 'Pairing List' Button inside the 'Actions' Column:**  
 
-
+<img src="/wiki/images/pairinglist/screenshot_1.jpg"/>
 
 Right now the setup dialog appears:
 
-[screenshot 2]
+<img src="/wiki/images/pairinglist/screenshot_2.jpg"/>
 
 You can specify the number of competitors, flight multiplier and which series should be used.  
 **(Note! When changing the standard count of competitors you can not apply your generated Pairing list to racelogs or print it. For adding/removing competitors please use the register function!)**  
 For more information about flight multiplier please read below.  
 When you hit the **'ok'** button a small progress dialog appears and after a few seconds a new window will be opened:
 
-[screenshot 3]
+<img src="/wiki/images/pairinglist/screenshot_3.jpg"/>
 
 In this window there are some attributes of the pairing list in the left box:  
 * Number of Flights: This number corresponds to the count of all Races in your selected series  
@@ -59,11 +59,11 @@ This function can be used to print your final Pairing list as paper or PDF docum
 After selecting your leaderboard in the 'Leaderboards' section hit the 'Print' button under Actions:  
 **(Note! You can only print a Pairing list if you applied one to your Racelogs!)**
 
-[Screenshot_Printing_1]
+<img src="/wiki/images/pairinglist/screenshot_printing_1.jpg"/>
 
 A new tab displaying the pairing list table opens. Now hit 'Print' and the browsers print dialog will open:  
 
-[Screenshot_Printing_2]
+<img src="/wiki/images/pairinglist/screenshot_printing_2.jpg"/>
 
 
 
