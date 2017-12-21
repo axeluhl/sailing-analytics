@@ -11,43 +11,50 @@ import com.sap.sse.common.TimeRange;
 /**
  * Convenience class that wraps the json objects used to render json result objects
  */
-public class ImportResultDTO {
+class ImportResultDTO {
+
     private final List<ErrorImportDTO> errorList = new CopyOnWriteArrayList<>();
     private final List<TrackImportDTO> importResult = new CopyOnWriteArrayList<>();
     private final Logger logger;
 
     static class TrackImportDTO {
-        private TimeRange range;
-        private long amount;
-        private UUID device;
 
-        public TrackImportDTO(UUID device, TimeRange range, long amount) {
+        private final TimeRange range;
+        private final long amount;
+        private final UUID device;
+
+        TrackImportDTO(UUID device, TimeRange range, long amount) {
             this.device = device;
             this.range = range;
             this.amount = amount;
         }
 
-        public TimeRange getRange() {
+        TimeRange getRange() {
             return range;
         }
-        
-        public UUID getDevice() {
+
+        UUID getDevice() {
             return device;
         }
 
-        public long getAmount() {
+        long getAmount() {
             return amount;
         }
     }
 
     static class ErrorImportDTO {
-        private String exUUID;
-        private String name;
-        private String message;
-        private String filename;
-        private String requestedImporter;
 
-        public ErrorImportDTO(String exUUID, String name, String message, String filename, String requestedImporter) {
+        private final String exUUID;
+        private final String name;
+        private final String message;
+        private final String filename;
+        private final String requestedImporter;
+
+        ErrorImportDTO(String name, String message) {
+            this(null, name, message, null, null);
+        }
+
+        ErrorImportDTO(String exUUID, String name, String message, String filename, String requestedImporter) {
             this.exUUID = exUUID;
             this.name = name;
             this.message = message;
@@ -55,63 +62,61 @@ public class ImportResultDTO {
             this.requestedImporter = requestedImporter;
         }
 
-        public String getExUUID() {
+        String getExUUID() {
             return exUUID;
         }
 
-        public String getName() {
+        String getName() {
             return name;
         }
 
-        public String getMessage() {
+        String getMessage() {
             return message;
         }
 
-        public String getFilename() {
+        String getFilename() {
             return filename;
         }
 
-        public String getRequestedImporter() {
+        String getRequestedImporter() {
             return requestedImporter;
         }
-        
-        
+
     }
 
-    public ImportResultDTO(Logger logger) {
+    ImportResultDTO(Logger logger) {
         this.logger = logger;
     }
 
-    public void add(String requestedImporterName, String filename, Exception exception) {
+    void add(String requestedImporterName, String filename, Exception exception) {
         logger.log(Level.SEVERE, "Sensordata import importer: " + requestedImporterName);
         logger.log(Level.SEVERE, "Sensordata import filename: " + filename);
         logException(exception, filename, requestedImporterName);
     }
 
-    public void add(Exception exception) {
+    void add(Exception exception) {
         logException(exception, "", "");
     }
 
-    private void logException(Exception e, String filename, String requestedImporterName) {
-        final String exUUID = UUID.randomUUID().toString();
-        logger.log(Level.SEVERE, "Sensordata import ExUUID: " + exUUID, e);
-        errorList.add(
-                new ErrorImportDTO(exUUID, e.getClass().getName(), e.getMessage(), filename, requestedImporterName));
+    private void logException(Exception exception, String filename, String requestedImporterName) {
+        final String exUUID = UUID.randomUUID().toString(), exClass = exception.getClass().getName();
+        logger.log(Level.SEVERE, "Sensordata import ExUUID: " + exUUID, exception);
+        errorList.add(new ErrorImportDTO(exUUID, exClass, exception.getMessage(), filename, requestedImporterName));
     }
 
-    public void noImporterSucceeded(String filename) {
-        errorList.add(new ErrorImportDTO(null,null,"No importer succeeded to process file",filename,null));
+    void noImporterSucceeded(String filename) {
+        errorList.add(new ErrorImportDTO(null, null, "No importer succeeded to process file", filename, null));
     }
 
-    public void addTrackData(TrackImportDTO trackImportDTO) {
+    void addTrackData(TrackImportDTO trackImportDTO) {
         importResult.add(trackImportDTO);
     }
-    
-    public List<ErrorImportDTO> getErrorList() {
+
+    List<ErrorImportDTO> getErrorList() {
         return errorList;
     }
-    
-    public List<TrackImportDTO> getImportResult() {
+
+    List<TrackImportDTO> getImportResult() {
         return importResult;
     }
 }

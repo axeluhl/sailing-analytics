@@ -3,6 +3,8 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -24,7 +26,12 @@ import com.sap.sse.util.ServiceTrackerFactory;
  */
 public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
-    // private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImportServlet.class.getName());
+    private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImportServlet.class.getName());
+
+    private static final String REQUEST_PARAMETER_BOAT_CLASS = "boatClass";
+    private static final String ERROR_MESSAGE_IMPORT_FILE_MISSING = "No file to import found!";
+    private static final String ERROR_MESSAGE_BOAT_CLASS_MISSING = "No boat class name found!";
+
     private ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
 
     @Override
@@ -51,21 +58,26 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                     fileName = fi.getName();
                     fileItem = fi;
                 } else if (fi.getFieldName() != null) {
-                    if ("boatClass".equals(fi.getFieldName())) {
+                    if (REQUEST_PARAMETER_BOAT_CLASS.equals(fi.getFieldName())) {
                         boatClassName = fi.getString();
                     }
                 }
             }
             if (fileItem == null) {
-                throw new RuntimeException("No file to import");
+                throw new AllinOneImportException(ERROR_MESSAGE_IMPORT_FILE_MISSING);
+            }
+            if (boatClassName == null || boatClassName.isEmpty()) {
+                throw new AllinOneImportException(ERROR_MESSAGE_BOAT_CLASS_MISSING);
             }
             importerResult = new ExpeditionAllInOneImporter(getService(),
                     raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
                     getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName);
         } catch (AllinOneImportException e) {
             importerResult = new ImporterResult(e, e.additionalErrors);
+            logger.log(Level.SEVERE, e.getMessage());
         } catch (Throwable t) {
             importerResult = new ImporterResult(t, Collections.emptyList());
+            logger.log(Level.SEVERE, t.getMessage());
         } finally {
             this.toJSON(importerResult).writeJSONString(resp.getWriter());
         }

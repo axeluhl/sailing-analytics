@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
@@ -66,6 +67,7 @@ public class ExpeditionAllInOneImporter {
 
     private static final String ERROR_MESSAGE_GPS_DATA_IMPORT_FAILED = "Failed to import GPS data!";
     private static final String ERROR_MESSAGE_SENSOR_DATA_IMPORT_FAILED = "Failed to import sensor data!";
+    private static final String ERROR_MESSAGE_BOAT_CLASS_DETERMINATION_FAILED = "Failed to determine boat class!";
 
     private final RacingEventService service;
     private final RaceLogTrackingAdapter adapter;
@@ -74,30 +76,15 @@ public class ExpeditionAllInOneImporter {
 
     public static class ImporterResult {
         final UUID eventId;
-        final String leaderboardName;
-        final String leaderboardGroupName;
-        final String regattaName;
-        final String raceName;
-        final String raceColumnName;
-        final String fleetName;
-        final List<TrackImportDTO> importGpsFixData;
-        final List<TrackImportDTO> importSensorFixData;
-        final List<ErrorImportDTO> errorList;
+        final String leaderboardName, leaderboardGroupName, regattaName, raceName, raceColumnName, fleetName;
+        final List<TrackImportDTO> importGpsFixData, importSensorFixData;
         final String sensorFixImporterType;
+        final List<ErrorImportDTO> errorList = new ArrayList<>();
 
         public ImporterResult(Throwable exception, List<ErrorImportDTO> additionalErrors) {
-            eventId = null;
-            this.leaderboardName = "";
-            this.leaderboardGroupName = "";
-            this.regattaName = "";
-            this.raceName = "";
-            this.raceColumnName = "";
-            this.fleetName = "";
-            this.importGpsFixData = Collections.emptyList();
-            this.importSensorFixData = Collections.emptyList();
-            this.errorList = additionalErrors;
-            errorList.add(new ErrorImportDTO(null, exception.getClass().getName(), exception.getMessage(), null, null));
-            sensorFixImporterType = "";
+            this(null, "", "", new RegattaNameAndRaceName("", ""), "", "", Collections.emptyList(),
+                    Collections.emptyList(), "", additionalErrors);
+            this.errorList.add(new ErrorImportDTO(exception.getClass().getName(), exception.getMessage()));
         }
 
         private ImporterResult(final UUID eventId, final String leaderboardName, String leaderboardGroupName,
@@ -115,7 +102,7 @@ public class ExpeditionAllInOneImporter {
             this.importGpsFixData = importGpsFixData;
             this.importSensorFixData = importSensorFixData;
             this.sensorFixImporterType = sensorFixImporterType;
-            this.errorList = errors;
+            this.errorList.addAll(errors);
         }
     }
 
@@ -231,6 +218,7 @@ public class ExpeditionAllInOneImporter {
         final Regatta regatta = service.createRegatta(regattaNameAndleaderboardName, boatClassName, null, null, UUID.randomUUID(),
                 Collections.singleton(series), true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
                 false, rankingMetricConstructor);
+        this.ensureBoatClassDetermination(regatta);
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
         final RegattaLeaderboard regattaLeaderboard = service.addRegattaLeaderboard(regattaIdentifier, null,
                 discardThresholds);
@@ -292,6 +280,12 @@ public class ExpeditionAllInOneImporter {
     private void ensureSuccessfulImport(ImportResultDTO result, String errorMessage) throws AllinOneImportException {
         if (!result.getErrorList().isEmpty()) {
             throw new AllinOneImportException(errorMessage, result.getErrorList());
+        }
+    }
+
+    private void ensureBoatClassDetermination(Regatta regatta) throws AllinOneImportException {
+        if (regatta.getBoatClass() == null) {
+            throw new AllinOneImportException(ERROR_MESSAGE_BOAT_CLASS_DETERMINATION_FAILED);
         }
     }
 }
