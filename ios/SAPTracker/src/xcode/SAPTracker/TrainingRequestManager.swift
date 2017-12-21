@@ -383,22 +383,42 @@ class TrainingRequestManager: NSObject {
         failure(error, stringForError(error))
     }
 
-    // MARK: - LeaderboardGroups
+    // MARK: - LeaderboardGroup
 
-    func getRaceName(
-        regattaName: String,
-        raceName: String,
-        success: @escaping () -> Void,
+    func getLeaderboardGroup(
+        leaderboardName: String,
+        success: @escaping (_ leaderboardGroupData: LeaderboardGroupData) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
-        let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/races/\(encodedRaceName)/course"
+        let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let urlString = "\(basePathString)/leaderboardgroups/\(encodedLeaderboardName)"
         manager.get(urlString, parameters: nil, success: { (requestOperation, responseObject) in
-            print(responseObject)
+            self.getLeaderboardGroupSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
-            print(error)
+            self.getLeaderboardGroupFailure(error: error, failure: failure)
         }
+    }
+
+    fileprivate func getLeaderboardGroupSuccess(
+        responseObject: Any?,
+        success: @escaping (_ leaderboardGroupData: LeaderboardGroupData) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let data = responseObject as? Data {
+            do {
+                let jsonObject = try JSONSerialization.jsonObject(with: data)
+                success(LeaderboardGroupData(dictionary: jsonObject as? [String: AnyObject]))
+            } catch {
+                failure(error, nil)
+            }
+        } else {
+            failure(TrainingRequestManagerError.invalidResponse, nil)
+        }
+    }
+
+    fileprivate func getLeaderboardGroupFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
     }
 
     // MARK: - RegattaRaceCourse
@@ -406,17 +426,39 @@ class TrainingRequestManager: NSObject {
     func getRegattaRaceCourse(
         regattaName: String,
         raceName: String,
-        success: @escaping () -> Void,
+        success: @escaping (_ regattaRaceCourseData: RegattaRaceCourseData) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/races/\(encodedRaceName)/course"
         manager.get(urlString, parameters: nil, success: { (requestOperation, responseObject) in
-            print(responseObject)
+            self.getRegattaRaceCourseSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
-            print(error)
+            self.getRegattaRaceCourseFailure(error: error, failure: failure)
         }
+    }
+
+    fileprivate func getRegattaRaceCourseSuccess(
+        responseObject: Any?,
+        success: @escaping (_ regattaRaceCourseData: RegattaRaceCourseData) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let data = responseObject as? Data {
+            do {
+                let jsonObject = try JSONSerialization.jsonObject(with: data)
+                success(RegattaRaceCourseData(dictionary: (jsonObject as? [String: AnyObject])))
+            } catch {
+                failure(error, nil)
+            }
+        } else {
+            failure(TrainingRequestManagerError.invalidResponse, nil)
+        }
+    }
+
+    fileprivate func getRegattaRaceCourseFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
     }
 
     // MARK: - LeaderboardAutoCourse

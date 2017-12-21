@@ -30,7 +30,7 @@ class TrainingController: NSObject {
 
     // MARK: - Notifications
 
-    fileprivate func subscribeForNotifications() {
+    fileprivate func subscribeForSentGPSFixesNotifications() {
         sentGPSFixesCount = 0
         NotificationCenter.default.addObserver(
             self,
@@ -40,7 +40,7 @@ class TrainingController: NSObject {
         )
     }
 
-    fileprivate func unsubscribeFromNotifications() {
+    fileprivate func unsubscribeFromSentGPSFixesNotifications() {
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -49,10 +49,10 @@ class TrainingController: NSObject {
             guard let sentDict = notification.userInfo?[GPSFixController.UserInfo.Sent] as? [String: Any] else { return }
             guard let count = sentDict[GPSFixController.UserInfo.SentKey.Count] as? NSNumber else { return }
             self.sentGPSFixesCount += count.intValue
-            if (self.sentGPSFixesCount > 1) {
+            if (self.sentGPSFixesCount >= AutoCourse.MinGPSFixesNeeded) {
                 if let trainingRaceData = self.trainingRaceData {
                     self.autoCourseRace(forTrainingRaceData: trainingRaceData, completion: {
-
+                        self.unsubscribeFromSentGPSFixesNotifications()
                     })
                 }
             }
@@ -203,9 +203,11 @@ class TrainingController: NSObject {
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        self.unsubscribeFromNotifications()
+        self.unsubscribeFromSentGPSFixesNotifications()
         self.stopActiveRace_SetStopTrackingTime(forTrainingRaceData: trainingRaceData, success: {
-            success()
+            self.autoCourseRace(forTrainingRaceData: trainingRaceData, completion: {
+                success()
+            })
         }) { (error) in
             failure(error)
         }
@@ -263,7 +265,7 @@ class TrainingController: NSObject {
                     )
                     success(trainingRaceData)
                     self.trainingRaceData = trainingRaceData
-                    self.subscribeForNotifications()
+                    self.subscribeForSentGPSFixesNotifications()
                 }, failure: { (error, message) in
                     failure(error)
                 })
@@ -281,22 +283,32 @@ class TrainingController: NSObject {
         forTrainingRaceData trainingRaceData: TrainingRaceData,
         completion: @escaping () -> Void)
     {
-        autoCourseRace(
-            leaderboardName: trainingRaceData.leaderboardName,
-            raceColumnName: trainingRaceData.raceColumnName,
-            fleetName: trainingRaceData.fleetName,
-            completion: completion
-        )
-    }
-    
-    func autoCourseRace(
-        leaderboardName: String,
-        raceColumnName: String,
-        fleetName: String,
-        completion: @escaping () -> Void)
-    {
-        trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: { (leaderboardAutoCourseData) in
-            completion()
+        let leaderboardName = trainingRaceData.leaderboardName
+        let regattaName = trainingRaceData.regattaName
+        let fleetName = trainingRaceData.fleetName
+        let raceColumnName = trainingRaceData.raceColumnName
+
+        // 1. Get tracked race name for race column
+        self.trainingRequestManager.getLeaderboardGroup(leaderboardName: leaderboardName, success: { (leaderboardGroupData) in
+            if let raceName = leaderboardGroupData.raceName(trainingRaceData: trainingRaceData) {
+
+                // 2. Get course for tracked race name
+                self.trainingRequestManager.getRegattaRaceCourse(regattaName: regattaName, raceName: raceName, success: { (regattaRaceCourseData) in
+
+                    // 3. Precondition for auto course
+                    if regattaRaceCourseData.isEmpty() || regattaRaceCourseData.isAutoCourse() {
+
+                        // 4. Set auto course
+                        self.trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: { (leaderboardAutoCourseData) in
+                            completion()
+                        }) { (error, message) in
+                            completion()
+                        }
+                    }
+                }, failure: { (error, message) in
+                    completion()
+                })
+            }
         }) { (error, message) in
             completion()
         }

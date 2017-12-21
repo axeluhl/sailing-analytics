@@ -348,6 +348,8 @@
 		C87A74EA1F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */; };
 		C87A74EC1F5068D0003DE396 /* CreateTrainingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */; };
 		C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */; };
+		C88F6D2D1FEACC5700A616BE /* LeaderboardGroupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */; };
+		C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
@@ -763,6 +765,8 @@
 		C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCompetitorCreateAndAddData.swift; sourceTree = "<group>"; };
 		C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingData.swift; sourceTree = "<group>"; };
 		C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardAutoCourseData.swift; sourceTree = "<group>"; };
+		C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardGroupData.swift; sourceTree = "<group>"; };
+		C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaRaceCourseData.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
@@ -1362,6 +1366,8 @@
 				C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */,
 				C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */,
 				C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */,
+				C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */,
+				C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -2117,6 +2123,7 @@
 				C8F71EE81D8691F700826DE4 /* TSMarkdownParser.m in Sources */,
 				C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
+				C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */,
 				C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */,
 				C8CF22B41F67C4D800A01E0A /* RegattaRaceColumnAddData.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
@@ -2125,6 +2132,7 @@
 				7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */,
 				C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */,
 				C8F71EEB1D8691F700826DE4 /* UIAlertView+AFNetworking.m in Sources */,
+				C88F6D2D1FEACC5700A616BE /* LeaderboardGroupData.swift in Sources */,
 				C87A74EA1F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift in Sources */,
 				C8E0D3131F59475B001EEF5C /* CheckInTableViewController.swift in Sources */,
 				C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */,

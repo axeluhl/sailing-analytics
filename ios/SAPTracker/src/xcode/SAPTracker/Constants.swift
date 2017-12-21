@@ -13,6 +13,10 @@ struct Application {
     static let RequestTimeout: TimeInterval = 7
 }
 
+struct AutoCourse {
+    static let MinGPSFixesNeeded = 10
+}
+
 struct URLs {
     static let CodeConvention = URL(string: "https://github.com/raywenderlich/swift-style-guide/blob/master/README.markdown")!
     static let Terms = URL(string: "http://www.sapsailing.com/EULA_iOS_SailingBoatTracker.html")!
