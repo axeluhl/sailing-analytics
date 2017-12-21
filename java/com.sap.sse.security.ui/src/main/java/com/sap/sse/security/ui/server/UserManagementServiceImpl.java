@@ -95,16 +95,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name) {
+        SecurityUtils.getSubject().checkPermission("role:create:"+roleDefinitionIdAsString);
         return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), name);
     }
 
     @Override
     public void deleteRoleDefinition(String roleIdAsString) {
+        SecurityUtils.getSubject().checkPermission("role:delete:" + roleIdAsString);
         getSecurityService().deleteRoleDefinition(getSecurityService().getRoleDefinition(UUID.fromString(roleIdAsString)));
     }
 
     @Override
     public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+        SecurityUtils.getSubject().checkPermission("role:edit:" + roleDefinitionWithNewProperties.getId().toString());
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
 
@@ -353,6 +356,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+        SecurityUtils.getSubject().checkPermission("user:edit:" + username);
         ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         getSecurityService().updateUserProperties(username, fullName, company,
                 getLocaleFromLocaleName(localeName));
@@ -369,12 +373,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
+        SecurityUtils.getSubject().checkPermission("user:edit:" + username);
         ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
     }
     
     @Override
     public void resetPassword(String username, String email, String passwordResetBaseURL) throws UserManagementException, MailException {
+        SecurityUtils.getSubject().checkPermission("user:edit:" + username);
         if (username == null || username.isEmpty()) {
             username = getSecurityService().getUserByEmail(email).getName();
         }

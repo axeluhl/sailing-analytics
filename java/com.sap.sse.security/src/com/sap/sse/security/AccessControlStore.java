@@ -33,7 +33,6 @@ public interface AccessControlStore extends Named {
     Iterable<Ownership> getOwnerships();
     Ownership getOwnership(String idOfOwnedObjectAsString);
     Ownership createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
-    void setOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
     void removeOwnership(String idOfOwnedObjectAsString);
     
     void clear();

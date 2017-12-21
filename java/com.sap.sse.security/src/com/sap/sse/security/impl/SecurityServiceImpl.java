@@ -105,6 +105,7 @@ import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
@@ -221,22 +222,29 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private void initEmptyStore() {
         final RoleDefinition adminRoleDefinition;
-        AdminRole adminRolePrototype = AdminRole.getInstance();
-        if (!Util.contains(userStore.getRoleDefinitions(), adminRolePrototype)) {
+        final AdminRole adminRolePrototype = AdminRole.getInstance();
+        if (getRoleDefinition(adminRolePrototype.getId()) == null) {
             logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+
                     AdminRole.getInstance().getPermissions()+"\"");
-            Set<String> adminPermissions = new HashSet<>();
-            adminPermissions.add("*");
             adminRoleDefinition = userStore.createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
-            for (final AbstractRoles otherPredefinedRole : AbstractRoles.values()) {
+        } else {
+            adminRoleDefinition = userStore.getRoleDefinition(adminRolePrototype.getId());
+        }
+        final UserRole userRolePrototype = UserRole.getInstance();
+        if (getRoleDefinition(userRolePrototype.getId()) == null) {
+            logger.info("No user role found. Creating default role \""+userRolePrototype.getName()+"\" with permission \""+
+                    userRolePrototype.getPermissions()+"\"");
+            userStore.createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(), userRolePrototype.getPermissions());
+        }
+        for (final AbstractRoles otherPredefinedRole : AbstractRoles.values()) {
+            if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
+                logger.info("Predefined role definition "+otherPredefinedRole+" not found; creating");
                 final Set<WildcardPermission> permissions = new HashSet<>();
                 for (final String stringPermission : otherPredefinedRole.getPermissions()) {
                     permissions.add(new WildcardPermission(stringPermission));
                 }
                 userStore.createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
             }
-        } else {
-            adminRoleDefinition = userStore.getRoleDefinition(adminRolePrototype.getId());
         }
         try {
             final SecurityUser adminUser;
@@ -254,9 +262,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
     
-    /**
-     * Creates a default "admin" role with * permission if the ACL <code>store</code> is empty.
-     */
     private void initEmptyAccessControlStore() {
     }
 
@@ -715,20 +720,24 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-        if (userStore.getTenantByName(defaultTenantNameForUsername) != null) {
-            throw new UserManagementException(UserManagementException.TENANT_ALREADY_EXISTS);
-        }
+        final Tenant tenant;
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        Tenant tenant = createTenant(UUID.randomUUID(), defaultTenantNameForUsername);
+        if (userStore.getTenantByName(defaultTenantNameForUsername) != null) {
+            logger.info("Found existing tenant "+defaultTenantNameForUsername+" for new user "+username);
+            tenant = userStore.getTenantByName(defaultTenantNameForUsername);
+        } else {
+            tenant = createTenant(UUID.randomUUID(), defaultTenantNameForUsername);
+        }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final UserImpl result = userStore.createUser(username, email, tenant, upa); // TODO: get the principal as owner
+        addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToTenant(tenant, result);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
         accessControlStore.createOwnership(tenant.getId().toString(), result, tenant, tenant.getName());

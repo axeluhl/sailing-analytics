@@ -266,7 +266,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
-                final Role role = loadRoleWithProxyUserQualifier((DBObject) rolesO, roleDefinitionsById, tenants);
+                final Role role = loadRoleWithProxyUserQualifier((DBObject) o, roleDefinitionsById, tenants);
                 if (role != null) {
                     roles.add(role);
                 } else {

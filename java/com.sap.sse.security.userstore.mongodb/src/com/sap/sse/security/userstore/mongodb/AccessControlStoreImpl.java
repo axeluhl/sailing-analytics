@@ -28,6 +28,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     
     private final ConcurrentHashMap<String, Ownership> ownerships;
     
+    private final Tenant defaultTenant;
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -38,6 +40,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, UserStore userStore) {
+        this.defaultTenant = userStore.getDefaultTenant();
         accessControlLists = new ConcurrentHashMap<>();
         ownerships = new ConcurrentHashMap<>();
         this.mongoObjectFactory = mongoObjectFactory;
@@ -128,15 +131,10 @@ public class AccessControlStoreImpl implements AccessControlStore {
     
     @Override
     public Ownership createOwnership(String idAsString, SecurityUser userOwnerName, Tenant tenantOwner, String displayNameOfOwnedObject) {
-        setOwnership(idAsString, userOwnerName, tenantOwner, displayNameOfOwnedObject);
-        return ownerships.get(idAsString);
-    }
-
-    @Override
-    public void setOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject) {
-        Ownership ownership = new OwnershipImpl(idOfOwnedObjectAsString, userOwner, tenantOwner, displayNameOfOwnedObject);
-        ownerships.put(idOfOwnedObjectAsString, ownership);
+        Ownership ownership = new OwnershipImpl(idAsString, userOwnerName, tenantOwner, displayNameOfOwnedObject);
+        ownerships.put(idAsString, ownership);
         mongoObjectFactory.storeOwnership(ownership);
+        return ownerships.get(idAsString);
     }
 
     @Override
@@ -147,9 +145,32 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public Ownership getOwnership(String idOfOwnedObjectAsString) {
-        return ownerships.get(idOfOwnedObjectAsString);
+        final Ownership storedOwnership = ownerships.get(idOfOwnedObjectAsString);
+        final Ownership result;
+        if (storedOwnership != null) {
+            result = storedOwnership;
+        } else {
+            result = createDefaultOwnership(idOfOwnedObjectAsString);
+        }
+        return result;
     }
     
+    /**
+     * If there is no ownership information for an object and there is a non-{@link #defaultTenant} available,
+     * create a default {@link Ownership} information that lists the {@link #defaultTenant} as the tenant owner
+     * for the object in question; no user owner is specified. If no {@link #defaultTenant} is available,
+     * {@code null} is returned.
+     */
+    private Ownership createDefaultOwnership(String idOfOwnedObjectAsString) {
+        final Ownership result;
+        if (defaultTenant != null) {
+            result = new OwnershipImpl(idOfOwnedObjectAsString, /* userOwner */ null, /* tenantOwner */ defaultTenant, /* displayNameOfOwnedObject */ null);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     @Override 
     public Iterable<Ownership> getOwnerships() {
         return new ArrayList<>(ownerships.values());

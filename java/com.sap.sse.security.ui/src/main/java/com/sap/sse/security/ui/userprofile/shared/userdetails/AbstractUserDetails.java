@@ -73,6 +73,7 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         setPlaceholder(oldPasswordUi, i18n.oldPasswordPlaceholder());
         setPlaceholder(newPasswordUi, i18n.newPasswordPlaceholder());
         setPlaceholder(newPasswordConfirmationUi, i18n.passwordRepeatPlaceholder());
+        presenter.fillTenants(defaultTenantUi);
     }
 
     public void setUser(UserDTO currentUser) {

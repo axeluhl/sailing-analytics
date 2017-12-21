@@ -7,12 +7,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
@@ -33,12 +36,17 @@ public class SecurityDTOFactory {
     private SecurityUser createUserDTOFromUser(SecurityUser user, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
             Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
             Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        SecurityUser result = fromOriginalToStrippedDownUser.get(user);
-        if (result == null) {
-            final SecurityUserImpl preResult = new SecurityUserImpl(user.getName(), /* default tenant to be set later: */ null);
-            result = preResult;
-            fromOriginalToStrippedDownUser.put(user, result);
-            preResult.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+        SecurityUser result;
+        if (user == null) {
+            result = null;
+        } else {
+            result = fromOriginalToStrippedDownUser.get(user);
+            if (result == null) {
+                final SecurityUserImpl preResult = new SecurityUserImpl(user.getName(), /* default tenant to be set later: */ null);
+                result = preResult;
+                fromOriginalToStrippedDownUser.put(user, result);
+                preResult.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+            }
         }
         return result;
     }
@@ -63,7 +71,8 @@ public class SecurityDTOFactory {
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, user.getRoles(), /* default tenant filled in later */ null,
+                accountDTOs, createRolesDTOs(user.getRoles(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser,
+                        fromOriginalToStrippedDownUserGroup), /* default tenant filled in later */ null,
                 user.getPermissions(),
                 createUserGroupDTOsFromUserGroups(securityService.getUserGroupsOfUser(user), fromOriginalToStrippedDownTenant,
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
@@ -71,6 +80,22 @@ public class SecurityDTOFactory {
         userDTO.setDefaultTenant(createTenantDTOFromTenant(user.getDefaultTenant(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup));
         return userDTO;
+    }
+
+    private Iterable<Role> createRolesDTOs(Iterable<Role> roles, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
+            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+        return Util.map(roles, role->createRoleDTO(role,
+                fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+    }
+
+    private Role createRoleDTO(Role role, Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
+            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+        return new RoleImpl(role.getRoleDefinition(), createTenantDTOFromTenant(role.getQualifiedForTenant(),
+                fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                createUserDTOFromUser(role.getQualifiedForUser(),
+                        fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
     }
 
     public SocialUserDTO createSocialUserDTO(SocialUserAccount socialUser) {

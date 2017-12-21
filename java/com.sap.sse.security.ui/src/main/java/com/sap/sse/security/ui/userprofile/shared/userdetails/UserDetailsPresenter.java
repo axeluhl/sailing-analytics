@@ -1,8 +1,13 @@
 package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
+import java.util.Collection;
+
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
+import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -112,8 +117,24 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
 
     @Override
     public void fillTenants(ListBox tenantListBox) {
-        // TODO Auto-generated method stub
-        
+        userManagementService.getTenants(new AsyncCallback<Collection<Tenant>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error fetching tenants: "+caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Collection<Tenant> result) {
+                final String oldSelectedTenantIdAsString = tenantListBox.getSelectedValue();
+                tenantListBox.clear();
+                for (final Tenant tenant : result) {
+                    tenantListBox.addItem(tenant.getName(), tenant.getId().toString());
+                    if (Util.equalsWithNull(tenant.getId().toString(), oldSelectedTenantIdAsString)) {
+                        tenantListBox.setSelectedIndex(tenantListBox.getItemCount()-1);
+                    }
+                }
+            }
+        });
     }
 
 }

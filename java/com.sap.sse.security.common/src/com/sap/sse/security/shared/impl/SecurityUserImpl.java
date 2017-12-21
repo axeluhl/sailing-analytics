@@ -89,6 +89,7 @@ public class SecurityUserImpl implements SecurityUser {
     
     @Override
     public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
+        // TODO determine user groups and ACLs
         return hasPermission(permission, ownership, /* user groups */ null, /* ACL */ null);
     }
 

@@ -239,4 +239,13 @@ public interface UserStore extends Named {
     void addPreferenceObjectListener(String key, PreferenceObjectListener<?> listener, boolean fireForAlreadyExistingPreferences);
     
     void removePreferenceObjectListener(PreferenceObjectListener<?> listener);
+
+    /**
+     * If a valid default tenant name was passed to the constructor, this field will contain a valid
+     * {@link Tenant} object whose name equals that of the default tenant name. It will have been used
+     * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
+     * and the users with the original role will obtain a corresponding {@link Role} with this default
+     * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
+     */
+    Tenant getDefaultTenant();
 }

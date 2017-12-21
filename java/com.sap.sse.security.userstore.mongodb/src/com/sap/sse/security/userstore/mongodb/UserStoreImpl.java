@@ -248,8 +248,13 @@ public class UserStoreImpl implements UserStore {
             defaultTenant = null;
         }
     }
+    
+    @Override
+    public Tenant getDefaultTenant() {
+        return defaultTenant;
+    }
 
-    public Tenant getOrCreateDefaultTenant(String defaultTenantName)
+    private Tenant getOrCreateDefaultTenant(String defaultTenantName)
             throws TenantManagementException, UserGroupManagementException {
         final Tenant result;
         if (defaultTenantName != null) {
