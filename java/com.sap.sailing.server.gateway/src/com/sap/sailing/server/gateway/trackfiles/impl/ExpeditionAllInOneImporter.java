@@ -22,9 +22,12 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
@@ -56,6 +59,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ExpeditionAllInOneImporter {
     private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImporter.class.getName());
@@ -122,7 +126,8 @@ public class ExpeditionAllInOneImporter {
 
     public ImporterResult importFiles(final String filenameWithSuffix, final FileItem fileItem,
             final String boatClassName) throws AllinOneImportException {
-        List<ErrorImportDTO> errors = new ArrayList<>();
+        // TODO ensure that boatClassName is given
+        final List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
 
         final String filename;
@@ -140,6 +145,7 @@ public class ExpeditionAllInOneImporter {
         final String regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
         final RegattaIdentifier regattaIdentifier = new RegattaName(filenameWithDateTimeSuffix);
         final String raceColumnName = filename;
+        final String trackedRaceName = filenameWithDateTimeSuffix;
         final String courseAreaName = "Default";
         final UUID courseAreaId = UUID.randomUUID();
         // This is just the default used in the UI
@@ -223,7 +229,7 @@ public class ExpeditionAllInOneImporter {
         final ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
         final RankingMetricConstructor rankingMetricConstructor = RankingMetricsFactory
                 .getRankingMetricConstructor(rankingMetric);
-        service.createRegatta(regattaNameAndleaderboardName, boatClassName, null, null, UUID.randomUUID(),
+        final Regatta regatta = service.createRegatta(regattaNameAndleaderboardName, boatClassName, null, null, UUID.randomUUID(),
                 Collections.singleton(series), true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
                 false, rankingMetricConstructor);
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
@@ -250,7 +256,15 @@ public class ExpeditionAllInOneImporter {
         // TODO explicitly set startOfRace?
 
         try {
-            adapter.denoteRaceForRaceLogTracking(service, regattaLeaderboard, raceColumn, fleet, null);
+            TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
+            // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
+            // that's why we can't jus call adapter.denoteRaceForRaceLogTracking
+            final TimePoint denotationTimePoint = startTrackingTimePoint.minus(1);
+            raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint,
+                    service.getServerAuthor(), raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
+            
+            raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
+            
             final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet, true,
                     correctWindDirectionByMagneticDeclination);
 
