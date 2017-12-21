@@ -12,7 +12,7 @@ First of all you need a regatta with at least one series with fleets and races t
 Now follow these steps:  
 **Open Adminconsole > Select 'Leaderboards' on the left menu > Enter your leaderboard name in the Leaderboards tab > Click on the 'Pairing List' Button inside the 'Actions' Column:**  
 
-[Screenshot 1]
+
 
 Right now the setup dialog appears:
 
