@@ -20,4 +20,10 @@ public interface IncrementalApproximatedFixesCalculator {
      */
     Iterable<GPSFixMoving> approximate(TimePoint earliestStart, TimePoint latestEnd);
 
+    /**
+     * Clears the whole state of the calculator, which is used for incremental calculation. The following calls of
+     * {@link #clearState()} will cause the this calculator to calculate douglas peucker fixes from scratch.
+     */
+    void clearState();
+
 }

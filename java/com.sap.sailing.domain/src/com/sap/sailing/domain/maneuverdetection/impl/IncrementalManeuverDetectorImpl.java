@@ -24,32 +24,33 @@ import com.sap.sse.common.Util;
 /**
  * Incremental maneuver detector, which is capable of detecting maneuvers by {@link #detectManeuvers()} call in an
  * incremental way. This detector is using {@link IncrementalApproximatedFixesCalculatorImpl} for incremental
- * calculation of douglas peucker fixes. When the douglas peucker fixes are calculated, it tries to much the fixes with
- * already calculated douglas peucker fixes groups for already calculated maneuvers (represented by
+ * calculation of douglas peucker fixes. When the douglas peucker fixes are calculated, it tries to match the resulted
+ * fixes with already calculated douglas peucker fixes groups for already calculated maneuvers (represented by
  * {@link ManeuverSpot}) from previous {@link #detectManeuvers()} calls. The existing maneuvers of matched existing
  * douglas peucker fixes groups are reused, when following conditions are met:
  * <ul>
- * <li>The next determined douglas peucker fix following after the last fix of matched existing douglas peucker fixes
- * group gets matched with the beginning fix of an another existing douglas peucker fixes group</li>
- * <li>The recorded wind within the douglas peucker fixes group is nearly the same as previouly measured.</li>
- * <li>The reused douglas peucker fixes group is far enough from the last fix of the track, so that it cannot be
- * extended by a new incoming douglas peucker fix. The "far enough" is defined in
+ * <li>The next determined douglas peucker fix following after the last fix of the matched existing douglas peucker
+ * fixes group gets matched with the beginning fix of an another existing douglas peucker fixes group</li>
+ * <li>The currently measured wind within the douglas peucker fixes group is nearly the same as previouly measured when
+ * the existing douglas peucker fixes group had been determined.</li>
+ * <li>The reused douglas peucker fixes group is far enough from the last fix of the track, so that its maneuvers cannot
+ * be extended by new incoming fixes. The "far enough" is defined in
  * {@link #checkManeuverSpotFarEnoughFromLatestRawFix(TimePoint, long, TimePoint, ManeuverSpot)}.
  * </ul>
  * With exception: the first and last calculated douglas peucker points are ignored during matching process, because
- * they are never added to douglas peucker fixes sets which represent maneuver section.
+ * they get never added to douglas peucker fixes sets which represent maneuver section.
  * {@link #checkDouglasPeuckerFixesNearlySame(GPSFixMoving, GPSFixMoving)} defines whether two douglas peucker match and
- * are nearly same. The nearly the same wind is defined by {@link #checkManeuverSpotWindNearlySame(ManeuverSpot)}.
+ * are nearly same. The nearly the same measured wind is defined by
+ * {@link #checkManeuverSpotWindNearlySame(ManeuverSpot)}.
  * 
  * @author Vladislav Chumak (D069712)
- * @see IncrementalManeuverDetector
  *
  */
 public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implements IncrementalManeuverDetector {
 
     /**
      * The wind course tolerance in degrees which defines the maximal acceptable deviation of wind measurement between
-     * last maneuver spot wind record and the current recorded wind at the same maneuver spot. If the tolerance limit is
+     * previously measured wind and the current recorded wind at the same maneuver spot. If the tolerance limit is
      * exceeded, the maneuvers for the analysed maneuver spot get recalculated.
      */
     private static final double WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_MANEUVER_REUSE = 5.0;
@@ -66,6 +67,9 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      */
     private volatile ManeuverDetectionResult lastManeuverDetectionResult = null;
 
+    /**
+     * Incremental calculator for douglas peucker fixes, which is stateful
+     */
     private final IncrementalApproximatedFixesCalculator incrementalApproximatedFixesCalculator;
 
     /**
@@ -376,6 +380,33 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         }
 
         return null;
+    }
+    
+    /**
+     * Represents a result of already performed maneuver analysis. The result is used by
+     * {@link IncrementalManeuverDetectorImpl} to determine maneuvers incrementally.
+     * 
+     * @author Vladislav Chumak (D069712)
+     *
+     */
+    private static class ManeuverDetectionResult {
+
+        private final TimePoint latestFixTimePoint;
+        private final List<ManeuverSpot> maneuverSpots;
+
+        public ManeuverDetectionResult(TimePoint latestFixTimePoint, List<ManeuverSpot> maneuverSpots) {
+            this.latestFixTimePoint = latestFixTimePoint;
+            this.maneuverSpots = maneuverSpots;
+        }
+
+        public TimePoint getLatestRawFixTimePoint() {
+            return latestFixTimePoint;
+        }
+
+        public List<ManeuverSpot> getManeuverSpots() {
+            return maneuverSpots;
+        }
+
     }
 
 }

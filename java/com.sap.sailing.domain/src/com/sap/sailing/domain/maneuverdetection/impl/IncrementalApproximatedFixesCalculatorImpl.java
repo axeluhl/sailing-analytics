@@ -502,4 +502,9 @@ public class IncrementalApproximatedFixesCalculatorImpl implements IncrementalAp
         }
     }
 
+    @Override
+    public void clearState() {
+        lastFixesApproximationResult = null;
+    }
+
 }
