@@ -21,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAndBoatsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
@@ -290,8 +291,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             // race exists, its competitors set takes precedence over what's in the race log. Usually,
             // the tracked race will have the same competitors as those in the race log, or more because
             // those from the regatta log are added to the tracked race as well.
-            Map<Competitor, Boat> viaRaceLog = new RegisteredCompetitorsAndBoatsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
-            competitors = viaRaceLog.keySet();
+            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
+            competitors = viaRaceLog;
         }
         return new Pair<>(raceDefinition, competitors);
     }
