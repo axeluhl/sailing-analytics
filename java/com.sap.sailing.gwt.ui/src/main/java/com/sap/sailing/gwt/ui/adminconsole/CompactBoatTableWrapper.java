@@ -51,9 +51,10 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
         };
         boatNameColumn.setSortable(true);
         boatColumnListHandler.setComparator(boatNameColumn, new Comparator<BoatDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(BoatDTO o1, BoatDTO o2) {
-                return o1.getName().compareTo(o2.getName());
+                return comparator.compare(o1.getName(), o2.getName());
             }
         });
 
@@ -93,6 +94,21 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
             @Override
             public Color getColor(BoatDTO t) {
                 return t.getColor();
+            }
+        });
+        boatColorColumn.setSortable(true);
+        boatColumnListHandler.setComparator(boatColorColumn, new Comparator<BoatDTO>() {
+            @Override
+            public int compare(BoatDTO o1, BoatDTO o2) {
+                if (o1.getColor() == null) {
+                    if (o2.getColor() == null) {
+                        return 0;
+                    }
+                    return -1;
+                } else if (o2.getColor() == null) {
+                    return 1;
+                }
+                return o1.getColor().getAsHtml().compareTo(o2.getColor().getAsHtml());
             }
         });
 
