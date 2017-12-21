@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -67,56 +68,67 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         mainPanel.addNorth(header, 75);
 
-        Button btn = new Button(getStringMessages().print());
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        contentPanel.add(btn);
         contentPanel.setWidth("100%");
         contentPanel.getElement().getStyle().setProperty("marginTop", "15px");
         contentPanel.getElement().getStyle().setProperty("marginBottom", "15px");
         scrollPanel.add(contentPanel);
-        sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(), 
+        sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(),
                 new AsyncCallback<PairingListDTO>() {
 
-            @Override
-            public void onSuccess(PairingListDTO result) {
-                if (strippedLeaderboardDTO != null) {
-                    sailingService.getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
-                            result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
+                    @Override
+                    public void onSuccess(PairingListDTO result) {
+                        if (strippedLeaderboardDTO == null) {
+
+                        } else {
+                            sailingService.getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
+                                    result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            HTML lbl = new HTML(
+                                                    "<h2>" + stringmessages.noPairingListAvailable() + "</h2>");
+                                            lbl.getElement().getStyle().setColor(Color.BLACK.toString());
+                                            contentPanel.add(lbl);
+                                        }
+
+                                        @Override
+                                        public void onSuccess(List<String> names) {
+                                            Button btn = new Button(getStringMessages().print());
+                                            contentPanel.add(btn);
+                                            VerticalPanel pairingListPanel = createPairingListPanel(result, names);
+                                            contentPanel.add(pairingListPanel);
+                                            btn.addClickHandler(new ClickHandler() {
+                                                @Override
+                                                public void onClick(ClickEvent event) {
+                                                    printPairingListGrid(
+                                                            "<div class='printHeader'><img src='images/home/logo-small@2x.png' </img>"
+                                                                    + "<b class='title'>"
+                                                                    + SafeHtmlUtils
+                                                                            .fromString(pairingListContextDefinition
+                                                                                    .getLeaderboardName())
+                                                                            .asString()
+                                                                    + "</b></div>" + pairingListPanel.asWidget()
+                                                                            .getElement().getInnerHTML());
+                                                }
+                                            });
+
+                                        }
+
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        try {
+                            throw caught;
+                        } catch (Throwable e) {
+                            e.printStackTrace();
                         }
 
-                        @Override
-                        public void onSuccess(List<String> names) {
-                            VerticalPanel pairingListPanel = createPairingListPanel(result, names);
-                            contentPanel.add(pairingListPanel);
-                            btn.addClickHandler(new ClickHandler() {
-                                @Override
-                                public void onClick(ClickEvent event) {
-                                    printPairingListGrid("<div class='printHeader'><img src='images/home/logo-small@2x.png' </img>"
-                                            + "<b class='title'>"
-                                            + SafeHtmlUtils.fromString(pairingListContextDefinition.getLeaderboardName())
-                                            .asString()
-                                            + "</b></div>" + pairingListPanel.asWidget().getElement().getInnerHTML());
-                                }
-                            });
-
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                try {
-                    throw caught;
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-
-            } 
-        });
+                    }
+                });
         mainPanel.add(scrollPanel);
     }
 
@@ -164,7 +176,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 // setting up fleet
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
-                //TODO add column for race 1-45 (default)
                 pairingListGrid.setWidget(groupIndex, 1,
                         new Label(fleetnames.get(groupIndex-1)));
                 // setting up fleets style
@@ -189,7 +200,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                         pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());
                     } else {
-                        // TODO change competitor name to competitor shorthand symbol
+                        // TODO change competitor name to competitor shorthand symbol ( bug2822 )
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid,
                                 new Label(competitorAndBoatPair.getA().getSailID()));
                     }
@@ -219,7 +230,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         return pairingListPanel;
     }
     
-    //TODO search for gwt API (Window, Document)
     private native void printPairingListGrid(String pageHTMLContent) /*-{
 		var frameID = '__gwt_historyFrame';
 		var frame = $doc.getElementById(frameID);
@@ -253,10 +263,11 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
 		document.close();
 
+                //Timeout for assets loading
 		setTimeout(function() {
 			frame.focus();
 			frame.print();
-		}, 500);
+		}, 100);
     }-*/;
 
 }
