@@ -116,7 +116,6 @@ public class ExpeditionAllInOneImporter {
 
     public ImporterResult importFiles(final String filenameWithSuffix, final FileItem fileItem,
             final String boatClassName) throws AllinOneImportException {
-        // TODO ensure that boatClassName is given
         final List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
 
