@@ -6,6 +6,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
@@ -31,7 +32,8 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
+        final String defaultTenantName = System.getProperty(UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME, ServerStartupConstants.SERVER_NAME);
+        UserStoreImpl userStore = new UserStoreImpl(defaultTenantName);
         AccessControlStoreImpl accessControlStore = new AccessControlStoreImpl(userStore);
         accessControlStoreRegistration = context.registerService(AccessControlStore.class.getName(),
                 accessControlStore, null);
