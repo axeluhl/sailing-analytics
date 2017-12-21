@@ -119,13 +119,7 @@ public class ExpeditionAllInOneImporter {
         final List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
 
-        final String filename;
-        if (filenameWithSuffix.toLowerCase().endsWith(".csv")) {
-            filename = filenameWithSuffix.substring(0, filenameWithSuffix.length()-4);
-        } else {
-            filename = filenameWithSuffix;
-        }
-
+        final String filename = ExpeditionImportFilenameUtils.truncateFilenameExtentions(filenameWithSuffix);
         final String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         final String eventName = filenameWithDateTimeSuffix;
         final String description = MessageFormat.format("Event imported from expedition file '{0}' on {1}", filename,
