@@ -75,7 +75,6 @@ public class PairinglistTest extends AbstractSeleniumTest {
             PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
             Assert.assertTrue(!dialog.isOkButtonEnabled());
             dialog.setCompetitorsCount("1");
-            dialog.clickFlightCheckBox();
             Assert.assertTrue(dialog.isOkButtonEnabled());
             dialog.setCompetitorsCount("-1");
             Assert.assertTrue(!dialog.isOkButtonEnabled());
@@ -103,7 +102,6 @@ public class PairinglistTest extends AbstractSeleniumTest {
             dialog.setFlightMultiplier("0");
             Assert.assertTrue(!dialog.isOkButtonEnabled());
             dialog.setFlightMultiplier("2");
-            dialog.clickFlightCheckBox();
             Assert.assertTrue(dialog.isOkButtonEnabled());
             PairinfListCreationDialogPO dialog2 = dialog.pressOk();
             Assert.assertEquals("12", dialog2.getValueOfFlightsLabel());
