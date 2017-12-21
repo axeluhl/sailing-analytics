@@ -10,11 +10,14 @@ import java.util.List;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 
 public abstract class ExpeditionImportFileHandler implements CompressedStreamsUtil.FileHandler {
-    public static final List<String> supportedExpeditionLogFileExtensions = Arrays.asList(new String[] { "csv", "log", "txt" });
+
+    public static final List<String> supportedExpeditionLogFileExtensions = Arrays.asList("csv", "log", "txt");
+    public static final List<String> supportedExpeditionArchiveFileExtensions = Arrays.asList("gz", "zip");
     public static final List<String> supportedExpeditionFileExtensions;
+
     static {
         final List<String> allExtensions = new ArrayList<>(supportedExpeditionLogFileExtensions);
-        allExtensions.addAll(Arrays.asList(new String[] { "gz", "zip" }));
+        allExtensions.addAll(supportedExpeditionArchiveFileExtensions);
         supportedExpeditionFileExtensions = Collections.unmodifiableList(allExtensions);
     }
 
