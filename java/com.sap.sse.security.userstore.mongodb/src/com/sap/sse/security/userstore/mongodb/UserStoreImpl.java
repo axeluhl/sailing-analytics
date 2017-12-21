@@ -186,11 +186,20 @@ public class UserStoreImpl implements UserStore {
             }
             for (final Tenant tenant : userGroupsAndTenants.getB()) {
                 tenants.put(tenant.getId(), tenant);
+                tenantsByName.put(tenant.getName(), tenant);
             }
+            final boolean defaultTenantWasCreated = (defaultTenantName != null && getTenantByName(defaultTenantName) == null);
             // identify, create and/or set default tenant
             defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
             for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, tenants)) {
                 users.put(u.getName(), u);
+                if (defaultTenantWasCreated) {
+                    // if the default tenant was just created, add all users to it
+                    defaultTenant.add(u);
+                }
+                if (u.getDefaultTenant() == null) {
+                    u.setDefaultTenant(defaultTenant);
+                }
                 addToUsersByEmail(u);
             }
             // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
@@ -646,6 +655,14 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void updateTenant(Tenant tenant) {
+        for (final Entry<String, Tenant> tenantByName : tenantsByName.entrySet()) {
+            if (tenantByName.getValue() == tenant && !tenantByName.getKey().equals(tenant.getName())) {
+                // name change
+                tenantsByName.remove(tenantByName.getKey());
+                tenantsByName.put(tenant.getName(), tenant);
+                break;
+            }
+        }
         updateUserGroup(tenant);
         logger.info("Updating tenant " + tenant.getId() + " in DB");
     }
