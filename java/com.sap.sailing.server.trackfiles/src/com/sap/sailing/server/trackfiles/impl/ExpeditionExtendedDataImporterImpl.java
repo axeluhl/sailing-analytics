@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
@@ -88,47 +87,45 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             boolean downsample) throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
-        logger.fine("Import Expedition CSV from " + filename);
-        final InputStreamReader isr;
-        if (sourceName.endsWith("gz")) {
-            logger.fine("Using gzip stream reader " + filename);
-            isr = new InputStreamReader(new GZIPInputStream(inputStream));
-        } else {
-            isr = new InputStreamReader(inputStream);
-        }
-        logger.fine("Start parsing Expedition file");
-        final AtomicLong lineNr = new AtomicLong();
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
-        try (BufferedReader buffer = new BufferedReader(isr)) {
-            String headerLine = buffer.readLine();
-            lineNr.incrementAndGet();
-            logger.fine("Validate and parse header columns");
-            final Map<String, Integer> colIndices = parseHeader(headerLine);
-            validateHeader(colIndices);
-            buffer.lines().forEach(line -> {
-                lineNr.incrementAndGet();
-                if (!line.trim().isEmpty()) {
-                    parseLine(lineNr.get(), filename, line, colIndices,
-                            (timePoint, lineContentTokens, columnsInFileFromHeader) -> {
-                                Double[] trackFixData = new Double[trackColumnCount];
-                                for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix
-                                        .entrySet()) {
-                                    Integer columnsInFileIdx = columnsInFileFromHeader
-                                            .get(columnNameToSearchForInFile.getKey());
-                                    trackFixData[columnNameToSearchForInFile
-                                            .getValue()] = columnsInFileIdx >= lineContentTokens.length ? null
-                                                    : lineContentTokens[columnsInFileIdx].trim().isEmpty() ? null
-                                                            : Double.parseDouble(lineContentTokens[columnsInFileIdx]);
-                                }
-                                importedFixes.set(true);
-                                callback.addFixes(
-                                        Collections.singleton(new DoubleVectorFixImpl(timePoint, trackFixData)),
-                                        trackIdentifier);
-                            });
+        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filename, inputStream, new ExpeditionImportFileHandler() {
+            @Override
+            protected void handleExpeditionFile(String fileName, InputStream inputStream) throws IOException, FormatNotSupportedException {
+                logger.fine("Start parsing Expedition file");
+                final AtomicLong lineNr = new AtomicLong();
+                try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+                    String headerLine = buffer.readLine();
+                    lineNr.incrementAndGet();
+                    logger.fine("Validate and parse header columns");
+                    final Map<String, Integer> colIndices = parseHeader(headerLine);
+                    validateHeader(colIndices);
+                    buffer.lines().forEach(line -> {
+                        lineNr.incrementAndGet();
+                        if (!line.trim().isEmpty()) {
+                            parseLine(lineNr.get(), filename, line, colIndices,
+                                    (timePoint, lineContentTokens, columnsInFileFromHeader) -> {
+                                        Double[] trackFixData = new Double[trackColumnCount];
+                                        for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix
+                                                .entrySet()) {
+                                            Integer columnsInFileIdx = columnsInFileFromHeader
+                                                    .get(columnNameToSearchForInFile.getKey());
+                                            trackFixData[columnNameToSearchForInFile
+                                                         .getValue()] = columnsInFileIdx >= lineContentTokens.length ? null
+                                                                 : lineContentTokens[columnsInFileIdx].trim().isEmpty() ? null
+                                                                         : Double.parseDouble(lineContentTokens[columnsInFileIdx]);
+                                        }
+                                        importedFixes.set(true);
+                                        callback.addFixes(
+                                                Collections.singleton(new DoubleVectorFixImpl(timePoint, trackFixData)),
+                                                trackIdentifier);
+                                    });
+                        }
+                    });
+                    buffer.close();
                 }
-            });
-            buffer.close();
-        }
+                
+            }
+        });
         return importedFixes.get();
     }
 
