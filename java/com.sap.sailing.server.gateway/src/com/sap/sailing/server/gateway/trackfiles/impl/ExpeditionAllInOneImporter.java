@@ -122,8 +122,8 @@ public class ExpeditionAllInOneImporter {
         final String filename = ExpeditionImportFilenameUtils.truncateFilenameExtentions(filenameWithSuffix);
         final String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         final String eventName = filenameWithDateTimeSuffix;
-        final String description = MessageFormat.format("Event imported from expedition file '{0}' on {1}", filename,
-                importTimeString);
+        final String description = MessageFormat.format("Event imported from expedition file ''{0}'' on {1}",
+                filenameWithSuffix, importTimeString);
         final String leaderboardGroupName = filenameWithDateTimeSuffix;
         final String regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
         final RegattaIdentifier regattaIdentifier = new RegattaName(filenameWithDateTimeSuffix);
