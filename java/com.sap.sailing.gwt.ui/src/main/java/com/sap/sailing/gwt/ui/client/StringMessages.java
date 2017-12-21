@@ -238,7 +238,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String setCompetitors();
     String seriesHint();
     String flightMultiplier();
-    String applyToRacelog();
+    String applyToRacelogs();
     String csvExport();
     String printView();
     String print();
@@ -255,6 +255,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String printHint();
     String blockedApplyButton();
     String multiplierInfo();
+    String noPairingListAvailable();
     String settingsForComponent(String localizedComponentName);
     String noEventsFound();
     String noEventSelected();

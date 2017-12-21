@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -48,7 +47,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         this.sailingService = sailingService;
         this.leaderboardDTO = leaderboardDTO;
         this.ensureDebugId("PairingListCreationDialog");
-        applyToRacelogButton = new Button(stringMessages.applyToRacelog());
+        applyToRacelogButton = new Button(stringMessages.applyToRacelogs());
         printPreViewButton = new Button(stringMessages.printView());
         refreshButton = new Button(stringMessages.reload());
         cSVExportAnchor = new Anchor(stringMessages.csvExport());
@@ -57,7 +56,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                 "data:text/plain;charset=utf-8," + getCSVFromPairingListTemplate(getResult().getPairingListTemplate()));
         cSVExportAnchor.getElement().setAttribute("download", "pairingListTemplate.csv");
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
-            this.disableApplyToRacelogs();
+            this.disableApplyToRacelogsAndPrintPreview();
         }
 
         sailingService.getPairingListFromTemplate(this.leaderboardDTO.getName(), this.template.getFlightMultiplier(),
@@ -104,7 +103,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         qualityHelpImage.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open("http://wiki.sapsailing.com/Pairinglist/", "", "");
+                Window.open("https://wiki.sapsailing.com/wiki/howto/eventmanagers/Pairing-Lists", "", "");
             }
         });
         formGrid.setWidget(3, 0, qualityPanel);
@@ -156,7 +155,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         getRightButtonPannel().add(printPreViewButton);
         getRightButtonPannel().add(refreshButton);
         getRightButtonPannel().add(cSVExportAnchor);
-        getRightButtonPannel().add(new HTML(stringMessages.printHint()));
         if (!applyToRacelogButton.isEnabled()) {
             Label label = new Label(stringMessages.blockedApplyButton());
             label.getElement().getStyle().setColor("red");
@@ -247,8 +245,9 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         return result.toString();
     }
 
-    private void disableApplyToRacelogs() {
+    private void disableApplyToRacelogsAndPrintPreview() {
         this.applyToRacelogButton.setEnabled(false);
+        printPreViewButton.setEnabled(false);
     }
 
 }

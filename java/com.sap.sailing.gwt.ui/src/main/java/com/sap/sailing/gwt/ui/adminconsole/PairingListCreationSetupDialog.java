@@ -36,7 +36,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     public PairingListCreationSetupDialog(StrippedLeaderboardDTO leaderboardDTO, StringMessages stringMessages,
             DialogCallback<PairingListTemplateDTO> callback) {
 
-        super(leaderboardDTO, stringMessages.pairingLists(), stringMessages,
+        super(leaderboardDTO, stringMessages.pairingList(), stringMessages,
                 new PairingListParameterValidator(stringMessages), callback);
 
         this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);

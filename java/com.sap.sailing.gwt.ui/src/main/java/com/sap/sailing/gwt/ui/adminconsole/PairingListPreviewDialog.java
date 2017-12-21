@@ -29,7 +29,7 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
     private final List<String> fleetNames;
     
     public PairingListPreviewDialog(PairingListDTO pairingListDTO, List<String> fleetNames, StringMessages stringMessages) {
-        super("Pairing List Preview", "", stringMessages.ok(), stringMessages.cancel(), null, null);
+        super(stringMessages.pairingList() + " " + stringMessages.printView(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
         this.stringMessages = stringMessages;
         this.pairingListDTO = pairingListDTO;
         this.fleetNames = fleetNames;
