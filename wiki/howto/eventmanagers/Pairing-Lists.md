@@ -10,7 +10,7 @@ It is highly important that the competitors sail as frequent as possible against
 First of all you need a regatta with at least one series with fleets and races that is not a medal series and registered competitors and boats.  
 
 Now follow these steps:  
-**Open Adminconsole > Select 'Leaderboards' on the left menu > Enter your leaderboard name in the leaderboards tab > Click on the 'Pairing List' Button inside the 'Actions' Column:**  
+**Open Adminconsole > Select 'Leaderboards' on the left menu > Enter your leaderboard name in the leaderboards tab > Click on the 'Pairing List' button inside the 'Actions' column:**  
 
 <img src="/wiki/images/pairinglist/screenshot_1.jpg"/>
 
@@ -50,14 +50,14 @@ Each value should now be in a single cell.
 
 ###Print function
 This function can be used to print your final Pairing list as paper or PDF document.  
-**(Note! We highly recommend to use Chrome because you can setup various layout settings (In Firefox that does not work!):**  
+**(Note! We highly recommend to use Chrome because you can setup various layout settings (In Firefox it does not work!):**  
 * Layout: Orientation of the page  
 * Paper size: various formats of paper sizes  
 * Margins: Space on the pages borders (It is recommended to set this to 'Default' because otherwise the printer may cut some content of the page)  
 * Background graphics: Enables a beautiful background styling)  
 
-After selecting your leaderboard in the 'Leaderboards' section hit the 'Print' button under Actions:  
-**(Note! You can only print a Pairing list if you applied one to your race logs!)**
+After selecting your leaderboard in the 'Leaderboards' section hit the 'Print' button under 'Actions':  
+**(Note! You can only print a pairing list if you applied one to your race logs!)**
 
 <img src="/wiki/images/pairinglist/screenshot_printing_1.jpg"/>
 
