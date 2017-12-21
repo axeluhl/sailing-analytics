@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
@@ -28,6 +30,8 @@ import com.sap.sse.common.settings.generic.ValueSetting;
  *            JSON Array type
  */
 public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
+    
+    private static final Logger LOG = Logger.getLogger(AbstractSettingsToJsonSerializer.class.getName());
 
     protected abstract OBJECT newOBJECT();
 
@@ -241,7 +245,13 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     }
 
     private <T> void deserializeValueSetting(Object jsonValue, ValueSetting<T> valueSetting) {
-        valueSetting.setValue(valueSetting.getValueConverter().fromJSONValue(jsonValue));
+        final ValueConverter<T> converter = valueSetting.getValueConverter();
+        try {
+            valueSetting.setValue(converter.fromJSONValue(jsonValue));
+        } catch(Exception e) {
+            LOG.log(Level.WARNING, "Error while converting JSON value \"" + jsonValue + "\" using converter \""
+                    + converter.getClass().getSimpleName() + "\"", e);
+        }
     }
 
     private <T> void deserializeListSetting(Object jsonValue, CollectionSetting<T> listSetting) {
@@ -295,7 +305,12 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
         List<T> values = new ArrayList<>();
         if(jsonArray != null) {
             for (Object value : fromJsonArray(jsonArray)) {
-                values.add(converter.fromJSONValue(value));
+                try {
+                    values.add(converter.fromJSONValue(value));
+                } catch(Exception e) {
+                    LOG.log(Level.WARNING, "Error while converting JSON value \"" + value + "\" using converter \""
+                            + converter.getClass().getSimpleName() + "\"", e);
+                }
             }
         }
         return values;
