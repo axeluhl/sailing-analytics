@@ -20,6 +20,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -58,7 +59,11 @@ public class UserStoreWithPersistenceTest {
     }
 
     private void newStore() {
-        store = new UserStoreImpl();
+        try {
+            store = new UserStoreImpl("TestDefaultTenant");
+        } catch (UserGroupManagementException | UserManagementException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -77,7 +82,7 @@ public class UserStoreWithPersistenceTest {
         store.createUser(username, email, defaultTenant);
         store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null, defaultTenant, Collections.emptySet()));
         newStore();
-        UserImpl savedUser = store.getUserByName(username);
+        User savedUser = store.getUserByName(username);
         assertEquals(username, savedUser.getName());
         assertEquals(email, savedUser.getEmail());
         assertEquals(company, savedUser.getCompany());

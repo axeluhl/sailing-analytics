@@ -249,7 +249,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("users:manage")) {
             List<UserDTO> users = new ArrayList<>();
-            for (UserImpl u : getSecurityService().getUserList()) {
+            for (User u : getSecurityService().getUserList()) {
                 UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
                 users.add(userDTO);
             }
@@ -390,7 +390,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("users:manage")) {
             List<UserDTO> users = new ArrayList<>();
-            for (UserImpl u : getSecurityService().getUserList()) {
+            for (User u : getSecurityService().getUserList()) {
                 if (filter != null && filter.isEmpty()) {
                     if (u.getName().contains(filter)) {
                         users.add(securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
@@ -457,7 +457,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("user:grant_permission,revoke_permission:" + username)) {
-            UserImpl u = getSecurityService().getUserByName(username);
+            User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
             }
@@ -544,7 +544,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserDTO verifySocialUser(CredentialDTO credentialDTO) {
-        UserImpl user = null;
+        User user = null;
         try {
             user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
         } catch (UserManagementException e) {

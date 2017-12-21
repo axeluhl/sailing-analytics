@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -29,10 +30,8 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
         this.authenticationManager = authenticationManager;
         this.userManagementService = userManagementService;
         this.mailVerifiedConfirmationUrlToken = mailVerifiedConfirmationUrlToken;
-        
         view.setPresenter(this);
-        
-        if(authenticationManager.getAuthenticationContext().isLoggedIn()) {
+        if (authenticationManager.getAuthenticationContext().isLoggedIn()) {
             view.setUser(authenticationManager.getAuthenticationContext().getCurrentUser());
         }
     }
@@ -42,7 +41,7 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     }
 
     @Override
-    public void handleSaveChangesRequest(String fullName, String company, String locale) {
+    public void handleSaveChangesRequest(String fullName, String company, String locale, String defaultTenantIdAsString) {
         authenticationManager.updateUserProperties(fullName, company, locale,
                 new AsyncCallback<Void>() {
             @Override
@@ -109,6 +108,12 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
                         view.clearPasswordFields();
                     }
                 });
+    }
+
+    @Override
+    public void fillTenants(ListBox tenantListBox) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

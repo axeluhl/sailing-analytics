@@ -36,6 +36,12 @@
               </label>
               <g:ValueListBox ui:field="localeUi" styleName="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+                <ui:text from="{i18n_sec.defaultTenant}" />
+              </label>
+              <g:ListBox ui:field="defaultTenantUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
             <div class="{local_res.css.useraccountdetails_content_submit} {res.mediaCss.small12}">
               <g:Button ui:field="saveChangesUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
                 <ui:text from="{i18n_sec.save}" />

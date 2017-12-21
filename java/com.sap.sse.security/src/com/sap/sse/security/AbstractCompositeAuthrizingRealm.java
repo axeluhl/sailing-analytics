@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -175,7 +176,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
                 ownership = getAccessControlStore().getOwnership(parts[2]);
                 acl = getAccessControlStore().getAccessControlList(parts[2]);
             }
-            final UserImpl user = getUserStore().getUserByName(username);
+            final User user = getUserStore().getUserByName(username);
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
                     user, getUserStore().getUserGroupsOfUser(user), getUserStore().getRolesFromUser(username), 
                     ownership, acl);

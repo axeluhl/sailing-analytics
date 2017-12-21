@@ -32,7 +32,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
             @Override
             protected SecurityServiceImpl createNewMaster()
                     throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, TenantManagementException, UserGroupManagementException {
-                final UserStore userStore = new UserStoreImpl(null, null); // no persistence
+                final UserStore userStore = new UserStoreImpl(null, null, "TestDefaultTenant"); // no persistence
                 final AccessControlStore accessControlStore = new AccessControlStoreImpl(null, null, userStore); // no persistence
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);
                 newMaster.clearReplicaState();

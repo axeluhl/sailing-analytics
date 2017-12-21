@@ -20,7 +20,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.SecurityUser;
@@ -196,7 +195,7 @@ public class SecurityResource extends AbstractSecurityResource {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
             try {
-                final UserImpl user = getService().getUserByName(username);
+                final User user = getService().getUserByName(username);
                 if (user == null) {
                     return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
                 } else {

@@ -39,12 +39,6 @@ import com.sap.sse.security.shared.WildcardPermission;
  *
  */
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
-    /**
-     * An instance of the bundle hosting this service may have a default tenant. If so, the default tenant's name is
-     * read from a system property whose name is provided by this constant.
-     */
-    String DEFAULT_TENANT_NAME_PROPERTY_NAME = "security.defaultTenantName";
-
     SecurityManager getSecurityManager();
 
     Ownership getOwnership(String idOfOwnedObjectAsString);
@@ -135,9 +129,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException;
 
-    Iterable<UserImpl> getUserList();
+    Iterable<User> getUserList();
 
-    UserImpl getUserByName(String username);
+    User getUserByName(String username);
 
     SecurityUser getUserByEmail(String email);
 
@@ -150,7 +144,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     String getAuthenticationUrl(Credential credential) throws UserManagementException;
 
-    UserImpl verifySocialUser(Credential credential) throws UserManagementException;
+    User verifySocialUser(Credential credential) throws UserManagementException;
 
     void logout();
 

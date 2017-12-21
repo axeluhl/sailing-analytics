@@ -31,7 +31,7 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        UserStoreImpl userStore = new UserStoreImpl();
+        UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
         AccessControlStoreImpl accessControlStore = new AccessControlStoreImpl(userStore);
         accessControlStoreRegistration = context.registerService(AccessControlStore.class.getName(),
                 accessControlStore, null);

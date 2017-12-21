@@ -30,6 +30,13 @@ import com.sap.sse.security.shared.WildcardPermission;
  *
  */
 public interface UserStore extends Named {
+    /**
+     * An instance of the bundle hosting this service may have a default tenant. If so, the default tenant's name is
+     * read from a system property whose name is provided by this constant.
+     */
+    String DEFAULT_TENANT_NAME_PROPERTY_NAME = "security.defaultTenantName";
+
+
     Iterable<UserGroup> getUserGroups();
     
     UserGroup getUserGroup(UUID groupId);
@@ -59,14 +66,14 @@ public interface UserStore extends Named {
     
     void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException;
     
-    Iterable<UserImpl> getUsers();
+    Iterable<User> getUsers();
     
     boolean hasUsers();
 
     /**
      * The user with that {@link UserImpl#getName() name} or {@code null} if no such user exists
      */
-    UserImpl getUserByName(String username);
+    User getUserByName(String username);
 
     /**
      * The user with that {@link UserImpl#getEmail() email} or {@code null} if no such user exists
@@ -77,7 +84,7 @@ public interface UserStore extends Named {
 
     UserImpl createUser(String name, String email, Tenant defaultTenant, Account... accounts) throws UserManagementException;
 
-    void updateUser(UserImpl user);
+    void updateUser(User user);
 
     Iterable<Role> getRolesFromUser(String username) throws UserManagementException;
 

@@ -8,11 +8,14 @@ import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -43,6 +46,11 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     });
     
     @UiField public TextBox emailUi;
+    
+    /**
+     * The item texts are the tenant names, the values are the tenant IDs as strings
+     */
+    @UiField public ListBox defaultTenantUi;
     @UiField public PasswordTextBox oldPasswordUi;
     @UiField public PasswordTextBox newPasswordUi;
     @UiField public PasswordTextBox newPasswordConfirmationUi;
@@ -72,12 +80,28 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         companyUi.setValue(currentUser.getCompany());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
-        
+        updateDefaultTenantSelection(currentUser.getDefaultTenant());
         String currentLocale = currentUser.getLocale();
         localeUi.setValue(currentLocale);
         localeUi.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
-        
         clearPasswordFields();
+    }
+
+    private void updateDefaultTenantSelection(Tenant defaultTenant) {
+        boolean found = false;
+        for (int i=0; i<defaultTenantUi.getItemCount(); i++) {
+            final String idOfTenantFromListBoxAsString = defaultTenantUi.getValue(i);
+            if (Util.equalsWithNull(defaultTenant.getId().toString(), idOfTenantFromListBoxAsString)) {
+                defaultTenantUi.setSelectedIndex(i);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // add the missing tenant to the list
+            defaultTenantUi.addItem(defaultTenant.getName(), defaultTenant.getId().toString());
+            defaultTenantUi.setSelectedIndex(defaultTenantUi.getItemCount()-1);
+        }
     }
 
     public void clearPasswordFields() {
@@ -92,7 +116,7 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     
     @UiHandler("saveChangesUi")
     public void onSaveChangesClicked(ClickEvent event) {
-        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue(), localeUi.getValue());
+        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue(), localeUi.getValue(), defaultTenantUi.getSelectedValue());
     }
     
     @UiHandler("changeEmailUi")

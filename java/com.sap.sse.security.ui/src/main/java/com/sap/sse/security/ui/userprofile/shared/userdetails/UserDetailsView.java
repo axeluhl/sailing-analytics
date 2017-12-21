@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
+import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -15,8 +16,9 @@ public interface UserDetailsView {
     void clearPasswordFields();
     
     public interface Presenter {
-        void handleSaveChangesRequest(String fullName, String company, String locale);
+        void handleSaveChangesRequest(String fullName, String company, String locale, String defaultTenantIdAsString);
         void handleEmailChangeRequest(String email);
         void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
+        void fillTenants(ListBox tenantListBox);
     }
 }

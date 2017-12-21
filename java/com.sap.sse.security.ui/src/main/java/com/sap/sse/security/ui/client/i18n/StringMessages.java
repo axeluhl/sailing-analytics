@@ -132,4 +132,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String couldNotAddUserToTenant(String username, String tenantname, String errorMessage);
     String couldNotRemoveUserFromTenant(String username, String tenantname, String errorMessage);
     String enterTenantName();
+    String defaultTenant();
 }

@@ -19,7 +19,10 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.TenantImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
@@ -40,7 +43,7 @@ public class AccessControlStoreTest {
     private AccessControlStore accessControlStore;
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException {
+    public void setUp() throws UnknownHostException, MongoException, TenantManagementException, UserGroupManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         DB db = service.getDB();
@@ -51,12 +54,16 @@ public class AccessControlStoreTest {
     }
 
     private void newStores() {
-        userStore = new UserStoreImpl();
+        try {
+            userStore = new UserStoreImpl("TestDefaultTenant");
+        } catch (UserGroupManagementException | UserManagementException e) {
+            throw new RuntimeException(e);
+        }
         accessControlStore = new AccessControlStoreImpl(userStore);
     }
 
     @Test
-    public void testCreateAccessControlList() {
+    public void testCreateAccessControlList() throws TenantManagementException, UserGroupManagementException {
         accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
         assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
 
@@ -65,7 +72,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testDeleteAccessControlList() {
+    public void testDeleteAccessControlList() throws TenantManagementException, UserGroupManagementException {
         accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
         accessControlStore.removeAccessControlList(testIdAsString);
         assertNull(accessControlStore.getAccessControlList(testIdAsString));
@@ -75,7 +82,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testCreateOwnership() {
+    public void testCreateOwnership() throws TenantManagementException, UserGroupManagementException {
         accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
         assertNotNull(accessControlStore.getOwnership(testIdAsString));
 
@@ -84,7 +91,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testDeleteOwnership() {
+    public void testDeleteOwnership() throws TenantManagementException, UserGroupManagementException {
         accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
         accessControlStore.removeOwnership(testIdAsString);
         assertNull(accessControlStore.getOwnership(testIdAsString));
@@ -94,7 +101,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testCreateRole() {
+    public void testCreateRole() throws TenantManagementException, UserGroupManagementException {
         userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
         assertNotNull(userStore.getRoleDefinition(testRoleId));
 
@@ -103,7 +110,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testDeleteRole() {
+    public void testDeleteRole() throws TenantManagementException, UserGroupManagementException {
         final RoleDefinition role = userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
         userStore.removeRoleDefinition(role);
         assertNull(userStore.getRoleDefinition(testRoleId));

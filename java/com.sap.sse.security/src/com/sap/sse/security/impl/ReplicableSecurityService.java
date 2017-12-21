@@ -4,9 +4,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -51,7 +51,7 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalDeleteTenant(UUID tenantId) throws TenantManagementException, UserGroupManagementException;
     
-    Void internalStoreUser(UserImpl user);
+    Void internalStoreUser(User user);
 
     Void internalSetPreference(String username, String key, String value);
 

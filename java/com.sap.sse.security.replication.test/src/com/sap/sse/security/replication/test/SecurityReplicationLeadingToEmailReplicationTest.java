@@ -51,11 +51,11 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     private class SecurityServerReplicationTestSetUp extends
             AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp {
         @Override
-        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException {
+        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException, TenantManagementException, UserGroupManagementException, UserManagementException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
-            final UserStoreImpl userStore = new UserStoreImpl();
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
             result.clearReplicaState();
@@ -63,11 +63,11 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() {
+        protected SecurityServiceImpl createNewReplica() throws TenantManagementException, UserGroupManagementException, UserManagementException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();
-            final UserStoreImpl userStore = new UserStoreImpl();
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
             return result;

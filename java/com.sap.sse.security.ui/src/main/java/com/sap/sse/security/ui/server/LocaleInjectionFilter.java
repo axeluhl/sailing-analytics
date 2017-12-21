@@ -18,7 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserImpl;
+import com.sap.sse.security.shared.User;
 
 /**
  * {@link Filter ServletFilter} implementation that sets a short living {@link Cookie} that carries a user's preferred
@@ -50,7 +50,7 @@ public class LocaleInjectionFilter implements Filter {
             if (principal instanceof String) {
                 final SecurityService service = securityServiceTracker.getService();
                 if (service != null) {
-                    final UserImpl user = service.getUserByName((String) principal);
+                    final User user = service.getUserByName((String) principal);
                     if (user != null) {
                         final Locale preferredLocale = user.getLocale();
                         if (preferredLocale != null) {

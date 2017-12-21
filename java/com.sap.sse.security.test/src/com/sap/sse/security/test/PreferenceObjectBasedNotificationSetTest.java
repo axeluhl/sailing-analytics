@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -21,6 +22,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -48,14 +50,14 @@ public class PreferenceObjectBasedNotificationSetTest {
     private static final HashSet<String> allValues = values(A, B, C);
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException {
+    public void setUp() throws UnknownHostException, MongoException, TenantManagementException, UserGroupManagementException, UserManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         DB db = service.getDB();
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        store = new UserStoreImpl();
+        store = new UserStoreImpl("TestDefaultTenant");
     }
     
     @Test
@@ -260,7 +262,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private static HashSet<UserImpl> users(UserImpl... values) {
+    private static Set<User> users(User... values) {
         return new HashSet<>(Arrays.asList(values));
     }
     
@@ -282,11 +284,11 @@ public class PreferenceObjectBasedNotificationSetTest {
         }
     }
     
-    private static class UserConsumerMock implements Consumer<UserImpl> {
-        final HashSet<UserImpl> calls = new HashSet<>();
+    private static class UserConsumerMock implements Consumer<User> {
+        final HashSet<User> calls = new HashSet<>();
 
         @Override
-        public void accept(UserImpl user) {
+        public void accept(User user) {
             if(user == null) {
                 throw new IllegalArgumentException("User is null");
             }

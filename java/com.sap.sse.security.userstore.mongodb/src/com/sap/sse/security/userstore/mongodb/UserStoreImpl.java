@@ -68,6 +68,16 @@ public class UserStoreImpl implements UserStore {
     
     private final ConcurrentHashMap<UUID, Tenant> tenants;
     private final ConcurrentHashMap<String, Tenant> tenantsByName;
+    
+    /**
+     * If a valid default tenant name was passed to the constructor, this field will contain a valid
+     * {@link Tenant} object whose name equals that of the default tenant name. It will have been used
+     * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
+     * and the users with the original role will obtain a corresponding {@link Role} with this default
+     * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
+     */
+    private final Tenant defaultTenant;
+    
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
     
@@ -81,8 +91,8 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<SecurityUser, Set<UserGroup>> userGroupsContainingUser;
     private final ConcurrentHashMap<UserGroup, Set<SecurityUser>> usersInUserGroups;
     
-    private final ConcurrentHashMap<String, UserImpl> users;
-    private final ConcurrentHashMap<String, Set<UserImpl>> usersByEmail;
+    private final ConcurrentHashMap<String, User> users;
+    private final ConcurrentHashMap<String, Set<User>> usersByEmail;
     private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
 
     private final ConcurrentHashMap<String, User> usersByAccessToken;
@@ -123,11 +133,13 @@ public class UserStoreImpl implements UserStore {
      */
     private final transient MongoObjectFactory mongoObjectFactory;
 
-    public UserStoreImpl() {
-        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
+    public UserStoreImpl(String defaultTenantName) throws TenantManagementException, UserGroupManagementException, UserManagementException {
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), defaultTenantName);
     }
     
-    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
+    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory,
+            String defaultTenantName) throws TenantManagementException, UserGroupManagementException, UserManagementException {
         tenants = new ConcurrentHashMap<>();
         tenantsByName = new ConcurrentHashMap<>();
         roleDefinitions = new ConcurrentHashMap<>();
@@ -167,11 +179,7 @@ public class UserStoreImpl implements UserStore {
             for (RoleDefinition roleDefinition : domainObjectFactory.loadAllRoleDefinitions()) {
                 roleDefinitions.put(UUID.fromString(roleDefinition.getId().toString()), roleDefinition);
             }
-            for (UserImpl u : domainObjectFactory.loadAllUsers(roleDefinitions)) {
-                users.put(u.getName(), u);
-                addToUsersByEmail(u);
-            }
-            final Pair<Iterable<UserGroup>, Iterable<Tenant>> userGroupsAndTenants = domainObjectFactory.loadAllUserGroupsAndTenants(users);
+            final Pair<Iterable<UserGroup>, Iterable<Tenant>> userGroupsAndTenants = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
             for (UserGroup group : userGroupsAndTenants.getA()) {
                 userGroups.put(group.getId(), group);
                 userGroupsByName.put(group.getName(), group);
@@ -179,6 +187,21 @@ public class UserStoreImpl implements UserStore {
             for (final Tenant tenant : userGroupsAndTenants.getB()) {
                 tenants.put(tenant.getId(), tenant);
             }
+            // identify, create and/or set default tenant
+            defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
+            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, tenants)) {
+                users.put(u.getName(), u);
+                addToUsersByEmail(u);
+            }
+            // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
+            // replace them based on the username key:
+            for (final UserGroup group : userGroups.values()) {
+                migrateProxyUsersInGroupToRealUsersByUsername(group);
+            }
+            for (final Tenant tenant : tenants.values()) {
+                migrateProxyUsersInGroupToRealUsersByUsername(tenant);
+            }
+            
             // the users loaded have dummy default tenant objects which have only their ID set;
             // replace them with the real Tenant objects loaded only now
             for (final User userWithDummyDefaultTenant : users.values()) {
@@ -212,9 +235,43 @@ public class UserStoreImpl implements UserStore {
                     }
                 }
             }
+        } else {
+            defaultTenant = null;
         }
     }
-    
+
+    public Tenant getOrCreateDefaultTenant(String defaultTenantName)
+            throws TenantManagementException, UserGroupManagementException {
+        final Tenant result;
+        if (defaultTenantName != null) {
+            final Tenant existingTenant =  getTenantByName(defaultTenantName);
+            if (existingTenant == null) {
+                logger.info("Couldn't find default tenant "+defaultTenantName+"; creating it");
+                result = createTenant(UUID.randomUUID(), defaultTenantName);
+            } else {
+                result = existingTenant;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    private void migrateProxyUsersInGroupToRealUsersByUsername(final UserGroup group) {
+        // copy user set before looping to avoid concurrent modification exception
+        final Set<SecurityUser> oldUsers = new HashSet<>();
+        Util.addAll(group.getUsers(), oldUsers);
+        for (final SecurityUser proxyUser : oldUsers) {
+            group.remove(proxyUser);
+            final User realUser = users.get(proxyUser.getName());
+            if (realUser == null) {
+                logger.warning("Couldn't find user "+proxyUser.getName()+" which was part of user group "+group.getName());
+            } else {
+                group.add(realUser);
+            }
+        }
+    }
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         preferenceConverters = new ConcurrentHashMap<>();
@@ -288,7 +345,7 @@ public class UserStoreImpl implements UserStore {
         for (RoleDefinition roleDefinition : newUserStore.getRoleDefinitions()) {
             roleDefinitions.put(roleDefinition.getId(), roleDefinition);
         }
-        for (UserImpl user : newUserStore.getUsers()) {
+        for (User user : newUserStore.getUsers()) {
             users.put(user.getName(), user);
             addToUsersByEmail(user);
             for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
@@ -370,7 +427,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public boolean setAccessToken(String username, String accessToken) {
         final boolean result;
-        final UserImpl user = getUserByName(username);
+        final User user = getUserByName(username);
         if (user == null) {
             result = false;
         } else {
@@ -418,9 +475,9 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
-    private void addToUsersByEmail(UserImpl u) {
+    private void addToUsersByEmail(User u) {
         if (u.getEmail() != null && !u.getEmail().isEmpty()) {
-            Set<UserImpl> set = usersByEmail.get(u.getEmail());
+            Set<User> set = usersByEmail.get(u.getEmail());
             if (set == null) {
                 set = new HashSet<>();
                 usersByEmail.put(u.getEmail(), set);
@@ -430,11 +487,11 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
-    private void removeFromUsersByEmail(UserImpl u) {
+    private void removeFromUsersByEmail(User u) {
         if (u != null) {
             final String email = emailForUsername.remove(u.getName());
             if (email != null) {
-                Set<UserImpl> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
+                Set<User> set = usersByEmail.get(email); // this also works if the user's e-mail has changed meanwhile
                 if (set != null) {
                     set.remove(u);
                 }
@@ -629,7 +686,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void updateUser(UserImpl user) {
+    public void updateUser(User user) {
         logger.info("Updating user "+user+" in DB");
         users.put(user.getName(), user);
         removeFromUsersByEmail(user);
@@ -640,8 +697,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<UserImpl> getUsers() {
-        return new ArrayList<UserImpl>(users.values());
+    public Iterable<User> getUsers() {
+        return new ArrayList<User>(users.values());
     }
 
     @Override
@@ -650,8 +707,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public UserImpl getUserByName(String name) {
-        final UserImpl result;
+    public User getUserByName(String name) {
+        final User result;
         if (name == null) {
             result = null;
         } else {
@@ -672,12 +729,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public UserImpl getUserByEmail(String email) {
-        final UserImpl result;
+    public User getUserByEmail(String email) {
+        final User result;
         if (email == null) {
             result = null;
         } else {
-            Set<UserImpl> set = usersByEmail.get(email);
+            Set<User> set = usersByEmail.get(email);
             if (set == null || set.isEmpty()) {
                 result = null;
             } else {
@@ -697,7 +754,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void addRoleForUser(String name, Role role) throws UserManagementException {
-        final UserImpl user = users.get(name);
+        final User user = users.get(name);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -728,7 +785,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void addPermissionForUser(String username, WildcardPermission permission) throws UserManagementException {
-        final UserImpl user = users.get(username);
+        final User user = users.get(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }

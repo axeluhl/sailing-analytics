@@ -10,7 +10,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.AccessControlStore;
@@ -27,13 +26,6 @@ public class Activator implements BundleActivator {
     private static SecurityService securityService;
     private ServiceRegistration<?> registration;
     
-    /**
-     * An instance of the bundle represented by this activator may have a default tenant. If so,
-     * the default tenant's name is provided by this field. The field is usually initialied by
-     * a system property read by the activator's {@link #start(BundleContext)} method.
-     */
-    private String defaultTenantName;
-
     /**
      * In a non-OSGi test environment, having Shiro instantiate this class with a
      * default constructor makes it difficult to get access to the user store
@@ -71,7 +63,6 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
-        defaultTenantName = System.getProperty(SecurityService.DEFAULT_TENANT_NAME_PROPERTY_NAME, ServerStartupConstants.SERVER_NAME);
         if (testUserStore != null && testAccessControlStore != null) {
             createAndRegisterSecurityService(bundleContext, testUserStore, testAccessControlStore);
         } else {
@@ -124,5 +115,4 @@ public class Activator implements BundleActivator {
         }
         Activator.context = null;
     }
-
 }

@@ -49,7 +49,7 @@ public class SecurityResourceTest {
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
-            store = new UserStoreImpl();
+            store = new UserStoreImpl("TestDefaultTenant");
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,

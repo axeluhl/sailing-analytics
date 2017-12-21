@@ -7,6 +7,7 @@ import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
 public class UsernamePasswordRealm extends AbstractCompositeAuthrizingRealm {
@@ -41,7 +42,7 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthrizingRealm {
         // read password hash and salt from db
         String saltedPassword = null;
         byte[] salt = null;
-        UserImpl user = getUserStore().getUserByName(username);
+        User user = getUserStore().getUserByName(username);
         if (user == null) {
             return null;
         }

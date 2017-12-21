@@ -36,7 +36,7 @@ public class UserPreferenceObjectAndConverterTest {
     private static final String serializedPref2 = prefConverter.toPreferenceString(pref2);
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException {
+    public void setUp() throws UnknownHostException, MongoException, TenantManagementException, UserGroupManagementException, UserManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         DB db = service.getDB();
@@ -44,7 +44,7 @@ public class UserPreferenceObjectAndConverterTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        store = new UserStoreImpl();
+        store = new UserStoreImpl("TestDefaultTenant");
     }
 
     @Test

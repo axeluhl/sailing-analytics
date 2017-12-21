@@ -129,7 +129,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private UserStore userStore;
     private AccessControlStore accessControlStore;
+    
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
+    
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
     /**
@@ -149,11 +151,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
-        this(null, userStore, accessControlStore);
+        this(/* mail service tracker */ null, userStore, accessControlStore);
     }
 
     /**
-     * @param mailProperties must not be <code>null</code>
+     * @param mailProperties
+     *            must not be <code>null</code>
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
         this(mailServiceTracker, userStore, accessControlStore, /* setAsActivatorTestSecurityService */ false);
@@ -279,7 +282,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void resetPassword(final String username, String passwordResetBaseURL) throws UserManagementException, MailException {
-        final UserImpl user = userStore.getUserByName(username);
+        final User user = userStore.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -508,7 +511,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Tenant getTenant(UUID id) {
         return userStore.getTenant(id);
     }
-
+    
     @Override
     public Tenant getTenantByName(String name) {
         return userStore.getTenantByName(name);
@@ -640,7 +643,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Iterable<UserImpl> getUserList() {
+    public Iterable<User> getUserList() {
         return userStore.getUsers();
     }
 
@@ -685,7 +688,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserImpl getUserByName(String name) {
+    public User getUserByName(String name) {
         return userStore.getUserByName(name);
     }
     
@@ -756,21 +759,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalStoreUser(UserImpl user) {
+    public Void internalStoreUser(User user) {
         userStore.updateUser(user);
         return null;
     }
 
     @Override
     public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
-        final UserImpl user = userStore.getUserByName(username);
+        final User user = userStore.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         updateSimpleUserPassword(user, newPassword);
     }
 
-    private void updateSimpleUserPassword(final UserImpl user, String newPassword) throws UserManagementException {
+    private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
         if (newPassword == null || newPassword.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
@@ -787,14 +790,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
-        final UserImpl user = userStore.getUserByName(username);
+        final User user = userStore.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         updateUserProperties(user, fullName, company, locale);
     }
 
-    private void updateUserProperties(UserImpl user, String fullName, String company, Locale locale) {
+    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
         user.setFullName(fullName);
         user.setCompany(company);
         user.setLocale(locale);
@@ -803,7 +806,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean checkPassword(String username, String password) throws UserManagementException {
-        final UserImpl user = userStore.getUserByName(username);
+        final User user = userStore.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -814,7 +817,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public boolean checkPasswordResetSecret(String username, String passwordResetSecret) throws UserManagementException {
-        final UserImpl user = userStore.getUserByName(username);
+        final User user = userStore.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -823,7 +826,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL) throws UserManagementException {
-        final UserImpl user = userStore.getUserByName(username);
+        final User user = userStore.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -845,7 +848,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean validateEmail(String username, String validationSecret) throws UserManagementException {
-        final UserImpl user = userStore.getUserByName(username);
+        final User user = userStore.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -1063,7 +1066,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserImpl verifySocialUser(Credential credential) throws UserManagementException {
+    public User verifySocialUser(Credential credential) throws UserManagementException {
         OAuthToken otoken = new OAuthToken(credential, credential.getVerifier());
         Subject subject = SecurityUtils.getSubject();
         if (!subject.isAuthenticated()) {
@@ -1091,7 +1094,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     + OAuthRealm.class.getName() + ".");
             throw new UserManagementException("An error occured while authenticating the user!");
         }
-        UserImpl user = userStore.getUserByName(username);
+        User user = userStore.getUserByName(username);
         if (user == null) {
             logger.info("Could not find user " + username);
             throw new UserManagementException("An error occured while authenticating the user!");
@@ -1101,7 +1104,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User getCurrentUser() {
-        final UserImpl result;
+        final User result;
         Subject subject = SecurityUtils.getSubject();
         if (subject == null || !subject.isAuthenticated()) {
             result = null;

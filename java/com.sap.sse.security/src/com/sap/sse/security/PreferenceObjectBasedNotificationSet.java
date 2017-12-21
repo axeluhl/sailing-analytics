@@ -19,6 +19,7 @@ import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.security.shared.User;
 
 /**
  * <p>
@@ -138,11 +139,11 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      * The given consumer will be called for every user that needs to be notified about the given object.
      * Users without a verified email address will be skipped.
      */
-    public void forUsersWithVerifiedEmailMappedTo(T object, Consumer<UserImpl> consumer) {
+    public void forUsersWithVerifiedEmailMappedTo(T object, Consumer<User> consumer) {
         for (String username : getUsersnamesToNotifyFor(object)) {
             // User objects can change silently. So we just keep the usernames and get the associated user objects on
             // the fly.
-            UserImpl user = store.getUserByName(username);
+            User user = store.getUserByName(username);
             if (user == null) {
                 logger.log(Level.SEVERE, "Could not get User for name \"" + username + "\"");
             } else {

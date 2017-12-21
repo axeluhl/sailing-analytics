@@ -35,7 +35,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
         @Override
         protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException,
                 UserManagementException, MailException, TenantManagementException, UserGroupManagementException {
-            final UserStoreImpl userStore = new UserStoreImpl();
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(userStore, accessControlStore);
             result.clearReplicaState();
@@ -43,8 +43,8 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() {
-            final UserStoreImpl userStore = new UserStoreImpl();
+        protected SecurityServiceImpl createNewReplica() throws TenantManagementException, UserGroupManagementException, UserManagementException {
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             return new SecurityServiceImpl(userStore, accessControlStore);
         }

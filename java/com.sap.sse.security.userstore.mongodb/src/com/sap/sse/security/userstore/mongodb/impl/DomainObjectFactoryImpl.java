@@ -18,7 +18,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
@@ -34,7 +33,9 @@ import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
@@ -49,20 +50,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private final DB db;
 
-    /**
-     * During the migration process from the old name-based to the new entity/ID-based role
-     * model, a default tenant can be provided to a server which is then recognized while loading
-     * user roles and object ownerships from the DB. When set to a non-null {@link Tenant}, and
-     * no {@link Tenant} can be determined from the current database content for an object ownership
-     * or a user's {@link SecurityUser#getDefaultTenant() default tenant} or for a {@link Role}'s
-     * {@link Role#getQualifiedForTenant() tenant qualification}, this attribute's value will be
-     * used.
-     */
-    private final Tenant defaultTenant;
-
-    public DomainObjectFactoryImpl(DB db, Tenant defaultTenant) {
+    public DomainObjectFactoryImpl(DB db) {
         this.db = db;
-        this.defaultTenant = defaultTenant;
     }
     
     @Override
@@ -165,14 +154,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Pair<Iterable<UserGroup>, Iterable<Tenant>> loadAllUserGroupsAndTenants(Map<String, UserImpl> usersByName) {
+    public Pair<Iterable<UserGroup>, Iterable<Tenant>> loadAllUserGroupsAndTenantsWithProxyUsers() {
         Set<UserGroup> userGroups = new HashSet<>();
         Set<Tenant> tenants = new HashSet<>();
         final Set<UUID> tenantIds = loadAllTenantIds();
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         try {
             for (DBObject o : userGroupCollection.find()) {
-                final UserGroup userGroup = loadUserGroup(o, usersByName);
+                final UserGroup userGroup = loadUserGroupWithProxyUsers(o);
                 if (tenantIds.contains(userGroup.getId())) {
                     tenants.add(new TenantImpl(userGroup));
                 } else {
@@ -186,17 +175,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new Pair<Iterable<UserGroup>, Iterable<Tenant>>(userGroups, tenants);
     }
     
-    private UserGroup loadUserGroup(DBObject groupDBObject, Map<String, UserImpl> usersByName) {
+    private UserGroup loadUserGroupWithProxyUsers(DBObject groupDBObject) {
         final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<SecurityUser> users = new HashSet<>();
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
         if (usersO != null) {
             for (Object o : usersO) {
-                final UserImpl user = usersByName.get((String) o);
-                if (user != null) {
-                    users.add(user);
-                }
+                users.add(new SecurityUserImpl((String) o, /* default tenant */ null));
             }
         }
         UserGroup result = new UserGroupImpl(id, name, users);
@@ -204,33 +190,67 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     /**
+     * @param defaultTenantForRoleMigration
+     *            when a string-based role is found on the user object it will be mapped to a {@link Role} object
+     *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
+     *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
+     *            parameter is {@code null}, role migration will throw an exception.
      * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
      *         tenant} attribute which need to be replaced by the caller once the {@link Tenant} objects have been
-     *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects
-     *         is their {@link Tenant#getId() ID} field.
+     *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects is their
+     *         {@link Tenant#getId() ID} field.
      */
     @Override
-    public Iterable<UserImpl> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById) {
-        ArrayList<UserImpl> result = new ArrayList<>();
+    public Iterable<User> loadAllUsers(
+            Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration, Map<UUID, Tenant> tenants) throws UserManagementException {
+        Map<String, User> result = new HashMap<>();
         DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
             for (DBObject o : userCollection.find()) {
-                result.add(loadUser(o, roleDefinitionsById));
+                User user = loadUserWithProxyRoleUserQualifiers(o, roleDefinitionsById, defaultTenantForRoleMigration, tenants);
+                result.put(user.getName(), user);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load users.");
             logger.log(Level.SEVERE, "loadAllUsers", e);
         }
-        return result;
+        resolveRoleUserQualifiers(result);
+        return result.values();
     }
     
+    private void resolveRoleUserQualifiers(Map<String, User> users) throws UserManagementException {
+        for (final User user : users.values()) {
+            final Set<Role> userRoles = new HashSet<>();
+            Util.addAll(user.getRoles(), userRoles); // avoid concurrent modification exception
+            for (final Role roleWithUserQualifierProxy : userRoles) {
+                final SecurityUser userQualifierProxy = roleWithUserQualifierProxy.getQualifiedForUser();
+                if (userQualifierProxy != null) {
+                    final User resolvedUserQualifier = users.get(userQualifierProxy.getName());
+                    if (resolvedUserQualifier == null) {
+                        throw new UserManagementException("Unable to resolve user named "+userQualifierProxy.getName()+
+                                " which serves as a role qualifier for role "+roleWithUserQualifierProxy.getName()+
+                                " for user "+user.getName());
+                    }
+                    user.removeRole(roleWithUserQualifierProxy);
+                    user.addRole(new RoleImpl(roleWithUserQualifierProxy.getRoleDefinition(),
+                            roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
+                }
+            }
+        }
+    }
+
     /**
-     * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
-     *         tenant} attribute which need to be replaced by the caller once the {@link Tenant} objects have been
-     *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects
-     *         is their {@link Tenant#getId() ID} field.
+     * @param defaultTenantForRoleMigration
+     *            when a string-based role is found on the user object it will be mapped to a {@link Role} object
+     *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
+     *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
+     *            parameter is {@code null}, role migration will throw an exception.
+     * @return the user objects returned have dummy objects for their {@link UserImpl#getRoles() roles'}
+     *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
+     *         user in the calling method where ultimately all users will be known.
      */
-    private UserImpl loadUser(DBObject userDBObject, Map<UUID, RoleDefinition> roleDefinitionsById) {
+    private UserImpl loadUserWithProxyRoleUserQualifiers(DBObject userDBObject,
+            Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration, Map<UUID, Tenant> tenants) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
@@ -246,7 +266,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
-                final Role role = loadRole((DBObject) rolesO, roleDefinitionsById);
+                final Role role = loadRoleWithProxyUserQualifier((DBObject) rolesO, roleDefinitionsById, tenants);
                 if (role != null) {
                     roles.add(role);
                 } else {
@@ -260,15 +280,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // otherwise a user would obtain global rights by means of migration which must not happen.
             BasicDBList roleNames = (BasicDBList) userDBObject.get("ROLES");
             if (roleNames != null) {
-                if (getDefaultTenant() == null) {
+                if (defaultTenantForRoleMigration == null) {
                     throw new IllegalStateException(
                             "For role migration a valid default tenant is required. Set system property "
-                                    + SecurityService.DEFAULT_TENANT_NAME_PROPERTY_NAME+" or provide a server name");
+                                    + UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME+" or provide a server name");
                 }
                 for (Object o : roleNames) {
                     for (final RoleDefinition roleDefinition : roleDefinitionsById.values()) {
                         if (roleDefinition.getName().equals(o.toString())) {
-                            roles.add(new RoleImpl(roleDefinition, getDefaultTenant(), /* user qualification */ null));
+                            roles.add(new RoleImpl(roleDefinition, defaultTenantForRoleMigration, /* user qualification */ null));
                             rolesMigrated = true;
                         }
                     }
@@ -282,11 +302,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         final UUID defaultTenantId = (UUID) userDBObject.get(FieldNames.User.DEFAULT_TENANT_ID.name());
-        final Tenant defaultTenantOnlyWithId = defaultTenantId == null ? null : new TenantImpl(defaultTenantId, null);
+        final Tenant defaultTenant = defaultTenantId == null ? null : tenants.get(defaultTenantId);
+        if (defaultTenantId != null && defaultTenant == null) {
+            logger.warning(
+                    "Couldn't find default tenant for user " + name + ". The default tenant was identified by ID "
+                            + defaultTenantId + " but no tenant with that ID was found");
+        }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
         UserImpl result = new UserImpl(name, email, fullName, company, locale,
-                emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenantOnlyWithId,
+                emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenant,
                 accounts.values());
         for (final Role role : roles) {
             result.addRole(role);
@@ -304,21 +329,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    /**
-     * When a server instance is migrated from the old name-based role model to the new entity / ID based role model
-     * where roles can be qualified with a tenant and/or user object that needs to act as the tenant/user owner of the
-     * object to which the role's permissions then apply, a default tenant is expected to be provided to this factory,
-     * e.g., originating from a system property read upon server start.
-     */
-    private Tenant getDefaultTenant() {
-        return defaultTenant;
-    }
-
-    private Role loadRole(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById) {
+    private Role loadRoleWithProxyUserQualifier(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById, Map<UUID, Tenant> tenants) {
         final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
-        final Tenant qualifyingTenant = rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name()) == null ? null
-                : new TenantImpl((UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name()),
-                        (String) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_NAME.name()));
+        final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
+        final Tenant qualifyingTenant = qualifyingTenantId == null ? null : tenants.get(qualifyingTenantId);
         final SecurityUser qualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
                 : new SecurityUserImpl((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()), /* default tenant */ null);
         return new RoleImpl(roleDefinition, qualifyingTenant, qualifyingUser);

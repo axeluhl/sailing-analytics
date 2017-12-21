@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
@@ -34,7 +35,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
         
-        UserImpl replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertEquals(username, replicatedErnie.getName());
         assertEquals(email, replicatedErnie.getEmail());
@@ -71,7 +72,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
         
-        UserImpl replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertEquals(username, replicatedErnie.getName());
         assertEquals(newEmail, replicatedErnie.getEmail());
@@ -95,7 +96,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
         
-        UserImpl replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertEquals(username, replicatedErnie.getName());
         assertFalse(replica.checkPassword(username, password));
@@ -119,7 +120,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
         
-        UserImpl replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertTrue(replicatedErnie.isEmailValidated());
         assertEquals(passwordResetSecret, replicatedErnie.getPasswordResetSecret());
