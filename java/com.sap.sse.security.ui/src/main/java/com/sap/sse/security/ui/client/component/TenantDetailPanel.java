@@ -33,14 +33,16 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.TenantListDataProvider.TenantListDataProviderChangeHandler;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class TenantDetailPanel extends HorizontalPanel implements Handler, ChangeHandler, KeyUpHandler, TenantListDataProviderChangeHandler {
     private final TextBox filterBox;
-    private final SingleSelectionModel<UserGroup> tenantSelectionModel;
+    private final SingleSelectionModel<Tenant> tenantSelectionModel;
     
     private final CellList<String> tenantUsersList;
     private final MultiSelectionModel<String> tenantUsersSelectionModel;
@@ -148,8 +150,9 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
         }
     }
     
-    public TenantDetailPanel(TextBox filterBox, SingleSelectionModel<UserGroup> tenantSelectionModel, 
-            TenantListDataProvider tenantListDataProvider, UserManagementServiceAsync userManagementService) {
+    public TenantDetailPanel(TextBox filterBox, SingleSelectionModel<Tenant> tenantSelectionModel, 
+            TenantListDataProvider tenantListDataProvider, UserManagementServiceAsync userManagementService,
+            StringMessages stringMessages) {
         this.filterBox = filterBox;
         filterBox.addChangeHandler(this);
         filterBox.addKeyUpHandler(this);
@@ -158,7 +161,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
         tenantListDataProvider.addChangeHandler(this);
         this.userManagementService = userManagementService;
         
-        final CaptionPanel tenantUsersPanelCaption = new CaptionPanel("Users in tenant");
+        final CaptionPanel tenantUsersPanelCaption = new CaptionPanel(stringMessages.usersInTenant());
         final VerticalPanel tenantUsersWrapper = new VerticalPanel();
         tenantUsersList = new CellList<>(new StringCell());
         SimplePager tenantUsersPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
@@ -171,7 +174,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
         tenantUsersList.setSelectionModel(tenantUsersSelectionModel);
         tenantUsersListDataProvider = new TenantUsersListDataProvider();
         tenantUsersListDataProvider.addDataDisplay(tenantUsersList);
-        final CaptionPanel allUsersPanelCaption = new CaptionPanel("All users");
+        final CaptionPanel allUsersPanelCaption = new CaptionPanel(stringMessages.allUsers());
         final VerticalPanel allUsersWrapper = new VerticalPanel();
         allUsersList = new CellList<>(new UserCell());
         SimplePager allUsersPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
@@ -196,14 +199,14 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                 UserGroup tenant = tenantSelectionModel.getSelectedObject();
                 Set<UserDTO> users = allUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
-                    Window.alert("You have to select a tenant.");
+                    Window.alert(stringMessages.youHaveToSelectATenant());
                     return;
                 }
                 for (UserDTO user : users) {
                     userManagementService.addUserToTenant(tenant.getId().toString(), user.getName(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Could not add user " + user.getName() + " to tenant.");
+                            Window.alert(stringMessages.couldNotAddUserToTenant(user.getName(), tenant.getName(), caught.getMessage()));
                         }
                         @Override
                         public void onSuccess(Void result) {
@@ -219,14 +222,14 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                 UserGroup tenant = tenantSelectionModel.getSelectedObject();
                 Set<String> users = tenantUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
-                    Window.alert("You have to select a tenant.");
+                    Window.alert(stringMessages.youHaveToSelectATenant());
                     return;
                 }
                 for (String username : users) {
                     userManagementService.removeUserFromTenant(tenant.getId().toString(), username, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Could not remove user " + username + " from tenant.");
+                            Window.alert(stringMessages.couldNotRemoveUserFromTenant(username, tenant.getName(), caught.getMessage()));
                         }
                         @Override
                         public void onSuccess(Void result) {

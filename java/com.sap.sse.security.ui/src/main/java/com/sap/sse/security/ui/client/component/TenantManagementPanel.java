@@ -18,14 +18,13 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class TenantManagementPanel extends DockPanel {
-    private SingleSelectionModel<UserGroup> tenantSingleSelectionModel;
+    private SingleSelectionModel<Tenant> tenantSingleSelectionModel;
     private TenantListDataProvider tenantListDataProvider;
     private TenantDetailPanel tenantDetailPanel;
     
@@ -44,18 +43,16 @@ public class TenantManagementPanel extends DockPanel {
         buttonPanel.add(new Button(stringMessages.createTenant(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new CreateTenantDialog(stringMessages, userManagementService, tenantListDataProvider).show();
+                new CreateTenantDialog(stringMessages, userService, userManagementService, tenantListDataProvider).show();
             }
         }));
         buttonPanel.add(new Button(stringMessages.removeTenant(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroup tenant = tenantSingleSelectionModel.getSelectedObject();
+                Tenant tenant = tenantSingleSelectionModel.getSelectedObject();
                 if (tenant == null) {
                     Window.alert(stringMessages.youHaveToSelectATenant());
-                    return;
-                }
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTenant(tenant.getName()))) {
+                } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveTenant(tenant.getName()))) {
                     userManagementService.deleteTenant(tenant.getId().toString(), new AsyncCallback<SuccessInfo>() {
                         @Override
                         public void onSuccess(SuccessInfo result) {
@@ -77,10 +74,9 @@ public class TenantManagementPanel extends DockPanel {
         final CellList<Tenant> tenantList = new CellList<Tenant>(new AbstractCell<Tenant>() {
             @Override
             public void render(Context context, Tenant value, SafeHtmlBuilder sb) {
-                if (value == null) {
-                    return;
+                if (value != null) {
+                    sb.appendEscaped(value.getName());
                 }
-                sb.appendEscaped(value.getName());
             }
         });
         tenantList.setSelectionModel(tenantSingleSelectionModel);
@@ -99,7 +95,7 @@ public class TenantManagementPanel extends DockPanel {
         TextBox userFilterBox = new TextBox();
         userFilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
         VerticalPanel userListWrapper = new VerticalPanel();
-        tenantDetailPanel = new TenantDetailPanel(userFilterBox, tenantSingleSelectionModel, tenantListDataProvider, userManagementService);
+        tenantDetailPanel = new TenantDetailPanel(userFilterBox, tenantSingleSelectionModel, tenantListDataProvider, userManagementService, stringMessages);
         userListWrapper.add(userFilterBox);
         userListWrapper.add(tenantDetailPanel);
         CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());

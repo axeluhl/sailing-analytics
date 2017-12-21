@@ -29,13 +29,13 @@ public interface UserManagementServiceAsync {
 
     void getTenants(AsyncCallback<Collection<Tenant>> callback);
 
-    void createTenant(String name, String owner, AsyncCallback<Tenant> callback);
+    void createTenant(String name, String nameOfTenantOwner, AsyncCallback<Tenant> callback);
 
     void addUserToTenant(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
 
-    void removeUserFromTenant(String idAsString, String user, AsyncCallback<Void> asyncCallback);
+    void removeUserFromTenant(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
 
-    void deleteTenant(String name, AsyncCallback<SuccessInfo> callback);
+    void deleteTenant(String tenantIdAsString, AsyncCallback<SuccessInfo> callback);
 
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
 

@@ -103,7 +103,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
 
-    void deleteOwnership(String idAsString);
+    void deleteOwnership(String idOfOwnedObjectAsString);
 
     Iterable<UserGroup> getUserGroupList();
 

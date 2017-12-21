@@ -80,28 +80,46 @@ public class PermissionChecker {
     
     /**
      * @param role
-     *            the role; its name can, e.g., be of the form "role_title:tenant". The tenant is an optional parameter.
-     *            It restricts permissions with a * as the instance id to data objects where the tenant parameter equals
-     *            the tenant owner of the data object. E.g.: event-admin:tw2016 -> {event:edit:*, regatta:edit:*} This
-     *            role would grant the user edit permission for every event and regatta where the tenant owner is
-     *            "tw2016".
+     *            the role; it may have a {@link Role#getQualifiedForTenant() tenant} and/or
+     *            {@link Role#getQualifiedForUser() user} qualification which means the role's permissions are granted
+     *            only if the {@code ownership}'s {@link Ownership#getTenantOwner() tenant} and/or
+     *            {@link Ownership#getUserOwner() user} owner match the role qualification. E.g.:
+     *            {@code event-admin:tw2016 -> {event:edit:*, regatta:edit:*}} This role would grant the user edit
+     *            permission for every event and regatta where the tenant owner is "tw2016".
      * @param permission
-     *            E.g. "regatta:edit:tw2016-dyas" (would return true if "tw2016-dyas" would have "tw2016" as the tenant
-     *            owner in case the role is qualified with the "tw2016" tenant)
+     *            the permission for which to check whether it shall be granted to the user for the object whose
+     *            {@code ownership} information is provided. E.g. "regatta:edit:tw2016-dyas" (would return true if the
+     *            object "tw2016-dyas" would have "tw2016" as the tenant owner in case the role is qualified with the
+     *            "tw2016" tenant)
      * @param ownership
      *            Ownership of the data object for which the {@code permission} is requested
      */
    private static boolean implies(Role role, WildcardPermission permission, Ownership ownership) {
-        String[] parts = role.getName().split(":");
-        // if there is no parameter or the first parameter (tenant) equals the tenant owner
-        // TODO consider user as Role parameter, comparing to ownership.getUserOwner()
-        if (parts.length < 2 || (ownership != null && ownership.getTenantOwner().getId().toString().equals(parts[1]))) {
+       final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
+       final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
+       final boolean permissionsApply;
+       boolean result;
+       if (roleIsTenantQualified || roleIsUserQualified) {
+           if (ownership == null) {
+               permissionsApply = false; // qualifications cannot be verified as no ownership info is provided; permissions do not apply
+           } else {
+               permissionsApply = (!roleIsTenantQualified || role.getQualifiedForTenant().equals(ownership.getTenantOwner())) &&
+                                  (!roleIsUserQualified || role.getQualifiedForUser().equals(ownership.getUserOwner()));
+           }
+       } else {
+           permissionsApply = true; // permissions apply without qualifications
+       }
+       if (permissionsApply) {
+           result = false; // if the role grants no permissions at all or no permission implies the one requested for, access is not granted
             for (WildcardPermission rolePermission : role.getPermissions()) {
                 if (rolePermission.implies(permission)) {
-                    return true;
+                    result = true;
+                    break;
                 }
             }
+        } else {
+            result = false;
         }
-        return false;
+        return result;
     }
 }

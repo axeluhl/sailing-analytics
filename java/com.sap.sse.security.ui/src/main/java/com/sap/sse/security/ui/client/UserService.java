@@ -241,7 +241,7 @@ public class UserService {
     public UserManagementServiceAsync getUserManagementService() {
         return userManagementService;
     }
-
+    
     /**
      * Loads the {@link #getCurrentUser() current user}'s preference with the given {@link String key} from server.
      * The preferences are passed to the {@link AsyncCallback} as serialized in {@link String}.

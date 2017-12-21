@@ -190,7 +190,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Tenant createTenant(String name, String tenantOwner) throws TenantManagementException, UnauthorizedException {
+    public Tenant createTenant(String name, String nameOfTenantOwner) throws TenantManagementException, UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:create")) {
             UUID newTenantId = UUID.randomUUID();
             Tenant tenant;
@@ -200,7 +200,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 throw new TenantManagementException(e.getMessage());
             }
             getSecurityService().createOwnership(newTenantId.toString(),
-                    getSecurityService().getCurrentUser(), getSecurityService().getTenantByName(tenantOwner), name);
+                    getSecurityService().getCurrentUser(), getSecurityService().getTenantByName(nameOfTenantOwner), name);
             return securityDTOFactory.createTenantDTOFromTenant(tenant);
         } else {
             throw new UnauthorizedException("Not permitted to create tenants");

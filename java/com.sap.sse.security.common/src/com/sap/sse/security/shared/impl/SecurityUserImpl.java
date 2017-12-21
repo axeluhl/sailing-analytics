@@ -19,6 +19,10 @@ public class SecurityUserImpl implements SecurityUser {
     private String name;
     private Set<Role> roles;
     private Set<WildcardPermission> permissions;
+    
+    /**
+     * The tenant to use as {@link Ownership#getTenantOwner() tenant owner} of new objects created by this user
+     */
     private Tenant defaultTenant;
 
     // For GWT serialization only

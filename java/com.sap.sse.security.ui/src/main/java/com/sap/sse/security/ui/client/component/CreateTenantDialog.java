@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.CreateTenantDialog.TenantData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -30,9 +31,9 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
         }
     }
     
-    public CreateTenantDialog(final StringMessages stringMessages, final UserManagementServiceAsync userManagementService, 
-            final TenantListDataProvider tenantListDataProvider) {
-        this(stringMessages, "Create a tenant", "Enter tenant name and owner", userManagementService, null, new DialogCallback<TenantData>() {
+    public CreateTenantDialog(final StringMessages stringMessages, UserService userService, 
+            final UserManagementServiceAsync userManagementService, final TenantListDataProvider tenantListDataProvider) {
+        this(stringMessages, stringMessages.createTenant(), stringMessages.enterTenantName(), userManagementService, null, new DialogCallback<TenantData>() {
             @Override
             public void ok(TenantData tenantData) {
                 userManagementService.createTenant(tenantData.name, "tenant", new AsyncCallback<Tenant>() {
@@ -90,7 +91,7 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
     @Override
     protected Widget getAdditionalWidget() {
         Grid result = new Grid(1, 2);
-        result.setWidget(0, 0, new Label("Name"));
+        result.setWidget(0, 0, new Label(getStringMessages().name()));
         result.setWidget(0, 1, getNameBox());
         return result;
     }

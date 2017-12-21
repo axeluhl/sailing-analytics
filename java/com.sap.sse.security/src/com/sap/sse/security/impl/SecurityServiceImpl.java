@@ -438,14 +438,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalDeleteAcl(String idAsString) {
-        accessControlStore.removeAccessControlList(idAsString);
+    public Void internalDeleteAcl(String idOfAccessControlledObjectAsString) {
+        accessControlStore.removeAccessControlList(idOfAccessControlledObjectAsString);
         return null;
     }
 
     @Override
-    public void createOwnership(String idAsString, SecurityUser userOwner, Tenant tenantOwner) {
-        createOwnership(idAsString, userOwner, tenantOwner, null);
+    public void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner) {
+        createOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
     }
 
     @Override
@@ -467,15 +467,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void deleteOwnership(String idAsString) {
-        if (getOwnership(idAsString) != null) {
-            apply(s->s.internalDeleteOwnership(idAsString));
+    public void deleteOwnership(String idOfOwnedObjectAsString) {
+        if (getOwnership(idOfOwnedObjectAsString) != null) {
+            apply(s->s.internalDeleteOwnership(idOfOwnedObjectAsString));
         }
     }
 
     @Override
-    public Void internalDeleteOwnership(String idAsString) {
-        accessControlStore.removeOwnership(idAsString);
+    public Void internalDeleteOwnership(String idOfOwnedObjectAsString) {
+        accessControlStore.removeOwnership(idOfOwnedObjectAsString);
         return null;
     }
 
