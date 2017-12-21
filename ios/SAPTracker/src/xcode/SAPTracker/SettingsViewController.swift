@@ -10,12 +10,14 @@ import Foundation
 
 class SettingsViewController: UITableViewController {
     
-    @IBOutlet weak var batterySavingTitleLabel: UILabel!
-    @IBOutlet weak var batterySavingDescriptionLabel: UILabel!
-    @IBOutlet weak var batterySavingSwitch: UISwitch!
-    @IBOutlet weak var deviceIdentifierTitleLabel: UILabel!
-    @IBOutlet weak var deviceIdentifierLabel: UILabel!
-    
+    @IBOutlet var batterySavingTitleLabel: UILabel!
+    @IBOutlet var batterySavingDescriptionLabel: UILabel!
+    @IBOutlet var batterySavingSwitch: UISwitch!
+    @IBOutlet var deviceIdentifierTitleLabel: UILabel!
+    @IBOutlet var deviceIdentifierLabel: UILabel!
+    @IBOutlet var trainingServerTitleLabel: UILabel!
+    @IBOutlet var trainingServerTextField: UITextField!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -51,6 +53,7 @@ class SettingsViewController: UITableViewController {
         navigationItem.title = Translation.SettingsView.Title.String
         batterySavingTitleLabel.text = Translation.SettingsView.BatterySavingTitleLabel.Text.String
         deviceIdentifierTitleLabel.text = Translation.SettingsView.DeviceIdentifierTitleLabel.Text.String
+        trainingServerTitleLabel.text = Translation.SettingsView.TrainingServerTitleLabel.Text.String
     }
     
     fileprivate func setupNavigationBar() {
@@ -80,7 +83,8 @@ class SettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0: return Translation.SettingsView.TableView.BatterySavingSection.Title.String
-        case 1: return Translation.SettingsView.TableView.OtherSettingsSection.Title.String
+        case 1: return Translation.SettingsView.TableView.DeviceSection.Title.String
+        case 2: return Translation.SettingsView.TableView.TrainingSection.Title.String
         default: return ""
         }
     }

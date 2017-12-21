@@ -40,6 +40,14 @@ class Translation: NSObject {
         }
     }
 
+    // MARK: Endpoint
+
+    struct Endpoint { private static let Key = "\(Endpoint.self)"
+        struct Training { private static let Key = "\(Endpoint.Key).\(Training.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+    }
+
     // MARK: - StartView
 
     struct StartView { private static let Key = "\(StartView.self)"
@@ -421,8 +429,13 @@ class Translation: NSObject {
                     static let String = NSLocalizedString(Key, comment: "")
                 }
             }
-            struct OtherSettingsSection { private static let Key = "\(TableView.Key).\(OtherSettingsSection.self)"
-                struct Title { private static let Key = "\(OtherSettingsSection.Key).\(Title.self)"
+            struct DeviceSection { private static let Key = "\(TableView.Key).\(DeviceSection.self)"
+                struct Title { private static let Key = "\(DeviceSection.Key).\(Title.self)"
+                    static let String = NSLocalizedString(Key, comment: "")
+                }
+            }
+            struct TrainingSection { private static let Key = "\(TableView.Key).\(TrainingSection.self)"
+                struct Title { private static let Key = "\(TrainingSection.Key).\(Title.self)"
                     static let String = NSLocalizedString(Key, comment: "")
                 }
             }
@@ -439,6 +452,11 @@ class Translation: NSObject {
         }
         struct DeviceIdentifierTitleLabel { private static let Key = "\(SettingsView.Key).\(DeviceIdentifierTitleLabel.self)"
             struct Text { private static let Key = "\(DeviceIdentifierTitleLabel.Key).\(Text.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct TrainingServerTitleLabel { private static let Key = "\(SettingsView.Key).\(TrainingServerTitleLabel.self)"
+            struct Text { private static let Key = "\(TrainingServerTitleLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }

@@ -1915,6 +1915,53 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
+                            <tableViewSection headerTitle="Training Settings Section" id="DWi-lx-SaV">
+                                <cells>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="BatterySaving" rowHeight="100" id="WvY-ig-6ig" userLabel="Device Identifier">
+                                        <rect key="frame" x="0.0" y="351.5" width="375" height="100"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="WvY-ig-6ig" id="83e-8G-6Kj">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="99.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Training Server Title Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="HEN-Xd-5AY">
+                                                    <rect key="frame" x="14" y="8" width="208" height="20"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aU0-oe-2Xq">
+                                                    <rect key="frame" x="14" y="36" width="347" height="55.5"/>
+                                                    <subviews>
+                                                        <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="0Vg-eG-ZcW">
+                                                            <rect key="frame" x="0.0" y="13" width="347" height="30"/>
+                                                            <nil key="textColor"/>
+                                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                            <textInputTraits key="textInputTraits"/>
+                                                        </textField>
+                                                    </subviews>
+                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="0Vg-eG-ZcW" secondAttribute="bottom" constant="8" id="2GE-2n-qYJ"/>
+                                                        <constraint firstItem="0Vg-eG-ZcW" firstAttribute="centerY" secondItem="aU0-oe-2Xq" secondAttribute="centerY" id="9T5-Ow-Af0"/>
+                                                        <constraint firstAttribute="trailing" secondItem="0Vg-eG-ZcW" secondAttribute="trailing" id="Ltp-Y0-BID"/>
+                                                        <constraint firstItem="0Vg-eG-ZcW" firstAttribute="top" relation="greaterThanOrEqual" secondItem="aU0-oe-2Xq" secondAttribute="top" constant="8" id="Ond-7j-xrb"/>
+                                                        <constraint firstItem="0Vg-eG-ZcW" firstAttribute="leading" secondItem="aU0-oe-2Xq" secondAttribute="leading" id="UTE-a5-FJu"/>
+                                                    </constraints>
+                                                </view>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="HEN-Xd-5AY" firstAttribute="leading" secondItem="83e-8G-6Kj" secondAttribute="leading" constant="14" id="8ep-zo-oPm"/>
+                                                <constraint firstItem="HEN-Xd-5AY" firstAttribute="top" secondItem="83e-8G-6Kj" secondAttribute="top" constant="8" id="GY7-uG-sAi"/>
+                                                <constraint firstAttribute="bottom" secondItem="aU0-oe-2Xq" secondAttribute="bottom" constant="8" id="Jox-2S-GOM"/>
+                                                <constraint firstItem="aU0-oe-2Xq" firstAttribute="leading" secondItem="83e-8G-6Kj" secondAttribute="leading" constant="14" id="fts-L9-yEl"/>
+                                                <constraint firstAttribute="trailing" secondItem="aU0-oe-2Xq" secondAttribute="trailing" constant="14" id="keR-lx-iLT"/>
+                                                <constraint firstItem="aU0-oe-2Xq" firstAttribute="top" secondItem="HEN-Xd-5AY" secondAttribute="bottom" constant="8" id="sG7-D9-6tF"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
                         </sections>
                         <connections>
                             <outlet property="delegate" destination="H1Q-9y-gn2" id="HKX-jS-iho"/>
@@ -1933,11 +1980,13 @@
                         <outlet property="batterySavingTitleLabel" destination="eRQ-p8-ydN" id="hmc-f2-gcY"/>
                         <outlet property="deviceIdentifierLabel" destination="IHy-Ae-s1D" id="jA2-FC-aWy"/>
                         <outlet property="deviceIdentifierTitleLabel" destination="GpR-bL-Ekk" id="OJD-Hl-4ZD"/>
+                        <outlet property="trainingServerTextField" destination="0Vg-eG-ZcW" id="xWj-7T-KLc"/>
+                        <outlet property="trainingServerTitleLabel" destination="HEN-Xd-5AY" id="XT1-UF-I8L"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="esa-2Y-AeG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3985" y="1355"/>
+            <point key="canvasLocation" x="3984.8000000000002" y="1354.2728635682161"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="F7s-H3-l3b">
