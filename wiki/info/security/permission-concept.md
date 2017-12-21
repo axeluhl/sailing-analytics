@@ -127,13 +127,13 @@ There currently are only a few hardcoded global roles. These shall be usable in 
 
 Roles have a definition and an instantiation. The role's definition has a UUID, defines a name and specifies the set of permissions a user will obtain by being assigned a role instantiated from this definition. A role instantiation references a role definition and "inherits" the definition's name. The instantiation can furthermore optionally constrain the role by a tenant and/or user qualifier. In this case the permissions the role definition specifies will be granted to a user in that role only if requested for an object whose tenant/user owner matches that of the tenant/user qualifier provided by the role instantiation, respectively.
 
-With this it is possible, for example, to have an ``admin`` role definition with permission "*". An instantiation of this role can then optionally restrict the tenant that must be an object's tenant owner for the role's permissions to be applied to permission checks for that object. If a user has role ``admin:server-A`` and requests permission for an object, the "*" permission from the ``admin`` role definition is granted if and only if the object's tenant owner is ``server-A``.
+With this it is possible, for example, to have an ``admin`` role definition with permission "\*". An instantiation of this role can then optionally restrict the tenant that must be an object's tenant owner for the role's permissions to be applied to permission checks for that object. If a user has role ``admin:server-A`` and requests permission for an object, the "\*" permission from the ``admin`` role definition is granted if and only if the object's tenant owner is ``server-A``.
 
 Similarly, if a role instantiation provides a user qualifier, the object for which a permission is checked must be owned by the user specified by the qualifier in order for the role's permissions to be granted to a user with this role.
 
 If both, a user and tenant parameter are declared for a role instantiation then both have to match in order for the role's permissions to be implied.
 
-Roles with a tenant qualifier are displayed in the form "<rolename>:<tenantname>". Roles with tenant and user qualifier are displayed as "<rolename>:<tenantname>:<username>", and role instantiations with only a user qualifier are shown as "<rolename>::<username>". Examples:
+Roles with a tenant qualifier are displayed in the form "\<rolename\>:\<tenantname\>". Roles with tenant and user qualifier are displayed as "\<rolename\>:\<tenantname\>:\<username\>", and role instantiations with only a user qualifier are shown as "\<rolename\>::\<username\>". Examples:
 
 1. Tenant Owner "owner:tw2018" (Can delete the tenant, in addition to everything the tenant admin can do)
 2. Tenant Admin "admin:kw2018" (Has (almost) every permission in his tenant)
