@@ -450,15 +450,15 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
         final FormPanel formPanel = new FormPanel();
         final Button uploadButton = new Button(stringMessages.upload());
-        uploadButton.addClickHandler( event -> {
-        	uploadButton.setEnabled(false);
-        	formPanel.submit();}
-        );
+        uploadButton.addClickHandler(event -> {
+            uploadButton.setEnabled(false);
+            formPanel.submit();
+        });
         formPanel.setMethod(FormPanel.METHOD_POST);
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT);
         formPanel.addSubmitCompleteHandler(event -> {
-        	uploadButton.setEnabled(true);        	   
+            uploadButton.setEnabled(true);
             final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
             if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
@@ -487,7 +487,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         boatClassPanel.add(boatClassInput);
         boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
         contentPanel.add(uploadButton);
-        final Runnable validation = () -> {        	
+        final Runnable validation = () -> {
             final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
             final boolean fileValid = filename != null && !filename.trim().isEmpty();
             final boolean boatClassValid = boatClass != null && !boatClass.trim().isEmpty();
