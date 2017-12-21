@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -508,7 +506,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public void removeRace(IEvent tractracEvent, IRace tractracRace, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public RaceDefinition removeRace(IEvent tractracEvent, IRace tractracRace, Regatta regattaToLoadRaceInto, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceDefinition raceDefinition;
         synchronized (raceCache) {
             raceDefinition = getExistingRaceDefinitionForRace(tractracRace.getId());
@@ -518,45 +516,33 @@ public class DomainFactoryImpl implements DomainFactory {
             }
         }
         if (raceDefinition != null) {
-            // FIXME this only removes the race from its default regatta, not any explicit regatta
-            Pair<String, BoatClass> defaultRegattaNameAndBoatClass = getDefaultRegattaNameAndBoatClass(tractracRace);
-            Pair<String, String> key = new Pair<String, String>(defaultRegattaNameAndBoatClass.getA(),
-                    defaultRegattaNameAndBoatClass.getB() == null ? null :
-                        defaultRegattaNameAndBoatClass.getB().getName());
             synchronized (regattaCache) {
-                Regatta regatta = regattaCache.get(key);
+                final Regatta regatta;
+                final Pair<String, String> key;
+                if (regattaToLoadRaceInto != null) {
+                    regatta = regattaToLoadRaceInto;
+                    key = new Pair<>(regatta.getName(), regatta.getBoatClass().getName());
+                } else {
+                    Pair<String, BoatClass> defaultRegattaNameAndBoatClass = getDefaultRegattaNameAndBoatClass(tractracRace);
+                    key = new Pair<String, String>(defaultRegattaNameAndBoatClass.getA(),
+                            defaultRegattaNameAndBoatClass.getB() == null ? null :
+                                defaultRegattaNameAndBoatClass.getB().getName());
+                    regatta = regattaCache.get(key);
+                }
                 if (regatta != null) {
                     // The following fixes bug 202: when tracking of multiple races of the same event has been started, this may not
                     // remove any race; however, the event may already have been created by another tracker whose race hasn't
                     // arrived yet and therefore the races list is still empty; therefore, only remove the event if its
                     // race list became empty by the removal performed here.
-                    int oldSize = Util.size(regatta.getAllRaces());
-                    regatta.removeRace(raceDefinition);
-                    if (oldSize > 0 && Util.size(regatta.getAllRaces()) == 0) {
+                    if (Util.contains(regatta.getAllRaces(), raceDefinition) && Util.size(regatta.getAllRaces()) == 1) {
                         logger.info("Removing regatta "+regatta.getName()+" ("+regatta.hashCode()+") from TracTrac DomainFactoryImpl");
                         regattaCache.remove(key);
                         weakDefaultRegattaCache.remove(tractracRace);
                     }
-                    TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(regatta);
-                    if (trackedRegatta != null) {
-                        // see above; only remove tracked regatta if it *became* empty because of the tracked race removal here
-                        final int oldSizeOfTrackedRaces;
-                        final int newSizeOfTrackedRaces;
-                        trackedRegatta.lockTrackedRacesForWrite();
-                        try {
-                            oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
-                            trackedRegatta.removeTrackedRace(raceDefinition);
-                            newSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
-                        } finally {
-                            trackedRegatta.unlockTrackedRacesAfterWrite();
-                        }
-                        if (oldSizeOfTrackedRaces > 0 && newSizeOfTrackedRaces == 0) {
-                            trackedRegattaRegistry.removeTrackedRegatta(regatta);
-                        }
-                    }
                 }
             }
         }
+        return raceDefinition;
     }
 
     @Override
@@ -879,17 +865,22 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds) throws MalformedURLException,
-            FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException {
-        return new TracTracRaceTrackerImpl(this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
+    public TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            LeaderboardGroupResolver leaderboardGroupResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+        return new TracTracRaceTrackerImpl(this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
+                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
     }
 
     @Override
-    public RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
-            SubscriberInitializationException {
+    public RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            LeaderboardGroupResolver leaderboardGroupResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            throws URISyntaxException, CreateModelException, SubscriberInitializationException, IOException,
+            InterruptedException {
         return new TracTracRaceTrackerImpl(regatta, this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
     }

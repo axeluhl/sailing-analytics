@@ -1043,12 +1043,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     legTypeCache.put(trackedLeg, trackedLegType);
                                 }
                                 if (legType == trackedLegType) {
-                                    Duration timeSpentOnDownwind = trackedLegOfCompetitor.getTime(timePoint);
-                                    if (timeSpentOnDownwind != null) {
+                                    Duration timeSpentInLegOfType = trackedLegOfCompetitor.getTime(timePoint);
+                                    if (timeSpentInLegOfType != null) {
                                         if (result == null) {
-                                            result = timeSpentOnDownwind;
+                                            result = timeSpentInLegOfType;
                                         } else {
-                                            result = result.plus(timeSpentOnDownwind);
+                                            result = result.plus(timeSpentInLegOfType);
                                         }
                                     } else {
                                         // Although the competitor has started the leg, no value was produced. This
