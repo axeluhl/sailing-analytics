@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="pqQ-jd-OwW">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="pqQ-jd-OwW">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -19,7 +19,7 @@
                         <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
@@ -269,7 +269,7 @@
             <objects>
                 <navigationController storyboardIdentifier="rootViewController" id="pqQ-jd-OwW" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="x3H-m5-yJB">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -289,7 +289,7 @@
                         <viewControllerLayoutGuide type="bottom" id="1Le-Y7-h2R"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="pUL-en-Wee">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ttp-CB-QaR">
@@ -333,7 +333,7 @@
                         <viewControllerLayoutGuide type="bottom" id="RbV-Vw-aEx"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="UH5-OA-vu5" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="smB-d7-XaS" userLabel="Regatta View">
@@ -480,7 +480,7 @@
             <objects>
                 <navigationController id="Pn3-0n-ZdQ" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="McN-2f-sK6">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -500,7 +500,7 @@
                         <viewControllerLayoutGuide type="bottom" id="m52-aU-l4F"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="O79-QA-nvv" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Iwv-h7-0ga">
@@ -521,19 +521,13 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="500" text="Boatclass Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="96C-Rt-oi7">
-                                <rect key="frame" x="255" y="289.5" width="100" height="24"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="tHt-hJ-M34"/>
-                                </constraints>
+                                <rect key="frame" x="191.5" y="290" width="163.5" height="24"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SQb-uc-DaV">
-                                <rect key="frame" x="20" y="193.5" width="227" height="216"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="INg-vK-nnm"/>
-                                </constraints>
+                                <rect key="frame" x="20" y="194" width="163.5" height="216"/>
                                 <connections>
                                     <outlet property="dataSource" destination="RRc-Lh-2o4" id="t6o-Je-VU4"/>
                                     <outlet property="delegate" destination="RRc-Lh-2o4" id="Q8I-TO-XUL"/>
@@ -546,6 +540,7 @@
                             <constraint firstItem="SQb-uc-DaV" firstAttribute="leading" secondItem="O79-QA-nvv" secondAttribute="leading" constant="20" id="GEi-50-6pi"/>
                             <constraint firstItem="m52-aU-l4F" firstAttribute="top" secondItem="Iwv-h7-0ga" secondAttribute="bottom" constant="20" id="KJB-hx-Utl"/>
                             <constraint firstItem="96C-Rt-oi7" firstAttribute="centerY" secondItem="SQb-uc-DaV" secondAttribute="centerY" id="Y3L-3W-KYp"/>
+                            <constraint firstItem="96C-Rt-oi7" firstAttribute="width" secondItem="SQb-uc-DaV" secondAttribute="width" id="YBI-Ld-UwT"/>
                             <constraint firstAttribute="trailing" secondItem="96C-Rt-oi7" secondAttribute="trailing" constant="20" id="a6I-Pi-deL"/>
                             <constraint firstItem="Iwv-h7-0ga" firstAttribute="leading" secondItem="O79-QA-nvv" secondAttribute="leading" constant="20" id="euz-fk-d4f"/>
                             <constraint firstItem="96C-Rt-oi7" firstAttribute="leading" secondItem="SQb-uc-DaV" secondAttribute="trailing" constant="8" id="hRL-P1-vaD"/>
@@ -575,7 +570,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kAU-Am-SqM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1977" y="-1847"/>
+            <point key="canvasLocation" x="1976.8" y="-1847.2263868065968"/>
         </scene>
         <!--Training Competitor View Controller-->
         <scene sceneID="Zlq-oI-kok">
@@ -586,7 +581,7 @@
                         <viewControllerLayoutGuide type="bottom" id="21h-Jd-SOp"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="N8Q-Eb-vTK" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cOY-Xs-ep7" userLabel="Competitor Container View">
@@ -668,7 +663,7 @@
                         <viewControllerLayoutGuide type="bottom" id="d4m-uX-YSN"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="RfE-jH-U2k" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="92" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="bav-TA-AP5">
@@ -814,7 +809,7 @@
                         <viewControllerLayoutGuide type="bottom" id="mxr-xl-HDh"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="wCk-xq-nRG" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0va-pF-eqc">
@@ -897,7 +892,7 @@
                         <viewControllerLayoutGuide type="bottom" id="cNo-41-lUw"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Ezh-Sq-hsb" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kAc-lC-coZ">
@@ -1204,7 +1199,7 @@
             <objects>
                 <navigationController id="I54-NN-JAf" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="Qb2-vc-6Pl">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1236,7 +1231,7 @@
                         <viewControllerLayoutGuide type="bottom" id="nE0-bK-d8x"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="6kF-Wb-Hv2">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="f2X-Kj-Run" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
@@ -1361,7 +1356,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Fixes Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Ujw-jg-ilY">
-                                                    <rect key="frame" x="20" y="16.5" width="160.5" height="20"/>
+                                                    <rect key="frame" x="20" y="16.5" width="160" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -1505,7 +1500,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="IeZ-JM-OWw">
-                                <rect key="frame" x="20" y="8" width="79.5" height="20"/>
+                                <rect key="frame" x="20" y="8" width="79" height="20"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1549,7 +1544,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V9h-qX-rao">
-                                <rect key="frame" x="20" y="8" width="79.5" height="20"/>
+                                <rect key="frame" x="20" y="8" width="79" height="20"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1592,7 +1587,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Tn-6d-NlO">
-                                <rect key="frame" x="20" y="8" width="79.5" height="20"/>
+                                <rect key="frame" x="20" y="8" width="79" height="20"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1631,7 +1626,7 @@
                         <viewControllerLayoutGuide type="bottom" id="UkO-Wl-zJn"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="wZ4-L7-UtM">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nUu-0d-8tk" userLabel="Top View">
@@ -1810,7 +1805,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Pqy-JO-DGY"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="2bf-uW-10v">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="4xj-vs-c49">
@@ -1841,7 +1836,7 @@
             <objects>
                 <tableViewController id="H1Q-9y-gn2" customClass="SettingsViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="dYc-OA-C1C">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <sections>
@@ -1861,13 +1856,13 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Battery Saving Description Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uqK-uV-1FP">
-                                                    <rect key="frame" x="14" y="36" width="289" height="55"/>
+                                                    <rect key="frame" x="14" y="36" width="281" height="55"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WvA-dL-zOH">
-                                                    <rect key="frame" x="311" y="34" width="51" height="31"/>
+                                                    <rect key="frame" x="303" y="34" width="51" height="31"/>
                                                     <connections>
                                                         <action selector="batterySavingChanged:" destination="H1Q-9y-gn2" eventType="valueChanged" id="6fN-hp-Ux5"/>
                                                     </connections>
@@ -1950,7 +1945,7 @@
                 <navigationController storyboardIdentifier="SettingsNavigationController" automaticallyAdjustsScrollViewInsets="NO" id="4Fb-v3-mkB" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="opw-zV-Qak">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -1968,7 +1963,7 @@
                 <navigationController storyboardIdentifier="AboutNavigationController" automaticallyAdjustsScrollViewInsets="NO" id="dfN-Ch-vpm" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="IvG-lp-FEV">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -2036,7 +2031,7 @@
                 <navigationController storyboardIdentifier="LeaderboardNavigationController" automaticallyAdjustsScrollViewInsets="NO" id="Njg-ZD-Ycd" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="bNh-Bg-ROM">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -2057,7 +2052,7 @@
                         <viewControllerLayoutGuide type="bottom" id="U4p-oA-QT1"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="ybT-0Q-H2L" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Cbe-i0-Bhg" userLabel="Mark Container View">
@@ -2403,9 +2398,9 @@
         <image name="training" width="328" height="150"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="GZT-j1-DBW"/>
         <segue reference="rUr-Ta-FZ1"/>
-        <segue reference="fgS-yf-c3u"/>
+        <segue reference="GZT-j1-DBW"/>
         <segue reference="Bsw-eS-BQx"/>
+        <segue reference="fgS-yf-c3u"/>
     </inferredMetricsTieBreakers>
 </document>
