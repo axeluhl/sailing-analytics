@@ -96,7 +96,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
 
         infoPanel.add(infoScrollPanel);
 
-        Grid formGrid = new Grid(4, 2);
+        Grid formGrid = new Grid(Util.size(selectedSeriesCheckboxes)+2, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label(stringMessages.setCompetitors()));
