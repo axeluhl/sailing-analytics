@@ -159,24 +159,17 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      */
     protected int[][] createPairingListTemplate(int flightCount, int groupCount, int competitorCount) {
         int[][] bestPLT = new int[flightCount * groupCount][competitorCount / groupCount];
-        double bestDev = Double.POSITIVE_INFINITY;
-        int equals = 0;
-        // TODO how to calc equals
-        if (flightCount >= 10) {
-            equals = 3;
-        } else {
-            equals = -1;
-        }
+        double bestDev = Double.POSITIVE_INFINITY;      
         int[][] allSeeds = new int[iterations][flightCount];
         for (int i = 0; i < iterations; i++) {
             allSeeds[i] = this.generateSeeds(flightCount, competitorCount, flightCount);
         }
         allSeeds = radixSort(allSeeds, competitorCount);
-        ArrayList<int[][]> parts = this.divideSeeds(equals, allSeeds);
+        ArrayList<int[][]> parts = this.divideSeeds(allSeeds);
         ArrayList<Future<int[][]>> futures = new ArrayList<>();
         for (int[][] is : parts) {
             Future<int[][]> future = executorService
-                    .submit((new CreateFilghtsForListOfSeeds(flightCount, groupCount, competitorCount, is, 0)));
+                    .submit((new CreateFilghtsForListOfSeeds(flightCount, groupCount, competitorCount, is)));
             futures.add(future);
         }
         for (Future<int[][]> f : futures) {
@@ -211,30 +204,40 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @param allSeeds array with seed combinations, which should be divided
      * @return an Arraylist, that contains parts of allSeeds.
      */
-    private ArrayList<int[][]> divideSeeds(int equalSeeds, int[][] allSeeds) {
-        int cut = 0;
+    private ArrayList<int[][]> divideSeeds(int[][] allSeeds) {
+//        int cut = 0;
         ArrayList<int[][]> output = new ArrayList<>();
-        if (equalSeeds > -1) {
-            for (int z = 1; z < allSeeds.length; z++) {
-                int[] temp1 = Arrays.copyOfRange(allSeeds[z - 1], 0, equalSeeds);
-                int[] temp2 = Arrays.copyOfRange(allSeeds[z], 0, equalSeeds);
-                if (Arrays.equals(temp1, temp2)) {
-                    continue;
-                } else {
-                    output.add(Arrays.copyOfRange(allSeeds, cut, z + 1));
-                    cut = z + 1;
-                }
+//        if (equalSeeds > -1) {
+//            for (int z = 1; z < allSeeds.length; z++) {
+//                int[] temp1 = Arrays.copyOfRange(allSeeds[z - 1], 0, equalSeeds);
+//                int[] temp2 = Arrays.copyOfRange(allSeeds[z], 0, equalSeeds);
+//                if (Arrays.equals(temp1, temp2)) {
+//                    continue;
+//                } else {
+//                    output.add(Arrays.copyOfRange(allSeeds, cut, z + 1));
+//                    cut = z + 1;
+//                }
+//            }
+//            return output;
+//        } else {
+//            int step = allSeeds.length / 4000;
+//            for (int x = 0; x < allSeeds.length; x += step) {
+//                output.add(Arrays.copyOfRange(allSeeds, cut, x + 1));
+//                cut = x + 1;
+//            }
+//            output.add(Arrays.copyOfRange(allSeeds, cut, allSeeds.length));
+//            return output;
+//        }
+        int parts=ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
+        int partsize= allSeeds.length/parts;
+        for(int x=0;x<allSeeds.length;x+=partsize){
+            if(x+partsize<allSeeds.length){
+            output.add(Arrays.copyOfRange(allSeeds, x, x+partsize));
+            }else{
+                output.add(Arrays.copyOfRange(allSeeds, x, allSeeds.length));
             }
-            return output;
-        } else {
-            int step = allSeeds.length / 4000;
-            for (int x = 0; x < allSeeds.length; x += step) {
-                output.add(Arrays.copyOfRange(allSeeds, cut, x + 1));
-                cut = x + 1;
-            }
-            output.add(Arrays.copyOfRange(allSeeds, cut, allSeeds.length));
-            return output;
         }
+        return output;
     }
     
     /**
@@ -299,7 +302,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     class CreateFilghtsForListOfSeeds implements Callable<int[][]> {
-        int flights, groups, competitors, equals;
+        int flights, groups, competitors;
         int[][] seeds;
 
         /**
@@ -319,17 +322,16 @@ public class PairingListTemplateImpl implements PairingListTemplate {
          * @param equals
          *            number of equal seeds at the beginning of all seed combinations
          */
-        CreateFilghtsForListOfSeeds(int flights, int groups, int competitors, int[][] seeds, int equals) {
+        CreateFilghtsForListOfSeeds(int flights, int groups, int competitors, int[][] seeds) {
             this.flights = flights;
             this.groups = groups;
             this.competitors = competitors;
             this.seeds = seeds;
-            this.equals = equals;
         }
 
         @Override
         public int[][] call() {
-            return createSinglePariringListTemplate(flights, groups, competitors, seeds, equals);
+            return createSinglePariringListTemplate(flights, groups, competitors, seeds);
         }
     }
     
@@ -447,7 +449,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return best complete pairing list out of given iterations
      */
     private int[][] createSinglePariringListTemplate(int flightCount, int groupCount, int competitorCount,
-            int[][] seeds, int i) {
+            int[][] seeds) {
         int[][] bestPLT = new int[flightCount * groupCount][competitorCount / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
         int[][] bestAssociations = new int[competitorCount][competitorCount];
@@ -462,11 +464,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         bestDev = calcStandardDev(bestAssociations);
         for (int z = seeds.length - 2; z >= 0; z--) {
             int[][] currentPLT = new int[flightCount * groupCount][competitorCount / groupCount];
-            for (int j = 0; j < i; j++) {
-                currentPLT[j] = bestPLT[j];
-            }
             int[][] currentAssociations = new int[competitorCount][competitorCount];
-            for (int x = i; x < seeds[0].length; x++) {
+            for (int x = 0; x < seeds[0].length; x++) {
                 int[][] flightColumn = this.createFlight(groupCount, competitorCount, currentAssociations, seeds[z][x]);
                 for (int y = 0; y < flightColumn.length; y++) {
                     System.arraycopy(flightColumn[y], 0, currentPLT[x * groupCount + y], 0, flightColumn[0].length);
