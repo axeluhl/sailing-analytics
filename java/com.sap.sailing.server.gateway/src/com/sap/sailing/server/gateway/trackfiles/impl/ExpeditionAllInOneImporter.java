@@ -64,6 +64,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ExpeditionAllInOneImporter {
     private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImporter.class.getName());
 
+    private static final String ERROR_MESSAGE_GPS_DATA_IMPORT_FAILED = "Failed to import GPS data!";
+    private static final String ERROR_MESSAGE_SENSOR_DATA_IMPORT_FAILED = "Failed to import sensor data!";
+
     private final RacingEventService service;
     private final RaceLogTrackingAdapter adapter;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
@@ -174,9 +177,7 @@ public class ExpeditionAllInOneImporter {
         try {
             new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport,
                     GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
-            if (!jsonHolderForGpsFixImport.getErrorList().isEmpty()) {
-                throw new AllinOneImportException((String) null, jsonHolderForGpsFixImport.getErrorList());
-            }
+            this.ensureSuccessfulImport(jsonHolderForGpsFixImport, ERROR_MESSAGE_GPS_DATA_IMPORT_FAILED);
         } catch (IOException e1) {
             errors.addAll(jsonHolderForGpsFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
@@ -190,9 +191,7 @@ public class ExpeditionAllInOneImporter {
         try {
             new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport,
                     importerNamesAndFilesForSensorFixImport);
-            if (!jsonHolderForSensorFixImport.getErrorList().isEmpty()) {
-                throw new AllinOneImportException((String) null, jsonHolderForSensorFixImport.getErrorList());
-            }
+            this.ensureSuccessfulImport(jsonHolderForSensorFixImport, ERROR_MESSAGE_SENSOR_DATA_IMPORT_FAILED);
         } catch (IOException e1) {
             errors.addAll(jsonHolderForSensorFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
@@ -287,6 +286,12 @@ public class ExpeditionAllInOneImporter {
                     sensorFixImporterType, errors);
         } catch (Exception e) {
             throw new AllinOneImportException(e, errors);
+        }
+    }
+
+    private void ensureSuccessfulImport(ImportResultDTO result, String errorMessage) throws AllinOneImportException {
+        if (!result.getErrorList().isEmpty()) {
+            throw new AllinOneImportException(errorMessage, result.getErrorList());
         }
     }
 }
