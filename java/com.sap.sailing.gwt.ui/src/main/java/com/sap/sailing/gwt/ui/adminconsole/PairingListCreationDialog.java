@@ -221,6 +221,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                                 @Override
                                 public void onSuccess(PairingListTemplateDTO result) {
                                     busyDialog.hide();
+                                    result.setSelectedFlightNames(template.getSelectedFlightNames());
                                     PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO,
                                             stringMessages, result, sailingService);
                                     dialog.show();
