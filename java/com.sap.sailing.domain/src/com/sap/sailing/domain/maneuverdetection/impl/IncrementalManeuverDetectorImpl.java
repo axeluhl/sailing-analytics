@@ -107,6 +107,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     @Override
     public void clearState() {
         lastManeuverDetectionResult = null;
+        incrementalApproximatedFixesCalculator.clearState();
     }
 
     @Override
@@ -381,7 +382,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
         return null;
     }
-    
+
     /**
      * Represents a result of already performed maneuver analysis. The result is used by
      * {@link IncrementalManeuverDetectorImpl} to determine maneuvers incrementally.
