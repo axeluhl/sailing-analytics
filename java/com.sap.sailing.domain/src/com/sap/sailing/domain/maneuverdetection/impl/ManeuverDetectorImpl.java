@@ -124,7 +124,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * 
      * @return {@code null} when there are no appropriate fixes contained within the analyzed track
      */
-    protected TrackTimeInfo getTrackTimeInfo() {
+    public TrackTimeInfo getTrackTimeInfo() {
         NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
         TimePoint earliestTrackRecord = null;
         TimePoint latestRawFixTimePoint = null;
