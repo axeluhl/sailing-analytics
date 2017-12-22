@@ -115,7 +115,7 @@ public class WildcardPermission implements Serializable {
     |             C O N S T A N T S             |
     ============================================*/
     public static final String WILDCARD_TOKEN = "*";
-    protected static final String PART_DIVIDER_TOKEN = ":";
+    public static final String PART_DIVIDER_TOKEN = ":";
     protected static final String SUBPART_DIVIDER_TOKEN = ",";
     protected static final boolean DEFAULT_CASE_SENSITIVE = false;
 

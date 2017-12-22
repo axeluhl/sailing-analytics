@@ -36,6 +36,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.IconResources;
@@ -178,20 +179,26 @@ public class UserDetailsView extends FlowPanel {
                 stringMessages.enterRoleName());
         result.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                final ArrayList<UUID> newRoleIds = new ArrayList<>();
+            public void onValueChange(final ValueChangeEvent<Iterable<String>> event) {
+                final ArrayList<UUID> newRoleDefinitionIds = new ArrayList<>();
                 final UserDTO selectedUser = UserDetailsView.this.user;
                 for (String roleName : event.getValue()) {
-                    RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(roleName);
+                    final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = RoleImpl
+                            .getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(roleName);
+                    RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA());
                     if (roleDefinition != null) {
-                        newRoleIds.add(roleDefinition.getId());
+                        newRoleDefinitionIds.add(roleDefinition.getId());
                     }    
                 }
                 userManagementService.setRolesForUser(selectedUser.getName(),
-                        // TODO need to allow for tenant / user qualifiying role parameters
-                        Util.map(newRoleIds, roleDefinitionId->new Triple<>(
-                                roleDefinitionId, /* qualifying tenant ID */ null, /* qualifying user name */ null)),
-                                new MarkedAsyncCallback<SuccessInfo>(
+                        Util.map(event.getValue(), roleName->{
+                            final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = RoleImpl
+                                    .getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(roleName);
+                            RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA());
+                            return new Triple<>(
+                                roleDefinition.getId(), /* qualifying tenant name */ roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getB(),
+                                /* qualifying user name */ roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getC());
+                        }), new MarkedAsyncCallback<SuccessInfo>(
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {

@@ -2,11 +2,19 @@ package com.sap.sse.security.shared;
 
 import java.util.Set;
 
+import com.sap.sse.common.Util.Triple;
+
 public class RoleImpl implements Role {
+    private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
     private static final long serialVersionUID = 1243342091492822614L;
     private RoleDefinition roleDefinition;
     private Tenant qualifiedForTenant;
     private SecurityUser qualifiedForUser;
+    
+    public static Triple<String, String, String> getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(String roleAsString) {
+        final String[] split = roleAsString.split(QUALIFIER_SEPARATOR);
+        return new Triple<>(split[0], split.length<2?null:split[1], split.length<3?null:split[2]);
+    }
     
     @Deprecated
     RoleImpl() {} // for GWT serialization only
@@ -51,9 +59,9 @@ public class RoleImpl implements Role {
     
     @Override
     public String toString() {
-        return getName()+((getQualifiedForTenant()!=null || getQualifiedForUser()!= null)?":":"")+
+        return getName()+((getQualifiedForTenant()!=null || getQualifiedForUser()!= null)?QUALIFIER_SEPARATOR:"")+
                 (getQualifiedForTenant()!=null?getQualifiedForTenant().getName():"")+
-                        (getQualifiedForUser()!=null?(":"+getQualifiedForUser().getName()):"");
+                        (getQualifiedForUser()!=null?(QUALIFIER_SEPARATOR+getQualifiedForUser().getName()):"");
     }
 
     @Override

@@ -67,7 +67,7 @@ public interface UserManagementServiceAsync {
 
     void getRoleDefinitions(AsyncCallback<ArrayList<RoleDefinition>> callback);
 
-    void setRolesForUser(String username, Iterable<Triple<UUID, UUID, String>> roleDefinitionIdAndTenantQualifierIdAndUsernames, AsyncCallback<SuccessInfo> callback);
+    void setRolesForUser(String username, Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantNameAndUsernames, AsyncCallback<SuccessInfo> callback);
 
     void setPermissionsForUser(String username, Iterable<String> permissions, AsyncCallback<SuccessInfo> callback);
 

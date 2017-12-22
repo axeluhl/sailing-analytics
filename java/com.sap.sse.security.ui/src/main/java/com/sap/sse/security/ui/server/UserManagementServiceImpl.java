@@ -420,7 +420,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo setRolesForUser(String username,
-            Iterable<Triple<UUID, UUID, String>> roleDefinitionIdAndTenantQualifierIdAndUsernames)
+            Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantQualifierNameAndUsernames)
             throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("user:grant_permission,revoke_permission:" + username)) {
             User u = getSecurityService().getUserByName(username);
@@ -428,10 +428,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
             }
             Set<Role> rolesToSet = new HashSet<>();
-            for (final Triple<UUID, UUID, String> roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierIdAndUsernames) {
-                rolesToSet.add(createRoleFromIDs(roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet.getA(),
-                        roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet.getB(),
-                        roleDefinitionIdAndTenantQualifierIdAndUsernameOfRoleToSet.getC()));
+            for (final Triple<UUID, String, String> roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierNameAndUsernames) {
+                final Tenant tenant = getSecurityService().getTenantByName(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB());
+                rolesToSet.add(createRoleFromIDs(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getA(),
+                        tenant == null ? null : tenant.getId(),
+                        roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getC()));
             }
             Set<Role> roleDefinitionsToRemove = new HashSet<>();
             Util.addAll(u.getRoles(), roleDefinitionsToRemove);
@@ -445,8 +446,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             for (Role roleToAdd : rolesToAdd) {
                 getSecurityService().addRoleForUser(u, roleToAdd);
             }
-            logger.info("Set roles "+roleDefinitionIdAndTenantQualifierIdAndUsernames+" for user "+username);
-            return new SuccessInfo(true, "Set roles " + roleDefinitionIdAndTenantQualifierIdAndUsernames + " for user " + username, /* redirectURL */null,
+            logger.info("Set roles "+roleDefinitionIdAndTenantQualifierNameAndUsernames+" for user "+username);
+            return new SuccessInfo(true, "Set roles " + roleDefinitionIdAndTenantQualifierNameAndUsernames + " for user " + username, /* redirectURL */null,
                     securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
         } else {
             throw new UnauthorizedException("Not permitted to grant permissions to user");
