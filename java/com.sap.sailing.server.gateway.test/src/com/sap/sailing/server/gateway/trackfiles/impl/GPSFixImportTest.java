@@ -19,7 +19,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
 import com.sap.sse.common.Util.Pair;
@@ -68,15 +70,18 @@ public class GPSFixImportTest {
     
     @Test
     public void testReusingImportStream() throws IOException {
-        TrackFilesImportServlet servlet = new TrackFilesImportServlet() {
-            private static final long serialVersionUID = -7636477441858728847L;
-
+        TrackFilesImporter importer = new TrackFilesImporter(null, null, null) {
             @Override
             public Collection<GPSFixImporter> getGPSFixImporters(String type) {
                 return Arrays.asList((GPSFixImporter) RouteConverterGPSFixImporterFactory.INSTANCE
                         .createRouteConverterGPSFixImporter());
             }
-
+            
+            @Override
+            protected void additionalDataExtractor(ImportResultDTO jsonResult, TrackFileImportDeviceIdentifier device)
+                    throws TransformationException {
+            }
+            
             @Override
             public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
             }
@@ -156,7 +161,7 @@ public class GPSFixImportTest {
             }
         };
         AtomicBoolean failed = new AtomicBoolean(false);
-        JsonHolder holder = new JsonHolder(Logger.getLogger(GPSFixImportTest.class.getName())){
+        ImportResultDTO holder = new ImportResultDTO(Logger.getLogger(GPSFixImportTest.class.getName())){
             
             @Override
             public void add(Exception exception) {
@@ -165,7 +170,7 @@ public class GPSFixImportTest {
             }
         };
         //The preferred importer will fail, however the default importer should succeed after
-        servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", fi)), holder, new AlwaysFailingGPSFixImporter(-1));
+        importer.importFilesWithPreferredImporter(Arrays.asList(new Pair<>("test.gpx", fi)), holder, new AlwaysFailingGPSFixImporter(-1));
         assertFalse(failed.get());
     }
 }

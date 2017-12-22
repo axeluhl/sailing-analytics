@@ -44,6 +44,7 @@ import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -54,7 +55,10 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
+import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
+import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -70,6 +74,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -85,7 +91,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private static final String WIND_IMPORT_PARAMETER_RACES = "races";
 
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
+    private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS = "boatClass";
 
+    private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
@@ -264,6 +272,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         mainPanel.add(createNmeaWindImportPanel());
         mainPanel.add(createBravoWindImportPanel());
         mainPanel.add(createIgtimiWindImportPanel(mainPanel));
+        mainPanel.add(createExpeditionAllInOneImportPanel());
     }
 
     private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel) {
@@ -437,6 +446,68 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         return new WindImportFileUploadForm(form, formContentPanel, fileUpload, submitButton);
+    }
+
+    private CaptionPanel createExpeditionAllInOneImportPanel() {
+        final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
+        final FormPanel formPanel = new FormPanel();
+        final BusyIndicator busyIndicator = new SimpleBusyIndicator();
+        final Button uploadButton = new Button(stringMessages.upload());
+        uploadButton.addClickHandler(event -> {
+            uploadButton.setEnabled(false);
+            busyIndicator.setBusy(true);
+            formPanel.submit();
+        });
+        formPanel.setMethod(FormPanel.METHOD_POST);
+        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        formPanel.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT);
+        formPanel.addSubmitCompleteHandler(event -> {
+            uploadButton.setEnabled(true);
+            busyIndicator.setBusy(false);
+            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
+            if (response.hasEventId()) {
+                new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
+                        response.getLeaderboardGroupName(), response.getLeaderboardName(), response.getRaceName(),
+                        response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
+                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
+                        errorReporter, stringMessages);
+            } else {
+                ExpeditionDataImportResultsDialog.showResults(response);
+            }
+        });
+        rootPanel.add(formPanel);
+        final VerticalPanel contentPanel = new VerticalPanel();
+        formPanel.add(contentPanel);
+        final FileUpload fileUpload = new FileUpload();
+        fileUpload.setName("upload");
+        contentPanel.add(fileUpload);
+        final HorizontalPanel boatClassPanel = new HorizontalPanel();
+        boatClassPanel.setSpacing(5);
+        contentPanel.add(boatClassPanel);
+        final Label boatClassLabel = new Label(stringMessages.boatClass() + ":");
+        boatClassPanel.add(boatClassLabel);
+        boatClassPanel.setCellVerticalAlignment(boatClassLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+        final SuggestBox boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
+        boatClassInput.getValueBox().setName(EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS);
+        boatClassPanel.add(boatClassInput);
+        boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
+        final HorizontalPanel controlPanel = new HorizontalPanel();
+        controlPanel.setSpacing(5);
+        controlPanel.add(uploadButton);
+        controlPanel.add(busyIndicator);
+        contentPanel.add(controlPanel);
+        final Runnable validation = () -> {
+            final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
+            final boolean fileValid = filename != null && !filename.trim().isEmpty();
+            final boolean boatClassValid = boatClass != null && !boatClass.trim().isEmpty();
+            uploadButton.setEnabled(fileValid && boatClassValid);
+        };
+        
+        fileUpload.addChangeHandler(event -> validation.run());
+        boatClassInput.addSelectionHandler(event -> validation.run());
+        boatClassInput.addKeyUpHandler(event -> validation.run());
+        validation.run();
+        return rootPanel;
     }
 
     private CaptionPanel createExpeditionWindImportPanel() {

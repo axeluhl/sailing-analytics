@@ -900,7 +900,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                     entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.leaderboardName, null, null, null);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(true);
-            ;
+            
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                     perspectiveOwnSettings, Collections.emptyMap());
 
