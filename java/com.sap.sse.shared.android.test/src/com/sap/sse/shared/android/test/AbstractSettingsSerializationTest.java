@@ -177,7 +177,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         
         @Override
         protected void addChildSettings() {
-            disallowedKey= new StringSetting("disallowed.key", this);
+            disallowedKey = new StringSetting("disallowed.key", this);
         }
     }
 
