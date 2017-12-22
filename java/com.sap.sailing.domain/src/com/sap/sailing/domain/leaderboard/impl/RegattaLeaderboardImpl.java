@@ -137,7 +137,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         return getRegatta().getOrCreateCompetitorsProvider();
     }
     
-    public void setFleetsCanRunInParallelToTrue(){
+    public void setFleetsCanRunInParallelToTrue() {
         this.getRegattaLike().setFleetsCanRunInParallelToTrue();
     }
 }
