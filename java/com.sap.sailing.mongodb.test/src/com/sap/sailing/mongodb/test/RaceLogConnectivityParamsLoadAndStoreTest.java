@@ -57,7 +57,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         theSeries.addRaceColumn("R2", racingEventService);
         theSeries.addRaceColumn("R3", racingEventService);
         final RegattaLeaderboard leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), /* leaderboardDisplayName */ null, new int[] { 5, 9 });
-        RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(domainObjectFactory.getBaseDomainFactory()).denoteAllRacesForRaceLogTracking(racingEventService, leaderboard,null);
+        RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(domainObjectFactory.getBaseDomainFactory()).denoteAllRacesForRaceLogTracking(racingEventService, leaderboard,
+                /* race name prefix */ null);
         final RaceLogConnectivityParams rlParams = new RaceLogConnectivityParams(
                 racingEventService, regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard,
                 delayToLiveInMillis, domainObjectFactory.getBaseDomainFactory(), trackWind,
