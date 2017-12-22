@@ -9,9 +9,7 @@ import com.sap.sse.common.Util.Pair;
 public class PairingListDTO implements Serializable{
     
     private static final long serialVersionUID = 102220422437194196L;
-
     private List<List<List<Pair<CompetitorDTO, BoatDTO>>>> pairingList;
-    
     private List<String> raceColumnNames;
     
     public PairingListDTO() { }
@@ -31,7 +29,6 @@ public class PairingListDTO implements Serializable{
     
     public List<BoatDTO> getBoats() {
         List<BoatDTO> boats = new ArrayList<>();
-
         for (List<Pair<CompetitorDTO, BoatDTO>> fleet : this.pairingList.get(0)) {
             for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : fleet) {
                 if (!boats.contains(competitorAndBoatPair.getB())) {
@@ -39,7 +36,6 @@ public class PairingListDTO implements Serializable{
                 }
             }
         }
-        
         return boats;
     }
     

@@ -44,17 +44,19 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         super.doOnModuleLoad();
         pairingListContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new PairingListContextDefinition());
-        this.sailingService.getLeaderboard(pairingListContextDefinition.getLeaderboardName(), new AsyncCallback<StrippedLeaderboardDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                strippedLeaderboardDTO=null;
-            }
-            @Override
-            public void onSuccess(StrippedLeaderboardDTO result) {
-                strippedLeaderboardDTO=result; 
-                createUI();
-            }
-        });
+        this.sailingService.getLeaderboard(pairingListContextDefinition.getLeaderboardName(),
+                new AsyncCallback<StrippedLeaderboardDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        strippedLeaderboardDTO = null;
+                    }
+
+                    @Override
+                    public void onSuccess(StrippedLeaderboardDTO result) {
+                        strippedLeaderboardDTO = result;
+                        createUI();
+                    }
+                });
     }
 
     private void createUI() {
@@ -79,9 +81,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
                     @Override
                     public void onSuccess(PairingListDTO result) {
-                        if (strippedLeaderboardDTO == null) {
-
-                        } else {
+                        if (strippedLeaderboardDTO != null) {
                             sailingService.getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
                                     result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
                                         @Override
@@ -104,12 +104,9 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                                                     printPairingListGrid(
                                                             "<div class='printHeader'><img src='images/home/logo-small@2x.png' </img>"
                                                                     + "<b class='title'>"
-                                                                    + SafeHtmlUtils
-                                                                            .fromString(pairingListContextDefinition
-                                                                                    .getLeaderboardName())
+                                                                    + SafeHtmlUtils.fromString(pairingListContextDefinition.getLeaderboardName())
                                                                             .asString()
-                                                                    + "</b></div>" + pairingListPanel.asWidget()
-                                                                            .getElement().getInnerHTML());
+                                                                    + "</b></div>" + pairingListPanel.asWidget().getElement().getInnerHTML());
                                                 }
                                             });
 
@@ -138,7 +135,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         final int flightCount = pairingListDTO.getPairingList().size();
         final int groupCount = pairingListDTO.getPairingList().get(0).size();
         final int boatCount = boats.size();
-        
+
         Grid pairingListGrid = new Grid(flightCount * groupCount + 1, (boatCount + 2));
         pairingListGrid.getElement().setId("grid");
         pairingListGrid.setCellPadding(15);
@@ -146,17 +143,17 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         int flightIndexInGrid = 1;
         int groupIndex = 1;
         int boatIndex = 0;
-        
+
         for (BoatDTO boat : boats) {
             pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()));
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setTextAlign(TextAlign.CENTER);
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setPadding(10, Unit.PX);
             if (boat.getColor() != null) {
-                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
-                        boat.getColor().getAsHtml());
+                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle()
+                        .setBackgroundColor(boat.getColor().getAsHtml());
             } else {
-                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
-                        "#cecece");
+                pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle()
+                        .setBackgroundColor("#cecece");
             }
             boatIndex++;
         }
@@ -176,12 +173,11 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                 // setting up fleet
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
-                pairingListGrid.setWidget(groupIndex, 1,
-                        new Label(fleetnames.get(groupIndex-1)));
+                pairingListGrid.setWidget(groupIndex, 1, new Label(fleetnames.get(groupIndex - 1)));
                 // setting up fleets style
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
-                
+
                 if (group.size() < boatCount) {
                     List<BoatDTO> boatsToRemove = new ArrayList<>(boats);
                     for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
@@ -191,8 +187,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                         group.add(new Pair<CompetitorDTO, BoatDTO>(new CompetitorDTOImpl(), boat));
                     }
                 }
-                
-                
                 for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
                     if (competitorAndBoatPair.getA().getName() == null) {
@@ -208,18 +202,17 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                             .setFontWeight(Style.FontWeight.BOLD);
                     pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setTextAlign(TextAlign.CENTER);
-                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
-                            .setPadding(5, Unit.PX);
+                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle().setPadding(5,
+                            Unit.PX);
                     pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setBackgroundColor(color);
                 }
-                
+
                 groupIndex++;
             }
             flightIndexInGrid++;
         }
 
-        
         VerticalPanel pairingListPanel = new VerticalPanel();
         pairingListPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         pairingListPanel.add(pairingListGrid);
@@ -229,7 +222,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
         return pairingListPanel;
     }
-    
+
     private native void printPairingListGrid(String pageHTMLContent) /*-{
 		var frameID = '__gwt_historyFrame';
 		var frame = $doc.getElementById(frameID);
@@ -263,7 +256,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
 		document.close();
 
-                //Timeout for assets loading
+		//Timeout for assets loading
 		setTimeout(function() {
 			frame.focus();
 			frame.print();

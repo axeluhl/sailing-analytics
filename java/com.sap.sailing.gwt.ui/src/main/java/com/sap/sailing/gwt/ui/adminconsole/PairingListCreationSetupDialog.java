@@ -50,7 +50,6 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         this.ensureDebugId("PairingListCreationSetupDialog");
 
         this.flightMultiplierCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 flightMultiplierTextBox.setEnabled(event.getValue());
@@ -84,25 +83,19 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     @Override
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
-
         CaptionPanel infoPanel = new CaptionPanel();
         infoPanel.setCaptionText("Info");
         panel.add(infoPanel);
-
         ScrollPanel infoScrollPanel = new ScrollPanel();
         infoScrollPanel.setPixelSize((Window.getClientWidth() / 3), 150);
         infoScrollPanel.add(new Label(stringMessages.pairingListCreationInfo()));
-
         infoPanel.add(infoScrollPanel);
-
-        Grid formGrid = new Grid(Util.size(selectedSeriesCheckboxes)+2, 2);
+        Grid formGrid = new Grid(Util.size(selectedSeriesCheckboxes) + 2, 2);
         panel.add(formGrid);
-
         formGrid.setWidget(0, 0, new Label(stringMessages.setCompetitors()));
         formGrid.setWidget(0, 1, this.competitorCountTextBox);
         formGrid.setWidget(1, 0, this.flightMultiplierCheckBox);
         formGrid.setWidget(1, 1, this.flightMultiplierTextBox);
-
         formGrid.setWidget(2, 0, new Label(stringMessages.seriesHint()));
         int count = 0;
         for (CheckBox current : selectedSeriesCheckboxes) {
@@ -116,29 +109,24 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     protected PairingListTemplateDTO getResult() {
         PairingListTemplateDTO dto = new PairingListTemplateDTO(this.competitorCountTextBox.getValue(),
                 this.flightMultiplierTextBox.getValue());
-        
         if (Util.size(this.getCheckedSelectedCheckBoxes()) > 0) {
             String seriesName = Util.get(this.getCheckedSelectedCheckBoxes(), 0).getText();
-            dto.setGroupCount(this.getOneRaceFromSeriesName(seriesName, leaderboardDTO.getRaceList()).getFleets().size());
+            dto.setGroupCount(
+                    this.getOneRaceFromSeriesName(seriesName, leaderboardDTO.getRaceList()).getFleets().size());
         } else {
             dto.setGroupCount(0);
         }
-
         if (this.flightMultiplierCheckBox.getValue()) {
             dto.setFlightMultiplier(this.flightMultiplierTextBox.getValue());
         } else {
             dto.setFlightMultiplier(1);
         }
-
         List<String> selectedFlightNames = new ArrayList<>();
         for (CheckBox box : getCheckedSelectedCheckBoxes()) {
             selectedFlightNames.addAll(getRaceColumnNamesFromSeriesName(box.getText(), leaderboardDTO.getRaceList()));
         }
-
         dto.setSelectedFlightNames(selectedFlightNames);
-        
         dto.setFlightCount(selectedFlightNames.size());
-
         return dto;
     }
 
@@ -148,9 +136,9 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
             this.validateAndUpdate();
         }
     }
-    
+
     private void validateCheckboxes(boolean enabled) {
-        if(enabled) {
+        if (enabled) {
             disableSelectedSeriesCheckBoxes(leaderboardDTO);
             if (flightMultiplierCheckBox.getValue()) {
                 if (Util.size(getCheckedSelectedCheckBoxes()) > 0) {
@@ -164,12 +152,12 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
                 }
             }
         } else {
-            if(Util.size(getCheckedSelectedCheckBoxes()) > 0) {
-                
+            if (Util.size(getCheckedSelectedCheckBoxes()) > 0) {
+
             } else {
                 enableOrDisableAllSelectedSeriesCheckBoxes(true, false);
             }
-            if(Util.size(getCheckedSelectedCheckBoxes()) < 2) {
+            if (Util.size(getCheckedSelectedCheckBoxes()) < 2) {
                 flightMultiplierCheckBox.setEnabled(true);
             }
         }
@@ -178,9 +166,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     private Iterable<String> getSeriesNamesFromAllRaces(final Iterable<RaceColumnDTO> raceColumns) {
         List<String> result = new ArrayList<>();
         for (RaceColumnDTO raceColumn : raceColumns) {
-            if (raceColumn.isMedalRace()) {
-
-            } else {
+            if (!raceColumn.isMedalRace()) {
                 if (result.contains(raceColumn.getSeriesName())) {
 
                 } else {
@@ -200,7 +186,8 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         return null;
     }
 
-    private List<String> getRaceColumnNamesFromSeriesName(final String seriesName, final Iterable<RaceColumnDTO> raceColumns) {
+    private List<String> getRaceColumnNamesFromSeriesName(final String seriesName,
+            final Iterable<RaceColumnDTO> raceColumns) {
         List<String> result = new ArrayList<>();
         for (RaceColumnDTO raceColumn : raceColumns) {
             if (!raceColumn.isMedalRace() && seriesName.equals(raceColumn.getSeriesName())) {
@@ -222,32 +209,28 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
 
     private void disableSelectedSeriesCheckBoxes(final StrippedLeaderboardDTO leaderboardDTO) {
         Iterable<CheckBox> boxes = getCheckedSelectedCheckBoxes();
-        if (Util.size(boxes) > 1) {
-
-        } else {
-
+        if (Util.size(boxes) <= 1) {
             RaceColumnDTO race = getOneRaceFromSeriesName(Util.get(boxes, 0).getText(), leaderboardDTO.getRaceList());
             for (CheckBox box : selectedSeriesCheckboxes) {
                 if (race.getFleets().size() == getOneRaceFromSeriesName(box.getText(), leaderboardDTO.getRaceList())
                         .getFleets().size()) {
-
                 } else {
                     box.setEnabled(false);
                 }
             }
         }
     }
-    
+
     private void enableOrDisableAllSelectedSeriesCheckBoxes(final boolean enabled, final boolean exclusiveSelected) {
-        if(exclusiveSelected) {
-            for(CheckBox box : selectedSeriesCheckboxes) {
-                if(box.getValue()) {
+        if (exclusiveSelected) {
+            for (CheckBox box : selectedSeriesCheckboxes) {
+                if (box.getValue()) {
                     continue;
                 }
                 box.setEnabled(enabled);
             }
         } else {
-            if(Util.size(getCheckedSelectedCheckBoxes())>0) {
+            if (Util.size(getCheckedSelectedCheckBoxes()) > 0) {
                 return;
             }
             for (CheckBox box : selectedSeriesCheckboxes) {
@@ -255,5 +238,5 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
             }
         }
     }
-    
+
 }
