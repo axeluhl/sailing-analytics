@@ -196,7 +196,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                             }
 
                             public void onSuccess(List<String> result) {
-                                PairingListPreviewDialog dialog = new PairingListPreviewDialog(pairingListDTO, result, stringMessages);
+                                PairingListPreviewDialog dialog = new PairingListPreviewDialog(pairingListDTO, result, stringMessages,leaderboardDTO.getName());
                                 dialog.show();
                             };
                         });

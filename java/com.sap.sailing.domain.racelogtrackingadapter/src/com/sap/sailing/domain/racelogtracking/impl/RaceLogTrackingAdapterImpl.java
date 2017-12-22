@@ -178,7 +178,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
                 if (prefix != null) {
-                    denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, prefix + " " + fleetcount);
+                    denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, prefix + fleetcount);
                 } else {
                     denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
                 }
