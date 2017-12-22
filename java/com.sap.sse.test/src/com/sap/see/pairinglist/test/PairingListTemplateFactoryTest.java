@@ -28,11 +28,9 @@ public class PairingListTemplateFactoryTest {
         final int flights = 15;
         final int groups = 3;
         final int competitors = 18;
-
         int[][] plTemplate = factoryImpl
                 .createPairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors))
                 .getPairingListTemplate();
-
         Assert.assertNotNull(plTemplate);
         for (int[] group : plTemplate) {
             for (int competitorNumber : group) {
@@ -41,27 +39,21 @@ public class PairingListTemplateFactoryTest {
                 }
             }
         }
-
         int[][] plTemplate2 = factoryImpl
                 .createPairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors + 1))
                 .getPairingListTemplate();
-
         int dummyCount = 0;
-
         Assert.assertNotNull(plTemplate2);
         for (int[] group : plTemplate2) {
             for (int competitorNumber : group) {
-
                 if (competitorNumber == -1) {
                     dummyCount++;
                 }
-
                 if (competitorNumber < -1 && competitorNumber < competitors) {
                     Assert.fail("Values of Pairing List Template must not be smaller -1, when there are dummies!");
                 }
             }
         }
-
         if (dummyCount != (groups - 1) * flights) {
             Assert.fail("There are not as much dummies as there should be!");
         }
@@ -144,16 +136,12 @@ public class PairingListTemplateFactoryTest {
         final int competitors = 18;
 
         ArrayList<Integer> availableCompetitors = new ArrayList<>();
-
         int[][] copy = factoryImpl.createPairingListTemplate(new PairingFrameProviderTest(flights, groups, competitors))
                 .getPairingListTemplate();
-
         for (int i = 0; i < flights; i++) {
-
             IntStream.range(0, competitors - 1).forEach(competitor -> {
                 availableCompetitors.add(competitor);
             });
-
             for (int j = 0; j < groups; j++) {
                 for (int k = 0; k < competitors / groups; k++) {
                     if (availableCompetitors.contains(copy[i * groups + j][k])) {
@@ -161,7 +149,6 @@ public class PairingListTemplateFactoryTest {
                     }
                 }
             }
-
             if (availableCompetitors.isEmpty()) {
                 continue;
             } else {

@@ -36,6 +36,7 @@ public class PairinglistTest extends AbstractSeleniumTest {
     private static final String SERIES_QUALIFICATION = "Quali";
     private static final String SERIES_MEDALS = "Medals";
     private static final String SERIES_DEFAULT = "Default";
+    
     @Override
     @Before
     public void setUp() {
@@ -44,7 +45,7 @@ public class PairinglistTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void createEventAndTestPOForCalculation() {
+    public void createEventAndTestPOForCalculation() throws InterruptedException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
         {
             AdminConsolePage adminConsolePage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -97,17 +98,14 @@ public class PairinglistTest extends AbstractSeleniumTest {
             PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
             dialog.setCompetitorsCount("18");
             Assert.assertTrue(!dialog.isFlightMultiplierBoxEnabled());
-            for(int i=0;i<1000;i++){
-            dialog.clickFlightMultiplierCheckBox();
-            if(dialog.getValueOfFlightMultiplierCheckBox()) break;
+            for (int i = 0; i < 1000; i++) {
+                dialog.clickFlightMultiplierCheckBox();
+                if (dialog.getValueOfFlightMultiplierCheckBox()) {
+                    break;
+                }
             }
             Assert.assertTrue(dialog.isFlightMultiplierBoxEnabled());
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            Thread.sleep(5000);
             dialog.setFlightMultiplier("0");
             Assert.assertTrue(!dialog.isOkButtonEnabled());
             dialog.setFlightMultiplier("2");
