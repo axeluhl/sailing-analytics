@@ -29,7 +29,7 @@ public interface RaceDefinition extends NamedWithID {
     /**
      * Gets the boat used by the competitor for this race.
      */
-    Boat getBoatOfCompetitorById(Serializable competitorID);
+    Boat getBoatOfCompetitor(Competitor competitor);
 
     /**
      * The MD5 hash as produced by

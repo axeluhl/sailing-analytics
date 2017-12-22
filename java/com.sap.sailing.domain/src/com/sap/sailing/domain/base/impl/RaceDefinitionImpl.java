@@ -27,7 +27,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final Course course;
     private final LinkedHashMap<Serializable, Competitor> competitorsById;
     private final Set<Competitor> competitors;
-    private final Map<Serializable, Boat> competitorBoats;
+    private final Map<Competitor, Boat> competitorBoats;
     private final BoatClass boatClass;
     private final Serializable id;
     private final RaceCompetitorIdsAsStringWithMD5Hash raceCompetitorsMD5Hash;
@@ -65,7 +65,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
             Competitor competitor = competitorsById.get(competitorAndBoat.getKey().getId()); // only assign boat if competitor is part of race
             if (competitor != null && competitorAndBoat.getValue() != null) {
-                competitorBoats.put(competitor.getId(), competitorAndBoat.getValue());
+                competitorBoats.put(competitor, competitorAndBoat.getValue());
             } else {
                 logger.warning("Trying to set boat "+competitorAndBoat.getValue()+" for competitor "+competitorAndBoat.getKey()+
                         " which is not part of race "+getName()+"'s set of competitors");
@@ -111,7 +111,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     }
 
     @Override
-    public Boat getBoatOfCompetitorById(Serializable competitorID) {
-        return competitorBoats.get(competitorID);
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return competitorBoats.get(competitor);
     }
 }
