@@ -237,8 +237,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pairingListCreationInfo();
     String setCompetitors();
     String seriesHint();
-    String flightMultiplier();
-    String applyToRacelogs();
+    String amountOfFlightRepeats();
+    String insertIntoRegatta();
+    String recalculate();
     String csvExport();
     String printView();
     String print();
@@ -246,9 +247,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String invalidFlightMultiplier();
     String invalidSeriesSelection();
     String flightsMustBeAMultipleOfMultiplier();
-    String dataOfPairingList();
+    String parameters();
     String numberOfFlights();
-    String numberOfGroups();
+    String numberOfFleets();
     String numberOfCompetitors();
     String quality();
     String pairingListTemplate();

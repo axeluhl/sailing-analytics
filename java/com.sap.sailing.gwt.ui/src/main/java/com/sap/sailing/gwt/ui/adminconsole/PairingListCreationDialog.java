@@ -47,9 +47,9 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         this.sailingService = sailingService;
         this.leaderboardDTO = leaderboardDTO;
         this.ensureDebugId("PairingListCreationDialog");
-        applyToRacelogButton = new Button(stringMessages.applyToRacelogs());
+        applyToRacelogButton = new Button(stringMessages.insertIntoRegatta());
         printPreViewButton = new Button(stringMessages.printView());
-        refreshButton = new Button(stringMessages.reload());
+        refreshButton = new Button(stringMessages.recalculate());
         cSVExportAnchor = new Anchor(stringMessages.csvExport());
         cSVExportAnchor.ensureDebugId("CSVExportAnchor");
         cSVExportAnchor.getElement().setAttribute("href",
@@ -80,8 +80,8 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         /* DATA PANEL */
 
         CaptionPanel dataPanel = new CaptionPanel();
-        dataPanel.setCaptionText(stringMessages.dataOfPairingList());
-        Grid formGrid = new Grid(5, 2);
+        dataPanel.setCaptionText(stringMessages.parameters());
+        Grid formGrid = new Grid(6, 2);
         dataPanel.add(formGrid);
         Label flights = new Label(String.valueOf(this.template.getFlightCount()));
         flights.ensureDebugId("FlightCountLabel");
@@ -91,10 +91,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         competitors.ensureDebugId("CompetitorCountLabel");
         formGrid.setWidget(0, 0, new Label(stringMessages.numberOfFlights()));
         formGrid.setWidget(0, 1, flights);
-        formGrid.setWidget(1, 0, new Label(stringMessages.numberOfGroups()));
+        formGrid.setWidget(1, 0, new Label(stringMessages.numberOfFleets()));
         formGrid.setWidget(1, 1, groups);
-        formGrid.setWidget(2, 0, new Label(stringMessages.numberOfCompetitors()));
-        formGrid.setWidget(2, 1, competitors);
+        formGrid.setWidget(2, 0, new Label(stringMessages.numberOfRaces()));
+        formGrid.setWidget(2, 1, new Label(String.valueOf((template.getFlightCount()*template.getGroupCount()))));
+        formGrid.setWidget(3, 0, new Label(stringMessages.numberOfCompetitors()));
+        formGrid.setWidget(3, 1, competitors);
         HorizontalPanel qualityPanel = new HorizontalPanel();
         qualityPanel.add(new Label(stringMessages.quality()));
         Image qualityHelpImage = new Image(resources.help());
@@ -106,12 +108,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                 Window.open("https://wiki.sapsailing.com/wiki/howto/eventmanagers/Pairing-Lists", "", "");
             }
         });
-        formGrid.setWidget(3, 0, qualityPanel);
-        formGrid.setWidget(3, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
+        formGrid.setWidget(4, 0, qualityPanel);
+        formGrid.setWidget(4, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
         if (this.template.getFlightMultiplier() > 1) {
             Label flightMultiplierLabel = new Label(String.valueOf(this.template.getFlightMultiplier()));
-            formGrid.setWidget(4, 0, new Label(stringMessages.flightMultiplier()));
-            formGrid.setWidget(4, 1, flightMultiplierLabel);
+            formGrid.setWidget(5, 0, new Label(stringMessages.amountOfFlightRepeats()));
+            formGrid.setWidget(5, 1, flightMultiplierLabel);
             flightMultiplierLabel.ensureDebugId("FlightMultiplierCountLabel");
         }
         formGrid.setCellSpacing(10);

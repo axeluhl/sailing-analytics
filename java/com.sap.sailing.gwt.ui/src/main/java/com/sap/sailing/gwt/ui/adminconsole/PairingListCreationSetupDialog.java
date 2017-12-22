@@ -45,7 +45,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         this.flightMultiplierTextBox.setEnabled(false);
         this.flightMultiplierTextBox.setValue(1);
         this.flightMultiplierTextBox.ensureDebugId("FlightMultiplierIntegerBox");
-        this.flightMultiplierCheckBox = createCheckbox(this.stringMessages.flightMultiplier());
+        this.flightMultiplierCheckBox = createCheckbox(this.stringMessages.amountOfFlightRepeats());
         this.flightMultiplierCheckBox.setTitle(this.stringMessages.multiplierInfo());
         this.ensureDebugId("PairingListCreationSetupDialog");
 
