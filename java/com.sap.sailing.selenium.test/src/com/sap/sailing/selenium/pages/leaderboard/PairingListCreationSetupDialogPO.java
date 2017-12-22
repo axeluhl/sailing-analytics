@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
 public class PairingListCreationSetupDialogPO extends PageArea {
     
@@ -51,9 +52,15 @@ public class PairingListCreationSetupDialogPO extends PageArea {
         multiplierIntegerBox.sendKeys(count);
     }
     public void clickFlightMultiplierCheckBox() {
-        multiplierCheckBox.click();
+        CheckBoxPO.create(driver, multiplierCheckBox).setSelected(!this.getValueOfFlightMultiplierCheckBox());
     }
     public void clickFlightCheckBox() {
-        flightsCheckbox.click();
+        CheckBoxPO.create(driver, flightsCheckbox).setSelected(!this.getValueOfFlightCheckBox());
+    }
+    public boolean getValueOfFlightCheckBox(){
+        return CheckBoxPO.create(driver, flightsCheckbox).isSelected();
+    }
+    public boolean getValueOfFlightMultiplierCheckBox(){
+        return CheckBoxPO.create(driver, multiplierCheckBox).isSelected();
     }
 }
