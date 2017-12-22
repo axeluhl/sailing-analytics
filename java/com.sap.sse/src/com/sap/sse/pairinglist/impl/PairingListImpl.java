@@ -42,7 +42,8 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
                 result.add(new Pair<Competitor, CompetitorAllocation>(competitors.get(competitorIndicesInRace.get(slot)),
                         Util.get(competitionFormat.getCompetitorAllocation(), slot)));
             } else {
-                result.add(new Pair<Competitor, CompetitorAllocation>(null, Util.get(competitionFormat.getCompetitorAllocation(), slot)));
+                result.add(new Pair<Competitor, CompetitorAllocation>(null, 
+                        Util.get(competitionFormat.getCompetitorAllocation(), slot)));
             }
         }
         return result;
