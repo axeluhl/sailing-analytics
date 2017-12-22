@@ -133,7 +133,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         throw new NoFixesException();
     }
 
-    private List<ManeuverSpot> detectManeuversIncrementally(TrackTimeInfo trackTimeInfo,
+    // public for unit tests
+    public List<ManeuverSpot> detectManeuversIncrementally(TrackTimeInfo trackTimeInfo,
             Iterable<GPSFixMoving> approximatingFixesToAnalyze, ManeuverDetectionResult lastManeuverDetectionResult)
             throws NoWindException {
         TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
@@ -329,6 +330,11 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         }
         return true;
     }
+    
+    //for unit tests only
+    public void setLastManeuverDetectionResult(ManeuverDetectionResult lastManeuverDetectionResult) {
+        this.lastManeuverDetectionResult = lastManeuverDetectionResult;
+    }
 
     /**
      * Tries to get an already processed maneuver spot from previous calls of {@link #detectManeuvers()} which starts
@@ -383,6 +389,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return null;
     }
 
+    // public for unit tests
     /**
      * Represents a result of already performed maneuver analysis. The result is used by
      * {@link IncrementalManeuverDetectorImpl} to determine maneuvers incrementally.
@@ -390,7 +397,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * @author Vladislav Chumak (D069712)
      *
      */
-    private static class ManeuverDetectionResult {
+    public static class ManeuverDetectionResult {
 
         private final TimePoint latestFixTimePoint;
         private final List<ManeuverSpot> maneuverSpots;
