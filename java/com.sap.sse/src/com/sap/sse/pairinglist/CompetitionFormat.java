@@ -1,9 +1,9 @@
 package com.sap.sse.pairinglist;
 
 import com.sap.sse.common.Util;
+
 /**
- * If a Class implements this Interface, it is possible to generate a ParingList out of this Class. 
- * The class needs some specific methods to get the attributes of the needed ParingList.
+ * This interface is used to get the objects that are required for a {@link PairingList}. 
  */
 public interface CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> extends PairingFrameProvider {
     Iterable<Flight> getFlights();
@@ -19,6 +19,6 @@ public interface CompetitionFormat<Flight, Group, Competitor, CompetitorAllocati
     default int getCompetitorsCount() {
         return Util.size(getCompetitors());
     }
-    
-    Iterable<CompetitorAllocation> getCompetitorAllocation(); 
+
+    Iterable<CompetitorAllocation> getCompetitorAllocation();
 }

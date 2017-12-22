@@ -102,6 +102,12 @@ public class PairinglistTest extends AbstractSeleniumTest {
             if(dialog.getValueOfFlightMultiplierCheckBox()) break;
             }
             Assert.assertTrue(dialog.isFlightMultiplierBoxEnabled());
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             dialog.setFlightMultiplier("0");
             Assert.assertTrue(!dialog.isOkButtonEnabled());
             dialog.setFlightMultiplier("2");

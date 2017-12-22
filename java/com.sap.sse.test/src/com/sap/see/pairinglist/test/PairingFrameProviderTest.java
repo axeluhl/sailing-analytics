@@ -1,12 +1,12 @@
 package com.sap.see.pairinglist.test;
 
-import com.sap.sse.pairinglist.AbstractPairingFrameProvider;
+import com.sap.sse.pairinglist.PairingFrameProvider;
 
 /**
  * Instances of this class are used for test generations of PairingLists
  *
  */
-public class PairingFrameProviderTest extends AbstractPairingFrameProvider {
+public class PairingFrameProviderTest implements PairingFrameProvider {
 
     private int flights, groups, competitors;
 

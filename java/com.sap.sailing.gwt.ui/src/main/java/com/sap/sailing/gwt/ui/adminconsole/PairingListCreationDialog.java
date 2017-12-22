@@ -94,7 +94,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         formGrid.setWidget(1, 0, new Label(stringMessages.numberOfFleets()));
         formGrid.setWidget(1, 1, groups);
         formGrid.setWidget(2, 0, new Label(stringMessages.numberOfRaces()));
-        formGrid.setWidget(2, 1, new Label(String.valueOf((template.getFlightCount()*template.getGroupCount()))));
+        formGrid.setWidget(2, 1, new Label(String.valueOf((template.getFlightCount() * template.getGroupCount()))));
         formGrid.setWidget(3, 0, new Label(stringMessages.numberOfCompetitors()));
         formGrid.setWidget(3, 1, competitors);
         HorizontalPanel qualityPanel = new HorizontalPanel();
