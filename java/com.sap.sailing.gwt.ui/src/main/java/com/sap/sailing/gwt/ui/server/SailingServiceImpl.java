@@ -5425,18 +5425,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
-        denoteForRaceLogTracking(leaderboardName, null);
+        denoteForRaceLogTracking(leaderboardName, /* race name prefix */ null);
     }
     
     @Override
-    public void denoteForRaceLogTracking(String leaderboardName,String prefix) throws Exception {
+    public void denoteForRaceLogTracking(String leaderboardName, String prefix) throws Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
-        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard,prefix);
+        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard, prefix);
     }
+    
     /**
-     * @param triple leaderboard and racecolumn and fleet names
-     * @return
-     * @throws NotFoundException 
+     * @param triple
+     *            leaderboard and racecolumn and fleet names
      */
     private RaceLog getRaceLog(com.sap.sse.common.Util.Triple<String, String, String> triple) throws NotFoundException {
         return getRaceLog(triple.getA(), triple.getB(), triple.getC());
@@ -6801,10 +6801,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount,
             final int competitorCount, final int flightMultiplier) {
-        
         PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
                 flightMultiplier);
-        
         return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, 
                 template.getPairingListTemplate(), template.getQuality());
     }
