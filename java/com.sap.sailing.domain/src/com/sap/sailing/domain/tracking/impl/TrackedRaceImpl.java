@@ -693,9 +693,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-                    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
-                            10000, competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor));
-
+                    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache =
+                            new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
+                            /* preserve how many milliseconds */ 10000,
+                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor));
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {
