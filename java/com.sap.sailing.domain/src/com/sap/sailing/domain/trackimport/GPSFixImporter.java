@@ -30,7 +30,9 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
  * @author Fredrik Teschke
  * 
  */
-public interface GPSFixImporter {    
+public interface GPSFixImporter {
+    public static final String EXPEDITION_TYPE = "Expedition";
+    
     String FILE_EXTENSION_PROPERTY = "fileExt";
     
     /**
