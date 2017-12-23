@@ -127,7 +127,11 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 maneuverSpots = detectManeuversIncrementally(trackTimeInfo, douglasPeuckerFixes,
                         lastManeuverDetectionResult);
             }
-            this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots);
+            int incrementalRunsCount = lastManeuverDetectionResult == null ? 1
+                    : (lastManeuverDetectionResult.getIncrementalRunsCount() < Integer.MAX_VALUE
+                            ? lastManeuverDetectionResult.getIncrementalRunsCount() + 1 : Integer.MAX_VALUE);
+            this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots,
+                    incrementalRunsCount);
             return getAllManeuversFromManeuverSpots(maneuverSpots);
         }
         throw new NoFixesException();
@@ -330,10 +334,16 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         }
         return true;
     }
-    
-    //for unit tests only
+
+    // for unit tests only
     public void setLastManeuverDetectionResult(ManeuverDetectionResult lastManeuverDetectionResult) {
         this.lastManeuverDetectionResult = lastManeuverDetectionResult;
+    }
+
+    @Override
+    public int getIncrementalRunsCount() {
+        ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
+        return lastManeuverDetectionResult != null ? lastManeuverDetectionResult.getIncrementalRunsCount() : 0;
     }
 
     /**
@@ -401,10 +411,13 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
         private final TimePoint latestFixTimePoint;
         private final List<ManeuverSpot> maneuverSpots;
+        private final int incrementalRunsCount;
 
-        public ManeuverDetectionResult(TimePoint latestFixTimePoint, List<ManeuverSpot> maneuverSpots) {
+        public ManeuverDetectionResult(TimePoint latestFixTimePoint, List<ManeuverSpot> maneuverSpots,
+                int incrementalRunsCount) {
             this.latestFixTimePoint = latestFixTimePoint;
             this.maneuverSpots = maneuverSpots;
+            this.incrementalRunsCount = incrementalRunsCount;
         }
 
         public TimePoint getLatestRawFixTimePoint() {
@@ -413,6 +426,10 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
         public List<ManeuverSpot> getManeuverSpots() {
             return maneuverSpots;
+        }
+
+        public int getIncrementalRunsCount() {
+            return incrementalRunsCount;
         }
 
     }

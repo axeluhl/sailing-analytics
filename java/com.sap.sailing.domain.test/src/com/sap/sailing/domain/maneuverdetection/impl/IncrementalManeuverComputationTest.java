@@ -100,12 +100,14 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
                 .minus(trackTimeInfo.getTrackStartTimePoint().until(trackTimeInfo.getTrackEndTimePoint()).divide(2));
         TimePoint endTime = startTime;
         ApproximatedFixesCalculatorImpl douglasPeucker = new ApproximatedFixesCalculatorImpl(trackedRace, competitor);
-        ManeuverDetectionResult lastResult = new ManeuverDetectionResult(endTime, Collections.emptyList());
+        int incrementalRunsCount = 1;
+        ManeuverDetectionResult lastResult = new ManeuverDetectionResult(endTime, Collections.emptyList(),
+                incrementalRunsCount++);
         while (startTime.after(trackTimeInfo.getTrackStartTimePoint())) {
             TrackTimeInfo mockedTrackTimeInfo = new TrackTimeInfo(startTime, endTime, endTime);
             List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuversIncrementally(mockedTrackTimeInfo,
                     douglasPeucker.approximate(startTime, endTime), lastResult);
-            lastResult = new ManeuverDetectionResult(endTime, maneuverSpots);
+            lastResult = new ManeuverDetectionResult(endTime, maneuverSpots, incrementalRunsCount++);
             startTime = startTime.minus(new MillisecondsDurationImpl(30000));
             endTime = endTime.plus(new MillisecondsDurationImpl(30000));
         }

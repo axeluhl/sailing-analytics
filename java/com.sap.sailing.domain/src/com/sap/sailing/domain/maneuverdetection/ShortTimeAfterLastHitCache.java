@@ -35,6 +35,7 @@ public class ShortTimeAfterLastHitCache<K, V> {
 
     private final long preserveHowManyMilliseconds;
     private final UncachedValueRetrieverCallback<K, V> uncachedValueRetrieverCallback;
+    private final CachedValueCleaningCallback<K, V> cachedValueCleaningCallback;
 
     private long hits;
     private long misses;
@@ -48,6 +49,9 @@ public class ShortTimeAfterLastHitCache<K, V> {
                 Entry<K, ValueWithTimestampSinceLastHit<V>> entry = iterator.next();
                 if (entry.getValue().getTimestampSinceLastHit() < oldestToKeep) {
                     iterator.remove();
+                    if(cachedValueCleaningCallback != null) {
+                        cachedValueCleaningCallback.cleanValue(entry.getKey(), entry.getValue().getValue());
+                    }
                 }
             }
             synchronized (cache) {
@@ -70,9 +74,27 @@ public class ShortTimeAfterLastHitCache<K, V> {
      */
     public ShortTimeAfterLastHitCache(long preserveHowManyMilliseconds,
             UncachedValueRetrieverCallback<K, V> uncachedValueRetrieverCallback) {
+        this(preserveHowManyMilliseconds, uncachedValueRetrieverCallback, null);
+    }
+
+    /**
+     * Constructs a new empty cache.
+     * 
+     * @param preserveHowManyMilliseconds
+     *            The period by which cache entries get invalidated, if they are not hit at least one time within the
+     *            provided period
+     * @param uncachedValueRetrieverCallback
+     *            Is used to retrieve values which are not contained in this cache
+     * @param cachedValueCleaningCallback
+     *            Callback which gets called, when a key-value pair gets removed from cache
+     */
+    public ShortTimeAfterLastHitCache(long preserveHowManyMilliseconds,
+            UncachedValueRetrieverCallback<K, V> uncachedValueRetrieverCallback,
+            CachedValueCleaningCallback<K, V> cachedValueCleaningCallback) {
         this.preserveHowManyMilliseconds = preserveHowManyMilliseconds;
         this.uncachedValueRetrieverCallback = uncachedValueRetrieverCallback;
         this.cache = new ConcurrentHashMap<>();
+        this.cachedValueCleaningCallback = cachedValueCleaningCallback;
     }
 
     private void add(K key, V value) {
@@ -126,6 +148,10 @@ public class ShortTimeAfterLastHitCache<K, V> {
 
     public interface UncachedValueRetrieverCallback<K, V> {
         V getUncachedValue(K key);
+    }
+
+    public interface CachedValueCleaningCallback<K, V> {
+        void cleanValue(K key, V value);
     }
 
     private static class ValueWithTimestampSinceLastHit<V> {
