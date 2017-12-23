@@ -10,14 +10,15 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak(D069712)
  *
  */
-public interface IncrementalApproximatedFixesCalculator {
+public interface IncrementalApproximatedFixesCalculator extends ApproximatedFixesCalculator {
 
     /**
      * Approximates incrementally douglas peucker points within the provided time range. The implementation must
      * reproduce the call of
-     * {@link com.sap.sailing.domain.tracking.TrackedRace#approximate(com.sap.sailing.domain.base.Competitor, com.sap.sailing.domain.common.Distance, TimePoint, TimePoint)}
+     * {@link com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator#approximate(TimePoint, TimePoint)}
      * supporting the incremental calculation.
      */
+    @Override
     Iterable<GPSFixMoving> approximate(TimePoint earliestStart, TimePoint latestEnd);
 
     /**

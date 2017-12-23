@@ -26,4 +26,10 @@ public interface IncrementalManeuverDetector extends ManeuverDetector {
      */
     void clearState();
 
+    /**
+     * Gets the count of how often incremental maneuver detection computation was triggered to produce the current state
+     * with increment data.
+     */
+    int getIncrementalRunsCount();
+
 }

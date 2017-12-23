@@ -107,6 +107,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     @Override
     public void clearState() {
         lastManeuverDetectionResult = null;
+        incrementalApproximatedFixesCalculator.clearState();
     }
 
     @Override
@@ -126,13 +127,18 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 maneuverSpots = detectManeuversIncrementally(trackTimeInfo, douglasPeuckerFixes,
                         lastManeuverDetectionResult);
             }
-            this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots);
+            int incrementalRunsCount = lastManeuverDetectionResult == null ? 1
+                    : (lastManeuverDetectionResult.getIncrementalRunsCount() < Integer.MAX_VALUE
+                            ? lastManeuverDetectionResult.getIncrementalRunsCount() + 1 : Integer.MAX_VALUE);
+            this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots,
+                    incrementalRunsCount);
             return getAllManeuversFromManeuverSpots(maneuverSpots);
         }
         throw new NoFixesException();
     }
 
-    private List<ManeuverSpot> detectManeuversIncrementally(TrackTimeInfo trackTimeInfo,
+    // public for unit tests
+    public List<ManeuverSpot> detectManeuversIncrementally(TrackTimeInfo trackTimeInfo,
             Iterable<GPSFixMoving> approximatingFixesToAnalyze, ManeuverDetectionResult lastManeuverDetectionResult)
             throws NoWindException {
         TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
@@ -329,6 +335,17 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return true;
     }
 
+    // for unit tests only
+    public void setLastManeuverDetectionResult(ManeuverDetectionResult lastManeuverDetectionResult) {
+        this.lastManeuverDetectionResult = lastManeuverDetectionResult;
+    }
+
+    @Override
+    public int getIncrementalRunsCount() {
+        ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
+        return lastManeuverDetectionResult != null ? lastManeuverDetectionResult.getIncrementalRunsCount() : 0;
+    }
+
     /**
      * Tries to get an already processed maneuver spot from previous calls of {@link #detectManeuvers()} which starts
      * with a douglas peucker fix similar to the provided {@code newDouglasPeuckerFix}. This method was designed to run
@@ -381,7 +398,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
         return null;
     }
-    
+
+    // public for unit tests
     /**
      * Represents a result of already performed maneuver analysis. The result is used by
      * {@link IncrementalManeuverDetectorImpl} to determine maneuvers incrementally.
@@ -389,14 +407,17 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * @author Vladislav Chumak (D069712)
      *
      */
-    private static class ManeuverDetectionResult {
+    public static class ManeuverDetectionResult {
 
         private final TimePoint latestFixTimePoint;
         private final List<ManeuverSpot> maneuverSpots;
+        private final int incrementalRunsCount;
 
-        public ManeuverDetectionResult(TimePoint latestFixTimePoint, List<ManeuverSpot> maneuverSpots) {
+        public ManeuverDetectionResult(TimePoint latestFixTimePoint, List<ManeuverSpot> maneuverSpots,
+                int incrementalRunsCount) {
             this.latestFixTimePoint = latestFixTimePoint;
             this.maneuverSpots = maneuverSpots;
+            this.incrementalRunsCount = incrementalRunsCount;
         }
 
         public TimePoint getLatestRawFixTimePoint() {
@@ -405,6 +426,10 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
         public List<ManeuverSpot> getManeuverSpots() {
             return maneuverSpots;
+        }
+
+        public int getIncrementalRunsCount() {
+            return incrementalRunsCount;
         }
 
     }
