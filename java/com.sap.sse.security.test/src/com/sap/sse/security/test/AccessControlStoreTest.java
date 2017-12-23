@@ -1,5 +1,6 @@
 package com.sap.sse.security.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -17,6 +18,7 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -33,6 +35,7 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
  * Tests that the MongoDB persistence is always in sync with the {@link UserStore}.
  */
 public class AccessControlStoreTest {
+    private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
     private final String testIdAsString = "test";
     private final String testDisplayName = "testDN";
     private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new TenantImpl(UUID.randomUUID(), "admin-tenant"));
@@ -55,7 +58,7 @@ public class AccessControlStoreTest {
 
     private void newStores() {
         try {
-            userStore = new UserStoreImpl("TestDefaultTenant");
+            userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
         } catch (UserGroupManagementException | UserManagementException e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +69,6 @@ public class AccessControlStoreTest {
     public void testCreateAccessControlList() throws TenantManagementException, UserGroupManagementException {
         accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
         assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
-
         newStores();
         assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
     }
@@ -76,7 +78,6 @@ public class AccessControlStoreTest {
         accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
         accessControlStore.removeAccessControlList(testIdAsString);
         assertNull(accessControlStore.getAccessControlList(testIdAsString));
-
         newStores();
         assertNull(accessControlStore.getAccessControlList(testIdAsString));
     }
@@ -85,7 +86,6 @@ public class AccessControlStoreTest {
     public void testCreateOwnership() throws TenantManagementException, UserGroupManagementException {
         accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
         assertNotNull(accessControlStore.getOwnership(testIdAsString));
-
         newStores();
         assertNotNull(accessControlStore.getOwnership(testIdAsString));
     }
@@ -94,17 +94,24 @@ public class AccessControlStoreTest {
     public void testDeleteOwnership() throws TenantManagementException, UserGroupManagementException {
         accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
         accessControlStore.removeOwnership(testIdAsString);
-        assertNull(accessControlStore.getOwnership(testIdAsString));
-
+        // expecting to fall back to default tenant ownership
+        final Ownership defaultOwnership = accessControlStore.getOwnership(testIdAsString);
+        assertDefaultOwnership(defaultOwnership);
         newStores();
-        assertNull(accessControlStore.getOwnership(testIdAsString));
+        assertDefaultOwnership(accessControlStore.getOwnership(testIdAsString));
+    }
+
+    private void assertDefaultOwnership(final Ownership defaultOwnershipToCheck) {
+        assertNull(defaultOwnershipToCheck.getUserOwner());
+        assertNotNull(defaultOwnershipToCheck.getTenantOwner());
+        assertEquals(DEFAULT_TENANT_NAME, defaultOwnershipToCheck.getTenantOwner().getName());
+        assertNull(defaultOwnershipToCheck.getDisplayNameOfOwnedObject());
     }
     
     @Test
     public void testCreateRole() throws TenantManagementException, UserGroupManagementException {
         userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
         assertNotNull(userStore.getRoleDefinition(testRoleId));
-
         newStores();
         assertNotNull(userStore.getRoleDefinition(testRoleId));
     }
