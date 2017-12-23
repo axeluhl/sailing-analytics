@@ -53,8 +53,6 @@ public class PermissionCheckerTest {
     private AccessControlList acl;
     private final UUID globalRoleId = UUID.randomUUID();
     private RoleDefinition globalRoleDefinition;
-    private final UUID tenantRoleId = UUID.randomUUID();
-    private RoleDefinition tenantRoleDefinition;
     
     @Before
     public void setUp() {
@@ -74,7 +72,6 @@ public class PermissionCheckerTest {
         Set<WildcardPermission> permissionSet = new HashSet<>();
         permissionSet.add(permission);
         globalRoleDefinition = new RoleDefinitionImpl(globalRoleId, "event", permissionSet);
-        tenantRoleDefinition = new RoleDefinitionImpl(tenantRoleId, "event:" + userTenantId.toString(), permissionSet);
     }
     
     @Test
