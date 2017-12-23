@@ -3,6 +3,7 @@ The following sections provide some known locations where images can be retrieve
 [[_TOC_]]
 
 # League events
+
 ## Norwegian Sailing League
 * [Images](https://www.flickr.com/photos/norgesseilforbund/albums/with/72157669769351622) 
 * Copyright: `© Norwegian Sailing League`
@@ -48,7 +49,8 @@ The following sections provide some known locations where images can be retrieve
 * [Images](https://www.facebook.com/pg/Eredivisie-Zeilen-1585864328326991/photos/?ref=page_internal)
 * Copyright: `© Remmelt Staal`
 
-# special events
+# Special events
+
 ## 505 worlds
+
 ## Travemünder Woche
-## 
