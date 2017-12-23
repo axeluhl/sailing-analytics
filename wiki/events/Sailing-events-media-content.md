@@ -1,4 +1,4 @@
-The following sections provide some known locations where images can be retrieved. The copyright information needs to be checked and added to the images e.g. as a watermark if necessary!
+The following sections provide some known locations where images can be retrieved and the responsible contact persons. The copyright information needs to be checked and added to the images e.g. as a watermark if necessary!
 
 [[_TOC_]]
 
