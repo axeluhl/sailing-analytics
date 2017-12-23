@@ -63,4 +63,5 @@ After selecting your leaderboard in the 'Leaderboards' section hit the 'Print' b
 
 A new tab displaying the pairing list table opens. Now hit 'Print' and the browsers print dialog will open:  
 
+(Usually the first row of the table below is colored with boat colors. In our test regatta the boat colors are not set) 
 <img src="/wiki/images/pairinglist/screenshot_printing_2.jpg"/>

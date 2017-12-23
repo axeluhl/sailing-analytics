@@ -4,7 +4,6 @@ import com.sap.sse.pairinglist.PairingFrameProvider;
 
 /**
  * Instances of this class are used for test generations of PairingLists
- *
  */
 public class PairingFrameProviderTest implements PairingFrameProvider {
 

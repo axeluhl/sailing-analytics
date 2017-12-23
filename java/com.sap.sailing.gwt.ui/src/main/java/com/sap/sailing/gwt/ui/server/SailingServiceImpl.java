@@ -271,6 +271,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -1777,7 +1778,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 competitorDTOsMap.put(competitorDTO.getIdAsString(), competitorDTO);
             }
             for (Competitor competitor : race.getCompetitors()) {
-                Boat boatOfCompetitor = race.getBoatOfCompetitorById(competitor.getId());
+                Boat boatOfCompetitor = race.getBoatOfCompetitor(competitor);
                 if (boatOfCompetitor != null) {
                     BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(),
                             boatOfCompetitor.getColor());
@@ -5425,18 +5426,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
-        denoteForRaceLogTracking(leaderboardName, null);
+        denoteForRaceLogTracking(leaderboardName, /* race name prefix */ null);
     }
     
     @Override
-    public void denoteForRaceLogTracking(String leaderboardName,String prefix) throws Exception {
+    public void denoteForRaceLogTracking(String leaderboardName, String prefix) throws Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
-        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard,prefix);
+        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard, prefix);
     }
+    
     /**
-     * @param triple leaderboard and racecolumn and fleet names
-     * @return
-     * @throws NotFoundException 
+     * @param triple
+     *            leaderboard and racecolumn and fleet names
      */
     private RaceLog getRaceLog(com.sap.sse.common.Util.Triple<String, String, String> triple) throws NotFoundException {
         return getRaceLog(triple.getA(), triple.getB(), triple.getC());
@@ -6801,10 +6802,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount,
             final int competitorCount, final int flightMultiplier) {
-        
         PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
                 flightMultiplier);
-        
         return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, 
                 template.getPairingListTemplate(), template.getQuality());
     }
@@ -6919,6 +6918,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             fleet.getName(), new HashSet<CompetitorDTO>());
                 }
             }
+        }
+        if (leaderboard instanceof LeaderboardThatHasRegattaLike && flightMultiplier > 1) {
+            final IsRegattaLike regattaLike = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike();
+            logger.info("Updating regatta "+regattaLike.getRegattaLikeIdentifier().getName()+
+                    ", setting flag that fleets can run in parallel because a pairing list with flight multiplier "+
+                    flightMultiplier+" has been used.");
+            regattaLike.setFleetsCanRunInParallelToTrue();
         }
     }
     

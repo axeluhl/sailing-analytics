@@ -259,8 +259,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
             @Override
             public void setFleetsCanRunInParallelToTrue() {
-                // TODO Auto-generated method stub
-                
+                RegattaImpl.this.setFleetsCanRunInParallelToTrue();
             }
         };
         this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(raceColumnListeners));

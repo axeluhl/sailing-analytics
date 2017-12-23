@@ -6,7 +6,11 @@ import java.util.List;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
@@ -27,12 +31,31 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
     private final StringMessages stringMessages;
     private final PairingListDTO pairingListDTO;
     private final List<String> fleetNames;
+    private final Button print;
+    private final String leaderboardName;
     
-    public PairingListPreviewDialog(PairingListDTO pairingListDTO, List<String> fleetNames, StringMessages stringMessages) {
+    public PairingListPreviewDialog(PairingListDTO pairingListDTO, List<String> fleetNames, StringMessages stringMessages,String leaderboardName) {
         super(stringMessages.pairingList() + " " + stringMessages.printView(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
         this.stringMessages = stringMessages;
         this.pairingListDTO = pairingListDTO;
         this.fleetNames = fleetNames;
+        this.leaderboardName=leaderboardName;
+        this.print= new Button(stringMessages.print());
+        this.print.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                Widget pairingListPanel = getPairingListGrid();
+                printPairingListGrid(
+                        "<div class='printHeader'><img src='images/home/logo-small@2x.png' </img>"
+                                + "<b class='title'>"
+                                + SafeHtmlUtils.fromString(leaderboardName)
+                                .asString()
+                                + "</b></div>" + pairingListPanel.asWidget()
+                                        .getElement().getInnerHTML());
+            }
+        });
+        this.getRightButtonPannel().add(print);
     }
 
     @Override
@@ -126,12 +149,12 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
                             .setFontWeight(Style.FontWeight.BOLD);
                     pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setTextAlign(TextAlign.CENTER);
-                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
-                            .setPadding(5, Unit.PX);
+                    pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle().setPadding(5,
+                            Unit.PX);
                     pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setBackgroundColor(color);
                 }
-                
+
                 groupIndex++;
             }
             flightIndexInGrid++;
@@ -148,5 +171,45 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
 
         return pairingListPanel;
     }
+
+    private native void printPairingListGrid(String pageHTMLContent) /*-{
+		var frameID = '__gwt_historyFrame';
+		var frame = $doc.getElementById(frameID);
+		if (!frame) {
+			$wnd.alert("Error: Can not find frame '" + frameID + "'");
+			return;
+		}
+		frame = frame.contentWindow;
+		var document = frame.document;
+		document.open();
+		document.write(pageHTMLContent);
+
+		//adding style to doc
+		var css = "body { background: #fff; font-family: 'Open Sans', Arial, Verdana, sans-serif;"
+				+ "line-height: 1; font-weight: 400; border: 0 }"
+				+ ".title { font-size: 18px; text-align: center; float: right; color: #f6f9fc; margin-bottom: 0.466666666666667em; margin-right: 0.466666666666667em }"
+				+ "img { max-height: 2em; float:left; margin-top: 0.466666666666667em; margin-left: 0.466666666666667em }"
+				+ ".printHeader { font-size: 1rem; background: #333; border-bottom: 0.333333333333333em solid #f0ab00;"
+				+ "height: 3.333333333333333em; line-height: 3em; width: 100%; overflow: hidden;}"
+				+ "table { border-collapse: collapse; border: 1px solid black; margin: auto; width: 100%}"
+				+ "td { font-size: 13px; }"
+		head = document.head || document.getElementsByTagName('head')[0];
+		style = document.createElement('style');
+		style.type = 'text/css';
+		if (style.styleSheet) {
+			style.styleSheet.cssText = css;
+		} else {
+			style.appendChild(document.createTextNode(css));
+		}
+		head.appendChild(style);
+
+		document.close();
+
+		//Timeout for assets loading
+		setTimeout(function() {
+			frame.focus();
+			frame.print();
+		}, 100);
+    }-*/;
 
 }

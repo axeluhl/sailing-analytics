@@ -26,9 +26,9 @@ public class CompetitorWithChangingBoatJsonSerializer extends CompetitorJsonSeri
     }
 
     @Override
-    protected Color getColor(Competitor competitor ) {
+    protected Color getColor(Competitor competitor) {
         if (race != null) {
-            Boat boatOfCompetitor = race.getBoatOfCompetitorById(competitor.getId());
+            Boat boatOfCompetitor = race.getBoatOfCompetitor(competitor);
             if (boatOfCompetitor != null) {
                 return boatOfCompetitor.getColor();
             }
@@ -37,9 +37,9 @@ public class CompetitorWithChangingBoatJsonSerializer extends CompetitorJsonSeri
     }
     
     @Override
-    protected Boat getBoat(Competitor competitor ) {
+    protected Boat getBoat(Competitor competitor) {
         if (race != null) {
-            Boat boatOfCompetitor = race.getBoatOfCompetitorById(competitor.getId());
+            Boat boatOfCompetitor = race.getBoatOfCompetitor(competitor);
             if (boatOfCompetitor != null) {
                 return boatOfCompetitor;
             }

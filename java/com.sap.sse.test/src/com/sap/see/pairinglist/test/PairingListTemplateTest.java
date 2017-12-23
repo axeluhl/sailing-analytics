@@ -21,12 +21,10 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
         final int flights = 15;
         final int groups = 3;
         final int competitors = 18;
-
         int[][] plTemplate = this.createPairingListTemplate(flights, groups, competitors);
         int[][] associations = new int[competitors][competitors];
 
         associations = this.incrementAssociations(plTemplate, associations);
-
         for (int x = 0; x < associations.length; x++) {
             for (int y = 0; y < associations[0].length; y++) {
                 if ((x == y) && (associations[x][y] != -1)) {
@@ -46,20 +44,16 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
 
         for (int i = 0; i < tests; i++) {
             long time = System.currentTimeMillis();
-
             this.createPairingListTemplate(15, 3, 18);
-
             time = System.currentTimeMillis() - time;
             System.out.println(time);
             a[i] = time;
         }
-
         long sum = 0;
         for (int i = 0; i < tests; i++) {
             sum += a[i];
         }
         double average = sum / tests + 1;
-
         System.out.println("Average Time: " + (average / 1000) + "s");
         if (average > 10000) {
             Assert.fail("The calculation of Pairing Lists took longer than expected!");
@@ -90,7 +84,6 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
 
         associations = this.incrementAssociations(flight, associations);
         associations = this.decrementAssociations(flight, associations);
-
         for (int[] key : associations) {
             for (int value : key) {
                 if (value > 0) {

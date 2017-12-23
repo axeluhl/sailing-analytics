@@ -31,10 +31,6 @@ public class BoatDTO extends NamedDTO implements Serializable {
         return sailId;
     }
     
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
