@@ -17,8 +17,8 @@ public class PairingListLeaderboardAdapter implements PairingList<RaceColumn, Fl
         int boatIndex = 0;
         for (Competitor competitor : raceColumn.getAllCompetitors(fleet)) {
             Boat boat;
-            if (isTrackedRace && raceColumn.getTrackedRace(fleet).getRace().getBoatOfCompetitorById(competitor) != null) {
-                boat = raceColumn.getTrackedRace(fleet).getRace().getBoatOfCompetitorById(competitor);
+            if (isTrackedRace && raceColumn.getTrackedRace(fleet).getRace().getBoatOfCompetitor(competitor) != null) {
+                boat = raceColumn.getTrackedRace(fleet).getRace().getBoatOfCompetitor(competitor);
             } else {
                 // TODO fetch boats form leader board (bug4403)
                 boat = new BoatImpl("Boat " + (boatIndex + 1), new BoatClassImpl("49er", true), "DE" + boatIndex);
