@@ -90,7 +90,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
-
+        
         final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, getUserService(), this, this, getStringMessages(), panel);
         eventManagementPanel.ensureDebugId("EventManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
@@ -101,6 +101,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             }
         }, getStringMessages().events(), Permission.MANAGE_EVENTS);
         leaderboardGroupsDisplayers.add(eventManagementPanel);
+        
+        /* REGATTAS */
 
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(
                 sailingService, this, getStringMessages(), this, eventManagementPanel);
@@ -147,7 +149,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         regattasDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
-
+        
         /* RACES */
         
         final HorizontalTabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");
@@ -209,7 +211,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel),
                 getStringMessages().tracTracEvents(), Permission.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(tractracEventManagementPanel);
-
+        
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
                 sailingService, this, this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(swissTimingReplayConnectorPanel),

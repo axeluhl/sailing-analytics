@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
@@ -44,6 +45,19 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
         final PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>(
                 perspectiveOwnSettings, Collections.emptyMap());
         return linkWithSettingsGenerator.createUrl(settings);
+    }
+    
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName) {
+        return createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName, leaderboardGroupName, regattaName, raceName, null);
+    }
+    
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName, String mode) {
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(regattaName,
+                raceName, leaderboardName, leaderboardGroupName, eventId, mode);
+        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                perspectiveOwnSettings, Collections.emptyMap());
+        return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
     }
 
     public static String createRaceBoardLink(RaceboardContextDefinition ctx,

@@ -5,6 +5,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 public enum Permission implements com.sap.sse.security.shared.Permission {
     // AdminConsole permissions
     MANAGE_EVENTS,
+    MANAGE_PAIRING_LISTS,
     MANAGE_REGATTAS,
     MANAGE_TRACKED_RACES,
     SHOW_TRACKED_RACES,
