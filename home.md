@@ -141,6 +141,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Kieler Woche event page|wiki/events/kieler-woche-2015]]
 * [[Charleston Race Week 2016|wiki/events/Charleston-Race-Week-2016]]
 * [[Sailing Leagues 2016|wiki/events/sailing-Leagues-2016]]
+* [[Media Content|wiki/events/Sailing-events-media-content]]
 
 ## Planning
 * [[Overview|https://wiki.sapsailing.com/pages/wiki/planning/]]
