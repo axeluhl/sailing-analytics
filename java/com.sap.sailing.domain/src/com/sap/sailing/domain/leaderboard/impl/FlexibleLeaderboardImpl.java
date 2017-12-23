@@ -107,7 +107,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
             @Override
             public void setFleetsCanRunInParallelToTrue() {
-                
+                // no need to do anything; a FlexibleLeaderboard only has one (default) fleet
             }
         };
         this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
@@ -389,6 +389,6 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public void setFleetsCanRunInParallelToTrue() {
-        
+        // no need to do anything because a FlexibleLeaderboard only has one (default) fleet
     }
 }
