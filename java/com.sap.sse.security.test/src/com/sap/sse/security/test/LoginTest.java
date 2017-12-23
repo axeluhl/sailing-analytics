@@ -3,6 +3,7 @@ package com.sap.sse.security.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
@@ -21,9 +22,12 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -84,6 +88,20 @@ public class LoginTest {
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));
+    }
+
+    @Test
+    public void roleWithQualifiersTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        Tenant userDefaultTenant = userStore.createTenant(UUID.randomUUID(), "me-tenant");
+        User meUser = userStore.createUser("me", "me@sap.com", userDefaultTenant);
+        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
+        final RoleImpl testRole = new RoleImpl(testRoleDefinition, userDefaultTenant, meUser);
+        userStore.addRoleForUser("me", testRole);
+        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
+        assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));
+        Role role2 = store2.getUserByName("me").getRoles().iterator().next();
+        assertSame(store2.getTenantByName("me-tenant"), role2.getQualifiedForTenant());
+        assertSame(store2.getUserByName("me"), role2.getQualifiedForUser());
     }
 
     @Test

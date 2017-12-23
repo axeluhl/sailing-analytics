@@ -4,6 +4,13 @@ import java.util.Set;
 
 import com.sap.sse.common.Util.Triple;
 
+/**
+ * For equality and hash code, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
+ * possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user qualifier
+ * are considered
+ * 
+ * @author Axel Uhl (D043530)
+ */
 public class RoleImpl implements Role {
     private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
     private static final long serialVersionUID = 1243342091492822614L;
@@ -64,16 +71,26 @@ public class RoleImpl implements Role {
                         (getQualifiedForUser()!=null?(QUALIFIER_SEPARATOR+getQualifiedForUser().getName()):"");
     }
 
+    /**
+     * For hashing, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
+     * possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user qualifier
+     * are hashed.
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((qualifiedForTenant == null) ? 0 : qualifiedForTenant.hashCode());
-        result = prime * result + ((qualifiedForUser == null) ? 0 : qualifiedForUser.hashCode());
+        result = prime * result + ((qualifiedForUser == null) ? 0 : qualifiedForUser.getName().hashCode());
         result = prime * result + ((roleDefinition == null) ? 0 : roleDefinition.hashCode());
         return result;
     }
 
+    /**
+     * For equality, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
+     * possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user qualifier
+     * are compared.
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -91,7 +108,7 @@ public class RoleImpl implements Role {
         if (qualifiedForUser == null) {
             if (other.qualifiedForUser != null)
                 return false;
-        } else if (!qualifiedForUser.equals(other.qualifiedForUser))
+        } else if (!qualifiedForUser.getName().equals(other.qualifiedForUser.getName()))
             return false;
         if (roleDefinition == null) {
             if (other.roleDefinition != null)

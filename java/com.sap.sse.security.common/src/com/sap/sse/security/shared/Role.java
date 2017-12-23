@@ -10,13 +10,16 @@ import com.sap.sse.common.Named;
  * serve as its own {@link RoleDefinition} object as it doesn't have to exist for different combinations of
  * {@link Tenant} and/or {@link SecurityUser} parameters. Otherwise, {@link Role} objects will carry the necessary
  * actual {@link Tenant} / {@link SecurityUser} parameter objects which then help to decide whether the parameterized
- * role implies its permissions for a given object.<p>
+ * role implies its permissions for a given object.
+ * <p>
  * 
- * A {@link Role} does not carry an ID of its own.<p>
+ * A {@link Role} does not carry an ID of its own.
+ * <p>
  * 
- * Equality ({@link #equals(Object)} and {@link #hashCode()} are expected to be based on the {@link RoleDefinition#getId() ID}
- * of the {@link #getRoleDefinition() role definition} on which this role is based, plus the {@link #getQualifiedForTenant()}
- * and {@link #getQualifiedForUser()} fields.
+ * Equality ({@link #equals(Object)} and {@link #hashCode()} are expected to be based on the
+ * {@link RoleDefinition#getId() ID} of the {@link #getRoleDefinition() role definition} on which this role is based,
+ * plus the {@link #getQualifiedForTenant() tenant qualifier's} {@link Tenant#getId() ID} and the
+ * {@link #getQualifiedForUser()} field's {@link SecurityUser#getName() username}.
  * 
  * @author Axel Uhl (d043530)
  *
