@@ -20,6 +20,7 @@ import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.shared.PermissionBuilderImpl;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.RoleImpl;
@@ -53,7 +54,7 @@ public class PermissionCheckerTest {
     private final UUID globalRoleId = UUID.randomUUID();
     private RoleDefinition globalRoleDefinition;
     private final UUID tenantRoleId = UUID.randomUUID();
-    private RoleDefinition tenantRole;
+    private RoleDefinition tenantRoleDefinition;
     
     @Before
     public void setUp() {
@@ -73,7 +74,7 @@ public class PermissionCheckerTest {
         Set<WildcardPermission> permissionSet = new HashSet<>();
         permissionSet.add(permission);
         globalRoleDefinition = new RoleDefinitionImpl(globalRoleId, "event", permissionSet);
-        tenantRole = new RoleDefinitionImpl(tenantRoleId, "event:" + userTenantId.toString(), permissionSet);
+        tenantRoleDefinition = new RoleDefinitionImpl(tenantRoleId, "event:" + userTenantId.toString(), permissionSet);
     }
     
     @Test
@@ -117,10 +118,11 @@ public class PermissionCheckerTest {
         roleDefinitions.add(globalRoleDefinition);
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, Util.map(roleDefinitions, rd->new RoleImpl(rd)), adminOwnership, acl));
         roleDefinitions.remove(globalRoleDefinition);
-        roleDefinitions.add(tenantRole);
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, Util.map(roleDefinitions, rd->new RoleImpl(rd)), adminOwnership, acl));
+        Set<Role> tenantQualifiedRole = new HashSet<>();
+        tenantQualifiedRole.add(new RoleImpl(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, tenantQualifiedRole, adminOwnership, acl));
         Ownership testOwnership = new OwnershipImpl(eventId.toString(), adminUser, userTenant, "event");
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, Util.map(roleDefinitions, rd->new RoleImpl(rd)), testOwnership, acl));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, Util.map(roleDefinitions, rd->new RoleImpl(rd)), null, acl));
+        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, tenantQualifiedRole, testOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, tenantQualifiedRole, null, acl));
     }
 }
