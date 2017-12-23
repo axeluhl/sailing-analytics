@@ -105,7 +105,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         qualityHelpImage.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open("https://wiki.sapsailing.com/wiki/howto/eventmanagers/Pairing-Lists", "", "");
+                Window.open("https://wiki.sapsailing.com/wiki/howto/eventmanagers/Pairing-Lists#pairing-list_general_quality", "", "");
             }
         });
         formGrid.setWidget(4, 0, qualityPanel);
