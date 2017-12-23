@@ -21,7 +21,7 @@ There are four image types which can be added to an event carrying different rol
 * **logo:** the sailing event or league logo which gets displayed e.g. in the upper left corner next to the name of the sailing event.
 * **stage:** used as a banner for the sailing event and gets displayed e.g. on the landing page.
 * **teaser:** used to give a preview about the sailing event and gets displayed e.g. in the event overview where all events are grouped by years.    
-* **galery:** representing the images which are displayed under the __media__ tab of each event.
+* **galery:** representing the images which are displayed under the _media_ tab of each event.
 
 ### Tutorial - GIMP
 
