@@ -5,7 +5,7 @@ This page descrips how to manage the media content like images and videos for th
 
 ## Images
 
-### List for images and videos of the sailing events
+### List of images and videos
 The following sections provide some known locations where images can be retrieved for the several leagues and events. The copyright information needs to checked and added to the images e.g. as a watermark if necessary!
 
 #### Norwegian Sailing League
@@ -21,6 +21,29 @@ The following sections provide some known locations where images can be retrieve
 * [Images](http://www.segelbundesliga.at/presse/pressefotos)
 * Copyright: `© SBL/Wolfgang Schreder`
 
+#### Allsvenskan Segling
+* [Images](https://www.facebook.com/allsvenskansegling/)
+* Copyright: `© Swedish Sailing Federation`
+* [Videos](https://www.youtube.com/user/svensksegling/featured)
+
+#### Deutsche Segel-Bundesliga
+* [Images](http://segelbundesliga.de/pressefotos/)
+* Copyright: Check the image details! (`© DSBL/Lars Wehrmann` or `© DSBL/Oliver Maier`)
+* [Videos](https://www.youtube.com/user/SegelBundesliga)
+
+#### Danish Sailing League
+* [Images](https://www.skyfish.com/p/sejlsportsligaen)
+* Coypright: `© Sejlsportsligaen`
+* [Videos](https://www.youtube.com/channel/UCgvYOeDH4NUM_tWj-kXs27Q/feed)
+
+#### Extreme Sailing Series
+* [Images](http://www.extremesailingseries.com/gallery)
+* Coypright: Check the image details!
+* [Videos](https://www.youtube.com/user/ExtremeSailingSeries)
+
+#### Polish Sailing League
+* [Images](https://www.facebook.com/pg/EkstraklasaZeglarska/photos/?ref=page_internal)
+* Copyright: `© Polish Sailing League`
 
 
 
