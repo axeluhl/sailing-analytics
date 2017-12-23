@@ -1,4 +1,4 @@
-The following sections provide some known locations where images can be retrieved for the several leagues and events. The copyright information needs to checked and added to the images e.g. as a watermark if necessary!
+The following sections provide some known locations where images can be retrieved. The copyright information needs to be checked and added to the images e.g. as a watermark if necessary!
 
 [[_TOC_]]
 
@@ -48,9 +48,4 @@ The following sections provide some known locations where images can be retrieve
 ## Dutch Sailing League
 * [Images](https://www.facebook.com/pg/Eredivisie-Zeilen-1585864328326991/photos/?ref=page_internal)
 * Copyright: `© Remmelt Staal`
-
-# Special events
-
-## 505 worlds
-
-## Travemünder Woche
+* [Videos](https://www.youtube.com/channel/UCQbA1IRh15t4BpU64lb6WaA) 
