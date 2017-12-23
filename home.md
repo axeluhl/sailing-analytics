@@ -111,6 +111,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Linking Race Videos|wiki/howto/eventmanagers/linking-race-videos]]
 * [[Import official results|wiki/howto/eventmanagers/results-import]]
 * [[Pairing lists|wiki/howto/eventmanagers/pairing-lists]]
+* [[Manage media content|wiki/howto/eventmanagers/Manage-media-content]]
 
 ### Setup
 
