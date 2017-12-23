@@ -33,6 +33,7 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
 public class LoginTest {
+    private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
     private UserStoreImpl userStore;
     private AccessControlStore accessControlStore;
 
@@ -47,7 +48,7 @@ public class LoginTest {
         db.getCollection(CollectionNames.ROLES.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        userStore = new UserStoreImpl("TestDefaultTenant");
+        userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
         accessControlStore = new AccessControlStoreImpl(userStore);
         
         Activator.setTestStores(userStore, accessControlStore);
@@ -63,7 +64,7 @@ public class LoginTest {
     @Test
     public void setPreferencesTest() throws TenantManagementException, UserGroupManagementException, UserManagementException {
         userStore.setPreference("me", "key", "value");
-        UserStoreImpl store2 = new UserStoreImpl("TestDefaultTenant");
+        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertEquals("value", store2.getPreference("me", "key"));
     }
 
@@ -71,7 +72,7 @@ public class LoginTest {
     public void setAndUnsetPreferencesTest() throws TenantManagementException, UserGroupManagementException, UserManagementException {
         userStore.setPreference("me", "key", "value");
         userStore.unsetPreference("me", "key");
-        UserStoreImpl store2 = new UserStoreImpl("TestDefaultTenant");
+        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertNull(store2.getPreference("me", "key"));
     }
 
@@ -81,7 +82,7 @@ public class LoginTest {
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final RoleImpl testRole = new RoleImpl(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
-        UserStoreImpl store2 = new UserStoreImpl("TestDefaultTenant");
+        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));
     }
 
@@ -89,7 +90,7 @@ public class LoginTest {
     public void permissionsTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
         userStore.createUser("me", "me@sap.com", new TenantImpl(UUID.randomUUID(), "me-tenant"));
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
-        UserStoreImpl store2 = new UserStoreImpl("TestDefaultTenant");
+        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertTrue(store2.getUserByName("me").hasPermission(new WildcardPermission("a:b:c")));
     }
 

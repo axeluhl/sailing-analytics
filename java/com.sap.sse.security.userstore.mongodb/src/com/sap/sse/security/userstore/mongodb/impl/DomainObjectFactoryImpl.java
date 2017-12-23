@@ -195,20 +195,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
      *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
      *            parameter is {@code null}, role migration will throw an exception.
-     * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
-     *         tenant} attribute which need to be replaced by the caller once the {@link Tenant} objects have been
-     *         loaded from the DB. The only field that is set correctly in those dummy {@link Tenant} objects is their
-     *         {@link Tenant#getId() ID} field.
+     * @param tenants
+     *            the tenants to resolve tenant IDs against for users' default tenants as well as role tenant qualifiers
+     * @return the user objects returned have a fully resolved default tenant as well as fully-resolved role tenant/user
+     *         qualifiers; the {@link Tenant} objects passed in the {@code tenants} map may still have an empty user
+     *         group that is filled later.
      */
     @Override
     public Iterable<User> loadAllUsers(
-            Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration, Map<UUID, Tenant> tenants) throws UserManagementException {
+            Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration,
+            Map<UUID, Tenant> tenants) throws UserManagementException {
         Map<String, User> result = new HashMap<>();
         DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
             for (DBObject o : userCollection.find()) {
-                User user = loadUserWithProxyRoleUserQualifiers(o, roleDefinitionsById, defaultTenantForRoleMigration, tenants);
-                result.put(user.getName(), user);
+                User userWithProxyRoleUserQualifier = loadUserWithProxyRoleUserQualifiers(o, roleDefinitionsById,
+                        defaultTenantForRoleMigration, tenants);
+                result.put(userWithProxyRoleUserQualifier.getName(), userWithProxyRoleUserQualifier);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load users.");
@@ -245,6 +248,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
      *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
      *            parameter is {@code null}, role migration will throw an exception.
+     * @param tenants
+     *            the tenants to resolve tenant IDs against for users' default tenants as well as role tenant qualifiers
      * @return the user objects returned have dummy objects for their {@link UserImpl#getRoles() roles'}
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
@@ -333,9 +338,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
         final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
         final Tenant qualifyingTenant = qualifyingTenantId == null ? null : tenants.get(qualifyingTenantId);
-        final SecurityUser qualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
+        final SecurityUser proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
                 : new SecurityUserImpl((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()), /* default tenant */ null);
-        return new RoleImpl(roleDefinition, qualifyingTenant, qualifyingUser);
+        return new RoleImpl(roleDefinition, qualifyingTenant, proxyQualifyingUser);
     }
 
     private Map<AccountType, Account> createAccountMapFromdDBObject(DBObject accountsMap) {

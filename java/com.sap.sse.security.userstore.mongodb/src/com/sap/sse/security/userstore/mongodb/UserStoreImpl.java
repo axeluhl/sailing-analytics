@@ -210,27 +210,6 @@ public class UserStoreImpl implements UserStore {
             for (final Tenant tenant : tenants.values()) {
                 migrateProxyUsersInGroupToRealUsersByUsername(tenant);
             }
-            
-            // the users loaded have dummy default tenant objects which have only their ID set;
-            // replace them with the real Tenant objects loaded only now
-            for (final User userWithDummyDefaultTenant : users.values()) {
-                if (userWithDummyDefaultTenant.getDefaultTenant() != null) {
-                    userWithDummyDefaultTenant.setDefaultTenant(getTenant(userWithDummyDefaultTenant.getDefaultTenant().getId()));
-                }
-            }
-            // furthermore, the users loaded only had dummy Role objects associated with them where
-            // the qualifying tenant and qualifying user were represented only by dummies that had only
-            // their keys set correctly; those need to be resolved and replaced by the original objects now:
-            for (final User userWithDummyRoles : users.values()) {
-                final Set<Role> dummyRoles = new HashSet<>();
-                Util.addAll(userWithDummyRoles.getRoles(), dummyRoles); // clone to avoid concurrent modification exceptions
-                for (final Role dummyRole : dummyRoles) {
-                    userWithDummyRoles.removeRole(dummyRole);
-                    if (userWithDummyRoles.getDefaultTenant() != null) {
-                        userWithDummyRoles.setDefaultTenant(getTenant(userWithDummyRoles.getDefaultTenant().getId()));
-                    }
-                }
-            }
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
                 if (e.getValue() != null) {
                     final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
