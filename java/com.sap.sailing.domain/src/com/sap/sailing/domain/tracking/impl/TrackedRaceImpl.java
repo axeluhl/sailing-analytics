@@ -711,8 +711,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-                    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
-                            10000, competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor),
+                    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache =
+                            /* preserve how many milliseconds */ 10000, competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor),
                             (competitor, detector) -> {
                                 // check if incremental detector computed its maneuvers incrementally. If yes, recompute
                                 // all maneuvers from scratch to remove douglas peucker fixes drift due to incremental
@@ -722,7 +722,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                     maneuverCache.triggerUpdate(competitor, null);
                                 }
                             });
-
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {

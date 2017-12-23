@@ -13,9 +13,9 @@ import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.ApproximateTime;
 
 /**
- * Caches entries and ensures that the entries only remain in the cache, if they are hit at least one time in the
- * configurable period of time. A separate timer keeps invalidating records. When the cache runs empty, the timer is
- * stopped. When new entries appear, the timer is started again.
+ * Caches entries and ensures that the entries only remain in the cache if they are hit at least one time in the
+ * configurable period of time. A separate timer keeps invalidating records. When the cache runs empty the timer is
+ * stopped. When new entries appear the timer is started again.
  * 
  * @author Vladislav Chumak (D069712)
  *
