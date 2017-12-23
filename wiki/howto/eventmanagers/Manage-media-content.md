@@ -3,6 +3,8 @@ This page descrips how to manage the media content like images and videos for th
 
 ## Images
 
+### Link list
+
 ### Tags and their impact
 
 ### Scale guidelines for several purposes
@@ -12,4 +14,10 @@ This page descrips how to manage the media content like images and videos for th
 ### Tutorial - GIMP
 
 ## Videos
+
+### Link list
+
+### Tags and their impact
+
+
 
