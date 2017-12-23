@@ -23,16 +23,16 @@ For performance reasons, images should be scaled before uploading them. The foll
 ## S3 folder structure
 Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following naming conventions:     
 
-Build a root folder for the event. Please add preceding number for providing a well grouped events order.  
+Build a event root folder for the event. Please add preceding number for providing a well grouped events order.  
 **pattern:** `event year`/`league name`/`event name with preceding number`/  
 e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/  
 
 Add a folder for the _logo_, _stage_ and _teaser_ images  
-**pattern:** `{root folder}`/`Images_Homepage`/  
+**pattern:** `{event root folder}`/`Images_Homepage`/  
 e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Homepage`/
 
 Add a folder for the _galery_ images  
-**pattern:** `{root folder}`/`Images_Photos`/    
+**pattern:** `{event root folder}`/`Images_Photos`/    
 e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Photos`/
 
 ## Image manipulation with GIMP
