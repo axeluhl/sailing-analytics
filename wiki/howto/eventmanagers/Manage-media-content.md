@@ -20,16 +20,28 @@ For performance reasons, images should be scaled before uploading them. The foll
 * **stage:** about 1800 x 500 pixel (file size < 500 kB)
 * **gallery:** about 1400 x 1000 pixel (file size < 350 kB)
 
-## Tutorial - GIMP
+## S3 folder structure
+Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following naming conventions:     
+
+Build a root folder for the event. Please add preceding number for providing a well grouped events order.  
+**pattern:** `event year`/`league name`/`event name with preceding number`/  
+e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/  
+
+Add a folder for the _logo_, _stage_ and _teaser_ images  
+**pattern:** `{root folder}`/`Images_Homepage`/  
+e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Homepage`/
+
+Add a folder for the _galery_ images  
+**pattern:** `{root folder}`/`Images_Photos`/    
+e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Photos`/
+
+## Image manipulation with GIMP
 The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [plugin](http://registry.gimp.org/node/26259) for batch manipulation.  
 
 1. Start up GIMP go to File -> Batch Image Manipulation
 2. Add -> Resize -> select the option _set exact size in pixel_ and _preserve aspect ratio_ -> insert the desired width & height -> Ok
 3. Add -> Add a watermark -> leave defaults -> insert copyright information -> Ok
 4. Add images -> ... -> Apply
-
-## S3 folder structure
-Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following naming conventions:
 
 
 
