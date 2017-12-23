@@ -695,16 +695,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
                     private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
                             /* preserve how many milliseconds */ 10000,
-                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor),
-                            (competitor, detector) -> {
-                                // check if incremental detector computed its maneuvers incrementally. If yes, recompute
-                                // all maneuvers from scratch to remove douglas peucker fixes drift due to incremental
-                                // computation.
-                                if (detector.getIncrementalRunsCount() > 1) {
-                                    detector.clearState();
-                                    maneuverCache.triggerUpdate(competitor, null);
-                                }
-                            });
+                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor));
 
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)

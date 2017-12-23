@@ -29,6 +29,8 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * {@code latestEnd} which has been ever provided.
  * 
  * @author Vladislav Chumak (D069712)
+ * @deprecated The set of douglas peucker fixes calculated by this calculator incrementally differs from the set
+ *             calculated by a full calculation run. Therefore, this calculator cannot be used in production right now.
  *
  */
 public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixesCalculatorImpl

@@ -63,6 +63,7 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
 
     // TODO Think about how to implement an incremental douglas peucker which matches exactly the non-incremental
     // version
+    @SuppressWarnings("deprecation")
     @Test
     @Ignore
     public void testIncrementalDouglasPeucker() throws NoWindException {
@@ -92,7 +93,8 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
     }
 
     @Test
-    public void testIncrementalManeuverCalculation() throws NoWindException, NoFixesException {
+    public void testIncrementalManeuverCalculationWithoutIncrementalDouglasPeucker()
+            throws NoWindException, NoFixesException {
         Competitor competitor = getCompetitorByName("Findel");
         DynamicTrackedRaceImpl trackedRace = getTrackedRace();
         IncrementalManeuverDetectorImpl maneuverDetector = new IncrementalManeuverDetectorImpl(trackedRace, competitor);

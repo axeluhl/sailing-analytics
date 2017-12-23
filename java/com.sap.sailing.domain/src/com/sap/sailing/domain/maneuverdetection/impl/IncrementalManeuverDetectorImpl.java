@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.maneuverdetection.IncrementalApproximatedFixesCalculator;
+import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -23,11 +23,11 @@ import com.sap.sse.common.Util;
 
 /**
  * Incremental maneuver detector, which is capable of detecting maneuvers by a {@link #detectManeuvers()} call in an
- * incremental way. This detector is using {@link IncrementalApproximatedFixesCalculatorImpl} for incremental
- * calculation of Douglas Peucker fixes. When the Douglas Peucker fixes are calculated, it tries to match the resulting
- * fixes with already calculated Douglas Peucker fixes groups for already calculated maneuvers (represented by
- * {@link ManeuverSpot}) from previous {@link #detectManeuvers()} calls. The existing maneuvers of matched existing
- * Douglas Peucker fixes groups are reused, when the following conditions are met:
+ * incremental way. This detector is using {@link ApproximatedFixesCalculatorImpl} for calculation of Douglas Peucker
+ * fixes. When the Douglas Peucker fixes are calculated, it tries to match the resulting fixes with already calculated
+ * Douglas Peucker fixes groups for already calculated maneuvers (represented by {@link ManeuverSpot}) from previous
+ * {@link #detectManeuvers()} calls. The existing maneuvers of matched existing Douglas Peucker fixes groups are reused,
+ * when the following conditions are met:
  * <ul>
  * <li>The next determined Douglas Peucker fix following after the last fix of the matched existing Douglas Peucker
  * fixes group gets matched with the beginning fix of an another existing Douglas Peucker fixes group</li>
@@ -68,16 +68,16 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     private volatile ManeuverDetectionResult lastManeuverDetectionResult = null;
 
     /**
-     * Incremental calculator for douglas peucker fixes, which is stateful
+     * Calculator for douglas peucker fixes
      */
-    private final IncrementalApproximatedFixesCalculator incrementalApproximatedFixesCalculator;
+    private final ApproximatedFixesCalculator approximatedFixesCalculator;
 
     /**
      * Constructor for unit tests only.
      */
     public IncrementalManeuverDetectorImpl() {
         super();
-        this.incrementalApproximatedFixesCalculator = null;
+        this.approximatedFixesCalculator = null;
     }
 
     /**
@@ -91,8 +91,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      */
     public IncrementalManeuverDetectorImpl(TrackedRace trackedRace, Competitor competitor) {
         super(trackedRace, competitor);
-        this.incrementalApproximatedFixesCalculator = new IncrementalApproximatedFixesCalculatorImpl(trackedRace,
-                competitor);
+        // TODO Use IncrementalApproximatedFixesCalculatorImpl when its deprecation status gets fixed
+        this.approximatedFixesCalculator = new ApproximatedFixesCalculatorImpl(trackedRace, competitor);
     }
 
     @Override
@@ -107,7 +107,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     @Override
     public void clearState() {
         lastManeuverDetectionResult = null;
-        incrementalApproximatedFixesCalculator.clearState();
+        // TODO If IncrementalApproximatedFixesCalculator is used, call its
+        // incrementalApproximatedFixesCalculator.clearState() also.
     }
 
     @Override
@@ -117,8 +118,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
             TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
             TimePoint latestRawFixTimePoint = trackTimeInfo.getLatestRawFixTimePoint();
-            Iterable<GPSFixMoving> douglasPeuckerFixes = incrementalApproximatedFixesCalculator
-                    .approximate(earliestManeuverStart, latestManeuverEnd);
+            Iterable<GPSFixMoving> douglasPeuckerFixes = approximatedFixesCalculator.approximate(earliestManeuverStart,
+                    latestManeuverEnd);
             ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
             List<ManeuverSpot> maneuverSpots;
             if (lastManeuverDetectionResult == null) {
