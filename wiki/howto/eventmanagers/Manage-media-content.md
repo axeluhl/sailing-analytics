@@ -45,6 +45,13 @@ The following sections provide some known locations where images can be retrieve
 * [Images](https://www.facebook.com/pg/EkstraklasaZeglarska/photos/?ref=page_internal)
 * Copyright: `© Polish Sailing League`
 
+#### French Sailing League
+* [Images](https://www.facebook.com/ffvoile)
+* Copyright: Check the image details! 
+
+#### Dutch Sailing League
+* [Images](https://www.facebook.com/pg/Eredivisie-Zeilen-1585864328326991/photos/?ref=page_internal)
+* Copyright: `© Remmelt Staal`
 
 
 
