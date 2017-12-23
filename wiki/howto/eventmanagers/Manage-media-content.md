@@ -5,8 +5,26 @@ This page descrips how to manage the media content like images and videos for th
 
 ## Images
 
-### Link list for images and copyright information
-The following collection provides some known locations where images can be retrieved for the several leagues and events. The copyright information needs to checked and added to the images e.g. as a watermark if necessary!
+### List for images and videos of the sailing events
+The following sections provide some known locations where images can be retrieved for the several leagues and events. The copyright information needs to checked and added to the images e.g. as a watermark if necessary!
+
+#### Norwegian Sailing League
+* [Images](https://www.flickr.com/photos/norgesseilforbund/albums/with/72157669769351622) 
+* Copyright: `© Norwegian Sailing League`
+* [Videos](https://www.youtube.com/channel/UC3rqOwGZsKMOwY7Q_F-5oPQ/featured)
+
+#### Finnish Sailing League
+* [Images](https://www.facebook.com/purjehdusliiga/?fref=ts)
+* Copyright: `© Nina Paloheimo`
+
+#### Austrian Sailing Leauge
+* [Images](http://www.segelbundesliga.at/presse/pressefotos)
+* Copyright: `© SBL/Wolfgang Schreder`
+
+
+
+
+
 
 ### Scale guidelines for several purposes
 For performance reasons, images should be scaled before uploading them. The following image resolutions showed up as good manner:
