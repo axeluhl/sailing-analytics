@@ -271,6 +271,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -6917,6 +6918,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             fleet.getName(), new HashSet<CompetitorDTO>());
                 }
             }
+        }
+        if (leaderboard instanceof LeaderboardThatHasRegattaLike && flightMultiplier > 1) {
+            final IsRegattaLike regattaLike = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike();
+            logger.info("Updating regatta "+regattaLike.getRegattaLikeIdentifier().getName()+
+                    ", setting flag that fleets can run in parallel because a pairing list with flight multiplier "+
+                    flightMultiplier+" has been used.");
+            regattaLike.setFleetsCanRunInParallelToTrue();
         }
     }
     
