@@ -15,16 +15,23 @@ There are four image types which can be added to an event carrying different rol
 ## Scale guidelines for several purposes
 For performance reasons, images should be scaled before uploading them. The following image resolutions showed up as good manner:
 
+* **logo:** about 150 x 150 pixel (file size < 100 kB); take a .png file with transparent background!
 * **teaser:** about 640 x 480 pixel (file size < 100 kB)
-* **stage:** about 1600 x 1200 pixel (file size < 500 kB)
+* **stage:** about 1800 x 500 pixel (file size < 500 kB)
 * **gallery:** about 1400 x 1000 pixel (file size < 350 kB)
 
 ## Tutorial - GIMP
-The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [plugin](http://registry.gimp.org/node/26259) for batch manipulation.
+The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [plugin](http://registry.gimp.org/node/26259) for batch manipulation.  
 
-### Resize an image
+1. Start up GIMP go to File -> Batch Image Manipulation
+2. Add -> Resize -> select the option _set exact size in pixel_ and _preserve aspect ratio_ -> insert the desired width & height -> Ok
+3. Add -> Add a watermark -> leave defaults -> insert copyright information -> Ok
+4. Add images -> ... -> Apply
 
-### Add a watermark
+## S3 folder structure
+Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following naming conventions:
+
+
 
 
 
