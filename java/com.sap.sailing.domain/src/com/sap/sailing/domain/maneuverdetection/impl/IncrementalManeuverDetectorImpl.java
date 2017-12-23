@@ -22,24 +22,24 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
- * Incremental maneuver detector, which is capable of detecting maneuvers by {@link #detectManeuvers()} call in an
+ * Incremental maneuver detector, which is capable of detecting maneuvers by a {@link #detectManeuvers()} call in an
  * incremental way. This detector is using {@link IncrementalApproximatedFixesCalculatorImpl} for incremental
- * calculation of douglas peucker fixes. When the douglas peucker fixes are calculated, it tries to match the resulted
- * fixes with already calculated douglas peucker fixes groups for already calculated maneuvers (represented by
+ * calculation of Douglas Peucker fixes. When the Douglas Peucker fixes are calculated, it tries to match the resulting
+ * fixes with already calculated Douglas Peucker fixes groups for already calculated maneuvers (represented by
  * {@link ManeuverSpot}) from previous {@link #detectManeuvers()} calls. The existing maneuvers of matched existing
- * douglas peucker fixes groups are reused, when following conditions are met:
+ * Douglas Peucker fixes groups are reused, when the following conditions are met:
  * <ul>
- * <li>The next determined douglas peucker fix following after the last fix of the matched existing douglas peucker
- * fixes group gets matched with the beginning fix of an another existing douglas peucker fixes group</li>
- * <li>The currently measured wind within the douglas peucker fixes group is nearly the same as previouly measured when
- * the existing douglas peucker fixes group had been determined.</li>
- * <li>The reused douglas peucker fixes group is far enough from the last fix of the track, so that its maneuvers cannot
+ * <li>The next determined Douglas Peucker fix following after the last fix of the matched existing Douglas Peucker
+ * fixes group gets matched with the beginning fix of an another existing Douglas Peucker fixes group</li>
+ * <li>The currently measured wind within the Douglas Peucker fixes group is nearly the same as previouly measured when
+ * the existing Douglas Peucker fixes group had been determined.</li>
+ * <li>The reused Douglas Peucker fixes group is far enough from the last fix of the track, so that its maneuvers cannot
  * be extended by new incoming fixes. The "far enough" is defined in
  * {@link #checkManeuverSpotFarEnoughFromLatestRawFix(TimePoint, long, TimePoint, ManeuverSpot)}.
  * </ul>
- * With exception: the first and last calculated douglas peucker points are ignored during matching process, because
- * they get never added to douglas peucker fixes sets which represent maneuver section.
- * {@link #checkDouglasPeuckerFixesNearlySame(GPSFixMoving, GPSFixMoving)} defines whether two douglas peucker match and
+ * With exception: the first and last calculated Douglas Peucker points are ignored during matching process, because
+ * they get never added to Douglas Peucker fixes sets which represent maneuver section.
+ * {@link #checkDouglasPeuckerFixesNearlySame(GPSFixMoving, GPSFixMoving)} defines whether two Douglas Peucker match and
  * are nearly same. The nearly the same measured wind is defined by
  * {@link #checkManeuverSpotWindNearlySame(ManeuverSpot)}.
  * 
