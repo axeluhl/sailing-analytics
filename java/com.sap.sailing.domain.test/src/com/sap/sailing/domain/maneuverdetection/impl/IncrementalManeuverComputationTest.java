@@ -61,6 +61,8 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
                 new WindSourceImpl(WindSourceType.WEB));
     }
 
+    // TODO Think about how to implement an incremental douglas peucker which matches exactly the non-incremental
+    // version
     @Test
     @Ignore
     public void testIncrementalDouglasPeucker() throws NoWindException {

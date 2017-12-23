@@ -68,6 +68,7 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
                 recalculateFixesAtBeginning = true;
                 GPSFixMoving earliestFix = track.getFirstFixAtOrAfter(earliestStart);
                 int legNumberOfEarliestFix = earliestFix != null ? getLegNumberAt(earliestFix.getTimePoint()) : 0;
+                // ingore first existing leg, because it might be incomplete
                 existingLegFixesIterator.next();
                 while (existingLegFixesIterator.hasNext()) {
                     LegFixes legFixesToReuse = existingLegFixesIterator.next();
@@ -101,11 +102,15 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
                         LegFixes legFixesToReuse = existingLegFixesIterator.next();
                         if (checkIfLegEndFarEnoughFromLatestFixToReuse(latestFix, legNumberOfLatestFix,
                                 legFixesToReuse)) {
-                            legFixesListToReuse.add(legFixesToReuse);
-                            if (latestFix.getTimePoint()
+                            // ignore the last leg, because it might be incomplete. Do not ignore it, if the time point
+                            // of the latest fix matches with the latest fix of the existing leg.
+                            if (existingLegFixesIterator.hasNext() || latestFix.getTimePoint()
                                     .equals(legFixesToReuse.getLastApproximatedFix().getTimePoint())) {
-                                recalculateFixesAtEnd = false;
-                                break;
+                                legFixesListToReuse.add(legFixesToReuse);
+                                if (!existingLegFixesIterator.hasNext()) {
+                                    recalculateFixesAtEnd = false;
+                                    break;
+                                }
                             }
                         } else {
                             break;
@@ -123,7 +128,7 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
                 if (recalculateFixesAtBeginning) {
                     LegFixes firstLegFixesToReuse = legFixesListToReuse.get(0);
                     Iterable<GPSFixMoving> newApproximatedFixesBefore = super.approximate(earliestStart,
-                            firstLegFixesToReuse.getFirstApproximatedFix().getTimePoint());
+                            getTimePointToEndTheCalculation(firstLegFixesToReuse, lastFixesApproximationResult));
                     Iterator<GPSFixMoving> newApproximatedFixesBeforeIterator = newApproximatedFixesBefore.iterator();
                     if (newApproximatedFixesBeforeIterator.hasNext()) {
                         storeNewFixesBeforeExistingFixes(newApproximatedFixesBefore, earliestStart);
@@ -147,7 +152,8 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
                 if (recalculateFixesAtEnd) {
                     LegFixes lastReusedLegFixes = legFixesListToReuse.get(legFixesListToReuse.size() - 1);
                     Iterable<GPSFixMoving> newApproximatedFixesAfter = super.approximate(
-                            lastReusedLegFixes.getLastApproximatedFix().getTimePoint(), latestEnd);
+                            getTimePointToStartTheCalculationFrom(lastReusedLegFixes, lastFixesApproximationResult),
+                            latestEnd);
                     Iterator<GPSFixMoving> newApproximatedFixesAfterIterator = newApproximatedFixesAfter.iterator();
                     if (newApproximatedFixesAfterIterator.hasNext()) {
                         storeNewFixesAfterExistingFixes(newApproximatedFixesAfter, latestFix, latestEnd);
@@ -165,6 +171,66 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
             }
         }
         return result;
+    }
+
+    private TimePoint getTimePointToStartTheCalculationFrom(LegFixes reusedLastLegFixes,
+            FixesApproximationResult lastFixesApproximationResult) {
+        LegFixes nextExistingLeg = getExistingLegFixesByLegNumber(reusedLastLegFixes.getLegNumber() + 1,
+                lastFixesApproximationResult);
+        TimePoint result = reusedLastLegFixes.getLastApproximatedFix().getTimePoint();
+        if (nextExistingLeg != null
+                && !nextExistingLeg.getFirstApproximatedFix().equals(nextExistingLeg.getLastApproximatedFix())) {
+            TimePoint timePointOfNextMarkPassing = reusedLastLegFixes.getTimePointOfNextMarkPassing();
+            if (timePointOfNextMarkPassing != null) {
+                Duration durationFromLastFixOfReusedLegToMarkPassing = reusedLastLegFixes.getLastApproximatedFix()
+                        .getTimePoint().until(timePointOfNextMarkPassing);
+                Duration durationFromMarkPassingTillNextExistingFix = timePointOfNextMarkPassing
+                        .until(nextExistingLeg.getFirstApproximatedFix().getTimePoint());
+                if (durationFromLastFixOfReusedLegToMarkPassing
+                        .compareTo(durationFromMarkPassingTillNextExistingFix) > 0) {
+                    result = nextExistingLeg.getFirstApproximatedFix().getTimePoint();
+                }
+            }
+        }
+        return result;
+    }
+
+    private TimePoint getTimePointToEndTheCalculation(LegFixes reusedFirstLegFixes,
+            FixesApproximationResult lastFixesApproximationResult) {
+        LegFixes previousExistingLeg = getExistingLegFixesByLegNumber(reusedFirstLegFixes.getLegNumber() - 1,
+                lastFixesApproximationResult);
+        TimePoint result = reusedFirstLegFixes.getLastApproximatedFix().getTimePoint();
+        if (previousExistingLeg != null && !previousExistingLeg.getFirstApproximatedFix()
+                .equals(previousExistingLeg.getLastApproximatedFix())) {
+            TimePoint timePointOfPreviousMarkPassing = previousExistingLeg.getTimePointOfNextMarkPassing();
+            if (timePointOfPreviousMarkPassing != null) {
+                Duration durationFromMarkPassingToFirstFixOfReusedLeg = timePointOfPreviousMarkPassing
+                        .until(reusedFirstLegFixes.getFirstApproximatedFix().getTimePoint());
+                Duration durationFromPreviousExistingFixToMarkPassing = previousExistingLeg.getLastApproximatedFix()
+                        .getTimePoint().until(timePointOfPreviousMarkPassing);
+                if (durationFromMarkPassingToFirstFixOfReusedLeg
+                        .compareTo(durationFromPreviousExistingFixToMarkPassing) > 0) {
+                    result = previousExistingLeg.getLastApproximatedFix().getTimePoint();
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets the LegFixes within the provided {@code lastFixesApproximationResult} which number corresponds to the
+     * provided {@code legNumber}
+     */
+    private LegFixes getExistingLegFixesByLegNumber(int legNumber,
+            FixesApproximationResult lastFixesApproximationResult) {
+        LegFixes matchedLegFixes = null;
+        for (LegFixes legFixes : lastFixesApproximationResult.getLegFixesList()) {
+            if (legFixes.getLegNumber() == legNumber) {
+                matchedLegFixes = legFixes;
+                break;
+            }
+        }
+        return matchedLegFixes;
     }
 
     /**
@@ -372,7 +438,7 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
                         }
                     } while (approximatedFix != null);
                     if (!legFixes.isEmpty()) {
-                        result.add(new LegFixes(legNumber, legFixes));
+                        result.add(new LegFixes(legNumber, rounding.getTimePoint(), legFixes));
                     }
                     ++legNumber;
                     legFixes = new ArrayList<>();
@@ -385,10 +451,10 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
                     approximatedFix = approximatedFixesIterator.hasNext() ? approximatedFixesIterator.next() : null;
                 }
                 if (!legFixes.isEmpty()) {
-                    result.add(new LegFixes(legNumber, legFixes));
+                    result.add(new LegFixes(legNumber, null, legFixes));
                 }
             } else {
-                result.add(new LegFixes(0, approximatedFixes));
+                result.add(new LegFixes(0, null, approximatedFixes));
             }
         }
         return result;
@@ -473,10 +539,12 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
         private final Iterable<GPSFixMoving> approximatedFixes;
         private final GPSFixMoving firstApproximatedFix;
         private final GPSFixMoving lastApproximatedFix;
+        private final TimePoint timePointOfNextMarkPassing;
 
-        public LegFixes(int legNumber, Iterable<GPSFixMoving> approximatedFixes) {
+        public LegFixes(int legNumber, TimePoint timePointOfNextMarkPassing, Iterable<GPSFixMoving> approximatedFixes) {
             this.legNumber = legNumber;
             this.approximatedFixes = approximatedFixes;
+            this.timePointOfNextMarkPassing = timePointOfNextMarkPassing;
             Iterator<GPSFixMoving> iterator = approximatedFixes.iterator();
             GPSFixMoving lastFix = iterator.next();
             this.firstApproximatedFix = lastFix;
@@ -500,6 +568,10 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
 
         public GPSFixMoving getLastApproximatedFix() {
             return lastApproximatedFix;
+        }
+
+        public TimePoint getTimePointOfNextMarkPassing() {
+            return timePointOfNextMarkPassing;
         }
     }
 
