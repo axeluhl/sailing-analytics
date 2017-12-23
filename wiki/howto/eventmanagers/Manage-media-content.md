@@ -1,9 +1,11 @@
 # Sailing event media content
 This page descrips how to manage the media content like images and videos for the events at www.sapsailing.com, providing a guidance based on user's best experiences. A list of websites for retrieving images and their specific copyright information is shown. Moreover YouTube channels for current videos from leagues and special events are provided.
 
+[[_TOC_]]
+
 ## Images
 
-### Link list and Copyright
+### Link list for images and copyright information
 The following collection provides some known locations where images can be retrieved for the several leagues and events. The copyright information needs to checked and added to the images e.g. as a watermark if necessary!
 
 ### Scale guidelines for several purposes
