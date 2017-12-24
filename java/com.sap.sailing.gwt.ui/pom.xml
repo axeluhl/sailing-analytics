@@ -142,6 +142,7 @@
                 <module>com.sap.sailing.gwt.ui.VideoPopup</module>
                 <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
                 <module>com.sap.sailing.gwt.ui.Simulator</module>
+                <module>com.sap.sailing.gwt.ui.PairingList</module>
                 <module>com.sap.sailing.gwt.regattaoverview.RegattaOverview</module>
               </modules>
 							<!-- uncomment the following for PRETTY-printed, non-obfuscated output 
