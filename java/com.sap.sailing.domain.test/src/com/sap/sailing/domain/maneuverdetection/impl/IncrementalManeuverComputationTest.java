@@ -39,6 +39,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
+/**
+ * Tests incremental maneuver computation components and asserts that the computed maneuver data in an incremental way
+ * matches the data computed within a full (non-incremental) run.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class IncrementalManeuverComputationTest extends AbstractManeuverDetectionTestCase {
     public IncrementalManeuverComputationTest() throws MalformedURLException, URISyntaxException {
     }

@@ -175,6 +175,15 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
         return result;
     }
 
+    /**
+     * Gets the time point, from which the calculation of new fixes shall get started, if at least one existing leg is
+     * being reused. The {@code reusedLastLegFixes} must be the last reused leg and lie before the new computation
+     * interval. This method determines the optimal start time point of the new computation interval, such that the time
+     * point corresponds to the already determined douglas peucker fix which lies closest to the next mark passing after
+     * {@code reusedLastLegFixes}. The determined start time point can lie either on {code reusedLastLegFixes}, or its
+     * following existing leg contained in {@code lastFixesApproximationResult}. The next existing leg gets ignored if
+     * it is composed less than of two fixes.
+     */
     private TimePoint getTimePointToStartTheCalculationFrom(LegFixes reusedLastLegFixes,
             FixesApproximationResult lastFixesApproximationResult) {
         LegFixes nextExistingLeg = getExistingLegFixesByLegNumber(reusedLastLegFixes.getLegNumber() + 1,
@@ -197,6 +206,15 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
         return result;
     }
 
+    /**
+     * Gets the time point, till which the calculation of new fixes shall run, if at least one existing leg is being
+     * reused. The {@code reusedFirstLegFixes} must be the first reused leg and lie after the new computation interval.
+     * This method determines the optimal end time point of the new computation interval, such that the time point
+     * corresponds to the already determined douglas peucker fix which lies closest to the mark passing from which the
+     * {@code reusedFirstLegFixes} starts. The determined end time point can lie either on {code reusedFirstLegFixes},
+     * or its preceding existing leg contained in {@code lastFixesApproximationResult}. The preceding existing leg gets
+     * ignored if it is composed less than of two fixes.
+     */
     private TimePoint getTimePointToEndTheCalculation(LegFixes reusedFirstLegFixes,
             FixesApproximationResult lastFixesApproximationResult) {
         LegFixes previousExistingLeg = getExistingLegFixesByLegNumber(reusedFirstLegFixes.getLegNumber() - 1,
