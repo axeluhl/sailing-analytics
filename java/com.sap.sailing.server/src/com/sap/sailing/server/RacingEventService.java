@@ -23,12 +23,14 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
@@ -95,6 +97,8 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
 import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.pairinglist.PairingList;
+import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -792,4 +796,25 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * anniversary races only.
      */
     AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
+    
+    /**
+     * Returns a calculated {@link PairingListTemplate}, specified by flights, groups and competitors.
+     *
+     * @param leaderboardName the name of the leaderboard
+     * @param competitorsCount count of competitor
+     * @param flightMultiplier specifies how often the flights will be cloned
+     * @return calculated {@link PairingListTemplate}
+     */
+    PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount,
+            final int competitorsCount, final int flightMultiplier);
+    
+    /**
+     * Matches the competitors of a leaderboard to the {@link PairingList}
+     * 
+     * @param pairingListTemplate the returned {@link PairingList} is based upon it 
+     * @param leaderboardName name of the leaderboard
+     * @return {@link PairingList} that contains competitor objects matched to {@link RaceColumn}s and {@link Fleet}s
+     */
+    PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
+            final String leaderboardName, final Iterable<RaceColumn> selectedFlights);
 }

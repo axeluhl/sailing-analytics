@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
@@ -30,6 +31,8 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -100,6 +103,7 @@ import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
+import com.sap.sse.pairinglist.PairingListTemplate;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -664,6 +668,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Boolean> callback);
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
+    
+    void denoteForRaceLogTracking(String leaderboardName,String prefix, AsyncCallback<Void> callback);
 
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
             boolean correctWindByDeclination, AsyncCallback<Void> callback);
@@ -867,7 +873,64 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getExpeditionDeviceConfigurations(AsyncCallback<List<ExpeditionDeviceConfiguration>> callback);
 
+    void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
+
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
 
-    void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
+    /**
+     * Calculates a {@link PairingListTemplate} based on a competitor count, flight count and group count of the
+     * leaderboard. Since the competitor count must not be the competitors that are registered on the leaderboard, it
+     * can vary.
+     * 
+     * @param leaderboardName
+     *            the name of the leaderboard
+     * @param competitorCount
+     *            the count of competitors
+     * @param flightMultiplier
+     *            specifies how often the flights will be cloned
+     * @param callback
+     *            returns a {@link PairingListTemplateDTO}
+     * @throws NotFoundException
+     *             is thrown if the leaderboard is not found by name
+     * @throws IllegalArgumentException
+     */
+    void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
+            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback)
+            throws NotFoundException, IllegalArgumentException;
+
+    /**
+     * Creates a {@link PairingListDTO} in which the competitors will be matched to a {@link PairingList} based on the
+     * information that the {@link PairingListTemplate} contains.
+     * 
+     * @param leaderboardName
+     * @param flightMultiplier
+     *            specifies how often the flights will be cloned
+     * @param callback
+     */
+    void getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
+            final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO, AsyncCallback<PairingListDTO> callback);
+
+    /**
+     * Creates a {@link PairingListDTO} that is based on the competitors in the race logs of a leaderboard.
+     * 
+     * @param leaderboardName
+     *            the name of the leaderboard
+     * @param callback
+     *            returns a {@link PairingListDTO}
+     */
+    void getPairingListFromRaceLogs(final String leaderboardName, AsyncCallback<PairingListDTO> callback);
+
+    /**
+     * Registers all competitors of a {@link PairingList} in the respective {@link RaceColumn}s and {@link Fleet}s.
+     * 
+     * @param leaderboardName
+     *            the name of the leaderboard
+     * @param flightMultiplier
+     *            specifies how often the flights will be cloned
+     * @param callback
+     */
+    void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
+            final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
+    
+    void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
 }
