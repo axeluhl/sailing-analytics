@@ -23,7 +23,6 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final Course course;
     private final HashMap<Serializable, Competitor> competitorsByCompetitorId;
     private final HashMap<Serializable, Boat> boatsByCompetitorId;
-    private final Map<Competitor, Boat> competitorBoats;
     private final BoatClass boatClass;
     private final Serializable id;
     private final RaceCompetitorIdsAsStringWithMD5Hash raceCompetitorsMD5Hash;
@@ -107,6 +106,6 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
 
     @Override
     public Boat getBoatOfCompetitor(Competitor competitor) {
-        return competitorBoats.get(competitor);
+        return competitorsAndTheirBoats.get(competitor);
     }
 }
