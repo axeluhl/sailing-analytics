@@ -164,7 +164,7 @@ public class LeaderboardCourseChangeTest {
         when(mockedRaceDefinition.getCompetitors()).thenReturn(competitorAndBoatMap.keySet());
         when(mockedRaceDefinition.getCompetitorsAndTheirBoats()).thenReturn(competitorAndBoatMap);
         Boat boat = competitorAndBoatMap.get(competitorAndBoatMap.keySet().iterator().next());
-        when(mockedRaceDefinition.getBoatOfCompetitorById(any())).thenReturn(boat);
+        when(mockedRaceDefinition.getBoatOfCompetitor(any())).thenReturn(boat);
         return mockedRaceDefinition;
     }
 

@@ -160,7 +160,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
     private void storeTracks() throws FileNotFoundException, IOException {
         for (Map.Entry<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> competitorAndTrack : tracks.entrySet()) {
             Competitor competitor = competitorAndTrack.getKey();
-            Boat boatOfCompetitor = trackedRace.getRace().getBoatOfCompetitorById(competitor);
+            Boat boatOfCompetitor = trackedRace.getRace().getBoatOfCompetitor(competitor);
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = competitorAndTrack.getValue();
             storeTrack(competitor, boatOfCompetitor, track, getTracTracEvent().getName()+"-"+trackedRace.getRace().getName());
         }
