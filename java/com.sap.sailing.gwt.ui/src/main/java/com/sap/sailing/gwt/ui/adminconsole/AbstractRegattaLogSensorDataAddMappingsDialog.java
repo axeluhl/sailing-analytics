@@ -55,7 +55,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
             }
         });
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                /* multiSelection */ false, /* enablePager */ true);
+                /* multiSelection */ false, /* enablePager */ true, /* show only competitors with boat */ false);
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

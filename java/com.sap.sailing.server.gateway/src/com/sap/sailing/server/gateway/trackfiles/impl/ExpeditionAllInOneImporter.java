@@ -208,7 +208,9 @@ public class ExpeditionAllInOneImporter {
         final ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
         final RankingMetricConstructor rankingMetricConstructor = RankingMetricsFactory
                 .getRankingMetricConstructor(rankingMetric);
-        final Regatta regatta = service.createRegatta(regattaNameAndleaderboardName, boatClassName, null, null, UUID.randomUUID(),
+        final Regatta regatta = service.createRegatta(regattaNameAndleaderboardName, boatClassName,
+                /* can boats of competitors change */ false,
+                /* start date */ null, /* end date */ null, UUID.randomUUID(),
                 Collections.singleton(series), true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
                 false, rankingMetricConstructor);
         this.ensureBoatClassDetermination(regatta);

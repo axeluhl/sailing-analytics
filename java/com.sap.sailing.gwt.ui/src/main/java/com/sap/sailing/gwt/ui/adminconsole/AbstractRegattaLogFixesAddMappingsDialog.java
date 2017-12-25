@@ -65,10 +65,10 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
                 deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject());
             }
         });
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                false, true);
+        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                /* multiSelection */ false, /* enable pager */ true, /* show only competitors with boat */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(
-        /* multiSelection */false, sailingService, stringMessages, errorReporter);
+        /* multiSelection */ false, sailingService, stringMessages, errorReporter);
 
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
