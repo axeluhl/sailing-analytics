@@ -28,7 +28,14 @@ public class BooleanConverter implements ValueConverter<Boolean> {
 
     @Override
     public Boolean fromStringValue(String stringValue) {
-        return stringValue == null ? null : Boolean.valueOf(stringValue);
+        // Boolean.valueOf(stringValue) is explicitly not used here
+        // to ensure consistency to JSON value handling
+        if (Boolean.TRUE.toString().equalsIgnoreCase(stringValue)) {
+            return true;
+        } else if (Boolean.FALSE.toString().equalsIgnoreCase(stringValue)) {
+            return false;
+        }
+        throw new IllegalArgumentException("\"" + stringValue + "\" can not be parsed as boolean value");
     }
 
     @Override

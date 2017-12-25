@@ -34,7 +34,7 @@ public class BoatDTO extends NamedDTO implements Serializable {
     public String getSailId() {
         return sailId;
     }
-
+    
     public String getIdAsString() {
         return idAsString;
     }

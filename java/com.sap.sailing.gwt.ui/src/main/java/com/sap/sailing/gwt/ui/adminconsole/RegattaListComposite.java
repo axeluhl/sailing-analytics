@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -372,6 +372,4 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     public CellTable<RegattaDTO> getRegattaTable() {
         return regattaTable;
     }
-    
-    
 }

@@ -104,6 +104,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             public RaceColumn getRaceColumnByName(String raceColumnName) {
                 return getRaceColumnByName(raceColumnName);
             }
+
+            @Override
+            public void setFleetsCanRunInParallelToTrue() {
+                // no need to do anything; a FlexibleLeaderboard only has one (default) fleet
+            }
         };
         this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
         this.raceExecutionOrderProvider = new RaceExecutionOrderCache();
@@ -385,5 +390,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
                 raceColumn.setTrackedRace(fleet, null); // this will in particular detach the race log
             }
         }
+    }
+
+    @Override
+    public void setFleetsCanRunInParallelToTrue() {
+        // no need to do anything because a FlexibleLeaderboard only has one (default) fleet
     }
 }

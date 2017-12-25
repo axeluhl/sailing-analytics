@@ -128,16 +128,16 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
             Boat competitorBoat = masterTrackedRace.getBoatOfCompetitor(competitor);
             switch (competitorBoat.getSailID()) {
                 case boat1CompetitorName:
-                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitorById(competitor.getId()),
-                            replicaTrackedRace.getRace().getBoatOfCompetitorById(replicaCompetitor.getId()), boat1Name, boat1Color);
+                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitor(competitor),
+                            replicaTrackedRace.getRace().getBoatOfCompetitor(replicaCompetitor), boat1Name, boat1Color);
                     break;
                 case boat2CompetitorName:
-                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitorById(competitor.getId()),
-                            replicaTrackedRace.getRace().getBoatOfCompetitorById(replicaCompetitor.getId()), boat2Name, boat2Color);
+                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitor(competitor),
+                            replicaTrackedRace.getRace().getBoatOfCompetitor(replicaCompetitor), boat2Name, boat2Color);
                     break;
                 case boat3CompetitorName:
-                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitorById(competitor.getId()),
-                            replicaTrackedRace.getRace().getBoatOfCompetitorById(replicaCompetitor.getId()), boat3Name, boat3Color);
+                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitor(competitor),
+                            replicaTrackedRace.getRace().getBoatOfCompetitor(replicaCompetitor), boat3Name, boat3Color);
                     break;
             }
         }
