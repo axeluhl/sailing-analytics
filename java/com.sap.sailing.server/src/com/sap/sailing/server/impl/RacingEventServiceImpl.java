@@ -95,8 +95,6 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -4251,11 +4249,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);
-        //TODO (bug4403) get Boats of Regatta/Leaderboard
-        List<Boat> boats = new ArrayList<>();
-        for (int slot = 0; slot < pairingListTemplate.getPairingListTemplate()[0].length; slot++) {
-            boats.add(new BoatImpl("Boat " + (slot + 1), new BoatClassImpl("49er", true), "DE" + slot));
-        }
         PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(
                 new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
             @Override
@@ -4276,7 +4269,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             @Override
             public Iterable<Boat> getCompetitorAllocation() {
-                return boats;
+                return leaderboard.getAllBoats();
             }
         });
         return pairingList;

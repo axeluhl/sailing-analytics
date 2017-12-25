@@ -59,6 +59,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -87,6 +88,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -204,6 +206,7 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
@@ -915,7 +918,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.endDate = regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null;
         BoatClass boatClass = regatta.getBoatClass();
         if (boatClass != null) {
-            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam());
+            regattaDTO.boatClass = convertToBoatClassDTO(boatClass);
         }
         if (regatta.getDefaultCourseArea() != null) {
             regattaDTO.defaultCourseAreaUuid = regatta.getDefaultCourseArea().getId();
@@ -928,6 +931,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         regattaDTO.rankingMetricType = regatta.getRankingMetricType();
         return regattaDTO;
+    }
+
+    private BoatClassDTO convertToBoatClassDTO(BoatClass boatClass) {
+        return new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam());
     }
 
     private List<SeriesDTO> convertToSeriesDTOs(Regatta regatta) {
@@ -5632,7 +5639,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceColumn.getRaceLog(fleet);
     }
 
-    private Competitor getCompetitor(CompetitorDTO dto) {
+    private Competitor getCompetitor(CompetitorWithoutBoatDTO dto) {
         return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
 
@@ -5642,10 +5649,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
+            Map<? extends CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatDTOs)
+            throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
         Set<Competitor> competitorsToRegister = new HashSet<>();
         Map<Competitor, Boat> competitorToBoatMapping = new HashMap<>();
-        for (Entry<CompetitorDTO, BoatDTO> competitorAndBoatEntry: competitorAndBoatDTOs.entrySet()) {
+        for (Entry<? extends CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatEntry: competitorAndBoatDTOs.entrySet()) {
             Competitor competitor = getCompetitor(competitorAndBoatEntry.getKey());
             competitorsToRegister.add(competitor);
             competitorToBoatMapping.put(competitor, getBoat(competitorAndBoatEntry.getValue()));
@@ -5669,9 +5677,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
+            Set<? extends CompetitorWithoutBoatDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
         Set<Competitor> competitorsToRegister = new HashSet<>();
-        for (CompetitorDTO dto : competitorDTOs) {
+        for (CompetitorWithoutBoatDTO dto : competitorDTOs) {
             competitorsToRegister.add(getCompetitor(dto));
         }
         
@@ -5694,7 +5702,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
+    public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<? extends CompetitorWithoutBoatDTO> competitorDTOs)
             throws DoesNotHaveRegattaLogException, NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (!(leaderboard instanceof HasRegattaLike)){
@@ -5702,7 +5710,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         Set<Competitor> competitorsToRegister = new HashSet<Competitor>();
-        for (CompetitorDTO dto : competitorDTOs) {
+        for (CompetitorWithoutBoatDTO dto : competitorDTOs) {
             competitorsToRegister.add(getCompetitor(dto));
         }
         
@@ -7096,23 +7104,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = getService()
                 .getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
-        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
+        List<List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>>> result = new ArrayList<>();
         for (RaceColumn raceColumn : selectedRaces) {
-            List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
+            List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
             for (Fleet fleet : raceColumn.getFleets()) {
-                List<Pair<CompetitorDTO, BoatDTO>> fleetList = new ArrayList<>();
+                List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> fleetList = new ArrayList<>();
                 for (Pair<Competitor, Boat> competitorAndBoatPair : pairingList.getCompetitors(raceColumn, fleet)) {
+                    final Boat boat = competitorAndBoatPair.getB();
                     if (competitorAndBoatPair.getA() != null) {
-                        fleetList.add(new Pair<CompetitorDTO, BoatDTO>(
+                        fleetList.add(new Pair<>(
                                 baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
-                                new BoatDTO(competitorAndBoatPair.getB().getName(),
-                                        competitorAndBoatPair.getB().getSailID(),
-                                        competitorAndBoatPair.getB().getColor())));
+                                new BoatDTO(boat.getId().toString(), boat.getName(), convertToBoatClassDTO(boat.getBoatClass()),
+                                        boat.getSailID(),
+                                        boat.getColor())));
                     } else {
-                        fleetList.add(new Pair<CompetitorDTO, BoatDTO>(new CompetitorDTOImpl(),
-                                new BoatDTO(competitorAndBoatPair.getB().getName(),
-                                        competitorAndBoatPair.getB().getSailID(),
-                                        competitorAndBoatPair.getB().getColor())));
+                        fleetList.add(new Pair<>(new CompetitorDTOImpl(),
+                                new BoatDTO(boat.getId().toString(), boat.getName(), convertToBoatClassDTO(boat.getBoatClass()),
+                                        boat.getSailID(),
+                                        boat.getColor())));
                     }
                 }
                 raceColumnList.add(fleetList);
@@ -7126,18 +7135,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public PairingListDTO getPairingListFromRaceLogs(final String leaderboardName) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
-        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
+        List<List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>>> result = new ArrayList<>();
         List<String> raceColumnNames = new ArrayList<>();
         PairingListRaceLogAdapter adapter = new PairingListRaceLogAdapter();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (!raceColumn.isMedalRace()) {
-                List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
+                List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
                 for (Fleet fleet : raceColumn.getFleets()) {
-                    List<Pair<CompetitorDTO, BoatDTO>> fleetList = new ArrayList<>();
+                    List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> fleetList = new ArrayList<>();
                     for (Pair<Competitor, Boat> competitorAndBoatPair : adapter.getCompetitors(raceColumn, fleet)) {
-                        fleetList.add(new Pair<CompetitorDTO, BoatDTO>(baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
-                                new BoatDTO(competitorAndBoatPair.getB().getName(), competitorAndBoatPair.getB().getSailID(), 
-                                        competitorAndBoatPair.getB().getColor())));
+                        final Boat boat = competitorAndBoatPair.getB();
+                        fleetList.add(new Pair<CompetitorWithoutBoatDTO, BoatDTO>(baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
+                                new BoatDTO(boat.getId().toString(), boat.getName(),
+                                        convertToBoatClassDTO(boat.getBoatClass()), boat.getSailID(), 
+                                        boat.getColor())));
                     }
                     if (fleetList.size() > 0) {
                         raceColumnList.add(fleetList);
@@ -7168,10 +7179,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 groupCount = 0;
                 for (Fleet fleet : raceColumn.getFleets()) {
                     raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
-                    Set<CompetitorDTO> competitors = new HashSet<>();
-                    List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
+                    Set<CompetitorWithoutBoatDTO> competitors = new HashSet<>();
+                    List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
                             .get(flightCount).get(groupCount);
-                    for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
+                    for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
                         if (competitorAndBoatPair.getA() != null && competitorAndBoatPair.getA().getName() != null) {
                             competitors.add(competitorAndBoatPair.getA());
                         }

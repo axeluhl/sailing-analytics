@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
@@ -160,7 +160,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         String color = "";
         pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor("#cecece");
         pairingListGrid.getCellFormatter().getElement(0, 1).getStyle().setBackgroundColor("#cecece");
-        for (List<List<Pair<CompetitorDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
+        for (List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
             color = (color.equals("none") ? "#cecece" : "none");
             // setting up race
             int currentRaceInGridCells = (((flightIndexInGrid - 1) * groupCount) + 1);
@@ -169,7 +169,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle().setPadding(5, Unit.PX);
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle()
                     .setBackgroundColor(color);
-            for (List<Pair<CompetitorDTO, BoatDTO>> group : flight) {
+            for (List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> group : flight) {
                 // setting up fleet
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
@@ -180,23 +180,22 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
                 if (group.size() < boatCount) {
                     List<BoatDTO> boatsToRemove = new ArrayList<>(boats);
-                    for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
+                    for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : group) {
                         boatsToRemove.remove(competitorAndBoatPair.getB());
                     }
                     for (BoatDTO boat : boatsToRemove) {
-                        group.add(new Pair<CompetitorDTO, BoatDTO>(new CompetitorDTOImpl(), boat));
+                        group.add(new Pair<>(new CompetitorDTOImpl(), boat));
                     }
                 }
-                for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
+                for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
                     if (competitorAndBoatPair.getA().getName() == null) {
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(getStringMessages().empty()));
                         pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());
                     } else {
-                        // TODO change competitor name to competitor shorthand symbol ( bug2822 )
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid,
-                                new Label(competitorAndBoatPair.getA().getSailID()));
+                                new Label(competitorAndBoatPair.getA().getShortName()));
                     }
                     pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setFontWeight(Style.FontWeight.BOLD);
