@@ -375,7 +375,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
-    String boat();
     String boatClass();
     String setDelayToLive();
     String pleaseEnterNonEmptyVenue();
