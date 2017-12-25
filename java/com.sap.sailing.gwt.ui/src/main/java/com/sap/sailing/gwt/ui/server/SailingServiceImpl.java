@@ -5682,17 +5682,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (CompetitorWithoutBoatDTO dto : competitorDTOs) {
             competitorsToRegister.add(getCompetitor(dto));
         }
-        
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-
         Collection<Competitor> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet).keySet();
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
         Util.addAll(competitorsToRemove, competitorSetToRemove);
         filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
-        
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
-        
         // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
         for (Competitor competitorToRegister: competitorsToRegister) {
             if (competitorToRegister instanceof CompetitorWithBoat) {
@@ -7134,7 +7130,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PairingListDTO getPairingListFromRaceLogs(final String leaderboardName) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
         List<List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>>> result = new ArrayList<>();
         List<String> raceColumnNames = new ArrayList<>();
         PairingListRaceLogAdapter adapter = new PairingListRaceLogAdapter();
@@ -7156,14 +7151,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 if (raceColumnList.size() > 0) {
                     result.add(raceColumnList);
-                    
                     if (!raceColumnNames.contains(raceColumn.getName())) {
                         raceColumnNames.add(raceColumn.getName());
                     }
                 }
             }
         }
-        
         return new PairingListDTO(result, raceColumnNames);
     }
     
@@ -7210,45 +7203,69 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    public List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName,List<String> raceColumnNames) throws NotFoundException{
-        Leaderboard leaderboard=this.getLeaderboardByName(leaderboardName);
-        List<String> result=new ArrayList<>();
+    public List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames)
+            throws NotFoundException {
+        Leaderboard leaderboard = this.getLeaderboardByName(leaderboardName);
+        List<String> result = new ArrayList<>();
+        boolean complete = true;
+        // try looking for tracked races and their names first
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if(raceColumn.hasTrackedRaces()){
+            if (raceColumn.hasTrackedRaces()) {
                 if (raceColumnNames.contains(raceColumn.getName())) {
                     for (Fleet fleet : raceColumn.getFleets()) {
-                        if(raceColumn.getTrackedRace(fleet) != null && raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null){
+                        if (raceColumn.getTrackedRace(fleet) != null
+                                && raceColumn.getTrackedRace(fleet).getRaceIdentifier() != null) {
                             result.add(raceColumn.getTrackedRace(fleet).getRaceIdentifier().getRaceName());
-                        }
-                    }
-                }
-            }else{
-                break;
-            }
-        }
-        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
-            return result;
-        }
-        result.clear();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
-                for(Fleet fleet: raceColumn.getFleets()){
-                    NavigableSet<RaceLogEvent> set=raceColumn.getRaceLog(fleet).getUnrevokedEvents();
-                    for (RaceLogEvent raceLogEvent : set) {
-                        if(raceLogEvent instanceof RaceLogDenoteForTrackingEvent){
-                            RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
-                            result.add(denoteEvent.getRaceName());
+                        } else {
+                            complete = false;
                             break;
                         }
                     }
                 }
+            } else {
+                complete = false;
+                break;
+            }
         }
-        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
-            return result;
+        if (!complete) {
+            // new attempt, this time looking for tracking denotations that would carry a race name:
+            result.clear();
+            complete = true;
+            raceColumnLoop:
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                if (raceColumnNames.contains(raceColumn.getName())) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                        final NavigableSet<RaceLogEvent> set = raceLog.getUnrevokedEventsDescending();
+                        complete = false; // have to find a denotation to remain complete:
+                        raceLog.lockForRead();
+                        try {
+                            for (RaceLogEvent raceLogEvent : set) {
+                                if (raceLogEvent instanceof RaceLogDenoteForTrackingEvent) {
+                                    RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
+                                    result.add(denoteEvent.getRaceName());
+                                    complete = true;
+                                    break;
+                                }
+                            }
+                        } finally {
+                            raceLog.unlockAfterRead();
+                        }
+                        if (!complete) {
+                            break raceColumnLoop;
+                        }
+                    }
+                }
+            }
+            if (!complete) {
+                // that didn't work either; construct a plain "Race x" counting
+                result.clear();
+                for (int count = 1; count <= raceColumnNames.size()
+                        * Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets()); count++) {
+                    result.add("Race " + count);
+                }
+            }
         }
-        result.clear();
-        for(int count=1;count<=raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets());count++){
-            result.add("Race "+count);
-        }
-        return result;
+        return result; 
     }
 }

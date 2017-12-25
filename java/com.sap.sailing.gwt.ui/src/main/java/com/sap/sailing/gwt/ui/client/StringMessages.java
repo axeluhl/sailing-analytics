@@ -2049,4 +2049,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String importFinishedGotoRaceboard();
     String importFinishedGotoEvent();
     String chooseAName();
+    String errorFillingRaceLogsFromPairingList(String message);
+    String successfullyFilledRaceLogsFromPairingList();
+    String errorFetchingRaceDisplayNamedFromLeaderboard(String message);
+    String errorCalculatingPairingListTemplate(String message);
 }

@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
@@ -932,13 +931,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            specifies how often the flights will be cloned
      * @param callback
      *            returns a {@link PairingListTemplateDTO}
-     * @throws NotFoundException
-     *             is thrown if the leaderboard is not found by name
-     * @throws IllegalArgumentException
      */
     void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
-            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback)
-            throws NotFoundException, IllegalArgumentException;
+            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} in which the competitors will be matched to a {@link PairingList} based on the

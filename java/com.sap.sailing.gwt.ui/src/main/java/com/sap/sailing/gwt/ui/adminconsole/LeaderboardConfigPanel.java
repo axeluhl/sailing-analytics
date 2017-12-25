@@ -1059,28 +1059,24 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             public void ok(PairingListTemplateDTO editedObject) {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
-                try {
-                    sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
-                            editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
-                            new AsyncCallback<PairingListTemplateDTO>() {
+                sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
+                        editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
+                        new AsyncCallback<PairingListTemplateDTO>() {
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    busyDialog.hide();
-                                    System.out.println(caught);
-                                }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                busyDialog.hide();
+                                errorReporter.reportError(stringMessages.errorCalculatingPairingListTemplate(caught.getMessage()));
+                            }
 
-                                @Override
-                                public void onSuccess(PairingListTemplateDTO result) {
-                                    busyDialog.hide();
-                                    result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
-                                    openPairingListCreationDialog(leaderboardDTO, result);
-                                }
+                            @Override
+                            public void onSuccess(PairingListTemplateDTO result) {
+                                busyDialog.hide();
+                                result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
+                                openPairingListCreationDialog(leaderboardDTO, result);
+                            }
 
-                            });
-                } catch (Exception exception) {
-                    // TODO show error somehow
-                }
+                        });
             }
 
             @Override
@@ -1092,7 +1088,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     private void openPairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, PairingListTemplateDTO template) {
-        PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template, sailingService);
+        PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template, sailingService, errorReporter);
         dialog.show();
     }
     

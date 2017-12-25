@@ -730,7 +730,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
 
     void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
-    
+
+    /**
+     * @throws NotFoundException
+     *             is thrown if the leaderboard is not found by name
+     */
     PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
             final int flightMultiplier)
             throws NotFoundException, IllegalArgumentException;
