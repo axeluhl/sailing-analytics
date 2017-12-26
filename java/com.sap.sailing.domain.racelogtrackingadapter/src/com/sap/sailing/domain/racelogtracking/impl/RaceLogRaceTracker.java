@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -61,6 +63,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.Util;
@@ -91,12 +94,14 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final WindStore windStore;
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceLogResolver raceLogResolver;
+    private final TrackedRegattaRegistry trackedRegattaRegistry;
 
     private volatile DynamicTrackedRace trackedRace;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams) {
+            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams, TrackedRegattaRegistry trackedRegattaRegistry) {
         super(connectivityParams);
+        this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.params = params;
         this.windStore = windStore;
         this.trackedRegatta = regatta;
@@ -306,5 +311,35 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         synchronized (this) {
             this.notifyAll();
         }
+        registerListenerThatWillRemoveThisRaceWhenTheRaceColumnIsRemoved();
+    }
+
+    private void registerListenerThatWillRemoveThisRaceWhenTheRaceColumnIsRemoved() {
+        getRegatta().addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
+            private static final long serialVersionUID = -2924864263579432528L;
+
+            @Override
+            public void defaultAction() {
+            }
+
+            @Override
+            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+                try {
+                    trackedRegattaRegistry.removeRace(getRegatta(), getRace());
+                } catch (IOException | InterruptedException e) {
+                    logger.log(Level.WARNING, "Error trying to remove smart phone / race log tracked race whose race column was deleted: "+
+                            e.getMessage(), e);
+                }
+            }
+
+            /**
+             * This listener is transient and will therefore not be serialized to any replicas or with
+             * the master data import.
+             */
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
+        });
     }
 }
