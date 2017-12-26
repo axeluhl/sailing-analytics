@@ -114,7 +114,7 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.PairingListRaceLogAdapter;
+import com.sap.sailing.domain.base.PairingListLeaderboardAdapter;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -6857,7 +6857,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         List<String> raceColumnNames = new ArrayList<>();
-        PairingListRaceLogAdapter adapter = new PairingListRaceLogAdapter();
+        PairingListLeaderboardAdapter adapter = new PairingListLeaderboardAdapter();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (!raceColumn.isMedalRace()) {
                 List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
