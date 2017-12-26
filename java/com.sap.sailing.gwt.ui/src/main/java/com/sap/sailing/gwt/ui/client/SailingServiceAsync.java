@@ -443,12 +443,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void removeRegattas(Collection<RegattaIdentifier> regattas, AsyncCallback<Void> asyncCallback);
 
-    void addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
-            AsyncCallback<RaceColumnInSeriesDTO> callback);
-
-    void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
-            AsyncCallback<Void> callback);
-
     void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 

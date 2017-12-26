@@ -82,7 +82,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
             throw new RaceNotCreatedException("No regatta for race-log tracked race");
         }
         DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
-        return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver, this);
+        return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver, this, trackedRegattaRegistry);
     }
 
     @Override
