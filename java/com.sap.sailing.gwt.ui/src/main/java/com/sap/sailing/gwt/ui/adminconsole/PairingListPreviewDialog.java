@@ -103,11 +103,12 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
             }
             boatIndex++;
         }
-        String color = "";
-        pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor("#cecece");
-        pairingListGrid.getCellFormatter().getElement(0, 1).getStyle().setBackgroundColor("#cecece");
+        final String BACKGROUND_SHADE = "#cecece";
+        String color = BACKGROUND_SHADE;
+        pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor(BACKGROUND_SHADE);
+        pairingListGrid.getCellFormatter().getElement(0, 1).getStyle().setBackgroundColor(BACKGROUND_SHADE);
         for (List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
-            color = (color.equals("none") ? "#cecece" : "none");
+            color = (color.equals("none") ? BACKGROUND_SHADE : "none");
             // setting up race
             int currentRaceInGridCells = (((flightIndexInGrid - 1) * groupCount) + 1);
             pairingListGrid.setWidget(currentRaceInGridCells, 0,
