@@ -144,16 +144,13 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
                     public void visit(RegattaLogDefineMarkEvent event) {
                         RaceLogRaceTracker.this.onDefineMarkEvent(event);
                     }
-
                 };
                 visitors.put(log, visitor);
                 ((RegattaLog) log).addListener(visitor);
             }
         }
-
         logger.info(String.format("Created race-log tracker for: %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
-
         // load race for which tracking already started
         if (new RaceLogTrackingStateAnalyzer(params.getRaceLog()).analyze() == RaceLogTrackingState.TRACKING) {
             startTracking(null);
