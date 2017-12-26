@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.pairinglist.PairingList; 
 
-public class PairingListRaceLogAdapter implements PairingList<RaceColumn, Fleet, Competitor, Boat> {
+public class PairingListLeaderboardAdapter implements PairingList<RaceColumn, Fleet, Competitor, Boat> {
     
     @Override
     public Iterable<Pair<Competitor, Boat>> getCompetitors(RaceColumn raceColumn, Fleet fleet) {

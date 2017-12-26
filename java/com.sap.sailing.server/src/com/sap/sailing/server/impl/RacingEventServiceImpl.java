@@ -4227,7 +4227,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         return groupsCount;
                     }
 
-                    // TODO set count of selected flights
                     @Override
                     public int getFlightsCount() {
                         return flightsCount;
