@@ -85,4 +85,9 @@ public class BoatDTO extends NamedDTO implements Serializable {
             return false;
         return true;
     }
+    
+    @Override
+    public String toString() {
+        return getName() == null ? (getBoatClass().getName() + " / " + getSailId()) : getName();
+    }
 }

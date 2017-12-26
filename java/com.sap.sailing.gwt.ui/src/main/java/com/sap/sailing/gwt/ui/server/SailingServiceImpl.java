@@ -205,7 +205,6 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
@@ -7114,7 +7113,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         boat.getSailID(),
                                         boat.getColor())));
                     } else {
-                        fleetList.add(new Pair<>(new CompetitorDTOImpl(),
+                        fleetList.add(new Pair<>(/* no competitor */ null,
                                 new BoatDTO(boat.getId().toString(), boat.getName(), convertToBoatClassDTO(boat.getBoatClass()),
                                         boat.getSailID(),
                                         boat.getColor())));
@@ -7172,16 +7171,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 groupCount = 0;
                 for (Fleet fleet : raceColumn.getFleets()) {
                     raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
-                    Set<CompetitorWithoutBoatDTO> competitors = new HashSet<>();
+                    Map<CompetitorWithoutBoatDTO, BoatDTO> competitors = new HashMap<>();
                     List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
                             .get(flightCount).get(groupCount);
                     for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
                         if (competitorAndBoatPair.getA() != null && competitorAndBoatPair.getA().getName() != null) {
-                            competitors.add(competitorAndBoatPair.getA());
+                            competitors.put(competitorAndBoatPair.getA(), competitorAndBoatPair.getB());
                         }
                     }
-                    // TODO set boat and competitors in race logs (bug4403)
-                    // TODO add Javadoc to setCompetitorRegistrationsInRacelog
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), competitors);
                     groupCount++;

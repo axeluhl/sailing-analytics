@@ -2053,4 +2053,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String successfullyFilledRaceLogsFromPairingList();
     String errorFetchingRaceDisplayNamedFromLeaderboard(String message);
     String errorCalculatingPairingListTemplate(String message);
+    String errorCreatingPairingList(String message);
 }

@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -85,7 +84,7 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
         int groupIndex = 1;
         int boatIndex = 0;
         for (BoatDTO boat : boats) {
-            pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()));
+            pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()==null?boat.getSailId():boat.getName()));
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setTextAlign(TextAlign.CENTER);
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setPadding(10, Unit.PX);
             if (boat.getColor() != null) {
@@ -127,18 +126,19 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
                         boatsToRemove.remove(competitorAndBoatPair.getB());
                     }
                     for (BoatDTO boat : boatsToRemove) {
-                        group.add(new Pair<>(new CompetitorDTOImpl(), boat));
+                        group.add(new Pair<>(null, boat));
                     }
                 }
                 for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
-                    if (competitorAndBoatPair.getA().getName() == null) {
+                    if (competitorAndBoatPair.getA() == null) {
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(stringMessages.empty()));
                         pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());
                     } else {
+                        final String shortName = competitorAndBoatPair.getA().getShortName();
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid,
-                                new Label(competitorAndBoatPair.getA().getShortName()));
+                                new Label(shortName == null ? competitorAndBoatPair.getA().getName() : shortName));
                     }
                     pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setFontWeight(Style.FontWeight.BOLD);

@@ -26,13 +26,11 @@ public class RegattaLogBoatsInLogAnalyzer<LogT extends AbstractLog<EventT, Visit
     @Override
     protected Set<Boat> performAnalysis() {
         Set<Boat> result = new HashSet<Boat>();
-
         for (EventT event : getLog().getUnrevokedEvents()) {
             if (event instanceof RegattaLogRegisterBoatEvent) {
                 result.add(((RegattaLogRegisterBoatEvent) event).getBoat());
             }
         }
-
         return result;
     }
 }

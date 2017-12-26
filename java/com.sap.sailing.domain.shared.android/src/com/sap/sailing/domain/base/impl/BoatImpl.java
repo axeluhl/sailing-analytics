@@ -12,14 +12,14 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.RenamableImpl;
 
-public class BoatImpl implements DynamicBoat {
+public class BoatImpl extends RenamableImpl implements DynamicBoat {
     private static final long serialVersionUID = 3489730487528955788L;
     private final BoatClass boatClass;
     private final Serializable id;
     private String sailID;
     private Color color;
-    private String name;
     private transient Set<BoatChangeListener> listeners;
 
     public BoatImpl(Serializable id, String name, BoatClass boatClass, String sailId) {
@@ -27,8 +27,8 @@ public class BoatImpl implements DynamicBoat {
     }
 
     public BoatImpl(Serializable id, String name, BoatClass boatClass, String sailID, Color color) {
+        super(name);
         this.id = id;
-        this.name = name;
         this.boatClass = boatClass;
         this.sailID = sailID;
         this.color = color;
@@ -61,15 +61,10 @@ public class BoatImpl implements DynamicBoat {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
     public void setName(String newName) {
-        final String oldName = this.name;
+        final String oldName = getName();
         if (!Util.equalsWithNull(oldName, newName)) {
-            this.name = newName;
+            super.setName(newName);
             for (BoatChangeListener listener : getListeners()) {
                 listener.nameChanged(oldName, newName);
             }

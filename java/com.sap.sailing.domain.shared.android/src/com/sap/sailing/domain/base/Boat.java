@@ -9,7 +9,7 @@ import com.sap.sse.datamining.annotations.Dimension;
  * The boat being sailed by a competitor.
  *
  */
-public interface Boat extends NamedWithID, IsManagedByCache<SharedDomainFactory>{
+public interface Boat extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
     BoatClass getBoatClass();   
     
     @Dimension(messageKey="SailID")

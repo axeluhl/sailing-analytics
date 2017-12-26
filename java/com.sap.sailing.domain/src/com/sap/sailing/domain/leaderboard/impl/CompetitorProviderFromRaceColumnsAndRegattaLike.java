@@ -176,16 +176,17 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     }
 
     /**
-     * Returns a Collection of all {@link Boat boats} collected over {@link RegattaLog}, {@link RaceLog} as
-     * well as the {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached.
-     * While subsequent calls may return different {@link Collection Collections} the contents of a {@link Collection} returned may never change.
+     * Returns a Collection of all {@link Boat boats} collected over {@link RegattaLog}, {@link RaceLog} as well as the
+     * {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached. While subsequent calls
+     * may return different {@link Collection Collections} the contents of a {@link Collection} returned may never
+     * change.
      */
     public Iterable<Boat> getAllBoats() {
         Set<Boat> result = new HashSet<>();
-        for (RaceColumn rc: provider.getRaceColumns()) {
+        for (RaceColumn rc : provider.getRaceColumns()) {
             result.addAll(rc.getAllCompetitorsAndTheirBoats().values());
         }
-        for (Boat boat: provider.getBoatsRegisteredInRegattaLog()) {
+        for (Boat boat : provider.getBoatsRegisteredInRegattaLog()) {
             result.add(boat);
         }
         return result; 

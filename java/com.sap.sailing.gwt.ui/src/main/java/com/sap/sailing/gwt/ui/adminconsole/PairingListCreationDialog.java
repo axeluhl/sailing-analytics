@@ -67,7 +67,10 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                 this.template.getSelectedFlightNames(), this.template, new AsyncCallback<PairingListDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        PairingListCreationDialog.this.errorReporter.reportError(stringMessages.errorCreatingPairingList(caught.getMessage()));
                         pairingListDTO = null;
+                        applyToRacelogButton.setEnabled(false);
+                        printPreViewButton.setEnabled(false);
                     }
 
                     @Override
