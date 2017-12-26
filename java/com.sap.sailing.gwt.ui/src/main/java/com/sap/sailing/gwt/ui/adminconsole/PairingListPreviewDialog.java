@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style;
@@ -24,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PairingListPreviewDialog extends DataEntryDialog<Void> {
@@ -71,7 +74,8 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
     }
     
     public Widget getPairingListGrid() {
-        final List<BoatDTO> boats = pairingListDTO.getBoats();
+        final List<BoatDTO> boats = new ArrayList<>(pairingListDTO.getBoats());
+        Collections.sort(boats, getBoatsComparator());
         final int flightCount = pairingListDTO.getPairingList().size();
         final int groupCount = pairingListDTO.getPairingList().get(0).size();
         final int boatCount = boats.size();
@@ -84,7 +88,7 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
         int groupIndex = 1;
         int boatIndex = 0;
         for (BoatDTO boat : boats) {
-            pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()==null?boat.getSailId():boat.getName()));
+            pairingListGrid.setWidget(0, boatIndex + 2, new Label(getBoatDisplayName(boat)));
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setTextAlign(TextAlign.CENTER);
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setPadding(10, Unit.PX);
             if (boat.getColor() != null) {
@@ -121,12 +125,12 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
                 if (group.size() < boatCount) {
-                    List<BoatDTO> boatsToRemove = new ArrayList<>(boats);
+                    List<BoatDTO> unusedBoats = new ArrayList<>(boats);
                     for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : group) {
-                        boatsToRemove.remove(competitorAndBoatPair.getB());
+                        unusedBoats.remove(competitorAndBoatPair.getB());
                     }
-                    for (BoatDTO boat : boatsToRemove) {
-                        group.add(new Pair<>(null, boat));
+                    for (BoatDTO unusedBoat : unusedBoats) {
+                        group.add(new Pair<>(null, unusedBoat));
                     }
                 }
                 for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : group) {
@@ -165,6 +169,19 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
         result.add(pairingListPanel);
 
         return pairingListPanel;
+    }
+
+    private String getBoatDisplayName(BoatDTO boat) {
+        return boat.getName()==null?boat.getSailId():boat.getName();
+    }
+
+    /**
+     * Compare boats such that a natural ordering in the pairing list display is achieved. This
+     * is based on the natural comparator principle, using the string that will be displayed for the boats.
+     */
+    private Comparator<BoatDTO> getBoatsComparator() {
+        final Comparator<String> naturalComparator = new NaturalComparator();
+        return (b1, b2)->naturalComparator.compare(getBoatDisplayName(b1), getBoatDisplayName(b2));
     }
 
     private boolean isDark(Color color) {
