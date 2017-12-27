@@ -5,7 +5,7 @@
   0.2 Adjust default values
   0.3 Show manual
 
-1. Structure 
+1. Structure
   1.1 Files and their tasks
   1.2 Scenarios
 
@@ -89,12 +89,9 @@ Miscellaneous auxiliary variables (time stamp, script name, etc.)
 lib/utils.sh:
 Functions for the output of colored messages, logging and sourcing of remaining bash files
 
-lib/variables_aws.sh:
-Default values for variables
-
 1.2 Scenarios
 
-Scenarios are encapsulated execution units that are orchestrated by AWS and instance-specific functions 
+Scenarios are encapsulated execution units that are orchestrated by AWS and instance-specific functions
 to automate a specific use case.
 
 Scenarios include the following functions:
@@ -109,9 +106,9 @@ Scenarios include the following functions:
 2.1 Initialization of required variables
 
 Each scenario requires certain initialized variables for its execution. The assignment of a value to a variable takes place
-either at the start of the script via the input of a parameter or if no parameter has been transferred, by input of the user after being prompted. 
+either at the start of the script via the input of a parameter or if no parameter has been transferred, by input of the user after being prompted.
 When the user is prompted to enter a value for a variable, he is being offered a default value out of the aws_variables.sh file.
-This facilitates user input because certain values, such as the standard key name to connect to an instance don't change very often. 
+This facilitates user input because certain values, such as the standard key name to connect to an instance don't change very often.
 
 2.2 Error handling
 
@@ -119,13 +116,13 @@ To check the successful execution of a function, various strategies are used:
 
 1. Checking the return value of a function
 
-This strategy is applied to AWS-specific functions. When calling an AWS command (e.g. aws elb create-load-balancer) 
+This strategy is applied to AWS-specific functions. When calling an AWS command (e.g. aws elb create-load-balancer)
 the return value is either 0 (error occured) or 1 (no error occured).
 
 2. Checking the HTTP status code
 
 When a curl command is called, the option -w "\ n% {http_code}" is also passed as a parameter. In doing so, response and HTTP code can be assigned
-to two different variables, allowing separate processing. The HTTP status code can then be compared to the expected result, without loosing information 
+to two different variables, allowing separate processing. The HTTP status code can then be compared to the expected result, without loosing information
 about the actual response.
 
 3. TODO

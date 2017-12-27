@@ -104,6 +104,23 @@ function require_ssh_user(){
 	require_variable "$ssh_user_param" ssh_user "" "$ssh_user_ask_message"
 }
 
+function require_super_instance(){
+	require_variable "$super_instance_param" super_instance "" "$super_instance_message"
+}
+
+function require_description(){
+	require_variable "$description_param" description "$instance_name" "$description_message"
+}
+
+function require_contact_person(){
+	require_variable "$contact_person_param" contact_person "" "$contact_person_message"
+}
+
+function require_contact_email(){
+	require_variable "$contact_email_param" contact_email "" "$contact_email_message"
+}
+
+
 region_ask_message="Please enter the region for the instance: "
 instance_type_ask_message="Please enter the instance type: "
 key_name_ask_message="Please enter the name of your keypair to connect to the instance: "
@@ -117,3 +134,7 @@ user_username_ask_message="Please enter the username of your new user: "
 user_password_ask_message="Please enter the password of your new user: "
 public_dns_name_ask_message="Please enter the public dns name: "
 ssh_user_ask_message="Please enter the ssh user: "
+super_instance_message="Please enter the dns name of the superior instance: "
+description_message="Please enter a description for the server: "
+contact_person_message="Please enter the name of a contact person: "
+contact_email_message="Please enter the email of the contact person: "

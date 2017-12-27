@@ -86,6 +86,12 @@ do
     if [[ "${utility_file}" == *"utils.sh"* ]]; then
       continue
     fi
+
+    # Don't source config files for now
+    if [[ "${utility_file}" == *"config_"* ]]; then
+      continue
+    fi
+
     source "$utility_file"
   fi
 done

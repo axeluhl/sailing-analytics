@@ -7,7 +7,7 @@
 # -----------------------------------------------------------
 function query_public_dns_name(){
 	local_echo "Querying for the instance public dns name..."
-	aws_wrapper --region "$region" ec2 describe-instances --instance-ids "$1" --output text --query 'Reservations[*].Instances[*].PublicDnsName'
+	aws_wrapper ec2 describe-instances --instance-ids $1 --output text --query 'Reservations[*].Instances[*].PublicDnsName'
 }
 
 # -----------------------------------------------------------
@@ -17,6 +17,16 @@ function query_public_dns_name(){
 function get_default_vpc_id(){
 	local_echo "Querying for the default vpc id..."
 	aws_wrapper ec2 describe-vpcs --query 'Vpcs[?IsDefault==`true`].VpcId' --output text
+}
+
+# -----------------------------------------------------------
+# Query for instance id by public dns name
+# param $1 public dns name
+# @return    instance id
+# -----------------------------------------------------------
+function get_instance_id(){
+	local_echo "Querying for the instance id..."
+	aws_wrapper aws ec2 describe-instances --query "Reservations[*].Instances[?PublicDnsName=='$1'].InstanceId" --output text
 }
 
 # -----------------------------------------------------------
@@ -35,7 +45,7 @@ function allocate_address(){
 # -----------------------------------------------------------
 function associate_address(){
 	local_echo "Associating instance \"$1\" with elastic ip \"$2\"..."
-	aws_wrapper ec2 associate-address --instance-id "$1" --public-ip "$2"
+	aws_wrapper ec2 associate-address --instance-id $1 --public-ip $2
 }
 
 # -----------------------------------------------------------
@@ -43,7 +53,7 @@ function associate_address(){
 # @return  availability zones array
 # -----------------------------------------------------------
 function get_availability_zones(){
-	aws_wrapper ec2 --region $region describe-availability-zones --query "AvailabilityZones[].ZoneName"
+	aws_wrapper ec2 describe-availability-zones --query "AvailabilityZones[].ZoneName"
 }
 
 # -----------------------------------------------------------
@@ -70,51 +80,14 @@ function wait_for_ssh_connection(){
 }
 
 
-# -----------------------------------------------------------
-# Creates $count instances inside $region with image $image_id and
-# $instance_type and $user_data as well as according $tag_specifications,
-# $security_group_ids and $key_name
-# @return    instance id
-# -----------------------------------------------------------
 function run_instance(){
 	local_echo "Creating instance..."
-	write_user_data_to_file
 
-	local command="aws_wrapper --region $region ec2 run-instances"
-	command+=$(add_param "region" $region)
-	command+=$(add_param "image-id" $image_id)
-	command+=$(add_param "count" $instance_count)
-	command+=$(add_param "instance-type" $instance_type)
-	command+=$(add_param "key-name" $key_name)
-	command+=$(add_param "security-group-ids" $instance_security_group_ids)
-	command+=$(add_param "user-data" 'file://${tmpDir}/$user_data_file')
-	command+=$(add_param "tag-specifications" $(printf $tag_specifications "$instance_name"))
+	local user_data=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
+	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
+	"INSTALL_FROM_RELEASE=$(get_latest_release)" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
 
-	eval "$command"
-}
-
-# -----------------------------------------------------------
-# Creates a file with user data for instance creation
-# -----------------------------------------------------------
-function write_user_data_to_file(){
-	local MONGODB_HOST="$mongodb_host"
-	local MONGODB_PORT="$mongodb_port"
-	local MONGODB_NAME="$(lower_trim $instance_name | only_letters_and_numbers)"
-	local REPLICATION_CHANNEL="$MONGODB_NAME"
-	local SERVER_NAME="$MONGODB_NAME"
-	local USE_ENVIRONMENT="live-server"
-	local INSTALL_FROM_RELEASE="$(get_latest_release)"
-	local SERVER_STARTUP_NOTIFY="$default_server_startup_notify"
-
-	local content=
-	content+=$(add_user_data_variable "MONGODB_HOST" $MONGODB_HOST)
-	content+=$(add_user_data_variable "MONGODB_PORT" $MONGODB_PORT)
-	content+=$(add_user_data_variable "MONGODB_NAME" $MONGODB_NAME)
-	content+=$(add_user_data_variable "INSTALL_FROM_RELEASE" $INSTALL_FROM_RELEASE)
-	content+=$(add_user_data_variable "USE_ENVIRONMENT" $USE_ENVIRONMENT)
-	content+=$(add_user_data_variable "REPLICATION_CHANNEL" $REPLICATION_CHANNEL)
-	content+=$(add_user_data_variable "SERVER_NAME" $SERVER_NAME)
-	content+=$(add_user_data_variable "SERVER_STARTUP_NOTIFY" $SERVER_STARTUP_NOTIFY)
-
-	echo "$content" > "${tmpDir}/$user_data_file"
+	aws_wrapper ec2 run-instances --image-id $image_id --count $instance_count --instance-type $instance_type --key-name $key_name \
+	--security-group-ids $instance_security_group_ids --user-data "$user_data" \
+	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]"
 }

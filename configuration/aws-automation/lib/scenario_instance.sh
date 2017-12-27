@@ -28,30 +28,26 @@ function instance_require(){
 function instance_execute() {
 	header "Instance Initialization"
 
+	# create instance
 	local json_instance=$(run_instance)
 	instance_id=$(echo "$json_instance" | get_attribute '.Instances[0].InstanceId')
-  instance_private_ip=$(echo "$json_instance" | get_attribute '.Instances[0].PrivateIpAddress')
 
-	wait_instance_exists "$instance_id"
+	# wait till instance is recognized by aws
+	wait_instance_exists $instance_id
 
-	public_dns_name=$(query_public_dns_name "$instance_id")
+	# get public dns name of instance
+	public_dns_name=$(query_public_dns_name $instance_id)
 
-	header "SSH Connection"
-
-	wait_for_ssh_connection "$ssh_user" "$public_dns_name"
-
+	# if --tail option is passed then tail logfiles of instance within tmux
 	if $tail; then
 		tail_start
 	fi
 
 	header "Event and user creation"
 
-	wait_for_access_token_resource "$admin_username" "$admin_password" "$public_dns_name"
-	access_token=$(get_access_token "$admin_username" "$admin_password" "$public_dns_name")
-
-	wait_for_create_event_resource "$public_dns_name"
-	event_id=$(create_event "$access_token" "$public_dns_name" "$instance_name")
-
-	change_admin_password "$access_token" "$public_dns_name" "$admin_username" "$new_admin_password"
-	create_new_user "$access_token" "$public_dns_name" "$user_username" "$user_password"
+	local port="8888"
+	access_token=$(get_access_token $admin_username $admin_password $public_dns_name $port)
+	event_id=$(create_event $access_token $public_dns_name $port $instance_name)
+	change_admin_password $access_token $public_dns_name $port $admin_username $new_admin_password
+	create_new_user $access_token $public_dns_name $port $user_username $user_password
 }

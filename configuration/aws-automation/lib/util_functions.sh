@@ -1,35 +1,40 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------------
-# Creates a parameter from a key and value
-# @param $1  key
-# @param $2  value
-# @return    result ("--key value")
+# Appends multiple parameters (e.g. "SERVER_NAME=Test")
+# Also includes parameters starting with "#" as comments.
+# @param $@  variable key and value (e.g. "MONGODB_HOST=123.123.123.123")
 # -----------------------------------------------------------
-function add_param() {
-	if [ ! -z "$2" ]; then
-		local result=" --$1 $2"
-	fi
-	echo "$result"
-}
-
-# -----------------------------------------------------------
-# Constructs string of user data variable name and value plus linebreak
-# @param $1  user data variable name
-# @param $2  user data variable value
-# @return    name=value (linebreak) if value not empty else nothing
-# -----------------------------------------------------------
-function add_user_data_variable(){
-		if ! [ -z "$2" ]; then
-			local CR_LF=$'\r'$'\n'
-			local content="$1=$2"
-			content+=$CR_LF
-			echo "$content"
+function build_configuration(){
+	for var in "$@"
+	do
+		# if parameters starts with #, add parameters to content
+		if [[ $var == \#* ]]; then
+			content+="$var\n"
+			continue
 		fi
+
+		key=${var%=*}
+		value=${var#*=}
+
+		if [[ ! -z "$key"  && ! -z "$value" ]]; then
+			content+="$key=$value\n"
+	  fi
+	done
+	echo -e $content
 }
 
 function command_was_successful(){
 	[ $1 -eq 0 ]
+}
+
+# -----------------------------------------------------------
+# Uncomments a line starting with a specific pattern
+# @param $1  pattern
+# @param $2  file
+# -----------------------------------------------------------
+function uncomment_line_starting_with(){
+	sed -i '/$1/s/^#//g' $2
 }
 
 # -----------------------------------------------------------
@@ -40,6 +45,23 @@ function command_was_successful(){
 function is_number(){
 	[[ $1 =~ ^-?[0-9]+$ ]]
 }
+
+# -----------------------------------------------------------
+# Finds first missing number in array of sorted numbers
+# @param $1  array of numbers
+# @return first missing number
+# -----------------------------------------------------------
+function find_first_missing_number_in_array(){
+	arr=("$@")
+	for (( i = 0 ; i < $((${#arr[@]})) ; i++ )); do
+		if [ "$((${arr[$i]}+1))" != "${arr[$(($i + 1))]}" ] ;then
+			missing_number="$((${arr[$i]}+1))"
+		break
+	fi
+	done
+	echo $missing_number
+}
+
 
 # -----------------------------------------------------------
 # Check if variable is a number and its value is 200
@@ -64,6 +86,10 @@ function get_attribute(){
 
 function sanitize(){
 	tr -d '\r'
+}
+
+function alphanumeric(){
+	lower_trim $1 | only_letters_and_numbers
 }
 
 # ------------------------------------------------------

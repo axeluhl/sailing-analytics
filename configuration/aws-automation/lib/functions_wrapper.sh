@@ -33,7 +33,7 @@ function curl_wrapper(){
 # -----------------------------------------------------------
 function aws_wrapper(){
   local out;
-  out=$(aws "$@")
+  out=$(aws --region $region "$@")
   if command_was_successful $?; then
     success "[ OK ]"
     echo $out | sanitize

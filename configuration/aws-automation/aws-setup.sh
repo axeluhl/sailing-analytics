@@ -17,6 +17,12 @@ else
   exit 1
 fi
 
+function source_region_config_file(){
+  require_region
+  local region_config_fle=$(echo lib/config_$region.sh | tr '-' '_')
+  source $region_config_fle
+}
+
 # delete temp files when trapped
 function trapCleanup() {
   echo ""
@@ -60,6 +66,8 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 function mainScript() {
 echo -n
 
+source_region_config_file
+
 if $tail; then
   check_if_tmux_is_used
 fi
@@ -75,6 +83,12 @@ if $instance; then
   if $associate_alb; then
   	associate_alb_start
   fi
+  confirm_reset_panes
+	safeExit
+fi
+
+if $sub_instance; then
+  sub_instance_start
   confirm_reset_panes
 	safeExit
 fi
@@ -105,17 +119,22 @@ usage() {
   -l, --instance-short-name     Short name for instance (e.g. subdomain \"wcs17\")
   -a, --new-admin-password      New password for the admin user
   -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
+  -p, --super-instance          Dns name of superior instance (e.g. base instance for sub instances)
+  -w, --description             Description of sub instance
+  -c, --contact-person          Contact person
+  -e, --contact-email           Email of contact person
   -f, --force                   Skip user input and use default variables
   -d, --debug                   Debug mode
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
+  --sub-instance                Create sub instance
   --associate-alb               Associate instance with existing application load balancer whos
                                 listener is defined in variables_aws.sh. Automatically
                                 create necessary target group and host name rule.
                                 Currently *.dummy.sapsailing.com is used for test purposes.
   --associate-clb               Associate instance with new classic load balancer.
-  --asslociate-elastic-ip       Associate instance with new elastic ip.
+  --associate-elastic-ip       Associate instance with new elastic ip.
   --tail                        Tail logs from instance using tmux
 
   ${bold}Other:${reset}
@@ -204,6 +223,7 @@ associate_clb=false
 associate_alb=false
 associate_elastic_ip=false
 instance=false
+sub_instance=false
 tail=false
 
 # Read the options and set variables
@@ -222,12 +242,17 @@ while [[ $1 = -?* ]]; do
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
+  -b|--super-instance) shift; super_instance_param=${1} ;;
+  -w|--description) shift; description_param=${1} ;;
+  -c|--contact-person) shift; contact_person_param=${1} ;;
+  -e|--contact-email) shift; contact_email_param=${1} ;;
   -f|--force) force=true ;;
 	-d|--debug) debug=true ;;
+  --instance) instance=true ;;
+  --sub-instance) sub_instance=true ;;
 	--associate-clb) associate_clb=true ;;
   --associate-alb) associate_alb=true ;;
   --associate-elastic-ip) associate_elastic_ip=true ;;
-  --instance) instance=true ;;
 	--tail) tail=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;

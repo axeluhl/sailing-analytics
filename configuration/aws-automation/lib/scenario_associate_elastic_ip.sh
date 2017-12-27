@@ -14,23 +14,21 @@ function associate_elastic_ip_start(){
 # the user will be prompted to enter a value
 # -----------------------------------------------------------
 function associate_elastic_ip_require(){
-	require_region
-	require_instance_type
-	require_instance_name
-	require_instance_short_name
-	require_key_name
-	require_key_file
-	require_new_admin_password
-	require_user_username
-	require_user_password
+# will only be executed after instance creation
+	:
 }
 
 function associate_elastic_ip_execute() {
 	header "Elastic ip creation"
 
+	# allocate elastic ip
 	local elastic_ip=$(allocate_address)
-	associate_address "$instance_id" "$elastic_ip"
+
+	# associate elastic ip
+	associate_address $instance_id $elastic_ip
 
 	header "Apache configuration"
-	configure_apache "$elastic_ip" "$event_id" "$ssh_user" "$elastic_ip" "ssl"
+
+	# configure apache with event macro
+	append_event_ssl_macro_to_001_events_conf $elastic_ip $event_id $ssh_user $elastic_ip '8888'
 }
