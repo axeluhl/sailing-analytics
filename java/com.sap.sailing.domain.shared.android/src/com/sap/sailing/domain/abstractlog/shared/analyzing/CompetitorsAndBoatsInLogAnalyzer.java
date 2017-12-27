@@ -7,11 +7,14 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 
 /**
- * This class searches for {@link RaceLogRegisterCompetitorEvent}s in the given log.
+ * This class searches for {@link RaceLogRegisterCompetitorEvent}s or {@link RegattaLogRegisterCompetitorEvent}s in the given log
+ * in order to determine the competitor/boat mappings for both kind of events
  * 
  */
 public class CompetitorsAndBoatsInLogAnalyzer<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>
@@ -27,8 +30,14 @@ public class CompetitorsAndBoatsInLogAnalyzer<LogT extends AbstractLog<EventT, V
 
         for (EventT event : getLog().getUnrevokedEvents()) {
             if (event instanceof RaceLogRegisterCompetitorEvent) {
-                RaceLogRegisterCompetitorEvent competitorAndBoatEvent = (RaceLogRegisterCompetitorEvent) event;
-                result.put(competitorAndBoatEvent.getCompetitor(), competitorAndBoatEvent.getBoat());
+                RaceLogRegisterCompetitorEvent raceLogCompetitorEvent = (RaceLogRegisterCompetitorEvent) event;
+                result.put(raceLogCompetitorEvent.getCompetitor(), raceLogCompetitorEvent.getBoat());
+            } else if (event instanceof RegattaLogRegisterCompetitorEvent) {
+                RegattaLogRegisterCompetitorEvent regattaLogCompetitorEvent = (RegattaLogRegisterCompetitorEvent) event;
+                if (regattaLogCompetitorEvent.getCompetitor() instanceof CompetitorWithBoat) {
+                    CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) regattaLogCompetitorEvent.getCompetitor();
+                    result.put(competitorWithBoat, competitorWithBoat.getBoat());
+                }
             }
         }
 

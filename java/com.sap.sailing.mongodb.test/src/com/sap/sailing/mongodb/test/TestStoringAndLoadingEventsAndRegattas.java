@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -416,30 +417,32 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String regattaBaseName = "Kieler Woche";
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         Regatta regattaProxy = createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, regattaStartDate, regattaEndDate, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ false, regattaStartDate, regattaEndDate, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
         final String regattaName = regattaProxy.getName();
         Regatta regatta = res.createRegatta(regattaName, regattaProxy.getBoatClass().getName(), 
-                /* canBoatsOfCompetitorsChangePerRace */ true, regattaStartDate, regattaEndDate,
+                /* canBoatsOfCompetitorsChangePerRace */ false, regattaStartDate, regattaEndDate,
                 "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
                 /* defaultCourseAreaId */ null, /*buoyZoneRadiusInHullLengths*/ 2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
-        Competitor competitor1 = AbstractLeaderboardTest.createCompetitor("Humba1");
-        Competitor competitor2 = AbstractLeaderboardTest.createCompetitor("Humba2");
+        CompetitorWithBoat competitorWithBoat1 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba1");
+        CompetitorWithBoat competitorWithBoat2 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba2");
         Boat boat1= AbstractLeaderboardTest.createBoat("Humba1 Boot");
         Boat boat2 = AbstractLeaderboardTest.createBoat("Humba2 Boot");
-        res.getCompetitorStore().addNewCompetitors(Arrays.asList(competitor1, competitor2));
+        res.getCompetitorStore().addNewCompetitors(Arrays.asList(competitorWithBoat1, competitorWithBoat2));
         res.getCompetitorStore().addNewBoats(Arrays.asList(boat1, boat2));
-        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1));
-        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2));
-        assertTrue(Util.contains(regatta.getAllCompetitors(), competitor1));
-        assertTrue(Util.contains(regatta.getAllCompetitors(), competitor2));
-        assertTrue(Util.contains(regatta.getAllBoats(), boat1));
-        assertTrue(Util.contains(regatta.getAllBoats(), boat2));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitorWithBoat1));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitorWithBoat2));
+        assertTrue(Util.contains(regatta.getAllCompetitors(), competitorWithBoat1));
+        assertTrue(Util.contains(regatta.getAllCompetitors(), competitorWithBoat2));
+        Iterable<Boat> allBoats = regatta.getAllBoats();
+        assertTrue(Util.size(allBoats) == 2);
+        assertTrue(Util.contains(regatta.getAllBoats(), competitorWithBoat1.getBoat()));
+        assertTrue(Util.contains(regatta.getAllBoats(), competitorWithBoat2.getBoat()));
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         RegattaLeaderboard fullLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), null, new int[] { 3, 5 });
         // use the set-up and add a regatta leaderboard with eliminations that wraps the regatta leaderboard
         RegattaLeaderboardWithEliminations withEliminations = res.addRegattaLeaderboardWithEliminations("U16", /* leaderboardDisplayName */ "Display Name", fullLeaderboard);
-        res.apply(new UpdateEliminatedCompetitorsInLeaderboard(withEliminations.getName(), Collections.singleton(competitor1)));
+        res.apply(new UpdateEliminatedCompetitorsInLeaderboard(withEliminations.getName(), Collections.singleton(competitorWithBoat1)));
 
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
@@ -461,8 +464,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertTrue(loadedLeaderboardWithEliminations instanceof RegattaLeaderboardWithEliminations);
         assertEquals("Display Name", loadedLeaderboardWithEliminations.getDisplayName());
         assertEquals(withEliminations.getAllCompetitors(), loadedLeaderboardWithEliminations.getAllCompetitors());
-        assertTrue(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitor1));
-        assertFalse(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitor2));
+        assertTrue(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitorWithBoat1));
+        assertFalse(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitorWithBoat2));
     }
     
     @Test
