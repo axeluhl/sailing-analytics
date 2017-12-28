@@ -2007,7 +2007,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RegattaLogRegisterCompetitorEvent loadRegattaLogRegisterCompetitorEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
-        CompetitorWithBoat comp = getCompetitorWithBoatByID(dbObject);
+        Competitor comp = getCompetitorByID(dbObject);
         final RegattaLogRegisterCompetitorEvent result;
         if (comp == null) {
             result = null;
