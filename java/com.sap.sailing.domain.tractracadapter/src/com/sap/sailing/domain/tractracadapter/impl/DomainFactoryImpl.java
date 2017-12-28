@@ -666,19 +666,19 @@ public class DomainFactoryImpl implements DomainFactory {
 
     /**
      * Obtains the boats for the given competitors.
-     * There are 2 cases to distinguish:
-     * 1. Races with boat information in the competitor metadata field  
-     * 2. Races without any boat information
+     * There are 2 cases to distinguish:<ol>
+     * <li>Races with boat information in the competitor metadata field</li>  
+     * <li>Races without any boat information</li>
+     * </ol>
      */
     @Override
-     public Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, LeaderboardGroupResolver leaderboardGroupResolver,
+    public Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, LeaderboardGroupResolver leaderboardGroupResolver,
             IRace race, BoatClass defaultBoatClass) {
         final CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         getCompetingCompetitors(race).forEach(rc->{
             Serializable competitorId = rc.getCompetitor().getId(); 
             BoatMetaData competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
-
             // If the tractrac race contains boat metadata we assume the regatta can have changing boats per race.
             // As the attribute 'canBoatsOfCompetitorsChangePerRace' is new and 'false' is the default value 
             // we need to set it's value to true for the regatta, but only if the regatta is of type MigratableRegattaImpl
@@ -698,7 +698,6 @@ public class DomainFactoryImpl implements DomainFactory {
                     }
                 }
             }
-
             // Case 1
             if (regatta.canBoatsOfCompetitorsChangePerRace()) {
                 // create an unique identifier for the boat and try to find it in the boatStore
@@ -713,11 +712,9 @@ public class DomainFactoryImpl implements DomainFactory {
                     boatId = createUniqueBoatIdentifierFromCompetitor(rc.getCompetitor());
                     sailId = rc.getCompetitor().getShortName();
                 }
-
                 Boat existingBoat = competitorAndBoatStore.getExistingBoatById(boatId);
                 Competitor existingCompetitor = competitorAndBoatStore.getExistingCompetitorById(competitorId);
                 boolean competitorMigrationRequired = existingCompetitor != null && existingCompetitor.hasBoat();
-
                 // Now we check if we already have a separate competitor and boat for this competitor in the store
                 if (existingCompetitor != null && existingBoat != null && !competitorMigrationRequired) {                    
                     competitorsAndBoats.put(existingCompetitor, existingBoat);
@@ -727,7 +724,6 @@ public class DomainFactoryImpl implements DomainFactory {
                         competitorToUse = getOrCreateCompetitor(rc.getCompetitor());
                     } else if (competitorMigrationRequired) {
                         competitorToUse = competitorAndBoatStore.migrateToCompetitorWithoutBoat((CompetitorWithBoat) existingCompetitor);
-
                         // we might also want to update the shortName field of the competitor during migration (instead of using sailID)
                         if (competitorToUse.getShortName() != rc.getCompetitor().getShortName()) {
                             boolean savedIsCompetitorToUpdateDuringGetOrCreate = competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(competitorToUse);
@@ -742,7 +738,6 @@ public class DomainFactoryImpl implements DomainFactory {
                             }
                         }
                     }
-
                     Boat boatToUse = existingBoat;
                     if (existingBoat == null) {
                         if (competitorBoatInfo != null) {

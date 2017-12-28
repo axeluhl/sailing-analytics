@@ -148,8 +148,8 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         assertNotNull(replicaBoat);
         assertEquals(masterBoat.getName(), replicaBoat.getName());
         assertEquals(masterBoat.getColor(), replicaBoat.getColor());
-        assertEquals(replicaBoat.getName(), expectedBoatName);
-        assertEquals(replicaBoat.getColor().getAsHtml(), expectedBoatColor);
+        assertEquals(expectedBoatName, replicaBoat.getName());
+        assertEquals(expectedBoatColor, replicaBoat.getColor().getAsHtml());
     }        
 
     private Competitor findCompetitor(Iterable<Competitor> competitors, Competitor otherCompetitor) {
