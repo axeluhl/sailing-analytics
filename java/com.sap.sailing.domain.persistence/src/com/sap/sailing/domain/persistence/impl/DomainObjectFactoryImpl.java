@@ -1957,12 +1957,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return comp;
     }
 
-    private CompetitorWithBoat getCompetitorWithBoatByID(DBObject dbObject) {
-        Serializable competitorId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name());
-        CompetitorWithBoat comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
-        return comp;
-    }
-
     private Boat getBoatByID(DBObject dbObject) {
         Serializable boatId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_BOAT_ID.name());
         Boat boat = baseDomainFactory.getCompetitorStore().getExistingBoatById(boatId);
