@@ -314,6 +314,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
+     * Creates a regatta and replicates this to all replicas currently attached.
+     * 
      * @param series
      *            the series must not have any {@link RaceColumn}s yet
      * @param controlTrackingFromStartAndFinishTimes

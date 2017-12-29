@@ -281,7 +281,7 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             // TODO bug2822: if only boat is to be updated then this would currently fail here; consider competitorStore.isBoatToUpdateDuringGetOrCreate(...)
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            DynamicBoat boat = (DynamicBoat) competitorStore.getOrCreateBoat(UUID.randomUUID(), null /* no boat name available */, boatClass, sailId, null);
+            DynamicBoat boat = (DynamicBoat) competitorStore.getOrCreateBoat(UUID.randomUUID(), null /* no boat name available */, boatClass, sailId, /* color */ null);
             domainCompetitor = competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, (DynamicBoat) boat);
