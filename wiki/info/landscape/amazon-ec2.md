@@ -12,6 +12,7 @@
 
 #### Starting an instance
 
+
 - Which instance type to choose:
   - Archive: m2.2xlarge
   - Live: c1.xlarge
@@ -81,6 +82,165 @@ MONGODB_NAME=myspecificevent-replica
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
 SERVER_STARTUP_NOTIFY=you@email.com
 </pre>
+
+
+
+#### Setting up a Multi Instance
+To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsailing.com" and description "Schwartauer Segler-Verein, [www.ssv-net.de](http://www.ssv-net.de), Alexander Probst, [webmaster@alexprobst.de](mailto:webmaster@alexprobst.de)" perform the following steps:
+
+
+
+##### Instance configuration
+
+1. Connect to the EC2 instance where your multi instance should be deployed. For example: Connect to the instance "SL Multi-Instance Sailing Server" with dns name  "ec2-34-250-136-229.eu-west-1.compute.amazonaws.com" in region Ireland via SSH.
+
+   <pre>
+   ssh -i .ssh/Administrator.pem root@ec2-34-250-136-229.eu-west-1.compute.amazonaws.com
+   </pre>
+
+2. Navigate to the directory /home/sailing/servers.
+
+   <pre>
+   cd /home/sailing/servers
+   </pre>
+
+3. Create a new directory with name "ssv".
+
+   <pre>
+   mkdir ssv
+   </pre>
+
+4. Copy the file /home/sailing/code/java/target/refreshInstance.sh to your new directory.
+
+   <pre>
+   cp /home/sailing/code/java/target/refreshInstance.sh ssv
+   </pre>
+
+5. Initialize a new environment variable "DEPLOY_TO" with the name of the directory.
+
+   <pre>
+   export DEPLOY_TO=ssv
+   </pre>
+
+6. Execute the refreshInstance.sh script with your desired release build version from releases.sapsailing.com.
+
+   <pre>
+   ./refreshInstance.sh install-release build-201712270844
+   </pre>
+
+7. Once the script finished, uncomment the following lines in your env.sh file.
+
+   <pre>
+   # Uncomment for use with SAP JVM only:
+
+   ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS-XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
+   </pre>
+
+   Afterwards comment out the line where it says "JAVA_HOME=/opt/jdk1.8.0_20" 
+
+   <pre>
+   # JAVA_HOME=/opt/jdk1.8.0_20
+   </pre>
+
+8. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
+
+   <pre>
+   grep -Roh --include=env.sh "SERVER_PORT=.*" /home/sailing/servers | tr -d "SERVER_PORT=" | sort | uniq
+   </pre>
+
+   Do this for TELNET_PORT and EXPEDITION_PORT likewise.
+
+   If this is the first multi instance on the server, use the values SERVER_PORT=8888, TELNET_PORT=14900, EXPEDITION_PORT=2000.
+
+9. Append the following variable assignments to your env.sh file.
+   <pre>
+   SERVER_NAME=SSV
+   TELNET_PORT=14900
+   SERVER_PORT=8888
+   MONGODB_NAME=SSV
+   EXPEDITION_PORT=2000
+   MONGODB_HOST=dbserver.internal.sapsailing.com
+   MONGODB_PORT=10202
+   DEPLOY_TO=ssv
+   </pre>
+
+10. Append the following description to the /home/sailing/servers/README file.
+
+  <pre>
+  # ssv (Schwartauer Segler-Verein, www.ssv-net.de, Alexander Probst, webmaster@alexprobst.de)
+  SERVER_NAME=SSV
+  TELNET_PORT=14900
+  SERVER_PORT=8888
+  MONGODB_NAME=SSV
+  EXPEDITION_PORT=2000
+  </pre>
+
+11. Start the multi instance.
+    <pre>
+    cd /home/sailing/servers/ssv
+    ./start
+    </pre>
+
+12. Change the admin password now and create a new user with admin role.
+
+13. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
+
+
+
+
+##### Reachability
+
+To reach your multi instance via "ssv.sapsailing.com", perform the following steps within the AWS Web Console inside region Ireland.
+
+1. Create a new target group with the following details.
+
+   <img src="/wiki/images/amazon/TargetGroup_1.png"/>
+   <img src="/wiki/images/amazon/TargetGroup_2.png"/>
+
+   Notice the overwritten health check port that is now pointing directly to the instance.
+
+2. Add the "SL Multi-Instance Sailing Server" instance to the target group.
+
+  <img src="/wiki/images/amazon/TargetGroup_3.png"/>
+
+3. Create a rule within the application load balancer that is forwarding ssv.sapsailing.com to your created target group. Choose "Load Balancers" from the sidebar an select the load balancer with the name "Sailing-eu-west-1". Click on the tab "Listeners" and then on "View/edit rules" inside the row of the HTTPS Listener.
+
+  <img src="/wiki/images/amazon/ApplicationLoadBalancer_1.png"/>
+
+   Click on the plus sign and insert the new rule at the very top. Enter "ssv.sapsailing.com" into the host-header field and select the target group "S-shared-ssv" under "forward". Then click on "Save".
+
+  <img src="/wiki/images/amazon/ApplicationLoadBalancer_2.png"/>
+
+   Your application load balancer is now configured to redirect all requests with host-header "ssv.sapsailing.com" to the target group "S-shared-ssv". That means all requests will now be routed to the "SL Multi-Instance Sailing Server" instance inside this target group using HTTPS and port 443 as specified in the configuration of the target group. To establish a connection on port 8888, where our multi instance is listening, we have to modify the apache configuration on the "SL Multi-Instance Sailing Server" instance.
+
+4. Connect to the  "SL Multi-Instance Sailing Server" instance via SSH. Navigate to the directory /etc/httpd/conf.d. Open up the file "001-events.conf" and append the following line.
+
+   <pre>
+   Use Plain-SSL ssv.sapsailing.com 127.0.0.1 8888
+   </pre>
+
+5. Save the file and run a configuration file syntax check.
+
+   <pre>
+   apachectl configtest
+   </pre>
+
+   If it reports "Syntax OK", continue with reloading the httpd configuration.
+
+6. Reload the httpd configuration.
+
+   <pre>
+   /etc/init.d/httpd reload
+   </pre>
+
+
+You should now be able to reach your multi instance with the dns name "ssv.sapsailing.com".
+
+
+
+#### Setting up a Dedicated Instance
+[...]
+
 
 ## Costs per month
 
@@ -457,5 +617,6 @@ Should you want to compare servers of which you know they have different sets of
 <tr><td>Security Group</td><td>Firewall configuration that can be associated to an instance. There is no need of configuring iptables or such. One can associate many instances the the same Security Group.</td></tr>
 <tr><td>Elastic Load Balancer (ELB)</td><td>Service that makes it possible to balance over services running on different instances.</td></tr>
 <tr><td>Network Interfaces</td><td>Virtual network interfaces that are mapped to physical network interfaces on instances. </td></tr>
-<tr><td>Placement Groups</td><td>Enables applications to get the full-bisection bandwidth and low-latency network performance required for tightly coupled, node-to-node communication. Placement Groups can only contain HVM instance and have other limitations described here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using_cluster_computing.html</td></tr>
+
+<tr><td>Multi instance</td><td>App instance that runs along with other app instances on the same EC2 instance</td></tr><tr><td>Placement Groups</td><td>Enables applications to get the full-bisection bandwidth and low-latency network performance required for tightly coupled, node-to-node communication. Placement Groups can only contain HVM instance and have other limitations described here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using_cluster_computing.html</td></tr>
 </table>
