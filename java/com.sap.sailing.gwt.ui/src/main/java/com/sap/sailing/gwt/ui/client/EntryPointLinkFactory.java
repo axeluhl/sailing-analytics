@@ -38,4 +38,8 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     public static String createDashboardLink(Map<String, String> parameters) {
         return createEntryPointLink("/dashboards/RibDashboard.html", parameters);
     }
+    
+    public static String createPairingListLink(Map<String, String> parameters) {
+        return createEntryPointLink("/gwt/PairingList.html", parameters);
+    }
 }

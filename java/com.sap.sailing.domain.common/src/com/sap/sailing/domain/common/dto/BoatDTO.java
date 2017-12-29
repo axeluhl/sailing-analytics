@@ -30,7 +30,7 @@ public class BoatDTO extends NamedDTO implements Serializable {
     public String getSailId() {
         return sailId;
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;

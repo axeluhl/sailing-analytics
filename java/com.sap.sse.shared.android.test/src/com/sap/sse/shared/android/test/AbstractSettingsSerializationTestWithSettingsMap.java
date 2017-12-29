@@ -2,17 +2,69 @@ package com.sap.sse.shared.android.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
+import com.sap.sse.common.filter.TextOperator;
+import com.sap.sse.common.filter.TextOperator.Operators;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.DecimalSetting;
+import com.sap.sse.common.settings.generic.EnumSetSetting;
+import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
+import com.sap.sse.common.settings.generic.StringSetSetting;
+import com.sap.sse.common.settings.generic.StringSetting;
 
 public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> extends AbstractSettingsSerializationTest<SOT> {
-
+    private static class UntypedSettings extends AbstractGenericSerializableSettings {
+        private static final long serialVersionUID = -2265305217290147424L;
+        private transient StringSetting enumSetting;
+        private transient StringSetSetting enumSetSetting;
+        private transient StringSetting numberSetting;
+        private transient StringSetting booleanSetting;
+        
+        public UntypedSettings(String enumValue, Collection<String> enumValues, String numberValue, String booleanValue) {
+            enumSetting.setValue(enumValue);
+            enumSetSetting.setValues(enumValues);
+            numberSetting.setValue(numberValue);
+            booleanSetting.setValue(booleanValue);
+        }
+        
+        @Override
+        protected void addChildSettings() {
+            enumSetting = new StringSetting("enumSetting", this);
+            enumSetSetting = new StringSetSetting("enumSetSetting", this);
+            numberSetting = new StringSetting("numberSetting", this);
+            booleanSetting = new StringSetting("booleanSetting", this);
+        }
+    }
+    
+    private static class TypedSettings extends AbstractGenericSerializableSettings {
+        private static final long serialVersionUID = -2265305217290147424L;
+        @SuppressWarnings("unused")
+        private transient EnumSetting<TextOperator.Operators> enumSetting;
+        private transient EnumSetSetting<TextOperator.Operators> enumSetSetting;
+        @SuppressWarnings("unused")
+        private transient DecimalSetting numberSetting;
+        @SuppressWarnings("unused")
+        private transient BooleanSetting booleanSetting;
+        
+        @Override
+        protected void addChildSettings() {
+            enumSetting = new EnumSetting<>("enumSetting", this, TextOperator.Operators::valueOf);
+            enumSetSetting = new EnumSetSetting<>("enumSetSetting", this, TextOperator.Operators::valueOf);
+            numberSetting = new DecimalSetting("numberSetting", this);
+            booleanSetting = new BooleanSetting("booleanSetting", this);
+        }
+    }
+    
     @Test
     public void testSettingsMapWithOneSerializableSettings() throws Exception {
         final GenericSerializableSettings settingsValues = createTestSettingsWithValues();
@@ -244,5 +296,23 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
             innerMap.put(entry.getKey(), copiedSettings);
         }
         return new SettingsMapImpl(innerMap);
+    }
+    
+    /**
+     * Regression test for Bug 4383.
+     * When the serialized settings contain values that can't be converted to the setting
+     * type, those values may not break the deserialization. If a user e.g. manipulates the URL, the page may not stay
+     * empty because of an internal exception. In this case, the wrong values should be ignored instead but all other
+     * values must be deserialized.
+     */
+    @Test
+    public void testIllegalValuesInSerializedSettings() throws Exception {
+        UntypedSettings untypedSettings = new UntypedSettings("WrongEnumValue", Arrays.asList("Contains", "WrongEnumValue"), "noNumber", "noBoolean");
+        SOT serialized = serialize(untypedSettings);
+        TypedSettings deserialized = deserialize(serialized, new TypedSettings());
+        TypedSettings expected = new TypedSettings();
+        // this is the only value that will be correctly deserialized
+        expected.enumSetSetting.addValue(Operators.Contains);
+        assertEquals(expected, deserialized);
     }
 }
