@@ -95,7 +95,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 1. Connect to the EC2 instance where your multi instance should be deployed. For example: Connect to the instance "SL Multi-Instance Sailing Server" with dns name  "ec2-34-250-136-229.eu-west-1.compute.amazonaws.com" in region Ireland via SSH.
 
    <pre>
-   ssh -i .ssh/Administrator.pem root@ec2-34-250-136-229.eu-west-1.compute.amazonaws.com
+   ssh sailing@ec2-34-250-136-229.eu-west-1.compute.amazonaws.com
    </pre>
 
 2. Navigate to the directory /home/sailing/servers.
@@ -145,20 +145,20 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 8. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
 
    <pre>
-   grep -Roh --include=env.sh "SERVER_PORT=.*" /home/sailing/servers | tr -d "SERVER_PORT=" | sort | uniq
+   for i in /home/sailing/servers/*/env.sh; do cat $i | grep "^ *SERVER_PORT=" | tail -1 | tr -d "SERVER_PORT="; done | sort -n
    </pre>
 
    Do this for TELNET_PORT and EXPEDITION_PORT likewise.
 
-   If this is the first multi instance on the server, use the values SERVER_PORT=8888, TELNET_PORT=14900, EXPEDITION_PORT=2000.
+   If this is the first multi instance on the server, use the values SERVER_PORT=8888, TELNET_PORT=14888, EXPEDITION_PORT=2010.
 
 9. Append the following variable assignments to your env.sh file.
    <pre>
    SERVER_NAME=SSV
-   TELNET_PORT=14900
+   TELNET_PORT=14888
    SERVER_PORT=8888
    MONGODB_NAME=SSV
-   EXPEDITION_PORT=2000
+   EXPEDITION_PORT=2010
    MONGODB_HOST=dbserver.internal.sapsailing.com
    MONGODB_PORT=10202
    DEPLOY_TO=ssv
@@ -192,12 +192,13 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 
 To reach your multi instance via "ssv.sapsailing.com", perform the following steps within the AWS Web Console inside region Ireland.
 
-1. Create a new target group with the following details.
+1. Create a new target group with the following details, where the name "S-shared-ssv" is created as follows: "S" for "Sailing", "shared" because it's a shared instance, and "ssv" represents the server instance name:
 
    <img src="/wiki/images/amazon/TargetGroup_1.png"/>
-   <img src="/wiki/images/amazon/TargetGroup_2.png"/>
 
-   Notice the overwritten health check port that is now pointing directly to the instance.
+   <img src="/wiki/images/amazon/TargetGroup_2.png"/>
+   
+   Notice the overwritten health check port that is now pointing directly to the instance with its `SERVER_PORT` 8888.
 
 2. Add the "SL Multi-Instance Sailing Server" instance to the target group.
 
@@ -211,13 +212,15 @@ To reach your multi instance via "ssv.sapsailing.com", perform the following ste
 
   <img src="/wiki/images/amazon/ApplicationLoadBalancer_2.png"/>
 
-   Your application load balancer is now configured to redirect all requests with host-header "ssv.sapsailing.com" to the target group "S-shared-ssv". That means all requests will now be routed to the "SL Multi-Instance Sailing Server" instance inside this target group using HTTPS and port 443 as specified in the configuration of the target group. To establish a connection on port 8888, where our multi instance is listening, we have to modify the apache configuration on the "SL Multi-Instance Sailing Server" instance.
+   Your application load balancer is now configured to redirect all requests with host-header "ssv.sapsailing.com" to the target group "S-shared-ssv". That means all requests will now be routed to the "SL Multi-Instance Sailing Server" instance inside this target group using HTTPS and port 443 as specified in the configuration of the target group. To establish a connection on port 8888 (the `SERVER_PORT` property from above), where our multi instance is listening, we have to modify the apache configuration on the "SL Multi-Instance Sailing Server" instance.
 
-4. Connect to the  "SL Multi-Instance Sailing Server" instance via SSH. Navigate to the directory /etc/httpd/conf.d. Open up the file "001-events.conf" and append the following line.
+4. Connect to the  "SL Multi-Instance Sailing Server" instance via SSH as user `root`. Navigate to the directory /etc/httpd/conf.d. Open up the file "001-events.conf" and append the following line.
 
    <pre>
    Use Plain-SSL ssv.sapsailing.com 127.0.0.1 8888
    </pre>
+   
+   where 8888 is again the `SERVER_PORT` from before.
 
 5. Save the file and run a configuration file syntax check.
 
@@ -230,9 +233,8 @@ To reach your multi instance via "ssv.sapsailing.com", perform the following ste
 6. Reload the httpd configuration.
 
    <pre>
-   /etc/init.d/httpd reload
+   service httpd reload
    </pre>
-
 
 You should now be able to reach your multi instance with the dns name "ssv.sapsailing.com".
 
