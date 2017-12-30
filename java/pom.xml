@@ -109,7 +109,7 @@
         <module>com.sap.sailing.domain.tractracadapter</module>
         <module>com.sap.sailing.domain.tractracadapter.persistence</module>
         <module>com.sap.sailing.domain.windfinderadapter</module>
-        <module>com.sap.sailing.windfinderadapter.test</module>
+        <module>com.sap.sailing.domain.windfinderadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter</module>
         <module>com.sap.sailing.domain.igtimiadapter.persistence</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter</module>
