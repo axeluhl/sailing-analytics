@@ -25,7 +25,18 @@ public interface Spot extends NamedWithID, Positioned {
      */
     String getKeyword();
     
+    /**
+     * @return the URL of a web page showing a current weather report for this spot
+     */
     URL getReportUrl() throws MalformedURLException;
     
+    /**
+     * @return the URL of a web page showing a weather forecast for this spot
+     */
     URL getForecastUrl() throws MalformedURLException;
+    
+    /**
+     * @return the URL of a web page showing general wind statistics for this spot
+     */
+    URL getStatisticsUrl() throws MalformedURLException;
 }

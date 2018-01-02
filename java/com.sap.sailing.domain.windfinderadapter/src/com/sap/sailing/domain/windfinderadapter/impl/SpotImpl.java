@@ -12,6 +12,7 @@ public class SpotImpl extends NamedImpl implements Spot {
     private static final String BASE_URL = "https://www.windfinder.com";
     private static final String BASE_REPORT_URL = BASE_URL + "/report";
     private static final String BASE_FORECAST_URL = BASE_URL + "/forecast";
+    private static final String BASE_STATISTICS_URL = BASE_URL + "/windstatistics";
 
     private final String id;
     private final String keyword;
@@ -49,4 +50,8 @@ public class SpotImpl extends NamedImpl implements Spot {
         return new URL(BASE_FORECAST_URL+"/"+getKeyword());
     }
 
+    @Override
+    public URL getStatisticsUrl() throws MalformedURLException {
+        return new URL(BASE_STATISTICS_URL+"/"+getKeyword());
+    }
 }
