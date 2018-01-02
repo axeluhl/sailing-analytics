@@ -313,5 +313,13 @@ class TrainingController: NSObject {
             completion()
         }
     }
-    
+
+    // MARK: - Properties
+
+    var baseURLString: String {
+        get {
+            return trainingRequestManager.baseURLString
+        }
+    }
+
 }

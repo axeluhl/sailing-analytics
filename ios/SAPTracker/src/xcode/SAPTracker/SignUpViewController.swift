@@ -44,21 +44,23 @@ class SignUpViewController: FormularViewController {
     
     weak var signUpController: SignUpController?
     
-    @IBOutlet weak var infoLabel: UILabel!
-    @IBOutlet weak var errorLabel: UILabel!
-    @IBOutlet weak var emailLabel: UILabel!
-    @IBOutlet weak var emailTextField: UITextField!
-    @IBOutlet weak var userNameLabel: UILabel!
-    @IBOutlet weak var userNameTextField: UITextField!
-    @IBOutlet weak var fullNameLabel: UILabel!
-    @IBOutlet weak var fullNameTextField: UITextField!
-    @IBOutlet weak var companyLabel: UILabel!
-    @IBOutlet weak var companyTextField: UITextField!
-    @IBOutlet weak var passwordLabel: UILabel!
-    @IBOutlet weak var passwordTextField: UITextField!
-    @IBOutlet weak var repeatPasswordLabel: UILabel!
-    @IBOutlet weak var repeatPasswordTextField: UITextField!
-    @IBOutlet weak var signUpButton: UIButton!
+    @IBOutlet var infoLabel: UILabel!
+    @IBOutlet var errorLabel: UILabel!
+    @IBOutlet var endpointLabel: UILabel!
+    @IBOutlet var endpointValueLabel: UILabel!
+    @IBOutlet var emailLabel: UILabel!
+    @IBOutlet var emailTextField: UITextField!
+    @IBOutlet var userNameLabel: UILabel!
+    @IBOutlet var userNameTextField: UITextField!
+    @IBOutlet var fullNameLabel: UILabel!
+    @IBOutlet var fullNameTextField: UITextField!
+    @IBOutlet var companyLabel: UILabel!
+    @IBOutlet var companyTextField: UITextField!
+    @IBOutlet var passwordLabel: UILabel!
+    @IBOutlet var passwordTextField: UITextField!
+    @IBOutlet var repeatPasswordLabel: UILabel!
+    @IBOutlet var repeatPasswordTextField: UITextField!
+    @IBOutlet var signUpButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,6 +90,8 @@ class SignUpViewController: FormularViewController {
         navigationItem.title = SignUpTranslation.SignUpView.Title.String
         infoLabel.text = SignUpTranslation.SignUpView.InfoLabel.Text.String
         errorLabel.text = ""
+        endpointLabel.text = SignUpTranslation.Common.Server.String
+        endpointValueLabel.text = signUpController?.baseURLString
         emailLabel.text = SignUpTranslation.Common.Email.String
         userNameLabel.text = SignUpTranslation.Common.UserName.String
         fullNameLabel.text = SignUpTranslation.SignUpView.FullNameLabel.Text.String

@@ -10,6 +10,7 @@
 
 "Common.Email" = "E-Mail";
 "Common.Password" = "Passwort";
+"Common.Server" = "Server";
 "Common.UserName" = "Benutzername";
 
 // MARK: - ForgotPasswordView

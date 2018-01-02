@@ -20,13 +20,15 @@ class LoginViewController: FormularViewController {
 
     var signUpController: SignUpController?
 
-    @IBOutlet weak var userNameLabel: UILabel!
-    @IBOutlet weak var userNameTextField: UITextField!
-    @IBOutlet weak var passwordLabel: UILabel!
-    @IBOutlet weak var passwordTextField: UITextField!
-    @IBOutlet weak var forgotPasswordButton: UIButton!
-    @IBOutlet weak var signUpButton: UIButton!
-    @IBOutlet weak var loginButton: UIButton!
+    @IBOutlet var endpointLabel: UILabel!
+    @IBOutlet var endpointValueLabel: UILabel!
+    @IBOutlet var userNameLabel: UILabel!
+    @IBOutlet var userNameTextField: UITextField!
+    @IBOutlet var passwordLabel: UILabel!
+    @IBOutlet var passwordTextField: UITextField!
+    @IBOutlet var forgotPasswordButton: UIButton!
+    @IBOutlet var signUpButton: UIButton!
+    @IBOutlet var loginButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,6 +49,8 @@ class LoginViewController: FormularViewController {
     
     fileprivate func setupLocalization() {
         navigationItem.title = SignUpTranslation.LoginView.Title.String
+        endpointLabel.text = SignUpTranslation.Common.Server.String
+        endpointValueLabel.text = signUpController?.baseURLString
         userNameLabel.text = SignUpTranslation.Common.UserName.String
         passwordLabel.text = SignUpTranslation.Common.Password.String
         forgotPasswordButton.setTitle(SignUpTranslation.ForgotPasswordView.Title.String, for: .normal)

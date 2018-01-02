@@ -119,7 +119,15 @@ class SignUpController: NSObject {
     fileprivate func didLogoutWithViewController(_ controller: UIViewController) {
         delegate?.signUpControllerDidLogout(self)
     }
-    
+
+    // MARK: - Properties
+
+    var baseURLString: String {
+        get {
+            return requestManager.baseURLString
+        }
+    }
+
     // MARK: - Helper
     
     fileprivate func showAlert(forError error: Error, andMessage message: String?, withViewController controller: UIViewController) {

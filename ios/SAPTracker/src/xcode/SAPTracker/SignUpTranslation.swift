@@ -18,11 +18,14 @@ class SignUpTranslation: NSObject {
         struct Email {
             static let String = NSLocalizedString("Common.Email", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
         }
-        struct UserName {
-            static let String = NSLocalizedString("Common.UserName", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
-        }
         struct Password {
             static let String = NSLocalizedString("Common.Password", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
+        }
+        struct Server {
+            static let String = NSLocalizedString("Common.Server", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
+        }
+        struct UserName {
+            static let String = NSLocalizedString("Common.UserName", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
         }
     }
     

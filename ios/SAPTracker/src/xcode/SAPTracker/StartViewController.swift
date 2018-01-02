@@ -162,51 +162,7 @@ class StartViewController: UIViewController {
     }
 
     @IBAction func trainingButtonTapped(_ sender: Any) {
-        if (userName == nil) {
-            signUpController.loginWithViewController(self)
-        } else {
-            performSegue(withIdentifier: Segue.Training, sender: self)
-        }
-    }
-    
-    // MARK: - Segues
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        super.prepare(for: segue, sender: sender)
-        if (segue.identifier == Segue.Training) {
-            if let trainingCheckInTVC = segue.destination as? TrainingCheckInTableViewController {
-                trainingCheckInTVC.userName = userName
-                trainingCheckInTVC.signUpController = signUpController
-            }
-        }
-    }
-    
-    // MARK: - Properties
-    
-    fileprivate lazy var signUpController: SignUpController = {
-        let signUpController = SignUpController(baseURLString: "https://ubilabstest.sapsailing.com")
-        signUpController.delegate = self
-        return signUpController
-    }()
-    
-}
-
-// MARK: - SignUpControllerDelegate
-
-extension StartViewController: SignUpControllerDelegate {
-    
-    func signUpController(_ controller: SignUpController, didFinishLoginWithUserName userName: String) {
-        self.userName = userName
         performSegue(withIdentifier: Segue.Training, sender: self)
     }
-    
-    func signUpControllerDidCancelLogin(_ controller: SignUpController) {
-        userName = nil
-    }
-    
-    func signUpControllerDidLogout(_ controller: SignUpController) {
-        userName = nil
-        navigationController?.popToRootViewController(animated: true)
-    }
-    
+
 }

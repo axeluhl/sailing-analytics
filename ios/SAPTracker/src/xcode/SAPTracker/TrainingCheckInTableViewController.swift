@@ -14,10 +14,9 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     fileprivate struct Segue {
         static let CreateTraining = "CreateTraining"
     }
-    
-    var signUpController: SignUpController!
-    var userName: String!
-    
+
+    var signUpController: SignUpController?
+
     @IBOutlet weak var addButton: UIButton!
     
     override func viewDidLoad() {
@@ -93,13 +92,13 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
     }
-    
+
     fileprivate func logout() {
-        signUpController.logoutWithViewController(self)
+        // TODO: implement
     }
     
     // MARK: - Segues
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
         if (segue.identifier == Segue.CreateTraining) {
@@ -112,7 +111,7 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     }
     
     // MARK: - Properties
-    
+
     fileprivate lazy var trainingCheckInController: TrainingCheckInController = {
         return TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
     }()
@@ -122,7 +121,7 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     }()
     
     fileprivate lazy var trainingCoreDataManager: TrainingCoreDataManager = {
-        return TrainingCoreDataManager(name: self.userName)
+        return TrainingCoreDataManager(name: "TrainingCoreData")
     }()
     
 }

@@ -396,7 +396,7 @@
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
                                                 <connections>
-                                                    <action selector="trainingButtonTapped:" destination="ulQ-cJ-h3D" eventType="touchUpInside" id="sIW-5N-i04"/>
+                                                    <segue destination="1ba-kX-Lnq" kind="show" identifier="Training" id="AOw-ED-ugn"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -468,7 +468,6 @@
                         <outlet property="trainingButton" destination="TBi-yV-KGH" id="dUU-B8-sSj"/>
                         <outlet property="trainingButtonView" destination="Ift-x8-TYe" id="fng-Dg-vXq"/>
                         <outlet property="trainingImageView" destination="QQn-nO-8d9" id="ToN-eh-bGD"/>
-                        <segue destination="1ba-kX-Lnq" kind="show" identifier="Training" id="eP3-jF-cGa"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="QYW-k3-jSc" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1897,8 +1896,8 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Device Identifier Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IHy-Ae-s1D">
-                                                    <rect key="frame" x="14" y="36" width="153" height="55"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Device Identifier Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IHy-Ae-s1D">
+                                                    <rect key="frame" x="14" y="36" width="345" height="55"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -1908,6 +1907,7 @@
                                                 <constraint firstItem="GpR-bL-Ekk" firstAttribute="leading" secondItem="aHh-Fu-bjO" secondAttribute="leading" constant="14" id="1RO-LX-3Du"/>
                                                 <constraint firstAttribute="bottom" secondItem="IHy-Ae-s1D" secondAttribute="bottom" constant="8" id="3jK-sb-mbn"/>
                                                 <constraint firstItem="IHy-Ae-s1D" firstAttribute="leading" secondItem="aHh-Fu-bjO" secondAttribute="leading" constant="14" id="J8G-id-aec"/>
+                                                <constraint firstAttribute="trailing" secondItem="IHy-Ae-s1D" secondAttribute="trailing" constant="16" id="MGy-lJ-0yQ"/>
                                                 <constraint firstItem="GpR-bL-Ekk" firstAttribute="top" secondItem="aHh-Fu-bjO" secondAttribute="top" constant="8" id="UBz-vY-TpH"/>
                                                 <constraint firstItem="IHy-Ae-s1D" firstAttribute="top" secondItem="GpR-bL-Ekk" secondAttribute="bottom" constant="8" id="Ys6-qB-CkQ"/>
                                             </constraints>
