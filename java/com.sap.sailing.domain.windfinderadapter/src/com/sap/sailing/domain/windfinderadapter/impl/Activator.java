@@ -1,11 +1,24 @@
 package com.sap.sailing.domain.windfinderadapter.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 
 public class Activator implements BundleActivator {
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     private static BundleContext context;
+    
+    /**
+     * Registrations of OSGi services to be de-registered when the bundle shuts down
+     */
+    private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
     static BundleContext getContext() {
         return context;
@@ -18,6 +31,10 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
+        logger.info("Creating ExpeditionTrackerFactory");
+        final WindFinderTrackerFactory windfinderTrackerFactory = new WindFinderTrackerFactory();
+        registrations.add(context.registerService(WindFinderTrackerFactory.class, windfinderTrackerFactory, /* properties */null));
+        registrations.add(context.registerService(WindTrackerFactory.class, windfinderTrackerFactory, /* properties */null));
     }
 
     /*
@@ -26,6 +43,10 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext bundleContext) throws Exception {
+        for (ServiceRegistration<?> reg : registrations) {
+            reg.unregister();
+        }
+        registrations.clear();
         Activator.context = null;
     }
 

@@ -3,6 +3,8 @@ package com.sap.sailing.domain.windfinderadapter.impl;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -34,14 +36,25 @@ public class WindFinderReportParser {
         return new WindImpl(position, new MillisecondsTimePoint(dateFormat.parse(jsonOfSingleMeasurement.get("dtl").toString())),
                 new KnotSpeedWithBearingImpl(Double.parseDouble(jsonOfSingleMeasurement.get("ws").toString()),
                         new DegreeBearingImpl(Double.parseDouble(jsonOfSingleMeasurement.get("wd").toString())).reverse()));
-    }   
+    }
+    
+    /**
+     * @param position The position of the station from which messages are to be parsed
+     */
+    Iterable<Wind> parse(Position position, JSONArray jsonOfSeveralMeasurements) throws NumberFormatException, ParseException {
+        final List<Wind> result = new ArrayList<>();
+        for (final Object jsonOfSingleMeasurement : jsonOfSeveralMeasurements) {
+            result.add(parse(position, (JSONObject) jsonOfSingleMeasurement));
+        }
+        return result;
+    }
     
     Spot parseSpot(JSONObject jsonOfSingleSpot) {
         return new SpotImpl(jsonOfSingleSpot.get("n").toString(),
                 jsonOfSingleSpot.get("id").toString(),
                 jsonOfSingleSpot.get("kw").toString(),
                 new DegreePosition(((Number) jsonOfSingleSpot.get("lat")).doubleValue(),
-                        ((Number) jsonOfSingleSpot.get("lon")).doubleValue()));
+                        ((Number) jsonOfSingleSpot.get("lon")).doubleValue()), this);
     }
     
     Iterable<Spot> parseSpots(JSONArray jsonOfMultipleSpots) {

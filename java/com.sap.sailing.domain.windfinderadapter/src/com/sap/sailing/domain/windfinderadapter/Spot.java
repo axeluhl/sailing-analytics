@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.windfinderadapter;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 
 import com.sap.sailing.domain.common.Positioned;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.NamedWithID;
 
 /**
@@ -39,4 +42,6 @@ public interface Spot extends NamedWithID, Positioned {
      * @return the URL of a web page showing general wind statistics for this spot
      */
     URL getStatisticsUrl() throws MalformedURLException;
+
+    Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException;
 }
