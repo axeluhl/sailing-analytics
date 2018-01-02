@@ -32,6 +32,7 @@ class SettingsViewController: UITableViewController {
         setupLocalization()
         setupNavigationBar()
         setupTableView()
+        setupTrainingServerTextField()
     }
     
     fileprivate func setupBatterySavingSwitch() {
@@ -54,6 +55,7 @@ class SettingsViewController: UITableViewController {
         batterySavingTitleLabel.text = Translation.SettingsView.BatterySavingTitleLabel.Text.String
         deviceIdentifierTitleLabel.text = Translation.SettingsView.DeviceIdentifierTitleLabel.Text.String
         trainingServerTitleLabel.text = Translation.SettingsView.TrainingServerTitleLabel.Text.String
+        trainingServerTextField.placeholder = Translation.Endpoint.Training.String
     }
     
     fileprivate func setupNavigationBar() {
@@ -64,7 +66,11 @@ class SettingsViewController: UITableViewController {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 140
     }
-    
+
+    fileprivate func setupTrainingServerTextField() {
+        trainingServerTextField.text = Preferences.serverEndpoint
+    }
+
     // MARK: - Actions
     
     @IBAction func batterySavingChanged(_ sender: UISwitch) {

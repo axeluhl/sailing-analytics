@@ -25,6 +25,7 @@ class Preferences: NSObject {
         static let CodeConventionRead = "CodeConventionRead"
         static let BatterySaving = "BatterySaving"
         static let NewCheckInURL = "NewCheckInURL"
+        static let TrainingServerEndpoint = "TrainingServerEndpoint"
         static let TermsAccepted = "TermsAccepted"
         static let UUID = "udid"
     }
@@ -117,5 +118,15 @@ class Preferences: NSObject {
             NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
         }
     }
-    
+
+    class var serverEndpoint: String {
+        get {
+            return preferences.string(forKey: PreferenceKey.TrainingServerEndpoint) ?? Translation.Endpoint.Training.String
+        }
+        set (value) {
+            preferences.set(value, forKey:PreferenceKey.TrainingServerEndpoint)
+            preferences.synchronize()
+        }
+    }
+
 }
