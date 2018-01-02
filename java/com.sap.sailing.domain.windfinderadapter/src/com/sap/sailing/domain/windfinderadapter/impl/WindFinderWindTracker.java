@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.windfinderadapter.impl;
 
+import java.util.Collections;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -7,6 +8,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -70,7 +72,17 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
 
     private Iterable<Spot> getUsefulSpots() {
         // TODO Auto-generated method stub
-        return null;
+        // mocking with the single spot we also have mocked the spot measurement URL for:
+//        {
+//            "c": "Germany",
+//            "lon": 10.28,
+//            "n": "Kiel/Leuchtturm",
+//            "kw": "kiel_leuchtturm",
+//            "lat": 54.47,
+//            "has": "1111010",
+//            "id": "10044N"
+//        }
+        return Collections.singleton(new SpotImpl("Kiel/Leuchtturm", "10044N", "kiel_leuchtturm", new DegreePosition(54.47, 10.28), parser));
     }
 
     @Override

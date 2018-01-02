@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.windfinderadapter.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -66,8 +68,8 @@ public class SpotImpl extends NamedImpl implements Spot {
     
     @Override
     public Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException {
-        final String response = (String) getMeasurementsUrl().getContent();
-        final Iterable<Wind> measurements = parser.parse(getPosition(), (JSONArray) new JSONParser().parse(response));
+        final InputStream response = (InputStream) getMeasurementsUrl().getContent();
+        final Iterable<Wind> measurements = parser.parse(getPosition(), (JSONArray) new JSONParser().parse(new InputStreamReader(response)));
         final Wind result;
         if (measurements != null && !Util.isEmpty(measurements)) {
             result = Util.last(measurements);
