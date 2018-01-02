@@ -53,10 +53,14 @@ public class WindFinderReportParserTest {
         assertEquals("Kiel-Holtenau Airport", kielHoltenau.getName());
         assertEquals("kiel-holtenau", kielHoltenau.getKeyword());
         assertEquals("de15", kielHoltenau.getId());
+        assertEquals("https://www.windfinder.com/report/kiel-holtenau", kielHoltenau.getReportUrl().toString());
+        assertEquals("https://www.windfinder.com/forecast/kiel-holtenau", kielHoltenau.getForecastUrl().toString());
         assertPositionEquals(new DegreePosition(54.38, 10.15), kielHoltenau.getPosition(), 0.000001);
         assertEquals("Kiel/Leuchtturm", kielLeuchtturm.getName());
         assertEquals("kiel_leuchtturm", kielLeuchtturm.getKeyword());
         assertEquals("10044N", kielLeuchtturm.getId());
+        assertEquals("https://www.windfinder.com/report/kiel_leuchtturm", kielLeuchtturm.getReportUrl().toString());
+        assertEquals("https://www.windfinder.com/forecast/kiel_leuchtturm", kielLeuchtturm.getForecastUrl().toString());
         assertPositionEquals(new DegreePosition(54.47, 10.28), kielLeuchtturm.getPosition(), 0.000001);
     }
 
