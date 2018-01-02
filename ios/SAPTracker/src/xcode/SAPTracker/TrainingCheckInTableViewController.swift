@@ -24,8 +24,13 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
         delegate = self
         super.viewDidLoad()
         setup()
+        subscribeForNotifications()
     }
-    
+
+    deinit {
+        unsubscribeFromNotifications()
+    }
+
     // MARK: - Setup
     
     fileprivate func setup() {
@@ -42,7 +47,29 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
         headerTitleLabel.text = Translation.TrainingCheckInListView.HeaderTitleLabel.Text.String
         footerTextView.text = Translation.TrainingCheckInListView.FooterTextView.Text.String
     }
-    
+
+    // MARK: - Notifications
+
+    fileprivate func subscribeForNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(trainingEndpointChanged(_:)),
+            name: NSNotification.Name(rawValue: Preferences.NotificationType.TrainingEndpointChanged),
+            object: nil
+        )
+    }
+
+    fileprivate func unsubscribeFromNotifications() {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc fileprivate func trainingEndpointChanged(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
+            guard let trainingEndpoint = notification.userInfo?[Preferences.UserInfo.TrainingEndpoint] as? String else { return }
+            self.trainingController = TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: trainingEndpoint)
+        })
+    }
+
     // MARK: - Actions
     
     @IBAction func optionButtonTapped(_ sender: Any) {
@@ -91,7 +118,7 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     }()
     
     fileprivate lazy var trainingController: TrainingController = {
-        return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: "https://ubilabstest.sapsailing.com")
+        return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: Preferences.trainingEndpoint)
     }()
     
     fileprivate lazy var trainingCoreDataManager: TrainingCoreDataManager = {

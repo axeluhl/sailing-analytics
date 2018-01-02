@@ -521,13 +521,13 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="500" text="Boatclass Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="96C-Rt-oi7">
-                                <rect key="frame" x="191.5" y="290" width="163.5" height="24"/>
+                                <rect key="frame" x="191.5" y="289.5" width="163.5" height="24"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SQb-uc-DaV">
-                                <rect key="frame" x="20" y="194" width="163.5" height="216"/>
+                                <rect key="frame" x="20" y="193.5" width="163.5" height="216"/>
                                 <connections>
                                     <outlet property="dataSource" destination="RRc-Lh-2o4" id="t6o-Je-VU4"/>
                                     <outlet property="delegate" destination="RRc-Lh-2o4" id="Q8I-TO-XUL"/>
@@ -1938,6 +1938,9 @@
                                                             <nil key="textColor"/>
                                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                             <textInputTraits key="textInputTraits"/>
+                                                            <connections>
+                                                                <action selector="trainingEndpointEditingDidEnd:" destination="H1Q-9y-gn2" eventType="editingDidEnd" id="1l4-dR-WqF"/>
+                                                            </connections>
                                                         </textField>
                                                     </subviews>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -1980,7 +1983,7 @@
                         <outlet property="batterySavingTitleLabel" destination="eRQ-p8-ydN" id="hmc-f2-gcY"/>
                         <outlet property="deviceIdentifierLabel" destination="IHy-Ae-s1D" id="jA2-FC-aWy"/>
                         <outlet property="deviceIdentifierTitleLabel" destination="GpR-bL-Ekk" id="OJD-Hl-4ZD"/>
-                        <outlet property="trainingServerTextField" destination="0Vg-eG-ZcW" id="xWj-7T-KLc"/>
+                        <outlet property="trainingEndpointTextField" destination="0Vg-eG-ZcW" id="xWj-7T-KLc"/>
                         <outlet property="trainingServerTitleLabel" destination="HEN-Xd-5AY" id="XT1-UF-I8L"/>
                     </connections>
                 </tableViewController>

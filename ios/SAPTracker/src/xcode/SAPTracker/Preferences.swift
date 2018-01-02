@@ -13,11 +13,13 @@ class Preferences: NSObject {
     struct NotificationType {
         static let BatterySavingChanged = "BatterySavingChanged"
         static let NewCheckInURLChanged = "NewCheckInURLChanged"
+        static let TrainingEndpointChanged = "TrainingEndpointChanged"
     }
     
     struct UserInfo {
         static let BatterySaving = "BatterySaving"
         static let CheckInURL = "CheckInURL"
+        static let TrainingEndpoint = "TrainingEndpoint"
     }
     
     struct PreferenceKey {
@@ -25,7 +27,7 @@ class Preferences: NSObject {
         static let CodeConventionRead = "CodeConventionRead"
         static let BatterySaving = "BatterySaving"
         static let NewCheckInURL = "NewCheckInURL"
-        static let TrainingServerEndpoint = "TrainingServerEndpoint"
+        static let TrainingEndpoint = "TrainingEndpoint"
         static let TermsAccepted = "TermsAccepted"
         static let UUID = "udid"
     }
@@ -119,13 +121,20 @@ class Preferences: NSObject {
         }
     }
 
-    class var serverEndpoint: String {
+    class var trainingEndpoint: String {
         get {
-            return preferences.string(forKey: PreferenceKey.TrainingServerEndpoint) ?? Translation.Endpoint.Training.String
+            return preferences.string(forKey: PreferenceKey.TrainingEndpoint) ?? Translation.Endpoint.Training.String
         }
         set (value) {
-            preferences.set(value, forKey:PreferenceKey.TrainingServerEndpoint)
+            guard let url = URL(string: value) else { return }
+            preferences.set(url.absoluteString, forKey:PreferenceKey.TrainingEndpoint)
             preferences.synchronize()
+
+            // Send notification
+            var userInfo = [String: AnyObject]()
+            userInfo[UserInfo.TrainingEndpoint] = value as AnyObject?
+            let notification = Notification(name: Notification.Name(rawValue: NotificationType.TrainingEndpointChanged), object: self, userInfo: userInfo)
+            NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
         }
     }
 

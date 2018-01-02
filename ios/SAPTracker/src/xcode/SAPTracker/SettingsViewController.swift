@@ -16,7 +16,7 @@ class SettingsViewController: UITableViewController {
     @IBOutlet var deviceIdentifierTitleLabel: UILabel!
     @IBOutlet var deviceIdentifierLabel: UILabel!
     @IBOutlet var trainingServerTitleLabel: UILabel!
-    @IBOutlet var trainingServerTextField: UITextField!
+    @IBOutlet var trainingEndpointTextField: UITextField!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,7 +32,7 @@ class SettingsViewController: UITableViewController {
         setupLocalization()
         setupNavigationBar()
         setupTableView()
-        setupTrainingServerTextField()
+        setupTrainingEndpointTextField()
     }
     
     fileprivate func setupBatterySavingSwitch() {
@@ -55,7 +55,7 @@ class SettingsViewController: UITableViewController {
         batterySavingTitleLabel.text = Translation.SettingsView.BatterySavingTitleLabel.Text.String
         deviceIdentifierTitleLabel.text = Translation.SettingsView.DeviceIdentifierTitleLabel.Text.String
         trainingServerTitleLabel.text = Translation.SettingsView.TrainingServerTitleLabel.Text.String
-        trainingServerTextField.placeholder = Translation.Endpoint.Training.String
+        trainingEndpointTextField.placeholder = Preferences.trainingEndpoint
     }
     
     fileprivate func setupNavigationBar() {
@@ -67,8 +67,8 @@ class SettingsViewController: UITableViewController {
         tableView.estimatedRowHeight = 140
     }
 
-    fileprivate func setupTrainingServerTextField() {
-        trainingServerTextField.text = Preferences.serverEndpoint
+    fileprivate func setupTrainingEndpointTextField() {
+        trainingEndpointTextField.text = Preferences.trainingEndpoint
     }
 
     // MARK: - Actions
@@ -79,7 +79,12 @@ class SettingsViewController: UITableViewController {
         setupBatterySavingDescriptionLabel()
         tableView.endUpdates()
     }
-    
+
+    @IBAction func trainingEndpointEditingDidEnd(_ sender: Any) {
+        guard let trainingEndpoint = trainingEndpointTextField.text else { return }
+        Preferences.trainingEndpoint = trainingEndpoint
+    }
+
     @IBAction func doneButtonTapped(_ sender: Any) {
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
