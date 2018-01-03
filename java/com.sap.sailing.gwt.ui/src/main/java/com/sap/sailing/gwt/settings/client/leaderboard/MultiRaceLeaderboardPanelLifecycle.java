@@ -26,7 +26,6 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
@@ -44,7 +43,6 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
