@@ -2026,4 +2026,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String importFinishedGotoRaceboard();
     String importFinishedGotoEvent();
     String chooseAName();
+    String windFinderWindSourceTypeName();
+    String windFinderWindSourceTypeTooltip();
 }
