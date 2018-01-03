@@ -12,6 +12,8 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    
+    static final String BASE_URL_FOR_JSON_DOCUMENTS = "http://external.windfinder.com/sap";
 
     private static BundleContext context;
     

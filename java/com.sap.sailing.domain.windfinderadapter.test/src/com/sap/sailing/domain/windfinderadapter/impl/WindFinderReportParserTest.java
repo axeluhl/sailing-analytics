@@ -5,6 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -47,7 +51,8 @@ public class WindFinderReportParserTest {
         final Reader reader = new InputStreamReader(getClass().getResourceAsStream("/schilksee_nearby.json"));
         final JSONArray fullJson = (JSONArray) new JSONParser().parse(reader);
         assertEquals(2, fullJson.size());
-        final Iterable<Spot> spots = new WindFinderReportParser().parseSpots(fullJson);
+        final WindFinderReportParser parser = new WindFinderReportParser();
+        final Iterable<Spot> spots = parser.parseSpots(fullJson, new ReviewedSpotsCollectionImpl("schilksee"));
         final Spot kielHoltenau = (Spot) Util.get(spots, 0);
         final Spot kielLeuchtturm = (Spot) Util.get(spots, 1);
         assertEquals("Kiel-Holtenau Airport", kielHoltenau.getName());
@@ -62,6 +67,19 @@ public class WindFinderReportParserTest {
         assertEquals("https://www.windfinder.com/report/kiel_leuchtturm", kielLeuchtturm.getReportUrl().toString());
         assertEquals("https://www.windfinder.com/forecast/kiel_leuchtturm", kielLeuchtturm.getForecastUrl().toString());
         assertPositionEquals(new DegreePosition(54.47, 10.28), kielLeuchtturm.getPosition(), 0.000001);
+    }
+    
+    @Test
+    public void testTwoSpotsInSchilksee() throws MalformedURLException, IOException, ParseException {
+        assertEquals(2, Util.size(new ReviewedSpotsCollectionImpl("schilksee").getSpots()));
+    }
+
+    @Test
+    public void testSpotsInSchilkseeAreThoseWithIds_10044N_And_de15() throws MalformedURLException, IOException, ParseException {
+        final Iterable<Spot> spots = new ReviewedSpotsCollectionImpl("schilksee").getSpots();
+        final Set<String> spotIds = new HashSet<>();
+        Util.addAll(Util.map(spots, s->s.getId()), spotIds);
+        assertEquals(new HashSet<>(Arrays.asList("10044N", "de15")), spotIds);
     }
 
     private static void assertPositionEquals(Position p1, Position p2, double degreeDelta) {

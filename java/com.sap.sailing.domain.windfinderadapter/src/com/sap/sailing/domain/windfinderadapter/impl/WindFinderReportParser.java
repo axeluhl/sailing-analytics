@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.windfinderadapter.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinderadapter.Spot;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -49,15 +50,16 @@ public class WindFinderReportParser {
         return result;
     }
     
-    Spot parseSpot(JSONObject jsonOfSingleSpot) {
+    Spot parseSpot(JSONObject jsonOfSingleSpot, ReviewedSpotsCollection reviewedSpotsCollection) {
         return new SpotImpl(jsonOfSingleSpot.get("n").toString(),
                 jsonOfSingleSpot.get("id").toString(),
                 jsonOfSingleSpot.get("kw").toString(),
+                jsonOfSingleSpot.get("c").toString(),
                 new DegreePosition(((Number) jsonOfSingleSpot.get("lat")).doubleValue(),
-                        ((Number) jsonOfSingleSpot.get("lon")).doubleValue()), this);
+                                ((Number) jsonOfSingleSpot.get("lon")).doubleValue()), this, reviewedSpotsCollection);
     }
     
-    Iterable<Spot> parseSpots(JSONArray jsonOfMultipleSpots) {
-        return Util.map(jsonOfMultipleSpots, jsonOfSingleSpot->parseSpot((JSONObject) jsonOfSingleSpot));
+    Iterable<Spot> parseSpots(JSONArray jsonOfMultipleSpots, ReviewedSpotsCollection reviewedSpotsCollection) {
+        return Util.map(jsonOfMultipleSpots, jsonOfSingleSpot->parseSpot((JSONObject) jsonOfSingleSpot, reviewedSpotsCollection));
     }
 }

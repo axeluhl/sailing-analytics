@@ -10,7 +10,8 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.NamedWithID;
 
 /**
- * A measurement spot for which a report and / or a forecast may exist.
+ * A measurement spot for which a report and / or a forecast may exist. Equality and
+ * hash code are based on the {@link #getId() ID} only.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -27,6 +28,11 @@ public interface Spot extends NamedWithID, Positioned {
      * {@link #getForecastUrl() forecast} web pages.
      */
     String getKeyword();
+    
+    /**
+     * Name of the country this spot is in, provided in the English language
+     */
+    String getEnglishCountryName();
     
     /**
      * @return the URL of a web page showing a current weather report for this spot

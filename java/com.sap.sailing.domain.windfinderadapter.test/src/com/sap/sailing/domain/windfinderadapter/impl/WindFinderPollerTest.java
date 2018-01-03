@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.windfinderadapter.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Test;
@@ -25,8 +28,10 @@ import com.sap.sse.common.Util.Pair;
 public class WindFinderPollerTest {
     @Test
     public void testPolling() throws Exception {
+        final Object monitor = new Object();
         WindFinderTrackerFactory factory = new WindFinderTrackerFactory();
-        final List<Pair<Wind, WindSource>> wind = new ArrayList<>(); // TODO use blocking queue and read from it with a timeout
+        factory.addReviewedSpotCollection(new ReviewedSpotsCollectionImpl("schilksee"));
+        final List<Pair<Wind, WindSource>> wind = new ArrayList<>();
         final RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
         final DynamicTrackedRegatta mockedTrackedRegatta = mock(DynamicTrackedRegatta.class);
         final DynamicTrackedRace mockedTrackedRace = mock(DynamicTrackedRace.class);
@@ -36,6 +41,9 @@ public class WindFinderPollerTest {
             @Override
             public Boolean answer(InvocationOnMock invocation) throws Throwable {
                 wind.add(new Pair<>(invocation.getArgumentAt(0, Wind.class), invocation.getArgumentAt(1, WindSourceWithAdditionalID.class)));
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
                 return true;
             }
         });
@@ -46,9 +54,14 @@ public class WindFinderPollerTest {
                 return true;
             }
         });
-        WindTracker tracker = factory.createWindTracker(mockedTrackedRegatta, mockedRaceDefinition, /* correctByDeclination */ false);
-        Thread.sleep(5000); // TODO see above; use blocking queue and timeout
+        final WindTracker tracker;
+        synchronized (monitor) {
+            tracker = factory.createWindTracker(mockedTrackedRegatta, mockedRaceDefinition, /* correctByDeclination */ false);
+            monitor.wait(5000);
+        }
         tracker.stop();
-        assertEquals(1, wind.size()); // one latest measurement
+        assertFalse(wind.isEmpty()); // at least one latest measurement
+        Pair<Wind, WindSource> firstFix = wind.iterator().next();
+        assertTrue(new HashSet<>(Arrays.asList("de15", "10044N")).contains(((WindSourceWithAdditionalID) firstFix.getB()).getId()));
     }
 }

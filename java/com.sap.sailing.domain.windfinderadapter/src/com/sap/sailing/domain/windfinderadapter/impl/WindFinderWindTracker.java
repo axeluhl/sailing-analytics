@@ -1,19 +1,25 @@
 package com.sap.sailing.domain.windfinderadapter.impl;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.parser.ParseException;
+
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.domain.windfinderadapter.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinderadapter.Spot;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -37,17 +43,13 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
     private static final Duration POLL_EVERY = Duration.ONE_MINUTE;
     
     private final DynamicTrackedRace trackedRace;
-    private final boolean correctByDeclination;
     private final WindFinderTrackerFactory factory;
-    private final WindFinderReportParser parser;
 
     private ScheduledFuture<?> poller;
 
-    public WindFinderWindTracker(DynamicTrackedRace trackedRace, boolean correctByDeclination, WindFinderTrackerFactory factory) {
+    public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactory factory) {
         this.trackedRace = trackedRace;
-        this.correctByDeclination = correctByDeclination;
         this.factory = factory;
-        this.parser = new WindFinderReportParser();
         this.poller = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this,
                 /* initialDelay */ 0, /* period */ POLL_EVERY.asMillis(), TimeUnit.MILLISECONDS);
     }
@@ -70,19 +72,12 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
         }
     }
 
-    private Iterable<Spot> getUsefulSpots() {
-        // TODO Auto-generated method stub
-        // mocking with the single spot we also have mocked the spot measurement URL for:
-//        {
-//            "c": "Germany",
-//            "lon": 10.28,
-//            "n": "Kiel/Leuchtturm",
-//            "kw": "kiel_leuchtturm",
-//            "lat": 54.47,
-//            "has": "1111010",
-//            "id": "10044N"
-//        }
-        return Collections.singleton(new SpotImpl("Kiel/Leuchtturm", "10044N", "kiel_leuchtturm", new DegreePosition(54.47, 10.28), parser));
+    private Iterable<Spot> getUsefulSpots() throws MalformedURLException, IOException, ParseException {
+        final Set<Spot> spots = new HashSet<>();
+        for (final ReviewedSpotsCollection collection : factory.getReviewedSpotsCollections()) {
+            Util.addAll(collection.getSpots(), spots);
+        }
+        return spots;
     }
 
     @Override
