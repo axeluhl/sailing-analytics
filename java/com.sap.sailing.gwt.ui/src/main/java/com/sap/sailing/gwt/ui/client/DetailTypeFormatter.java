@@ -200,6 +200,8 @@ public class DetailTypeFormatter {
             return stringMessages.beatAngle();
         case COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegrees();
+        case TOTAL_SCORED_RACE_COUNT:
+            return stringMessages.racesScored();
         }
         return null;
     }
@@ -332,6 +334,7 @@ public class DetailTypeFormatter {
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
         case BEAT_ANGLE:
         case TIME_ON_TIME_FACTOR:
+        case TOTAL_SCORED_RACE_COUNT:
             return "";
         default:
             break;
@@ -537,6 +540,8 @@ public class DetailTypeFormatter {
             return "";
         case COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegreesTooltip();
+        case TOTAL_SCORED_RACE_COUNT:
+            return "";
         }
         
         return "";

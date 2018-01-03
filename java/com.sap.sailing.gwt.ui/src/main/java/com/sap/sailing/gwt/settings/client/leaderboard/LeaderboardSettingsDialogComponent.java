@@ -38,7 +38,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected RadioButton lastNRacesColumnSelectionRadioBtn;
     protected IntegerBox numberOfLastRacesToShowBox;
     protected CheckBox showAddedScoresCheckBox;
-    protected CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
     protected CheckBox showCompetitorSailIdColumnheckBox;
     protected CheckBox showCompetitorFullNameColumnCheckBox;
     protected CheckBox isCompetitorNationalityColumnVisible;
@@ -162,10 +161,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
         }
-        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox = dialog.createCheckbox(stringMessages.showNumberOfRacesScored());
-        dialog.addTooltip(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox, stringMessages.showNumberOfRacesScored());
-        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.setValue(initialSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-        overallDetailDialogContent.add(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox);
         
         FlowPanel overallDetailDialogContentSecondLine = new FlowPanel();
         overallDetailDialogContentSecondLine.addStyleName("dialogInnerContent");
