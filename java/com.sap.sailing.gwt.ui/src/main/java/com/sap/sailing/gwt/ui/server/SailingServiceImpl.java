@@ -4907,23 +4907,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitorsOfRace(String leaderboardName, String raceColumnName, String fleetName) {
-        List<CompetitorDTO> result = null;
-        Map<Competitor, Boat> competitorAndBoats = getService().getCompetitorToBoatMappingsForRace(leaderboardName, raceColumnName, fleetName);
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-            Fleet fleet = leaderboard.getFleet(fleetName);
-            if (raceColumn != null && fleet != null) {
-                result = new ArrayList<>();
-                for (Competitor competitor: leaderboard.getCompetitors(raceColumn, fleet)) {
-                    Boat boatOfCompetitor = competitorAndBoats.get(competitor);
-                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, boatOfCompetitor);
-                    result.add(competitorDTO);
-                }
-            }
-        }
-        return result;
+    public Map<CompetitorDTO, BoatDTO> getCompetitorsAndBoatsOfRace(String leaderboardName, String raceColumnName, String fleetName) {
+        Map<Competitor, Boat> competitorsAndBoats = getService().getCompetitorToBoatMappingsForRace(leaderboardName, raceColumnName, fleetName);
+        return baseDomainFactory.convertToCompetitorAndBoatDTOs(competitorsAndBoats);
     }
     
     @Override

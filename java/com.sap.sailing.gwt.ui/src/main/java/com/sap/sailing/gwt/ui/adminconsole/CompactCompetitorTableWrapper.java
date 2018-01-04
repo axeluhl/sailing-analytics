@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.resources.client.ImageResource;
@@ -14,6 +15,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -166,18 +168,18 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
     }
     
     public void refreshCompetitorListFromRace(String leaderboardName, String raceColumnName, String fleetName) {
-        final AsyncCallback<Iterable<CompetitorDTO>> myCallback = new AsyncCallback<Iterable<CompetitorDTO>>() {
+        final AsyncCallback<Map<CompetitorDTO, BoatDTO>> myCallback = new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Iterable<CompetitorDTO> result) {
-                refreshCompetitorList(result);
+            public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
+                refreshCompetitorList(result.keySet());
             }
         };
-        sailingService.getCompetitorsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
+        sailingService.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
     }
 
     private void getFilteredCompetitors(Iterable<CompetitorDTO> result) {

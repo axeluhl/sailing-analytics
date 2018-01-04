@@ -921,15 +921,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
         ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService, 
                 stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, 
-                raceName, false, new DialogCallback<List<CompetitorDTO>>() {
-            @Override
-            public void cancel() {
-            }
-
-            @Override
-            public void ok(final List<CompetitorDTO> result) {
-            }
-        });
+                raceName);
         dialog.show();
     }
 

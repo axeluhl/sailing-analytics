@@ -1,58 +1,41 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
-import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class ShowCompetitorToBoatMappingsDialog extends DataEntryDialog<List<CompetitorDTO>> {
-    private final SailingServiceAsync sailingService;
-    private final StringMessages stringMessages;
-    private final ErrorReporter errorReporter;
-    private final String leaderboardName;
-    private final String raceColumnName;
-    private final String fleetName;
-    private final boolean enableActions;
+public class ShowCompetitorToBoatMappingsDialog extends DialogBox {
 
-    protected static class CompetitorsValidator implements Validator<List<CompetitorDTO>> {
-        public CompetitorsValidator() {
-            super();
-        }
-
-        @Override
-        public String getErrorMessage(List<CompetitorDTO> valueToValidate) {
-            return null;
-        }
-    }
-        
     public ShowCompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages, 
             final ErrorReporter errorReporter, String leaderboardName, final String raceColumnName, final String fleetName,
-            String raceName, boolean enableActions, DialogCallback<List<CompetitorDTO>> callback) {
-        super(stringMessages.actionShowCompetitorToBoatAssignments(),
-                stringMessages.race() + ":" + raceName, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
-        this.sailingService = sailingService;
-        this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
-        this.leaderboardName = leaderboardName;
-        this.raceColumnName = raceColumnName;
-        this.fleetName = fleetName;
-        this.enableActions = enableActions;
-    }
+            String raceName) {
+        super();
 
-    @Override
-    protected List<CompetitorDTO> getResult() {
-        return null;
-    }
+        setText(stringMessages.actionShowCompetitorToBoatAssignments());
+        setAnimationEnabled(true);
+        setGlassEnabled(true);
 
-    @Override
-    protected Widget getAdditionalWidget() {
-        CompetitorToBoatMappingsPanel competitorPanel = new CompetitorToBoatMappingsPanel(sailingService,
-                stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, enableActions);
+        Button okButton = new Button(stringMessages.ok());
+        okButton.addClickHandler(new ClickHandler() {
+          public void onClick(ClickEvent event) {
+              ShowCompetitorToBoatMappingsDialog.this.hide();
+          }
+        });
 
-        return competitorPanel; 
+        VerticalPanel vPanel = new VerticalPanel();
+        CompetitorToBoatMappingsViewPanel competitorPanel = new CompetitorToBoatMappingsViewPanel(sailingService,
+                stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName);
+
+        vPanel.add(new Label(stringMessages.race() + ": " + raceName));
+        vPanel.add(competitorPanel);
+        vPanel.add(okButton);
+        
+        setWidget(vPanel);
     }
 }

@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -14,6 +14,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -165,10 +166,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
         getFilteredBoats(boats);
     }
 
-    public void refreshBoatList() {
-        refreshBoatList(null);
-    }
-    
     public void selectBoat(BoatDTO boatToSelect) {
         for (BoatDTO boat: getAllBoats()) {
             if (boat.getIdAsString().equals(boatToSelect.getIdAsString())) {
@@ -182,23 +179,31 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
         getSelectionModel().clear();
     }
 
-    public void refreshBoatList(final Callback<Iterable<BoatDTO>, Throwable> callback) {
+    public void refreshBoatListFromRace(String leaderboardName, String raceColumnName, String fleetName) {
+        final AsyncCallback<Map<CompetitorDTO, BoatDTO>> myCallback = new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Remote Procedure Call refreshBoatListFromRace() - Failure: " + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
+                filterBoats(result.values());
+            }
+        };
+        sailingService.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
+    }
+    
+    public void refreshBoatList() {
         sailingService.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
-                if (callback != null) {
-                    callback.onFailure(caught);
-                }
+                errorReporter.reportError("Remote Procedure Call getAllBoats() - Failure: " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(Iterable<BoatDTO> result) {
-                getFilteredBoats(result);
                 filterBoats(result);
-                if (callback != null) {
-                    callback.onSuccess(result);
-                }
             }
         });
     }

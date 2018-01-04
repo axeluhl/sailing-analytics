@@ -436,7 +436,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 
-    Iterable<CompetitorDTO> getCompetitorsOfRace(String leaderboardName, String raceColumnName, String fleetName);
+    Map<CompetitorDTO, BoatDTO> getCompetitorsAndBoatsOfRace(String leaderboardName, String raceColumnName, String fleetName);
     
     List<CompetitorDTO> addOrUpdateCompetitors(List<CompetitorDTO> competitors) throws Exception;
 
