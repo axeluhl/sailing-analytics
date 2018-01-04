@@ -31,7 +31,16 @@ Particularly when starting an EC2 instance, it is helpful to be able to do that 
 
 This will ask you for a comment about the release which goes into the release notes text file that accompanies the release. The build results are packed up into a .tar.gz file which is then uploaded to [releases.sapsailing.com](http://releases.sapsailing.com), using the name optionally provided using the -n parameter with the `release` action, or---as a default---the current timestamp for the release name.
 
-A release can be downloaded and installed to a server by changing to the server's directory, e.g., `~/servers/server` and there executing the `refreshInstance.sh` script with the parameter `install-release <release-name>`. Afterwards, starting the instance works as after a local build.
+A release can be downloaded and installed to a server by changing to the server's directory, e.g., `~/servers/server` or whatever the sub-directory of the server installation is, and there executing the `refreshInstance.sh` script with the parameter `install-release <release-name>`. Afterwards, starting the instance works as after a local build.
+
+A sample session could look like this:
+
+<pre>
+$ ssh sailing@34.250.136.229
+$ cd servers/ubilabs-test
+$ ./refreshInstance.sh install-release build-201712210442
+$ ./stop; ./start
+</pre>
 
 Instead of building a release yourself you can let the build server to the job. There is a job that looks out for a git tag named `release`. If a new revision is found then an automatic release build is being executed. The result of that is persisted to http://releases.sapsailing.com/. You can create that tag as follows. Make sure that you're on the current master branch before executing the following commands.
 

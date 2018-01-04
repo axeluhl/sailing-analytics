@@ -573,19 +573,33 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     private void denoteForRaceLogTracking(final StrippedLeaderboardDTO leaderboard) {
-        sailingService.denoteForRaceLogTracking(leaderboard.name, new AsyncCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                loadAndRefreshLeaderboard(leaderboard.name);
-                updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
-                raceColumnTableSelectionModel.clear();
-            }
+        final ChooseNameDenoteEventDialog dialog = new ChooseNameDenoteEventDialog(stringMessages,leaderboard,
+                new DialogCallback<String>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
-            }
-        });
+                    @Override
+                    public void ok(String prefix) {
+                        sailingService.denoteForRaceLogTracking(leaderboard.name, prefix, new AsyncCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                loadAndRefreshLeaderboard(leaderboard.name);
+                                updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
+                                raceColumnTableSelectionModel.clear();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter
+                                        .reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
+        dialog.show();
     }
 
     private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {

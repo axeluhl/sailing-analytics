@@ -43,12 +43,14 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
 
-        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(null, null, raceDetails, overallDetails,
-                null, null, null, RaceColumnSelectionStrategies.EXPLICIT,true, false,
-                true,
-                false, true);
+        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, raceDetails, overallDetails,
+                /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */ null,
+                /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.EXPLICIT,
+                /* showAddedScores */ true, /* showCompetitorSailIdColumn */ true,
+                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ true);
 
-        timer = new com.sap.sse.gwt.client.player.Timer(
+        timer = new Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);

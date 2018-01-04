@@ -153,7 +153,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
     public boolean addAll(Collection<? extends E> c) {
         boolean result = false;
         for (E e : c) {
-            result = result || add(e);
+            result = add(e) || result;
         }
         return result;
     }

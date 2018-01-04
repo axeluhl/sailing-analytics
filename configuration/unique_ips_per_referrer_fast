@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Production:
+CACHE=/var/log/old/cache/unique-ips-per-referrer
+# Test:
+#CACHE=/var/log/old/cache/unique-ips-per-referrer/test
+VISITED_FILES=$CACHE/visited
+STATS=$CACHE/stats
+OUTPUT=$STATS/results
+MONTHS=$OUTPUT/permonth
+TOTALS=$OUTPUT/totals
+EVENTTOTALS=$OUTPUT/eventtotals
+
+function monthMapper() {
+  monthname=$1
+  case $monthname in
+    Jan)
+      echo "01"
+      ;;
+    Feb)
+      echo "02"
+      ;;
+    Mar)
+      echo "03"
+      ;;
+    Apr)
+      echo "04"
+      ;;
+    May)
+      echo "05"
+      ;;
+    Jun)
+      echo "06"
+      ;;
+    Jul)
+      echo "07"
+      ;;
+    Aug)
+      echo "08"
+      ;;
+    Sep)
+      echo "09"
+      ;;
+    Oct)
+      echo "10"
+      ;;
+    Nov)
+      echo "11"
+      ;;
+    Dec)
+      echo "12"
+      ;;
+  esac
+}
+
+mkdir -p $OUTPUT
+rm $OUTPUT/*
+mkdir -p $MONTHS
+rm $MONTHS/*
+
+# Now filter and group by month
+for i in ${STATS}/*.ips; do
+  hostname=`basename $i .ips`
+  cat $i | while read line; do
+    #echo line is $line
+    read ipaddress dayandmonth useragent <<< "$line"
+    read day month <<< "${dayandmonth/\// }"
+    read monthname year <<< "${month//\// }"
+    monthfile=$MONTHS/${year}-$(monthMapper $monthname)
+    #echo ipaddress is $ipaddress and dayandmonth is $dayandmonth and month is $month and monthname is $monthname and year is $year and monthfile is $monthfile
+    echo "$hostname $line" >>$monthfile
+    echo "$hostname $line" >>$EVENTTOTALS
+    echo "$line" >>$TOTALS
+  done
+done
+cat $EVENTTOTALS | sort -u | awk '{ print $1; }' | uniq -c | awk '{ print $2, $1; }' >${EVENTTOTALS}.unique
+rm $EVENTTOTALS
+cat $TOTALS | sort -u | wc | awk '{ print $1; }' >${TOTALS}.unique
+rm $TOTALS
+for monthfile in $MONTHS/*; do
+  cat $monthfile | sort -u | awk '{ print $1; }' | uniq -c | awk '{ print $2, $1; }' >$monthfile.unique
+  rm $monthfile
+done
+echo Done with $0 at `date`

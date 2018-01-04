@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
@@ -330,6 +331,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     Window.open(EntryPointLinkFactory.createDashboardLink(dashboardURLParameters), "", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {
                     showRegattaLog();
+                } else if (LeaderboardConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST.equals(value)) {
+                    createPairingListTemplate(leaderboardDTO);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST.equals(value)) {
+                    openPairingListEntryPoint(leaderboardDTO);
                 }
             }
         });
@@ -1014,5 +1019,57 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         filteredLeaderboardList.getList().remove(leaderBoard);
         availableLeaderboardList.remove(leaderBoard);
         leaderboardSelectionModel.setSelected(leaderBoard, false);
+    }
+    
+    private void createPairingListTemplate(final StrippedLeaderboardDTO leaderboardDTO) {
+        final PairingListCreationSetupDialog dialog = new PairingListCreationSetupDialog(leaderboardDTO, this.stringMessages, 
+                new DialogCallback<PairingListTemplateDTO>() {
+
+            @Override
+            public void ok(PairingListTemplateDTO editedObject) {
+                BusyDialog busyDialog = new BusyDialog();
+                busyDialog.show();
+                try {
+                    sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
+                            editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
+                            new AsyncCallback<PairingListTemplateDTO>() {
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    busyDialog.hide();
+                                    System.out.println(caught);
+                                }
+
+                                @Override
+                                public void onSuccess(PairingListTemplateDTO result) {
+                                    busyDialog.hide();
+                                    result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
+                                    openPairingListCreationDialog(leaderboardDTO, result);
+                                }
+
+                            });
+                } catch (Exception exception) {
+                    // TODO show error somehow
+                }
+            }
+
+            @Override
+            public void cancel() {
+                
+            }
+        });
+        dialog.show();
+    }
+    
+    private void openPairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, PairingListTemplateDTO template) {
+        PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template, sailingService);
+        dialog.show();
+    }
+    
+    private void openPairingListEntryPoint(StrippedLeaderboardDTO leaderboardDTO) {
+        Map<String, String> result = new HashMap<>();
+        result.put("leaderboardName", leaderboardDTO.getName());
+        String link = EntryPointLinkFactory.createPairingListLink(result); 
+        Window.open(link,  "", "");
     }
 }

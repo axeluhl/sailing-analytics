@@ -550,6 +550,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public void setControlTrackingFromStartAndFinishTimes(
                             boolean controlTrackingFromStartAndFinishTimes) {
                     }
+
+                    @Override
+                    public void setFleetsCanRunInParallelToTrue() {
+                    }
                 };
             }
 
