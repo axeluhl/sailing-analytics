@@ -46,7 +46,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
     private final WindFinderTrackerFactory factory;
 
     private ScheduledFuture<?> poller;
-
+    
     public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactory factory) {
         this.trackedRace = trackedRace;
         this.factory = factory;
@@ -75,6 +75,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
     private Iterable<Spot> getUsefulSpots() throws MalformedURLException, IOException, ParseException {
         final Set<Spot> spots = new HashSet<>();
         for (final ReviewedSpotsCollection collection : factory.getReviewedSpotsCollections()) {
+            // TODO bug1301 judge each spot's usefulness given the location of trackedRace
             Util.addAll(collection.getSpots(), spots);
         }
         return spots;

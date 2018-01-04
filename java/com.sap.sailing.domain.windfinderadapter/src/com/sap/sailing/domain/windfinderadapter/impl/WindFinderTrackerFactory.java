@@ -6,20 +6,38 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.windfinderadapter.ReviewedSpotsCollection;
+import com.sap.sse.common.Util;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class WindFinderTrackerFactory implements WindTrackerFactory {
     private final Map<RaceDefinition, WindTracker> windTrackerPerRace;
-    private final Set<ReviewedSpotsCollection> reviewedSpotsCollections;
     
+    /**
+     * Can hold reviewed spots collections. Starts out as {@code null}. If this is the case, an attempt
+     * will be made to retrieve spot collection IDs from {@link #reviewedSpotsCollectionIdProvider} if
+     * that is not {@code null} either, e.g., because we're running outside of an OSGi environment such
+     * as a test set-up.
+     */
+    private Set<ReviewedSpotsCollection> reviewedSpotsCollections;
+    private final ServiceTracker<WindFinderReviewedSpotsCollectionIdProvider, WindFinderReviewedSpotsCollectionIdProvider> reviewedSpotsCollectionIdProvider;
+
     public WindFinderTrackerFactory() {
         this.windTrackerPerRace = new HashMap<>();
         this.reviewedSpotsCollections = Collections.synchronizedSet(new HashSet<>());
+        if (Activator.getContext() != null) {
+            reviewedSpotsCollectionIdProvider = ServiceTrackerFactory.createAndOpen(Activator.getContext(), WindFinderReviewedSpotsCollectionIdProvider.class);
+        } else {
+            reviewedSpotsCollectionIdProvider = null;
+        }
     }
 
     @Override
@@ -60,7 +78,20 @@ public class WindFinderTrackerFactory implements WindTrackerFactory {
      * @return an unmodifiable set of spots collections known by this factory
      */
     public Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections() {
-        return Collections.unmodifiableSet(reviewedSpotsCollections);
+        final Iterable<ReviewedSpotsCollection> result;
+        if (reviewedSpotsCollections != null) {
+            result = Collections.unmodifiableSet(reviewedSpotsCollections);
+        } else {
+            final WindFinderReviewedSpotsCollectionIdProvider provider;
+            if (reviewedSpotsCollectionIdProvider != null && (provider = reviewedSpotsCollectionIdProvider.getService()) != null) {
+                reviewedSpotsCollections = new HashSet<>();
+                Util.addAll(Util.map(provider.getWindFinderReviewedSpotsCollectionIds(), id->new ReviewedSpotsCollectionImpl(id)), reviewedSpotsCollections);
+                result = Collections.unmodifiableSet(reviewedSpotsCollections);
+            } else {
+                result = Collections.emptySet();
+            }
+        }
+        return result;
     }
     
     public void addReviewedSpotCollection(ReviewedSpotsCollection collection) {

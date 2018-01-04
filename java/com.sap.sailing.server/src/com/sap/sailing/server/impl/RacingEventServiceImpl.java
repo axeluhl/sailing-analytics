@@ -4223,4 +4223,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return pairingList;
     }
 
+    @Override
+    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
+        final Set<String> result = new HashSet<>();
+        for (final Event event : getAllEvents()) {
+            Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
+        }
+        return result;
+    }
 }

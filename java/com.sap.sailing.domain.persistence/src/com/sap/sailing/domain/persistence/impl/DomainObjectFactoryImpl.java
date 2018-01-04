@@ -1058,6 +1058,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
         Event result = new EventImpl(name, startDate, endDate, venue, isPublic, id);
         result.setDescription(description);
+        @SuppressWarnings("unchecked")
+        final List<String> windFinderReviewedSpotCollectionIds = (List<String>) eventDBObject.get(FieldNames.EVENT_WINDFINDER_SPOT_COLLECTION_IDS.name());
+        if (windFinderReviewedSpotCollectionIds != null) {
+            result.setWindFinderReviewedSpotsCollection(windFinderReviewedSpotCollectionIds);
+        }
         String officialWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name());
         if (officialWebSiteURLAsString != null) {
             try {
