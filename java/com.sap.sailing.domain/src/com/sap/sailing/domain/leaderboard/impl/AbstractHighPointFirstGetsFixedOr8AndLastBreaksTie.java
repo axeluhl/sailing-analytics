@@ -37,7 +37,7 @@ public abstract class AbstractHighPointFirstGetsFixedOr8AndLastBreaksTie extends
     }
 
     @Override
-    public int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint) {
+    public int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
         Double o1Highest = getHighestScore(o1Scores);
         Double o2Highest = getHighestScore(o2Scores);
         return o2Highest.compareTo(o1Highest);

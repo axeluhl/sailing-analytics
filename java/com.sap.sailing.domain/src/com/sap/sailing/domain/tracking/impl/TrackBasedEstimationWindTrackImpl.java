@@ -689,7 +689,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
-                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
                     suspended = false;
                 }
             } else if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {

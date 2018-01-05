@@ -19,4 +19,6 @@ public interface FilterSelectionProvider extends DataMiningComponentProvider<Ser
 
     public void clearSelection();
 
+    void setHighestRetrieverLevelWithFilterDimension(FunctionDTO dimension, Serializable groupKey);
+
 }

@@ -1,34 +1,16 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class LeaderboardPanelLifecycle
-        implements ComponentLifecycle<LeaderboardSettings> {
+public abstract class LeaderboardPanelLifecycle<T extends LeaderboardSettings>
+        implements ComponentLifecycle<T> {
     public static final String ID = "lb";
 
     protected final StringMessages stringMessages;
-    protected final List<String> namesOfRaceColumns;
 
-    public LeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+    public LeaderboardPanelLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.namesOfRaceColumns = leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>();
-    }
-
-    @Override
-    public LeaderboardSettingsDialogComponent getSettingsDialogComponent(LeaderboardSettings settings) {
-        return new LeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages);
-    }
-
-    @Override
-    public LeaderboardSettings createDefaultSettings() {
-        return LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettingsWithRaceColumns(namesOfRaceColumns);
     }
 
     @Override
@@ -45,32 +27,4 @@ public class LeaderboardPanelLifecycle
     public boolean hasSettings() {
         return true;
     }
-
-    @Override
-    public LeaderboardSettings extractUserSettings(LeaderboardSettings currentLeaderboardSettings) {
-        LeaderboardSettings defaultLeaderboardSettings = createDefaultSettings();
-        LeaderboardSettings globalLeaderboardSettings = new LeaderboardSettings(
-                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
-                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
-                defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
-                defaultLeaderboardSettings.getNamesOfRacesToShow(),
-                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
-                defaultLeaderboardSettings.isAutoExpandPreSelectedRace(),
-                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                defaultLeaderboardSettings.getNameOfRaceToSort(), defaultLeaderboardSettings.isSortAscending(),
-                currentLeaderboardSettings.isUpdateUponPlayStateChange(),
-                currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
-                currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality());
-        return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
-    }
-
-    @Override
-    public LeaderboardSettings extractDocumentSettings(LeaderboardSettings leaderboardSettings) {
-        return leaderboardSettings;
-    }
-
 }

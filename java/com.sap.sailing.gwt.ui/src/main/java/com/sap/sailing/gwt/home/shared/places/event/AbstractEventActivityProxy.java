@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.home.shared.places.event;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.Activity;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
@@ -66,7 +66,7 @@ public abstract class AbstractEventActivityProxy<C extends ClientFactory & Clien
     protected abstract void afterEventLoad(C clientFactory, EventViewDTO event, AbstractEventPlace place);
 
     private AbstractEventPlace getRealPlace(EventType eventType) {
-        if(eventType == EventType.SERIES_EVENT || eventType == EventType.SINGLE_REGATTA) {
+        if(eventType == EventType.SERIES || eventType == EventType.SINGLE_REGATTA) {
             return new RegattaOverviewPlace(new EventContext(place.getCtx()).withRegattaId(null));
         }
         return new MultiregattaOverviewPlace(place.getCtx());

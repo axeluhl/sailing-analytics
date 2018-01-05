@@ -7,11 +7,11 @@ public class MetaLeaderboardPerspectiveLifecycle extends AbstractLeaderboardPers
     
     public static final String ID = "mlbh";
     
-    private final MultiLeaderboardPanelLifecycle multiLeaderboardPanelLifecycle;
+    private final MultipleMultiLeaderboardPanelLifecycle multiLeaderboardPanelLifecycle;
     
     public MetaLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
         super(stringMessages, leaderboard, true);
-        multiLeaderboardPanelLifecycle = new MultiLeaderboardPanelLifecycle(null, stringMessages);
+        multiLeaderboardPanelLifecycle = new MultipleMultiLeaderboardPanelLifecycle(null, stringMessages);
         addLifeCycle(multiLeaderboardPanelLifecycle);
     }
 
@@ -25,7 +25,7 @@ public class MetaLeaderboardPerspectiveLifecycle extends AbstractLeaderboardPers
         return ID;
     }
     
-    public MultiLeaderboardPanelLifecycle getMultiLeaderboardPanelLifecycle() {
+    public MultipleMultiLeaderboardPanelLifecycle getMultiLeaderboardPanelLifecycle() {
         return multiLeaderboardPanelLifecycle;
     }
 }

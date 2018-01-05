@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -263,7 +262,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, connectivityParams, timeoutInMilliseconds);
     }
@@ -285,7 +284,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     TracTracRaceTrackerImpl(final Regatta regatta, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
         final URI liveURI = connectivityParams.getLiveURI();
@@ -385,16 +384,19 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         } else {
             effectiveRegatta = regatta;
         }
-        // removeRace may detach the domain regatta from the domain factory if that
-        // removed the last race; therefore, it's important to getOrCreate the
-        // domain regatta *after* calling removeRace
-        domainFactory.removeRace(tractracRace.getEvent(), tractracRace, trackedRegattaRegistry);
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found;
         // in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
                 raceLogStore, regattaLogStore, tractracRace, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
+        // removeRace may detach the domain regatta from the domain factory if that
+        // removed the last race; therefore, it's important to getOrCreate the
+        // domain regatta *after* calling removeRace
+        final RaceDefinition raceDefinition = domainFactory.removeRace(tractracRace.getEvent(), tractracRace, this.regatta, trackedRegattaRegistry);
+        if (raceDefinition != null) {
+            trackedRegattaRegistry.removeRace(this.regatta, raceDefinition);
+        }
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
                 simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, tractracRace,
@@ -460,7 +462,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         return trackedRegatta;
     }
 
-    public static Object createID(URL paramURL, URI liveURI, URI storedURI) {
+    public static Object createID(URL paramURL, final URI liveURI, final URI storedURI) {
+        URL paramURLStrippedOfRandomParam = getParamURLStrippedOfRandomParam(paramURL);
+        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
+    }
+
+    public static URL getParamURLStrippedOfRandomParam(URL paramURL) {
         URL paramURLStrippedOfRandomParam;
         if (paramURL == null) {
             paramURLStrippedOfRandomParam = null;
@@ -496,7 +503,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 }
             }
         }
-        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
+        return paramURLStrippedOfRandomParam;
     }
     
     @Override
@@ -533,7 +540,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
     
     @Override
-    protected void onStop(boolean stopReceiversPreemtively) throws InterruptedException {
+    protected void onStop(boolean stopReceiversPreemtively, boolean willBeRemoved) throws InterruptedException {
         if (!stopped) {
             stopped = true;
             eventSubscriber.unsubscribeRaces(racesListener);
@@ -553,13 +560,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 new AbstractLoadingQueueDoneCallBack(receivers) {
                     @Override
                     protected void executeWhenAllReceiversAreDoneLoading() {
-                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                        lastStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                         updateStatusOfTrackedRaces();
                     }
                 };
             } else {
                 // queues contents were cleared preemptively; this means we're done with loading immediately
-                lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                lastStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                 updateStatusOfTrackedRaces();
             }
             if (stopReceiversPreemtively && simulator != null) {
@@ -662,7 +669,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     @Override
     public void raceNotLoaded(String reason) throws MalformedURLException, IOException, InterruptedException {
         logger.severe("Race for tracker "+this+" with ID "+getID()+" did not load: "+reason+". Stopping tracker.");
-        trackedRegattaRegistry.stopTracking(regatta, race);
+        if (race != null) {
+            trackedRegattaRegistry.stopTracking(regatta, race);
+        }
     }
 
     @Override

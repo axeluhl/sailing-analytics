@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -220,6 +221,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getAllCompetitors();
     }
 
+    @Override
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return getFullLeaderboard().getAllCompetitorsWithRaceDefinitionsConsidered();
+    }
+
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         return getFullLeaderboard().getAllCompetitors(raceColumn, fleet);
     }
@@ -274,7 +280,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getMaxPointsReason(competitor, race, timePoint);
     }
 
-    public Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
+    public Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         return getFullLeaderboard().getNetPoints(competitor, race, timePoint);
     }
 

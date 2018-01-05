@@ -12,8 +12,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -212,12 +212,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                     if (result == 0) {
                         // compare by last race:
-                        result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter);
+                        result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
                         if (result == 0) {
-                            try {
-                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
-                            } catch (NoWindException e) {
-                                throw new NoWindError(e);
+                            result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                            if (result == 0) {
+                                result = compareByArbitraryButStableCriteria(o1, o2);
                             }
                         }
                     }
@@ -225,6 +224,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             }
         }
         return result;
+    }
+
+    private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {
+        return o1.getName().compareTo(o2.getName());
     }
 
     /**
@@ -405,11 +408,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     /**
      * Assuming both competitors scored in the same number of races, and assuming they scored the same net score,
      * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
-     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint)
+     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard)
      */
     protected int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Util.Pair<RaceColumn, Double>> o2Scores, TimePoint timePoint) {
-        return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint);
+        return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard);
     }
     
     /**

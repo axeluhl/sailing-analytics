@@ -201,9 +201,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
             try {
                 event.accept(listener);
             } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceLogEventVisitor " + listener + " threw exception " + t.getMessage());
-                logger.throwing(RaceLogImpl.class.getName(), "notifyListenersAboutReceive(RaceLogEvent)", t);
-                t.printStackTrace();
+                logger.log(Level.SEVERE, "RaceLogEventVisitor " + listener + " threw exception " + t.getMessage(), t);
             }
         }
     }

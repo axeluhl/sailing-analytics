@@ -15,6 +15,6 @@ import CoreData
 extension Leaderboard {
 
     @NSManaged var name: String
-    @NSManaged var regatta: Regatta
+    @NSManaged var checkIn: CheckIn
 
 }

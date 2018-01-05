@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * This is a special lifecycle that uses a different ID, which is required to allow a OverallLeaderboard and a normal
  * Leaderboard to coexist.
  */
-public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
+public class OverallLeaderboardPanelLifecycle extends MultiRaceLeaderboardPanelLifecycle {
 
     public static final String ID = "olb";
 
@@ -26,7 +26,7 @@ public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle 
     }
     
     @Override
-    public LeaderboardSettingsDialogComponent getSettingsDialogComponent(LeaderboardSettings settings) {
+    public MultiRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(MultiRaceLeaderboardSettings settings) {
         return new OverallLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages);
     }
 

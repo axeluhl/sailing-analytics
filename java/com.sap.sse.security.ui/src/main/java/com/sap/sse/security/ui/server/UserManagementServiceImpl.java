@@ -18,6 +18,7 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import org.apache.shiro.SecurityUtils;
@@ -124,15 +125,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         logger.info("Logging out user: " + SecurityUtils.getSubject());
         getSecurityService().logout();
         getHttpSession().invalidate();
+        final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        getThreadLocalResponse().addCookie(cookie);
         logger.info("Invalidated HTTP session");
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
+            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());
@@ -171,7 +176,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
-        if (!subject.hasRole(DefaultRoles.ADMIN.name()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -181,7 +186,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
         ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         getSecurityService().updateUserProperties(username, fullName, company,
-                localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
+                getLocaleFromLocaleName(localeName));
+    }
+
+    private Locale getLocaleFromLocaleName(String localeName) {
+        try {
+            return localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e, () -> "Error while parsing locale with name '" + localeName + "'");
+            return null;
+        }
     }
     
     @Override

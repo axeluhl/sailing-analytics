@@ -19,6 +19,8 @@ public enum BoatClassMasterdata {
     _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W", "470 - M", "470 - W"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
     _5_5MR ("5.5mR", true, 9.50, 1.92, BoatHullType.MONOHULL, true, "5.5 Meter", "5.5 Metre", "5.5", "5.5M", "5.5-metre", "5.5 metre"),
+    _6MR ("6mR", true, 11, 2.2, BoatHullType.MONOHULL, true, "6 Meter", "6 Metre", "6", "6M", "6-metre", "6 metre"),
+    _8MR ("8mR", true, 9.62, 2.45, BoatHullType.MONOHULL, true, "8 Meter", "8 Metre", "8M", "8-metre"),
     A_CAT ("A-Catamaran", true, 5.49, 2.30, BoatHullType.CATAMARAN, false, "A-Cat", "ACat", "A-Class Catamaran"),
     ALBIN_EXPRESS ("Albin Express", true, 7.77, 2.50, BoatHullType.MONOHULL, false),
     ALBIN_BALLAD ("Albin Ballad", true, 9.12, 2.95, BoatHullType.MONOHULL, false),
@@ -76,6 +78,7 @@ public enum BoatClassMasterdata {
     MUSTO_SKIFF ("Musto Skiff", true, 4.55, 1.35, BoatHullType.MONOHULL, true, "Musto Performance Skiff", "MPS", "Musto"),
     NACRA_15 ("Nacra 15", true, 4.70, 2.35, BoatHullType.CATAMARAN, true, "N15", "Nacra-15"),
     NACRA_17 ("Nacra 17", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17", "Nacra-17"),
+    NACRA_17_FOIL ("Nacra 17 Foiling", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17F", "Nacra-17-Foiling"),
     O_JOLLE ("O-Jolle", true, 5.00, 1.66, BoatHullType.MONOHULL, false, "O Jolle", "OJolle", "Olympiajolle"),
     OK ("OK Dinghy", true, 5.25, 2.59, BoatHullType.MONOHULL, false, "OK-Dinghy", "OK-Jolle", "OK"),
     OPEN_BIC("O'pen BIC", true, 2.75, 1.14, BoatHullType.MONOHULL, false, "OpenBIC"),
@@ -90,7 +93,7 @@ public enum BoatClassMasterdata {
     RS500 ("RS 500", true, 4.34, 1.58, BoatHullType.MONOHULL, true, "RS500", "RS_500"),
     RS800 ("RS 800", true, 4.80, 1.88, BoatHullType.MONOHULL, true, "RS800", "RS_800"),
     RS_AERO ("RS Aero", true, 4.00, 1.40, BoatHullType.MONOHULL, false, "RSAERO", "RS_Aero"),
-    RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman"),
+    RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman", "RS:X Women"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
     SKUD_18 ("SKUD 18", true, 5.8, 2.29, BoatHullType.MONOHULL, true),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),
@@ -109,6 +112,7 @@ public enum BoatClassMasterdata {
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
     TOM_28_MAX ("Tom 28 MAX", true, 8.48, 2.48, BoatHullType.MONOHULL, true, "Tom 28"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
+    TP52 ("TP52", true, 15.85, 4.35, BoatHullType.MONOHULL, true, "TP 52", "Transpac 52", "Transpac52"),
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),
     VO60 ("VO60", true, 19.5, 5.25, BoatHullType.MONOHULL, true, "Volvo Ocean 60", "VolvoOcean60", "W60", "Whitbread60", "Whitbread 60"),
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
@@ -121,7 +125,10 @@ public enum BoatClassMasterdata {
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int."),
     
     // Performance Handicap Racing Fleet (PHRF) is a handicap system used for racing in North America
-    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true);
+    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+
+    // a 'boat class' to track runners at runnng events 
+    RUNNING ("Runner", true, 1.0, 1.0, BoatHullType.NO_HULL, false, "Running");
 
     private final String displayName;
     private final String[] alternativeNames;

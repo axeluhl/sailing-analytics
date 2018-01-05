@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.datamining.shared.FoilingSegmentsDataMiningSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.polarmining.FoilingSegmentsDataMiningSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
@@ -22,6 +24,9 @@ public class DataMiningSettingsInfoManager {
         PolarDataMiningSettingsInfo polarDataMiningSettingsInfo = new PolarDataMiningSettingsInfo();
         infosMappedBySettingsType.put(PolarDataMiningSettings.class, polarDataMiningSettingsInfo);
         infosMappedBySettingsType.put(PolarDataMiningSettingsImpl.class, polarDataMiningSettingsInfo);
+        
+        FoilingSegmentsDataMiningSettingsInfo foilingDataMiningSettingsInfo = new FoilingSegmentsDataMiningSettingsInfo();
+        infosMappedBySettingsType.put(FoilingSegmentsDataMiningSettings.class, foilingDataMiningSettingsInfo);
     }
 
     public DataMiningSettingsInfo getSettingsInfo(Class<?> settingsType) {
@@ -29,7 +34,6 @@ public class DataMiningSettingsInfoManager {
     }
     
     private class PolarDataMiningSettingsInfo implements DataMiningSettingsInfo {
-
         @SuppressWarnings("unchecked")
         @Override
         public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
@@ -45,7 +49,23 @@ public class DataMiningSettingsInfoManager {
         public String getId() {
             return "PolarDataMiningSettingsInfo";
         }
-        
     }
 
+    private class FoilingSegmentsDataMiningSettingsInfo implements DataMiningSettingsInfo {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new FoilingSegmentsDataMiningSettingsDialogComponent((FoilingSegmentsDataMiningSettings) settings);
+        }
+
+        @Override
+        public String getLocalizedName(StringMessages stringMessages) {
+            return stringMessages.foilingSegments();
+        }
+
+        @Override
+        public String getId() {
+            return "FoilingSegmentsDataMiningSettingsInfo";
+        }
+    }
 }

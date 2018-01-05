@@ -115,31 +115,6 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
     }
     
     @Test
-    public void testRegattaToEventAssociationBeingReplicated() throws InterruptedException {
-        final UUID tvCourseAreaId = UUID.randomUUID();
-        final UUID golfCourseAreaId = UUID.randomUUID();
-        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
-        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
-        Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", /*isPublic*/true, UUID.randomUUID());
-        master.addCourseAreas(event.getId(), new String[] {"TV"}, new UUID[] {tvCourseAreaId});
-        master.addCourseAreas(event.getId(), new String[] {"Golf"}, new UUID[] {golfCourseAreaId});
-        final String regattaName = RegattaImpl.getDefaultName("Kiel Week 2012", "49er");
-        Regatta masterRegatta = master.createRegatta(regattaName, "49er", /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>emptyList(),
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), tvCourseAreaId,
-                /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
-        event = master.getEvent(event.getId());
-        assertTrue(event.getRegattas().iterator().hasNext());
-        assertEquals(regattaName, event.getRegattas().iterator().next().getName());
-        Thread.sleep(1000);
-        Event replicatedEvent = replica.getEvent(event.getId());
-        Iterator<Regatta> regattasInReplicatedEvent = replicatedEvent.getRegattas().iterator();
-        assertTrue(regattasInReplicatedEvent.hasNext());
-        assertEquals(regattaName, regattasInReplicatedEvent.next().getName());
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, golfCourseAreaId, null,
-                /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false));
-    }
-    
-    @Test
     public void testUpdateSpecificRegattaReplicationForProcedureAndCourseDesignerAndConfig() throws InterruptedException {
         Regatta replicatedRegatta;
         

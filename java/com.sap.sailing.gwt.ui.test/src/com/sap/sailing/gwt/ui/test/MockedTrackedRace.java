@@ -70,6 +70,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -407,6 +408,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
         return null;
     }
@@ -720,7 +731,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public boolean isUsingMarkPassingCalculator() {
-        // TODO Auto-generated method stub
         return false;
     }
     
@@ -868,6 +878,28 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getEstimatedDistanceToComplete(TimePoint now) {
+        return null;
+    }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
 }

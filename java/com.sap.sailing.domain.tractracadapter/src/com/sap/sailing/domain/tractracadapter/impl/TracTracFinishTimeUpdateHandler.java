@@ -11,22 +11,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class TracTracFinishTimeUpdateHandler extends UpdateHandler {
     private final static Logger logger = Logger.getLogger(TracTracFinishTimeUpdateHandler.class.getName());
 
-    private final static Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_MINUTE.times(2);
     private final static String ACTION_STOP_TRACKING = "end_tracking";
     private final static String FIELD_TRACKING_END_TIME = "tracking_end_time";
 
@@ -57,9 +57,11 @@ public class TracTracFinishTimeUpdateHandler extends UpdateHandler {
                         final URI stopTrackingURI = getActionURI(ACTION_STOP_TRACKING);
                         final HttpPost request = new HttpPost(stopTrackingURI);
                         final List<BasicNameValuePair> params = getDefaultParametersAsNewList();
-                        params.add(new BasicNameValuePair(FIELD_TRACKING_END_TIME, String.valueOf(newFinishedTime.plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH).asMillis())));
+                        params.add(new BasicNameValuePair(FIELD_TRACKING_END_TIME, String.valueOf(newFinishedTime.plus(
+                                TrackedRace.STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH).asMillis())));
                         request.setEntity(new UrlEncodedFormEntity(params));
-                        final HttpClient client = new SystemDefaultHttpClient();
+                        final AbstractHttpClient client = new SystemDefaultHttpClient();
+                        client.setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes());
                         logger.info("Using " + stopTrackingURI.toString() + " to stop tracking");
                         final HttpResponse response = client.execute(request);
                         try {

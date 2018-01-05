@@ -172,11 +172,17 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void denoteAllRacesForRaceLogTracking(final RacingEventService service, final Leaderboard leaderboard)
-            throws NotDenotableForRaceLogTrackingException {
+    public void denoteAllRacesForRaceLogTracking(final RacingEventService service, final Leaderboard leaderboard,
+            final String prefix) throws NotDenotableForRaceLogTrackingException {
+        int fleetcount = 1;
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
-                denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
+                if (prefix != null) {
+                    denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, prefix + fleetcount);
+                } else {
+                    denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
+                }
+                fleetcount++;
             }
         }
     }

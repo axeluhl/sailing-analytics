@@ -43,7 +43,7 @@ public class EventsOverviewUpcomingEvent extends Composite {
         eventName.setInnerText(event.getDisplayName());
         venueName.setInnerText(event.getVenue());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
-        days.setInnerText(StringMessages.INSTANCE.upcommingEventStartsInDays(DateUtil.daysFromNow(event.getStartDate())));
+        days.setInnerText(StringMessages.INSTANCE.upcomingEventStartsInDays(DateUtil.daysFromNow(event.getStartDate())));
     }
     
     @UiHandler("eventOverviewLink")

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.CircleVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.DinghyWithSpinnakerVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.Extreme40VectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.GC32VectorGraphics;
@@ -38,12 +39,12 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.D_35, BoatClassMasterdata.SKUD_18, BoatClassMasterdata.WETA);
         BoatClassVectorGraphics gc32 = new GC32VectorGraphics(BoatClassMasterdata.GC_32, BoatClassMasterdata.M32);
         BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics(BoatClassMasterdata.NACRA_15, BoatClassMasterdata.NACRA_17,
-                BoatClassMasterdata.F_16, BoatClassMasterdata.F_18, BoatClassMasterdata.HOBIE_WILD_CAT, BoatClassMasterdata.HOBIE_16,
-                BoatClassMasterdata.HOBIE_TIGER, BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO,
-                BoatClassMasterdata.FLYING_PHANTOM);
+                BoatClassMasterdata.NACRA_17_FOIL, BoatClassMasterdata.F_16, BoatClassMasterdata.F_18,
+                BoatClassMasterdata.HOBIE_WILD_CAT, BoatClassMasterdata.HOBIE_16, BoatClassMasterdata.HOBIE_TIGER,
+                BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO, BoatClassMasterdata.FLYING_PHANTOM);
         BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.J70,
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
-                BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS100);
+                BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS100, BoatClassMasterdata.TP52);
         BoatClassVectorGraphics dinghyWithSpinnaker = new DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata._420,
                 BoatClassMasterdata._470, BoatClassMasterdata._5O5, BoatClassMasterdata.CADET, BoatClassMasterdata.FLYING_DUTCHMAN,
                 BoatClassMasterdata.FOLKBOAT, BoatClassMasterdata.DYAS, BoatClassMasterdata.DRAGON_INT,
@@ -53,9 +54,10 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.RS200, BoatClassMasterdata.RS400, BoatClassMasterdata.RS500, BoatClassMasterdata.RS800,
                 BoatClassMasterdata.STREAMLINE, BoatClassMasterdata.SWAN_45, BoatClassMasterdata.TEENY, BoatClassMasterdata.X_99,
                 BoatClassMasterdata.TRIAS);
+        BoatClassVectorGraphics circle = new CircleVectorGraphics(BoatClassMasterdata.RUNNING);
 
         defaultBoatVectorGraphics = dinghyWithSpinnaker; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
-        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker, dinghyWithSpinnaker, gc32}) {
+        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker, dinghyWithSpinnaker, gc32, circle}) {
             for (BoatClassMasterdata b : g.getCompatibleBoatClasses()) {
                 compatibleBoatVectorGraphicsMap.put(b, g);
             }

@@ -48,7 +48,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
                 try {
                     executor.execute(instruction);
                 } catch (RejectedExecutionException exc) {
-                    LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName()
+                    LOGGER.log(Level.FINEST, "A " + RejectedExecutionException.class.getSimpleName()
                             + " appeared during the processing.");
                     instruction.run();
                 }

@@ -17,6 +17,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * One or more races that would be noted together in a single column in a {@link Leaderboard}. If the number of
@@ -250,6 +251,13 @@ public interface RaceColumn extends Named {
      * regatta log}.
      */
     Iterable<Competitor> getAllCompetitors();
+
+    /**
+     * Same as {@link #getAllCompetitors()}, but the {@link RaceDefinition}s whose {@link RaceDefinition#getCompetitors() competitors}
+     * were considered while computing the results are returned as the first element of the pair. The second element are the competitors
+     * as they are returned by {@link #getAllCompetitors()}.
+     */
+    Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
 
     /**
      * Same as {@link #getAllCompetitors()}, but restricted to the single race identified by the <code>fleet</code> parameter.

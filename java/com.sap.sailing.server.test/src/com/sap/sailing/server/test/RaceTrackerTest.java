@@ -80,7 +80,6 @@ public class RaceTrackerTest {
         RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained race: "+race);
         assertNotNull(race);
-        // TODO the following assertion fails; this suggests that the race obtained above hasn't properly been entered into the regatta. Why???
         assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
     }
     
@@ -144,7 +143,7 @@ public class RaceTrackerTest {
             assertNotSame(oldTrackedRace, newTrackedRace);
             assertNotSame(oldRaceDefinition, newTrackedRace.getRace());
         } finally {
-            service.stopTracking(myRaceHandle.getRegatta());
+            service.stopTracking(myRaceHandle.getRegatta(), /* willBeRemoved */ false);
         }
         logger.exiting(getClass().getName(), "testStopTracking");
     }
@@ -172,7 +171,7 @@ public class RaceTrackerTest {
             assertSame(oldTrackedRace, newTrackedRace);
             assertSame(raceHandle.getRaceTracker(), myRaceHandle.getRaceTracker());
         } finally {
-            service.stopTracking(myRaceHandle.getRegatta());
+            service.stopTracking(myRaceHandle.getRegatta(), /* willBeRemoved */ false);
         }
         logger.exiting(getClass().getName(), "testStopTracking");
     }

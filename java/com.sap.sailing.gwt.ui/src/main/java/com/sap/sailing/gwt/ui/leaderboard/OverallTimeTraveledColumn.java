@@ -7,9 +7,7 @@ import java.util.Map;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -30,7 +28,7 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
     private String headerStyle;
     private MinMaxRenderer minmaxRenderer;
 
-    public OverallTimeTraveledColumn(LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String headerStyle, String columnStyle, String detailHeaderStyle,
+    public OverallTimeTraveledColumn(LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String headerStyle, String columnStyle, String detailHeaderStyle,
             String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true, new TextCell(), DETAIL_TYPE.getDefaultSortingOrder(), 
                 stringMessages, detailHeaderStyle, detailColumnStyle,
@@ -49,7 +47,7 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
     
     @Override
     protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
+            LeaderboardPanel<?> leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
 
@@ -99,7 +97,7 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
     }
 
     @Override
-    public Header<SafeHtml> getHeader() {
+    public SortableExpandableColumnHeader getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(
         /* title */DetailTypeFormatter.format(DETAIL_TYPE), /* tooltip */ DetailTypeFormatter.getTooltip(DETAIL_TYPE),
         DetailTypeFormatter.getUnit(DETAIL_TYPE), /* iconURL */null, getLeaderboardPanel(), this, stringMessages);

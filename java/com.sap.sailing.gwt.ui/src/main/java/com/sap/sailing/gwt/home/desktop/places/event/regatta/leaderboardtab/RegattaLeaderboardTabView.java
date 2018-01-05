@@ -29,10 +29,10 @@ import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.dispatch.shared.commands.CollectionResult;
 
@@ -88,10 +88,10 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
-            final Consumer<LeaderboardPanel> leaderboardConsumer = new Consumer<LeaderboardPanel>() {
+            MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
+            final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
                 @Override
-                public void consume(LeaderboardPanel leaderboardPanel) {
+                public void consume(MultiRaceLeaderboardPanel leaderboardPanel) {
                     leaderboardUpdateProvider = leaderboardPanel;
                     leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaLeaderboardTabView.this);
                     OldLeaderboardDelegateFullscreenViewer leaderboardDelegate = new OldLeaderboardDelegateFullscreenViewer();
@@ -123,14 +123,15 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             } else if( /*FIXME placeToken not empty */ false) {
                 createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
                         /* FIXME placeToken */ null)
-                                .getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+                                .getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
                                     @Override
-                                    public void onSuccess(LeaderboardSettings settings) {
+                                    public void onSuccess(MultiRaceLeaderboardSettings settings) {
                                         leaderboardPanel.updateSettings(settings);
                                         leaderboardConsumer.consume(leaderboardPanel);
                                     }
                                 });
             } else {
+                leaderboardPanel.loadCompleteLeaderboard(false);
                 leaderboardConsumer.consume(leaderboardPanel);
             }
         } else {

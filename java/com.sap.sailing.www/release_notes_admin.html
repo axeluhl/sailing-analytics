@@ -22,6 +22,98 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
     
+                    <h2 class="articleSubheadline">December 2017</h2>
+                    <ul class="bulletList">
+                        <li>In the raceboard it is now possible to upload 360� videos in addition to the already supported video types. 
+                        360� Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
+                        The dialog will try an auto-detection for the mimetype upon entering the link.
+                        Additionally, for mp4  videos it is now possible to use the start time, written in the file, as an start time preset for the mediatrack, simplifying the video linking.</li>
+                        <li> In Home it is now also possible to use 360� videos, for example as an highlight video</li>
+                        <li>Various Fix importers can now properly report errors and other states</li>
+                        <li>Pairing list generation is now supported. Add competitors to a regatta, then use the new
+                            action icons in the Leaderboards/Leaderboards panel in the administration console to generate
+                            a pairing list. The result can be exported as a CSV file compatible with the TracTrac Excel
+                            spreadsheet for importing the pairing lists into their solution; printing is also enabled.
+                            For smart phone tracking it is possible to fill the pairing list into the race logs in order
+                            to record the competitor / boat assignments according to the pairing list. To allow for
+                            contiguous race numbering, in this context a new feature was introduced that allows users
+                            to pick a race name prefix during denoting all races of a regatta for smart phone tracking,
+                            producing contiguously increasing race names/numbers (R1, R2, ..., R45).</li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">November 2017</h2>
+                    <ul class="bulletList">
+                        <li>In addition to the "Set start time" dialog there's now a "Set finishing and end time dialog".
+                            This dialog makes it possible to set the finishing as well as the end time in the RaceLog.
+                            It is intended to be used in cases where a race wasn't correctly finished using the race management app.
+                        </li>
+                        <li>New GPS fix, wind and sensor data importers have been implemented: "Bravo" and "Expedition."
+                        </li>
+                        <li>An upgrade to TracAPI 3.8.0 is expected to have fixed the issue with static marks not providing
+                            a position fix within a race's tracking time interval when the tracking start is set after the
+                            static position was entered.
+                        </li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">September 2017</h2>
+                    <ul class="bulletList">
+                        <li>Authentication for Igtimi accounts is now possible with an OAuth process.
+                            Instead of having to enter the username/password combination into the
+                            administration console, a popup window will show an IFrame with Igtimi's
+                            authentication form. Redirection goes to www.sapsailing.com, together with
+                            a "state" URL parameter providing the base URL of the original server instance
+                            requesting authentication. www.sapsailing.com will then redirect to that server,
+                            removing the "state" parameter from the request and leaving only the "code"
+                            parameter in the URL which the server ultimately receiving the redirected request
+                            will use to obtain an access token and the Igtimi account details. For now, and
+                            as a fallback, the old, non-OAuth process is still supported for a while, though
+                            deprecated as of now.
+                        </li> 
+                        <li>In the process of supporting Igtimi OAuth authentication, new optional system properties for
+                            the Igtimi connector have been introduced:
+                            <ul>
+                              <li><tt>igtimi.client.redirect.protocol</tt>: the redirection protocol, usually one of http or https</li>
+                              <li><tt>igtimi.client.redirect.host</tt>: redirection host; defaults to www.sapsailing.com</li>
+                              <li><tt>igtimi.client.redirect.port</tt>: redirection port; defaults to empty, using the default port for the protocol</li>
+                            </ul>
+                        </li>
+                        <li>When using a TracTrac update URI, errors were possible due to the incorrect use of HTTP
+                            instead of HTTPS as the URI/URL's protocol. The TracTrac server responds to an HTTP
+                            request with a response code 302 (temporary redirect), but our TracTrac connector did
+                            not handle this due to redirects that change protocols are not followed by default in
+                            Java. This has now been changed, and although it is of course better to use the correct
+                            protocol (HTTPS) right away, redirects will now be handled correctly, too.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">August 2017</h2>
+                    <ul class="bulletList">
+                        <li>An NMEA wind import feature is now available under "Tracked Races -- Wind." It can be
+                            used to import .txt and .zip files containing data in NMEA-0183 format. The importer
+                            recognizes wind data provided by MWD and MDA sentences but can also use apparent and true
+                            wind readings from MWV sentences which are then combined with position, heading and motion data
+                            to obtain a true wind speed and direction. ZIP files are searched for .txt files which
+                            are then analyzed.
+                        </li>
+                        <li>A new scoring scheme "Low Point with Automatic RDG" is now available. It can help in league
+                            set-ups where one possible definition for the score of a redress given can be to average the
+                            scores of the competitor in all other flights scored, for past and coming races. This scoring
+                            scheme will apply as a default score for an RDG this average. As usual, as soon as an explicit
+                            score is provided for the race, the default calculation will no longer be applied.
+                        </li> 
+                    </ul>
+    
+                    <h2 class="articleSubheadline">July 2017</h2>
+                    <ul class="bulletList">
+                        <li>The sort order of Events/Leaderboards in event series in Home.html is now more consistent
+                            by using the declared sort order in the respective LeaderboardGroup. In addition, the flag
+                            "Display groups in reverse order" in the LeaderboardGroup dialog now affects all occurrences
+                            of Events/Leaderboards in event series in Home.html. If the flag is not set, the order is
+                            latest on top in vertical lists and latest right in horizontal lists. With this change,
+                            the operator is now fully responsible for the sort order.
+                        </li>
+                    </ul>
+    
                     <h2 class="articleSubheadline">May 2017</h2>
                     <ul class="bulletList">
                         <li>The logic of the "Control tracking from start and finish times" check box now behaves slightly

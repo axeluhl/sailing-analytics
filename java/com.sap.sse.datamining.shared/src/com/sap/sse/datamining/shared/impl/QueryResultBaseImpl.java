@@ -22,10 +22,6 @@ public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase
     public QueryResultBaseImpl() {
     }
 
-    public QueryResultBaseImpl(QueryResultState state, Map<GroupKey, ResultType> results) {
-        this(state, results, new NullAdditionalResultData());
-    }
-
     public QueryResultBaseImpl(QueryResultState state, Map<GroupKey, ResultType> results,
             AdditionalResultData additionalData) {
         this.state = state;
@@ -75,5 +71,4 @@ public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase
     public void addResult(GroupKey key, ResultType value) {
         results.put(key, value);
     }
-
 }

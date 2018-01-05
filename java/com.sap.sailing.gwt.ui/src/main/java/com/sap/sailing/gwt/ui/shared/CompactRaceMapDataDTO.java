@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 
 /**
@@ -36,11 +37,16 @@ public class CompactRaceMapDataDTO implements IsSerializable {
      * otherwise, the set of competitor IDs, {@link Object#toString() converted to strings}, in no particular order.
      */
     private HashSet<String> raceCompetitorIdsAsStrings;
+    /**
+     * Contains a rough estimate of the duration the whole race will take, based on the information available at given timepoint
+     */
+    private Duration estimatedDuration;
     
     CompactRaceMapDataDTO() {}
 
     public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions, CoursePositionsDTO coursePositions,
-           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion, HashSet<String> raceCompetitorIdsAsStrings) {
+           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion, HashSet<String> raceCompetitorIdsAsStrings, Duration estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
         this.boatPositionsByCompetitorIdAsString = new CompactBoatPositionsDTO(boatPositions);
         this.raceCompetitorIdsAsStrings = raceCompetitorIdsAsStrings;
         this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : Util.size(quickRanks.getQuickRanks()));
@@ -71,6 +77,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         result.boatPositions = boatPositionsByCompetitorIdAsString.getBoatPositionsForCompetitors(competitorsByIdAsString);
         result.simulationResultVersion = simulationResultVersion;
         result.raceCompetitorIdsAsStrings = this.raceCompetitorIdsAsStrings;
+        result.estimatedDuration = estimatedDuration;
         return result;
     }
 }

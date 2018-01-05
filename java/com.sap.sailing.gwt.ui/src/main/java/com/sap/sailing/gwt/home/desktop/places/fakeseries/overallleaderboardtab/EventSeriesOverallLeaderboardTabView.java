@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 
 /**
@@ -62,9 +62,9 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
-            final Consumer<LeaderboardPanel> leaderboardConsumer = new Consumer<LeaderboardPanel>() {
+            final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
                 @Override
-                public void consume(LeaderboardPanel leaderboardPanel) {
+                public void consume(MultiRaceLeaderboardPanel leaderboardPanel) {
                     initWidget(ourUiBinder.createAndBindUi(EventSeriesOverallLeaderboardTabView.this));
                     leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
                     eventSeriesAnalyticsManager.hideCompetitorChart();
@@ -74,13 +74,13 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
                     }
                 }
             };
-            LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 
+            MultiRaceLeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 
             if(leaderboardPanel == null) {
                 createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer);
             } else if( /*FIXME placeToken not empty */ false) {
-                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
                     @Override
-                    public void onSuccess(LeaderboardSettings settings) {
+                    public void onSuccess(MultiRaceLeaderboardSettings settings) {
                         leaderboardPanel.updateSettings(settings);
                         leaderboardConsumer.consume(leaderboardPanel);
                     }

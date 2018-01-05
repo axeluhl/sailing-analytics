@@ -3,13 +3,12 @@ package com.sap.sailing.gwt.ui.client;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 
 /**
  * Listener interface that gets information about refresh of leaderboard.
  * Currently implemented by {@link RaceBoardPanel} and triggered by
- * {@link LeaderboardPanel}.
+ * {@link ClassicLeaderboardPanel}.
  * 
  * @author Simon Marcel Pamies
  */

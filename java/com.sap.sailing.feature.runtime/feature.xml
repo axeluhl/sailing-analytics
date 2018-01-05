@@ -147,4 +147,17 @@
          version="1.9.4"
          unpack="false"/>
 
+   <plugin
+         id="net.sf.marineapi"
+         download-size="0"
+         install-size="0"
+         version="0.5.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.mp4parser.isoparser"
+         download-size="0"
+         install-size="0"
+         version="1.9.31"/>
+
 </feature>

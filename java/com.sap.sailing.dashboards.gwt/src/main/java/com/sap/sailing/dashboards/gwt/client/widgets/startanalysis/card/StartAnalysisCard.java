@@ -167,7 +167,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
                 defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), defaultRaceMapSettings.isShowEstimatedDuration());
 
         
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,

@@ -192,8 +192,8 @@
 
     <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
     <string name="choose_xray_flag_down">Einzelrückruf entfernen</string>
-    <string name="login_type_officer_on_start_vessel">Als Startschiff-Wettfahrtleiter anmelden</string>
-    <string name="login_type_officer_on_finish_vessel">Als Zielschiff-Wettfahrtleiter anmelden</string>
+    <string name="login_type_superuser">Als Superuser anmelden</string>
+    <string name="login_type_officer_on_vessel">Als Wettfahrtleiter auf dem Boot anmelden</string>
     <string name="login_type_shore_control">Als Regattaleitung an Land anmelden</string>
     <string name="gate_launch_stops_after">Gate Launch stoppt nach %dmin</string>
     <string name="override_default_course_designer_type_select_header">Kursdesigner</string>
@@ -425,10 +425,10 @@
     <string name="error_wrong_degree_value_title">Fehler</string>
     <string name="error_wrong_degree_value_message">Bitte geben Sie einen Wert zwischen 0 und 360 an.</string>
 
-    <string name="author_type_officer_start">Startschiff-Wettfahrtleiter</string>
-    <string name="author_type_officer_finish">Zielschiff-Wettfahrtleiter</string>
+    <string name="author_type_officer_vessel">Wettfahrtleiter auf Wasser</string>
     <string name="author_type_shore_control">Regattaleitung an Land</string>
     <string name="author_viewer">Demo-Modus</string>
+    <string name="author_type_superuser">Superuser</string>
     <string name="change_proceed">fortfahren</string>
     <string name="change_cancel">Abbrechen</string>
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>

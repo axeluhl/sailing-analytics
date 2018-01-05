@@ -10,15 +10,15 @@ import UIKit
 
 @IBDesignable class GradientView: UIView {
     
-    @IBInspectable var firstColor: UIColor = UIColor.whiteColor()
-    @IBInspectable var secondColor: UIColor = UIColor.blackColor()
+    @IBInspectable var firstColor: UIColor = UIColor.white
+    @IBInspectable var secondColor: UIColor = UIColor.black
     
-    override class func layerClass() -> AnyClass {
+    override class var layerClass : AnyClass {
         return CAGradientLayer.self
     }
     
     override func layoutSubviews() {
-        (layer as! CAGradientLayer).colors = [firstColor.CGColor, secondColor.CGColor]
+        (layer as! CAGradientLayer).colors = [firstColor.cgColor, secondColor.cgColor]
     }
     
 }

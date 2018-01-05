@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter.Callback;
+import com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public final class LearningBatchProcessor implements DoubleFixProcessor {

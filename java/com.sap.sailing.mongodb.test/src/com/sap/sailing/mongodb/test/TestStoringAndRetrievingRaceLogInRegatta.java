@@ -14,6 +14,7 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
@@ -210,7 +211,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
                 "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
-        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
+        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningListChangedEvent event = new RaceLogFinishPositioningListChangedEventImpl(now, author, 0, storedPositioningList);
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();
@@ -234,7 +235,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
                 "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
-        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
+        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();

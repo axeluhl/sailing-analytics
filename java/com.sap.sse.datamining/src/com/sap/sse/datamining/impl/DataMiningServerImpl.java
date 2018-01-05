@@ -38,6 +38,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
 import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
+import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.components.management.RuntimeMemoryInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -234,7 +235,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+    public ReducedDimensions getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         return functionRegistry.getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
     }

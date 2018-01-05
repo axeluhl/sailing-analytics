@@ -13,6 +13,7 @@ import com.google.gwt.maps.client.events.idle.IdleMapHandler;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
@@ -20,10 +21,9 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
@@ -80,7 +80,8 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowSimulationOverlay(),
                 defaultSettings.isShowMapControls(),
                 defaultSettings.getManeuverTypesToShow(),
-                defaultSettings.isShowDouglasPeuckerPoints());
+                defaultSettings.isShowDouglasPeuckerPoints(),
+                defaultSettings.isShowEstimatedDuration());
         
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
 
@@ -144,7 +145,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
 
                                     @Override
                                     public void onSettingsReloaded(MultiCompetitorRaceChartSettings patchedSettings) {
-                                        SettingsDefaultValuesUtils.keepDefaults(competitorChart.getSettings(), patchedSettings);
                                         competitorChart.updateSettings(patchedSettings);
                                     }
                                     
@@ -178,7 +178,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
     }
 
     private void adjustLeaderboardSettings() {
-        final LeaderboardPanel leaderboardPanel = getLeaderboardPanel();
+        final SingleRaceLeaderboardPanel leaderboardPanel = getLeaderboardPanel();
         final List<DetailType> raceDetailsToShow = new ArrayList<>();
         raceDetailsToShow.add(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START);
@@ -188,13 +188,12 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START);
         raceDetailsToShow.add(DetailType.START_TACK);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
-        final LeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
-        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<LeaderboardSettings>() {
+        final SingleRaceLeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
 
             @Override
-            public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
-                LeaderboardSettings settingsToUse = LeaderboardSettingsFactory.getInstance().createSettingsWithCustomExpandPreselectedRaceState(patchedSettings, true);
-                leaderboardPanel.updateSettings(settingsToUse);
+            public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
+                leaderboardPanel.updateSettings(patchedSettings);
             }
             
         });

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -30,7 +32,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * A caching provider of a competitor set, based on the tracked races and {@link RaceLog}s of the {@link RaceColumn}s of
+ * A caching provider of a competitor set, based on the {@link TrackedRace TrackedRaces} and {@link RaceLog}s of the {@link RaceColumn}s of
  * a {@link HasRaceColumnsAndRegattaLike} and the {@link RegattaLog} of the same object. After an answer has been
  * provided, it is cached. The cache is invalidated when one of the following events occurs:
  * <ul>
@@ -60,12 +62,15 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     private final RaceColumnListener raceColumnListener;
 
     private Iterable<Competitor> allCompetitorsCache;
+    
+    private Set<RaceDefinition> raceDefinitionsConsidered;
 
     private final ConcurrentMap<Pair<RaceColumn, Fleet>, Iterable<Competitor>> allCompetitorsCacheByRace;
 
     public CompetitorProviderFromRaceColumnsAndRegattaLike(HasRaceColumnsAndRegattaLike provider) {
         super();
         this.provider = provider;
+        this.raceDefinitionsConsidered = new HashSet<>();
         this.allCompetitorsCacheByRace = new ConcurrentHashMap<>();
         // A note regarding listener serializability: RaceLogListener and RegattaLogListener objects
         // don't need to be serializable as the log listeners are a transient structure. The race column
@@ -156,24 +161,39 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         };
     }
 
+    /**
+     * Returns a Collection of all {@link Competitor Competitors} collected over {@link RegattaLog}, {@link RaceLog} as
+     * well as the {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached.
+     * While subsequent calls may return different {@link Collection Collections} the contents of a {@link Collection} returned may never change.
+     */
     public Iterable<Competitor> getAllCompetitors() {
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
+    }
+    
+    /**
+     * Returns a Collection of all {@link Competitor Competitors} collected over {@link RegattaLog}, {@link RaceLog} as
+     * well as the {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached. While
+     * subsequent calls may return different {@link Collection Collections} the contents of a {@link Collection}
+     * returned may never change. The {@link RaceDefinition}s touched by this are returned as the first element
+     * of the resulting pair; the competitors as the second.
+     */
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         if (allCompetitorsCache == null) {
             final Set<Competitor> result = new HashSet<>();
-            boolean hasRaceColumns = false;
+            final Set<RaceDefinition> raceDefinitions = new HashSet<>();
             for (RaceColumn rc : provider.getRaceColumns()) {
-                hasRaceColumns = true;
-                Util.addAll(rc.getAllCompetitors(), result);
+                final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsInRaceColumnWithRaceDefinitionsConsidered = rc.getAllCompetitorsWithRaceDefinitionsConsidered();
+                Util.addAll(allCompetitorsInRaceColumnWithRaceDefinitionsConsidered.getB(), result);
+                Util.addAll(allCompetitorsInRaceColumnWithRaceDefinitionsConsidered.getA(), raceDefinitions);
                 for (final Fleet fleet : rc.getFleets()) {
                     rc.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
                 }
             }
             final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
-            if (!hasRaceColumns) {
-                // If no race exists, the regatta log-provided competitor registrations will not have
-                // been considered yet; add them:
-                final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
-                result.addAll(regattaLogProvidedCompetitors);
-            }
+            // If no race exists, the regatta log-provided competitor registrations will not have
+            // been considered yet; add them:
+            final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
+            result.addAll(regattaLogProvidedCompetitors);
             // else, don't add regatta log competitors because they have been added in each column already.
             // The competitors are collected from the races. Those, however, will be the regatta log
             // competitors if the race does not define its own.
@@ -182,9 +202,14 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             provider.addRaceColumnListener(raceColumnListener);
             // consider {@link RegattaLog} competitor changes because the RaceColumns may have added the competitors from there
             regattaLog.addListener(regattaLogCompetitorsCacheInvalidationListener);
-            allCompetitorsCache = result;
+            synchronized (this) {
+                allCompetitorsCache = result;
+                raceDefinitionsConsidered = raceDefinitions;
+            }
         }
-        return allCompetitorsCache;
+        synchronized (this) {
+            return new Pair<>(raceDefinitionsConsidered, allCompetitorsCache);
+        }
     }
 
     /**

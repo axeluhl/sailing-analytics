@@ -5,19 +5,19 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -35,7 +35,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author Axel Uhl (d043530)
  */
 public class EventSeriesAnalyticsDataManager {
-    private LeaderboardPanel overallLeaderboardPanel;
+    private MultiRaceLeaderboardPanel overallLeaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
     private MultiLeaderboardProxyPanel multiLeaderboardPanel;
 
@@ -44,10 +44,13 @@ public class EventSeriesAnalyticsDataManager {
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Timer timer;
-    private final int MAX_COMPETITORS_IN_CHART = 30; 
+    private final int MAX_COMPETITORS_IN_CHART = 30;
+    private final FlagImageResolver flagImageResolver; 
 
     public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter) {
+            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter,
+            FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -57,18 +60,19 @@ public class EventSeriesAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
+    public MultiRaceLeaderboardPanel createMultiRaceOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if(overallLeaderboardPanel == null) {
-            overallLeaderboardPanel = new LeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
-                    leaderboardSettings, true, preselectedRace,
+            overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
+                    leaderboardSettings, true, 
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
+                    flagImageResolver);
         }
         return overallLeaderboardPanel;
     }
@@ -87,14 +91,14 @@ public class EventSeriesAnalyticsDataManager {
     }
 
     public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            LeaderboardSettings leaderboardSettings,
-            String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
+            MultiRaceLeaderboardSettings leaderboardSettings,
+            String preselectedLeaderboardName,  String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         if(multiLeaderboardPanel == null) {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
-                    preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
-                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings);
+                    preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,
+                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver);
         }
         return multiLeaderboardPanel;
     }
@@ -103,7 +107,7 @@ public class EventSeriesAnalyticsDataManager {
         return multiLeaderboardPanel;
     }
 
-    public LeaderboardPanel getLeaderboardPanel() {
+    public MultiRaceLeaderboardPanel getLeaderboardPanel() {
         return overallLeaderboardPanel;
     }
 

@@ -13,8 +13,10 @@ import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * The name shall be unique across all regattas tracked concurrently. In particular, if you want to keep apart regattas
@@ -120,6 +122,13 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
     Iterable<Competitor> getAllCompetitors();
 
     /**
+     * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element of a pair
+     * which {@link RaceDefinition}s' {@link RaceDefinition#getCompetitors() competitors} were used in assembling the
+     * result.
+     */
+    Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
+
+    /**
      * Will remove the series from this regatta. Will also call {@link RaceColumn#removeRaceIdentifier(Fleet)} to make
      * sure that all raceLogs and race associations get removed for all race columns in this series.
      */
@@ -199,14 +208,6 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
      */
     void setUseStartTimeInference(boolean useStartTimeInference);
 
-    /**
-     * {@link Event} manages an association to its {@link Event#getRegattas() regattas}. When something on the
-     * regatta changes (in particular, the implicit link to an event through an event's {@link CourseArea} that
-     * is assigned as this regatta's {@link #setDefaultCourseArea(CourseArea) default course area}), the
-     * opposite end of the association needs to be maintained on the event's side.
-     */
-    void adjustEventToRegattaAssociation(EventFetcher eventFetcher);
-    
     RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 
     default RankingMetrics getRankingMetricType() {

@@ -5,10 +5,10 @@ import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -39,19 +40,20 @@ import com.sap.sse.security.ui.client.UserService;
  *            The concrete {@link AbstractEventRegattaPlace} subclass, this instance is bound to.
  */
 public class EventRegattaActivity extends AbstractEventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
-    private EventRegattaView currentView = new TabletAndDesktopRegattaEventView();
+    private EventRegattaView currentView;
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS;
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventViewDTO eventDTO, EventClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
+            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay, FlagImageResolver flagImageResolver) {
         super(place, eventDTO, clientFactory, homePlacesNavigator);
+        currentView = new TabletAndDesktopRegattaEventView(flagImageResolver);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
                     clientFactory.getSailingService(),
                     asyncActionsExecutor,
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
-                    clientFactory.getErrorReporter()));
+                    clientFactory.getErrorReporter(), flagImageResolver));
         }
         
         initNavigationPath(navigationPathDisplay);
@@ -62,7 +64,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         List<NavigationItem> navigationItems = new ArrayList<>();
         navigationItems.add(new NavigationItem(i18n.home(), getHomeNavigation()));
         navigationItems.add(new NavigationItem(i18n.events(), getEventsNavigation()));
-        if(getEventDTO().getType() == EventType.SERIES_EVENT) {
+        if(getEventDTO().getType() == EventType.SERIES) {
             navigationItems.add(new NavigationItem(getEventDTO().getSeriesName(), getCurrentEventSeriesNavigation()));
         }
         navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getCurrentEventNavigation()));
@@ -83,14 +85,14 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public boolean needsSelectionInHeader() {
         EventViewDTO event = eventDTO;
-        return (event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.MULTI_REGATTA);
+        return (event.getType() == EventType.SERIES || event.getType() == EventType.MULTI_REGATTA);
     }
     
     @Override
     public void forPlaceSelection(PlaceCallback callback) {
         EventViewDTO event = eventDTO;
-        if (event.getType() == EventType.SERIES_EVENT) {
-            for(EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeries()) {
+        if (event.getType() == EventType.SERIES) {
+            for(EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeriesSorted()) {
                 if(seriesEvent.getState() != EventState.PLANNED) {
                     AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
                     callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));

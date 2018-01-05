@@ -28,16 +28,16 @@ class Preferences: NSObject {
         static let UUID = "udid"
     }
     
-    private static let preferences = NSUserDefaults.standardUserDefaults()
+    fileprivate static let preferences = UserDefaults.standard
     
     // MARK: - CodeConventionRead
     
     class var codeConventionRead: Bool {
         get {
-            return preferences.boolForKey(PreferenceKey.CodeConventionRead)
+            return preferences.bool(forKey: PreferenceKey.CodeConventionRead)
         }
         set(value) {
-            preferences.setBool(value, forKey:PreferenceKey.CodeConventionRead)
+            preferences.set(value, forKey:PreferenceKey.CodeConventionRead)
             preferences.synchronize()
         }
     }
@@ -46,17 +46,17 @@ class Preferences: NSObject {
     
     class var newCheckInURL: String? {
         get {
-            return preferences.stringForKey(PreferenceKey.NewCheckInURL)
+            return preferences.string(forKey: PreferenceKey.NewCheckInURL)
         }
         set(value) {
-            preferences.setObject(value, forKey: PreferenceKey.NewCheckInURL)
+            preferences.set(value, forKey: PreferenceKey.NewCheckInURL)
             preferences.synchronize()
 
             // Send notification
             var userInfo = [String: AnyObject]()
-            userInfo[UserInfo.CheckInURL] = value
-            let notification = NSNotification(name: NotificationType.NewCheckInURLChanged, object: self, userInfo: userInfo)
-            NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+            userInfo[UserInfo.CheckInURL] = value as AnyObject?
+            let notification = Notification(name: Notification.Name(rawValue: NotificationType.NewCheckInURLChanged), object: self, userInfo: userInfo)
+            NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
         }
     }
     
@@ -64,19 +64,19 @@ class Preferences: NSObject {
     
     class var termsAccepted: Bool {
         get {
-            return preferences.boolForKey(PreferenceKey.TermsAccepted)
+            return preferences.bool(forKey: PreferenceKey.TermsAccepted)
         }
         set(value) {
-            preferences.setBool(value, forKey:PreferenceKey.TermsAccepted)
+            preferences.set(value, forKey:PreferenceKey.TermsAccepted)
             preferences.synchronize()
         }
     }
     
     // MARK: - UUID
 
-    static private(set) var uuid: String? = {
-        let uuid = preferences.stringForKey(PreferenceKey.UUID) ?? NSUUID().UUIDString.lowercaseString
-        preferences.setObject(uuid, forKey: PreferenceKey.UUID)
+    static fileprivate(set) var uuid: String? = {
+        let uuid = preferences.string(forKey: PreferenceKey.UUID) ?? NSUUID().uuidString.lowercased()
+        preferences.set(uuid, forKey: PreferenceKey.UUID)
         preferences.synchronize()
         return uuid
     }()
@@ -85,16 +85,16 @@ class Preferences: NSObject {
     
     class var batterySaving: Bool {
         get {
-            return preferences.boolForKey(PreferenceKey.BatterySaving)
+            return preferences.bool(forKey: PreferenceKey.BatterySaving)
         }
         set(value) {
-            preferences.setBool(value, forKey: PreferenceKey.BatterySaving)
+            preferences.set(value, forKey: PreferenceKey.BatterySaving)
             preferences.synchronize()
             
             // Send notification
             let userInfo = [UserInfo.BatterySaving: value]
-            let notification = NSNotification(name: NotificationType.BatterySavingChanged, object: self, userInfo: userInfo)
-            NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+            let notification = Notification(name: Notification.Name(rawValue: NotificationType.BatterySavingChanged), object: self, userInfo: userInfo)
+            NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
         }
     }
     

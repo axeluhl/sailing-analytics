@@ -37,55 +37,62 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
         final String message = getResourceBundle(locale).getString(messageKey);
         final StringBuilder result = new StringBuilder();
         boolean withinQuotedArea = false;
-        for (int i=0; i<message.length(); i++) {
-        	if (isSingleQuote(message, i) || (withinQuotedArea && message.charAt(i) == '\'')) {
-        		withinQuotedArea = !withinQuotedArea;
-        	} else if (isDoubleQuote(message, i)) {
-        		result.append('\''); // an escaped single quote
-        		i++; // skip the second one
-        	} else {
-        		if (withinQuotedArea) {
-        			result.append(message.charAt(i));
-        		} else {
-        			final int paramNumber = isParameterPlaceholder(message, i);
-        			if (paramNumber != -1) {
-        				result.append(parameters[paramNumber]);
-        				i += (""+paramNumber).length()+1; // skip the number plus one curly brace
-        			} else {
-        				result.append(message.charAt(i));
-        			}
-        		}
-        	}
+        for (int i = 0; i < message.length(); i++) {
+            if (isSingleQuote(message, i) || (withinQuotedArea && message.charAt(i) == '\'')) {
+                withinQuotedArea = !withinQuotedArea;
+            } else if (isDoubleQuote(message, i)) {
+                result.append('\''); // an escaped single quote
+                i++; // skip the second one
+            } else {
+                if (withinQuotedArea) {
+                    result.append(message.charAt(i));
+                } else {
+                    final int paramNumber = isParameterPlaceholder(message, i);
+                    if (paramNumber != -1) {
+                        result.append(parameters[paramNumber]);
+                        i += ("" + paramNumber).length() + 1; // skip the number plus one curly brace
+                    } else {
+                        result.append(message.charAt(i));
+                    }
+                }
+            }
         }
         return result.toString();
     }
 
     private boolean isDoubleQuote(String message, int i) {
-		return i < message.length()-1 && message.charAt(i) == '\'' && message.charAt(i+1) == '\'';
-	}
+        return i < message.length() - 1 && message.charAt(i) == '\'' && message.charAt(i + 1) == '\'';
+    }
 
-	private static final Pattern placeholderMatcher = Pattern.compile("\\{([0-9]+)\\}.*$");
+    private static final Pattern placeholderMatcher = Pattern.compile("\\{([0-9]+)\\}.*$");
+
     /**
-     * @return -1 if there is no placeholder starting at character {@code i} in {@code message},
-     * or the number of the parameter represented by the placeholder, such as {@code 4} for the placeholder
-     * 			<pre>{4}</pre>.
+     * @return -1 if there is no placeholder starting at character {@code i} in {@code message}, or the number of the
+     *         parameter represented by the placeholder, such as {@code 4} for the placeholder
+     * 
+     *         <pre>
+     *         { 4 }
+     *         </pre>
+     * 
+     *         .
      */
-	private int isParameterPlaceholder(String message, int i) {
-		final Matcher matcher = placeholderMatcher.matcher(message.substring(i));
-		final int result;
-		if (matcher.matches()) {
-			result = Integer.valueOf(matcher.group(1));
-		} else {
-			result = -1;
-		}
-		return result;
-	}
+    private int isParameterPlaceholder(String message, int i) {
+        final Matcher matcher = placeholderMatcher.matcher(message.substring(i));
+        final int result;
+        if (matcher.matches()) {
+            result = Integer.valueOf(matcher.group(1));
+        } else {
+            result = -1;
+        }
+        return result;
+    }
 
-	private boolean isSingleQuote(String message, int i) {
-		return i<message.length() && message.charAt(i) == '\'' && (i==message.length()-1 || message.charAt(i+1) != '\'');
-	}
+    private boolean isSingleQuote(String message, int i) {
+        return i < message.length() && message.charAt(i) == '\''
+                && (i == message.length() - 1 || message.charAt(i + 1) != '\'');
+    }
 
-	private ResourceBundle getResourceBundle(Locale locale) {
+    private ResourceBundle getResourceBundle(Locale locale) {
         Control controller = Util.createControl(encoding);
         if (resourceClassLoader != null) {
             return ResourceBundle.getBundle(resourceBaseName, locale, resourceClassLoader, controller);
@@ -93,7 +100,7 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
             return ResourceBundle.getBundle(resourceBaseName, locale, controller);
         }
     }
-    
+
     @Override
     public String getResourceBaseName() {
         return resourceBaseName;

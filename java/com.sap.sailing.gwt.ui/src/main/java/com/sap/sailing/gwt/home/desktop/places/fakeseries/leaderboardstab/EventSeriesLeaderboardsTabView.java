@@ -19,9 +19,9 @@ import com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard.OldMultiLe
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.MultiLeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultipleMultiLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -74,14 +74,14 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             final EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
             final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
 
-            final ComponentContext<LeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null);
-            componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+            final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null);
+            componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
                 @Override
-                public void onSuccess(LeaderboardSettings settings) {
+                public void onSuccess(MultiRaceLeaderboardSettings settings) {
                     MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(null, componentContext,
                             settings,
                             null, // TODO: preselectedLeaderboardName
-                            null,
+                            
                             "leaderboardGroupName",
                             leaderboardName,
                             true, // TODO @FM this information came from place, now hard coded. check with frank
@@ -124,12 +124,12 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
         }
     }
     
-    private ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
+    private ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
-        final MultiLeaderboardPanelLifecycle lifecycle = new MultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesRegattaLeaderboards(leaderboardName);
 
-        final ComponentContext<LeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
+        final ComponentContext<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
                 lifecycle, userService, storageDefinition, placeToken);
         return componentContext;
     }

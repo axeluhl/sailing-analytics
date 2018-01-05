@@ -52,17 +52,18 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -72,13 +73,13 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
- * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
+ * An editable version of the {@link ClassicLeaderboardPanel} which allows a user to enter carried / accumulated
  * points and fix individual race scores.
  * 
  * @author Axel Uhl (d043530)
  *
  */
-public class EditableLeaderboardPanel extends LeaderboardPanel {
+public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     private static EditableLeaderboardResources resources = GWT.create(EditableLeaderboardResources.class);
 
     final DateBox lastScoreCorrectionTimeBox;
@@ -98,7 +99,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public void onClick(ClickEvent event) {
-            new SettingsDialog<LeaderboardSettings>(EditableLeaderboardPanel.this, stringMessages).show();
+            new SettingsDialog<MultiRaceLeaderboardSettings>(EditableLeaderboardPanel.this, stringMessages).show();
         }
     }
 
@@ -151,9 +152,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             final String twoLetterIsoCountryCode = object.getTwoLetterIsoCountryCode();
             final ImageResource flagImageResource;
             if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                flagImageResource = FlagImageResolverImpl.get().getEmptyFlagImageResource();
             } else {
-                flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
             }
             if (flagImageResource != null) {
                 sb.append(renderer.render(flagImageResource));
@@ -577,9 +578,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     public EditableLeaderboardPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
-        super(null, null, sailingService, asyncActionsExecutor, new LeaderboardSettings(),
+        super(null, null, sailingService, asyncActionsExecutor, new MultiRaceLeaderboardSettings(),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
-                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true);
+                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
+                FlagImageResolverImpl.get());
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();

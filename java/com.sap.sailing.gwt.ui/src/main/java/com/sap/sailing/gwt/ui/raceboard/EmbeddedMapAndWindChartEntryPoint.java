@@ -23,13 +23,14 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.TimePanel;
@@ -59,6 +60,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint {
     private static final String PARAM_REGATTA_LIKE_NAME = "regattaLikeName";
@@ -117,7 +119,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
                 defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), true);
         
         sailingService.getRaceIdentifier(regattaLikeName, raceColumnName, fleetName, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
@@ -149,11 +151,15 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     
     private void createErrorPage(String message) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        final SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication();
+        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         RootLayoutPanel.get().add(vp);
-        vp.addNorth(logoAndTitlePanel, 100);
-        vp.add(new Label(message));
+        vp.addNorth(header, 100);
+        final Label infoText = new Label(message);
+        infoText.getElement().getStyle().setMargin(1, Unit.EM);
+        vp.add(infoText);
+        // TODO: Styling of error page slightly differs from the other usages of SAPSailingHeaderWithAuthentication
+        // because of the root font-size. Adjustments are postponed because they might affect the hole page content.
     }
 
     private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorDTO, BoatDTO> competitorBoats,

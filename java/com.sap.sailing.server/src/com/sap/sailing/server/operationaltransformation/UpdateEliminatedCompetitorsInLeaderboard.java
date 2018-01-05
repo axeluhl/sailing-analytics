@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -19,13 +20,15 @@ public class UpdateEliminatedCompetitorsInLeaderboard extends AbstractLeaderboar
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
+        // important not to manipulate the operation; create a local copy of the competitors before alterint it; see bug 4247
+        final Set<Competitor> myNewEliminatedCompetitors = new HashSet<>(newEliminatedCompetitors);
         RegattaLeaderboardWithEliminations leaderboard = (RegattaLeaderboardWithEliminations) toState.getLeaderboardByName(getLeaderboardName());
         // first un-eliminate those currently eliminated and no longer in newEliminatedCompetitors
         for (final Competitor c : leaderboard.getEliminatedCompetitors()) {
-            leaderboard.setEliminated(c, newEliminatedCompetitors.remove(c));
+            leaderboard.setEliminated(c, myNewEliminatedCompetitors.remove(c));
         }
         // then eliminated the remaining ones from newEliminatedCompetitors
-        for (final Competitor c : newEliminatedCompetitors) {
+        for (final Competitor c : myNewEliminatedCompetitors) {
             leaderboard.setEliminated(c, true);
         }
         updateStoredLeaderboard(toState, leaderboard);

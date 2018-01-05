@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -475,23 +476,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         });
         leaderboardGroupsControlsPanel.add(createGroupButton);
         
-        removeButton = new Button(stringMessages.remove());
-        removeButton.ensureDebugId("RemoveLeaderboardButton");
-        removeButton.setEnabled(false);
-        removeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                StringBuilder messageBuilder = new StringBuilder("Do you really want to remove the leaderboard groups:\n");
-                for (LeaderboardGroupDTO group : refreshableGroupsSelectionModel.getSelectedSet()) {
-                    messageBuilder.append("\n" + group.getName());
-                }
-                
-                if (Window.confirm(messageBuilder.toString())) {
-                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
-                }
-            }
-        });
-        leaderboardGroupsControlsPanel.add(removeButton);
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
         refreshButton.addClickHandler(new ClickHandler() {
@@ -513,6 +497,30 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
             }
         };
+        
+        
+        removeButton = new Button(stringMessages.remove());
+        removeButton.ensureDebugId("RemoveLeaderboardButton");
+        removeButton.setEnabled(false);
+        removeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if(askUserForConfirmation()){
+                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()); 
+                }
+            }
+
+            private boolean askUserForConfirmation() {
+                if (refreshableGroupsSelectionModel.itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
+                    final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
+                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
+                } 
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
+            }
+        });
+        leaderboardGroupsControlsPanel.add(removeButton);
+        
+       
         groupNameColumn.setSortable(true);
         leaderboardGroupsListHandler.setComparator(groupNameColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
@@ -851,9 +859,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
 
     private void groupSelectionChanged() {
-        isSingleGroupSelected = refreshableGroupsSelectionModel.getSelectedSet().size() == 1;
+        Set<LeaderboardGroupDTO> selectedLeaderboardGroups = refreshableGroupsSelectionModel.getSelectedSet();
+        isSingleGroupSelected = selectedLeaderboardGroups.size() == 1;
         final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
+       
         removeButton.setEnabled(selectedGroup != null);
+        removeButton.setEnabled(!selectedLeaderboardGroups.isEmpty());
+        removeButton.setText(selectedLeaderboardGroups.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedLeaderboardGroups.size()));
+        
         splitPanel.setVisible(isSingleGroupSelected && selectedGroup != null);
         if (isSingleGroupSelected && selectedGroup != null) {
             //Display details of the group

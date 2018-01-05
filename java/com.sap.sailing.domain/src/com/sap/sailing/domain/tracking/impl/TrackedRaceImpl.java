@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -124,7 +125,6 @@ import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
-import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
@@ -303,11 +303,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private final ConcurrentMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
     /**
-     * Mapping of {@link Competitor} to generic {@link DynamicTrack} implementation. Because the same competitor could
+     * Mapping of {@link Competitor} to generic {@link DynamicSensorFixTrack} implementation. Because the same competitor could
      * be mapped to several different tracks, a combined key of competitor object and track name identifier string is
      * used. This identifier is usually defined within the track interface (e.g. see {@link BravoFixTrack#TRACK_NAME}).
      */
-    private final Map<Pair<Competitor, String>, DynamicTrack<?>> sensorTracks;
+    private final Map<Pair<Competitor, String>, DynamicSensorFixTrack<Competitor, ?>> sensorTracks;
     
     private final Map<String, Sideline> courseSidelines;
 
@@ -635,6 +635,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
         getRace().getCourse().addCourseListener(this);
+        for (DynamicSensorFixTrack<Competitor, ?> sensorTrack : sensorTracks.values()) {
+            sensorTrack.addedToTrackedRace(this);
+        }
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         attachedRegattaLogs = new ConcurrentHashMap<>();
@@ -1212,7 +1215,50 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     private Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint, boolean considerGateStart) {
-        final Distance result;
+        return getValueFromStartToTimePointOrEnd(competitor, timePoint, 
+                (from, to)->{
+                    final Distance result;
+                    final Distance preResult = getTrack(competitor).getDistanceTraveled(from, to);
+                    if (considerGateStart && preResult != null) {
+                        result = preResult.add(getAdditionalGateStartDistance(competitor, timePoint));
+                    } else {
+                        result = preResult;
+                    }
+                    return result;
+                });
+    }
+    
+    @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(competitor, timePoint, BravoFixTrack::getDistanceSpentFoiling);
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(competitor, timePoint, BravoFixTrack::getTimeSpentFoiling);
+    }
+    
+    @FunctionalInterface
+    private static interface BravoFromToValueCalculator<T> {
+        T getValue(BravoFixTrack<Competitor> bravoFixTrack, TimePoint from, TimePoint to);
+    }
+
+    private <T> T getBravoValue(Competitor competitor, TimePoint timePoint, BravoFromToValueCalculator<T> bravoValueCalculator) {
+        return getValueFromStartToTimePointOrEnd(competitor, timePoint, 
+                (from, to)->{
+                    final T result;
+                    final BravoFixTrack<Competitor> bravoFixTrack = getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                    if (bravoFixTrack != null) {
+                        result = bravoValueCalculator.getValue(bravoFixTrack, from, to);
+                    } else {
+                        result = null;
+                    }
+                    return result;
+                });
+    }
+
+    private <T> T getValueFromStartToTimePointOrEnd(Competitor competitor, TimePoint timePoint, Track.TimeRangeValueCalculator<T> valueCalculator) {
+        final T result;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         try {
             lockForRead(markPassings);
@@ -1239,12 +1285,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 if (end == null) {
                     result = null;
                 } else {
-                    final Distance preResult = getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
-                    if (considerGateStart && preResult != null) {
-                        result = preResult.add(getAdditionalGateStartDistance(competitor, timePoint));
-                    } else {
-                        result = preResult;
-                    }
+                    result = valueCalculator.calculate(markPassings.first().getTimePoint(), end);
                 }
             }
             return result;
@@ -1734,20 +1775,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             Wind wind = getWind(position, timepoint);
             if (wind != null) {
                 result = true;
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean hasGPSData() {
-        boolean result = false;
-        if (!tracks.values().isEmpty()) {
-            for (GPSFixTrack<Competitor, GPSFixMoving> gpsTrack : tracks.values()) {
-                if (gpsTrack.getFirstRawFix() != null) {
-                    result = true;
-                    break;
-                }
             }
         }
         return result;
@@ -3373,7 +3400,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING && oldStatus != TrackedRaceStatusEnum.LOADING) {
             suspendAllCachesNotUpdatingWhileLoading();
-        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
     }
@@ -3584,12 +3611,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
+        final Speed result;
         if (getStartOfRace() == null) {
-            return null;
+            result = null;
+        } else {
+            TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
+            result = getTrack(competitor).getEstimatedSpeed(beforeStart);
         }
-
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
-        return getTrack(competitor).getEstimatedSpeed(beforeStart);
+        return result;
     }
 
     @Override
@@ -4025,7 +4054,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
         for (TrackedLeg leg : trackedLegs.values()) {
             final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
-            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeToComplete(polarDataService, current, markPositionCache);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeAndDistanceToComplete(polarDataService, current, markPositionCache);
             legTargetTimes.add(legTargetTime);
             durationOfAllLegs = durationOfAllLegs.plus(legTargetTime.getExpectedDuration());
             current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of the projected finishing time of the previous leg
@@ -4033,6 +4062,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return new TargetTimeInfoImpl(legTargetTimes);
     }
     
+    @Override
+    public Distance getEstimatedDistanceToComplete(final TimePoint timepoint)
+            throws NotEnoughDataHasBeenAddedException, NoWindException {
+        if (polarDataService == null) {
+            throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
+        }
+        Distance distanceOfAllLegs = Distance.NULL;
+        TimePoint current = timepoint;
+        final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
+        for (TrackedLeg leg : trackedLegs.values()) {
+            final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeAndDistanceToComplete(polarDataService, current,
+                    markPositionCache);
+            legTargetTimes.add(legTargetTime);
+            distanceOfAllLegs = distanceOfAllLegs.add(legTargetTime.getExpectedDistance());
+            current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of
+                                                                         // the projected finishing time of the previous
+                                                                         // leg
+        }
+        return distanceOfAllLegs;
+    }
+
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
@@ -4079,44 +4130,74 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             LockUtil.unlockAfterRead(sensorTracksLock);
         }
     }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return LockUtil.<Iterable<TrackT>>executeWithReadLockAndResult(sensorTracksLock, () -> {
+            final Set<TrackT> result = new HashSet<>();
+            for (Competitor competitor : tracks.keySet()) {
+                final Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+                final TrackT track = getTrackInternal(key);
+                if (track != null) {
+                    result.add(track);
+                }
+            }
+            return result;
+        });
+    }
 
     protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        Optional<Runnable> executeAfterReleasingLock = Optional.empty();
+        TrackT result;
         LockUtil.lockForWrite(sensorTracksLock);
         try {
-            TrackT result = getTrackInternal(key);
+            result = getTrackInternal(key);
             if (result == null && tracks.containsKey(competitor)) {
                 // A track is only added if the given Competitor is known to participate in this race
                 result = newTrackFactory.get();
-                addSensorTrackInternal(key, result);
+                executeAfterReleasingLock = addSensorTrackInternal(key, result);
             }
-            return result;
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+        executeAfterReleasingLock.ifPresent(r->r.run());
+        return result;
     }
     
     protected void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        Optional<Runnable> executeAfterReleasingLock = Optional.empty();
         LockUtil.lockForWrite(sensorTracksLock);
         try {
-            if(getTrackInternal(key) != null) {
+            if (getTrackInternal(key) != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.WARNING)) {
                     logger.warning(SensorFixTrack.class.getName() + " already exists for competitor: "
                             + competitor.getName() + "; trackName: " + trackName);
                 }
             } else {
-                this.addSensorTrackInternal(key, track);
+                executeAfterReleasingLock = this.addSensorTrackInternal(key, track);
             }
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+        executeAfterReleasingLock.ifPresent(r->r.run());
     }
     
-    protected <FixT extends SensorFix> void addSensorTrackInternal(Pair<Competitor, String> key,
+    /**
+     * To call this method, the caller must have obtained the write lock of {@link #sensorTracksLock}.
+     * Optionally, the method may return a {@link Runnable} to execute after the lock has been released.
+     * This may, e.g., be a routine that notifies listeners. Callers are responsible for invoking this
+     * {@link Runnable} <em>after</em> releasing the write lock.
+     */
+    protected <FixT extends SensorFix> Optional<Runnable> addSensorTrackInternal(Pair<Competitor, String> key,
             DynamicSensorFixTrack<Competitor, FixT> track) {
+        assert sensorTracksLock.isWriteLockedByCurrentThread();
         sensorTracks.put(key, track);
+        track.addedToTrackedRace(this);
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -4164,5 +4245,77 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return new HashSet<>(attachedRaceLogs.values());
+    }
+    
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        Speed result = null;
+        Duration totalTimeSailedInRace = Duration.NULL;
+        Distance totalDistanceSailedInRace = Distance.NULL;
+        for (TrackedLeg legGeneral : getTrackedLegs()) {
+            TrackedLegOfCompetitor leg = legGeneral.getTrackedLeg(competitor);
+            if (leg != null && leg.hasStartedLeg(timePoint)) {
+                totalDistanceSailedInRace = totalDistanceSailedInRace.add(leg.getDistanceTraveled(timePoint));
+                totalTimeSailedInRace = totalTimeSailedInRace.plus(leg.getTime(timePoint));
+            }
+        }
+        if (!totalTimeSailedInRace.equals(Duration.NULL) && !totalDistanceSailedInRace.equals(Distance.NULL)) {
+            result = totalDistanceSailedInRace.inTime(totalTimeSailedInRace);
+        }
+        return result;
+    }
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
+        final SpeedWithBearing result;
+        if (trackedLeg != null) {
+            result = trackedLeg.getVelocityMadeGood(timePoint, windPositionMode, cache);
+        } else {
+            // check if wind information is available; if so, compute a VMG only based on wind data:
+            if (windPositionMode == WindPositionMode.LEG_MIDDLE) {
+                result = null;
+            } else {
+                final Wind wind = getWind(windPositionMode, /* trackedLeg */ null, competitor, timePoint, cache);
+                result = projectOnto(getTrack(competitor).getEstimatedSpeed(timePoint), wind.getBearing());
+            }
+        }
+        return result;
+    }
+    
+    SpeedWithBearing projectOnto(SpeedWithBearing speed, Bearing projectToBearing) {
+        final SpeedWithBearing result;
+        if (speed != null && speed.getBearing() != null && projectToBearing != null) {
+            double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
+            if (cos < 0) {
+                projectToBearing = projectToBearing.reverse();
+            }
+            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    /**
+     * @param trackedLeg
+     *            The caller is expected to obtain the {@link #getTrackedLeg(Competitor, TimePoint) tracked leg} the
+     *            {@code competitor} is sailing in at time point {@code at}. If {@code null}, any
+     *            non-{@link WindPositionMode#EXACT exact} wind position mode will use {@code null} for the wind
+     *            position, defaulting to the "COMBINED" wind source at the middle of the course. In particular, it then
+     *            obviously makes no real sense to request {@link WindPositionMode#LEG_MIDDLE} because no leg is known.
+     */
+    Wind getWind(WindPositionMode windPositionMode, TrackedLegImpl trackedLeg, Competitor competitor, TimePoint at, WindLegTypeAndLegBearingCache cache) {
+        final Wind wind;
+        if (windPositionMode == WindPositionMode.EXACT) {
+            wind = cache.getWind(this, competitor, at);
+        } else {
+            wind = getWind(trackedLeg == null ? null : 
+                    trackedLeg.getEffectiveWindPosition(
+                            () -> getTrack(competitor)
+                                    .getEstimatedPosition(at, false), at, windPositionMode), at);
+        }
+        return wind;
     }
 }

@@ -33,13 +33,17 @@ public interface BravoFix extends SensorFix {
     
     @Dimension(messageKey="IsFoiling")
     boolean isFoiling();
+    
+    /**
+     * Same as {@link #isFoiling()}, only that instead of using the {@link #MIN_FOILING_HEIGHT_THRESHOLD} constant as
+     * the threshold value for the ride height, here the caller can provide a specific ride height that must be reached
+     * for a fix to be considered foiling.
+     */
+    boolean isFoiling(Distance minimumRideHeight);
 
     @Statistic(messageKey="pitch", resultDecimals=1)
     Bearing getPitch();
 
     @Statistic(messageKey = "heel", resultDecimals = 1)
     Bearing getHeel();
-
-
-
 }

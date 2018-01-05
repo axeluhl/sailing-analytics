@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.util.EventUtil;
 
 public class EventListDataCalculator implements EventVisitor {
     
@@ -28,16 +29,18 @@ public class EventListDataCalculator implements EventVisitor {
 
     @Override
     public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-        EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, service);
-        if (HomeServiceUtil.calculateEventState(event) != EventState.UPCOMING && HomeServiceUtil.isFakeSeries(event)) {
-            String seriesName = HomeServiceUtil.getSeriesName(event);
-            EventListEventDTO latestEvent = lastestEventPerSeries.get(seriesName);
-            if (latestEvent == null || latestEvent.getStartDate().before(eventDTO.getStartDate())) {
-                lastestEventPerSeries.put(seriesName, eventDTO);
+        if (event.getStartDate() != null) {
+            EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, service);
+            if (HomeServiceUtil.calculateEventState(event) != EventState.UPCOMING && EventUtil.isFakeSeries(event)) {
+                String seriesName = HomeServiceUtil.getSeriesName(event);
+                EventListEventDTO latestEvent = lastestEventPerSeries.get(seriesName);
+                if (latestEvent == null || latestEvent.getStartDate().before(eventDTO.getStartDate())) {
+                    lastestEventPerSeries.put(seriesName, eventDTO);
+                }
+                increaseNumberOfEvents(seriesName);
+            } else {
+                addEventToResults(eventDTO);
             }
-            increaseNumberOfEvents(seriesName);
-        } else {
-            addEventToResults(eventDTO);
         }
     }
     
@@ -55,6 +58,7 @@ public class EventListDataCalculator implements EventVisitor {
             latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesName));
             addEventToResults(latestEvent);
         }
+        result.addStatistics(service.getOverallStatisticsByYear());
         return result;
     }
     

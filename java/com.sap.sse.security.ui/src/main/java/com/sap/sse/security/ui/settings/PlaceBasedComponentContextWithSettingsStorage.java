@@ -4,7 +4,6 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
 import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 import com.sap.sse.security.ui.client.UserService;
@@ -20,7 +19,7 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
-        extends ComponentContextWithSettingsStorage<S> {
+        extends ComponentContextWithSettingsStorageAndAdditionalSettingsLayers<S> {
 
     /**
      * Constructs a special case of {@link ComponentContextWithSettingsStorage} which considers the provided
@@ -63,15 +62,7 @@ public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
     protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
             UserService userService, StoredSettingsLocation storageDefinitionId,
             SettingsRepresentationTransformer settingsRepresentationTransformer) {
-        this(rootLifecycle, userService, storageDefinitionId, settingsRepresentationTransformer,
-                new UserSettingsBuildingPipeline(settingsRepresentationTransformer));
+        super(rootLifecycle, userService, storageDefinitionId, settingsRepresentationTransformer,
+                new UserSettingsBuildingPipelineWithAdditionalSettingsLayers(settingsRepresentationTransformer));
     }
-
-    protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StoredSettingsLocation storageDefinitionId,
-            SettingsRepresentationTransformer settingsRepresentationTransformer,
-            SettingsBuildingPipeline settingsBuildingPipeline) {
-        super(rootLifecycle, userService, storageDefinitionId, settingsRepresentationTransformer, settingsBuildingPipeline);
-    }
-
 }

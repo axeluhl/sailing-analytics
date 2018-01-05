@@ -6,6 +6,7 @@ package com.sap.sailing.domain.common.security;
 public enum Permission implements com.sap.sse.security.shared.Permission {
     // AdminConsole permissions
     MANAGE_EVENTS,
+    MANAGE_PAIRING_LISTS,
     MANAGE_REGATTAS,
     MANAGE_TRACKED_RACES,
     SHOW_TRACKED_RACES,
@@ -14,6 +15,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_COURSE_LAYOUT,
     MANAGE_WIND,
     MANAGE_IGTIMI_ACCOUNTS,
+    MANAGE_EXPEDITION_DEVICE_CONFIGURATIONS,
     MANAGE_LEADERBOARDS,
     MANAGE_LEADERBOARD_RESULTS,
     MANAGE_LEADERBOARD_GROUPS,

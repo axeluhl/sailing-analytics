@@ -8,9 +8,7 @@
 
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.grid}">
-			<div class="{local_res.css.eventheaderplaceholder}">
-			</div>
-			<div class="{local_res.css.eventheader} {res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.eventheadernobox} {local_res.css.eventheaderwithinputbox}">
+			<div class="{local_res.css.eventheader} {res.mediaCss.small12} {res.mediaCss.columns}">
 				<div class="{local_res.css.eventheader_info} {res.mediaCss.small12} {res.mediaCss.columns}">
 					<div class="{local_res.css.eventheader_info_title}">
 						<!-- IF event.name -->

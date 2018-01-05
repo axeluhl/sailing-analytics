@@ -7,32 +7,22 @@ import java.util.List;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -62,15 +52,12 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final RegattaOverviewContextDefinition regattaOverviewContextDefinition;
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
-    private boolean showLeaderboard = false;
     
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
     
-    private TabPanel leaderboardsTabPanel;
     private final Anchor settingsButton;
     private final Anchor refreshNowButton;
     private final Anchor startStopUpdatingButton;
-    private CheckBox leaderboardCheckBox;
     private final FlowPanel repeatedInfoLabel = new FlowPanel();
     private VerticalPanel mainPanel;
     private UserService userService;
@@ -234,14 +221,6 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.uiUpdateTimer.play();
         
 
-        // TODO create a perspective and add this parameter to the perspectiveOwnSettings
-        final boolean showLeaderboardButton = Window.Location.getParameter("enableLeaderboard") != null
-                && Window.Location.getParameter("enableLeaderboard").equalsIgnoreCase("true");
-        if (showLeaderboardButton) {
-            leaderboardCheckBox = addLeaderboardEnablerButton();
-        } else {
-            leaderboardCheckBox = null;
-        }
         FlowPanel flowPanelLeft = new FlowPanel();
         flowPanelLeft.addStyleName(style.functionBarLeft());
         flowPanelLeft.add(repeatedInfoLabel);
@@ -251,9 +230,6 @@ public class RegattaOverviewPanel extends SimplePanel {
         FlowPanel flowPanelRight = new FlowPanel();
         flowPanelRight.addStyleName(style.functionBar());
 
-        if (leaderboardCheckBox != null) {
-            flowPanelRight.add(leaderboardCheckBox);
-        }
         // flexTable.add(refreshNowButton);
         flowPanelRight.add(startStopUpdatingButton);
         flowPanelRight.add(settingsButton);
@@ -266,80 +242,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         mainPanel.add(leftRightToolbar);
         mainPanel.add(regattaRaceStatesComponent);
         
-        if (showLeaderboardButton) {
-            leaderboardsTabPanel = new TabPanel();
-            leaderboardsTabPanel.setStyleName(style.leaderboards());
-            leaderboardsTabPanel.setVisible(false);
-            mainPanel.add(leaderboardsTabPanel);
-        } else {
-            leaderboardsTabPanel = null;
-        }
         checkToEnableSettingsButton();
-    }
-
-    private CheckBox addLeaderboardEnablerButton() {
-        final CheckBox checkBox = new CheckBox(stringMessages.leaderboard());
-
-        checkBox.setEnabled(true);
-        checkBox.setValue(false);
-        checkBox.setTitle(stringMessages.showHideComponent("Leaderboard"));
-        // checkBox.getElement().getStyle().setMarginRight(10, Unit.PX);
-        checkBox.setStyleName(RES.mainCss().button());
-        checkBox.addStyleName(style.button());
-        checkBox.addStyleName(style.buttonLeaderboard());
-        checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
-                boolean visible = checkBox.getValue();
-                showLeaderboard = visible;
-                loadLeaderboard();
-            }
-        });
-        
-        return checkBox;
-    }
-    
-    private void loadLeaderboard() {
-        /*
-         * Load a tabbed widget with one tab per regatta. Each tab contains the leaderboard for the regatta.
-         */
-        if (leaderboardsTabPanel != null) {
-            if (showLeaderboard) {
-                final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-                final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(); 
-                sailingService.getLeaderboardsByEvent(eventDTO, new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
-                        new AsyncCallback<List<StrippedLeaderboardDTO>>() {
-                            @Override
-                            public void onSuccess(List<StrippedLeaderboardDTO> result) {
-                                leaderboardsTabPanel.clear();
-                                for (StrippedLeaderboardDTO leaderboard : result) {
-                                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(null, null, sailingService,
-                                            new AsyncActionsExecutor(), leaderboardSettings, false, 
-                                            /*preSelectedRace*/null, 
-                                            competitorSelectionProvider, 
-                                            null, leaderboard.name, 
-                                            errorReporter, stringMessages, /* showRaceDetails */false);
-                                    leaderboardsTabPanel.add(leaderboardPanel,
-                                            (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName())
-                                            + " " + stringMessages.leaderboard());
-                                }
-                                if (!result.isEmpty()) {
-                                    leaderboardsTabPanel.setVisible(true);
-                                    leaderboardsTabPanel.selectTab(0);
-                                } else {
-                                    leaderboardCheckBox.setValue(false);
-                                    errorReporter.reportError(stringMessages.errorLoadingLeaderBoardByEvent());
-                                }
-                            }
-                            @Override
-                            public void onFailure(Throwable caught) {
-                            }
-                        }));
-            } else {
-                leaderboardsTabPanel.clear();
-                leaderboardsTabPanel.setVisible(false);
-            }
-        }
     }
 
     private void checkToEnableSettingsButton() {

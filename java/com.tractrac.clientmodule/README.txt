@@ -16,6 +16,145 @@ It contains also some files:
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
 
+********************************************
+************* TracAPI 3.8.0 ****************
+********************************************
+This is a final version. It change the signature of a method, breaking the
+backward compatibility:
+
+- com.tractrac.model.lib.api.event.RaceStatusType enum. UNKNOWN value of this enum type has been renamed to PENDING.
+
+This version provides a new JavaDoc version.
+
+Release date: 22/11/2017
+Build number: 14453
+
+ 1) Features
+
+ - com.tractrac.model.lib.api.event.RaceStatusType enum. UNKNOWN value of this enum type has been renamed to PENDING.
+ (Requested by Chris Terkelsen 24/10/2017)
+ - Support for sensor data. IRaceSubscriber has been updated adding methods to retrieve sensor data (Requested by SAP)
+ - When the tracking of a race is initialized, TracAPI also sends the positions of the controls using the tracking start time
+ as timestamp (Requested by Axel Uhl, 14/11/2017)
+
+
+********************************************
+************* TracAPI 3.7.7 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 29/10/2017
+Build number: 14453
+
+ 1) Bugs
+
+ - Selector.wakeup() throws an IOException in Android 5. It seems a bug on this platform
+ (Reported by André Borud, 30/08/2017)
+ - There is a synchronization bug on the implementation of the IAttachable interface
+ (Reported by Axel Uhl, 29/10/2017)
+
+
+********************************************
+************* TracAPI 3.7.6 ****************
+********************************************
+ This is a final version.It fixes bugs in the implementation and it adds a some features.
+ It keeps the backward compatibility.
+
+ Release date: 14/08/2017
+ Build number: 14241
+
+ 1) Features
+
+ - Two new RaceCompetitorStatusType values have been added: 8 (Did not finish) and 9 (Missing data). (Requested by
+ Chris Terkelsen, 28/07/2017)
+
+ 2) Bugs
+
+ - Releasing the memory when the ISubscriber.close method is called (Reported by Axel Uhl, 04/08/2017)
+ - The live messages (e.g: race start time updated, live delay updated...) are not arriving sometimes,
+ despite of the server is sending them all the time. The implementation of this part has been
+ downgraded to the version used in TracAPI 3.6.x (Reported by SAP)
+
+
+********************************************
+************* TracAPI 3.7.5 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 25/07/2017
+Build number: 14214
+
+ 1) Bugs
+
+ - When the library calls the IRaceStartStopTimesChangeListener methods,
+   the IRace object can be not updated (Reported By Axel Uhl, 25/07/2017)
+
+********************************************
+************* TracAPI 3.7.4 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 25/07/2017
+Build number: 14207
+
+ 1) Bugs
+
+ - It is not possible to connect a second time to the ISubscriber object to receive
+ live notifications if it has been closed before (Reported By Axel Uhl, 24/07/2017)
+
+********************************************
+************* TracAPI 3.7.3 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 24/07/2017
+Build number: 14195
+
+ 1) Bugs
+
+ - When the specific live delay is updated, the EM sends a message with the new and the
+  old values to the clients. TracAPI checks if the cached value is equals to the old value and
+  only in this case, it updates the live delay. If the server sends some wrong values or if a message
+  is lost, the live delay will never be updated and for this reason this validation has been
+  removed (Reported By Axel Uhl, 24/07/2017)
+
+********************************************
+************* TracAPI 3.7.2 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 21/07/2017
+Build number: 14174
+
+ 1) Bugs
+
+ - IRace.getCourseArea() is not updated when the race is loaded a second time (Reported By Axel Uhl, 21/07/2017)
+
+********************************************
+************* TracAPI 3.7.1 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features.
+It keeps the backward compatibility.
+
+Release date: 21/07/2017
+Build number: 14172
+
+ 1) Features
+
+ - RaceStatusType includes a new value: 9 - Final. The meaning of this value is that the related race has finished and the
+ splits have been validated (Requested by Chris Terkelsen, 18/07/2017).
+
+ 2) Bugs
+
+ - NullPointerException when the client stops the subscription during the loading progress (it happens sometimes).
+ The data provider is set to null and one of the threads that sends the positions to the app can use it (Reported
+ By André Borud, 03/07/2017)
+ - IRace.getEvent() is null when the race is updated (Reported By Axel Uhl, 21/07/2017)
 
 ********************************************
 ************* TracAPI 3.7.0 ****************

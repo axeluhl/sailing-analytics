@@ -67,7 +67,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         time = System.currentTimeMillis() - time;
         result.put("FinderPerformance", time);
         System.out.println(time);
-        Assert.assertTrue("Time expected to be less than 5000ms but was "+time+"ms", time < 5000);
+        Assert.assertTrue("Time expected to be less than 7000ms but was "+time+"ms", time < 7000);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         final long time = timeToAddCandidatesToChooser(500, 1, 25);
         System.out.println(time);
         result.put("ChooserPerformance", time);
-        assertTrue(time < 15000);
+        assertTrue("time needs to be less than 15s but was "+time+"ms", time < 15000);
     }
 
     private long timeToAddCandidatesToChooser(int numberOfTimesAdding, int numberToAddEachTime, int numberOfRepititions) {

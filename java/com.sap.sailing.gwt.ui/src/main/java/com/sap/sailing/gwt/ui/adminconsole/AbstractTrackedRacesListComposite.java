@@ -69,7 +69,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     
     private SelectionCheckboxColumn<RaceDTO> selectionCheckboxColumn;
 
-    private FlushableCellTable<RaceDTO> raceTable;
+    protected FlushableCellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
 

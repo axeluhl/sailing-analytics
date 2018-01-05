@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -87,6 +86,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
@@ -325,6 +325,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+                        return null;
+                    }
+
+                    @Override
                     public void addRace(RaceDefinition race) {
                     }
 
@@ -471,10 +476,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
-                    }
-
-                    @Override
                     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
                         return null;
                     }
@@ -548,6 +549,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void setControlTrackingFromStartAndFinishTimes(
                             boolean controlTrackingFromStartAndFinishTimes) {
+                    }
+
+                    @Override
+                    public void setFleetsCanRunInParallelToTrue() {
                     }
                 };
             }
@@ -670,6 +675,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
         return null;
     }
 
@@ -1136,6 +1151,28 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     
     @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getEstimatedDistanceToComplete(TimePoint now) {
+        return null;
+    }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
 }

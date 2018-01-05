@@ -23,7 +23,7 @@ class SettingsViewController: UITableViewController {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupBatterySavingSwitch()
         setupBatterySavingDescriptionLabel()
         setupDeviceIdentifierLabel()
@@ -32,52 +32,52 @@ class SettingsViewController: UITableViewController {
         setupTableView()
     }
     
-    private func setupBatterySavingSwitch() {
+    fileprivate func setupBatterySavingSwitch() {
         batterySavingSwitch.setOn(Preferences.batterySaving, animated: true)
     }
     
-    private func setupBatterySavingDescriptionLabel() {
+    fileprivate func setupBatterySavingDescriptionLabel() {
         batterySavingDescriptionLabel.text = String(format: Translation.SettingsView.BatterySavingDescriptionLabel.Text.String,
                                                     Preferences.batterySaving ?
                                                         BatteryManager.SendingInterval.BatterySaving :
                                                         BatteryManager.SendingInterval.Normal)
     }
     
-    private func setupDeviceIdentifierLabel() {
+    fileprivate func setupDeviceIdentifierLabel() {
         deviceIdentifierLabel.text = Preferences.uuid
     }
     
-    private func setupLocalization() {
+    fileprivate func setupLocalization() {
         navigationItem.title = Translation.SettingsView.Title.String
         batterySavingTitleLabel.text = Translation.SettingsView.BatterySavingTitleLabel.Text.String
         deviceIdentifierTitleLabel.text = Translation.SettingsView.DeviceIdentifierTitleLabel.Text.String
     }
     
-    private func setupNavigationBar() {
+    fileprivate func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
     
-    private func setupTableView() {
+    fileprivate func setupTableView() {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 140
     }
     
     // MARK: - Actions
     
-    @IBAction func batterySavingChanged(sender: UISwitch) {
-        Preferences.batterySaving = sender.on
+    @IBAction func batterySavingChanged(_ sender: UISwitch) {
+        Preferences.batterySaving = sender.isOn
         tableView.beginUpdates()
         setupBatterySavingDescriptionLabel()
         tableView.endUpdates()
     }
     
-    @IBAction func doneButtonTapped(sender: AnyObject) {
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func doneButtonTapped(_ sender: AnyObject) {
+        presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
     // MARK: - UITableViewDataSource
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0: return Translation.SettingsView.TableView.BatterySavingSection.Title.String
         case 1: return Translation.SettingsView.TableView.OtherSettingsSection.Title.String
@@ -87,7 +87,7 @@ class SettingsViewController: UITableViewController {
     
     // MARK: - UITableViewDelegate
     
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
     }
     

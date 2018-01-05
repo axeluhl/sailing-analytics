@@ -74,19 +74,24 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                run(SimpleQueryRunner.this.queryDefinitionProvider.getQueryDefinition());
+                runQuery();
             }
         });
 
         queryReleaseTimer = new Timer() {
             @Override
             public void run() {
-                SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
+                runQuery();
             }
         };
         if (this.settings.isRunAutomatically()) {
             queryDefinitionProvider.addQueryDefinitionChangedListener(this);
         }
+    }
+
+    @Override
+    public void runQuery() {
+        run(queryDefinitionProvider.getQueryDefinition());
     }
 
     @Override
@@ -103,7 +108,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
                 @Override
-                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
+                protected void handleSuccess(QueryResultDTO<Serializable> result) {
                     resultsPresenter.showResult(result);
                 }
             });

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
@@ -23,14 +24,18 @@ import com.sap.sse.gwt.settings.AbstractEntryPointWithSettingsLinkFactory;
  */
 public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSettingsLinkFactory {
 
+    private static final String LEADERBOARD_EDITING_PATH = "/gwt/LeaderboardEditing.html";
+    private static final String RACE_BOARD_PATH = "/gwt/RaceBoard.html";
+    private static final String REGATTA_OVERVIEW_PATH = "/gwt/RegattaOverview.html";
+
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings) {
-        return createRegattaOverviewLink(regattaOverviewSettings, new RegattaRaceStatesSettings());
+        return createRegattaOverviewLink(regattaOverviewSettings, new RegattaRaceStatesSettings(), true);
     }
 
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings,
-            RegattaRaceStatesSettings regattaRaceStatesSettings) {
-        return new LinkWithSettingsGenerator<>("/gwt/RegattaOverview.html", regattaOverviewSettings,
-                new IgnoreLocalSettings(true)).createUrl(regattaRaceStatesSettings);
+            RegattaRaceStatesSettings regattaRaceStatesSettings, boolean ignoreLocalSettings) {
+        return new LinkWithSettingsGenerator<>(REGATTA_OVERVIEW_PATH, regattaOverviewSettings,
+                new IgnoreLocalSettings(ignoreLocalSettings)).createUrl(regattaRaceStatesSettings);
     }
     
     public static String createLeaderboardLink(LeaderboardContextDefinition contextDefinition, LeaderboardPerspectiveOwnSettings perspectiveOwnSettings) {
@@ -41,16 +46,33 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
                 perspectiveOwnSettings, Collections.emptyMap());
         return linkWithSettingsGenerator.createUrl(settings);
     }
+    
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName) {
+        return createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName, leaderboardGroupName, regattaName, raceName, null);
+    }
+    
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName, String mode) {
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(regattaName,
+                raceName, leaderboardName, leaderboardGroupName, eventId, mode);
+        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                perspectiveOwnSettings, Collections.emptyMap());
+        return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
+    }
 
     public static String createRaceBoardLink(RaceboardContextDefinition ctx,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
-        return new LinkWithSettingsGenerator<>("/gwt/RaceBoard.html", ctx).createUrl(settings);
+        return new LinkWithSettingsGenerator<>(RACE_BOARD_PATH, ctx).createUrl(settings);
+    }
+    
+    public static String createRaceBoardLink(String baseUrl, RaceboardContextDefinition ctx,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
+        return new LinkWithSettingsGenerator<>(baseUrl, RACE_BOARD_PATH, ctx).createUrl(settings);
     }
     
     public static String createLeaderboardEditingLink(String leaderboardName) {
         final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                "/gwt/LeaderboardEditing.html",
-                new LeaderboardEditContextDefinition(leaderboardName));
+                LEADERBOARD_EDITING_PATH, new LeaderboardEditContextDefinition(leaderboardName));
         return linkWithSettingsGenerator.createUrl();
     }
 

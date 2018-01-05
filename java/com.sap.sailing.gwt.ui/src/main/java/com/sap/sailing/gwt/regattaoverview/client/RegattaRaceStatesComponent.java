@@ -170,9 +170,11 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
     @SuppressWarnings("unchecked")
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
         allEntries = newEntries;
-        String lastCourseAreaName = null;
-        String lastRegattaName = null;
-        String lastCourseName = null;
+        String firstCourseAreaName = null;
+        String firstRegattaName = null;
+        String firstCourseName = null;
+        RaceInfoDTO firstCourseRegattaOverviewEntry = null;
+        RegattaOverviewEntryDTO firstRegattaNameEntry = null;
         String lastBoatClass = null;
         boolean canRemoveCourseArea = true;
         boolean canRemoveCourse = true;
@@ -180,68 +182,72 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         boolean canRemoveBoatClass = true;
         boolean canRemoveLastUpdate = true;
         boolean canRemoveProtestTime = true;
-        boolean isAppending = false;
-        RegattaOverviewEntryDTO firstEntry = null;
-        for (RegattaOverviewEntryDTO entryDTO : allEntries) {
-            if (firstEntry == null) {
-                firstEntry = entryDTO;
-            }
-            if (lastRegattaName == null) {
-                lastRegattaName = entryDTO.regattaDisplayName;
-            } else if (canRemoveRegatta && !lastRegattaName.equals(entryDTO.regattaDisplayName)) {
-                canRemoveRegatta = false;
-            }
-            if (canRemoveLastUpdate && timePassedInSeconds(entryDTO.raceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
+        boolean first = true;
+        for (RegattaOverviewEntryDTO loopEntryDTO : allEntries) {
+            final RaceInfoDTO loopRaceInfo = loopEntryDTO.raceInfo;
+            if (canRemoveLastUpdate && timePassedInSeconds(loopRaceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveLastUpdate = false;
             }
-            if (canRemoveProtestTime && entryDTO.raceInfo.protestFinishTime != null
-                    && timePassedInSeconds(entryDTO.raceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
+            if (canRemoveProtestTime && loopRaceInfo.protestFinishTime != null
+                    && timePassedInSeconds(loopRaceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveProtestTime = false;
             }
-            if (lastCourseAreaName == null) {
-                lastCourseAreaName = entryDTO.courseAreaName;
-            } else if (canRemoveCourseArea && !lastCourseAreaName.equals(entryDTO.courseAreaName)) {
-                canRemoveCourseArea = false;
+            if (first) {
+                firstRegattaName = loopEntryDTO.regattaDisplayName;
+                firstRegattaNameEntry = loopEntryDTO;
+                firstCourseAreaName = loopEntryDTO.courseAreaName;
+                firstCourseName = loopRaceInfo.lastCourseName;
+                firstCourseRegattaOverviewEntry = loopRaceInfo;
+                lastBoatClass = loopEntryDTO.boatClassName;
+            } else {
+                if (canRemoveRegatta && !Util.equalsWithNull(firstRegattaName, loopEntryDTO.regattaDisplayName)) {
+                    canRemoveRegatta = false;
+                }
+                if (canRemoveCourseArea && !Util.equalsWithNull(firstCourseAreaName, loopEntryDTO.courseAreaName)) {
+                    canRemoveCourseArea = false;
+                }
+                // a course must be shown individually for a race if its name or its course design differs
+                if (canRemoveCourse && (!Util.equalsWithNull(firstCourseName, loopRaceInfo.lastCourseName)
+                        || !Util.equalsWithNull(firstCourseRegattaOverviewEntry.lastCourseDesign,
+                                loopRaceInfo.lastCourseDesign))) {
+                    canRemoveCourse = false;
+                }
+                if (canRemoveBoatClass && !Util.equalsWithNull(lastBoatClass, loopEntryDTO.boatClassName)) {
+                    canRemoveBoatClass = false;
+                }
             }
-            if (lastCourseName == null) {
-                lastCourseName = entryDTO.raceInfo.lastCourseName;
-            } else if (canRemoveCourse && !lastCourseName.equals(entryDTO.raceInfo.lastCourseName)) {
-                canRemoveCourse = false;
-            }
-
-            if (lastBoatClass == null) {
-                lastBoatClass = entryDTO.boatClassName;
-            } else if (canRemoveBoatClass && !lastBoatClass.equals(entryDTO.boatClassName)) {
-                canRemoveBoatClass = false;
-            }
+            first = false;
         }
-        final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
+        // final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
         repeatedInfoLabel.clear();
-        isAppending |= collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta,
+        boolean isAppending = false;
+        RegattaOverviewEntryDTO _firstRegattaNameEntry = firstRegattaNameEntry;
+        isAppending |= collectRepeatedInfos(stringMessages.regatta(), firstRegattaName, canRemoveRegatta,
                 repeatedInfoLabel, isAppending, new Command() {
                     @Override
                     public void execute() {
-                        Window.open(createRegattaLink(entryForRepeatedInfos), "_blank", "");
+                        Window.open(createRegattaLink(_firstRegattaNameEntry), "_blank", "");
                     }
                 });
-        // private boolean collectRepeatedInfos(String label, String info,
-        // boolean canRemove, FlowPanel panel, boolean append,
-        // final Command linkAction) {
-        isAppending |= collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea,
+
+        isAppending |= collectRepeatedInfos(stringMessages.courseArea(), firstCourseAreaName, canRemoveCourseArea,
                 repeatedInfoLabel,
                 isAppending, null);
-        isAppending |= collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfoLabel,
+
+        final RaceInfoDTO _lastCourseEntry = firstCourseRegattaOverviewEntry;
+        isAppending |= collectRepeatedInfos(stringMessages.course(), firstCourseName, canRemoveCourse,
+                repeatedInfoLabel,
                 isAppending, new Command() {
                     @Override
                     public void execute() {
-                        raceCourseClicked(entryForRepeatedInfos);
+                        raceCourseClicked(_lastCourseEntry);
                     }
                 });
+
         isAppending |= collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
                 repeatedInfoLabel,
                 isAppending, null);
-        isAppending |= collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
-        isAppending |= collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
+
         LinkedList<ColumnSortInfo> sortInfos = new LinkedList<ColumnSortList.ColumnSortInfo>();
         if (table != null) {
             ColumnSortList columnSortList = table.getColumnSortList();
@@ -519,7 +525,9 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         raceStatusColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                entryClickedHandler.onEntryClicked(object);
+                if(entryClickedHandler != null) {
+                    entryClickedHandler.onEntryClicked(object);
+                }
             }
         });
         raceStatusColumn.setSortable(true);
@@ -549,7 +557,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                raceCourseClicked(object);
+                raceCourseClicked(object.raceInfo);
             }
         });
         // raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -845,10 +853,10 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         return result;
     }
 
-    private void raceCourseClicked(RegattaOverviewEntryDTO object) {
-        RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
+    private void raceCourseClicked(RaceInfoDTO raceInfo) {
+        RaceCourseDTO courseDTO = raceInfo.lastCourseDesign;
         if (courseDTO != null && courseDTO.waypoints.size() > 0) {
-            DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
+            DialogBox courseViewDialogBox = createCourseViewDialogBox(raceInfo);
             courseViewDialogBox.center();
             courseViewDialogBox.setGlassEnabled(true);
             courseViewDialogBox.setAnimationEnabled(true);
@@ -888,11 +896,11 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
 
     private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
         if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
-            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.regattaName,
-                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.regattaName, null, null, null);
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.raceInfo.raceIdentifier.getRegattaName(),
+                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.leaderboardName, null, null, null);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(true);
-            ;
+            
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                     perspectiveOwnSettings, Collections.emptyMap());
 
@@ -902,7 +910,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
     }
 
     private String createRegattaLink(RegattaOverviewEntryDTO entryDTO) {
-        String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.regattaName);
+        String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.leaderboardName);
         return leaderboardLink;
     }
     public void setRepeatedInfoLabel(FlowPanel repeatedInfoLabel) {

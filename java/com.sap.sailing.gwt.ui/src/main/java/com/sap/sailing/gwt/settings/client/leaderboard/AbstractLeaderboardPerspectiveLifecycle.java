@@ -9,7 +9,7 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
 
     protected AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages,
             AbstractLeaderboardDTO leaderboard, boolean isOverall) {
-        addLifeCycle(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
+        addLifeCycle(new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages));
         addLifeCycle(new MultiCompetitorLeaderboardChartLifecycle(isOverall));
     }
     

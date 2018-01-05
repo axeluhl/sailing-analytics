@@ -6,9 +6,7 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -85,7 +83,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         }
     }
 
-    public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider,
+    public ManeuverCountRaceColumn(LeaderboardPanel<?> leaderboardPanel, RaceNameProvider raceNameProvider,
             StringMessages stringConstants, List<DetailType> maneuverDetailSelection, String headerStyle,
             String columnStylee, String detailHeaderStyle, String detailColumnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), DetailType.NUMBER_OF_MANEUVERS.getDefaultSortingOrder(), 
@@ -167,7 +165,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public Header<SafeHtml> getHeader() {
+    public SortableExpandableColumnHeader getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(
         /* title */stringMessages.maneuverTypes(), /* tooltip */ stringMessages.numberOfManeuversInRaceTooltip(),
         /* iconURL */null, getLeaderboardPanel(), this, stringMessages);
@@ -235,7 +233,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
+            LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
         result.put(DetailType.TACK, new FormattedDoubleDetailTypeColumn(DetailType.TACK, new NumberOfTacks(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));

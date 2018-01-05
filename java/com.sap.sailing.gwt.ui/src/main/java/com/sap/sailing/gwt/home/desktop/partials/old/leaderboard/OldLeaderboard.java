@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.old.leaderboard;
 
 import java.util.Date;
+import java.util.Objects;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -10,8 +11,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -24,17 +23,14 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
-import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
@@ -63,9 +59,13 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
-    private LeaderboardPanel leaderboardPanel;
+    private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
+    
+    public OldLeaderboard() {
+        this(null);
+    }
     
     public OldLeaderboard(final OldLeaderboardDelegate delegate) {
         this.leaderboardPanel = null;
@@ -77,28 +77,6 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
-        
-        // adding handler on page loading
-        this.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                if (event.isAttached() && leaderboardPanel != null) {
-                    // waiting while leaderboard is loaded
-                    leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
-                        @Override
-                        public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-                            // If race or regatta is live then check button by default
-                            if (leaderboard.hasLiveRace(autoRefreshTimer.getLiveTimePointInMillis())) {
-                                turnOnAutoPlay();
-                            }
-                        }
-
-                        @Override
-                        public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) { }
-                    });
-                }
-            }
-        });
     }
     
     private void setupFullscreenDelegate() {
@@ -138,14 +116,19 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
             autoRefreshTimer.setPlayMode(PlayModes.Live);
         }
-        
-        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
-        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-        if (delegate != null) {
-            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-        }
+        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but style is lost
+        this.updateAutoRefreshStylesDependingOnPlayState();
     }
     
+    private void updateAutoRefreshStylesDependingOnPlayState() {
+        final boolean isPlaying = autoRefreshTimer != null && autoRefreshTimer.getPlayState() == PlayStates.Playing;
+        final String isPlayingStyleName = local_res.css().regattaleaderboard_meta_reload_live();
+        this.autoRefreshAnchor.setStyleName(isPlayingStyleName, isPlaying);
+        if (Objects.nonNull(delegate)) {
+            this.delegate.getAutoRefreshControl().setStyleName(isPlayingStyleName, isPlaying);
+        }
+    }
+
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
@@ -157,21 +140,10 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         if (autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
-                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
-                // autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
-                // if (delegate != null) {
-                // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("#8ab54e");
-                // delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
-                // }
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
-                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
-                autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-                if (delegate != null) {
-                    // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("red");
-                    delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-                }
+                this.updateAutoRefreshStylesDependingOnPlayState();
             }
         }
     }
@@ -182,7 +154,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
             final String componentName = leaderboardPanel.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
 
-            SettingsDialog<?> dialog = new SettingsDialog<LeaderboardSettings>(leaderboardPanel, StringMessages.INSTANCE) {
+            SettingsDialog<MultiRaceLeaderboardSettings> dialog = new SettingsDialog<MultiRaceLeaderboardSettings>(leaderboardPanel, StringMessages.INSTANCE) {
                 protected Widget getAdditionalWidget() {
                     Widget additionalWidget = super.getAdditionalWidget();
                     if (!oldLeaderboardPanel.getElement().isOrHasChild(leaderboardPanel.getElement())) {
@@ -223,18 +195,19 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         return fullscreenAnchor;
     }
 
-    public void setLeaderboard(LeaderboardPanel leaderboardPanel, final Timer timer) {
+    public void setLeaderboard(MultiRaceLeaderboardPanel leaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
         if (leaderboardPanel.getComponentContext() == null) {
             throw new IllegalStateException("Leaderboard Component with null Context");
         }
+        this.updateAutoRefreshStylesDependingOnPlayState();
         oldLeaderboardPanel.add(leaderboardPanel);
         leaderboardPanel.addBusyStateChangeListener(this);
     }
 
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        boolean hasLiveRace = leaderboardPanel.hasLiveRace();
+        final boolean hasLiveRace = leaderboardPanel.hasLiveRace();
         if (leaderboard != null) {
             String comment = leaderboard.getComment() != null ? leaderboard.getComment() : "";
             String scoringScheme = leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "";
@@ -271,6 +244,9 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
                 setVisible(delegate.getLastScoringUpdateTextElement(), !hasLiveRace);
                 setVisible(delegate.getLastScoringUpdateTimeElement(), !hasLiveRace);
                 setVisible(delegate.getScoringSchemeElement(), true);
+            }
+            if (hasLiveRace) {
+                turnOnAutoPlay();
             }
         }
     }

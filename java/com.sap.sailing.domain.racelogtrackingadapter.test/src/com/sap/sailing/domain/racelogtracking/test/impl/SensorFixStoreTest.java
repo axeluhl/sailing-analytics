@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 
 import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -30,7 +31,6 @@ import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -106,17 +106,17 @@ public class SensorFixStoreTest {
     }
     
     @Test
-    public void testFew() throws Exception {
+    public void testProgressFew() throws Exception {
         testProgress(80);
     }
     
     @Test
-    public void testLittle() throws Exception {
+    public void testProgressLittle() throws Exception {
         testProgress(109);
     }
 
     @Test
-    public void testProgressMay() throws Exception {
+    public void testProgressMany() throws Exception {
         testProgress(2000);
     }
 
@@ -384,7 +384,7 @@ public class SensorFixStoreTest {
     }
 
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
-        double[] fixData = new double[BravoSensorDataMetadata.getTrackColumnCount()];
+        Double[] fixData = new Double[BravoSensorDataMetadata.getTrackColumnCount()];
         fixData[BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex()] = rideHeight;
         fixData[BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex()] = rideHeight;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);

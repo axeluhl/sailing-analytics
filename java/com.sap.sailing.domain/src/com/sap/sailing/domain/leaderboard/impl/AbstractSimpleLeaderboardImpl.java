@@ -40,6 +40,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -192,14 +193,15 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         
         @Override
         public int getNumberOfCompetitorsWithoutMaxPointReason(RaceColumn column, TimePoint timePoint) {
-        	if (numberOfCompetitorsWithoutMaxPointReason == -1) {
-        		numberOfCompetitorsWithoutMaxPointReason = 0;
-				for (Competitor competitor : getCompetitors()) {
-					MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column, timePoint);
-					numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
-				}
-        	}
-        	return numberOfCompetitorsWithoutMaxPointReason;
+            if (numberOfCompetitorsWithoutMaxPointReason == -1) {
+                numberOfCompetitorsWithoutMaxPointReason = 0;
+                for (Competitor competitor : getCompetitors()) {
+                    MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column,
+                            timePoint);
+                    numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
+                }
+            }
+            return numberOfCompetitorsWithoutMaxPointReason;
         }
     }
 
@@ -384,7 +386,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     public Double getTotalPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) {
         return getScoreCorrection().getCorrectedScore(
                 ()->getTrackedRank(competitor, raceColumn, timePoint), competitor,
-                raceColumn, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme()).getCorrectedScore();
+                raceColumn, this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme()).getCorrectedScore();
     }
 
     @Override
@@ -423,13 +425,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         return getNetPoints(competitor, raceColumn, getRaceColumns(), timePoint);
     }
 
     @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn,
-            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
                 .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
         return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
@@ -626,7 +628,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             Set<RaceColumn> discardedRaceColumns) throws NoWindException {
         Callable<Integer> trackedRankProvider = ()->getTrackedRank(competitor, race, timePoint);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
-                timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
+                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
         return new EntryImpl(trackedRankProvider, correctedScore, ()->correctedResults.getUncorrectedScore(),
@@ -690,7 +692,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             for (final Competitor competitor : getCompetitors()) {
                 Callable<Integer> trackedRankProvider = ()->getTrackedRank(competitor, raceColumn, timePoint);
                 final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, raceColumn,
-                        timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
+                        this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
@@ -789,30 +791,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
         Speed result = null;
-        for (TrackedRace trackedRace : getTrackedRaces()) {
-            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
-                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-                if (!markPassings.isEmpty()) {
-                    TimePoint from = markPassings.first().getTimePoint();
-                    TimePoint to;
-                    if (timePoint.after(markPassings.last().getTimePoint()) &&
-                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
-                        // stop counting when competitor finished the race
-                        to = markPassings.last().getTimePoint();
-                    } else {
-                        if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
-                                timePoint.after(markPassings.last().getTimePoint())) {
-                            result = null;
-                            break;
-                        }
-                        to = timePoint;
-                    }
-                    Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
-                    if (distanceTraveled != null) {
-                        result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
-                    }
-                }
-            }
+        final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
+        final Distance totalDistanceSailed = this.getTotalDistanceTraveled(competitor, timePoint);
+        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Distance.NULL)) {
+            result = totalDistanceSailed.inTime(totalTimeSailed);
         }
         return result;
     }

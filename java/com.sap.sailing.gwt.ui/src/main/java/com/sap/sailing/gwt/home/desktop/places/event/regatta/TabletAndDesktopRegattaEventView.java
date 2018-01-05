@@ -14,16 +14,19 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewTabView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesTabView;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -40,10 +43,15 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
 
     @UiField(provided = true) TabPanel<AbstractEventRegattaPlace, EventRegattaView.Presenter, RegattaTabView<AbstractEventRegattaPlace>> tabPanelUi;
     @UiField(provided = true) EventHeader eventHeader;
+    @UiField(provided = true) RegattaRacesTabView racesTabUi;
+    @UiField(provided = true) RegattaOverviewTabView regattaOverviewTabUi;
     
     private Presenter currentPresenter;
 
-    public TabletAndDesktopRegattaEventView() {
+    private final FlagImageResolver flagImageResolver;
+
+    public TabletAndDesktopRegattaEventView(FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
     }
 
     @Override
@@ -51,9 +59,11 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         this.currentPresenter = currentPresenter;
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         eventHeader = new EventHeader(currentPresenter);
+        racesTabUi = new RegattaRacesTabView(flagImageResolver);
+        regattaOverviewTabUi = new RegattaOverviewTabView(flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         
-        if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
+        if(currentPresenter.getEventDTO().getType() == EventType.SERIES) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
             Anchor seriesAnchor = new Anchor(i18n.overallLeaderboardSelection());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());

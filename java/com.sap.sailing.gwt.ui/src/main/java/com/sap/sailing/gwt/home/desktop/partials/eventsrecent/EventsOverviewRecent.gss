@@ -84,7 +84,6 @@
 }
 .eventsoverviewrecent_year_content {
   margin-top: 0.666666666666667em;
-  padding-bottom: 1.333333333333333em;
 }
 .eventsoverviewrecent_year_content_floattoinlineblock {
   font-size: 0;

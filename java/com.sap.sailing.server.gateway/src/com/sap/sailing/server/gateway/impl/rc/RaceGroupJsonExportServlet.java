@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -11,11 +13,13 @@ import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -41,8 +45,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        String courseAreaFilter = request.getParameter(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER);
+        String courseAreaFilter = request.getParameter(RaceLogServletConstants.PARAMS_COURSE_AREA_FILTER);
         if (courseAreaFilter == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Need to set a course area filter.");
             return;
@@ -52,7 +55,6 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Course area filter must be valid UUID.");
             return;
         }
-
         CourseArea filterCourseArea = getService().getCourseArea(courseAreaId);
         if (filterCourseArea == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No course area found with given UUID.");
@@ -67,20 +69,26 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         }
         JsonSerializer<RaceGroup> serializer = createSerializer(clientUuid);
         JSONArray result = new JSONArray();
-
         RaceGroupFactory raceGroupFactory = new RaceGroupFactory();
+        final Set<Regatta> regattasForWhichRegattaLeaderboardsWereAdded = new HashSet<>();
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
             if (filterCourseArea.equals(leaderboard.getDefaultCourseArea())) {
-                RaceGroup raceGroup = null;
-                if (leaderboard instanceof RegattaLeaderboard) {
-                    raceGroup = raceGroupFactory.convert((RegattaLeaderboard) leaderboard);
+                if (leaderboard instanceof RegattaLeaderboard && !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
+                    result.add(serializer.serialize(raceGroupFactory.convert((RegattaLeaderboard) leaderboard)));
+                    regattasForWhichRegattaLeaderboardsWereAdded.add(((RegattaLeaderboard) leaderboard).getRegatta());
                 } else if (leaderboard instanceof FlexibleLeaderboard) {
-                    raceGroup = raceGroupFactory.convert((FlexibleLeaderboard) leaderboard);
+                    result.add(serializer.serialize(raceGroupFactory.convert((FlexibleLeaderboard) leaderboard)));
                 }
-                result.add(serializer.serialize(raceGroup));
             }
         }
-
+        // now add only those RegattaLeaderboardWithEliminations for which the original RegattaLeaderboard hasn't been added
+        for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+            if (leaderboard instanceof RegattaLeaderboardWithEliminations &&
+                    filterCourseArea.equals(leaderboard.getDefaultCourseArea()) && 
+                    !regattasForWhichRegattaLeaderboardsWereAdded.contains(((RegattaLeaderboardWithEliminations) leaderboard).getRegatta())) {
+                result.add(serializer.serialize(raceGroupFactory.convert((RegattaLeaderboardWithEliminations) leaderboard)));
+            }
+        }
         setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
     }

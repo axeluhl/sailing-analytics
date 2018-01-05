@@ -21,19 +21,20 @@ public class EventStageCandidateCalculator implements EventVisitor {
 
     @Override
     public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-        EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
-        if (now.after(event.getStartDate()) && now.before(event.getEndDate())) {
-            featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.RUNNING, holder));
-        } else if (event.getStartDate().after(now) &&
-                event.getStartDate().before(now.plus(Duration.ONE_WEEK.times(4)))) {
-            // This ensures that no events appear on the stage that do not have their leaderboards configured
-            // as the event page only shows a placeholder message in this stage
-            if(HomeServiceUtil.hasRegattaData(event)) {
-                featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.UPCOMING_SOON, holder));
+        final TimePoint startDate = event.getStartDate(), endDate = event.getEndDate();
+        if (startDate != null) {
+            final EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
+            if (now.after(startDate) && (endDate == null || now.before(endDate))) {
+                featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.RUNNING, holder));
+            } else if (startDate.after(now) && startDate.before(now.plus(Duration.ONE_WEEK.times(4)))) {
+                // This ensures that no events appear on the stage that do not have their leaderboards configured
+                // as the event page only shows a placeholder message in this stage
+                if (HomeServiceUtil.hasRegattaData(event)) {
+                    featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.UPCOMING_SOON, holder));
+                }
+            } else if (endDate != null && endDate.before(now) && endDate.after(now.minus(Duration.ONE_YEAR))) {
+                featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.POPULAR, holder));
             }
-        } else if (event.getEndDate().before(now) &&
-                event.getEndDate().after(now.minus(Duration.ONE_YEAR))) {
-            featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.POPULAR, holder));
         }
     }
 
