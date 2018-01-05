@@ -132,8 +132,7 @@ public class SpotImpl extends NamedImpl implements Spot {
 
     @Override
     public Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException {
-        final InputStream response = (InputStream) getMeasurementsUrl().getContent();
-        final Iterable<Wind> measurements = parser.parse(getPosition(), (JSONArray) new JSONParser().parse(new InputStreamReader(response)));
+        final Iterable<Wind> measurements = getAllMeasurements();
         final Wind result;
         if (measurements != null && !Util.isEmpty(measurements)) {
             final List<Wind> measurementsSortedByTimepoint = new ArrayList<>();
@@ -144,6 +143,25 @@ public class SpotImpl extends NamedImpl implements Spot {
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public Iterable<Wind> getAllMeasurementsAfter(TimePoint timePoint) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException {
+        final List<Wind> result = new ArrayList<>();
+        for (final Wind measurement : getAllMeasurements()) {
+            if (timePoint == null || measurement.getTimePoint().after(timePoint)) {
+                result.add(measurement);
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public Iterable<Wind> getAllMeasurements()
+            throws IOException, MalformedURLException, ParseException, org.json.simple.parser.ParseException {
+        final InputStream response = (InputStream) getMeasurementsUrl().getContent();
+        final Iterable<Wind> measurements = parser.parse(getPosition(), (JSONArray) new JSONParser().parse(new InputStreamReader(response)));
+        return measurements;
     }
 
     private URL getMeasurementsUrl() throws MalformedURLException {

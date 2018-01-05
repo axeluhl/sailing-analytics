@@ -2153,20 +2153,22 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private Widget createInfoWindowLabelAndValue(String labelName, String value) {
-    	FlowPanel flowPanel = new FlowPanel();
+        Label valueLabel = new Label(value);
+        valueLabel.setWordWrap(false);
+        valueLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        valueLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        return createInfoWindowLabelWithWidget(labelName, valueLabel);
+    }
+
+    public Widget createInfoWindowLabelWithWidget(String labelName, Widget value) {
+        FlowPanel flowPanel = new FlowPanel();
         Label label = new Label(labelName + ":");
         label.setWordWrap(false);
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
         label.getElement().getStyle().setPadding(3, Style.Unit.PX);
         label.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
         flowPanel.add(label);
-
-        Label valueLabel = new Label(value);
-        valueLabel.setWordWrap(false);
-        valueLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        valueLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        flowPanel.add(valueLabel);
-
+        flowPanel.add(value);
         return flowPanel;
     }
     
@@ -2206,11 +2208,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
         final VerticalPanel vPanel = new VerticalPanel();
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSource(), WindSourceTypeFormatter.format(windSource, stringMessages)));
+        final Anchor windSourceNameAnchor = new Anchor(WindSourceTypeFormatter.format(windSource, stringMessages));
+        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.windSource(), windSourceNameAnchor));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.wind(), Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
-        final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(windDTO.measureTimepoint);
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(), timePoint.toString()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
+        final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(windDTO.measureTimepoint);
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(), timePoint.asDate().toString()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsSignedDecimalDegrees()));
         if (windSource.getType() == WindSourceType.WINDFINDER) {
@@ -2222,16 +2225,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
                 @Override
                 public void onSuccess(String result) {
-                    vPanel.add(createWindFinderButtonLink(windSource.getId().toString(), result));
+                    // TODO bug1301 place WindFinder button icon on anchor
+                    windSourceNameAnchor.setHref(result);
+                    windSourceNameAnchor.setTarget("_blank");
                 }
             });
         }
         return vPanel;
-    }
-
-    private Widget createWindFinderButtonLink(String spotId, String url) {
-        // TODO bug1301 place WindFinder button icon on anchor
-        return new Anchor(stringMessages.windFinder(), url);
     }
 
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType lastFix) {

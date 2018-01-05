@@ -60,4 +60,13 @@ public interface Spot extends NamedWithID, Positioned {
     URL getCurrentlyMostAppropriateUrl(TimePoint timePoint) throws MalformedURLException;
 
     Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException;
+
+    Iterable<Wind> getAllMeasurements() throws IOException, MalformedURLException, ParseException, org.json.simple.parser.ParseException;
+
+    /**
+     * @param timePoint
+     *            if {@code null} then this call delivers the result of {@link #getAllMeasurements()}
+     * @return an always valid but possibly empty collection
+     */
+    Iterable<Wind> getAllMeasurementsAfter(TimePoint timePoint) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException;
 }
