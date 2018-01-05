@@ -9,6 +9,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.domain.windfinderadapter.WindFinderTrackerFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -34,7 +35,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         logger.info("Creating ExpeditionTrackerFactory");
-        final WindFinderTrackerFactory windfinderTrackerFactory = new WindFinderTrackerFactory();
+        final WindFinderTrackerFactoryImpl windfinderTrackerFactory = new WindFinderTrackerFactoryImpl();
         registrations.add(context.registerService(WindFinderTrackerFactory.class, windfinderTrackerFactory, /* properties */null));
         registrations.add(context.registerService(WindTrackerFactory.class, windfinderTrackerFactory, /* properties */null));
     }

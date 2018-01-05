@@ -17,7 +17,10 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.windfinderadapter.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinderadapter.Spot;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class SpotImpl extends NamedImpl implements Spot {
@@ -26,6 +29,9 @@ public class SpotImpl extends NamedImpl implements Spot {
     private static final String BASE_REPORT_URL = BASE_URL + "/report";
     private static final String BASE_FORECAST_URL = BASE_URL + "/forecast";
     private static final String BASE_STATISTICS_URL = BASE_URL + "/windstatistics";
+    
+    private static final Duration FORECAST_DURATION = Duration.ONE_DAY.times(9);
+    private static final Duration REPORT_LOOKBACK = Duration.ONE_DAY.times(7);
 
     private final String id;
     private final String keyword;
@@ -104,6 +110,26 @@ public class SpotImpl extends NamedImpl implements Spot {
         return new URL(BASE_STATISTICS_URL+"/"+getKeyword());
     }
     
+    @Override
+    public URL getCurrentlyMostAppropriateUrl(TimePoint timePoint) throws MalformedURLException {
+        final URL result;
+        final TimePoint now = MillisecondsTimePoint.now();
+        if (timePoint.compareTo(now.plus(Duration.ONE_MINUTE))<=0) {  // up to one minute into the future
+            if (timePoint.compareTo(now.minus(REPORT_LOOKBACK))>=0) { // and up to seven days back
+                result = getReportUrl();                              // is covered by the report page;
+            } else { // we're looking further into the past; so it's the statistics page
+                result = getStatisticsUrl();
+            }
+        } else { // we're looking into the future
+            if (timePoint.compareTo(now.plus(FORECAST_DURATION))<=0) { // and it's still covered by the forecast
+                result = getForecastUrl();
+            } else { // otherwise we again resort to the stats page
+                result = getStatisticsUrl();
+            }
+        }
+        return result;
+    }
+
     @Override
     public Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException {
         final InputStream response = (InputStream) getMeasurementsUrl().getContent();

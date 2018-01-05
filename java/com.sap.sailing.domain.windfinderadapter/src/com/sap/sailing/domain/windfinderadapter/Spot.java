@@ -8,6 +8,7 @@ import java.text.ParseException;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.TimePoint;
 
 /**
  * A measurement spot for which a report and / or a forecast may exist. Equality and
@@ -48,6 +49,15 @@ public interface Spot extends NamedWithID, Positioned {
      * @return the URL of a web page showing general wind statistics for this spot
      */
     URL getStatisticsUrl() throws MalformedURLException;
+    
+    /**
+     * For this spot provides a {@link URL} that a web UI can use to link
+     * to the WindFinder web site with the content most appropriate given the time point.
+     * This could be the report page if the time is about now; the forecast page if the time point
+     * is up to ten days in the future, or the statistics page if the time point is out of any
+     * of the scopes above.
+     */
+    URL getCurrentlyMostAppropriateUrl(TimePoint timePoint) throws MalformedURLException;
 
     Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException;
 }

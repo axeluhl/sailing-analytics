@@ -31,7 +31,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * <p>
  * 
  * {@link #stop() Stopping} this tracker will cancel the task that polls for regular updates and will tell the
- * {@link WindFinderTrackerFactory} that this tracker has been stopped. The tracker will therefore be released by the
+ * {@link WindFinderTrackerFactoryImpl} that this tracker has been stopped. The tracker will therefore be released by the
  * factory and will no longer be returned as the tracker responsible for retrieving WindFinder data for the particular
  * race that this tracker was bound to.
  * 
@@ -43,7 +43,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
     private static final Duration POLL_EVERY = Duration.ONE_MINUTE;
     
     private final DynamicTrackedRace trackedRace;
-    private final WindFinderTrackerFactory factory;
+    private final WindFinderTrackerFactoryImpl factory;
 
     private final ScheduledFuture<?> poller;
     
@@ -54,7 +54,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
      */
     private final Iterable<ReviewedSpotsCollection> allSpotCollections;
     
-    public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactory factory) {
+    public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactoryImpl factory) {
         this.trackedRace = trackedRace;
         this.factory = factory;
         this.allSpotCollections = factory.getReviewedSpotsCollections();
@@ -72,7 +72,12 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
             for (final Spot usefulSpot : usefulSpots) {
                 final Wind wind = usefulSpot.getLatestMeasurement();
                 if (wind != null) {
-                    trackedRace.recordWind(wind, new WindSourceWithAdditionalID(WindSourceType.WINDFINDER, usefulSpot.getId()));
+                    final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.WINDFINDER, usefulSpot.getId());
+                    final Wind existingFix = trackedRace.getOrCreateWindTrack(windSource).getFirstRawFixAtOrAfter(wind.getTimePoint());
+                    // don't add the same fix twice
+                    if (existingFix == null || !existingFix.getTimePoint().equals(wind.getTimePoint())) {
+                        trackedRace.recordWind(wind, windSource);
+                    }
                 }
             }
         } catch (Exception e) {

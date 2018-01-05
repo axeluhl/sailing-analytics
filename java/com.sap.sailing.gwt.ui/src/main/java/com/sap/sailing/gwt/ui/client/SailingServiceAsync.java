@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -926,5 +927,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
     
-    void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+    void getRaceDisplayNamesFromLeaderboard(final String leaderboardName, List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+    
+    /**
+     * For a given WindFinder spot ID provides a {@link URL} that a web UI can use to link
+     * to the WindFinder web site with the content most appropriate given the time point.
+     * This could be the report page if the time is about now; the forecast page if the time point
+     * is up to ten days in the future, or the statistics page if the time point is out of any
+     * of the scopes above.
+     */
+    void getWindFinderLink(TimePoint forWhichTime, String spotId, AsyncCallback<String> callback);
 }

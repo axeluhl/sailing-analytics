@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.windfinderadapter.impl;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.simple.parser.ParseException;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -15,12 +18,13 @@ import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
-import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.windfinderadapter.ReviewedSpotsCollection;
+import com.sap.sailing.domain.windfinderadapter.Spot;
+import com.sap.sailing.domain.windfinderadapter.WindFinderTrackerFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.ServiceTrackerFactory;
 
-public class WindFinderTrackerFactory implements WindTrackerFactory {
+public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
     private final Map<RaceDefinition, WindTracker> windTrackerPerRace;
     
     /**
@@ -32,7 +36,7 @@ public class WindFinderTrackerFactory implements WindTrackerFactory {
     private Set<ReviewedSpotsCollection> reviewedSpotsCollections;
     private final ServiceTracker<WindFinderReviewedSpotsCollectionIdProvider, WindFinderReviewedSpotsCollectionIdProvider> reviewedSpotsCollectionIdProvider;
 
-    public WindFinderTrackerFactory() {
+    public WindFinderTrackerFactoryImpl() {
         this.windTrackerPerRace = new HashMap<>();
         this.reviewedSpotsCollections = Collections.synchronizedSet(new HashSet<>());
         if (Activator.getContext() != null) {
@@ -80,12 +84,27 @@ public class WindFinderTrackerFactory implements WindTrackerFactory {
      * 
      * @return a non-live set of spots collections known by this factory at this point in time
      */
-    Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections() {
+    @Override
+    public Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections() {
         final List<ReviewedSpotsCollection> result = new ArrayList<>();
         result.addAll(reviewedSpotsCollections);
         final WindFinderReviewedSpotsCollectionIdProvider provider;
         if (reviewedSpotsCollectionIdProvider != null && (provider = reviewedSpotsCollectionIdProvider.getService()) != null) {
             Util.addAll(Util.map(provider.getWindFinderReviewedSpotsCollectionIds(), id->new ReviewedSpotsCollectionImpl(id)), result);
+        }
+        return result;
+    }
+
+    @Override
+    public Spot getSpotById(String spotId) throws MalformedURLException, IOException, ParseException {
+        Spot result = null;
+        for (final ReviewedSpotsCollection coll : getReviewedSpotsCollections()) {
+            for (final Spot spot : coll.getSpots()) {
+                if (Util.equalsWithNull(spot.getId(), spotId)) {
+                    result = spot;
+                    break;
+                }
+            }
         }
         return result;
     }

@@ -29,7 +29,7 @@ public class WindFinderPollerTest {
     @Test
     public void testPolling() throws Exception {
         final Object monitor = new Object();
-        WindFinderTrackerFactory factory = new WindFinderTrackerFactory();
+        WindFinderTrackerFactoryImpl factory = new WindFinderTrackerFactoryImpl();
         factory.addReviewedSpotCollection(new ReviewedSpotsCollectionImpl("schilksee"));
         final List<Pair<Wind, WindSource>> wind = new ArrayList<>();
         final RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);

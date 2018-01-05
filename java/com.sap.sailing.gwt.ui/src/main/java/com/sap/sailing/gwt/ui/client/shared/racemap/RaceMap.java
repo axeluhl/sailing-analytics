@@ -63,6 +63,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -135,6 +136,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -859,6 +861,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
+                    windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
                             /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
@@ -2171,6 +2174,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.getName()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), markDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), markDTO.position.getAsSignedDecimalDegrees()));
         return vPanel;
     }
 
@@ -2198,16 +2202,36 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return vPanel;
     }
 
-    private Widget getInfoWindowContent(WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
+    private Widget getInfoWindowContent(final WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        VerticalPanel vPanel = new VerticalPanel();
+        final VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSource(), WindSourceTypeFormatter.format(windSource, stringMessages)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.wind(), Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
+        final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(windDTO.measureTimepoint);
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(), timePoint.toString()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsSignedDecimalDegrees()));
+        if (windSource.getType() == WindSourceType.WINDFINDER) {
+            sailingService.getWindFinderLink(timePoint, windSource.getId().toString(), new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(stringMessages.unableToResolveWindFinderSpotId(windSource.getId().toString(), caught.getMessage()), /* silentMode */ true);
+                }
+
+                @Override
+                public void onSuccess(String result) {
+                    vPanel.add(createWindFinderButtonLink(windSource.getId().toString(), result));
+                }
+            });
+        }
         return vPanel;
+    }
+
+    private Widget createWindFinderButtonLink(String spotId, String url) {
+        // TODO bug1301 place WindFinder button icon on anchor
+        return new Anchor(stringMessages.windFinder(), url);
     }
 
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType lastFix) {
