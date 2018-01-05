@@ -15,11 +15,13 @@ import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositeP
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
+import com.sap.sailing.selenium.pages.leaderboard.PairingListCreationSetupDialogPO;
 
 public class LeaderboardConfigurationPanelPO extends PageArea {
     public static class LeaderboardEntryPO extends DataEntryPO {
 
         private static final String ACTION_NAME_CONFIGURE_URL = "ACTION_CONFIGURE_URL";
+        private static final String ACTION_NAME_CALC_PAIRINGLIST = "ACTION_CREATE_PAIRINGLIST";
 
         public LeaderboardEntryPO(CellTablePO<?> table, WebElement element) {
             super(table, element);
@@ -46,6 +48,10 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         public LeaderboardUrlConfigurationDialogPO getLeaderboardPageUrlConfigurationDialog() {
             clickActionImage(ACTION_NAME_CONFIGURE_URL);
             return waitForPO(LeaderboardUrlConfigurationDialogPO::new, "LeaderboardPageUrlConfigurationDialog", 60);
+        }
+        public PairingListCreationSetupDialogPO getLeaderboardPairingListCreationSetupDialog(){
+            clickActionImage(ACTION_NAME_CALC_PAIRINGLIST);
+            return waitForPO(PairingListCreationSetupDialogPO::new, "PairingListCreationSetupDialog", 60);
         }
     }
     

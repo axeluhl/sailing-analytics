@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.common.Renamable;
+import com.sap.sse.common.Renamable;
 
 /**
  * Base interface for series consisting of static information describing the Series.

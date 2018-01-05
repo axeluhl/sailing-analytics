@@ -145,6 +145,10 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
                     InterruptedException {
             }
+            @Override
+            public void removeRace(Regatta regatta, RaceDefinition race)
+                    throws MalformedURLException, IOException, InterruptedException {
+            }
         };
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertNotNull(leaderboardDTO);

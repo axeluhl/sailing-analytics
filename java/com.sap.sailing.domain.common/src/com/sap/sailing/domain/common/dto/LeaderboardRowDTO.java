@@ -28,6 +28,7 @@ public class LeaderboardRowDTO implements Serializable {
     public Double totalDistanceTraveledInMeters;
     public Double totalDurationFoiledInSeconds;
     public Double totalDistanceFoiledInMeters;
+    public Integer totalScoredRaces;
     
     @Override
     public int hashCode() {
