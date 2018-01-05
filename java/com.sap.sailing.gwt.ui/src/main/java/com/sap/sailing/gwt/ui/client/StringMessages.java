@@ -2028,4 +2028,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chooseAName();
     String windFinderWindSourceTypeName();
     String windFinderWindSourceTypeTooltip();
+    String windFinder();
+    String enterTagsForTheVideo();
+    String enterIdOfWindfinderReviewedSpotCollection();
+    String enterTagsForTheImage();
 }

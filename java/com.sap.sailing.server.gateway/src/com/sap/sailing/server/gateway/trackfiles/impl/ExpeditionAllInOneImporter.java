@@ -221,7 +221,7 @@ public class ExpeditionAllInOneImporter {
         service.updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
                 Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
-                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos());
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
 
         final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
         final Fleet fleet = raceColumn.getFleets().iterator().next();
