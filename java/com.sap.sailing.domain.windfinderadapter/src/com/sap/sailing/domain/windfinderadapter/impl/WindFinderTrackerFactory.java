@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.windfinderadapter.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,25 +73,19 @@ public class WindFinderTrackerFactory implements WindTrackerFactory {
     }
 
     /**
-     * Obtains the reviewed spot collections that this factory knows about. This set is
-     * configurable using {@link #addReviewedSpotCollection(ReviewedSpotCollection)} and
-     * {@link #removeReviewedSpotCollection(ReviewedSpotsCollection)}.
+     * Obtains the reviewed spot collections that this factory knows about. This set is constructed from the collections
+     * provided explicitly using {@link #addReviewedSpotCollection(ReviewedSpotCollection)} and
+     * {@link #removeReviewedSpotCollection(ReviewedSpotsCollection)}, and is extended by the collections obtained
+     * through {@link #reviewedSpotsCollectionIdProvider} if a corresponding service can be resolved.
      * 
-     * @return an unmodifiable set of spots collections known by this factory
+     * @return a non-live set of spots collections known by this factory at this point in time
      */
-    public Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections() {
-        final Iterable<ReviewedSpotsCollection> result;
-        if (reviewedSpotsCollections != null) {
-            result = Collections.unmodifiableSet(reviewedSpotsCollections);
-        } else {
-            final WindFinderReviewedSpotsCollectionIdProvider provider;
-            if (reviewedSpotsCollectionIdProvider != null && (provider = reviewedSpotsCollectionIdProvider.getService()) != null) {
-                reviewedSpotsCollections = new HashSet<>();
-                Util.addAll(Util.map(provider.getWindFinderReviewedSpotsCollectionIds(), id->new ReviewedSpotsCollectionImpl(id)), reviewedSpotsCollections);
-                result = Collections.unmodifiableSet(reviewedSpotsCollections);
-            } else {
-                result = Collections.emptySet();
-            }
+    Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections() {
+        final List<ReviewedSpotsCollection> result = new ArrayList<>();
+        result.addAll(reviewedSpotsCollections);
+        final WindFinderReviewedSpotsCollectionIdProvider provider;
+        if (reviewedSpotsCollectionIdProvider != null && (provider = reviewedSpotsCollectionIdProvider.getService()) != null) {
+            Util.addAll(Util.map(provider.getWindFinderReviewedSpotsCollectionIds(), id->new ReviewedSpotsCollectionImpl(id)), result);
         }
         return result;
     }

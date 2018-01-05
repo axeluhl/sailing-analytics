@@ -66,4 +66,8 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
         return parser.parseSpots(spotsAsJson, this);
     }
 
+    @Override
+    public String toString() {
+        return "WindFinder Reviewed Spots Collection [id=" + id + "]";
+    }
 }

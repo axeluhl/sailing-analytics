@@ -45,11 +45,19 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
     private final DynamicTrackedRace trackedRace;
     private final WindFinderTrackerFactory factory;
 
-    private ScheduledFuture<?> poller;
+    private final ScheduledFuture<?> poller;
+    
+    /**
+     * The set of all {@link ReviewedSpotsCollection}s delivered by the {@link #factory} when this tracker
+     * was created. This is the basis for {@link #getUsefulSpots()} when evaluating, e.g., based on the
+     * {@link #trackedRace race's} location, which of the spots is actually useful for this tracker.
+     */
+    private final Iterable<ReviewedSpotsCollection> allSpotCollections;
     
     public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactory factory) {
         this.trackedRace = trackedRace;
         this.factory = factory;
+        this.allSpotCollections = factory.getReviewedSpotsCollections();
         this.poller = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this,
                 /* initialDelay */ 0, /* period */ POLL_EVERY.asMillis(), TimeUnit.MILLISECONDS);
     }
@@ -74,7 +82,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
 
     private Iterable<Spot> getUsefulSpots() throws MalformedURLException, IOException, ParseException {
         final Set<Spot> spots = new HashSet<>();
-        for (final ReviewedSpotsCollection collection : factory.getReviewedSpotsCollections()) {
+        for (final ReviewedSpotsCollection collection : allSpotCollections) {
             // TODO bug1301 judge each spot's usefulness given the location of trackedRace
             Util.addAll(collection.getSpots(), spots);
         }
