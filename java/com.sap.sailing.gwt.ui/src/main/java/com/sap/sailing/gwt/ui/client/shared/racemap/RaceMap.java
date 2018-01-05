@@ -2230,7 +2230,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     windSourceNameAnchor.setTarget("_blank");
                 }
             });
-        }
+        } // TODO bug1301 else, or in any case, register an event listener on the Anchor that opens the wind chart
         return vPanel;
     }
 
