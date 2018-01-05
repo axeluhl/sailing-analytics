@@ -2131,18 +2131,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         infoWindow.open(map);
     }
 
-    private String formatPosition(double lat, double lng) {
-        NumberFormat numberFormat = NumberFormat.getFormat("0.00000");
-        String result = numberFormat.format(lat) + " lat, " + numberFormat.format(lng) + " lng";
-        return result;
-    }
-    
     private void showWindSensorInfoWindow(final WindSensorOverlay windSensorOverlay) {
     	WindSource windSource = windSensorOverlay.getWindSource();
     	WindTrackInfoDTO windTrackInfoDTO = windSensorOverlay.getWindTrackInfoDTO();
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-        if(windDTO != null && windDTO.position != null) {
-            if(lastInfoWindow != null) {
+        if (windDTO != null && windDTO.position != null) {
+            if (lastInfoWindow != null) {
                 lastInfoWindow.close();
             }
             LatLng where = coordinateSystem.toLatLng(windDTO.position);
@@ -2176,7 +2170,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Widget getInfoWindowContent(MarkDTO markDTO) {
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.getName()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.getLatDeg(), markDTO.position.getLngDeg())));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), markDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
         return vPanel;
     }
 
@@ -2211,7 +2205,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSource(), WindSourceTypeFormatter.format(windSource, stringMessages)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.wind(), Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(windDTO.position.getLatDeg(), windDTO.position.getLngDeg())));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsSignedDecimalDegrees()));
         return vPanel;
     }
 
