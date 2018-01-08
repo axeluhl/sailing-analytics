@@ -16,6 +16,18 @@
  href="https://www.sapsailing.com/sailing-normalize-3.0.2.cache.css">
 <link rel="stylesheet" type="text/css"
  href="https://www.sapsailing.com/sailing-fontface-1.0.cache.css">
+ 
+<script type="text/javascript">
+function handleSearch() {
+	var searchUrl = "https://www.sapsailing.com/gwt/Home.html#SearchResultPlace:";
+	var searchBox = document.getElementById("searchBox");
+	if (searchBox != null) {
+		searchUrl += searchBox.value;
+	}
+	window.location.href = searchUrl;
+	return false;
+}
+</script>
 
 <style>
 .E6EY1K-c-g {
@@ -334,10 +346,10 @@ h2 {
      </nav>
     </div>
     <form class="E6EY1K-c-l E6EY1K-b-ib E6EY1K-b-K E6EY1K-b-b"
-     method="POST" action="https://www.sapsailing.com">
+     method="POST" onSubmit="return handleSearch();">
      <div class="E6EY1K-c-c">
-      <button type="button" class="E6EY1K-a-a E6EY1K-a-e E6EY1K-c-d">Search</button>
-      <input type="text" class="E6EY1K-c-e"
+      <button type="submit" class="E6EY1K-a-a E6EY1K-a-e E6EY1K-c-d">Search</button>
+      <input id="searchBox" type="text" class="E6EY1K-c-e"
        placeholder="Search SAPSailing.com ">
      </div>
     </form>
