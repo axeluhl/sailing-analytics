@@ -80,7 +80,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
                     final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.WINDFINDER, usefulSpot.getId());
                     final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     for (final Wind wind : windFixes) {
-                        final Wind existingFix = windTrack.getFirstRawFixAtOrAfter(wind.getTimePoint());
+                        final Wind existingFix = windTrack==null?null/*test scenario*/:windTrack.getFirstRawFixAtOrAfter(wind.getTimePoint());
                         if (existingFix == null || !existingFix.getTimePoint().equals(wind.getTimePoint())) {
                             // avoid duplicates by adding the same fix again 
                             trackedRace.recordWind(wind, windSource);
