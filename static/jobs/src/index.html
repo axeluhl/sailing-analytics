@@ -21,7 +21,7 @@
 function handleSearch() {
 	var searchUrl = "https://www.sapsailing.com/gwt/Home.html#SearchResultPlace:";
 	var searchBox = document.getElementById("searchBox");
-	if (searchBox != null) {
+	if (searchBox && searchBox.value) {
 		searchUrl += searchBox.value;
 	}
 	window.location.href = searchUrl;
