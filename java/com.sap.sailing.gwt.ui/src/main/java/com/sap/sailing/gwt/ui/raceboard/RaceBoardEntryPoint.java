@@ -130,9 +130,13 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                                 final RaceBoardPanel raceBoardPanel = createPerspectivePage(null,
                                                         componentContext, initialSettings, raceboardData,
                                                         showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
+                                                final RaceBoardMode mode;
                                                 if (finalMode != null) {
-                                                    finalMode.getMode().applyTo(raceBoardPanel);
+                                                    mode = finalMode.getMode();
+                                                } else {
+                                                    mode = new DefaultMode();
                                                 }
+                                                mode.applyTo(raceBoardPanel);
                                             }
                                         });
                             }
