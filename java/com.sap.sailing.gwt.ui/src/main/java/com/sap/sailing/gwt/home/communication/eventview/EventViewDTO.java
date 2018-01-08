@@ -2,13 +2,17 @@ package com.sap.sailing.gwt.home.communication.eventview;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
@@ -24,6 +28,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String officialWebsiteURL;
     private String sailorsInfoWebsiteURL;
     private String description;
+    private List<String> allWindFinderReviewedSpotsCollectionIdsUsedByEvent;
 
     public EventType getType() {
         return type;
@@ -110,6 +115,30 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
         this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
     }
     
+    /**
+     * In addition to the wind finder spot collections specified by this event explicitly (see
+     * {@link #getWindFinderReviewedSpotsCollectionIds()}), this method may return additional spot collection IDs based
+     * on the tracked races reachable from this event's associated leaderboard groups and their wind sources. The
+     * {@link WindSource#getId() wind source IDs} of all wind sources of type {@link WindSourceType#WINDFINDER} will be
+     * collected and returned.
+     */
+    public Iterable<String> getAllWindFinderReviewedSpotsCollectionIdsUsedByEvent() {
+        final Iterable<String> result;
+        if (allWindFinderReviewedSpotsCollectionIdsUsedByEvent == null) {
+            result = Collections.emptySet();
+        } else {
+            result = allWindFinderReviewedSpotsCollectionIdsUsedByEvent;
+        }
+        return result;
+    }
+    
+    public void setAllWindFinderReviewedSpotsCollectionIdsUsedByEvent(Iterable<String> allWindFinderReviewedSpotsCollectionIdsUsedByEvent) {
+        this.allWindFinderReviewedSpotsCollectionIdsUsedByEvent = new ArrayList<>();
+        if (allWindFinderReviewedSpotsCollectionIdsUsedByEvent != null) {
+            Util.addAll(allWindFinderReviewedSpotsCollectionIdsUsedByEvent, this.allWindFinderReviewedSpotsCollectionIdsUsedByEvent);
+        }
+    }
+
     public String getLocationAndVenueAndCountry() {
         String venue = getLocationAndVenue();
         if(getVenueCountry() != null && !getVenueCountry().isEmpty()) {

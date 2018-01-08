@@ -2,6 +2,8 @@ package com.sap.sailing.domain.base;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 /**
@@ -48,6 +50,15 @@ public interface Event extends EventBase {
      * and this getter returns the IDs last set.
      */
     Iterable<String> getWindFinderReviewedSpotsCollectionIds();
+    
+    /**
+     * In addition to the wind finder spot collections specified by this event explicitly (see
+     * {@link #getWindFinderReviewedSpotsCollectionIds()}), this method may return additional spot collection IDs based
+     * on the tracked races reachable from this event's associated leaderboard groups and their wind sources. The
+     * {@link WindSource#getId() wind source IDs} of all wind sources of type {@link WindSourceType#WINDFINDER} will be
+     * collected and returned.
+     */
+    Iterable<String> getAllFinderReviewedSpotsCollectionIdsUsedByEvent();
 
     /**
      * Set the IDs of the reviewed WindFinder spot collections to consider during this event.

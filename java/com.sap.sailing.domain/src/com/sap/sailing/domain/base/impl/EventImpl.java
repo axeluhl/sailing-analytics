@@ -3,6 +3,8 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -10,7 +12,11 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -69,6 +75,22 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
         return Collections.unmodifiableSet(windFinderReviewedSpotsCollectionIds.keySet());
+    }
+
+    @Override
+    public Iterable<String> getAllFinderReviewedSpotsCollectionIdsUsedByEvent() {
+        final Set<String> result = new HashSet<>();
+        Util.addAll(getWindFinderReviewedSpotsCollectionIds(), result);
+        for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                    for (final WindSource windTrackerWindSource : trackedRace.getWindSources(WindSourceType.WINDFINDER)) {
+                        result.add(windTrackerWindSource.getId().toString());
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override

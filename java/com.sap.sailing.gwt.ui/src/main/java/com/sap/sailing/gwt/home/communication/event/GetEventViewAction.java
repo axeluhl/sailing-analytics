@@ -62,6 +62,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
         URL sailorsInfoWebsiteURL = event.getSailorsInfoWebsiteURLOrFallback(context.getClientLocale());
         dto.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL == null ? null : sailorsInfoWebsiteURL.toString());
+        dto.setAllWindFinderReviewedSpotsCollectionIdsUsedByEvent(event.getAllFinderReviewedSpotsCollectionIdsUsedByEvent());
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));

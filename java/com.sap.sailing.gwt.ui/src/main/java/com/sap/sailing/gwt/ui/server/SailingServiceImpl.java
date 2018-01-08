@@ -3919,9 +3919,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventDTO.venue.getCourseAreas().add(courseAreaDTO);
         }
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, withStatisticalData));
+            eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */ false, withStatisticalData));
         }
         eventDTO.setWindFinderReviewedSpotsCollection(event.getWindFinderReviewedSpotsCollectionIds());
+        eventDTO.setAllWindFinderReviewedSpotsCollectionIdsUsedByEvent(event.getAllFinderReviewedSpotsCollectionIdsUsedByEvent());
         return eventDTO;
     }
 
@@ -4522,7 +4523,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
                 newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(),
                 newEvent.getBaseURL(), newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos(),
-                newEvent.getWindFinderReviewedSpotsCollection());
+                newEvent.getWindFinderReviewedSpotsCollectionIds());
     }
     
     @Override

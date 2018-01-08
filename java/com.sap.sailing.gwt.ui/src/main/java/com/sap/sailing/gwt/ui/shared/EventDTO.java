@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sse.common.Util;
 
@@ -17,6 +19,7 @@ public class EventDTO extends EventBaseDTO {
     private List<LeaderboardGroupDTO> leaderboardGroups; // keeps the more specific type accessible in a type-safe way
     
     private List<String> windFinderReviewedSpotsCollectionIds;
+    private List<String> allWindFinderReviewedSpotsCollectionIdsUsedByEvent;
 
     public EventDTO() {
         this(new ArrayList<LeaderboardGroupDTO>());
@@ -92,7 +95,7 @@ public class EventDTO extends EventBaseDTO {
      * 
      * @return always a valid {@link Iterable} which may, though, be empty
      */
-    public Iterable<String> getWindFinderReviewedSpotsCollection() {
+    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
         final Iterable<String> result;
         if (windFinderReviewedSpotsCollectionIds == null) {
             result = Collections.emptySet();
@@ -109,7 +112,32 @@ public class EventDTO extends EventBaseDTO {
      */
     public void setWindFinderReviewedSpotsCollection(Iterable<String> reviewedSpotsCollectionId) {
         windFinderReviewedSpotsCollectionIds = new ArrayList<>();
-        Util.addAll(reviewedSpotsCollectionId, windFinderReviewedSpotsCollectionIds);
+        if (reviewedSpotsCollectionId != null) {
+            Util.addAll(reviewedSpotsCollectionId, windFinderReviewedSpotsCollectionIds);
+        }
     }
 
+    /**
+     * In addition to the wind finder spot collections specified by this event explicitly (see
+     * {@link #getWindFinderReviewedSpotsCollectionIds()}), this method may return additional spot collection IDs based
+     * on the tracked races reachable from this event's associated leaderboard groups and their wind sources. The
+     * {@link WindSource#getId() wind source IDs} of all wind sources of type {@link WindSourceType#WINDFINDER} will be
+     * collected and returned.
+     */
+    public Iterable<String> getAllWindFinderReviewedSpotsCollectionIdsUsedByEvent() {
+        final Iterable<String> result;
+        if (allWindFinderReviewedSpotsCollectionIdsUsedByEvent == null) {
+            result = Collections.emptySet();
+        } else {
+            result = allWindFinderReviewedSpotsCollectionIdsUsedByEvent;
+        }
+        return result;
+    }
+    
+    public void setAllWindFinderReviewedSpotsCollectionIdsUsedByEvent(Iterable<String> allWindFinderReviewedSpotsCollectionIdsUsedByEvent) {
+        this.allWindFinderReviewedSpotsCollectionIdsUsedByEvent = new ArrayList<>();
+        if (allWindFinderReviewedSpotsCollectionIdsUsedByEvent != null) {
+            Util.addAll(allWindFinderReviewedSpotsCollectionIdsUsedByEvent, this.allWindFinderReviewedSpotsCollectionIdsUsedByEvent);
+        }
+    }
 }

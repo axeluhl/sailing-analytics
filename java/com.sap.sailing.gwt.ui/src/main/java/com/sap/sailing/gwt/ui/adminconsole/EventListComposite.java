@@ -619,7 +619,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 updatedEvent.getOfficialWebsiteURL(),
                 updatedEvent.getBaseURL(),
                 updatedEvent.getSailorsInfoWebsiteURLs(), updatedEvent.getImages(),
-                updatedEvent.getVideos(), updatedEvent.getWindFinderReviewedSpotsCollection(), new AsyncCallback<EventDTO>() {
+                updatedEvent.getVideos(), updatedEvent.getWindFinderReviewedSpotsCollectionIds(), new AsyncCallback<EventDTO>() {
          @Override
          public void onFailure(Throwable t) {
         errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());
