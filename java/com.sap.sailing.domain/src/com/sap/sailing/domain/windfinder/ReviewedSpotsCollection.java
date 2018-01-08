@@ -1,7 +1,8 @@
-package com.sap.sailing.domain.windfinderadapter;
+package com.sap.sailing.domain.windfinder;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
 
 import org.json.simple.parser.ParseException;
 
@@ -22,5 +23,11 @@ public interface ReviewedSpotsCollection extends WithID {
     @Override
     String getId();
     
-    Iterable<Spot> getSpots() throws MalformedURLException, IOException, ParseException;
+    /**
+     * @param cached
+     *            if {@code true}, only those spots collections are returned that this factory has previously obtained;
+     *            this is useful for a very fast lookup but does not guarantee that all spots collections added recently
+     *            will be considered
+     */
+    Iterable<Spot> getSpots(boolean cached) throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException;
 }

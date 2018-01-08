@@ -57,6 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -241,6 +242,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -311,8 +313,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.sailing.domain.windfinderadapter.Spot;
-import com.sap.sailing.domain.windfinderadapter.WindFinderTrackerFactory;
+import com.sap.sailing.domain.windfinder.Spot;
+import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
@@ -3922,7 +3924,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */ false, withStatisticalData));
         }
         eventDTO.setWindFinderReviewedSpotsCollection(event.getWindFinderReviewedSpotsCollectionIds());
-        eventDTO.setAllWindFinderReviewedSpotsCollectionIdsUsedByEvent(event.getAllFinderReviewedSpotsCollectionIdsUsedByEvent());
+        final WindFinderTrackerFactory windFinderTrackerFactory = windFinderTrackerFactoryServiceTracker.getService();
+        final List<SpotDTO> windFinderSpots = new ArrayList<>();
+        if (windFinderTrackerFactory != null) {
+            for (final String spotsCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
+                try {
+                    for (final Spot spot : windFinderTrackerFactory.getReviewedSpotsCollectionById(spotsCollectionId).getSpots(/* cached */ false)) {
+                        windFinderSpots.add(new SpotDTO(spot));
+                    }
+                } catch (IOException | org.json.simple.parser.ParseException | InterruptedException | ExecutionException e) {
+                    logger.warning("Unable to determine WindFinder spots for reviewed spot collection with ID "+spotsCollectionId);
+                }
+            }
+            for (final String spotIdFromTrackedRace : event.getAllFinderSpotIdsUsedByTrackedRacesInEvent()) {
+                try {
+                    windFinderSpots.add(new SpotDTO(windFinderTrackerFactory.getSpotById(spotIdFromTrackedRace, /* cached */ false)));
+                } catch (IOException | org.json.simple.parser.ParseException | InterruptedException | ExecutionException e) {
+                    logger.warning("Unable to determine WindFinder spot with ID "+spotIdFromTrackedRace);
+                }
+            }
+            eventDTO.setAllWindFinderSpotsUsedByEvent(windFinderSpots);
+        }
         return eventDTO;
     }
 
@@ -6958,19 +6980,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public String getWindFinderLink(TimePoint forWhichTime, String spotId) throws MalformedURLException, IOException, org.json.simple.parser.ParseException {
-        final URL result;
+    public SpotDTO getWindFinderSpot(String spotId) throws MalformedURLException, IOException, org.json.simple.parser.ParseException, InterruptedException, ExecutionException {
+        final SpotDTO result;
         final WindFinderTrackerFactory windFinderTrackerFactory = windFinderTrackerFactoryServiceTracker.getService();
         if (windFinderTrackerFactory != null) {
-            final Spot spot = windFinderTrackerFactory.getSpotById(spotId);
+            final Spot spot = windFinderTrackerFactory.getSpotById(spotId, /* cached */ false);
             if (spot != null) {
-                result = spot.getCurrentlyMostAppropriateUrl(forWhichTime);
+                result = new SpotDTO(spot);
             } else {
                 result = null;
             }
         } else {
             result = null;
         }
-        return result.toString();
+        return result;
     }
 }

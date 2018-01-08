@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
@@ -936,5 +937,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * is up to ten days in the future, or the statistics page if the time point is out of any
      * of the scopes above.
      */
-    void getWindFinderLink(TimePoint forWhichTime, String spotId, AsyncCallback<String> callback);
+    void getWindFinderSpot(String spotId, AsyncCallback<SpotDTO> callback);
 }

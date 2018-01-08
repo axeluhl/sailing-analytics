@@ -45,20 +45,24 @@ public interface Event extends EventBase {
     void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups);
     
     /**
-     * An event may happen in the vicinity of one or more WindFinder (https://www.windfinder.com) weather
-     * stations. Which ones those are can be defined using {@link #setWindFinderReviewedSpotsCollection(Iterable)},
-     * and this getter returns the IDs last set.
+     * An event may happen in the vicinity of one or more WindFinder (https://www.windfinder.com) weather stations.
+     * Which ones those are can be defined using {@link #setWindFinderReviewedSpotsCollection(Iterable)}, and this
+     * getter returns the IDs last set.
+     * 
+     * @return an always valid (non-{@code null}) but possibly empty and unmodifiable set of strings; the set is "live,"
+     *         meaning it will change as the underlying data changes
      */
     Iterable<String> getWindFinderReviewedSpotsCollectionIds();
     
     /**
-     * In addition to the wind finder spot collections specified by this event explicitly (see
-     * {@link #getWindFinderReviewedSpotsCollectionIds()}), this method may return additional spot collection IDs based
-     * on the tracked races reachable from this event's associated leaderboard groups and their wind sources. The
-     * {@link WindSource#getId() wind source IDs} of all wind sources of type {@link WindSourceType#WINDFINDER} will be
-     * collected and returned.
+     * This method may return WindFinder spot IDs based on the tracked races reachable from this event's associated
+     * leaderboard groups and their wind sources. The {@link WindSource#getId() wind source IDs} of all wind sources of
+     * type {@link WindSourceType#WINDFINDER} will be collected and returned.
+     * 
+     * @return an always valid (non-{@code null}) but possibly empty set of strings that is a non-live copy computed
+     *         just for this call
      */
-    Iterable<String> getAllFinderReviewedSpotsCollectionIdsUsedByEvent();
+    Iterable<String> getAllFinderSpotIdsUsedByTrackedRacesInEvent();
 
     /**
      * Set the IDs of the reviewed WindFinder spot collections to consider during this event.

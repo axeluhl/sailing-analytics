@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -19,7 +20,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.windfinderadapter.Spot;
+import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sse.common.Util;
 
 public class WindFinderReportParserTest {
@@ -70,13 +71,13 @@ public class WindFinderReportParserTest {
     }
     
     @Test
-    public void testTwoSpotsInSchilksee() throws MalformedURLException, IOException, ParseException {
-        assertEquals(2, Util.size(new ReviewedSpotsCollectionImpl("schilksee").getSpots()));
+    public void testTwoSpotsInSchilksee() throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
+        assertEquals(2, Util.size(new ReviewedSpotsCollectionImpl("schilksee").getSpots(/* cached */ false)));
     }
 
     @Test
-    public void testSpotsInSchilkseeAreThoseWithIds_10044N_And_de15() throws MalformedURLException, IOException, ParseException {
-        final Iterable<Spot> spots = new ReviewedSpotsCollectionImpl("schilksee").getSpots();
+    public void testSpotsInSchilkseeAreThoseWithIds_10044N_And_de15() throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
+        final Iterable<Spot> spots = new ReviewedSpotsCollectionImpl("schilksee").getSpots(/* cached */ false);
         final Set<String> spotIds = new HashSet<>();
         Util.addAll(Util.map(spots, s->s.getId()), spotIds);
         assertEquals(new HashSet<>(Arrays.asList("10044N", "de15")), spotIds);

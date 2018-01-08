@@ -1,14 +1,22 @@
 package com.sap.sailing.gwt.home.communication.event;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.json.simple.parser.ParseException;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.dto.EventType;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -62,7 +70,24 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
         URL sailorsInfoWebsiteURL = event.getSailorsInfoWebsiteURLOrFallback(context.getClientLocale());
         dto.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL == null ? null : sailorsInfoWebsiteURL.toString());
-        dto.setAllWindFinderReviewedSpotsCollectionIdsUsedByEvent(event.getAllFinderReviewedSpotsCollectionIdsUsedByEvent());
+        final List<SpotDTO> windFinderSpots = new ArrayList<>();
+        for (final String spotsCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
+            try {
+                for (final Spot spot : context.getWindFinderTrackerFactory().getReviewedSpotsCollectionById(spotsCollectionId).getSpots(/* cached */ true)) {
+                    windFinderSpots.add(new SpotDTO(spot));
+                }
+            } catch (IOException | ParseException | InterruptedException | ExecutionException e) {
+                logger.warning("Unable to determine WindFinder spots for reviewed spot collection with ID "+spotsCollectionId);
+            }
+        }
+        for (final String spotIdFromTrackedRace : event.getAllFinderSpotIdsUsedByTrackedRacesInEvent()) {
+            try {
+                windFinderSpots.add(new SpotDTO(context.getWindFinderTrackerFactory().getSpotById(spotIdFromTrackedRace, /* cached */ true)));
+            } catch (IOException | ParseException | InterruptedException | ExecutionException e) {
+                logger.warning("Unable to determine WindFinder spot with ID "+spotIdFromTrackedRace);
+            }
+        }
+        dto.setAllWindFinderSpotsUsedByEvent(windFinderSpots);
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));

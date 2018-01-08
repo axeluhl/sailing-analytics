@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -17,8 +18,8 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindTracker;
-import com.sap.sailing.domain.windfinderadapter.ReviewedSpotsCollection;
-import com.sap.sailing.domain.windfinderadapter.Spot;
+import com.sap.sailing.domain.windfinder.ReviewedSpotsCollection;
+import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -58,10 +59,10 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
      */
     private final Iterable<ReviewedSpotsCollection> allSpotCollections;
     
-    public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactoryImpl factory) {
+    public WindFinderWindTracker(DynamicTrackedRace trackedRace, WindFinderTrackerFactoryImpl factory) throws InterruptedException, ExecutionException {
         this.trackedRace = trackedRace;
         this.factory = factory;
-        this.allSpotCollections = factory.getReviewedSpotsCollections();
+        this.allSpotCollections = factory.getReviewedSpotsCollections(/* cached */ false); // obtain fresh copy of all spots, updating cache
         this.poller = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this,
                 /* initialDelay */ 0, /* period */ POLL_EVERY.asMillis(), TimeUnit.MILLISECONDS);
     }
@@ -95,11 +96,11 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
         }
     }
 
-    private Iterable<Spot> getUsefulSpots() throws MalformedURLException, IOException, ParseException {
+    private Iterable<Spot> getUsefulSpots() throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
         final Set<Spot> spots = new HashSet<>();
         for (final ReviewedSpotsCollection collection : allSpotCollections) {
             // TODO bug1301 judge each spot's usefulness given the location of trackedRace
-            Util.addAll(collection.getSpots(), spots);
+            Util.addAll(collection.getSpots(/* cached */ false), spots);
         }
         return spots;
     }

@@ -78,9 +78,8 @@ public class EventImpl extends EventBaseImpl implements Event {
     }
 
     @Override
-    public Iterable<String> getAllFinderReviewedSpotsCollectionIdsUsedByEvent() {
+    public Iterable<String> getAllFinderSpotIdsUsedByTrackedRacesInEvent() {
         final Set<String> result = new HashSet<>();
-        Util.addAll(getWindFinderReviewedSpotsCollectionIds(), result);
         for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups()) {
             for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {

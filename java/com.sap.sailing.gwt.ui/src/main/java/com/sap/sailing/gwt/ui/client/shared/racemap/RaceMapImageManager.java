@@ -91,4 +91,8 @@ public class RaceMapImageManager {
     public ImageTransformer getWindSensorIconTransformer() {
         return windSensorIconTransformer;
     }
+    
+    public ImageResource getWindFinderIconSmall() {
+        return resources.getWindFinderIconSmall();
+    }
 }

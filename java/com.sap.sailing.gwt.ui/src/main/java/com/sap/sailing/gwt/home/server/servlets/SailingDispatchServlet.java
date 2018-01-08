@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.server.servlets;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.SailingDispatchContextImpl;
 import com.sap.sailing.gwt.ui.server.Activator;
@@ -21,6 +22,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
     private static final long serialVersionUID = -245230476512348999L;
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final ServiceTracker<WindFinderTrackerFactory, WindFinderTrackerFactory> windFinderTrackerFactory;
     private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     private final ServiceTracker<UserStore, UserStore> userStoreTracker;
@@ -29,6 +31,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
     public SailingDispatchServlet() {
         final BundleContext context = Activator.getDefault();
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        windFinderTrackerFactory = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
         userStoreTracker = ServiceTrackerFactory.createAndOpen(context, UserStore.class);
@@ -39,6 +42,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
     protected <R extends Result, A extends Action<R, SailingDispatchContext>> SailingDispatchContext createDispatchContextFor(
             RequestWrapper<R, A, SailingDispatchContext> request) {
         return new SailingDispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(),
+                windFinderTrackerFactory.getService(),
                 eventNewsServiceTracker.getService(), securityServiceTracker.getService(),
                 userStoreTracker.getService(), trackedRaceStatisticsCacheTracker.getService(),
                 request.getClientLocaleName(), getThreadLocalRequest());

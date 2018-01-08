@@ -86,6 +86,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
@@ -2215,18 +2216,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(windDTO.measureTimepoint);
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(), timePoint.asDate().toString()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsSignedDecimalDegrees()));
+        Label positionInDecimalDegreesLabel = new Label("  "+windDTO.position.getAsSignedDecimalDegrees());
+        positionInDecimalDegreesLabel.setWordWrap(false);
+        positionInDecimalDegreesLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        positionInDecimalDegreesLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        positionInDecimalDegreesLabel.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
+        positionInDecimalDegreesLabel.getElement().getStyle().setFontSize(0.7, Unit.EM);
+        vPanel.add(positionInDecimalDegreesLabel);
         if (windSource.getType() == WindSourceType.WINDFINDER) {
-            sailingService.getWindFinderLink(timePoint, windSource.getId().toString(), new AsyncCallback<String>() {
+            sailingService.getWindFinderSpot(windSource.getId().toString(), new AsyncCallback<SpotDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError(stringMessages.unableToResolveWindFinderSpotId(windSource.getId().toString(), caught.getMessage()), /* silentMode */ true);
                 }
 
                 @Override
-                public void onSuccess(String result) {
-                    // TODO bug1301 place WindFinder button icon on anchor
-                    windSourceNameAnchor.setHref(result);
+                public void onSuccess(SpotDTO result) {
+                    // TODO bug1301 place WindFinder button icon on anchor and format nicely; this or similar could be the image icon to use: RaceMap.this.raceMapImageManager.getWindFinderIconSmall();
+                    windSourceNameAnchor.setHref(result.getCurrentlyMostAppropriateUrl(timePoint));
+                    windSourceNameAnchor.setName(stringMessages.windFinder()+": "+result.getName()+" ("+result.getId()+")");
                     windSourceNameAnchor.setTarget("_blank");
                 }
             });

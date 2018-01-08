@@ -1,12 +1,8 @@
-package com.sap.sailing.domain.windfinderadapter;
+package com.sap.sailing.domain.common.windfinder;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.ParseException;
 
 import com.sap.sailing.domain.common.Positioned;
-import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 
@@ -17,7 +13,7 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Spot extends NamedWithID, Positioned {
+public interface SpotBase extends NamedWithID, Positioned {
     /**
      * A spot's ID is always a {@link String}
      */
@@ -38,17 +34,17 @@ public interface Spot extends NamedWithID, Positioned {
     /**
      * @return the URL of a web page showing a current weather report for this spot
      */
-    URL getReportUrl() throws MalformedURLException;
+    String getReportUrl();
     
     /**
      * @return the URL of a web page showing a weather forecast for this spot
      */
-    URL getForecastUrl() throws MalformedURLException;
+    String getForecastUrl();
     
     /**
      * @return the URL of a web page showing general wind statistics for this spot
      */
-    URL getStatisticsUrl() throws MalformedURLException;
+    String getStatisticsUrl();
     
     /**
      * For this spot provides a {@link URL} that a web UI can use to link
@@ -57,16 +53,5 @@ public interface Spot extends NamedWithID, Positioned {
      * is up to ten days in the future, or the statistics page if the time point is out of any
      * of the scopes above.
      */
-    URL getCurrentlyMostAppropriateUrl(TimePoint timePoint) throws MalformedURLException;
-
-    Wind getLatestMeasurement() throws NumberFormatException, ParseException, org.json.simple.parser.ParseException, MalformedURLException, IOException;
-
-    Iterable<Wind> getAllMeasurements() throws IOException, MalformedURLException, ParseException, org.json.simple.parser.ParseException;
-
-    /**
-     * @param timePoint
-     *            if {@code null} then this call delivers the result of {@link #getAllMeasurements()}
-     * @return an always valid but possibly empty collection
-     */
-    Iterable<Wind> getAllMeasurementsAfter(TimePoint timePoint) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException;
+    String getCurrentlyMostAppropriateUrl(TimePoint timePoint);
 }

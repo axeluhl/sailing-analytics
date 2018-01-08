@@ -27,6 +27,9 @@ public interface RaceMapResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/maneuver_green.png")
     ImageResource maneuverMarkerGreen();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/windfinder_small.png")
+    ImageResource getWindFinderIconSmall();
 
     @Source("RaceMap.css")
     RaceMapStyle raceMapStyle();

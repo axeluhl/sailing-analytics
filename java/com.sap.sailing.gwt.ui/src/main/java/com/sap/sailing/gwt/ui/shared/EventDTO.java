@@ -9,6 +9,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sse.common.Util;
 
 public class EventDTO extends EventBaseDTO {
@@ -19,7 +20,7 @@ public class EventDTO extends EventBaseDTO {
     private List<LeaderboardGroupDTO> leaderboardGroups; // keeps the more specific type accessible in a type-safe way
     
     private List<String> windFinderReviewedSpotsCollectionIds;
-    private List<String> allWindFinderReviewedSpotsCollectionIdsUsedByEvent;
+    private List<SpotDTO> allWindFinderSpotIdsUsedByEvent;
 
     public EventDTO() {
         this(new ArrayList<LeaderboardGroupDTO>());
@@ -124,20 +125,20 @@ public class EventDTO extends EventBaseDTO {
      * {@link WindSource#getId() wind source IDs} of all wind sources of type {@link WindSourceType#WINDFINDER} will be
      * collected and returned.
      */
-    public Iterable<String> getAllWindFinderReviewedSpotsCollectionIdsUsedByEvent() {
-        final Iterable<String> result;
-        if (allWindFinderReviewedSpotsCollectionIdsUsedByEvent == null) {
+    public Iterable<SpotDTO> getAllWindFinderSpotIdsUsedByEvent() {
+        final Iterable<SpotDTO> result;
+        if (allWindFinderSpotIdsUsedByEvent == null) {
             result = Collections.emptySet();
         } else {
-            result = allWindFinderReviewedSpotsCollectionIdsUsedByEvent;
+            result = allWindFinderSpotIdsUsedByEvent;
         }
         return result;
     }
     
-    public void setAllWindFinderReviewedSpotsCollectionIdsUsedByEvent(Iterable<String> allWindFinderReviewedSpotsCollectionIdsUsedByEvent) {
-        this.allWindFinderReviewedSpotsCollectionIdsUsedByEvent = new ArrayList<>();
-        if (allWindFinderReviewedSpotsCollectionIdsUsedByEvent != null) {
-            Util.addAll(allWindFinderReviewedSpotsCollectionIdsUsedByEvent, this.allWindFinderReviewedSpotsCollectionIdsUsedByEvent);
+    public void setAllWindFinderSpotsUsedByEvent(List<SpotDTO> windFinderSpots) {
+        this.allWindFinderSpotIdsUsedByEvent = new ArrayList<>();
+        if (windFinderSpots != null) {
+            Util.addAll(windFinderSpots, this.allWindFinderSpotIdsUsedByEvent);
         }
     }
 }

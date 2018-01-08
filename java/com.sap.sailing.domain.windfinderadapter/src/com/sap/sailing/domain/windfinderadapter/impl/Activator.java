@@ -9,7 +9,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
-import com.sap.sailing.domain.windfinderadapter.WindFinderTrackerFactory;
+import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
