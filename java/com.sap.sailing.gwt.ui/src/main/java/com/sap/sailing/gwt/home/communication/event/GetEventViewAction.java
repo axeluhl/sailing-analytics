@@ -73,7 +73,8 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         final List<SpotDTO> windFinderSpots = new ArrayList<>();
         for (final String spotsCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
             try {
-                for (final Spot spot : context.getWindFinderTrackerFactory().getReviewedSpotsCollectionById(spotsCollectionId).getSpots(/* cached */ true)) {
+                for (final Spot spot : context.getWindFinderTrackerFactory().getReviewedSpotsCollectionById(spotsCollectionId, /* lookupInCache */ true).
+                        getSpots(/* cached */ true)) {
                     windFinderSpots.add(new SpotDTO(spot));
                 }
             } catch (IOException | ParseException | InterruptedException | ExecutionException e) {

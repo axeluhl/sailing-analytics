@@ -3929,7 +3929,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (windFinderTrackerFactory != null) {
             for (final String spotsCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
                 try {
-                    for (final Spot spot : windFinderTrackerFactory.getReviewedSpotsCollectionById(spotsCollectionId).getSpots(/* cached */ false)) {
+                    for (final Spot spot : windFinderTrackerFactory.getReviewedSpotsCollectionById(spotsCollectionId, /* lookupInCache */ true).
+                            getSpots(/* cached */ false)) {
                         windFinderSpots.add(new SpotDTO(spot));
                     }
                 } catch (IOException | org.json.simple.parser.ParseException | InterruptedException | ExecutionException e) {

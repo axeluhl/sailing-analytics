@@ -25,7 +25,7 @@ public interface WindFinderTrackerFactory extends WindTrackerFactory {
      */
     Iterable<ReviewedSpotsCollection> getReviewedSpotsCollections(boolean cached) throws InterruptedException, ExecutionException;
 
-    ReviewedSpotsCollection getReviewedSpotsCollectionById(String spotsCollectionId) throws InterruptedException, ExecutionException;
+    ReviewedSpotsCollection getReviewedSpotsCollectionById(String spotsCollectionId, boolean lookupInCache) throws InterruptedException, ExecutionException;
 
     /**
      * @param cached

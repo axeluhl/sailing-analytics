@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.json.simple.parser.ParseException;
@@ -45,17 +46,20 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
      */
     private Set<ReviewedSpotsCollection> reviewedSpotsCollections;
     private final ServiceTracker<WindFinderReviewedSpotsCollectionIdProvider, WindFinderReviewedSpotsCollectionIdProvider> reviewedSpotsCollectionIdProvider;
+    
+    private final ScheduledExecutorService executor;
 
     public WindFinderTrackerFactoryImpl() {
         this.windTrackerPerRace = new HashMap<>();
+        this.executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         this.reviewedSpotsCollections = Collections.synchronizedSet(new HashSet<>());
         if (Activator.getContext() != null) {
             reviewedSpotsCollectionIdProvider = ServiceTrackerFactory.createAndOpen(Activator.getContext(), WindFinderReviewedSpotsCollectionIdProvider.class);
-            reviewedSpotsCollectionsByIdCache = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(1, getClass().getName()+" init").schedule(
+            reviewedSpotsCollectionsByIdCache = executor.schedule(
                     ()->{
                         final ConcurrentMap<String, ReviewedSpotsCollection> result = new ConcurrentHashMap<>();
                         reviewedSpotsCollectionIdProvider.getService();
-                        for (final ReviewedSpotsCollection c : loadSpotCollectionsFromProvider()) {
+                        for (final ReviewedSpotsCollection c : loadSpotCollectionsFromProvider(/* lookupInCache */ false)) {
                             result.put(c.getId(), c);
                         }
                         return result;
@@ -110,7 +114,7 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
             result.addAll(reviewedSpotsCollectionsByIdCache.get().values());
         } else {
             result.addAll(reviewedSpotsCollections);
-            Util.addAll(loadSpotCollectionsFromProvider(), result);
+            Util.addAll(loadSpotCollectionsFromProvider(/* lookupInCache */ true), result);
             for (final ReviewedSpotsCollection c : result) {
                 reviewedSpotsCollectionsByIdCache.get().putIfAbsent(c.getId(), c);
             }
@@ -118,23 +122,24 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
         return result;
     }
 
-    private Iterable<ReviewedSpotsCollection> loadSpotCollectionsFromProvider() throws InterruptedException, ExecutionException {
+    private Iterable<ReviewedSpotsCollection> loadSpotCollectionsFromProvider(boolean lookupInCache) throws InterruptedException, ExecutionException {
         final Set<ReviewedSpotsCollection> result = new HashSet<>();
         final WindFinderReviewedSpotsCollectionIdProvider provider;
         if (reviewedSpotsCollectionIdProvider != null && (provider = reviewedSpotsCollectionIdProvider.getService()) != null) {
             for (String id : provider.getWindFinderReviewedSpotsCollectionIds()) {
-                result.add(getReviewedSpotsCollectionById(id));
+                result.add(getReviewedSpotsCollectionById(id, lookupInCache));
             }
         }
         return result;
     }
 
     @Override
-    public ReviewedSpotsCollection getReviewedSpotsCollectionById(String spotsCollectionId) throws InterruptedException, ExecutionException {
-        ReviewedSpotsCollection result = reviewedSpotsCollectionsByIdCache.get().get(spotsCollectionId);
-        if (result == null) {
-            result = new ReviewedSpotsCollectionImpl(spotsCollectionId);
-            reviewedSpotsCollectionsByIdCache.get().put(spotsCollectionId, result);
+    public ReviewedSpotsCollection getReviewedSpotsCollectionById(String spotsCollectionId, boolean lookupInCache) throws InterruptedException, ExecutionException {
+        ReviewedSpotsCollection result;
+        if (!lookupInCache || (result = reviewedSpotsCollectionsByIdCache.get().get(spotsCollectionId)) == null) {
+            final ReviewedSpotsCollectionImpl finalResult = new ReviewedSpotsCollectionImpl(spotsCollectionId);
+            result = finalResult;
+            executor.schedule(()->reviewedSpotsCollectionsByIdCache.get().put(spotsCollectionId, finalResult), /* delay */ 0, TimeUnit.MILLISECONDS);
         }
         return result;
     }
