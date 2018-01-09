@@ -52,10 +52,10 @@ args=()
 
 # Create temp directory with three random numbers and the process ID
 # in the name.  This directory is removed automatically at exit.
-tmpDir="./tmp.$RANDOM.$RANDOM.$RANDOM.$$/"
-(umask 000 && mkdir "${tmpDir}") || {
-  die "Could not create temporary directory! Exiting."
-}
+# tmpDir="./tmp.$RANDOM.$RANDOM.$RANDOM.$$/"
+# (umask 000 && mkdir "${tmpDir}") || {
+  # die "Could not create temporary directory! Exiting."
+# }
 
 # Logging (not used)
 # To never save a logfile change variable to '/dev/null'
