@@ -95,6 +95,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -927,4 +928,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
     
     void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+
+    void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
+
+    void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimeRange timeRange,
+            AsyncCallback<RegattaAndRaceIdentifier> callback);
 }

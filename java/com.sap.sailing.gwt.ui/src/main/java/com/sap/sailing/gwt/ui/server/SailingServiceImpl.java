@@ -57,9 +57,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -69,6 +71,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
@@ -79,13 +82,18 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImp
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -296,6 +304,7 @@ import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -6945,5 +6954,106 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add("Race "+count);
         }
         return result;
+    }
+    
+    @Override
+    public boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) {
+        final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
+        if (Util.size(regatta.getSeries()) != 1) {
+            return false;
+        }
+        for (Series series : regatta.getSeries()) {
+            if (Util.size(series.getFleets()) != 1) {
+                return false;
+            }
+        }
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
+        if (trackedRace == null || trackedRace.getStartOfTracking() == null) {
+            return false;
+        }
+        return true;
+    }
+    
+    @Override
+    public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
+            TimeRange timeRange) {
+        if (!canSliceRace(raceIdentifier)) {
+            throw new RuntimeException("Can not slice race");
+        }
+        final String trackedRaceName = newRaceColumnName;
+        final RegattaIdentifier regattaIdentifier = new RegattaName(raceIdentifier.getRegattaName());
+        final Regatta regatta = getService().getRegatta(regattaIdentifier);
+        final Series series = regatta.getSeries().iterator().next();
+        final Fleet fleet = series.getFleets().iterator().next();
+        final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
+        final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
+        final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
+        if (startOfTrackingOfRaceToSlice.after(timeRange.from()) || (endOfTrackingOfRaceToSlice != null && endOfTrackingOfRaceToSlice.before(timeRange.to()))) {
+            throw new RuntimeException("The TimeRange to slice is not part of the race");
+        }
+        
+        getService().apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
+        final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) getService().getLeaderboardByName(raceIdentifier.getRegattaName());
+        
+        final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRaceToSlice);
+        final RaceColumn raceColumnOfRaceToSlice = raceColumnAndFleetOfRaceToSlice.getA();
+        final RaceLog raceLogOfRaceToSlice = raceColumnOfRaceToSlice.getRaceLog(fleet);
+        
+        final RaceColumn raceColumn = regattaLeaderboard.getRaceColumnByName(newRaceColumnName);
+        
+        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        
+        final AbstractLogEventAuthor author = getService().getServerAuthor();
+        
+        final TimePoint startOfTracking = timeRange.from();
+        final TimePoint endOfTracking = timeRange.to();
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
+        raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
+        
+        for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
+            if (raceLogEvent instanceof RaceLogRegisterCompetitorEvent) {
+                final RaceLogRegisterCompetitorEvent raceLogRegisterCompetitorEvent = (RaceLogRegisterCompetitorEvent) raceLogEvent;
+                raceLog.add(new RaceLogRegisterCompetitorEventImpl(startOfTracking, author, raceLog.getCurrentPassId(),
+                        raceLogRegisterCompetitorEvent.getCompetitor()));
+            }
+            if (raceLogEvent instanceof RaceLogWindFixEvent) {
+                final RaceLogWindFixEvent raceLogWindFixEvent = (RaceLogWindFixEvent) raceLogEvent;
+                final Wind windFix = raceLogWindFixEvent.getWindFix();
+                if (timeRange.includes(windFix.getTimePoint())) {
+                    raceLog.add(new RaceLogWindFixEventImpl(windFix.getTimePoint(), author, raceLog.getCurrentPassId(), windFix, raceLogWindFixEvent.isMagnetic()));
+                }
+            }
+            // TODO do we need to copy more events?
+        }
+        
+        try {
+            TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
+            // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
+            // that's why we can't just call adapter.denoteRaceForRaceLogTracking
+            final TimePoint denotationTimePoint = startTrackingTimePoint.minus(1);
+            raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint,
+                    author, raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
+            
+            raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
+            
+            final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
+                    raceColumn, fleet, /* trackWind */true, /* correctWindDirectionByMagneticDeclination */ true);
+
+            // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
+            raceHandle.getRace();
+
+            final DynamicTrackedRace trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
+            
+            for (WindSource windSourceToCopy : trackedRaceToSlice.getWindSources(WindSourceType.EXPEDITION)) {
+                final WindTrack windTrackToCopyFrom = trackedRaceToSlice.getOrCreateWindTrack(windSourceToCopy);
+                for (Wind windToCopy : windTrackToCopyFrom.getFixes(startOfTracking, true, endOfTracking, true)) {
+                    trackedRace.recordWind(windToCopy, windSourceToCopy);
+                }
+            }
+            return trackedRace.getRaceIdentifier();
+        } catch (Exception e) {
+            throw new RuntimeException("Error while slicing race");
+        }
+        
     }
 }
