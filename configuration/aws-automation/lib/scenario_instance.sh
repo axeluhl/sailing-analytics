@@ -38,10 +38,13 @@ function instance_execute() {
 	# get public dns name of instance
 	public_dns_name=$(query_public_dns_name $instance_id)
 
+	wait_for_ssh_connection $ssh_user $public_dns_name
+
 	# if --tail option is passed then tail logfiles of instance within tmux
 	if $tail; then
 		tail_start
 	fi
+
 
 	header "Event and user creation"
 
