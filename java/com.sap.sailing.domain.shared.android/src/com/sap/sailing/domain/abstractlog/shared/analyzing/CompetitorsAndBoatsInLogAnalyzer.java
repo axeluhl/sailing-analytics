@@ -6,7 +6,9 @@ import java.util.Map;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -27,16 +29,23 @@ public class CompetitorsAndBoatsInLogAnalyzer<LogT extends AbstractLog<EventT, V
     @Override
     protected Map<Competitor, Boat> performAnalysis() {
         Map<Competitor, Boat> result = new HashMap<>();
+        LogT log = getLog();
 
-        for (EventT event : getLog().getUnrevokedEvents()) {
-            if (event instanceof RaceLogRegisterCompetitorEvent) {
-                RaceLogRegisterCompetitorEvent raceLogCompetitorEvent = (RaceLogRegisterCompetitorEvent) event;
-                result.put(raceLogCompetitorEvent.getCompetitor(), raceLogCompetitorEvent.getBoat());
-            } else if (event instanceof RegattaLogRegisterCompetitorEvent) {
-                RegattaLogRegisterCompetitorEvent regattaLogCompetitorEvent = (RegattaLogRegisterCompetitorEvent) event;
-                if (regattaLogCompetitorEvent.getCompetitor() instanceof CompetitorWithBoat) {
-                    CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) regattaLogCompetitorEvent.getCompetitor();
-                    result.put(competitorWithBoat, competitorWithBoat.getBoat());
+        if (log instanceof RegattaLog) {
+            for (EventT event : getLog().getUnrevokedEvents()) {
+                if (event instanceof RegattaLogRegisterCompetitorEvent) {
+                    RegattaLogRegisterCompetitorEvent regattaLogCompetitorEvent = (RegattaLogRegisterCompetitorEvent) event;
+                    if (regattaLogCompetitorEvent.getCompetitor() instanceof CompetitorWithBoat) {
+                        CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) regattaLogCompetitorEvent.getCompetitor();
+                        result.put(competitorWithBoat, competitorWithBoat.getBoat());
+                    }
+                }
+            }
+        } else if (log instanceof RaceLog) {
+            for (EventT event : getLog().getUnrevokedEvents()) {
+                if (event instanceof RaceLogRegisterCompetitorEvent) {
+                    RaceLogRegisterCompetitorEvent raceLogCompetitorEvent = (RaceLogRegisterCompetitorEvent) event;
+                    result.put(raceLogCompetitorEvent.getCompetitor(), raceLogCompetitorEvent.getBoat());
                 }
             }
         }
