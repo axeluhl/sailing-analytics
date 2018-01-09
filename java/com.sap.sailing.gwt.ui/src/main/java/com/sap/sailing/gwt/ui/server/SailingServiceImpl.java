@@ -6959,16 +6959,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) {
         final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
-        if (Util.size(regatta.getSeries()) != 1) {
+        final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
+        if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null || trackedRace.getStartOfTracking() == null) {
             return false;
         }
-        for (Series series : regatta.getSeries()) {
-            if (Util.size(series.getFleets()) != 1) {
-                return false;
-            }
-        }
-        final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
-        if (trackedRace == null || trackedRace.getStartOfTracking() == null) {
+        
+        final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRace);
+        if (raceColumnAndFleetOfRaceToSlice == null) {
+            // the TrackedRace is not associated to the given RegattaLeaderboard
             return false;
         }
         return true;
@@ -6983,8 +6982,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final String trackedRaceName = newRaceColumnName;
         final RegattaIdentifier regattaIdentifier = new RegattaName(raceIdentifier.getRegattaName());
         final Regatta regatta = getService().getRegatta(regattaIdentifier);
-        final Series series = regatta.getSeries().iterator().next();
-        final Fleet fleet = series.getFleets().iterator().next();
         final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
         final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
         final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
@@ -6992,13 +6989,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException("The TimeRange to slice is not part of the race");
         }
         
-        getService().apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
         final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         
         final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRaceToSlice);
-        final RaceColumn raceColumnOfRaceToSlice = raceColumnAndFleetOfRaceToSlice.getA();
+        // RaceColumns in a RegattaLeaderboard are always RaceColumnInSeries instances
+        final RaceColumnInSeries raceColumnOfRaceToSlice = (RaceColumnInSeries) raceColumnAndFleetOfRaceToSlice.getA();
+        final Fleet fleet = raceColumnAndFleetOfRaceToSlice.getB();
+        final Series series = raceColumnOfRaceToSlice.getSeries();
         final RaceLog raceLogOfRaceToSlice = raceColumnOfRaceToSlice.getRaceLog(fleet);
         
+        getService().apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
         final RaceColumn raceColumn = regattaLeaderboard.getRaceColumnByName(newRaceColumnName);
         
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
@@ -7026,18 +7026,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // TODO do we need to copy more events?
         }
         
+        final TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
+        // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
+        // that's why we can't just call adapter.denoteRaceForRaceLogTracking
+        final TimePoint denotationTimePoint = startTrackingTimePoint.minus(1);
+        raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint,
+                author, raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
+        
+        raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
+            
         try {
-            TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
-            // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
-            // that's why we can't just call adapter.denoteRaceForRaceLogTracking
-            final TimePoint denotationTimePoint = startTrackingTimePoint.minus(1);
-            raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint,
-                    author, raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
-            
-            raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
-            
             final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
-                    raceColumn, fleet, /* trackWind */true, /* correctWindDirectionByMagneticDeclination */ true);
+                    raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
 
             // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
             raceHandle.getRace();
