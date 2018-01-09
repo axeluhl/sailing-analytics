@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import org.apache.commons.fileupload.FileItem;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
@@ -147,11 +147,6 @@ public class ExpeditionAllInOneImporter {
         final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         final int[] discardThresholds = new int[0];
 
-        // TODO These are the defaults also used by the UI
-        final String raceLogEventAuthorName = "Shore";
-        final int raceLogEventPriority = 4;
-        final boolean correctWindDirectionByMagneticDeclination = true;
-
         final ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
         final List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filenameWithSuffix, fileItem));
         try {
@@ -227,7 +222,7 @@ public class ExpeditionAllInOneImporter {
         final Fleet fleet = raceColumn.getFleets().iterator().next();
 
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        final LogEventAuthorImpl author = new LogEventAuthorImpl(raceLogEventAuthorName, raceLogEventPriority);
+        final AbstractLogEventAuthor author = service.getServerAuthor();
 
         final TimePoint startOfTracking = firstFixAt;
         final TimePoint endOfTracking = lastFixAt;
@@ -245,8 +240,8 @@ public class ExpeditionAllInOneImporter {
             
             raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
             
-            final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet, true,
-                    correctWindDirectionByMagneticDeclination);
+            final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
+                    /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
 
             // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
             raceHandle.getRace();
