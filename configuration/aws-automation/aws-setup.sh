@@ -74,12 +74,6 @@ fi
 
 if $instance; then
 	instance_start
-  if $associate_clb; then
-  	associate_clb_start
-  fi
-  if $associate_elastic_ip; then
-  	associate_elastic_ip_start
-  fi
   if $associate_alb; then
   	associate_alb_start
   fi
@@ -132,9 +126,6 @@ usage() {
   --associate-alb               Associate instance with existing application load balancer whos
                                 listener is defined in variables_aws.sh. Automatically
                                 create necessary target group and host name rule.
-                                Currently *.dummy.sapsailing.com is used for test purposes.
-  --associate-clb               Associate instance with new classic load balancer.
-  --associate-elastic-ip       Associate instance with new elastic ip.
   --tail                        Tail logs from instance using tmux
 
   ${bold}Other:${reset}
@@ -148,12 +139,9 @@ usage() {
   Associate application load balancer:
   > ./aws-setup.sh --instance --associate-alb
 
-  Associate instance with classic load balancer while
+  Associate instance with application load balancer while
   automatically tailing important log files (tmux required):
-  > ./aws-setup.sh --instance --associate-clb --tail
-
-  Associate instance with elastic ip:
-  > ./aws-setup.sh --instance --associate-elastic-ip
+  > ./aws-setup.sh --instance --associate-alb --tail
 
   Tail logfiles of running instance with dns name:
   > ./aws-setup.sh --tail --public-dns-name ec2-x.compute.amazonaws.com
@@ -162,17 +150,8 @@ usage() {
   > ./aws-setup.sh --instance --force
 
   Create instance and use default values except instance name
-  and instance short name:
-  > ./aws-setup.sh --instance --instance-name Test --instance-short-name t --force
-
-  Associate instance with classic load balancer by
-  passing all relevant parameters to script.
-  Also use debug mode.
-  > ./aws-setup.sh --region eu-west-2 --instance-type t2.medium
-  --key-name leonradeck-keypair --key-file /cygdrive/c/Users/d069485/
-  .ssh/leonradeck-keypair.pem --user-username test --user-password test
-  --instance-name \"WC Santander 2017\" --instance-short-name test
-  --new-admin-password admin -d --instance-with-load-balancer
+  and instance short name. Also activate debug mode.
+  > ./aws-setup.sh --instance --instance-name Test --instance-short-name t --force -d
 
 
 "
@@ -219,9 +198,7 @@ unset options
 [[ $# -eq 0 ]] && set -- "--help"
 
 # Set default value of variable without parameter value to false
-associate_clb=false
 associate_alb=false
-associate_elastic_ip=false
 instance=false
 sub_instance=false
 tail=false
@@ -250,9 +227,7 @@ while [[ $1 = -?* ]]; do
 	-d|--debug) debug=true ;;
   --instance) instance=true ;;
   --sub-instance) sub_instance=true ;;
-	--associate-clb) associate_clb=true ;;
   --associate-alb) associate_alb=true ;;
-  --associate-elastic-ip) associate_elastic_ip=true ;;
 	--tail) tail=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
