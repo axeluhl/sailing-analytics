@@ -65,6 +65,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -77,6 +78,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCours
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesEventFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
@@ -90,10 +92,12 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.Readon
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -7011,22 +7015,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
         
         for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
-            if (raceLogEvent instanceof RaceLogRegisterCompetitorEvent) {
-                final RaceLogRegisterCompetitorEvent raceLogRegisterCompetitorEvent = (RaceLogRegisterCompetitorEvent) raceLogEvent;
-                raceLog.add(new RaceLogRegisterCompetitorEventImpl(raceLogEvent.getLogicalTimePoint(),
-                        raceLogEvent.getAuthor(), raceLog.getCurrentPassId(),
-                        raceLogRegisterCompetitorEvent.getCompetitor()));
-            }
-            if (raceLogEvent instanceof RaceLogWindFixEvent) {
-                final RaceLogWindFixEvent raceLogWindFixEvent = (RaceLogWindFixEvent) raceLogEvent;
-                final Wind windFix = raceLogWindFixEvent.getWindFix();
-                if (timeRange.includes(windFix.getTimePoint())) {
-                    raceLog.add(
-                            new RaceLogWindFixEventImpl(raceLogEvent.getLogicalTimePoint(), raceLogEvent.getAuthor(),
-                                    raceLog.getCurrentPassId(), windFix, raceLogWindFixEvent.isMagnetic()));
+            raceLogEvent.accept(new BaseRaceLogEventVisitor() {
+                @Override
+                public void visit(RaceLogRegisterCompetitorEvent event) {
+                    raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                            raceLog.getCurrentPassId(), event.getCompetitor()));
                 }
-            }
-            // TODO do we need to copy more events?
+
+                @Override
+                public void visit(RaceLogWindFixEvent event) {
+                    final Wind windFix = event.getWindFix();
+                    if (timeRange.includes(windFix.getTimePoint())) {
+                        raceLog.add(new RaceLogWindFixEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), windFix, event.isMagnetic()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
+                    raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(event.getCreatedAt(), event.getAuthor(),
+                            event.getLogicalTimePoint(), UUID.randomUUID(), raceLog.getCurrentPassId()));
+                }
+                
+                @Override
+                public void visit(RaceLogCourseDesignChangedEvent event) {
+                    if (!event.getLogicalTimePoint().after(endOfTracking)) {
+                        raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getLogicalTimePoint(),
+                                event.getAuthor(), raceLog.getCurrentPassId(), event.getCourseDesign(),
+                                event.getCourseDesignerMode()));
+                    }
+                }
+                // TODO do we need to copy more events?
+            });
         }
         
         final TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
