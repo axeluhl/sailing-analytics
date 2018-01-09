@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -85,6 +87,9 @@ import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     private static final long serialVersionUID = -5651389357061229100L;
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardWithCache.class.getName());
+    
+    private final MaxPointsReason[] MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES = new MaxPointsReason[] {
+            MaxPointsReason.DNS, MaxPointsReason.DNF, MaxPointsReason.DNC };
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
     protected static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     private transient LeaderboardDTOCache leaderboardDTOCache;
@@ -488,6 +493,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     + ". Leaving empty.", e);
                 }
             }
+            
+            if (addOverallDetails) {
+                //this reuses several prior calculated fields, so must be evaluated after them
+                row.totalScoredRaces = this.getTotalRaces(competitor, row, timePoint);
+            }
             result.rows.put(competitorDTO, row);
             String displayName = this.getDisplayName(competitor);
             if (displayName != null) {
@@ -499,7 +509,39 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         return result;
     }
-    
+ 
+    private Integer getTotalRaces(Competitor competitor, LeaderboardRowDTO row, TimePoint timePoint) {
+        int amount = 0;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            // reuse calculations already done earlier
+            LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(raceColumn.getName());
+            if (entry.netPoints != null) {
+                if (entry.reasonForMaxPoints.equals(MaxPointsReason.NONE)
+                        || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
+                                entry.reasonForMaxPoints)) {
+                    if (raceColumn instanceof MetaLeaderboardColumn) {
+                        Leaderboard leaderBoardForMeta = ((MetaLeaderboardColumn) raceColumn).getLeaderboard();
+                        for (RaceColumn subRace : leaderBoardForMeta.getRaceColumns()) {
+                            Double netPointsForSubRace = leaderBoardForMeta.getNetPoints(competitor, subRace, timePoint);
+                            MaxPointsReason subMaxPointsReason = leaderBoardForMeta.getMaxPointsReason(competitor, subRace, timePoint);
+                            if(netPointsForSubRace != null){
+                                if (subMaxPointsReason.equals(MaxPointsReason.NONE) || !Util.contains(
+                                        Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
+                                        subMaxPointsReason)) {
+                                    amount++;
+                                }
+                            }
+                        }
+                    } else {
+                        amount++;
+                    }
+
+                }
+            }
+        }
+        return amount;
+    }
+
     /**
      * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that

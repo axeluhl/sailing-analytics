@@ -1205,7 +1205,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showSimulationOverlay();
     String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
-    String showNumberOfRacesScored();
     String racesScored();
     String racesScoredTooltip();
     String averageNumberOfOperationsPerMessage();
@@ -2049,4 +2048,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String importFinishedGotoRaceboard();
     String importFinishedGotoEvent();
     String chooseAName();
+    String unexpectedErrorDuringFileImport();
 }

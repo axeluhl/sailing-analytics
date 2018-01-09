@@ -114,7 +114,7 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.PairingListRaceLogAdapter;
+import com.sap.sailing.domain.base.PairingListLeaderboardAdapter;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -4123,20 +4123,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
-        Regatta regatta = getService().getRegatta(regattaIdentifier);
-        if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
-        }
-        RaceColumnInSeriesDTO result = null;
-        RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
-        if(raceColumnInSeries != null) {
-            result = convertToRaceColumnInSeriesDTO(raceColumnInSeries);
-        }
-        return result;
-    }
-
-    @Override
     public void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
@@ -4145,15 +4131,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for(String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
-    }
-
-    @Override
-    public void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
-        Regatta regatta = getService().getRegatta(regattaIdentifier);
-        if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
-        }
-        getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
@@ -6857,7 +6834,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         List<String> raceColumnNames = new ArrayList<>();
-        PairingListRaceLogAdapter adapter = new PairingListRaceLogAdapter();
+        PairingListLeaderboardAdapter adapter = new PairingListLeaderboardAdapter();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (!raceColumn.isMedalRace()) {
                 List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
