@@ -7013,14 +7013,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
             if (raceLogEvent instanceof RaceLogRegisterCompetitorEvent) {
                 final RaceLogRegisterCompetitorEvent raceLogRegisterCompetitorEvent = (RaceLogRegisterCompetitorEvent) raceLogEvent;
-                raceLog.add(new RaceLogRegisterCompetitorEventImpl(startOfTracking, author, raceLog.getCurrentPassId(),
+                raceLog.add(new RaceLogRegisterCompetitorEventImpl(raceLogEvent.getLogicalTimePoint(),
+                        raceLogEvent.getAuthor(), raceLog.getCurrentPassId(),
                         raceLogRegisterCompetitorEvent.getCompetitor()));
             }
             if (raceLogEvent instanceof RaceLogWindFixEvent) {
                 final RaceLogWindFixEvent raceLogWindFixEvent = (RaceLogWindFixEvent) raceLogEvent;
                 final Wind windFix = raceLogWindFixEvent.getWindFix();
                 if (timeRange.includes(windFix.getTimePoint())) {
-                    raceLog.add(new RaceLogWindFixEventImpl(windFix.getTimePoint(), author, raceLog.getCurrentPassId(), windFix, raceLogWindFixEvent.isMagnetic()));
+                    raceLog.add(
+                            new RaceLogWindFixEventImpl(raceLogEvent.getLogicalTimePoint(), raceLogEvent.getAuthor(),
+                                    raceLog.getCurrentPassId(), windFix, raceLogWindFixEvent.isMagnetic()));
                 }
             }
             // TODO do we need to copy more events?
