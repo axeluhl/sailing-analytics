@@ -9,9 +9,18 @@
 		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
 		</servlet-class>
 		<init-param>
-	   		<param-name>useFileMappedBuffer</param-name>
-	   		<param-value>false</param-value>
-	 	</init-param>
+			<param-name>useFileMappedBuffer</param-name>
+			<param-value>false</param-value>
+		</init-param>
 	</servlet>
 	
+	<filter>
+		<filter-name>CORSFilter</filter-name>
+		<filter-class>com.sap.sailing.www.CORSFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>CORSFilter</filter-name>
+		<url-pattern>/fonts/*</url-pattern>
+	</filter-mapping>
 </web-app>
