@@ -5,27 +5,28 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.tracking.ManeuverCurveEnteringAndExitingDetails;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sse.common.TimePoint;
 
-public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassingManeuver {
+public class MarkPassingManeuverImpl extends ManeuverWithStableSpeedAndCourseBoundariesImpl implements MarkPassingManeuver {
     private static final long serialVersionUID = 8935348908557191614L;
     private final Waypoint waypointPassed;
     private final NauticalSide side;
 
     public MarkPassingManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss,
-            TimePoint timePoint, TimePoint timePointBefore, TimePoint timePointAfter,
-            SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, TimePoint timePointBeforeMainCurve, TimePoint timePointAfterMainCurve,
-            double directionChangeWithinMainCurveInDegrees, double maxAngularVelocityInDegreesPerSecond, Waypoint waypointPassed, NauticalSide side) {
-        super(type, newTack, position, maneuverLoss, timePoint, timePointBefore, timePointAfter, speedWithBearingBefore,
-                speedWithBearingAfter, directionChangeInDegrees, timePointBeforeMainCurve, timePointAfterMainCurve,
-                directionChangeWithinMainCurveInDegrees, maxAngularVelocityInDegreesPerSecond);
+            TimePoint timePoint, ManeuverCurveEnteringAndExitingDetails mainCurveEnteringAndExistingDetails,
+            ManeuverCurveEnteringAndExitingDetails maneuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails,
+            double maxAngularVelocityInDegreesPerSecond, Waypoint waypointPassed, NauticalSide side) {
+        super(type, newTack, position, maneuverLoss, timePoint, mainCurveEnteringAndExistingDetails,
+                maneuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails,
+                maxAngularVelocityInDegreesPerSecond);
         this.waypointPassed = waypointPassed;
         this.side = side;
     }
+
+
 
     @Override
     public Waypoint getWaypointPassed() {

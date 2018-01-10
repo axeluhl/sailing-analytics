@@ -70,75 +70,32 @@ public interface Maneuver extends GPSFix {
     TimePoint getTimePoint();
 
     /**
-     * Gets the time point of maneuver start. The time point refers to a position before the main curve where the boat
-     * has started to lose speed due to preparations for turning.
+     * Gets time points and speeds with bearings of main curve beginning and end.
      * 
-     * @return The time point of maneuver start
+     * @return Entering and exiting details of maneuver main curve
      * @see Maneuver
      */
-    TimePoint getTimePointBefore();
+    ManeuverCurveEnteringAndExitingDetails getMainCurveEnteringAndExitingDetails();
 
     /**
-     * Gets the time point of maneuver end. The time point refers to a position after the main curve where the boat has
-     * accelerated to its target speed after turning.
+     * Gets time points and speeds with bearings before and after the maneuver, such that the speed and course before
+     * and after the maneuver are considered as stable.
      * 
-     * @return The time point of maneuver end
+     * @return Entering and existing details of maneuver section, with stable speed and bearing before and after that
+     *         section
      * @see Maneuver
      */
-    TimePoint getTimePointAfter();
+    ManeuverCurveEnteringAndExitingDetails getManeuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails();
 
     /**
-     * Gets the speed with bearing at maneuver start, which is at {@link #getTimePointBefore()}.
+     * Gets time points and speeds with bearings before and after the maneuver considering the maneuver type. The
+     * maneuver boundaries may be represented either by {@link #getMainCurveEnteringAndExitingDetails()}, or
+     * {@link #getManeuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails()}. The former is
+     * considered for HEAD_UP and BEAR_AWAY maneuvers, whereas the latter is considered for the remainder.
      * 
-     * @return The speed with bearing at maneuver start
-     * 
+     * @return Entering and existing details of maneuver
      */
-    SpeedWithBearing getSpeedWithBearingBefore();
-
-    /**
-     * Gets the speed with bearing at maneuver end, which is at {@link #getTimePointAfter()}.
-     * 
-     * @return The speed with bearing at maneuver end
-     */
-    SpeedWithBearing getSpeedWithBearingAfter();
-
-    /**
-     * Gets the total course change performed within maneuver between {@link #getTimePointBefore()} and
-     * {@link #getTimePointAfter()} in degrees. The port side course changes produce a negative value. The value may
-     * exceed 360 degrees if the performed maneuver is a penalty circle.
-     * 
-     * @return The total course change within the whole maneuver in degrees
-     */
-    @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
-    double getDirectionChangeInDegrees();
-
-    /**
-     * Gets the time point of main curve start, where the boat starts to perform the main turn of the maneuver towards
-     * the direction of maneuver.
-     * 
-     * @return The time point of the main curve start
-     * @see Maneuver
-     */
-    TimePoint getTimePointBeforeMainCurve();
-
-    /**
-     * Gets the time point of main curve end, , where the boat finishes to perform the main turn of the maneuver towards
-     * the direction of maneuver.
-     * 
-     * @return The time point of the main curve end
-     * @see Maneuver
-     */
-    TimePoint getTimePointAfterMainCurve();
-
-    /**
-     * Gets the total course change performed within the main curve of maneuver between
-     * {@link #getTimePointBeforeMainCurve()} and {@link #getTimePointAfterMainCurve()} in degrees. The port side course
-     * changes produce a negative value. The value may exceed 360 degrees if the performed maneuver is a penalty circle.
-     * 
-     * @return The total course change with the main curve in degrees
-     */
-    @Statistic(messageKey = "DirectionChangeWithinMainCurve", resultDecimals = 2, ordinal = 3)
-    double getDirectionChangeWithinMainCurveInDegrees();
+    ManeuverCurveEnteringAndExitingDetails getManeuverEnteringAndExistingDetails();
 
     /**
      * The maximal angular velocity recorded within the main curve at maneuver climax.
@@ -148,5 +105,33 @@ public interface Maneuver extends GPSFix {
      */
     @Statistic(messageKey = "MaxAngularVelocityInDegreesPerSecond", resultDecimals = 4, ordinal = 4)
     double getMaxAngularVelocityInDegreesPerSecond();
+
+    /**
+     * Gets the speed with bearing at maneuver start, which is at {@link #getTimePointBefore()}.
+     * 
+     * @return The speed with bearing at maneuver start
+     * @see #getManeuverEnteringAndExistingDetails()
+     * 
+     */
+    SpeedWithBearing getSpeedWithBearingBefore();
+
+    /**
+     * Gets the speed with bearing at maneuver end, which is at {@link #getTimePointAfter()}.
+     * 
+     * @return The speed with bearing at maneuver end
+     * @see #getManeuverEnteringAndExistingDetails()
+     */
+    SpeedWithBearing getSpeedWithBearingAfter();
+
+    /**
+     * Gets the total course change performed within maneuver between {@link #getTimePointBefore()} and
+     * {@link #getTimePointAfter()} in degrees. The port side course changes produce a negative value. The value may
+     * exceed 360 degrees if the performed maneuver is a penalty circle.
+     * 
+     * @return The total course change within the whole maneuver in degrees
+     * @see #getManeuverEnteringAndExistingDetails()
+     */
+    @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
+    double getDirectionChangeInDegrees();
 
 }

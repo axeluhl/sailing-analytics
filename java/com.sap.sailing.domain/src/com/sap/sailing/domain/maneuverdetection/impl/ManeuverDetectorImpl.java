@@ -33,7 +33,9 @@ import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.ManeuverImpl;
+import com.sap.sailing.domain.tracking.impl.ManeuverWithMainCurveBoundariesImpl;
+import com.sap.sailing.domain.tracking.impl.ManeuverWithStableSpeedAndCourseBoundariesImpl;
+import com.sap.sailing.domain.tracking.impl.ManeuverWithUnknownBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingManeuverImpl;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
 import com.sap.sse.common.Duration;
@@ -348,7 +350,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * {@code maneuverDirection} ({@link Maneuver more info}).</li>
      * <li>Maneuver start and end with stable speed and course are determined by analysis of speed maxima starting
      * before and after the main curve, followed by extension to the points with stable course
-     * ({@link #computeManeuverDetails(Competitor, CurveDetailsWithBearingSteps, TimePoint, TimePoint) more info})</li>
+     * ({@link #computeManeuverDetails(Competitor, ManeuverCurveDetailsWithBearingSteps, TimePoint, TimePoint) more
+     * info})</li>
      * <li>The maneuver type is determined considering the maneuver's main curve, marks and wind direction</li>
      * </ol>
      * 
@@ -370,7 +373,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @throws NoWindException
      *             When no wind information during maneuver performance is available
      * @see #groupChangesInSameDirectionIntoManeuvers(Competitor, List, boolean, TimePoint, TimePoint)
-     * @see #computeManeuverDetails(Competitor, CurveDetailsWithBearingSteps, TimePoint, TimePoint)
+     * @see #computeManeuverDetails(Competitor, ManeuverCurveDetailsWithBearingSteps, TimePoint, TimePoint)
      */
     protected ManeuverSpot createManeuverFromFixesGroup(List<GPSFixMoving> douglasPeuckerFixesGroup,
             NauticalSide maneuverDirection, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
@@ -390,12 +393,12 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                                         .asMillis() + durationForDouglasPeuckerExtensionForMainCurveAnalysisInMillis),
                         latestManeuverEnd));
 
-        CurveDetailsWithBearingSteps maneuverMainCurveDetails = computeManeuverMainCurveDetails(
+        ManeuverCurveDetailsWithBearingSteps maneuverMainCurveDetails = computeManeuverMainCurveDetails(
                 earliestTimePointBeforeManeuver, latestTimePointAfterManeuver, maneuverDirection);
         if (maneuverMainCurveDetails == null) {
             return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers, null);
         }
-        CurveDetails maneuverDetails = computeManeuverDetails(maneuverMainCurveDetails, earliestManeuverStart,
+        ManeuverCurveDetails maneuverDetails = computeManeuverDetails(maneuverMainCurveDetails, earliestManeuverStart,
                 latestManeuverEnd);
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = track;
         Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimePoint(),
@@ -429,11 +432,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             sideToWhichWaypointWasPassed = maneuverDirection;
             // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
             maneuvers.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
-                    maneuverLoss, markPassingTimePoint, maneuverDetails.getTimePointBefore(),
-                    maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
-                    maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(),
-                    maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
-                    maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
+                    maneuverLoss, markPassingTimePoint, maneuverDetails.extractEnteringAndExistingDetailsOnly(),
+                    maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
                     maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), waypointPassed,
                     sideToWhichWaypointWasPassed));
         } else {
@@ -442,7 +442,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         final Bearing courseBeforeManeuver = maneuverMainCurveDetails.getSpeedWithBearingBefore().getBearing();
         final Bearing courseAfterManeuver = maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing();
-        final double mainCurveTotalCourseChangeInDegrees = maneuverMainCurveDetails.getTotalCourseChangeInDegrees();
+        final double mainCurveTotalCourseChangeInDegrees = maneuverMainCurveDetails.getDirectionChangeInDegrees();
         int numberOfJibes = wind == null ? 0
                 : bearingChangeAnalyzer.didPass(courseBeforeManeuver, mainCurveTotalCourseChangeInDegrees,
                         courseAfterManeuver, wind.getBearing());
@@ -482,11 +482,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
                 }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
-                CurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
+                ManeuverCurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
                         maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
                         maneuverDirection);
 
-                CurveDetails refinedPenaltyDetails;
+                ManeuverCurveDetails refinedPenaltyDetails;
                 if (refinedPenaltyMainCurveDetails == null) {
                     // This should really not happen!
                     logger.warning(
@@ -507,14 +507,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 }
                 Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimePoint(),
                         /* extrapolate */ false);
-                final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
-                        maneuverLoss, refinedPenaltyDetails.getTimePoint(), refinedPenaltyDetails.getTimePointBefore(),
-                        refinedPenaltyDetails.getTimePointAfter(), refinedPenaltyDetails.getSpeedWithBearingBefore(),
-                        refinedPenaltyDetails.getSpeedWithBearingAfter(),
-                        refinedPenaltyDetails.getTotalCourseChangeInDegrees(),
-                        refinedPenaltyMainCurveDetails.getTimePointBefore(),
-                        refinedPenaltyMainCurveDetails.getTimePointAfter(),
-                        refinedPenaltyMainCurveDetails.getTotalCourseChangeInDegrees(),
+                final Maneuver maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType,
+                        tackAfterManeuver, penaltyPosition, maneuverLoss, refinedPenaltyDetails.getTimePoint(),
+                        refinedPenaltyMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
+                        refinedPenaltyDetails.extractEnteringAndExistingDetailsOnly(),
                         refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 maneuvers.add(maneuver);
                 // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes
@@ -525,52 +521,53 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     maneuvers.addAll(getAllManeuversFromManeuverSpots(maneuverSpots));
                 }
             } else {
-                if (numberOfTacks > 0) {
-                    maneuverType = ManeuverType.TACK;
+                final Maneuver maneuver;
+                if (numberOfTacks > 0 || numberOfJibes > 0) {
+                    maneuverType = numberOfTacks > 0 ? ManeuverType.TACK : ManeuverType.JIBE;
                     if (legBeforeManeuver != null) {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
                                 maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                     }
-                } else if (numberOfJibes > 0) {
-                    maneuverType = ManeuverType.JIBE;
-                    if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
-                                maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
-                    }
+                    maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
+                            maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
+                            maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
+                            maneuverDetails.extractEnteringAndExistingDetailsOnly(),
+                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
+                } else if (wind != null) {
+                    // heading up or bearing away
+                    Bearing windBearing = wind.getBearing();
+                    Bearing toWindBeforeManeuver = windBearing
+                            .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingBefore().getBearing());
+                    Bearing toWindAfterManeuver = windBearing
+                            .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing());
+                    maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math
+                            .abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                    // treat maneuver main curve details as main maneuver details, because the detected maneuver is
+                    // either HEAD_UP or BEAR_AWAY
+                    maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver,
+                            maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
+                            maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
+                            maneuverDetails.extractEnteringAndExistingDetailsOnly(),
+                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 } else {
-                    if (wind != null) {
-                        // heading up or bearing away
-                        Bearing windBearing = wind.getBearing();
-                        Bearing toWindBeforeManeuver = windBearing
-                                .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingBefore().getBearing());
-                        Bearing toWindAfterManeuver = windBearing
-                                .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing());
-                        maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math
-                                .abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
-                        // treat maneuver main curve details as main maneuver details, because the detected maneuver is
-                        // either HEAD_UP or BEAR_AWAY
-                        maneuverDetails = maneuverMainCurveDetails;
-                    } else {
-                        // no wind information; marking as UNKNOWN
-                        maneuverType = ManeuverType.UNKNOWN;
-                        if (legBeforeManeuver != null) {
-                            maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
-                                    maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
-                        }
+                    // no wind information; marking as UNKNOWN
+                    maneuverType = ManeuverType.UNKNOWN;
+                    if (legBeforeManeuver != null) {
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                                maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                     }
+                    maneuver = new ManeuverWithUnknownBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                            maneuverLoss, maneuverDetails.getTimePoint(),
+                            maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
+                            maneuverDetails.extractEnteringAndExistingDetailsOnly(),
+                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 }
-                final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                        maneuverLoss, maneuverDetails.getTimePoint(), maneuverDetails.getTimePointBefore(),
-                        maneuverDetails.getTimePointAfter(), maneuverDetails.getSpeedWithBearingBefore(),
-                        maneuverDetails.getSpeedWithBearingAfter(), maneuverDetails.getTotalCourseChangeInDegrees(),
-                        maneuverMainCurveDetails.getTimePointBefore(), maneuverMainCurveDetails.getTimePointAfter(),
-                        maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
-                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
                 maneuvers.add(maneuver);
             }
         }
-        return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers, new WindMeasurement(
-                maneuverDetails.getTimePoint(), maneuverPosition, wind == null ? null : wind.getBearing()));
+        return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers,
+                new WindMeasurement(maneuverDetails.getTimePoint(), maneuverPosition,
+                        wind == null ? null : wind.getBearing()));
     }
 
     protected Duration getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(Duration approximateManeuverDuration) {
@@ -656,22 +653,22 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            The target course change direction for the main curve to determine
      * @return The details of the maneuver main curve
      */
-    private CurveDetailsWithBearingSteps computeManeuverMainCurveDetails(TimePoint timePointBeforeManeuver,
+    private ManeuverCurveDetailsWithBearingSteps computeManeuverMainCurveDetails(TimePoint timePointBeforeManeuver,
             TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
         SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(timePointBeforeManeuver,
                 timePointAfterManeuver);
-        CurveDetails maneuverMainCurveDetails = computeManeuverMainCurve(stepsToAnalyze, maneuverDirection);
+        ManeuverCurveDetails maneuverMainCurveDetails = computeManeuverMainCurve(stepsToAnalyze, maneuverDirection);
         if (maneuverMainCurveDetails == null) {
             return null;
         }
         SpeedWithBearingStepsIterable maneuverMainCurveSpeedWithBearingSteps = getSpeedWithBearingStepsWithinTimeRange(
                 stepsToAnalyze, maneuverMainCurveDetails.getTimePointBefore(),
                 maneuverMainCurveDetails.getTimePointAfter());
-        return new CurveDetailsWithBearingSteps(maneuverMainCurveDetails.getTimePointBefore(),
+        return new ManeuverCurveDetailsWithBearingSteps(maneuverMainCurveDetails.getTimePointBefore(),
                 maneuverMainCurveDetails.getTimePointAfter(), maneuverMainCurveDetails.getTimePoint(),
                 maneuverMainCurveDetails.getSpeedWithBearingBefore(),
                 maneuverMainCurveDetails.getSpeedWithBearingAfter(),
-                maneuverMainCurveDetails.getTotalCourseChangeInDegrees(),
+                maneuverMainCurveDetails.getDirectionChangeInDegrees(),
                 maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
                 maneuverMainCurveSpeedWithBearingSteps);
     }
@@ -712,16 +709,16 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            Maneuver end will not be after this time point
      * @return The details of the maneuver
      */
-    private CurveDetails computeManeuverDetails(CurveDetailsWithBearingSteps maneuverMainCurveDetails,
+    private ManeuverCurveDetails computeManeuverDetails(ManeuverCurveDetailsWithBearingSteps maneuverMainCurveDetails,
             TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
-        CurveBoundaryExtension beforeManeuverSectionExtension = expandBeforeManeuverSectionBySpeedAndBearingTrendAnalysis(
+        ManeuverCurveBoundaryExtension beforeManeuverSectionExtension = expandBeforeManeuverSectionBySpeedAndBearingTrendAnalysis(
                 maneuverMainCurveDetails, earliestManeuverStart);
-        CurveBoundaryExtension afterManeuverSectionExtension = expandAfterManeuverSectionBySpeedAndBearingTrendAnalysis(
+        ManeuverCurveBoundaryExtension afterManeuverSectionExtension = expandAfterManeuverSectionBySpeedAndBearingTrendAnalysis(
                 maneuverMainCurveDetails, latestManeuverEnd);
         double totalCourseChangeInDegrees = beforeManeuverSectionExtension.getCourseChangeInDegreesWithinExtensionArea()
-                + maneuverMainCurveDetails.getTotalCourseChangeInDegrees()
+                + maneuverMainCurveDetails.getDirectionChangeInDegrees()
                 + afterManeuverSectionExtension.getCourseChangeInDegreesWithinExtensionArea();
-        return new CurveDetails(beforeManeuverSectionExtension.getExtensionTimePoint(),
+        return new ManeuverCurveDetails(beforeManeuverSectionExtension.getExtensionTimePoint(),
                 afterManeuverSectionExtension.getExtensionTimePoint(), maneuverMainCurveDetails.getTimePoint(),
                 beforeManeuverSectionExtension.getSpeedWithBearingAtExtensionTimePoint(),
                 afterManeuverSectionExtension.getSpeedWithBearingAtExtensionTimePoint(), totalCourseChangeInDegrees,
@@ -750,10 +747,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            Maneuver start will not be before this time point
      * @return The time point and speed at located step with speed maximum, as well as the total course change from the
      *         step iteration started until the step with the speed maximum
-     * @see #computeManeuverDetails(Competitor, CurveDetailsWithBearingSteps, TimePoint, TimePoint)
+     * @see #computeManeuverDetails(Competitor, ManeuverCurveDetailsWithBearingSteps, TimePoint, TimePoint)
      */
-    private CurveBoundaryExtension expandBeforeManeuverSectionBySpeedAndBearingTrendAnalysis(
-            CurveDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint earliestManeuverStart) {
+    private ManeuverCurveBoundaryExtension expandBeforeManeuverSectionBySpeedAndBearingTrendAnalysis(
+            ManeuverCurveDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint earliestManeuverStart) {
         Duration approximateManeuverDuration = getApproximateManeuverDuration();
         Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration.divide(8.0);
         Duration maxDurationForSpeedTrendAnalysis = approximateManeuverDuration;
@@ -767,7 +764,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 .minus(minDurationForSpeedTrendAnalysis);
         SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(earliestTimePointForSpeedTrendAnalysis,
                 latestTimePointForSpeedTrendAnalysis);
-        CurveBoundaryExtension maneuverStart = findSpeedMaximum(stepsToAnalyze, true,
+        ManeuverCurveBoundaryExtension maneuverStart = findSpeedMaximum(stepsToAnalyze, true,
                 timePointSinceGlobalMaximumSearch);
         if (isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverStart)) {
             maneuverStart = null;
@@ -778,8 +775,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 : maneuverStart.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
                 stableBearingAnalysisUntil);
-        CurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze,
-                true, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        ManeuverCurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(
+                stepsToAnalyze, true, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         if (stableBearingExtension != null
                 && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
             maneuverStart = stableBearingExtension;
@@ -787,21 +784,22 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     .getCourseChangeInDegreesWithinExtensionArea();
         }
         return maneuverStart != null
-                ? new CurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
+                ? new ManeuverCurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
                         maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
                         courseChangeSinceManeuverMainCurveInDegrees
                                 + maneuverStart.getCourseChangeInDegreesWithinExtensionArea())
-                : new CurveBoundaryExtension(maneuverMainCurveDetails.getTimePointBefore(),
+                : new ManeuverCurveBoundaryExtension(maneuverMainCurveDetails.getTimePointBefore(),
                         maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0);
     }
 
-    private boolean isCourseChangeLimitExceededForCurveExtension(CurveDetailsWithBearingSteps maneuverMainCurveDetails,
-            CurveBoundaryExtension curveBoundaryExtension) {
+    private boolean isCourseChangeLimitExceededForCurveExtension(
+            ManeuverCurveDetailsWithBearingSteps maneuverMainCurveDetails,
+            ManeuverCurveBoundaryExtension curveBoundaryExtension) {
         if (curveBoundaryExtension == null) {
             return false;
         }
         return curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()
-                * maneuverMainCurveDetails.getTotalCourseChangeInDegrees() < 0
+                * maneuverMainCurveDetails.getDirectionChangeInDegrees() < 0
                 && Math.abs(curveBoundaryExtension
                         .getCourseChangeInDegreesWithinExtensionArea()) > MAX_COURSE_CHANGE_TOWARD_MANEUVER_OPPOSITE_DIRECTION_FOR_CURVE_EXTENSION_IN_DEGREES;
     }
@@ -828,10 +826,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            Maneuver end will not be after this time point
      * @return The time point and speed at located step with speed maximum, as well as the total course change from the
      *         step iteration started until the step with the speed maximum
-     * @see #computeManeuverDetails(Competitor, CurveDetailsWithBearingSteps, TimePoint, TimePoint)
+     * @see #computeManeuverDetails(Competitor, ManeuverCurveDetailsWithBearingSteps, TimePoint, TimePoint)
      */
-    private CurveBoundaryExtension expandAfterManeuverSectionBySpeedAndBearingTrendAnalysis(
-            CurveDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint latestManeuverEnd) {
+    private ManeuverCurveBoundaryExtension expandAfterManeuverSectionBySpeedAndBearingTrendAnalysis(
+            ManeuverCurveDetailsWithBearingSteps maneuverMainCurveDetails, TimePoint latestManeuverEnd) {
         Duration approximateManeuverDuration = getApproximateManeuverDuration();
         Duration minDurationForSpeedTrendAnalysis = approximateManeuverDuration;
         Duration maxDurationForSpeedTrendAnalysis = getMaxDurationForAfterManeuverSectionExtension(
@@ -846,7 +844,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 .plus(minDurationForSpeedTrendAnalysis);
         SpeedWithBearingStepsIterable stepsToAnalyze = getSpeedWithBearingSteps(earliestTimePointForSpeedTrendAnalysis,
                 latestTimePointForSpeedTrendAnalysis);
-        CurveBoundaryExtension maneuverEnd = findSpeedMaximum(stepsToAnalyze, false, timePointBeforeLocalMaximumSearch);
+        ManeuverCurveBoundaryExtension maneuverEnd = findSpeedMaximum(stepsToAnalyze, false,
+                timePointBeforeLocalMaximumSearch);
         if (isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverEnd)) {
             maneuverEnd = null;
         }
@@ -856,17 +855,17 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 : maneuverEnd.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, stableBearingAnalysisFrom,
                 latestTimePointForSpeedTrendAnalysis);
-        CurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(stepsToAnalyze,
-                false, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
+        ManeuverCurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(
+                stepsToAnalyze, false, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
         if (stableBearingExtension != null
                 && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
             maneuverEnd = stableBearingExtension;
             courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
                     .getCourseChangeInDegreesWithinExtensionArea();
         }
-        return maneuverEnd != null ? new CurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
+        return maneuverEnd != null ? new ManeuverCurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
                 maneuverEnd.getSpeedWithBearingAtExtensionTimePoint(), courseChangeSinceManeuverMainCurveInDegrees)
-                : new CurveBoundaryExtension(maneuverMainCurveDetails.getTimePointAfter(),
+                : new ManeuverCurveBoundaryExtension(maneuverMainCurveDetails.getTimePointAfter(),
                         maneuverMainCurveDetails.getSpeedWithBearingAfter(), 0);
     }
 
@@ -892,7 +891,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @return The time point and speed at located step with speed maximum, as well as the total course change from the
      *         step iteration started until the step with the speed maximum
      */
-    public CurveBoundaryExtension findSpeedMaximum(SpeedWithBearingStepsIterable stepsToAnalyze,
+    public ManeuverCurveBoundaryExtension findSpeedMaximum(SpeedWithBearingStepsIterable stepsToAnalyze,
             boolean timeBackwardSearch, TimePoint globalMaximumSearchUntilTimePoint) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
         final Predicate<SpeedWithBearingStep> localMaximumSearch;
@@ -938,8 +937,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees -= stepWithMaxSpeed.getCourseChangeInDegrees();
         }
         return stepWithMaxSpeed == null ? null
-                : new CurveBoundaryExtension(stepWithMaxSpeed.getTimePoint(), stepWithMaxSpeed.getSpeedWithBearing(),
-                        courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees);
+                : new ManeuverCurveBoundaryExtension(stepWithMaxSpeed.getTimePoint(),
+                        stepWithMaxSpeed.getSpeedWithBearing(), courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees);
     }
 
     private Iterable<SpeedWithBearingStep> cloneAndReverseIterable(SpeedWithBearingStepsIterable stepsToAnalyze) {
@@ -966,7 +965,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @return The time point and speed at located step with the first stable course, as well as the total course change
      *         from the step iteration started until the located step
      */
-    public CurveBoundaryExtension findStableBearingWithMaxAbsCourseChangeSpeed(
+    public ManeuverCurveBoundaryExtension findStableBearingWithMaxAbsCourseChangeSpeed(
             SpeedWithBearingStepsIterable stepsToAnalyze, boolean timeBackwardSearch,
             double maxCourseChangeInDegreesPerSecond) {
         final Iterable<SpeedWithBearingStep> finalStepsToAnalyze;
@@ -996,7 +995,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             stepUntilStableBearing = previousStep;
         }
         return stepUntilStableBearing == null ? null
-                : new CurveBoundaryExtension(stepUntilStableBearing.getTimePoint(),
+                : new ManeuverCurveBoundaryExtension(stepUntilStableBearing.getTimePoint(),
                         stepUntilStableBearing.getSpeedWithBearing(), courseChangeUntilStepWithStableBearingInDegrees);
     }
 
@@ -1017,7 +1016,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @return The computed entering and exiting time point with its speeds with bearings, time point of maneuver climax
      *         and total course change for the main curve
      */
-    public CurveDetails computeManeuverMainCurve(SpeedWithBearingStepsIterable bearingStepsToAnalyze,
+    public ManeuverCurveDetails computeManeuverMainCurve(SpeedWithBearingStepsIterable bearingStepsToAnalyze,
             NauticalSide maneuverDirection) {
         double totalCourseChangeSignum = maneuverDirection == NauticalSide.PORT ? -1 : 1;
         double maxCourseChangeInDegrees = 0;
@@ -1083,9 +1082,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             // point itself.
             return null;
         }
-        CurveDetails maneuverEnteringAndExitingDetails = new CurveDetails(refinedTimePointBeforeManeuver,
-                refinedTimePointAfterManeuver, maneuverTimePoint, refinedSpeedWithBearingBeforeManeuver,
-                refinedSpeedWithBearingAfterManeuver, maxCourseChangeInDegrees, maxAngularVelocityInDegreesPerSecond);
+        ManeuverCurveDetails maneuverEnteringAndExitingDetails = new ManeuverCurveDetails(
+                refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, maneuverTimePoint,
+                refinedSpeedWithBearingBeforeManeuver, refinedSpeedWithBearingAfterManeuver, maxCourseChangeInDegrees,
+                maxAngularVelocityInDegreesPerSecond);
         return maneuverEnteringAndExitingDetails;
     }
 

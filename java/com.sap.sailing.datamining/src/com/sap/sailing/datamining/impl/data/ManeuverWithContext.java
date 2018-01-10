@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurveEnteringAndExitingDetails;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 
@@ -24,28 +25,26 @@ public class ManeuverWithContext implements HasManeuverContext {
     private TimePoint timePointAfterForAnalysis;
     private double directionChangeInDegreesForAnalysis;
 
-    public ManeuverWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver maneuver, boolean mainCurveAnalysis) {
+    public ManeuverWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver maneuver,
+            boolean mainCurveAnalysis) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.maneuver = maneuver;
-        if(mainCurveAnalysis) {
-            this.timePointBeforeForAnalysis = maneuver.getTimePointBeforeMainCurve();
-            this.timePointAfterForAnalysis = maneuver.getTimePointAfterMainCurve();
-            this.directionChangeInDegreesForAnalysis = maneuver.getDirectionChangeWithinMainCurveInDegrees();
-        } else {
-            this.timePointBeforeForAnalysis = maneuver.getTimePointBefore();
-            this.timePointAfterForAnalysis = maneuver.getTimePointAfter();
-            this.directionChangeInDegreesForAnalysis = maneuver.getDirectionChangeInDegrees();
-        }
+        ManeuverCurveEnteringAndExitingDetails enteringAndExistingDetails = mainCurveAnalysis
+                ? maneuver.getMainCurveEnteringAndExitingDetails()
+                : maneuver.getManeuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails();
+        this.timePointBeforeForAnalysis = enteringAndExistingDetails.getTimePointBefore();
+        this.timePointAfterForAnalysis = enteringAndExistingDetails.getTimePointAfter();
+        this.directionChangeInDegreesForAnalysis = enteringAndExistingDetails.getDirectionChangeInDegrees();
     }
-    
+
     public TimePoint getTimePointBeforeForAnalysis() {
         return timePointBeforeForAnalysis;
     }
-    
+
     public TimePoint getTimePointAfterForAnalysis() {
         return timePointAfterForAnalysis;
     }
-    
+
     public double getDirectionChangeInDegreesForAnalysis() {
         return directionChangeInDegreesForAnalysis;
     }
@@ -127,12 +126,12 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     private Double getAbsTWAAtTimepoint(TimePoint timepoint) {
         Double twa = getTWAAtTimepoint(timepoint);
-        if(twa == null) {
+        if (twa == null) {
             return null;
         }
         return Math.abs(twa);
     }
-    
+
     private Double getTWAAtTimepoint(TimePoint timepoint) {
         Wind wind = trackedLegOfCompetitor.getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
                 .getWind(maneuver.getPosition(), timepoint);
@@ -165,15 +164,15 @@ public class ManeuverWithContext implements HasManeuverContext {
     @Override
     public Tack getTackBeforeManeuver() {
         Double twa = getTWAAtTimepoint(getTimePointBeforeForAnalysis());
-        if(twa == null) {
+        if (twa == null) {
             return null;
         }
-        if(twa < 0) {
+        if (twa < 0) {
             return Tack.PORT;
         }
         return Tack.STARBOARD;
     }
-    
+
     private Double getSpeedInKnotsAtTimePoint(TimePoint timePoint) {
         return getGPSFixTrack().getEstimatedSpeed(timePoint).getKnots();
     }
