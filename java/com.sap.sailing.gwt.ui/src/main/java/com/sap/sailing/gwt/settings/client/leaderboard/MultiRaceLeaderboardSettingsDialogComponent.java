@@ -61,8 +61,6 @@ public class MultiRaceLeaderboardSettingsDialogComponent
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
-                /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
-                        .getValue().booleanValue(),
                 showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
                 showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue());
         return newSettings;

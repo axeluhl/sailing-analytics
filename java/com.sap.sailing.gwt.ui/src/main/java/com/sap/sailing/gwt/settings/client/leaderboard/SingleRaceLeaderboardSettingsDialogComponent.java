@@ -32,8 +32,6 @@ public class SingleRaceLeaderboardSettingsDialogComponent
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
-                /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
-                        .getValue().booleanValue(),
                 showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
                 showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
         return newSettings;

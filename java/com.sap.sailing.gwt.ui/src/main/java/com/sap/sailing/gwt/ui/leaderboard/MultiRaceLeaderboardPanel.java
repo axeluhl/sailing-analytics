@@ -88,8 +88,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(selectedManeuverDetails,
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, namesOfRaceColumnsToShow,
                 raceColumnSelection.getNumberOfLastRaceColumnsToShow(), timer.getRefreshInterval(),
-                raceColumnSelection.getType(), isShowAddedScores(),
-                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorShortName(),
+                raceColumnSelection.getType(), isShowAddedScores(), isShowCompetitorShortName(),
                 isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality);
         return leaderboardSettings;
     }

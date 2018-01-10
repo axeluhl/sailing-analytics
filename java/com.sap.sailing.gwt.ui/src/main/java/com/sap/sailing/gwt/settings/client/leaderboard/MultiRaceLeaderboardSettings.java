@@ -37,13 +37,11 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
             Integer numberOfLastRacesToShow,
             Long delayBetweenAutoAdvancesInMilliseconds,
             RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
-            boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
-            boolean showCompetitorShortNameColumn, boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn,
-            boolean isCompetitorNationalityColumnVisible) {
+            boolean showAddedScores, boolean showCompetitorShortNameColumn, boolean showCompetitorFullNameColumn,
+            boolean showCompetitorBoatInfoColumn, boolean isCompetitorNationalityColumnVisible) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow, delayBetweenAutoAdvancesInMilliseconds,
-                showAddedScores, showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorShortNameColumn,
+                showAddedScores, showCompetitorShortNameColumn,
                 showCompetitorFullNameColumn, showCompetitorBoatInfoColumn, isCompetitorNationalityColumnVisible);
-        
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
         this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
@@ -65,7 +63,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         newSettings.showAddedScores.setValue(this.isShowAddedScores());
         newSettings.showCompetitorShortNameColumn.setValue(this.isShowCompetitorShortNameColumn());
         newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());
-        newSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(this.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         newSettings.isShowCompetitorNationality.setValue(this.isShowCompetitorNationality());
         newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);

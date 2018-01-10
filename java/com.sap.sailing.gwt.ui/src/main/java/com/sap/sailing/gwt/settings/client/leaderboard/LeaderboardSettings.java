@@ -39,12 +39,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     protected BooleanSetting showCompetitorShortNameColumn;
     protected BooleanSetting showCompetitorFullNameColumn;
     protected BooleanSetting showCompetitorBoatInfoColumn;
-    
-    /**
-     * Show a column with total number of races completed
-     */
-    protected BooleanSetting showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
-    
+        
     @Override
     protected void addChildSettings() {
         isShowCompetitorNationality = new BooleanSetting("showCompetitorNationality", this, false);
@@ -69,7 +64,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         showCompetitorShortNameColumn = new BooleanSetting("showCompetitorShortNameColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
         showCompetitorBoatInfoColumn = new BooleanSetting("showCompetitorBoatInfoColumn", this, false);
-        showOverallColumnWithNumberOfRacesCompletedPerCompetitor = new BooleanSetting("showOverallColumnWithNumberOfRacesCompletedPerCompetitor", this, false);
     }
     
     public LeaderboardSettings() {
@@ -81,8 +75,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
             Long delayBetweenAutoAdvancesInMilliseconds, 
-            boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
-            boolean showCompetitorShortNameColumn, boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn,
+            boolean showAddedScores, boolean showCompetitorShortNameColumn, 
+            boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn,
             boolean isCompetitorNationalityColumnVisible) {
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
@@ -93,11 +87,9 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         this.showCompetitorShortNameColumn.setValue(showCompetitorShortNameColumn);
         this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
         this.showCompetitorBoatInfoColumn.setValue(showCompetitorBoatInfoColumn);
-        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(showOverallColumnWithNumberOfRacesCompletedPerCompetitor);
         this.isShowCompetitorNationality.setValue(isCompetitorNationalityColumnVisible);
     }
   
-
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
@@ -136,10 +128,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
 
     public boolean isShowAddedScores() {
         return showAddedScores.getValue();
-    }
-    
-    public boolean isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor() {
-        return showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getValue();
     }
     
     public boolean isShowCompetitorShortNameColumn() {

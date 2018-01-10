@@ -32,8 +32,12 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
-        SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, DEFAULT_REFRESH_INTERVAL, defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
-                /*showCompetitorShortNameColumn*/ true,
+
+        SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(
+                defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(),
+                defaultSettings.getRaceDetailsToShow(), overallDetails, DEFAULT_REFRESH_INTERVAL,
+                defaultSettings.isShowAddedScores(),
+                /* showCompetitorShortNameColumn */ true,
                 /*
                  * don't showCompetitorFullNameColumn in case screen is so small that we don't even display the
                  * leaderboard initially
@@ -56,7 +60,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
@@ -73,7 +76,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),

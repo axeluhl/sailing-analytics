@@ -149,8 +149,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     public SingleRaceLeaderboardSettings getSettings() {
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(selectedManeuverDetails,
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, timer.getRefreshInterval(),
-                isShowAddedScores(),
-                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorShortName(),
+                isShowAddedScores(), isShowCompetitorShortName(),
                 isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality, showRaceRankColumn);
         return leaderboardSettings;
     }

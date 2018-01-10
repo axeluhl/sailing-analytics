@@ -31,7 +31,7 @@ In this window there are some attributes of the pairing list in the left box:
 * Number of competitors: This is equal to the count of all registered competitors on this regatta  
 * Quality: This value describes the quality of one pairing list template (for more information about quality please read below)  
 On the right side a box with the title **'Pairinglist Template'** is displayed. If there are registered competitors every different value in this box will be replaced with one competitor. The matrix describes the assignments of each competitor to a boat where each row represents a single fleet and each column a single boat.  
-When you hit **'Apply to race logs'** the competitor to boat assignments will be registered into race logs. In the print preview the assignment of all competitors to boats are displayed. For more information about the print function and the csv export please read below.
+When you hit **'Insert into regatta'** the competitor to boat assignments will be registered into race logs. In the print preview the assignment of all competitors to boats are displayed. For more information about the print function and the csv export please read below.
 
 ###Flight repeats
 In some cases it is necessary to reduce the transfer traffic while an event (e.g. if only electrical motorboats can be used). In this case you can set flight repeats. It will duplicate flights as often as given (eg.: flight repeats equals 2 means that a flight occurs 2 times). Furthermore it will set the 'fleet can run in parallel'-flag, so you can run the first fleets of the repeated flights in a straight row without any changes. If you use the flight repeats a smaller template is calculated and duplicated, because of this the quality can be worse than normal.   
@@ -44,8 +44,8 @@ The quality of a pairing list is measured by the standard deviation of its templ
 
 ###CSV-Export
 This function can be used to put the numbers from the generated pairing list template into Excel. After generating the template you can hit a link called **'Export as CSV'** and a file called **'pairingListTemplate.csv'** will be downloaded.  
-Now follow these steps:  
-**Open a new or existing Excel file > In your table select the cell in the top left corner of the excerpt in which you want to place your template in > On the top header bar select the 'Data' tab > From the selection underneath select 'From Text' > Switch to your download directory (Default path: C:\Users\[username]\Downloads) and open your downloaded template file > On the appeared window click 'Next' > Under 'Delimiters' select 'Comma' and hit 'Next' and confirm with 'Finish' > On the next appeared window hit 'Properties', select 'Overwrite existing cells with new data...' and confirm twice**  
+Now follow these steps (tested with Excel 2016):  
+**Open a new or existing Excel file > In your table select the cell in the top left corner of the excerpt in which you want to place your template in > On the top header bar select the 'Data' tab > From the selection underneath select 'From Text' > Switch to your download directory (Default path: C:\Users\Username\Downloads) and open your downloaded template file > On the appeared window click 'Next' > Under 'Delimiters' select 'Comma' and hit 'Next' and confirm with 'Finish' > On the next appeared window hit 'Properties', select 'Overwrite existing cells with new data...' and confirm twice**  
 Each value should now be in a single cell.
 
 ###Print function
