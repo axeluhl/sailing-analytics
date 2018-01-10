@@ -13,10 +13,10 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin/tree/gpe-fork using http://storage.googleapis.com/gwt-eclipse-plugin/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. Git for Windows v2.12.2), http://git-scm.com / https://git-for-windows.github.io/
-4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
+4. MongoDB (e.g. Production Release 2.6.7), download: https://www.mongodb.com/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8 is the link.
-6. JDK 1.7 (Java SE 7), http://jdk7.java.net
-7. JDK 1.8 (Java SE 8), http://jdk8.java.net
+6. JDK 1.7 (Java SE 7), http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
+7. JDK 1.8 (Java SE 8), http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 8. Maven 3.1.1 (or higher), http://maven.apache.org
 9. GWT SDK 2.8.2 (http://www.gwtproject.org/download.html)
 10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
