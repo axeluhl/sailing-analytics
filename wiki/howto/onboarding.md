@@ -40,7 +40,7 @@ Be aware hat the installation may take several minutes depending on your Interne
 1. Cygwin, http://www.cygwin.com/
 2. Eclipse Mylyn Bugzilla extension
 3. kdiff3 (git tool)
-4. Firebug (javascript & .css debugging)
+4. Firebug (javascript & .css debugging, included in Firefox Developer Tools in newer versions of Firefox by default)
 
 #### Accounts
 
