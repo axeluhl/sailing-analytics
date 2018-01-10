@@ -34,7 +34,6 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithMainCurveBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithStableSpeedAndCourseBoundariesImpl;
-import com.sap.sailing.domain.tracking.impl.ManeuverWithUnknownBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingManeuverImpl;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
 import com.sap.sse.common.Duration;
@@ -558,7 +557,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(maneuverDetails.getTimePointBefore(),
                                 maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                     }
-                    maneuver = new ManeuverWithUnknownBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                    maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverLoss, maneuverDetails.getTimePoint(),
                             maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
                             maneuverDetails.extractEnteringAndExistingDetailsOnly(),
