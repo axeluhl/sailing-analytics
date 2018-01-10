@@ -9,12 +9,10 @@ import java.util.ListIterator;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
-import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
@@ -112,7 +110,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     }
 
     @Override
-    public List<Maneuver> detectManeuvers() throws NoWindException, NoFixesException {
+    public List<Maneuver> detectManeuvers() {
         TrackTimeInfo trackTimeInfo = getTrackTimeInfo();
         if (trackTimeInfo != null) {
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
@@ -135,13 +133,12 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                     incrementalRunsCount);
             return getAllManeuversFromManeuverSpots(maneuverSpots);
         }
-        throw new NoFixesException();
+        return Collections.emptyList();
     }
 
     // public for unit tests
     public List<ManeuverSpot> detectManeuversIncrementally(TrackTimeInfo trackTimeInfo,
-            Iterable<GPSFixMoving> approximatingFixesToAnalyze, ManeuverDetectionResult lastManeuverDetectionResult)
-            throws NoWindException {
+            Iterable<GPSFixMoving> approximatingFixesToAnalyze, ManeuverDetectionResult lastManeuverDetectionResult) {
         TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
         TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
         TimePoint latestRawFixTimePoint = trackTimeInfo.getLatestRawFixTimePoint();

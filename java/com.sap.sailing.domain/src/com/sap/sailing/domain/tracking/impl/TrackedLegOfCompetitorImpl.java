@@ -781,8 +781,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getManeuverLoss(TimePoint timePointWhenSpeedStartedToDrop,
-            TimePoint maneuverTimePoint, TimePoint timePointWhenSpeedLevelledOffAfterManeuver) throws NoWindException {
+    public Distance getManeuverLoss(TimePoint timePointWhenSpeedStartedToDrop, TimePoint maneuverTimePoint,
+            TimePoint timePointWhenSpeedLevelledOffAfterManeuver) {
         assert timePointWhenSpeedStartedToDrop != null;
         assert timePointWhenSpeedLevelledOffAfterManeuver != null;
         Distance result;

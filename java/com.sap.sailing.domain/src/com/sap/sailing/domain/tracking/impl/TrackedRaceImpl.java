@@ -112,7 +112,6 @@ import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
-import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
@@ -2651,27 +2650,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
-    private List<Maneuver> computeManeuvers(Competitor competitor, ManeuverDetector maneuverDetector) throws NoWindException {
+    private List<Maneuver> computeManeuvers(Competitor competitor, ManeuverDetector maneuverDetector)
+            throws NoWindException {
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
-        List<Maneuver> result = null;
-        try {
-            result = maneuverDetector.detectManeuvers();
-        } catch (NoWindException ex) {
-            // Catching the NoWindException here without letting it propagate thru other handlers.
-            // This is mainly to avoid having logs flooded with stack traces. It is safe to catch
-            // it here because we can assume that this exception does not hide any severe problem
-            // other than that there is no wind. Because maneuvers are mostly computed using a
-            // future cache and need wind (like getTack) they will often fail before the wind has been
-            // loaded from database. We can safely return null here because we can be sure that
-            // cache will be updated when new fixes are fed into the stream therefore leading to a
-            // recomputation.
-            logger.fine("NoWindException during computation of maneuvers for " + competitor.getName());
-        } catch (NoFixesException ex) {
-            logger.fine("NoFixesException during computation of maneuvers for " + competitor.getName());
-        }
-        // else competitor has no fixes to consider; remove any maneuver cache entry
+        List<Maneuver> result = maneuverDetector.detectManeuvers();
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;

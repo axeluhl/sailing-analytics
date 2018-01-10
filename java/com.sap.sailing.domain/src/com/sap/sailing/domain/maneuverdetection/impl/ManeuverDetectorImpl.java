@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
-import com.sap.sailing.domain.maneuverdetection.NoFixesException;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -111,14 +110,14 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     @Override
-    public List<Maneuver> detectManeuvers() throws NoWindException, NoFixesException {
+    public List<Maneuver> detectManeuvers() {
         TrackTimeInfo startAndEndTimePoints = getTrackTimeInfo();
         if (startAndEndTimePoints != null) {
             List<ManeuverSpot> maneuverSpots = detectManeuvers(startAndEndTimePoints.getTrackStartTimePoint(),
                     startAndEndTimePoints.getTrackEndTimePoint());
             return getAllManeuversFromManeuverSpots(maneuverSpots);
         }
-        throw new NoFixesException();
+        return Collections.emptyList();
     }
 
     /**
@@ -208,8 +207,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @return an empty list if no maneuver spots are detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuver spots with corresponding maneuvers detected.
      */
-    protected List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
-            throws NoWindException {
+    protected List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         return detectManeuvers(trackedRace.approximate(competitor,
                 competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(), earliestManeuverStart,
                 latestManeuverEnd), earliestManeuverStart, latestManeuverEnd);
@@ -220,7 +218,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * corresponding maneuvers.
      */
     protected List<ManeuverSpot> detectManeuvers(Iterable<GPSFixMoving> approximatingFixesToAnalyze,
-            TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
+            TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         List<ManeuverSpot> result = new ArrayList<>();
         if (Util.size(approximatingFixesToAnalyze) > 2) {
             List<GPSFixMoving> fixesGroupForManeuverSpotAnalysis = new ArrayList<GPSFixMoving>();
@@ -376,8 +374,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * @see #computeManeuverDetails(Competitor, ManeuverCurveDetailsWithBearingSteps, TimePoint, TimePoint)
      */
     protected ManeuverSpot createManeuverFromFixesGroup(List<GPSFixMoving> douglasPeuckerFixesGroup,
-            NauticalSide maneuverDirection, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
-            throws NoWindException {
+            NauticalSide maneuverDirection, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         List<Maneuver> maneuvers = new ArrayList<>();
         long durationForDouglasPeuckerExtensionForMainCurveAnalysisInMillis = getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(
                 getApproximateManeuverDuration()).asMillis();
@@ -404,9 +401,14 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimePoint(),
                 /* extrapolate */false);
         final Wind wind = trackedRace.getWind(maneuverPosition, maneuverDetails.getTimePoint());
-        final Tack tackAfterManeuver = wind == null ? null
-                : trackedRace.getTack(maneuverPosition, maneuverDetails.getTimePointAfter(),
-                        maneuverDetails.getSpeedWithBearingAfter().getBearing());
+        Tack tackAfterManeuver;
+        try {
+            tackAfterManeuver = wind == null ? null
+                    : trackedRace.getTack(maneuverPosition, maneuverDetails.getTimePointAfter(),
+                            maneuverDetails.getSpeedWithBearingAfter().getBearing());
+        } catch (NoWindException e) {
+            tackAfterManeuver = null;
+        }
         ManeuverType maneuverType;
         Distance maneuverLoss = null;
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
