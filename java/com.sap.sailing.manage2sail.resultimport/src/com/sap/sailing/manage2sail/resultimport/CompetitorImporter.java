@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -170,14 +171,25 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                                 nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
-        // TODO bug2822: Check where the 'short name' and 'boat name' should come from
+        UUID competitorUUID;
+        try {
+            competitorUUID = UUID.fromString(team.getTeamID());
+        } catch (IllegalArgumentException e) {
+            competitorUUID = null;
+        }
+        UUID boatUUID;
+        try {
+            boatUUID = UUID.fromString(boat.getBoatID());
+        } catch (IllegalArgumentException e) {
+            boatUUID = null;
+        }
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
-                            event==null?null:event.getTitle(),
-                            division==null?null:(division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
-                            boatClassName, race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber,
-                            /* name */ team.getTeamName(), /* short name */ team.getTeamName(), /* team name */ team.getTeamName(), 
-                            boat.getBoatName(), teamNationality[0] == null ? null : teamNationality[0].getCountryCode(),
-                            persons, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                            event == null ? null : event.getTitle(),
+                            division == null ? null : (division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
+                            race != null ? race.getRaceName() : null, /* fleetName */ null, competitorUUID, /* name */ team.getTeamName(),
+                            /* short name */ null, /* team name */ team.getTeamName(), persons, 
+                            teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), /* timeOnTimeFactor */ null,
+                            /* timeOnDistanceAllowancePerNauticalMile */ null, boatUUID, boat.getBoatName(), boatClassName, sailNumber);
         return competitorDescriptor;
     }
 

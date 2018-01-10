@@ -93,6 +93,8 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
 
     void addNewCompetitors(Iterable<Competitor> competitors);
 
+    void addNewCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitorsWithBoat);
+
     CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor competitor);
 
     CompetitorDTO convertToCompetitorWithBoatDTO(Competitor c, Boat b);

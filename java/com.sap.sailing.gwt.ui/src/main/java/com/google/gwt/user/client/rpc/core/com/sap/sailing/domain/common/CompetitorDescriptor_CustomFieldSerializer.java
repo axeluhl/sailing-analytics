@@ -1,6 +1,7 @@
 package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -24,17 +25,19 @@ public class CompetitorDescriptor_CustomFieldSerializer extends CustomFieldSeria
         streamWriter.writeObject(instance.getPersons());
         streamWriter.writeString(instance.getEventName());
         streamWriter.writeString(instance.getRegattaName());
-        streamWriter.writeString(instance.getBoatClassName());
         streamWriter.writeString(instance.getRaceName());
         streamWriter.writeString(instance.getFleetName());
-        streamWriter.writeString(instance.getSailNumber());
+        streamWriter.writeObject(instance.getCompetitorUUID());
         streamWriter.writeString(instance.getName());
         streamWriter.writeString(instance.getShortName());
         streamWriter.writeString(instance.getTeamName());
-        streamWriter.writeString(instance.getBoatName());
         streamWriter.writeObject(instance.getCountryCode());
         streamWriter.writeObject(instance.getTimeOnTimeFactor());
         streamWriter.writeObject(instance.getTimeOnDistanceAllowancePerNauticalMile());
+        streamWriter.writeObject(instance.getBoatUUID());
+        streamWriter.writeString(instance.getBoatName());
+        streamWriter.writeString(instance.getBoatClassName());
+        streamWriter.writeString(instance.getSailNumber());
     }
 
     @Override
@@ -52,11 +55,27 @@ public class CompetitorDescriptor_CustomFieldSerializer extends CustomFieldSeria
             throws SerializationException {
         @SuppressWarnings("unchecked")
         final List<PersonDTO> persons = (List<PersonDTO>) streamReader.readObject();
-        return new CompetitorDescriptor(streamReader.readString(), streamReader.readString(),
-                streamReader.readString(), streamReader.readString(), streamReader.readString(),
-                streamReader.readString(), streamReader.readString(), streamReader.readString(),
-                streamReader.readString(), streamReader.readString(), (CountryCode) streamReader.readObject(),
-                persons, (Double) streamReader.readObject(), (Duration) streamReader.readObject());
+        String eventName = streamReader.readString();
+        String regattaName = streamReader.readString();
+        String raceName = streamReader.readString();
+        String fleetName = streamReader.readString();
+        UUID competitorUUID = (UUID) streamReader.readObject();
+        String fullName = streamReader.readString();
+        String shortName = streamReader.readString();
+        String teamName = streamReader.readString();
+        CountryCode countryCode = (CountryCode) streamReader.readObject();
+        Double timeOnTimeFactor = (Double) streamReader.readObject();
+        Duration timeOnDistanceAllowancePerNauticalMile = (Duration) streamReader.readObject();
+        UUID boatUUID = (UUID) streamReader.readObject();
+        String boatName = streamReader.readString();
+        String boatClassName = streamReader.readString();
+        String sailNumber = streamReader.readString();
+              
+        return new CompetitorDescriptor(eventName, regattaName,
+                raceName, fleetName, competitorUUID,
+                fullName, shortName, teamName,
+                persons, countryCode, timeOnTimeFactor,
+                timeOnDistanceAllowancePerNauticalMile, boatUUID, boatName, boatClassName, sailNumber);
     }
 
     @Override

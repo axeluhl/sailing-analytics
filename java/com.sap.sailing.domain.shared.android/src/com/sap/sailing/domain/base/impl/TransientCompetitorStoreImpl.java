@@ -376,6 +376,14 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         }
     }
 
+    @Override
+    public void addNewCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
+        for (CompetitorWithBoat competitor: competitors) {
+            addNewCompetitor(competitor);
+            addNewBoat(competitor.getBoat());
+        }
+    }
+
     private CompetitorWithBoat createCompetitorWithBoat(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
         CompetitorWithBoat competitor = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
