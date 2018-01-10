@@ -86,9 +86,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.base.Competitor resolveCompetitor(ICompetitor competitor);
 
-//    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
-
-//    com.sap.sailing.domain.base.CompetitorWithBoat getOrCreateCompetitorWithBoat(ICompetitor competitor);
+    void updateCompetitor(ICompetitor competitor);
     
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the

@@ -241,15 +241,27 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor resolveCompetitor(ICompetitor competitor) {
-        Competitor result = null;
-        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
-        result = competitorStore.getExistingCompetitorById(competitor.getId());
-        if (result == null) {
-            result = competitorStore.getExistingCompetitorWithBoatById(competitor.getId());
-        }
-        return result;
+        return baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitor.getId());
     }
 
+    @Override
+    public void updateCompetitor(ICompetitor competitor) {
+        Competitor domainCompetitor = this.resolveCompetitor(competitor);
+        if (domainCompetitor != null) {
+            if (domainCompetitor instanceof CompetitorWithBoat) {
+                getOrCreateCompetitorWithBoat(competitor);
+            } else {
+                getOrCreateCompetitor(competitor);
+            }
+            logger.info("Competitor " + competitor
+                    + " was updated on TracTrac side. Maybe consider updating in competitor store as well. "
+                    + "TracTrac competitor maps to " + domainCompetitor.getName() + " with ID "
+                    + domainCompetitor.getId().toString());
+        } else {
+            logger.info("Could not find competitor "+competitor+" in competitor store.");            
+        }
+    }
+    
     private Competitor getOrCreateCompetitor(ICompetitor competitor) {
         Competitor result = getOrCreateCompetitor(competitor.getId(), competitor.getNationality(), competitor.getName(),
                 competitor.getShortName(), competitor.getHandicapToT(), competitor.getHandicapToD(), null);

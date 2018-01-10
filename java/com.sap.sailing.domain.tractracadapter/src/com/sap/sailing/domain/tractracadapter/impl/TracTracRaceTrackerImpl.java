@@ -336,8 +336,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public void updateCompetitor(ICompetitor competitor) {
             	if (!competitor.isNonCompeting()) {
-                    // TODO bug2822: How should we handle an updated sailID now as the sailID belongs to the boat in our domain model
-                    TracTracRaceTrackerImpl.this.domainFactory.resolveCompetitor(competitor);
+                    TracTracRaceTrackerImpl.this.domainFactory.updateCompetitor(competitor);
             	}
             }
             
