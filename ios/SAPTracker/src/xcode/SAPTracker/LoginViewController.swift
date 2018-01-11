@@ -40,6 +40,7 @@ class LoginViewController: FormularViewController {
         setupButtons()
         setupLocalization()
         setupNavigationBar()
+        setupTextFields()
     }
     
     fileprivate func setupButtons() {
@@ -60,6 +61,11 @@ class LoginViewController: FormularViewController {
     
     fileprivate func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+
+    fileprivate func setupTextFields() {
+        userNameTextField.text = signUpController?.userName
+        passwordTextField.text = signUpController?.userPassword
     }
 
     // MARK: - Actions

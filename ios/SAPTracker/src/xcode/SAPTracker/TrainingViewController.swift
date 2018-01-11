@@ -40,6 +40,7 @@ class TrainingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
+        login()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -65,7 +66,18 @@ class TrainingViewController: UIViewController {
         startTrackingButton.setTitle(isTrainingActive ? Translation.TrainingView.StartTrackingButton.Title.StringWhenTrainingIsActive : Translation.TrainingView.StartTrackingButton.Title.StringWhenTrainingIsInActive, for: .normal)
         finishButton.setTitle(Translation.TrainingView.FinishButton.Title.String, for: .normal)
     }
-    
+
+    // MARK: - Login
+
+    fileprivate func login() {
+        SVProgressHUD.show()
+        signUpController.login(success: { (userName) in
+            SVProgressHUD.dismiss()
+        }) { (error, message) in
+            SVProgressHUD.dismiss()
+        }
+    }
+
     // MARK: - Refresh
     
     func refresh(_ animated: Bool) {
@@ -132,7 +144,7 @@ class TrainingViewController: UIViewController {
         failure: @escaping (_ error: Error) -> Void)
     {
         SVProgressHUD.show()
-        self.stopActiveRace {
+        self.stopActiveRace(completion: {
             self.startNewRace(success: {
                 SVProgressHUD.dismiss()
                 success()
@@ -140,7 +152,7 @@ class TrainingViewController: UIViewController {
                 SVProgressHUD.dismiss()
                 failure(error)
             }
-        }
+        })
     }
     
     fileprivate func stopActiveRace(completion: (() -> Void)? = nil) {
@@ -175,7 +187,7 @@ class TrainingViewController: UIViewController {
             self?.finishTrainingSuccess()
         }) { [weak self] (error) in
             SVProgressHUD.dismiss()
-            self?.showAlert(forError: error)
+            self?.handle(error: error)
         }
     }
 
@@ -197,7 +209,7 @@ class TrainingViewController: UIViewController {
             self?.reactivateTrainingSuccess()
         }) { [weak self] (error) in
             SVProgressHUD.dismiss()
-            self?.showAlert(forError: error)
+            self?.handle(error: error)
         }
     }
 
@@ -228,10 +240,12 @@ class TrainingViewController: UIViewController {
 
     @IBAction func startTrackingButtonTapped(_ sender: Any) {
         if isTrainingActive {
-            startTracking(success: {
-                self.delegate?.trainingViewController(self, startTrackingButtonTapped: sender)
-            }) { (error) in
-                self.showAlert(forError: error)
+            startTracking(success: { [weak self] in
+                if let strongSelf = self {
+                    strongSelf.delegate?.trainingViewController(strongSelf, startTrackingButtonTapped: sender)
+                }
+            }) { [weak self] (error) in
+                self?.handle(error: error)
             }
         } else {
             showReactivateAlert()
@@ -284,9 +298,23 @@ class TrainingViewController: UIViewController {
             return trainingCheckIn.event.endDate - Date().timeIntervalSince1970 > 0
         }
     }
-    
+
+    fileprivate lazy var signUpController: SignUpController = {
+        return SignUpController(baseURLString: self.trainingController.baseURLString)
+    }()
+
     fileprivate lazy var trainingController: TrainingController = {
         return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: self.trainingCheckIn.serverURL)
     }()
-    
+
+    // MARK: - Helper
+
+    fileprivate func handle(error: Error) {
+        if ErrorHelper.isResponseUnauthorized(error: error as NSError) {
+            self.signUpController.loginWithViewController(self)
+        } else {
+            self.showAlert(forError: error)
+        }
+    }
+
 }

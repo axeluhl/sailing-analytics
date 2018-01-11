@@ -76,6 +76,9 @@ class SignUpTranslation: NSObject {
         struct LoginFailed {
             static let String = NSLocalizedString("SignUpControllerError.LoginFailed", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
         }
+        struct Unauthenticated {
+            static let String = NSLocalizedString("SignUpControllerError.Unauthenticated", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
+        }
     }
     
     // MARK: - SignUpView

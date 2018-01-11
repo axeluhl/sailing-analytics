@@ -67,7 +67,7 @@ class CheckInController : NSObject {
     // MARK: - CheckIn
     
     func checkInWithViewController(
-        _ viewController: UIViewController,
+        _ viewController: UIViewController?,
         checkInData: CheckInData,
         success: @escaping (_ checkIn: CheckIn) -> Void,
         failure: @escaping (_ error: Error) -> Void)

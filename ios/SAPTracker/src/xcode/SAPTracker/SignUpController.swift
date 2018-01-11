@@ -10,6 +10,7 @@ import UIKit
 
 enum SignUpControllerError: Error {
     case loginFailed
+    case unauthenticated
 }
 
 extension SignUpControllerError: LocalizedError {
@@ -17,6 +18,8 @@ extension SignUpControllerError: LocalizedError {
         switch self {
         case .loginFailed:
             return SignUpTranslation.SignUpControllerError.LoginFailed.String
+        case .unauthenticated:
+            return SignUpTranslation.SignUpControllerError.Unauthenticated.String
         }
     }
 }
@@ -41,82 +44,81 @@ class SignUpController: NSObject {
         requestManager = SignUpRequestManager(baseURLString: baseURLString)
         super.init()
     }
-    
-    // MARK: - Login
-    
-    func loginWithViewController(_ controller: UIViewController) {
-        SVProgressHUD.show()
+
+    // MARK: - Check Authentication
+
+    func checkAuthentication(
+        success: @escaping (_ userName: String) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
         requestManager.postHello(success: { (principal, authenticated, remembered) in
-            self.loginWithViewControllerSuccess(controller)
-        }) { (error, message) in
-            do {
-                let userName = try Keychain.userName.readPassword()
-                let password = try Keychain.userPassword.readPassword()
-                self.requestManager.postAccessToken(userName: userName, password: password, success: { (userName, accessToken) in
-                    do {
-                        try Keychain.userName.savePassword(userName)
-                        try Keychain.userAccessToken.savePassword(accessToken)
-                    } catch {
-                        self.showAlert(forError: error, andMessage: message, withViewController: controller)
-                    }
-                    self.loginWithViewControllerSuccess(controller)
-                }, failure: { (error, message) in
-                    self.loginWithViewControllerFailure(controller)
-                })
-            } catch {
-                self.loginWithViewControllerFailure(controller)
+            if authenticated {
+                success(principal)
+            } else {
+                failure(SignUpControllerError.unauthenticated, nil)
             }
+        }) { (error, message) in
+            failure(error, message)
         }
     }
-    
-    fileprivate func loginWithViewControllerSuccess(_ controller: UIViewController) {
-        SVProgressHUD.dismiss()
-        self.didFinishLoginWithViewController(controller)
+
+    // MARK: - Refresh Access Token
+
+    func refreshAccessToken(
+        success: @escaping (_ userName: String) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        requestManager.postAccessToken(userName: userName ?? "", password: userPassword ?? "", success: { (userName, accessToken) in
+            self.userAccessToken = accessToken
+            success(userName)
+        }, failure: failure)
     }
-    
-    fileprivate func loginWithViewControllerFailure(_ controller: UIViewController) {
-        SVProgressHUD.dismiss()
+
+    // MARK: - Login
+
+    func login(
+        success: @escaping (_ userName: String) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        self.checkAuthentication(success: success) { (error, message) in
+            self.refreshAccessToken(success: success, failure: failure)
+        }
+    }
+
+    func loginWithViewController(_ controller: UIViewController) {
         let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
         let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
         let loginVC = loginNC.viewControllers[0] as! LoginViewController
         loginVC.signUpController = self
         controller.present(loginNC, animated: true, completion: nil)
     }
-    
+
     // MARK: - Logout
-    
-    func logoutWithViewController(_ controller: UIViewController) {
-        do {
-            try Keychain.userName.deleteItem()
-            try Keychain.userPassword.deleteItem()
-            try Keychain.userAccessToken.deleteItem()
-        } catch {
-            showAlert(forError: error, andMessage: nil, withViewController: controller)
-        }
+
+    func logout(completion: @escaping () -> Void) {
+        userName = nil
+        userPassword = nil
+        userAccessToken = nil
         requestManager.postLogout(success: { [weak self] in
-            self?.didLogoutWithViewController(controller)
+            self?.didLogout()
+            completion()
         }) { [weak self] (error, message) in
-            self?.didLogoutWithViewController(controller)
+            self?.didLogout()
+            completion()
         }
     }
-    
+
     // MARK: SignUpControllerDelegate
     
-    fileprivate func didFinishLoginWithViewController(_ controller: UIViewController) {
-        do {
-            let userName = try Keychain.userName.readPassword()
-            delegate?.signUpController(self, didFinishLoginWithUserName: userName)
-        } catch {
-            showAlert(forError: error, andMessage: nil, withViewController: controller)
-            didCancelLoginWithViewController(controller)
-        }
+    fileprivate func didFinishLogin() {
+        delegate?.signUpController(self, didFinishLoginWithUserName: userName ?? "")
     }
     
-    fileprivate func didCancelLoginWithViewController(_ controller: UIViewController) {
+    fileprivate func didCancelLogin() {
         delegate?.signUpControllerDidCancelLogin(self)
     }
     
-    fileprivate func didLogoutWithViewController(_ controller: UIViewController) {
+    fileprivate func didLogout() {
         delegate?.signUpControllerDidLogout(self)
     }
 
@@ -128,6 +130,54 @@ class SignUpController: NSObject {
         }
     }
 
+    var userName: String? {
+        get {
+            return password(forItem: Keychain.userName(forService: baseURLString))
+        }
+        set (value) {
+            setPassword(value, forItem: Keychain.userName(forService: baseURLString))
+        }
+    }
+
+    var userPassword: String? {
+        get {
+            return password(forItem: Keychain.userPassword(forService: baseURLString))
+        }
+        set (value) {
+            setPassword(value, forItem: Keychain.userPassword(forService: baseURLString))
+        }
+    }
+
+    var userAccessToken: String? {
+        get {
+            return password(forItem: Keychain.userAccessToken(forService: baseURLString))
+        }
+        set (value) {
+            setPassword(value, forItem: Keychain.userAccessToken(forService: baseURLString))
+        }
+    }
+
+    fileprivate func password(forItem item: KeychainPasswordItem) -> String? {
+        do {
+            return try item.readPassword()
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+
+    fileprivate func setPassword(_ password: String?, forItem item: KeychainPasswordItem) {
+        do {
+            if let password = password {
+                try item.savePassword(password)
+            } else {
+                try item.deleteItem()
+            }
+        } catch {
+            print(error)
+        }
+    }
+
     // MARK: - Helper
     
     fileprivate func showAlert(forError error: Error, andMessage message: String?, withViewController controller: UIViewController) {
@@ -136,7 +186,7 @@ class SignUpController: NSObject {
         alertController.addAction(okAction)
         controller.present(alertController, animated: true, completion: nil)
     }
-    
+
 }
 
 // MARK: - LoginViewControllerDelegate
@@ -153,19 +203,15 @@ extension SignUpController: LoginViewControllerDelegate {
     
     func loginViewControllerWillCancel(_ controller: LoginViewController) {
         controller.presentingViewController?.dismiss(animated: true)
-        didCancelLoginWithViewController(controller)
+        didCancelLogin()
     }
     
     fileprivate func loginViewController(_ controller: LoginViewController, didFinishLoginWithUserName userName: String, password: String, accessToken: String) {
-        do {
-            try Keychain.userName.savePassword(userName)
-            try Keychain.userPassword.savePassword(password)
-            try Keychain.userAccessToken.savePassword(accessToken)
-        } catch {
-            showAlert(forError: error, andMessage: nil, withViewController: controller)
-        }
+        self.userName = userName
+        self.userPassword = password
+        self.userAccessToken = accessToken
         controller.presentingViewController?.dismiss(animated: true)
-        didFinishLoginWithViewController(controller)
+        didFinishLogin()
     }
     
     fileprivate func loginViewController(_ controller: LoginViewController, didFailLoginWithError error: Error, message: String?) {
@@ -206,15 +252,11 @@ extension SignUpController: SignUpViewControllerDelegate {
         password: String,
         accessToken: String)
     {
-        do {
-            try Keychain.userName.savePassword(userName)
-            try Keychain.userPassword.savePassword(password)
-            try Keychain.userAccessToken.savePassword(accessToken)
-        } catch {
-            showAlert(forError: error, andMessage: nil, withViewController: controller)
-        }
+        self.userName = userName
+        self.userPassword = password
+        self.userAccessToken = accessToken
         controller.presentingViewController?.dismiss(animated: true)
-        didFinishLoginWithViewController(controller)
+        didFinishLogin()
     }
     
     fileprivate func signUpViewController(_ controller: SignUpViewController, didFailSignUpWithError error: Error, message: String?) {

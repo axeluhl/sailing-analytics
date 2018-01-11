@@ -17,17 +17,18 @@ protocol CreateTrainingViewControllerDelegate: class {
 class CreateTrainingViewController: UIViewController {
     
     weak var delegate: CreateTrainingViewControllerDelegate?
-    
+
     weak var trainingController: TrainingController!
     weak var trainingCoreDataManager: TrainingCoreDataManager!
-    
-    @IBOutlet weak var boatClassPickerView: UIPickerView!
-    @IBOutlet weak var boatClassNameLabel: UILabel!
-    @IBOutlet weak var createTrainingButton: UIButton!
+
+    @IBOutlet var boatClassPickerView: UIPickerView!
+    @IBOutlet var boatClassNameLabel: UILabel!
+    @IBOutlet var createTrainingButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
+        login()
     }
     
     // MARK: - Setup
@@ -51,7 +52,18 @@ class CreateTrainingViewController: UIViewController {
     fileprivate func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
-    
+
+    // MARK: - Login
+
+    fileprivate func login() {
+        SVProgressHUD.show()
+        signUpController.login(success: { (userName) in
+            SVProgressHUD.dismiss()
+        }) { (error, message) in
+            SVProgressHUD.dismiss()
+        }
+    }
+
     // MARK: - Actions
     
     @IBAction func cancelButtonTapped(_ sender: Any) {
@@ -59,43 +71,60 @@ class CreateTrainingViewController: UIViewController {
     }
     
     @IBAction func createTrainingButtonTapped(_ sender: Any) {
-        let boatClassName = BoatClassNames[boatClassPickerView.selectedRow(inComponent: 0)]
-        createTraining(forBoatClassName: boatClassName)
+        // TODO: sailID and nationality shouldn't be static
+        createTrainingAndPerformCheckIn(
+            forBoatClassName: BoatClassNames[boatClassPickerView.selectedRow(inComponent: 0)],
+            sailID: "",
+            nationality: "GER"
+        )
     }
     
     // MARK: - CreateTraining
-    
-    fileprivate func createTraining(forBoatClassName boatClassName: String) {
+
+    fileprivate func createTrainingAndPerformCheckIn(
+        forBoatClassName boatClassName: String,
+        sailID: String,
+        nationality: String)
+    {
         SVProgressHUD.show()
-        trainingController.createTraining(forBoatClassName: boatClassName, sailID: "", nationality: "GER", success: { checkInData in
+        self.trainingController.createTraining(forBoatClassName: boatClassName, sailID: sailID, nationality: nationality, success: { checkInData in
+            self.trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] (checkIn) in
+                SVProgressHUD.dismiss()
+                if let strongSelf = self {
+                    strongSelf.dismiss(animated: true) {
+                        strongSelf.delegate?.createTrainingViewController(strongSelf, didCheckIn: checkIn)
+                    }
+                }
+            }) { [weak self] (error) in
+                SVProgressHUD.dismiss()
+                self?.handle(error: error)
+            }
+        }) { [weak self] (error) in
             SVProgressHUD.dismiss()
-            self.checkIn(withCheckInData: checkInData)
-        }) { (error) in
-            SVProgressHUD.dismiss()
-            self.showAlert(forError: error)
+            self?.handle(error: error)
         }
     }
-    
-    fileprivate func checkIn(withCheckInData checkInData: CheckInData) {
-        trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { (checkIn) in
-            self.createTrainingSuccess(checkIn: checkIn)
-        }) { (error) in
-            self.showAlert(forError: error)
-        }
-    }
-    
-    fileprivate func createTrainingSuccess(checkIn: CheckIn) {
-        dismiss(animated: true) {
-            self.delegate?.createTrainingViewController(self, didCheckIn: checkIn)
-        }
-    }
-    
+
     // MARK: - Propeties
-    
+
+    fileprivate lazy var signUpController: SignUpController = {
+        return SignUpController(baseURLString: self.trainingController.baseURLString)
+    }()
+
     fileprivate lazy var trainingCheckInController: TrainingCheckInController = {
         return TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
     }()
-    
+
+    // MARK: - Helper
+
+    fileprivate func handle(error: Error) {
+        if ErrorHelper.isResponseUnauthorized(error: error as NSError) {
+            self.signUpController.loginWithViewController(self)
+        } else {
+            self.showAlert(forError: error)
+        }
+    }
+
 }
 
 // MARK: - UIPickerViewDataSource

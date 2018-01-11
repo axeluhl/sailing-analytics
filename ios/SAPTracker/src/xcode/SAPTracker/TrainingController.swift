@@ -263,9 +263,9 @@ class TrainingController: NSObject {
                         raceColumnName: raceColumnName,
                         fleetName: fleetName
                     )
-                    success(trainingRaceData)
                     self.trainingRaceData = trainingRaceData
                     self.subscribeForSentGPSFixesNotifications()
+                    success(trainingRaceData)
                 }, failure: { (error, message) in
                     failure(error)
                 })
@@ -290,25 +290,27 @@ class TrainingController: NSObject {
 
         // 1. Get tracked race name for race column
         self.trainingRequestManager.getLeaderboardGroup(leaderboardName: leaderboardName, success: { (leaderboardGroupData) in
-            if let raceName = leaderboardGroupData.raceName(trainingRaceData: trainingRaceData) {
-
-                // 2. Get course for tracked race name
-                self.trainingRequestManager.getRegattaRaceCourse(regattaName: regattaName, raceName: raceName, success: { (regattaRaceCourseData) in
-
-                    // 3. Precondition for auto course
-                    if regattaRaceCourseData.isEmpty() || regattaRaceCourseData.isAutoCourse() {
-
-                        // 4. Set auto course
-                        self.trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: { (leaderboardAutoCourseData) in
-                            completion()
-                        }) { (error, message) in
-                            completion()
-                        }
-                    }
-                }, failure: { (error, message) in
-                    completion()
-                })
+            guard let raceName = leaderboardGroupData.raceName(trainingRaceData: trainingRaceData) else {
+                completion()
+                return
             }
+
+            // 2. Get course for tracked race name
+            self.trainingRequestManager.getRegattaRaceCourse(regattaName: regattaName, raceName: raceName, success: { (course) in
+                guard course.isEmpty() || course.isAutoCourse() else {
+                    completion()
+                    return
+                }
+
+                // 3. Set auto course
+                self.trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: { (leaderboardAutoCourseData) in
+                    completion()
+                }) { (error, message) in
+                    completion()
+                }
+            }, failure: { (error, message) in
+                completion()
+            })
         }) { (error, message) in
             completion()
         }

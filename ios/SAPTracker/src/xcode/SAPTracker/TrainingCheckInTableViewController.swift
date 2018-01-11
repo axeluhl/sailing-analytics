@@ -15,8 +15,6 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
         static let CreateTraining = "CreateTraining"
     }
 
-    var signUpController: SignUpController?
-
     @IBOutlet weak var addButton: UIButton!
     
     override func viewDidLoad() {
@@ -24,6 +22,11 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
         super.viewDidLoad()
         setup()
         subscribeForNotifications()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        titleView.setSubtitle(subtitle: signUpController.userName ?? "")
     }
 
     deinit {
@@ -35,6 +38,7 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     fileprivate func setup() {
         setupAddButton()
         setupLocalization()
+        setupNavigationBar()
     }
     
     fileprivate func setupAddButton() {
@@ -42,9 +46,13 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     }
     
     fileprivate func setupLocalization() {
-        navigationItem.title = Translation.TrainingCheckInListView.Title.String
         headerTitleLabel.text = Translation.TrainingCheckInListView.HeaderTitleLabel.Text.String
         footerTextView.text = Translation.TrainingCheckInListView.FooterTextView.Text.String
+    }
+
+    fileprivate func setupNavigationBar() {
+        navigationItem.titleView = titleView
+        navigationController?.navigationBar.setNeedsLayout()
     }
 
     // MARK: - Notifications
@@ -65,6 +73,7 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     @objc fileprivate func trainingEndpointChanged(_ notification: Notification) {
         DispatchQueue.main.async(execute: {
             guard let trainingEndpoint = notification.userInfo?[Preferences.UserInfo.TrainingEndpoint] as? String else { return }
+            self.signUpController = SignUpController(baseURLString: trainingEndpoint)
             self.trainingController = TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: trainingEndpoint)
         })
     }
@@ -94,9 +103,11 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     }
 
     fileprivate func logout() {
-        // TODO: implement
+        signUpController.logout {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
-    
+
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -111,6 +122,17 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     }
     
     // MARK: - Properties
+
+    fileprivate lazy var titleView: TitleView = {
+        return TitleView(
+            title: Translation.TrainingCheckInListView.Title.String,
+            subtitle: self.signUpController.userName ?? ""
+        )
+    }()
+
+    fileprivate lazy var signUpController: SignUpController = {
+        return SignUpController(baseURLString: Preferences.trainingEndpoint)
+    }()
 
     fileprivate lazy var trainingCheckInController: TrainingCheckInController = {
         return TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
