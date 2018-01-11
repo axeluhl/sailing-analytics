@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -66,28 +66,28 @@ public class LeaderboardDiscardingRulesTest {
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
 
-        CompetitorAndBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner");
+        CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race1, "R1", /* medalRace */false);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race2, "R2", /* medalRace */false);
 
-        CompetitorAndBoat wolfgang = AbstractLeaderboardTest.createCompetitorAndBoat("Wolfgang Hunger");
+        CompetitorWithBoat wolfgang = AbstractLeaderboardTest.createCompetitorWithBoat("Wolfgang Hunger");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race3, "R3", /* medalRace */false);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 124, /* started */ true, boatClass);
         leaderboard.addRace(race4, "R4", /* medalRace */false);
 
-        leaderboard.getScoreCorrection().correctScore(hasso.getCompetitor(), leaderboard.getRaceColumnByName("R3"), 123.);
-        leaderboard.getScoreCorrection().correctScore(hasso.getCompetitor(), leaderboard.getRaceColumnByName("R4"), 123.);
-        leaderboard.getScoreCorrection().correctScore(wolfgang.getCompetitor(), leaderboard.getRaceColumnByName("R1"), 122.);
-        leaderboard.getScoreCorrection().correctScore(wolfgang.getCompetitor(), leaderboard.getRaceColumnByName("R2"), 122.);
+        leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R3"), 123.);
+        leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R4"), 123.);
+        leaderboard.getScoreCorrection().correctScore(wolfgang, leaderboard.getRaceColumnByName("R1"), 122.);
+        leaderboard.getScoreCorrection().correctScore(wolfgang, leaderboard.getRaceColumnByName("R2"), 122.);
         
         TimePoint now = MillisecondsTimePoint.now();
         // Hunger scores better than Plattner in this case because Hunger's two discards are 123/124, keeping 122/122
         // whereas Plattner is to discard two of the four 123 results, keeping 123/123, being two points worse than Hunger:
-        double netPointsHasso = leaderboard.getNetPoints(hasso.getCompetitor(), now);
-        double netPointsWolfgang = leaderboard.getNetPoints(wolfgang.getCompetitor(), now);
+        double netPointsHasso = leaderboard.getNetPoints(hasso, now);
+        double netPointsWolfgang = leaderboard.getNetPoints(wolfgang, now);
         assertEquals(122.+122., netPointsWolfgang, 0.0000000001);
         assertEquals(123.+123., netPointsHasso,  0.000000001);
     }
@@ -105,32 +105,32 @@ public class LeaderboardDiscardingRulesTest {
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", /* typicallyStartsUpwind */ true);
 
-        CompetitorAndBoat rasmus = AbstractLeaderboardTest.createCompetitorAndBoat("Rasmus");
+        CompetitorWithBoat rasmus = AbstractLeaderboardTest.createCompetitorWithBoat("Rasmus");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
         leaderboard.addRace(race1, "R1", /* medalRace */false);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
         leaderboard.addRace(race2, "R2", /* medalRace */false);
 
-        CompetitorAndBoat jes = AbstractLeaderboardTest.createCompetitorAndBoat("Jes");
+        CompetitorWithBoat jes = AbstractLeaderboardTest.createCompetitorWithBoat("Jes");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 2, /* started */ true, boatClass); // score 2.0
         leaderboard.addRace(race3, "R3", /* medalRace */false);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 3, /* started */ true, boatClass); // score 1.0
         leaderboard.addRace(race4, "R4", /* medalRace */false);
         
-        CompetitorAndBoat nobody = AbstractLeaderboardTest.createCompetitorAndBoat("Nobody");
+        CompetitorWithBoat nobody = AbstractLeaderboardTest.createCompetitorWithBoat("Nobody");
         final TrackedRace race5 = new MockedTrackedRaceWithFixedRank(nobody, /* rank */ 3, /* started */ true, boatClass); // score 1.0
         leaderboard.addRace(race5, "R5", /* medalRace */false);
 
-        leaderboard.getScoreCorrection().correctScore(rasmus.getCompetitor(), leaderboard.getRaceColumnByName("R3"), 2.0);
-        leaderboard.getScoreCorrection().correctScore(rasmus.getCompetitor(), leaderboard.getRaceColumnByName("R4"), 2.0);
-        leaderboard.getScoreCorrection().correctScore(jes.getCompetitor(), leaderboard.getRaceColumnByName("R1"), 3.0);
-        leaderboard.getScoreCorrection().correctScore(jes.getCompetitor(), leaderboard.getRaceColumnByName("R2"), 3.0);
+        leaderboard.getScoreCorrection().correctScore(rasmus, leaderboard.getRaceColumnByName("R3"), 2.0);
+        leaderboard.getScoreCorrection().correctScore(rasmus, leaderboard.getRaceColumnByName("R4"), 2.0);
+        leaderboard.getScoreCorrection().correctScore(jes, leaderboard.getRaceColumnByName("R1"), 3.0);
+        leaderboard.getScoreCorrection().correctScore(jes, leaderboard.getRaceColumnByName("R2"), 3.0);
         
         TimePoint now = MillisecondsTimePoint.now();
         // Jes scores better than Rasmus in this case because Jes's two discards are 1.0/2.0, keeping 3.0/3.0
         // whereas Rasmus is to discard two of the four 2.0 results, keeping 2.0/2.0, being two points worse than Hunger:
-        double netPointsRasmus = leaderboard.getNetPoints(rasmus.getCompetitor(), now);
-        double netPointsJes = leaderboard.getNetPoints(jes.getCompetitor(), now);
+        double netPointsRasmus = leaderboard.getNetPoints(rasmus, now);
+        double netPointsJes = leaderboard.getNetPoints(jes, now);
         assertEquals(3, Util.size(leaderboard.getCompetitors()));
         assertEquals(3.+3., netPointsJes, 0.0000000001);
         assertEquals(2.+2., netPointsRasmus,  0.000000001);
@@ -149,30 +149,30 @@ public class LeaderboardDiscardingRulesTest {
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
 
-        CompetitorAndBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner");
+        CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race1, "R1", /* medalRace */false);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race2, "R2", /* medalRace */false);
 
-        CompetitorAndBoat wolfgang = AbstractLeaderboardTest.createCompetitorAndBoat("Wolfgang Hunger");
+        CompetitorWithBoat wolfgang = AbstractLeaderboardTest.createCompetitorWithBoat("Wolfgang Hunger");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race3, "R3", /* medalRace */false);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 124, /* started */ true, boatClass);
         leaderboard.addRace(race4, "R4", /* medalRace */false);
 
-        leaderboard.getScoreCorrection().correctScore(hasso.getCompetitor(), leaderboard.getRaceColumnByName("R3"), 123.);
-        leaderboard.getScoreCorrection().correctScore(hasso.getCompetitor(), leaderboard.getRaceColumnByName("R4"), 123.);
-        leaderboard.getScoreCorrection().setMaxPointsReason(hasso.getCompetitor(), leaderboard.getRaceColumnByName("R1"), MaxPointsReason.DNE);
-        leaderboard.getScoreCorrection().correctScore(hasso.getCompetitor(), leaderboard.getRaceColumnByName("R1"), 123.);
-        leaderboard.getScoreCorrection().correctScore(wolfgang.getCompetitor(), leaderboard.getRaceColumnByName("R1"), 122.);
-        leaderboard.getScoreCorrection().correctScore(wolfgang.getCompetitor(), leaderboard.getRaceColumnByName("R2"), 122.);
+        leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R3"), 123.);
+        leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R4"), 123.);
+        leaderboard.getScoreCorrection().setMaxPointsReason(hasso, leaderboard.getRaceColumnByName("R1"), MaxPointsReason.DNE);
+        leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R1"), 123.);
+        leaderboard.getScoreCorrection().correctScore(wolfgang, leaderboard.getRaceColumnByName("R1"), 122.);
+        leaderboard.getScoreCorrection().correctScore(wolfgang, leaderboard.getRaceColumnByName("R2"), 122.);
         
         TimePoint now = MillisecondsTimePoint.now();
         // Hunger scores better than Plattner in this case because Hunger's two discards are 123/124, keeping 122/122
         // whereas Plattner is to discard two of the four 123 results, keeping 123/123, being two points worse than Hunger:
-        double netPointsHasso = leaderboard.getNetPoints(hasso.getCompetitor(), now);
-        double netPointsWolfgang = leaderboard.getNetPoints(wolfgang.getCompetitor(), now);
+        double netPointsHasso = leaderboard.getNetPoints(hasso, now);
+        double netPointsWolfgang = leaderboard.getNetPoints(wolfgang, now);
         assertEquals(122.+122., netPointsWolfgang, 0.0000000001);
         assertEquals(123.+123., netPointsHasso,  0.000000001);
     }

@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -79,7 +79,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         // resolved properly on the replica.
         final DomainFactory domainFactory = new DomainFactoryImpl((srlid)->null);
         BoatClass boatClass = domainFactory.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        CompetitorAndBoat hassoWithBoat = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner"); // don't create competitor using CompetitorStore
+        CompetitorWithBoat hassoWithBoat = AbstractLeaderboardTest.createCompetitorWithBoat("Dr. Hasso Plattner"); // don't create competitor using CompetitorStore
         final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hassoWithBoat, /* rank */ 1, /* started */ false, boatClass) {
             private static final long serialVersionUID = 1234L;
             @Override
@@ -98,9 +98,9 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         master.apply(new AddColumnToLeaderboard(Q2, leaderboardName, /* medalRace */ false)); // uses leaderboard's default fleet 
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(masterLeaderboard.getName(), Q2, /* default fleet */
                 masterLeaderboard.getFleet(null).getName(), q2YellowTrackedRace.getRaceIdentifier()));
-        master.apply(new UpdateLeaderboardMaxPointsReason(masterLeaderboard.getName(), Q2, hassoWithBoat.getCompetitor().getId().toString(),
+        master.apply(new UpdateLeaderboardMaxPointsReason(masterLeaderboard.getName(), Q2, hassoWithBoat.getId().toString(),
                 MaxPointsReason.DNF, MillisecondsTimePoint.now()));
-        assertEquals(MaxPointsReason.DNF, masterLeaderboard.getMaxPointsReason(hassoWithBoat.getCompetitor(),
+        assertEquals(MaxPointsReason.DNF, masterLeaderboard.getMaxPointsReason(hassoWithBoat,
                 masterLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // re-load new master from persistence
@@ -112,7 +112,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         // expecting the correction to not be in the leaderboard because the competitor was not found in the
         // domain factory's competitor store while loading and therefore the score correction could not immediately
         // be applied to the leaderboard's real score correction
-        assertEquals(MaxPointsReason.NONE, masterLeaderboardReloaded.getMaxPointsReason(hassoWithBoat.getCompetitor(),
+        assertEquals(MaxPointsReason.NONE, masterLeaderboardReloaded.getMaxPointsReason(hassoWithBoat,
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // replicate the re-loaded environment
@@ -130,7 +130,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2));
         // so far, the replica should also only have the delayed corrections since during deserializing them the
         // replicatedHasso competitor was not yet known to the replica's competitor store:
-        assertEquals(MaxPointsReason.NONE, replicaLeaderboard.getMaxPointsReason(hassoWithBoat.getCompetitor(),
+        assertEquals(MaxPointsReason.NONE, replicaLeaderboard.getMaxPointsReason(hassoWithBoat,
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
         
         logger.info("hasso object ID hash: "+System.identityHashCode(hassoWithBoat));
@@ -151,13 +151,13 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(masterLeaderboard.getName(), Q2, /* default fleet */
                 masterLeaderboard.getFleet(null).getName(), q2YellowTrackedRace.getRaceIdentifier()));
         logger.info("got score correction for competitor "+System.identityHashCode(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2).iterator().next()));
-        assertTrue(Util.contains(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2), hassoWithBoat.getCompetitor())); // now score corrections must have been applied from Delayed... 
+        assertTrue(Util.contains(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2), hassoWithBoat)); // now score corrections must have been applied from Delayed... 
         // now the delayed corrections are expected to have been resolved:
-        assertEquals(MaxPointsReason.DNF, master.getLeaderboardByName(leaderboardName).getMaxPointsReason(hassoWithBoat.getCompetitor(),
+        assertEquals(MaxPointsReason.DNF, master.getLeaderboardByName(leaderboardName).getMaxPointsReason(hassoWithBoat,
                 master.getLeaderboardByName(leaderboardName).getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
         Thread.sleep(1000); // wait for the tracked race to column connection to be replicated
-        assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2).getTrackedRace(hassoWithBoat.getCompetitor()));
-        assertEquals(MaxPointsReason.DNF, replicaLeaderboard.getMaxPointsReason(hassoWithBoat.getCompetitor(),
+        assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2).getTrackedRace(hassoWithBoat));
+        assertEquals(MaxPointsReason.DNF, replicaLeaderboard.getMaxPointsReason(hassoWithBoat,
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
     }
     

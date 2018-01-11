@@ -5,11 +5,9 @@ import java.util.Collections;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
@@ -21,10 +19,6 @@ import com.sap.sse.common.Color;
 public abstract class AbstractLeaderboardTest {
     private final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
     
-    public static CompetitorAndBoat createCompetitorAndBoat(String competitorName) {
-        return new CompetitorAndBoatImpl(createCompetitor(competitorName), createBoat(competitorName));
-    }
-
     public static Competitor createCompetitor(String competitorName) {
         return new CompetitorImpl(competitorName, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
