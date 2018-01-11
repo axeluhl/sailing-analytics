@@ -109,15 +109,30 @@ Check:
 
 ## 5. Smartphone Tracking (SPT)
 
-### 5.1 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on regatta level
+### 5.1 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on REGATTA level
 
 Check:
 
 - Create a simple SPT regatta where boats can not change per race
-- Open 'Competitor registrations' dialog
-- Dialog must show 'Add Competitor' button
+- Open 'Competitor registrations' dialog on leaderboard level
+- Dialog must show 'Add Competitor with boat' button
 - Dialog must show only competitors with a linked boat in the 'Competitor pool' table on the right side
-- The registered competitor must be added to regattaLog via the RegattaLogRegisterCompetitorAndBoatEvent
+- The registered competitor must be added to regattaLog via the RegattaLogRegisterCompetitorEvent
+
+### 5.2 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on RACE level
+
+Check:
+
+- Create a simple SPT regatta where boats can not change per race
+- Open 'Competitor registrations' dialog on race level
+- Select 'Register Competitors on Race' to enable registration on race level
+- Dialog must show 'Add Competitor with boat' button
+- Dialog must show only competitors with a linked boat in the 'Competitor pool' table on the right side
+- The registered competitor must be added to raceLog via the RaceLogRegisterCompetitorEvent
+
+### 5.3 Regatta where boats CAN change per race - Standalone competitors and boats are registered on regatta level
+
+
 
 ## 6. Incremental Leaderboard
 
@@ -157,7 +172,7 @@ Check:
 
 ## 1. CompetitorStore (CompetitorAndBoatStore) and BoatFactory
 
-## 2. Migration der 'COMPETITORS' collection -> 'COMPETITORS_WITH_BOAT_REFERENCES' und 'BOATS'
+## 2. Migration der 'COMPETITORS' collection -> 'COMPETITORS' und 'BOATS' + 'COMPETITORS_BAK' (backup)
 
 ## 3. Neue RaceLog und RegattaLogEvents
 
