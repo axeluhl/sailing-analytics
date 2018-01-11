@@ -10,7 +10,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -26,16 +26,16 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private final BoatClass boatClass;
     protected RaceDefinition raceDefinition;
     
-    public MockedTrackedRaceWithFixedRank(CompetitorAndBoat competitorWithBoat, int rank, boolean started, BoatClass boatClass) {
+    public MockedTrackedRaceWithFixedRank(CompetitorWithBoat competitorWithBoat, int rank, boolean started, BoatClass boatClass) {
         this.rank = rank;
         this.started = started;
         this.competitorsAndBoats = new HashMap<>();
         this.raceDefinition = new MockedRaceDefinition();
         this.boatClass = boatClass;
-        this.competitorsAndBoats.put(competitorWithBoat.getCompetitor(), competitorWithBoat.getBoat());
+        this.competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
     }
 
-    public MockedTrackedRaceWithFixedRank(CompetitorAndBoat competitorWithBoat,int rank, boolean started) {
+    public MockedTrackedRaceWithFixedRank(CompetitorWithBoat competitorWithBoat,int rank, boolean started) {
         this(competitorWithBoat, rank, started, /* boatClass */ null);
     }
 
@@ -59,17 +59,17 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
 
         @Override
         public Iterable<Competitor> getCompetitors() {
-            return MockedTrackedRaceWithFixedRank.this.competitorsAndBoats.keySet();
+            return competitorsAndBoats.keySet();
         }
 
         @Override
         public Iterable<Boat> getBoats() {
-            return MockedTrackedRaceWithFixedRank.this.competitorsAndBoats.values();
+            return competitorsAndBoats.values();
         }
 
         @Override
         public Map<Competitor, Boat> getCompetitorsAndTheirBoats() {
-            return MockedTrackedRaceWithFixedRank.this.competitorsAndBoats;
+            return competitorsAndBoats;
         }
 
         @Override
@@ -94,7 +94,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
 
         @Override
         public Boat getBoatOfCompetitor(Competitor competitor) {
-            return null;
+            return competitorsAndBoats.get(competitor);
         }
 
         @Override
@@ -126,5 +126,10 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     @Override
     public RaceDefinition getRace() {
         return raceDefinition;
+    }
+    
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return competitorsAndBoats.get(competitor);
     }
 }

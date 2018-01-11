@@ -6,14 +6,14 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 
 public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrackedRaceWithFixedRank {
     private static final long serialVersionUID = -6189437610363552577L;
     
-    public MockedTrackedRaceWithFixedRankAndManyCompetitors(CompetitorAndBoat competitorWithBoat, int rank, boolean started) {
+    public MockedTrackedRaceWithFixedRankAndManyCompetitors(CompetitorWithBoat competitorWithBoat, int rank, boolean started) {
         super(competitorWithBoat, rank, started);
         this.raceDefinition = new RaceDefinition() {
             private static final long serialVersionUID = 8878878939443845646L;
@@ -57,7 +57,7 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
             }
             @Override
             public Boat getBoatOfCompetitor(Competitor competitor) {
-                return null;
+                return competitorsAndBoats.get(competitor);
             }
             @Override
             public byte[] getCompetitorMD5() {
@@ -66,8 +66,8 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
         };
     }
     
-    public void addCompetitorAndBoat(CompetitorAndBoat competitorWithBoat) {
-        competitorsAndBoats.put(competitorWithBoat.getCompetitor(), competitorWithBoat.getBoat());
+    public void addCompetitorWithBoat(CompetitorWithBoat competitorWithBoat) {
+        competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
     }
 
     @Override

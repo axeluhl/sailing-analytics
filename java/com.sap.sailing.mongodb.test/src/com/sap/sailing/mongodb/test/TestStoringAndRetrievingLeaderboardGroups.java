@@ -129,7 +129,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
                 new CompetitorAndBoatImpl(wolfgang,wolfgangsBoat), /* rank */ 1, /* started */ true);
-        raceWithTwoCompetitors.addCompetitorAndBoat(new CompetitorAndBoatImpl(hasso,hassosBoat));
+        raceWithTwoCompetitors.addCompetitorWithBoat(new CompetitorAndBoatImpl(hasso,hassosBoat));
 
         final String[] leaderboardNames = {"Leaderboard 0", "Leaderboard 1", "Leaderboard 2", "Leaderboard 3"};
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
@@ -188,7 +188,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
                 new CompetitorAndBoatImpl(wolfgang,wolfgangsBoat), /* rank */ 1, /* started */ true);
-        raceWithTwoCompetitors.addCompetitorAndBoat(new CompetitorAndBoatImpl(hasso,hassosBoat));
+        raceWithTwoCompetitors.addCompetitorWithBoat(new CompetitorAndBoatImpl(hasso,hassosBoat));
 
         final String[] leaderboardNames = {"Leaderboard 0", "Leaderboard 1", "Leaderboard 2", "Leaderboard 3"};
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
@@ -247,7 +247,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
                 new CompetitorAndBoatImpl(wolfgang,wolfgangsBoat), /* rank */ 1, /* started */ true);
-        raceWithTwoCompetitors.addCompetitorAndBoat(new CompetitorAndBoatImpl(hasso,hassosBoat));
+        raceWithTwoCompetitors.addCompetitorWithBoat(new CompetitorAndBoatImpl(hasso,hassosBoat));
 
         final String[] leaderboardNames = {"Leaderboard 0", "Leaderboard 1", "Leaderboard 2", "Leaderboard 3"};
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
