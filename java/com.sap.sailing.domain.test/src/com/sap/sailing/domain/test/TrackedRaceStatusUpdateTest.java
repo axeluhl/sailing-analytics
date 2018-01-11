@@ -5,7 +5,7 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
@@ -19,12 +19,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *
  */
 public class TrackedRaceStatusUpdateTest extends TrackBasedTest {
-    private CompetitorAndBoat competitor;
+    private CompetitorWithBoat competitor;
     private DynamicTrackedRace trackedRace;
     
     @Before
     public void setUp() {
-        competitor = createCompetitorAndBoat("Test Competitor");
+        competitor = createCompetitorWithBoat("Test Competitor");
         trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", createCompetitorAndBoatsMap(competitor), MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
     }
     

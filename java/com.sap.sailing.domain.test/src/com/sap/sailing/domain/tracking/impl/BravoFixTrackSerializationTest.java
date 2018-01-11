@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
@@ -31,8 +31,8 @@ public class BravoFixTrackSerializationTest {
     
     @Before
     public void setUp() {
-        CompetitorAndBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("SAP Extreme Sailing Team");
-        track = new BravoFixTrackImpl<Competitor>(competitorAndBoat.getCompetitor(), BravoFixTrack.TRACK_NAME, false);
+        CompetitorWithBoat competitor = TrackBasedTest.createCompetitorWithBoat("SAP Extreme Sailing Team");
+        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME, false);
     }
     
     @Test

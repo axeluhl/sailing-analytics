@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -49,26 +49,23 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
-    private List<Competitor> competitors;
-    private List<CompetitorAndBoat> competitorsWithBoats;
+    private List<CompetitorWithBoat> competitors;
     private static final String[] competitorNames = new String[] { "Wolfgang Hunger", "Dr. Hasso Plattner",  "Robert Stanjek", "Simon Grotelueschen" };
     
     @Before
     public void setUp() {
-        competitorsWithBoats = new ArrayList<>();
         competitors = new ArrayList<>();
         for (String name : competitorNames) {
-            CompetitorAndBoat competitorAndBoat = createCompetitorAndBoat(name);
-            competitorsWithBoats.add(competitorAndBoat);
-            competitors.add(competitorAndBoat.getCompetitor());
+            CompetitorWithBoat competitor = createCompetitorWithBoat(name);
+            competitors.add(competitor);
         }
     }
     
     private void initRace(int numberOfCompetitorsToUse, int[] numberOfMarksPassed, TimePoint timePointForFixes) {
-        List<CompetitorAndBoat> subList = competitorsWithBoats.subList(0, numberOfCompetitorsToUse);
+        List<CompetitorWithBoat> subList = competitors.subList(0, numberOfCompetitorsToUse);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
-        for (CompetitorAndBoat competitorAndBoat: subList) {
-            competitorsAndBoats.put(competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());
+        for (CompetitorWithBoat competitor: subList) {
+            competitorsAndBoats.put(competitor, competitor.getBoat());
         }
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505",
                 competitorsAndBoats, timePointForFixes, /* useMarkPassingCalculator */ false));

@@ -20,7 +20,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
@@ -85,12 +85,12 @@ public class SearchServiceTest {
     private Venue flensburg;
     private Event pfingstbusch;
     private Regatta pfingstbusch29er;
-    private CompetitorAndBoat hassoPlattner;
-    private CompetitorAndBoat alexanderRies;
-    private CompetitorAndBoat antonKoch;
-    private CompetitorAndBoat  tobiasSchadewaldt;
-    private CompetitorAndBoat  philippBuhl;
-    private CompetitorAndBoat  dennisGehrlein;
+    private CompetitorWithBoat hassoPlattner;
+    private CompetitorWithBoat alexanderRies;
+    private CompetitorWithBoat antonKoch;
+    private CompetitorWithBoat tobiasSchadewaldt;
+    private CompetitorWithBoat philippBuhl;
+    private CompetitorWithBoat dennisGehrlein;
     private Regatta pfingstbusch470;
     private Regatta aalRegatta;
     private DynamicTrackedRace pfingstbusch29erTrackedR1;
@@ -182,12 +182,12 @@ public class SearchServiceTest {
                 /* displayGroupsInReverseOrder */ false, Collections.singletonList(RegattaImpl.getDefaultName("Aalregatta", "ORC")),
                 new int[0], /* overallLeaderboardScoringSchemeType */ null));
         server.apply(new AddLeaderboardGroupToEvent(aalEvent.getId(), aalLeaderboardGroup.getId()));
-        hassoPlattner = AbstractTracTracLiveTest.createCompetitorAndBoat("Hasso Plattner");
-        alexanderRies = AbstractTracTracLiveTest.createCompetitorAndBoat("Alexander Ries");
-        antonKoch = AbstractTracTracLiveTest.createCompetitorAndBoat("Anton Koch");
-        tobiasSchadewaldt = AbstractTracTracLiveTest.createCompetitorAndBoat("Tobias Schadewaldt");
-        philippBuhl = AbstractTracTracLiveTest.createCompetitorAndBoat("Philipp Buhl");
-        dennisGehrlein = AbstractTracTracLiveTest.createCompetitorAndBoat("Dennis Gehrlein");
+        hassoPlattner = AbstractTracTracLiveTest.createCompetitorWithBoat("Hasso Plattner");
+        alexanderRies = AbstractTracTracLiveTest.createCompetitorWithBoat("Alexander Ries");
+        antonKoch = AbstractTracTracLiveTest.createCompetitorWithBoat("Anton Koch");
+        tobiasSchadewaldt = AbstractTracTracLiveTest.createCompetitorWithBoat("Tobias Schadewaldt");
+        philippBuhl = AbstractTracTracLiveTest.createCompetitorWithBoat("Philipp Buhl");
+        dennisGehrlein = AbstractTracTracLiveTest.createCompetitorWithBoat("Dennis Gehrlein");
         final RaceDefinitionImpl pfingstbusch29erR1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch29er.getBoatClass(),
                 AbstractTracTracLiveTest.createCompetitorAndBoatsMap(alexanderRies, tobiasSchadewaldt));
         final RaceDefinitionImpl pfingstbusch29erR2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch29er.getBoatClass(),

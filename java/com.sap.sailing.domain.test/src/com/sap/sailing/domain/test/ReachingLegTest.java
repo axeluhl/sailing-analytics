@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -75,15 +75,12 @@ public class ReachingLegTest extends TrackBasedTest {
     @Before
     public void setUp() {
         competitorsAndBoats = new LinkedHashMap<>();
-        CompetitorAndBoat hungerWithBoat = createCompetitorAndBoat("Wolfgang Hunger");
-        hunger = hungerWithBoat.getCompetitor();
-        competitorsAndBoats.put(hungerWithBoat.getCompetitor(), hungerWithBoat.getBoat());
-        CompetitorAndBoat plattnerWithBoat = createCompetitorAndBoat("Dr. Hasso Plattner");
-        plattner = plattnerWithBoat.getCompetitor();
-        competitorsAndBoats.put(plattnerWithBoat.getCompetitor(), plattnerWithBoat.getBoat());
-        CompetitorAndBoat schomaekerWithBoat = createCompetitorAndBoat("Meike Schom�ker");
-        schomaeker = schomaekerWithBoat.getCompetitor();
-        competitorsAndBoats.put(schomaekerWithBoat.getCompetitor(), schomaekerWithBoat.getBoat());
+        CompetitorWithBoat hunger = createCompetitorWithBoat("Wolfgang Hunger"); 
+        competitorsAndBoats.put(hunger, hunger.getBoat());
+        CompetitorWithBoat plattner = createCompetitorWithBoat("Dr. Hasso Plattner");
+        competitorsAndBoats.put(plattner, plattner.getBoat());
+        CompetitorWithBoat schomaeker = createCompetitorWithBoat("Meike Schom�ker");
+        competitorsAndBoats.put(schomaeker, schomaeker.getBoat());
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         setTrackedRace(createTrackedRace("Kieler Woche", "505 Race 2", "505", competitorsAndBoats, start));
         List<MarkPassing> hungersMarkPassings = createMarkPassings(hunger, start);

@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -76,17 +76,17 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class TestFarthestAheadWithSkippedMarkPassing {
     private RankingMetric rankingMetric;
     private DynamicTrackedRace trackedRace;
-    private Competitor c1, c2;
+    private CompetitorWithBoat c1, c2;
     private Waypoint start;
     private Waypoint windward;
     private Waypoint finish;
     
     private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
-        CompetitorAndBoat fastCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("FastBoat");
-        c1 = fastCompetitorAndBoat.getCompetitor();
-        CompetitorAndBoat slowCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("SlowBoat");
-        c2 = slowCompetitorAndBoat.getCompetitor();
-        trackedRace = createTrackedRace(TrackBasedTest.createCompetitorAndBoatsMap(fastCompetitorAndBoat, slowCompetitorAndBoat));
+        CompetitorWithBoat fastCompetitor = TrackBasedTest.createCompetitorWithBoat("FastBoat");
+        c1 = fastCompetitor;
+        CompetitorWithBoat slowCompetitor = TrackBasedTest.createCompetitorWithBoat("SlowBoat");
+        c2 = slowCompetitor;
+        trackedRace = createTrackedRace(TrackBasedTest.createCompetitorAndBoatsMap(fastCompetitor, slowCompetitor));
         rankingMetric = trackedRace.getRankingMetric();
         assertEquals(120, trackedRace.getCourseLength().getNauticalMiles(), 0.02);
         assertSame(RankingMetrics.ONE_DESIGN, trackedRace.getTrackedRegatta().getRegatta().getRankingMetricType());

@@ -16,7 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
@@ -31,11 +31,12 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
@@ -88,23 +89,23 @@ public abstract class TrackBasedTest {
     }
 
     @SafeVarargs
-    public static Map<Competitor,Boat> createCompetitorAndBoatsMap(CompetitorAndBoat... competitorsAndBoats) {
+    public static Map<Competitor,Boat> createCompetitorAndBoatsMap(CompetitorWithBoat... competitorsWithBoats) {
         Map<Competitor,Boat> result = new LinkedHashMap<>(); 
-        for (CompetitorAndBoat competitorAndBoat: competitorsAndBoats) {
-            result.put(competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());
+        for (CompetitorWithBoat competitorWithBoat: competitorsWithBoats) {
+            result.put(competitorWithBoat, competitorWithBoat.getBoat());
         }
         return result;
     }
 
-    public static CompetitorAndBoat createCompetitorAndBoat(String competitorName) {
+    public static CompetitorWithBoat createCompetitorWithBoat(String competitorName) {
         Competitor c = new CompetitorImpl(UUID.randomUUID(), competitorName, "HP", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), 
                         /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat b = new BoatImpl(c.getId(), competitorName + "'s boat", boatClass, null, null);
-        return new CompetitorAndBoatImpl(c, b);
+        DynamicBoat b = new BoatImpl(c.getId(), competitorName + "'s boat", boatClass, null, null);
+        return new CompetitorWithBoatImpl(c, b);
     }
 
     /**

@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -35,14 +35,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *
  */
 public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBasedTest {
-    private Competitor competitor;
+    private CompetitorWithBoat competitor;
     private DynamicTrackedRace trackedRace;
     
     @Before
     public void setUp() {
-        CompetitorAndBoat competitorAndBoat = createCompetitorAndBoat("Test Competitor");
-        Map<Competitor, Boat> competitorsAndBoats = TrackBasedTest.createCompetitorAndBoatsMap(competitorAndBoat);
-        competitor = competitorAndBoat.getCompetitor();
+        competitor = createCompetitorWithBoat("Test Competitor");
+        Map<Competitor, Boat> competitorsAndBoats = TrackBasedTest.createCompetitorAndBoatsMap(competitor);
         trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", competitorsAndBoats, MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
     }
     
