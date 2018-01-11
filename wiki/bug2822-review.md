@@ -86,7 +86,7 @@ Checkpoints are the same as in 1.1.
 ESS 2016 – Hamburg  
 http://skitrac.traclive.dk/events/event_20160727_ESSHamburg/jsonservice.php
 
-## 3.3. Tracking of existing sailing event without changing boats
+### 3.3. Tracking of existing sailing event without changing boats
 
 505 IDM 2013 – Berlin:  
 http://traclive.dk/events/event_20130917_IDMO/jsonservice.php  
@@ -101,23 +101,53 @@ Check:
 - Overall Leaderboard: shortName, fullName are visible, boat name is invisible
 - In the ‚raceColumn‘ table of the leaderboard the ‚Edit used boats for competitors‘ action is not visible
 
-## 3.4 Create new league event with changing boats
-
-## 3.5 Create new event without changing boats
-
 ## 4. Tracking with SwissTiming connector
 
 ## 5. Smartphone Tracking (SPT)
 
-### 5.1 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on regatta level
+### 5.1 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on REGATTA level
 
 Check:
 
-- Create a simple SPT regatta where boats can not change per race
-- Open 'Competitor registrations' dialog
-- Dialog must show 'Add Competitor' button
+- Create a simple SPT regatta where boats CAN NOT change per race
+- Open 'Competitor registrations' dialog on leaderboard level
+- Dialog must show 'Add Competitor with boat' button
 - Dialog must show only competitors with a linked boat in the 'Competitor pool' table on the right side
-- The registered competitor must be added to regattaLog via the RegattaLogRegisterCompetitorAndBoatEvent
+- The registered competitor must be added to regattaLog via the RegattaLogRegisterCompetitorEvent
+- Clicking of 'Boat registrations' on leaderboard level should show a warning message 
+
+### 5.2 Regatta where boats CAN NOT change per race - Competitors (with boats) are registered on RACE level
+
+Check:
+
+- Create a simple SPT regatta where boats CAN NOT change per race
+- Open 'Competitor registrations' dialog on race level
+- Select 'Register Competitors on Race' to enable registration on race level
+- Dialog must show 'Add Competitor with boat' button
+- Dialog must show only competitors with a linked boat in the 'Competitor pool' table on the right side
+- The registered competitor must be added to raceLog via the RaceLogRegisterCompetitorEvent
+- Clicking of 'Boat registrations' on leaderboard level should show a warning message 
+
+### 5.3 Regatta where boats CAN change per race - Standalone competitors and boats are registered on regatta level
+
+Check:
+
+- REMARK: The competitor/boat assignments are only possible on the race level
+- Create a simple SPT regatta where boats CAN change per race
+- Open 'Competitor registrations' dialog on leaderboard level
+- Dialog must show a 'Add Competitor' button
+- Dialog must show only competitors without linked boats in the 'Competitor pool' table on the right side
+- The registered competitors must be added to regattaLog via the RegattaLogRegisterCompetitorEvent
+- Open 'Boat registrations' dialog on leaderboard level
+- Dialog must show a 'Add Boat' button
+- Dialog must show only standalone boats in the 'Boat pool' table on the right side
+- The registered boats must be added to the regattaLog via the RegattaLogRegisterBoatEvent
+- Open the 'Competitor registrations' dialog on race level
+- Check the 'Register Competitors on Race' checkbox to enable the registration of competitors
+- Add some competitors to the race and click on 'Continue with boat assignments'
+- Assign the boats to the competitors
+- Check the boat assignments with the 'Show boats used by competitors' action on race level
+- The registered competitors must be added to raceLog via the RegisterCompetitorEvent and contain also the assigned boat
 
 ## 6. Incremental Leaderboard
 
@@ -157,7 +187,7 @@ Check:
 
 ## 1. CompetitorStore (CompetitorAndBoatStore) and BoatFactory
 
-## 2. Migration der 'COMPETITORS' collection -> 'COMPETITORS_WITH_BOAT_REFERENCES' und 'BOATS'
+## 2. Migration der 'COMPETITORS' collection -> 'COMPETITORS' und 'BOATS' + 'COMPETITORS_BAK' (backup)
 
 ## 3. Neue RaceLog und RegattaLogEvents
 
