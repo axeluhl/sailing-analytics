@@ -350,6 +350,7 @@
 		C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */; };
 		C88F6D2D1FEACC5700A616BE /* LeaderboardGroupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */; };
 		C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */; };
+		C88F6D311FFBC35F00A616BE /* ErrorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
@@ -767,6 +768,7 @@
 		C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardAutoCourseData.swift; sourceTree = "<group>"; };
 		C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardGroupData.swift; sourceTree = "<group>"; };
 		C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaRaceCourseData.swift; sourceTree = "<group>"; };
+		C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHelper.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
@@ -1254,6 +1256,7 @@
 				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
 				C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */,
 				C85291511D48FB91009E9A9D /* Localizable.strings */,
+				C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -2057,6 +2060,7 @@
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */,
 				C8FF5B7C1EB8CF2C00CF9764 /* MarkData.swift in Sources */,
+				C88F6D311FFBC35F00A616BE /* ErrorHelper.swift in Sources */,
 				C8F71EEA1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.m in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
