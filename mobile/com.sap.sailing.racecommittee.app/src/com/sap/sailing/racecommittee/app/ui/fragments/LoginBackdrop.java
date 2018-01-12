@@ -1,8 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import com.sap.sailing.android.shared.data.LoginData;
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
@@ -13,7 +11,6 @@ import com.sap.sailing.android.shared.util.LoginTask;
 import com.sap.sailing.android.shared.util.LoginTask.LoginTaskListener;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.URLDecoder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -22,9 +19,8 @@ import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sailing.racecommittee.app.utils.UrlHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -33,12 +29,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
@@ -149,7 +143,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                     BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
                 }
             }
-            
+
             @Override
             public void onException(Exception exception) {
                 LoginBackdrop.this.onException(exception);
@@ -276,7 +270,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                     builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (saveData(
+                            if (QRHelper.with(getActivity()).saveData(
                                 url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.deviceIdentifierKey + "=" + device_id.getText()
                                     .toString())) {
                                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
@@ -351,7 +345,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 break;
 
             case Activity.RESULT_OK:
-                if (saveData(data.getStringExtra("SCAN_RESULT"))) {
+                if (QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"))) {
                     BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
                 }
                 break;
@@ -359,44 +353,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
             default:
                 Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
-    }
-
-    private boolean saveData(String content) {
-        try {
-            DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils
-                .splitQRContent(content, new URLDecoder() {
-                    @Override
-                    public String decode(String encodedURL) {
-                        try {
-                            return java.net.URLDecoder.decode(encodedURL, "UTF-8");
-                        } catch (UnsupportedEncodingException e) {
-                            ExLog.w(getActivity(), TAG, "Couldn't resolve encoding UTF-8");
-                            return encodedURL;
-                        }
-                    }
-                });
-
-            final String identifier = connectionConfiguration.getDeviceIdentifier();
-            final URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
-            final String accessToken = connectionConfiguration.getAccessToken();
-
-            if (apkUrl != null) {
-                String serverUrl = UrlHelper.getServerUrl(apkUrl);
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                editor.putString(getString(R.string.preference_identifier_key), identifier);
-                editor.putString(getString(R.string.preference_server_url_key), serverUrl);
-                editor.putString(getString(R.string.preference_access_token_key), accessToken);
-                editor.commit();
-
-                new AutoUpdater(getActivity()).checkForUpdate(false);
-                return true;
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr_malformed), Toast.LENGTH_LONG).show();
-            }
-        } catch (IllegalArgumentException e) {
-            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        return false;
     }
 
     private void formatText(TextView textView) {
