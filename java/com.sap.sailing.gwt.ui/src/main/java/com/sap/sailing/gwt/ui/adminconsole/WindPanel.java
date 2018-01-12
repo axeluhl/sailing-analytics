@@ -465,7 +465,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             uploadButton.setEnabled(true);
             busyIndicator.setBusy(false);
             final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
-            if (response.hasEventId()) {
+            if (response == null) {
+                Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
+            } else if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
                         response.getLeaderboardGroupName(), response.getLeaderboardName(), response.getRaceName(),
                         response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
