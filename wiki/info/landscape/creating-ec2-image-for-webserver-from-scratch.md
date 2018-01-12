@@ -10,7 +10,7 @@ This is an add-on to the regular EC2 image set-up described [here](https://wiki.
 
 Then carry out these steps:
 
-* install additional packages: `yum install git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
+* install additional packages: `yum install git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
 cpan install Date::Parse Email::Address Email::Send DBI
@@ -43,7 +43,6 @@ Successfully uninstalled rack-2.0.3
 * create `/etc/bugzilla/localconfig`
 * set up crontab for user `wiki` as `*/10 * * * * /home/wiki/syncgit` and make sure the script is in place
 * comment `lbmethod_heartbeat_module` in /etc/httpd/conf.modules.d/00-proxy.conf because we don't need this sort of load balancing across origin servers and it causes a warning message in error_log
-* (NOT WORKING CURRENTLY BECAUSE OF SINGLE-THREADED PHP: in `/etc/httpd/conf.module.d/00-mpm.conf` select `worker` instead of `prefork`)
 * install awstats to `/usr/share/awstats`, establish `/etc/httpd/conf/passwd.awstats` and create /etc/cron.weekly/awstats as follows:
 ```
 #!/bin/bash
