@@ -30,7 +30,7 @@ public class ManeuverWithEstimationDataCalculatorImpl implements ManeuverWithEst
 
     @Override
     public Iterable<ManeuverWithEstimationData> computeEstimationDataForManeuvers(TrackedRace trackedRace,
-            Competitor competitor, Iterable<Maneuver> maneuvers) {
+            Competitor competitor, Iterable<Maneuver> maneuvers, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
         int maneuversCount = Util.size(maneuvers);
         List<ManeuverWithEstimationData> result = new ArrayList<>(maneuversCount);
         if (maneuversCount > 0) {
@@ -40,13 +40,13 @@ public class ManeuverWithEstimationDataCalculatorImpl implements ManeuverWithEst
             while (maneuversIterator.hasNext()) {
                 Maneuver nextManeuver = maneuversIterator.next();
                 ManeuverWithEstimationData maneuverWithEstimationData = complementManeuverWithEstimationData(
-                        trackedRace, competitor, previousManeuver, maneuver, nextManeuver);
+                        trackedRace, competitor, previousManeuver, maneuver, nextManeuver, avgSpeedAndCogCalculationBeforeAndAfterManeuver);
                 result.add(maneuverWithEstimationData);
                 previousManeuver = maneuver;
                 maneuver = nextManeuver;
             }
             ManeuverWithEstimationData maneuverWithEstimationData = complementManeuverWithEstimationData(trackedRace,
-                    competitor, previousManeuver, maneuver, null);
+                    competitor, previousManeuver, maneuver, null, avgSpeedAndCogCalculationBeforeAndAfterManeuver);
             result.add(maneuverWithEstimationData);
         }
 
@@ -54,7 +54,7 @@ public class ManeuverWithEstimationDataCalculatorImpl implements ManeuverWithEst
     }
 
     private ManeuverWithEstimationData complementManeuverWithEstimationData(TrackedRace trackedRace,
-            Competitor competitor, Maneuver previousManeuver, Maneuver maneuver, Maneuver nextManeuver) {
+            Competitor competitor, Maneuver previousManeuver, Maneuver maneuver, Maneuver nextManeuver, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
         Wind wind = trackedRace.getWind(maneuver.getPosition(), maneuver.getTimePoint());
 
         Pair<SpeedWithBearing, SpeedWithBearing> speedPair = determineHighestAndLowestSpeedWithinMainCurve(trackedRace,
@@ -62,16 +62,22 @@ public class ManeuverWithEstimationDataCalculatorImpl implements ManeuverWithEst
         SpeedWithBearing highestSpeedWithinMainCurve = speedPair.getA();
         SpeedWithBearing lowestSpeedWithinMainCurve = speedPair.getB();
 
-        Pair<Duration, SpeedWithBearing> durationAndAverageSpeedWithBearingBetweenManeuvers = getDurationAndAverageSpeedWithBearingBetweenManeuvers(
-                trackedRace, competitor, previousManeuver, maneuver);
-        Duration durationFromPreviousManeuverEndToManeuverStart = durationAndAverageSpeedWithBearingBetweenManeuvers
-                .getA();
-        SpeedWithBearing averageSpeedWithBearingBefore = durationAndAverageSpeedWithBearingBetweenManeuvers.getB();
-
-        durationAndAverageSpeedWithBearingBetweenManeuvers = getDurationAndAverageSpeedWithBearingBetweenManeuvers(
-                trackedRace, competitor, maneuver, nextManeuver);
-        Duration durationFromManeuverEndToNextManeuverStart = durationAndAverageSpeedWithBearingBetweenManeuvers.getA();
-        SpeedWithBearing averageSpeedWithBearingAfter = durationAndAverageSpeedWithBearingBetweenManeuvers.getB();
+        Duration durationFromPreviousManeuverEndToManeuverStart = null;
+        SpeedWithBearing averageSpeedWithBearingBefore = null;
+        Duration durationFromManeuverEndToNextManeuverStart = null;
+        SpeedWithBearing averageSpeedWithBearingAfter = null;
+        if(avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
+            Pair<Duration, SpeedWithBearing> durationAndAverageSpeedWithBearingBetweenManeuvers = getDurationAndAverageSpeedWithBearingBetweenManeuvers(
+                    trackedRace, competitor, previousManeuver, maneuver);
+            durationFromPreviousManeuverEndToManeuverStart = durationAndAverageSpeedWithBearingBetweenManeuvers
+                    .getA();
+            averageSpeedWithBearingBefore = durationAndAverageSpeedWithBearingBetweenManeuvers.getB();
+    
+            durationAndAverageSpeedWithBearingBetweenManeuvers = getDurationAndAverageSpeedWithBearingBetweenManeuvers(
+                    trackedRace, competitor, maneuver, nextManeuver);
+            durationFromManeuverEndToNextManeuverStart = durationAndAverageSpeedWithBearingBetweenManeuvers.getA();
+            averageSpeedWithBearingAfter = durationAndAverageSpeedWithBearingBetweenManeuvers.getB();
+        }
         return new ManeuverWithEstimationDataImpl(maneuver, wind, highestSpeedWithinMainCurve,
                 lowestSpeedWithinMainCurve, averageSpeedWithBearingBefore,
                 durationFromPreviousManeuverEndToManeuverStart, averageSpeedWithBearingAfter,

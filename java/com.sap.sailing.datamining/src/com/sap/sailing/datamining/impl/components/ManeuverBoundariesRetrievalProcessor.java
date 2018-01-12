@@ -39,7 +39,7 @@ public class ManeuverBoundariesRetrievalProcessor
         ManeuverWithEstimationDataCalculator calculator = new ManeuverWithEstimationDataCalculatorImpl();
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
         Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = calculator
-                .computeEstimationDataForManeuvers(trackedRace, competitor, maneuvers);
+                .computeEstimationDataForManeuvers(trackedRace, competitor, maneuvers, true);
         for (ManeuverWithEstimationData maneuverWithEstimationData : maneuversWithEstimationData) {
             result.add(new ManeuverBoundariesWithContext(element, maneuverWithEstimationData));
         }

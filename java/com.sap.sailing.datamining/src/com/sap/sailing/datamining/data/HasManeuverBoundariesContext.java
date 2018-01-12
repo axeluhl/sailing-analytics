@@ -27,8 +27,8 @@ public interface HasManeuverBoundariesContext {
     @Statistic(messageKey = "ManeuverBoundarySpeedDeviationRatioFromAvg", ordinal = 1, resultDecimals = 4)
     Double getManeuverBoundarySpeedDeviationRatioFromAvgStatistic();
     
-    @Statistic(messageKey = "ManeuverBoundaryCogDeviationRatioFromAvg", ordinal = 2, resultDecimals = 4)
-    Double getManeuverBoundaryCogDeviationRatioFromAvgStatistic();
+    @Statistic(messageKey = "ManeuverBoundaryCogDeviationFromAvgInDegrees", ordinal = 2, resultDecimals = 4)
+    Double getManeuverBoundaryCogDeviationFromAvgInDegreesStatistic();
     
     @Statistic(messageKey = "DurationToNextManeuverInSeconds", ordinal = 3, resultDecimals = 4)
     Double getDurationToNextManeuverInSecondsStatistic();

@@ -1031,9 +1031,22 @@ public class RegattasResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/maneuversWithFullEstimationData")
+    public Response getManeuversWithFullEstimationData(@PathParam("regattaname") String regattaName,
+            @PathParam("racename") String raceName) {
+        return getManeuversWithEstimationData(regattaName, raceName, true);
+    }
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/maneuversWithEstimationData")
     public Response getManeuversWithEstimationData(@PathParam("regattaname") String regattaName,
             @PathParam("racename") String raceName) {
+        return getManeuversWithEstimationData(regattaName, raceName, false);
+    }
+    
+    private Response getManeuversWithEstimationData(String regattaName,
+            String raceName, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1052,7 +1065,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         new BoatClassJsonSerializer(),
                         new ManeuverWithEstimationDataJsonSerializer(new GPSFixJsonSerializer(),
                                 new ManeuverCurveBoundariesJsonSerializer(),
-                                new ManeuverWindJsonSerializer()));
+                                new ManeuverWindJsonSerializer(), avgSpeedAndCogCalculationBeforeAndAfterManeuver), avgSpeedAndCogCalculationBeforeAndAfterManeuver);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

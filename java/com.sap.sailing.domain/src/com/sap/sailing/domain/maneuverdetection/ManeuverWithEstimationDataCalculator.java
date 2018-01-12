@@ -17,6 +17,6 @@ public interface ManeuverWithEstimationDataCalculator {
      * Computes estimation data for the provided maneuvers.
      */
     Iterable<ManeuverWithEstimationData> computeEstimationDataForManeuvers(TrackedRace trackedRace,
-            Competitor competitor, Iterable<Maneuver> maneuvers);
+            Competitor competitor, Iterable<Maneuver> maneuvers, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver);
 
 }

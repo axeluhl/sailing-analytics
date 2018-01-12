@@ -22,11 +22,13 @@ public class ManeuversWithEstimationDataJsonSerializer extends AbstractTrackedRa
 
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final ManeuverWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer;
+    private final boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver;
 
     public ManeuversWithEstimationDataJsonSerializer(BoatClassJsonSerializer boatClassJsonSerializer,
-            ManeuverWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer) {
+            ManeuverWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
         this.boatClassJsonSerializer = boatClassJsonSerializer;
         this.maneuverWithEstimationDataJsonSerializer = maneuverWithEstimationDataJsonSerializer;
+        this.avgSpeedAndCogCalculationBeforeAndAfterManeuver = avgSpeedAndCogCalculationBeforeAndAfterManeuver;
     }
 
     @Override
@@ -55,7 +57,7 @@ public class ManeuversWithEstimationDataJsonSerializer extends AbstractTrackedRa
         Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = null;
         try {
             maneuversWithEstimationData = maneuverWithEstimationDataCalculator.computeEstimationDataForManeuvers(trackedRace, competitor,
-                    maneuvers);
+                    maneuvers, avgSpeedAndCogCalculationBeforeAndAfterManeuver);
         } catch(Exception e) {
             e.printStackTrace();
         }

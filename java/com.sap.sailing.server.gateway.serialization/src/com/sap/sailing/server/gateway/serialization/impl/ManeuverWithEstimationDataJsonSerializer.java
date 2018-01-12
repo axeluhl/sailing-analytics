@@ -33,13 +33,15 @@ public class ManeuverWithEstimationDataJsonSerializer implements JsonSerializer<
     private final ManeuverCurveBoundariesJsonSerializer maneuverCurveEnteringAndExitingDetailsJsonSerializer;
     private final ManeuverWindJsonSerializer windJsonSerializer;
     private final GPSFixJsonSerializer gpsFixSerializer;
+    private final boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver;
 
     public ManeuverWithEstimationDataJsonSerializer(GPSFixJsonSerializer gpsFixSerializer,
             ManeuverCurveBoundariesJsonSerializer maneuverCurveEnteringAndExitingDetailsJsonSerializer,
-            ManeuverWindJsonSerializer windJsonSerializer) {
+            ManeuverWindJsonSerializer windJsonSerializer, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
         this.gpsFixSerializer = gpsFixSerializer;
         this.maneuverCurveEnteringAndExitingDetailsJsonSerializer = maneuverCurveEnteringAndExitingDetailsJsonSerializer;
         this.windJsonSerializer = windJsonSerializer;
+        this.avgSpeedAndCogCalculationBeforeAndAfterManeuver = avgSpeedAndCogCalculationBeforeAndAfterManeuver;
     }
 
     @Override
@@ -64,21 +66,23 @@ public class ManeuverWithEstimationDataJsonSerializer implements JsonSerializer<
         result.put(LOWEST_SPEED_WITHIN_MAIN_CURVE_IN_KNOTS,
                 maneuverWithEstimationData.getLowestSpeedWithinMainCurve() == null ? null
                         : maneuverWithEstimationData.getLowestSpeedWithinMainCurve().getKnots());
-        result.put(AVERAGE_SPEED_BEFORE_IN_KNOTS, maneuverWithEstimationData.getAverageSpeedWithBearingBefore() == null
-                ? null : maneuverWithEstimationData.getAverageSpeedWithBearingBefore().getKnots());
-        result.put(AVERAGE_COURSE_BEFORE_IN_DEGREES,
-                maneuverWithEstimationData.getAverageSpeedWithBearingBefore() == null ? null
-                        : maneuverWithEstimationData.getAverageSpeedWithBearingBefore().getBearing().getDegrees());
-        result.put(DURATION_FROM_PREVIOUS_MANEUVER_IN_SECONDS,
-                maneuverWithEstimationData.getDurationFromPreviousManeuverEndToManeuverStart() == null ? null
-                        : maneuverWithEstimationData.getDurationFromPreviousManeuverEndToManeuverStart().asSeconds());
-        result.put(AVERAGE_SPEED_AFTER_IN_KNOTS, maneuverWithEstimationData.getAverageSpeedWithBearingAfter() == null
-                ? null : maneuverWithEstimationData.getAverageSpeedWithBearingAfter().getKnots());
-        result.put(AVERAGE_COURSE_AFTER_IN_DEGREES, maneuverWithEstimationData.getAverageSpeedWithBearingAfter() == null
-                ? null : maneuverWithEstimationData.getAverageSpeedWithBearingAfter().getBearing().getDegrees());
-        result.put(DURATION_TO_NEXT_MANEUVER_IN_SECONDS,
-                maneuverWithEstimationData.getDurationFromManeuverEndToNextManeuverStart() == null ? null
-                        : maneuverWithEstimationData.getDurationFromManeuverEndToNextManeuverStart().asSeconds());
+        if(avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
+            result.put(AVERAGE_SPEED_BEFORE_IN_KNOTS, maneuverWithEstimationData.getAverageSpeedWithBearingBefore() == null
+                    ? null : maneuverWithEstimationData.getAverageSpeedWithBearingBefore().getKnots());
+            result.put(AVERAGE_COURSE_BEFORE_IN_DEGREES,
+                    maneuverWithEstimationData.getAverageSpeedWithBearingBefore() == null ? null
+                            : maneuverWithEstimationData.getAverageSpeedWithBearingBefore().getBearing().getDegrees());
+            result.put(DURATION_FROM_PREVIOUS_MANEUVER_IN_SECONDS,
+                    maneuverWithEstimationData.getDurationFromPreviousManeuverEndToManeuverStart() == null ? null
+                            : maneuverWithEstimationData.getDurationFromPreviousManeuverEndToManeuverStart().asSeconds());
+            result.put(AVERAGE_SPEED_AFTER_IN_KNOTS, maneuverWithEstimationData.getAverageSpeedWithBearingAfter() == null
+                    ? null : maneuverWithEstimationData.getAverageSpeedWithBearingAfter().getKnots());
+            result.put(AVERAGE_COURSE_AFTER_IN_DEGREES, maneuverWithEstimationData.getAverageSpeedWithBearingAfter() == null
+                    ? null : maneuverWithEstimationData.getAverageSpeedWithBearingAfter().getBearing().getDegrees());
+            result.put(DURATION_TO_NEXT_MANEUVER_IN_SECONDS,
+                    maneuverWithEstimationData.getDurationFromManeuverEndToNextManeuverStart() == null ? null
+                            : maneuverWithEstimationData.getDurationFromManeuverEndToNextManeuverStart().asSeconds());
+        }
         return result;
     }
 
