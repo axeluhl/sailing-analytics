@@ -10,10 +10,10 @@ This is an add-on to the regular EC2 image set-up described [here](https://wiki.
 
 Then carry out these steps:
 
-* install additional packages: `yum install git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
+* install additional packages: `yum install fail2ban git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
-cpan install Date::Parse Email::Address Email::Send DBI
+cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl
 ```
 * make sure `/etc/alternatives/ruby` and `/etc/alternatives/gem` point to `/usr/bin/[ruby|gem]2.4`
 * run the following commands to install gollum and uninstall a too current rack version 2.0.3:
@@ -38,6 +38,17 @@ Successfully uninstalled rack-2.0.3
 * ensure there are users and groups for `wiki`, `scores`, `wordpress`, `trac` that match up with their /home directory owners / groups
 * ensure the Wiki startup script `serve.sh` configured for port 4567 and `config.ru` as well as the entire Gollum installation under /home/wiki are present, as well as the `users.yml` file
 * ensure there is a reasonable `/root/.goaccess` file
+* Configure goaccess by adjusting `/etc/goaccess.conf` such that it contains the following lines:
+```
+...
+time-format %H:%M:%S
+...
+date-format %d/%b/%Y
+...
+# NCSA Combined with virtual host name as prefix:
+log-format %v %h %^[%d:%t %^] "%r" %s %b "%R" "%u"
+```
+Note that the `log-format` piece is slightly different from the regular NCSA Combined Log Format in so far as it adds `%v` at the beginning which is capturing the virtual host name that our Apache servers are configured to log as the first field in each line.
 * ensure there is the `/etc/tmux.conf` file that maps your hotkeys (Ctrl-a vs. Ctrl-b, for example)
 * rename the `welcome.conf` file of the Apache configuration because it harms directory index presentation:
 ```
@@ -48,7 +59,7 @@ mv welcome.conf welcome.conf.org
 * create `/etc/bugzilla/localconfig`
 * set up crontab for user `wiki` as `*/10 * * * * /home/wiki/syncgit` and make sure the script is in place
 * comment `lbmethod_heartbeat_module` in /etc/httpd/conf.modules.d/00-proxy.conf because we don't need this sort of load balancing across origin servers and it causes a warning message in error_log
-* install awstats to `/usr/share/awstats`, establish `/etc/httpd/conf/passwd.awstats` and create /etc/cron.weekly/awstats as follows:
+* install awstats to `/usr/share/awstats`, establish `/etc/httpd/conf/passwd.awstats`, establish a configuration under `/etc/awstats`, establish AWStats data directory under `/var/lib/awstats` and create /etc/cron.weekly/awstats as follows:
 ```
 #!/bin/bash
 su -l -c '/usr/share/awstats/tools/awstats_updateall.pl now         -configdir="/etc/awstats"         -awstatsprog="/usr/share/awstats/wwwroot/cgi-bin/awstats.pl" >>/var/log/awstats-cron.out 2>>/var/log/awstats-cron.err'
@@ -129,7 +140,21 @@ HOME=/
 * Copy git contents of ssh://trac@sapsailing.com/home/trac/git to /home/trac/git
 * Ensure there is a /home/scores directory with subdirectories `barbados`, `kiwo`, `sailwave`, `scores`, `velum`, and `xrrftp`.
 * Establish the Apache web server configuration, in particular ensure that the SSL certificates are in place (see [here](https://wiki.sapsailing.com/wiki/info/security/ssl-support)) and the following files are set up: `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf/passwd.awstats`, `/etc/httpd/conf/passwd.git`, and `/etc/httpd/conf/conf.d/*.conf`.
+* Update the hostname in `/etc/sysconfig/network`: `HOSTNAME=analytics-webserver`
+* Run `chkconfig sendmail off; chkconfig postfix on` to make sure that the postfix mail server is the one that will be launched during boot
+* Reboot the system, among other things for the hostname change to take effect, and in addition to see whether all services start properly
+* configure fail2ban by editing `/etc/fail2ban/jail.conf`, entering reasonable e-mail configuration for the `ssh-iptables` filter as follows:
+```
+[ssh-iptables]
 
+enabled  = true
+filter   = sshd
+action   = iptables[name=SSH, port=ssh, protocol=tcp]
+           sendmail-whois[name=SSH, dest=axel.uhl@sap.com, sender=fail2ban@sapsailing.com]
+logpath  = /var/log/secure
+maxretry = 5
+```
+* Ensure that fail2ban will be started automatically when the instance starts: `chkconfig --level 23 fail2ban on` and start it right away with `service fail2ban start`. You can see which filters are active using `service fail2ban status`.
 
 ## Appendix / Resources
 BACKUP_DIRECTORIES="/etc /home/trac/git /home/trac/mailinglists /home/trac/maven-repositories /home/trac/p2-repositories /home/trac/releases /home/trac/sapsailing_layouts.git /var/www/static /home/trac/crontab /home/scores /var/log/old"
