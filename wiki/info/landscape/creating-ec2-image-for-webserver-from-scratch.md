@@ -15,7 +15,6 @@ Then carry out these steps:
 ```
 cpan install Date::Parse Email::Address Email::Send DBI
 ```
-* Since goaccess seems to have been removed from the Amazon Linux repositories, compile it from sources. See [https://goaccess.io/download](https://goaccess.io/download)
 * make sure `/etc/alternatives/ruby` and `/etc/alternatives/gem` point to `/usr/bin/[ruby|gem]2.4`
 * run the following commands to install gollum and uninstall a too current rack version 2.0.3:
 ```
