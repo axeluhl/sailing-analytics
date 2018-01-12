@@ -10,7 +10,7 @@ This is an add-on to the regular EC2 image set-up described [here](https://wiki.
 
 Then carry out these steps:
 
-* install additional packages: `yum install git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
+* install additional packages: `yum install fail2ban git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
 cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl
@@ -131,7 +131,20 @@ HOME=/
 * Establish the Apache web server configuration, in particular ensure that the SSL certificates are in place (see [here](https://wiki.sapsailing.com/wiki/info/security/ssl-support)) and the following files are set up: `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf/passwd.awstats`, `/etc/httpd/conf/passwd.git`, and `/etc/httpd/conf/conf.d/*.conf`.
 * Update the hostname in `/etc/sysconfig/network`: `HOSTNAME=analytics-webserver`
 * Run `chkconfig sendmail off; chkconfig postfix on` to make sure that the postfix mail server is the one that will be launched during boot
+* activate 
 * Reboot the system, among other things for the hostname change to take effect, and in addition to see whether all services start properly
+* configure fail2ban by editing `/etc/fail2ban/jail.conf`, entering reasonable e-mail configuration for the `ssh-iptables` filter as follows:
+```
+[ssh-iptables]
+
+enabled  = true
+filter   = sshd
+action   = iptables[name=SSH, port=ssh, protocol=tcp]
+           sendmail-whois[name=SSH, dest=axel.uhl@sap.com, sender=fail2ban@sapsailing.com]
+logpath  = /var/log/secure
+maxretry = 5
+```
+* Ensure that fail2ban will be started automatically when the instance starts: `chkconfig --level 23 fail2ban on` and start it right away with `service fail2ban start`. You can see which filters are active using `service fail2ban status`.
 
 ## Appendix / Resources
 BACKUP_DIRECTORIES="/etc /home/trac/git /home/trac/mailinglists /home/trac/maven-repositories /home/trac/p2-repositories /home/trac/releases /home/trac/sapsailing_layouts.git /var/www/static /home/trac/crontab /home/scores /var/log/old"
