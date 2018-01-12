@@ -1,7 +1,30 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
+
+import com.sap.sailing.android.shared.data.LoginData;
+import com.sap.sailing.android.shared.data.http.UnauthorizedException;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AuthCheckTask;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.LoginTask;
+import com.sap.sailing.android.shared.util.LoginTask.LoginTaskListener;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.URLDecoder;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.BackPressListener;
+import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -36,28 +59,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.data.LoginData;
-import com.sap.sailing.android.shared.data.http.UnauthorizedException;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AuthCheckTask;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.LoginTask;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.URLDecoder;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.BackPressListener;
-import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
-import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
-import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sailing.racecommittee.app.utils.UrlHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListener, AuthCheckTask.AuthCheckTaskListener, BackPressListener {
+public class LoginBackdrop extends Fragment implements BackPressListener {
 
     private static final String TAG = LoginBackdrop.class.getName();
     private static final int requestCodeQR = 45392;
@@ -68,6 +70,8 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
     private View onboarding;
     private boolean useBack;
     private String server;
+    private AuthCheckTask.AuthCheckTaskListener mAuthCheckTaskListener;
+    private LoginTaskListener loginTaskListener;
 
     public static LoginBackdrop newInstance() {
 
@@ -119,6 +123,38 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         setupOnboarding(layout);
         setupLogin(layout);
 
+        mAuthCheckTaskListener = new AuthCheckTask.AuthCheckTaskListener() {
+            @Override
+            public void onResultReceived(Boolean authenticated) {
+                if (authenticated) {
+                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+                } else {
+                    Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                LoginBackdrop.this.onException(exception);
+            }
+        };
+        loginTaskListener = new LoginTaskListener() {
+            @Override
+            public void onResultReceived(String accessToken) {
+                if (LoginBackdrop.this.login != null) {
+                    LoginBackdrop.this.login.setVisibility(View.GONE);
+                }
+                if (isAdded()) {
+                    AppPreferences.on(getActivity()).setAccessToken(accessToken);
+                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+                }
+            }
+            
+            @Override
+            public void onException(Exception exception) {
+                LoginBackdrop.this.onException(exception);
+            }
+        };
         receiver = new IntentReceiver();
 
         return layout;
@@ -291,9 +327,13 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
             login.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    LoginTask task = new LoginTask(getActivity(), AppPreferences.on(getActivity()).getServerBaseURL(), LoginBackdrop.this);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new LoginData(userName.getText().toString(), userPassword.getText()
-                        .toString()));
+                    LoginTask task;
+                    try {
+                        task = new LoginTask(getActivity(), AppPreferences.on(getActivity()).getServerBaseURL(), loginTaskListener);
+                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new LoginData(userName.getText().toString(), userPassword.getText().toString()));
+                    } catch (Exception e) {
+                        ExLog.e(getActivity(), TAG, "Error: Failed to perform checkin due to a MalformedURLException: " + e.getMessage());
+                    }
                 }
             });
         }
@@ -369,26 +409,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         }
     }
 
-    @Override
-    public void onTokenReceived(String accessToken) {
-        if (login != null) {
-            login.setVisibility(View.GONE);
-        }
-        AppPreferences.on(getActivity()).setAccessToken(accessToken);
-        BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
-    }
-
-    @Override
-    public void onRequestReceived(Boolean authenticated) {
-        if (authenticated) {
-            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
-        } else {
-            Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    public void onException(Exception exception) {
+    private void onException(Exception exception) {
         if (login != null) {
             if (login.getVisibility() == View.VISIBLE) {
                 if (exception instanceof UnauthorizedException) {
@@ -467,8 +488,12 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                 if (TextUtils.isEmpty(pref.getServerBaseURL())) {
                     BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_ONBOARDING));
                 } else {
-                    AuthCheckTask task = new AuthCheckTask(getActivity(), pref.getServerBaseURL(), LoginBackdrop.this);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    try {
+                        AuthCheckTask task = new AuthCheckTask(getActivity(), pref.getServerBaseURL(), mAuthCheckTaskListener);
+                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    } catch (MalformedURLException e) {
+                        ExLog.e(getActivity(), TAG, "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
+                    }
                 }
             } else if (AppConstants.INTENT_ACTION_SHOW_ONBOARDING.equals(action)) {
                 setVisibility(onboarding, View.VISIBLE);
