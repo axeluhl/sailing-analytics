@@ -38,6 +38,17 @@ Successfully uninstalled rack-2.0.3
 * ensure there are users and groups for `wiki`, `scores`, `wordpress`, `trac` that match up with their /home directory owners / groups
 * ensure the Wiki startup script `serve.sh` configured for port 4567 and `config.ru` as well as the entire Gollum installation under /home/wiki are present, as well as the `users.yml` file
 * ensure there is a reasonable `/root/.goaccess` file
+* Configure goaccess by adjusting `/etc/goaccess.conf` such that it contains the following lines:
+```
+...
+time-format %H:%M:%S
+...
+date-format %d/%b/%Y
+...
+# NCSA Combined with virtual host name as prefix:
+log-format %v %h %^[%d:%t %^] "%r" %s %b "%R" "%u"
+```
+Note that the `log-format` piece is slightly different from the regular NCSA Combined Log Format in so far as it adds `%v` at the beginning which is capturing the virtual host name that our Apache servers are configured to log as the first field in each line.
 * ensure there is the `/etc/tmux.conf` file that maps your hotkeys (Ctrl-a vs. Ctrl-b, for example)
 * rename the `welcome.conf` file of the Apache configuration because it harms directory index presentation:
 ```
@@ -131,7 +142,6 @@ HOME=/
 * Establish the Apache web server configuration, in particular ensure that the SSL certificates are in place (see [here](https://wiki.sapsailing.com/wiki/info/security/ssl-support)) and the following files are set up: `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf/passwd.awstats`, `/etc/httpd/conf/passwd.git`, and `/etc/httpd/conf/conf.d/*.conf`.
 * Update the hostname in `/etc/sysconfig/network`: `HOSTNAME=analytics-webserver`
 * Run `chkconfig sendmail off; chkconfig postfix on` to make sure that the postfix mail server is the one that will be launched during boot
-* activate 
 * Reboot the system, among other things for the hostname change to take effect, and in addition to see whether all services start properly
 * configure fail2ban by editing `/etc/fail2ban/jail.conf`, entering reasonable e-mail configuration for the `ssh-iptables` filter as follows:
 ```
