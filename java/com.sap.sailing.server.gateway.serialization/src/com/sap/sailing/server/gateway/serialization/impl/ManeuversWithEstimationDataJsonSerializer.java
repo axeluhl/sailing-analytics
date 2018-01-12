@@ -52,8 +52,14 @@ public class ManeuversWithEstimationDataJsonSerializer extends AbstractTrackedRa
             Competitor competitor) {
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
         ManeuverWithEstimationDataCalculator maneuverWithEstimationDataCalculator = new ManeuverWithEstimationDataCalculatorImpl();
-        return maneuverWithEstimationDataCalculator.computeEstimationDataForManeuvers(trackedRace, competitor,
-                maneuvers);
+        Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = null;
+        try {
+            maneuversWithEstimationData = maneuverWithEstimationDataCalculator.computeEstimationDataForManeuvers(trackedRace, competitor,
+                    maneuvers);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return maneuversWithEstimationData;
     }
 
 }

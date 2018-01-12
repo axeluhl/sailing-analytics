@@ -82,9 +82,9 @@ public class ManeuverWithEstimationDataCalculatorImpl implements ManeuverWithEst
             TrackedRace trackedRace, Competitor competitor, Maneuver previousManeuver, Maneuver maneuver) {
         Duration durationBetweenManeuvers = null;
         SpeedWithBearing averageSpeedWithBearing = null;
-        if (previousManeuver != null) {
+        if (previousManeuver != null && maneuver != null) {
             TimePoint previousManeuverEnd = previousManeuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                    .getTimePointBefore();
+                    .getTimePointAfter();
             TimePoint maneuverStart = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
                     .getTimePointBefore();
             Duration duration = previousManeuverEnd.until(maneuverStart);

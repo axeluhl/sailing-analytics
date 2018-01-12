@@ -86,7 +86,7 @@ import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSer
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveEnteringAndExitingDetailsJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveBoundariesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverWindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverWithEstimationDataJsonSerializer;
@@ -1051,7 +1051,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 ManeuversWithEstimationDataJsonSerializer serializer = new ManeuversWithEstimationDataJsonSerializer(
                         new BoatClassJsonSerializer(),
                         new ManeuverWithEstimationDataJsonSerializer(new GPSFixJsonSerializer(),
-                                new ManeuverCurveEnteringAndExitingDetailsJsonSerializer(),
+                                new ManeuverCurveBoundariesJsonSerializer(),
                                 new ManeuverWindJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();

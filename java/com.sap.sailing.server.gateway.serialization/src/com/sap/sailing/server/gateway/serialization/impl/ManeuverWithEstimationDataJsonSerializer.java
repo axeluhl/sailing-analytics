@@ -30,12 +30,12 @@ public class ManeuverWithEstimationDataJsonSerializer implements JsonSerializer<
     public final static String DURATION_FROM_PREVIOUS_MANEUVER_IN_SECONDS = "durationFromPreviousManeuverInSeconds";
     public final static String DURATION_TO_NEXT_MANEUVER_IN_SECONDS = "durationToNextManeuverInSeconds";
 
-    private final ManeuverCurveEnteringAndExitingDetailsJsonSerializer maneuverCurveEnteringAndExitingDetailsJsonSerializer;
+    private final ManeuverCurveBoundariesJsonSerializer maneuverCurveEnteringAndExitingDetailsJsonSerializer;
     private final ManeuverWindJsonSerializer windJsonSerializer;
     private final GPSFixJsonSerializer gpsFixSerializer;
 
     public ManeuverWithEstimationDataJsonSerializer(GPSFixJsonSerializer gpsFixSerializer,
-            ManeuverCurveEnteringAndExitingDetailsJsonSerializer maneuverCurveEnteringAndExitingDetailsJsonSerializer,
+            ManeuverCurveBoundariesJsonSerializer maneuverCurveEnteringAndExitingDetailsJsonSerializer,
             ManeuverWindJsonSerializer windJsonSerializer) {
         this.gpsFixSerializer = gpsFixSerializer;
         this.maneuverCurveEnteringAndExitingDetailsJsonSerializer = maneuverCurveEnteringAndExitingDetailsJsonSerializer;

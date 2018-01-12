@@ -8,14 +8,14 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverCurveEnteringAndExitingDetailsImpl implements ManeuverCurveBoundaries {
+public class ManeuverCurveBoundariesImpl implements ManeuverCurveBoundaries {
     private final TimePoint timePointBefore;
     private final TimePoint timePointAfter;
     private final SpeedWithBearing speedWithBearingBefore;
     private final SpeedWithBearing speedWithBearingAfter;
     private final double directionChangeInDegrees;
 
-    public ManeuverCurveEnteringAndExitingDetailsImpl(TimePoint timePointBefore, TimePoint timePointAfter,
+    public ManeuverCurveBoundariesImpl(TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
             double directionChangeInDegrees) {
         this.timePointBefore = timePointBefore;
