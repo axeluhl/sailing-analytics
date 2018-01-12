@@ -13,7 +13,7 @@ Then carry out these steps:
 * install additional packages: `yum install git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
-cpan install Date::Parse Email::Address Email::Send DBI
+cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl
 ```
 * make sure `/etc/alternatives/ruby` and `/etc/alternatives/gem` point to `/usr/bin/[ruby|gem]2.4`
 * run the following commands to install gollum and uninstall a too current rack version 2.0.3:
@@ -48,7 +48,7 @@ mv welcome.conf welcome.conf.org
 * create `/etc/bugzilla/localconfig`
 * set up crontab for user `wiki` as `*/10 * * * * /home/wiki/syncgit` and make sure the script is in place
 * comment `lbmethod_heartbeat_module` in /etc/httpd/conf.modules.d/00-proxy.conf because we don't need this sort of load balancing across origin servers and it causes a warning message in error_log
-* install awstats to `/usr/share/awstats`, establish `/etc/httpd/conf/passwd.awstats` and create /etc/cron.weekly/awstats as follows:
+* install awstats to `/usr/share/awstats`, establish `/etc/httpd/conf/passwd.awstats`, establish a configuration under `/etc/awstats`, establish AWStats data directory under `/var/lib/awstats` and create /etc/cron.weekly/awstats as follows:
 ```
 #!/bin/bash
 su -l -c '/usr/share/awstats/tools/awstats_updateall.pl now         -configdir="/etc/awstats"         -awstatsprog="/usr/share/awstats/wwwroot/cgi-bin/awstats.pl" >>/var/log/awstats-cron.out 2>>/var/log/awstats-cron.err'
@@ -129,7 +129,9 @@ HOME=/
 * Copy git contents of ssh://trac@sapsailing.com/home/trac/git to /home/trac/git
 * Ensure there is a /home/scores directory with subdirectories `barbados`, `kiwo`, `sailwave`, `scores`, `velum`, and `xrrftp`.
 * Establish the Apache web server configuration, in particular ensure that the SSL certificates are in place (see [here](https://wiki.sapsailing.com/wiki/info/security/ssl-support)) and the following files are set up: `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf/passwd.awstats`, `/etc/httpd/conf/passwd.git`, and `/etc/httpd/conf/conf.d/*.conf`.
-
+* Update the hostname in `/etc/sysconfig/network`: `HOSTNAME=analytics-webserver`
+* Run `chkconfig sendmail off; chkconfig postfix on` to make sure that the postfix mail server is the one that will be launched during boot
+* Reboot the system, among other things for the hostname change to take effect, and in addition to see whether all services start properly
 
 ## Appendix / Resources
 BACKUP_DIRECTORIES="/etc /home/trac/git /home/trac/mailinglists /home/trac/maven-repositories /home/trac/p2-repositories /home/trac/releases /home/trac/sapsailing_layouts.git /var/www/static /home/trac/crontab /home/scores /var/log/old"
