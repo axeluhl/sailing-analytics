@@ -79,7 +79,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse) (make sure to scan for nested projects)
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard "Git"->"Projects from Git" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
