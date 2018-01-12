@@ -107,7 +107,7 @@ public interface Maneuver extends GPSFix {
     double getMaxAngularVelocityInDegreesPerSecond();
 
     /**
-     * Gets the speed with bearing at maneuver start, which is at {@link #getTimePointBefore()}.
+     * Gets the speed with bearing at maneuver start, which is at {@link #getManeuverBoundaries()}.getTimePointBefore().
      * 
      * @return The speed with bearing at maneuver start
      * @see #getManeuverBoundaries()
@@ -116,7 +116,7 @@ public interface Maneuver extends GPSFix {
     SpeedWithBearing getSpeedWithBearingBefore();
 
     /**
-     * Gets the speed with bearing at maneuver end, which is at {@link #getTimePointAfter()}.
+     * Gets the speed with bearing at maneuver end, which is at {@link #getManeuverBoundaries()}.getTimePointAfter().
      * 
      * @return The speed with bearing at maneuver end
      * @see #getManeuverBoundaries()
@@ -124,9 +124,10 @@ public interface Maneuver extends GPSFix {
     SpeedWithBearing getSpeedWithBearingAfter();
 
     /**
-     * Gets the total course change performed within maneuver between {@link #getTimePointBefore()} and
-     * {@link #getTimePointAfter()} in degrees. The port side course changes produce a negative value. The value may
-     * exceed 360 degrees if the performed maneuver is a penalty circle.
+     * Gets the total course change performed within maneuver between
+     * {@link #getManeuverBoundaries()}.getTimePointBefore() and {@link #getManeuverBoundaries()}.getTimePointAfter() in
+     * degrees. The port side course changes produce a negative value. The value may exceed 360 degrees if the performed
+     * maneuver is a penalty circle.
      * 
      * @return The total course change within the whole maneuver in degrees
      * @see #getManeuverBoundaries()

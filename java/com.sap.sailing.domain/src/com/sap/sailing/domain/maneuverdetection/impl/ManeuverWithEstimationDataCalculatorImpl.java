@@ -29,7 +29,7 @@ import com.sap.sse.common.Util.Pair;
 public class ManeuverWithEstimationDataCalculatorImpl implements ManeuverWithEstimationDataCalculator {
 
     @Override
-    public Iterable<ManeuverWithEstimationData> complementManeuversWithEstimationData(TrackedRace trackedRace,
+    public Iterable<ManeuverWithEstimationData> computeEstimationDataForManeuvers(TrackedRace trackedRace,
             Competitor competitor, Iterable<Maneuver> maneuvers) {
         int maneuversCount = Util.size(maneuvers);
         List<ManeuverWithEstimationData> result = new ArrayList<>(maneuversCount);
