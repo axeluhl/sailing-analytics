@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.ManeuverCurveEnteringAndExitingDetails;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -19,18 +19,16 @@ public class ManeuverWithMainCurveBoundariesImpl extends ManeuverImpl {
     private static final long serialVersionUID = 5831188137884083419L;
 
     public ManeuverWithMainCurveBoundariesImpl(ManeuverType type, Tack newTack, Position position,
-            Distance maneuverLoss, TimePoint timePoint,
-            ManeuverCurveEnteringAndExitingDetails mainCurveEnteringAndExistingDetails,
-            ManeuverCurveEnteringAndExitingDetails maneuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails,
+            Distance maneuverLoss, TimePoint timePoint, ManeuverCurveBoundaries mainCurveBoundaries,
+            ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
             double maxAngularVelocityInDegreesPerSecond) {
-        super(type, newTack, position, maneuverLoss, timePoint, mainCurveEnteringAndExistingDetails,
-                maneuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails,
-                maxAngularVelocityInDegreesPerSecond);
+        super(type, newTack, position, maneuverLoss, timePoint, mainCurveBoundaries,
+                maneuverCurveWithStableSpeedAndCourseBoundaries, maxAngularVelocityInDegreesPerSecond);
     }
 
     @Override
-    public ManeuverCurveEnteringAndExitingDetails getManeuverEnteringAndExistingDetails() {
-        return getMainCurveEnteringAndExitingDetails();
+    public ManeuverCurveBoundaries getManeuverBoundaries() {
+        return getMainCurveBoundaries();
     }
 
 }

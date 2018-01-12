@@ -338,6 +338,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
+    
+    @Override
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
+        return null;
+    }
 
     @Override
     public boolean raceIsKnownToStartUpwind() {

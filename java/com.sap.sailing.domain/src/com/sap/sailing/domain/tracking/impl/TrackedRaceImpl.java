@@ -2684,6 +2684,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
+    
+    @Override
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
+        List<Maneuver> allManeuvers = maneuverCache.get(competitor, waitForLatest);
+        List<Maneuver> result;
+        if (allManeuvers == null) {
+            result = Collections.emptyList();
+        } else {
+            result = allManeuvers;
+        }
+        return result;
+    }
 
     private <T extends Timed> List<T> extractInterval(TimePoint from, TimePoint to, List<T> listOfTimed) {
         List<T> result = new LinkedList<T>();

@@ -11,7 +11,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface ManeuverCurveEnteringAndExitingDetails {
+public interface ManeuverCurveBoundaries {
 
     /**
      * Gets the computed time point of curve start.

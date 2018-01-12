@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.ManeuverCurveEnteringAndExitingDetails;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.impl.ManeuverCurveEnteringAndExitingDetailsImpl;
 import com.sap.sse.common.TimePoint;
 
@@ -18,8 +18,7 @@ public class ManeuverCurveDetails extends ManeuverCurveEnteringAndExitingDetails
     public ManeuverCurveDetails(TimePoint timePointBefore, TimePoint timePointAfter, TimePoint timePoint,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
             double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond) {
-        super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter,
-                directionChangeInDegrees);
+        super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees);
         this.timePoint = timePoint;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
     }
@@ -42,8 +41,9 @@ public class ManeuverCurveDetails extends ManeuverCurveEnteringAndExitingDetails
     public double getMaxAngularVelocityInDegreesPerSecond() {
         return maxAngularVelocityInDegreesPerSecond;
     }
-    
-    public ManeuverCurveEnteringAndExitingDetails extractEnteringAndExistingDetailsOnly() {
-        return new ManeuverCurveEnteringAndExitingDetailsImpl(getTimePointBefore(), getTimePointAfter(), getSpeedWithBearingBefore(), getSpeedWithBearingAfter(), getDirectionChangeInDegrees());
+
+    public ManeuverCurveBoundaries extractEnteringAndExistingDetailsOnly() {
+        return new ManeuverCurveEnteringAndExitingDetailsImpl(getTimePointBefore(), getTimePointAfter(),
+                getSpeedWithBearingBefore(), getSpeedWithBearingAfter(), getDirectionChangeInDegrees());
     }
 }

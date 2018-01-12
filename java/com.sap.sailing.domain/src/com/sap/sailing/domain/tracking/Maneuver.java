@@ -75,7 +75,7 @@ public interface Maneuver extends GPSFix {
      * @return Entering and exiting details of maneuver main curve
      * @see Maneuver
      */
-    ManeuverCurveEnteringAndExitingDetails getMainCurveEnteringAndExitingDetails();
+    ManeuverCurveBoundaries getMainCurveBoundaries();
 
     /**
      * Gets time points and speeds with bearings before and after the maneuver, such that the speed and course before
@@ -85,17 +85,17 @@ public interface Maneuver extends GPSFix {
      *         section
      * @see Maneuver
      */
-    ManeuverCurveEnteringAndExitingDetails getManeuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails();
+    ManeuverCurveBoundaries getManeuverCurveWithStableSpeedAndCourseBoundaries();
 
     /**
      * Gets time points and speeds with bearings before and after the maneuver considering the maneuver type. The
-     * maneuver boundaries may be represented either by {@link #getMainCurveEnteringAndExitingDetails()}, or
-     * {@link #getManeuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails()}. The former is
-     * considered for HEAD_UP and BEAR_AWAY maneuvers, whereas the latter is considered for the remainder.
+     * maneuver boundaries may be represented either by {@link #getMainCurveBoundaries()}, or
+     * {@link #getManeuverCurveWithStableSpeedAndCourseBoundaries()}. The former is considered for HEAD_UP and BEAR_AWAY
+     * maneuvers, whereas the latter is considered for the remainder.
      * 
      * @return Entering and existing details of maneuver
      */
-    ManeuverCurveEnteringAndExitingDetails getManeuverEnteringAndExistingDetails();
+    ManeuverCurveBoundaries getManeuverBoundaries();
 
     /**
      * The maximal angular velocity recorded within the main curve at maneuver climax.
@@ -110,7 +110,7 @@ public interface Maneuver extends GPSFix {
      * Gets the speed with bearing at maneuver start, which is at {@link #getTimePointBefore()}.
      * 
      * @return The speed with bearing at maneuver start
-     * @see #getManeuverEnteringAndExistingDetails()
+     * @see #getManeuverBoundaries()
      * 
      */
     SpeedWithBearing getSpeedWithBearingBefore();
@@ -119,7 +119,7 @@ public interface Maneuver extends GPSFix {
      * Gets the speed with bearing at maneuver end, which is at {@link #getTimePointAfter()}.
      * 
      * @return The speed with bearing at maneuver end
-     * @see #getManeuverEnteringAndExistingDetails()
+     * @see #getManeuverBoundaries()
      */
     SpeedWithBearing getSpeedWithBearingAfter();
 
@@ -129,7 +129,7 @@ public interface Maneuver extends GPSFix {
      * exceed 360 degrees if the performed maneuver is a penalty circle.
      * 
      * @return The total course change within the whole maneuver in degrees
-     * @see #getManeuverEnteringAndExistingDetails()
+     * @see #getManeuverBoundaries()
      */
     @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
     double getDirectionChangeInDegrees();

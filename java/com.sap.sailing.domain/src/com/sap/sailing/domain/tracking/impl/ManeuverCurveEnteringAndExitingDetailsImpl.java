@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.ManeuverCurveEnteringAndExitingDetails;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.TimePoint;
 
 /**
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverCurveEnteringAndExitingDetailsImpl implements ManeuverCurveEnteringAndExitingDetails {
+public class ManeuverCurveEnteringAndExitingDetailsImpl implements ManeuverCurveBoundaries {
     private final TimePoint timePointBefore;
     private final TimePoint timePointAfter;
     private final SpeedWithBearing speedWithBearingBefore;

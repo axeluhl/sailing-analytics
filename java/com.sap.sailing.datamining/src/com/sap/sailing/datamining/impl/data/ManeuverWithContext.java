@@ -12,10 +12,15 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.ManeuverCurveEnteringAndExitingDetails;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverWithContext implements HasManeuverContext {
     private static final long serialVersionUID = 7717196485074392156L;
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
@@ -29,9 +34,8 @@ public class ManeuverWithContext implements HasManeuverContext {
             boolean mainCurveAnalysis) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.maneuver = maneuver;
-        ManeuverCurveEnteringAndExitingDetails enteringAndExistingDetails = mainCurveAnalysis
-                ? maneuver.getMainCurveEnteringAndExitingDetails()
-                : maneuver.getManeuverCurveWithStableSpeedAndCourseBeforeAndAfterEnteringAndExistingDetails();
+        ManeuverCurveBoundaries enteringAndExistingDetails = mainCurveAnalysis ? maneuver.getMainCurveBoundaries()
+                : maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries();
         this.timePointBeforeForAnalysis = enteringAndExistingDetails.getTimePointBefore();
         this.timePointAfterForAnalysis = enteringAndExistingDetails.getTimePointAfter();
         this.directionChangeInDegreesForAnalysis = enteringAndExistingDetails.getDirectionChangeInDegrees();
