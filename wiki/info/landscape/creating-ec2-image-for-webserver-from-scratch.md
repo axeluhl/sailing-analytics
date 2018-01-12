@@ -39,6 +39,11 @@ Successfully uninstalled rack-2.0.3
 * ensure the Wiki startup script `serve.sh` configured for port 4567 and `config.ru` as well as the entire Gollum installation under /home/wiki are present, as well as the `users.yml` file
 * ensure there is a reasonable `/root/.goaccess` file
 * ensure there is the `/etc/tmux.conf` file that maps your hotkeys (Ctrl-a vs. Ctrl-b, for example)
+* rename the `welcome.conf` file of the Apache configuration because it harms directory index presentation:
+```
+cd /etc/httpd/conf.d
+mv welcome.conf welcome.conf.org
+```
 * install bugzilla to `/usr/share/bugzilla` and `/var/lib/bugzilla`
 * create `/etc/bugzilla/localconfig`
 * set up crontab for user `wiki` as `*/10 * * * * /home/wiki/syncgit` and make sure the script is in place
