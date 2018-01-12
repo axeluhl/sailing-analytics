@@ -38,7 +38,7 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
     Double getExitingAbsTWA();
 
     @Statistic(messageKey = "ManeuverDurationInSeconds", ordinal = 8, resultDecimals = 2)
-    Double getManeuverDuration();
+    Double getManeuverDurationInSeconds();
 
     @Statistic(messageKey = "EnteringManeuverSpeedMinusExitingSpeed", ordinal = 19, resultDecimals = 4)
     Double getEnteringManeuverSpeedMinusExitingSpeed();
@@ -51,7 +51,7 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "ManeuverExitingSpeedInKnots", ordinal = 18, resultDecimals = 2)
     Double getManeuverExitingSpeed();
-
+    
     TimePoint getTimePointBeforeForAnalysis();
 
     TimePoint getTimePointAfterForAnalysis();

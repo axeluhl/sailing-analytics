@@ -38,7 +38,7 @@ public class ManeuverRetrievalProcessor
                     ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, maneuver, settings.isMainCurveAnalysis());
                     // Compute only numbers which are really required for filtering
                     double maneuverDuration = settings.getMinManeuverDuration() != null
-                            || settings.getMaxManeuverDuration() != null ? maneuverWithContext.getManeuverDuration()
+                            || settings.getMaxManeuverDuration() != null ? maneuverWithContext.getManeuverDurationInSeconds()
                                     : 0;
                     double maneuverEnteringSpeed = settings.getMinManeuverEnteringSpeedInKnots() != null
                             || settings.getMaxManeuverEnteringSpeedInKnots() != null

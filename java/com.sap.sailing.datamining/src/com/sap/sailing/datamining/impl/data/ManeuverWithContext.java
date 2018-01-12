@@ -64,7 +64,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     @Override
-    public Double getManeuverDuration() {
+    public Double getManeuverDurationInSeconds() {
         return getTimePointBeforeForAnalysis().until(getTimePointAfterForAnalysis()).asSeconds();
     }
 
