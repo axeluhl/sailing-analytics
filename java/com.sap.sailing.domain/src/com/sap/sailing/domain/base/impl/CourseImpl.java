@@ -24,7 +24,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.common.impl.RenamableImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -32,7 +32,7 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
-public class CourseImpl extends NamedImpl implements Course {
+public class CourseImpl extends RenamableImpl implements Course {
 
     private static final long serialVersionUID = -4280487649617132403L;
 

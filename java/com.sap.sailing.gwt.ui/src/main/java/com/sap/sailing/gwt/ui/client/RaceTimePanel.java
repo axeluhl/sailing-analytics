@@ -59,7 +59,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
-        public void onUserStatusChange(UserDTO user) {
+        public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
             RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
                     Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE);
         }
@@ -97,8 +97,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     protected void onLoad() {
         super.onLoad();
-        userService.addUserStatusEventHandler(userStatusEventHandler);
-        userStatusEventHandler.onUserStatusChange(userService.getCurrentUser());
+        userService.addUserStatusEventHandler(userStatusEventHandler, true);
     }
     
     @Override
@@ -334,6 +333,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             if (newRaceTimesInfo.startOfRace != null) {
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
                         (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
+            } else if (newRaceTimesInfo.startOfTracking != null) {
+                timer.setTime(newRaceTimesInfo.startOfTracking.getTime());
             }
             break;
         }

@@ -44,7 +44,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
     private FileStorageService storageService;
 
     @Before
-    public void setUpSubClass() throws InvalidPropertiesException {
+    public void setUpSubClass() throws Exception {
         super.setUp();
         racingEventService = spy(racingEventService);
         storageService = AmazonS3TestSupport.createService();

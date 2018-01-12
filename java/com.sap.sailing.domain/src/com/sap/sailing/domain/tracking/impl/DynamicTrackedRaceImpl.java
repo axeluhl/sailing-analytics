@@ -13,7 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,6 +107,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * to be restored during at the time of de-serialization.
      */
     private transient RaceStateChangedListener raceStateBasedStartTimeChangedListener;
+    
+    /**
+     * Flag that indicates if a {@link GPSFix} is already tracked in any {@link GPSFixTrack} for a competitor of this
+     * race.
+     */
+    private final AtomicBoolean gpsFixReceived;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
@@ -123,6 +131,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.courseDesignChangedListeners = new HashSet<>();
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
+        
+        gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -132,12 +142,18 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
             setWindSourcesToExclude(windSourcesToExclude);
         }
+        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
         }
         // default wind tracks are observed because they are created by the superclass constructor using
         // createWindTrack which adds this object as a listener
+    }
+    
+    @Override
+    public boolean hasGPSData() {
+        return gpsFixReceived.get();
     }
 
     /**
@@ -220,29 +236,37 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus newStatus) {
-        TrackedRaceStatusEnum raceStatus = TrackedRaceStatusEnum.FINISHED;
+        TrackedRaceStatusEnum raceStatus;
         double totalProgress = 1.0;
-        synchronized (loaderStatus) {
-            this.updateLoaderStatus(source, newStatus);
-            if (!loaderStatus.isEmpty()) {
-                double sumOfLoaderProgresses = 0.0;
-                boolean anyError = false;
-                boolean anyLoading = false;
-                boolean allPrepared = true;
-                raceStatus = TrackedRaceStatusEnum.TRACKING;
-                for (TrackedRaceStatus status : loaderStatus.values()) {
-                    anyError |= (status.getStatus() == TrackedRaceStatusEnum.ERROR);
-                    anyLoading |= (status.getStatus() == TrackedRaceStatusEnum.LOADING);
-                    allPrepared &= (status.getStatus() == TrackedRaceStatusEnum.PREPARED);
-                    sumOfLoaderProgresses += status.getLoadingProgress();
-                }
-                if (anyError) {
-                    raceStatus = TrackedRaceStatusEnum.ERROR;
-                } else if (anyLoading) {
-                    raceStatus = TrackedRaceStatusEnum.LOADING;
-                    totalProgress = sumOfLoaderProgresses / loaderStatus.size();
-                } else {
-                    raceStatus = allPrepared ? TrackedRaceStatusEnum.PREPARED : TrackedRaceStatusEnum.TRACKING;
+        if (newStatus.getStatus() == TrackedRaceStatusEnum.REMOVED) {
+            synchronized (loaderStatus) {
+                this.updateLoaderStatus(source, newStatus);
+            }
+            raceStatus = newStatus.getStatus();
+        } else {
+            raceStatus = TrackedRaceStatusEnum.FINISHED;
+            synchronized (loaderStatus) {
+                this.updateLoaderStatus(source, newStatus);
+                if (!loaderStatus.isEmpty()) {
+                    double sumOfLoaderProgresses = 0.0;
+                    boolean anyError = false;
+                    boolean anyLoading = false;
+                    boolean allPrepared = true;
+                    raceStatus = TrackedRaceStatusEnum.TRACKING;
+                    for (TrackedRaceStatus status : loaderStatus.values()) {
+                        anyError |= (status.getStatus() == TrackedRaceStatusEnum.ERROR);
+                        anyLoading |= (status.getStatus() == TrackedRaceStatusEnum.LOADING);
+                        allPrepared &= (status.getStatus() == TrackedRaceStatusEnum.PREPARED);
+                        sumOfLoaderProgresses += status.getLoadingProgress();
+                    }
+                    if (anyError) {
+                        raceStatus = TrackedRaceStatusEnum.ERROR;
+                    } else if (anyLoading) {
+                        raceStatus = TrackedRaceStatusEnum.LOADING;
+                        totalProgress = sumOfLoaderProgresses / loaderStatus.size();
+                    } else {
+                        raceStatus = allPrepared ? TrackedRaceStatusEnum.PREPARED : TrackedRaceStatusEnum.TRACKING;
+                    }
                 }
             }
         }
@@ -250,7 +274,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
    
     private void updateLoaderStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
-        if (status.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+        if (status.getStatus() == TrackedRaceStatusEnum.FINISHED || status.getStatus() == TrackedRaceStatusEnum.REMOVED) {
             loaderStatus.remove(loader);
         } else {
             loaderStatus.put(loader, status);
@@ -554,6 +578,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor));
     }
 
+    private void notifyListenersAboutFirstGPSFixReceived() {
+        notifyListeners(RaceChangeListener::firstGPSFixReceived);
+    }
+
     private void notifyListeners(TrackedRaceStatus status, TrackedRaceStatus oldStatus) {
         notifyListeners(listener -> listener.statusChanged(status, oldStatus));
     }
@@ -582,7 +610,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.markPassingReceived(competitor, oldMarkPassings, markPassings));
     }
     
-    private void notifyListeners(DynamicSensorFixTrack<Competitor, ?> track) {
+    private void notifyListenersAboutSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
         notifyListeners(listener -> listener.competitorSensorTrackAdded(track));
     }
     
@@ -996,6 +1024,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);
+        
+        // getAndSet call is atomic which means, that it can be ensured that the listeners are notified only once
+        final boolean oldGPSFixReceived = gpsFixReceived.getAndSet(true);
+        if (!oldGPSFixReceived) {
+            notifyListenersAboutFirstGPSFixReceived();
+        }
     }
 
     @Override
@@ -1173,7 +1207,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    protected <FixT extends SensorFix> void addSensorTrackInternal(Pair<Competitor, String> key,
+    protected <FixT extends SensorFix> Optional<Runnable> addSensorTrackInternal(Pair<Competitor, String> key,
             DynamicSensorFixTrack<Competitor, FixT> track) {
         super.addSensorTrackInternal(key, track);
         track.addListener(new SensorFixTrackListener<Competitor, FixT>() {
@@ -1189,6 +1223,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 notifyListeners(item, trackName, fix);
             }
         });
-        notifyListeners(track);
+        return Optional.of(()->notifyListenersAboutSensorTrackAdded(track));
     }
 }

@@ -24,8 +24,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.freg.resultimport,
  com.sap.sailing.domain.swisstimingreplayadapter,
  com.sap.sailing.simulator,
- com.google.gwt.user;bundle-version="2.8.1";resolution:=optional,
- com.google.gwt.servlet;bundle-version="2.8.1",
+ com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
+ com.google.gwt.servlet;bundle-version="2.8.2",
  com.sap.sailing.domain.igtimiadapter,
  com.sap.sailing.xrr.resultimport,
  com.sap.sailing.datamining.shared,
@@ -53,7 +53,10 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.polars.datamining,
  com.sap.sse.datamining.annotations,
  com.sap.sse.shared.android,
- com.sap.sailing.competitorimport
+ com.sap.sailing.competitorimport,
+ com.sap.sailing.expeditionconnector,
+ com.sap.sailing.expeditionconnector.common,
+ org.mp4parser.isoparser;bundle-version="1.9.31"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",
@@ -67,8 +70,7 @@ Import-Package: javax.servlet;version="3.1.0",
 Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar,
- WEB-INF/lib/gwt-ajaxloader.jar,
- WEB-INF/lib/gwt-bootstrap-2.3.2.0.jar
+ WEB-INF/lib/gwt-ajaxloader.jar
 TrackLifecycle: true
 Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.confidence.impl,
  com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.impl,

@@ -10,11 +10,11 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
@@ -232,7 +232,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 regattaRaceStatesSettings.getVisibleRegattaSettings().addValue(getRegattaId());
             }
         }
-        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(new RegattaOverviewContextDefinition(getCtx().getEventId()), regattaRaceStatesSettings);
+        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(
+                new RegattaOverviewContextDefinition(getCtx().getEventId()), regattaRaceStatesSettings, false);
     }
     
     @Override
@@ -245,7 +246,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if (regattaId != null) {
             return regattaId;
         }
-        if (!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+        if (!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES)) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;

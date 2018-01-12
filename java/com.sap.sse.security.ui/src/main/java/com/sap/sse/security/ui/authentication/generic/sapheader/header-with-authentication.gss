@@ -2,7 +2,7 @@
     height: 100%;
 }
 .header_right_extension {
-	margin-right: 4em;
+	margin-right: 12em;
 }
 .usermanagement_icon {
 	display: none;
@@ -20,17 +20,17 @@
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
-    background-image: url('images/home/loggedout.svg');
+    background-image: resourceUrl('loggedout');
     cursor: pointer;
 }
 .usermanagement_icon.usermanagement_open {
-	background-image: url('images/home/loggedout-open.svg');
+	background-image: resourceUrl('loggedoutOpen');
 }
 .usermanagement_icon.usermanagement_loggedin {
-	background-image: url('images/home/loggedin.svg');
+	background-image: resourceUrl('loggedin');
 }
 .usermanagement_icon.usermanagement_loggedin.usermanagement_open {
-	background-image: url('images/home/loggedin-open.svg');
+	background-image: resourceUrl('loggedinOpen');
 }
 .usermanagement_view {
 	top: 68px !important;
@@ -41,4 +41,15 @@
 }
 .usermanagement_view * {
     font-size: 15px;
+}
+.languageSelector {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 5em;
+}
+.languageSelector select {
+    background-size: 1.333333em .75em;
+    font-size: 100% !important;
+    font-weight: normal;
 }

@@ -208,14 +208,6 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
      */
     void setUseStartTimeInference(boolean useStartTimeInference);
 
-    /**
-     * {@link Event} manages an association to its {@link Event#getRegattas() regattas}. When something on the
-     * regatta changes (in particular, the implicit link to an event through an event's {@link CourseArea} that
-     * is assigned as this regatta's {@link #setDefaultCourseArea(CourseArea) default course area}), the
-     * opposite end of the association needs to be maintained on the event's side.
-     */
-    void adjustEventToRegattaAssociation(EventFetcher eventFetcher);
-    
     RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 
     default RankingMetrics getRankingMetricType() {

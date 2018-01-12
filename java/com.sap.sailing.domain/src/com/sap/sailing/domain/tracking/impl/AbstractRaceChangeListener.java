@@ -147,4 +147,9 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     public void raceLogDetached(RaceLog raceLog) {
         defaultAction();
     }
+    
+    @Override
+    public void firstGPSFixReceived() {
+        defaultAction();
+    }
 }

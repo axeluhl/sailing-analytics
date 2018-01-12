@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.expeditionimport;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -14,7 +15,16 @@ public class TestWindLogParser {
     
     private static final double DOUBLE_TOLERANCE = 1e-7;
 
-	@Test
+    @Test
+    public void testPhoenixRows() throws Exception {
+        assertEquals(51., Double.valueOf("051"), 0.000001);
+        Iterable<Wind> windImport = WindLogParser.importWind(getClass().getResourceAsStream("PhoenixRowWithWind.csv"));
+        assertThat(Util.size(windImport), is(1));
+        Wind wind = windImport.iterator().next();
+        assertWind(wind, 10.5, 51, 41.521689, -71.338883);
+    }
+
+    @Test
     public void testCompleteRow() throws Exception {
         Iterable<Wind> windImport = WindLogParser.importWind(getClass().getResourceAsStream("CompleteRow.csv"));
         assertThat(Util.size(windImport), is(1));

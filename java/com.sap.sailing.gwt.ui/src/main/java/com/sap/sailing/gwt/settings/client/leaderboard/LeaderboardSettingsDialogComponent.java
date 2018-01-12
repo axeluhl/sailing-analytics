@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Float;
@@ -36,7 +38,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected RadioButton lastNRacesColumnSelectionRadioBtn;
     protected IntegerBox numberOfLastRacesToShowBox;
     protected CheckBox showAddedScoresCheckBox;
-    protected CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
     protected CheckBox showCompetitorSailIdColumnheckBox;
     protected CheckBox showCompetitorFullNameColumnCheckBox;
     protected CheckBox isCompetitorNationalityColumnVisible;
@@ -160,10 +161,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
         }
-        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox = dialog.createCheckbox(stringMessages.showNumberOfRacesScored());
-        dialog.addTooltip(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox, stringMessages.showNumberOfRacesScored());
-        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.setValue(initialSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-        overallDetailDialogContent.add(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox);
         
         FlowPanel overallDetailDialogContentSecondLine = new FlowPanel();
         overallDetailDialogContentSecondLine.addStyleName("dialogInnerContent");
@@ -251,5 +248,15 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
             result = raceDetailCheckboxes.values().iterator().next();
         }
         return result;
+    }
+    
+    protected List<DetailType> getSelected(Map<DetailType, CheckBox> checkBoxes) {
+        List<DetailType> selectedDetails = new ArrayList<DetailType>();
+        for (Map.Entry<DetailType, CheckBox> entry : checkBoxes.entrySet()) {
+            if (entry.getValue().getValue()) {
+                selectedDetails.add(entry.getKey());
+            }
+        }
+        return selectedDetails;
     }
 }

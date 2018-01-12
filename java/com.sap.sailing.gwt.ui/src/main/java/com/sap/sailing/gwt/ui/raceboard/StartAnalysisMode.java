@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomType
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
@@ -146,7 +145,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
 
                                     @Override
                                     public void onSettingsReloaded(MultiCompetitorRaceChartSettings patchedSettings) {
-                                        SettingsDefaultValuesUtils.keepDefaults(competitorChart.getSettings(), patchedSettings);
                                         competitorChart.updateSettings(patchedSettings);
                                     }
                                     

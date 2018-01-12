@@ -33,6 +33,7 @@ import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.WindFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.WindTrackRetrievalProcessor;
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
+import com.sap.sailing.datamining.shared.FoilingSegmentsDataMiningSettings;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
@@ -75,7 +76,7 @@ public class SailingDataRetrievalChainDefinitions {
         final DataRetrieverChainDefinition<RacingEventService, HasFoilingSegmentContext> foilingSegmentsRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 raceOfCompetitorRetrieverChainDefinition, HasFoilingSegmentContext.class, "FoilingSegmentsSailingDomainRetrieverChain");
         foilingSegmentsRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, FoilingSegmentRetrievalProcessor.class,
-                HasFoilingSegmentContext.class, "FoilingSegments");
+                HasFoilingSegmentContext.class, FoilingSegmentsDataMiningSettings.class, FoilingSegmentsDataMiningSettings.createDefaultSettings(), "FoilingSegments");
         dataRetrieverChainDefinitions.add(foilingSegmentsRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(

@@ -211,7 +211,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getVelocityMadeGood(TimePoint, WindPositionMode)}, only that a cache for wind data and leg type and bearing
      * is passed.
      */
-    Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
 
     /**
@@ -241,6 +241,11 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Bearing getHeel(TimePoint at);
 
     Bearing getPitch(TimePoint at);
+    
+    Distance getDistanceFoiled(TimePoint at);
+    
+    Duration getDurationFoiled(TimePoint at);
+    
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
      * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more
@@ -261,7 +266,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}, only that a cache for leg type
      * calculation is passed.
-     * @param rankingInfo TODO
      */
     Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 

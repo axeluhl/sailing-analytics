@@ -7,16 +7,17 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -66,8 +67,18 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         dto.setState(HomeServiceUtil.calculateEventState(event));
         // bug2982: always show leaderboard and competitor analytics 
         dto.setHasAnalytics(true);
+        
+        String description = event.getDescription();
+        if (description == null || description.trim().isEmpty() || event.getName().equalsIgnoreCase(description)) {
+            // If a description isn't useful, it should not be shown in the UI
+            description = null;
+        }
+        dto.setDescription(description);
 
-        final boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
+        final EventType eventType = EventUtil.getEventType(event);
+        dto.setType(eventType);
+        
+        final boolean isFakeSeries = eventType == EventType.SERIES;
         
         EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
             @Override
@@ -85,8 +96,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         });
         
         if (isFakeSeries) {
-            dto.setType(EventType.SERIES_EVENT);
-            
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
             dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
             
@@ -99,8 +108,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                 EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
                 dto.addEventToSeries(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
             }
-        } else {
-            dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
         }
         return dto;
     }

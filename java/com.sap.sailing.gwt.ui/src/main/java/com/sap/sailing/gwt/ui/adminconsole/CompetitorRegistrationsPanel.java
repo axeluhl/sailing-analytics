@@ -47,7 +47,6 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
     protected final boolean filterByLeaderBoardInitially = false;
     final StringMessages stringMessages;
-    protected final SailingServiceAsync sailingService;
     final ErrorReporter errorReporter;
     private Button registerBtn;
     private Button unregisterBtn;
@@ -83,7 +82,6 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
             Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
             boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
         this.stringMessages = stringMessages;
-        this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.restrictPoolToLeaderboard = restrictPoolToLeaderboard;
         this.validator = validator;

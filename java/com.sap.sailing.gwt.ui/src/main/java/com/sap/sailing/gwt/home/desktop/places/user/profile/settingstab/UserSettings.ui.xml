@@ -10,16 +10,25 @@
         .table {
             width: 100%;
         }
+        .table .empty {
+            margin: 1.033333333333333em;
+            font-style: italic;
+            line-height: 2em;
+        }
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-        <div ui:field="notificationsTextUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
-            <ui:text from="{i18n.userNotificationsOnlyIfMailAddressIsVerified}" />
+        <div class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
+            <ui:text from="{i18n.userProfileSettingsTabDescription}" />
         </div>
         <div class="{res.mediaCss.column} {res.mediaCss.mediumoffset6} {res.mediaCss.medium6}">
 	        <f:UserSettingsByKeyTextBoxFilter ui:field="userSettingsFilterUi"/>
         </div>
         <div ui:field="tableWrapper" class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-            <c:CellTable ui:field="userSettingsTable" addStyleNames="{style.table}" />
+            <c:CellTable ui:field="userSettingsTable" addStyleNames="{style.table}" >
+                <c:emptyTableWidget>
+                    <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}"/>
+                </c:emptyTableWidget>
+            </c:CellTable>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder> 

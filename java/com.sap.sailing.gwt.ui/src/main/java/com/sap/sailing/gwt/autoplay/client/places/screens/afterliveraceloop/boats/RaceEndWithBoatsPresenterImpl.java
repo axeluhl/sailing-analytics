@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -57,9 +58,12 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getContextDefinition().getLeaderboardName(),
                 getPlace().getLastRace().getRaceName()));
 
-        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null, false, false, true,
-                 false,
-                 false, true);
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
+                /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
+                /* showAddedScores */ false, /* showCompetitorSailIdColumn */ false,
+                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
+                /* showRaceRankColumn */ true);
 
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
 
@@ -69,7 +73,8 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
-                false, null, false, null, false, true, false, false, false,new SixtyInchLeaderBoardStyle(true));
+                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
+                FlagImageResolverImpl.get());
 
         
         int competitorCount = getPlace().getStatistic().getCompetitors();

@@ -4,11 +4,69 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
     <div class="innerContent">
+        <h5 class="articleSubheadline">November 2017</h5>
+        <ul class="bulletList">
+           <li>The language preference set in the user profile (if any), now also affects the website's language. Formerly,
+               this preference affected the language of notification mails only.
+               Be aware of the fact, that signing in will not force the page to be shown in the user's preferred language.
+               It will only take effect when refreshing the page manually or opening a new one, in order to prevent the
+               state of the currently opened page to get lost.
+               After a sign out (and another page reload) the language preference will stop to take effect.
+           </li>
+           <li>There are additional column types in the leaderboard that show per leg, per race and overall statistics
+               for distance foiled and duration foiled. This allows for quick competitor comparisons regarding these
+               figures which are so important for any foiling boat class. Note, that this feature is also available
+               on overall leaderboards, providing foiling stats across an entire season or event series.
+           </li>
+           <li>When a leaderboard belongs to a leaderboard group with an overall (series) leaderboard and the
+               leaderboard has no scores at all yet for a competitor, that competitor won't be assigned a score
+               in the overall (series) leaderboard either. This way, when an act or event has its leaderboard already
+               linked to the series leaderboard group, no scores will show in the series leaderboard before the
+               act/event starts producing scores for the competitors.
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">October 2017</h5>
+        <ul class="bulletList">
+           <li>The <tt>DataMining.html</tt> module now offers an additional chart type with error bars. This currently
+               shows minimum and maximum values for averages, and the tool tip visualizes those numerically, together
+               with the number of elements from which the average was drawn.
+           </li>
+           <li>The <tt>DataMining.html</tt> module now reacts on clicks on bars in the result chart and triggers
+               a corresponding drill-down operation, adding the first grouping key value as a new filter and removing
+               the grouping dimension. If that was the last dimension removed, the user is asked to provide a new
+               grouping dimension.
+           </li>
+           <li>If available, an event description is now shown on event overview pages.
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">September 2017</h5>
+        <ul class="bulletList">
+           <li>The system will now detect "anniversary races" and show those on the start page.
+               Anniversary races are detected based on the total number of tracked races known (races having GPS data and a valid start date).
+               Anniversary types currently known are round quarters like 10'000, 25'000, and 50'000 as well as numbers where all digits are the same like 11'111 or 22'222.
+               Some time before such a milestone is reached, a countdown is shown on the start page. When an anniversary is reached, the determined race is shown at the same place.
+           </li>
+           <li>Users that aren't authenticated will now see a message near the login icon in the page header.
+               This message gently hints about additional functionality being available for authenticated users.
+               This message lets you show details the additional functionality being available for authenticated users only.
+               When either logging in, showing details or dismissing this message, the message will disappear for some days until it reappears.
+           </li>
+        </ul>
+        
         <h5 class="articleSubheadline">August 2017</h5>
         <ul class="bulletList">
            <li>In the list of past events, you can now find some statistics for the current and past years.
                The statistics can be found at the end of the list of events for a year.
                To see statistics of a past year, you need to expand the list of events for that year.
+           </li>
+           <li>The simulation overlay is now also available prior to the start of a live race. It can
+               therefore, e.g., be used to "predict" the best course on the first upwind leg based on
+               the latest wind measurements.
+           </li>
+           <li>In several places you can now find statistics regarding the highest speed and the competitor that produced it (fastest competitor).
+               These statistics are available for events and regattas as well as in the yearly statistics.
            </li>
         </ul>
         

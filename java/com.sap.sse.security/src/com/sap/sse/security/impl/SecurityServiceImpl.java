@@ -191,11 +191,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * is empty.
      */
     private void initEmptyStore() {
-        if (Util.isEmpty(store.getUsers())) {
+        if (!store.hasUsers()) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
-                        /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
+                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -324,10 +324,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public User getUserByEmail(String email) {
         return store.getUserByEmail(email);
     }
-
+    
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, final String validationBaseURL) throws UserManagementException, MailException {
+        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL);
+    }
+
+    @Override
+    public User createSimpleUser(final String username, final String email, String password, String fullName,
+            String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -343,6 +349,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final User result = store.createUser(username, email, upa);
         result.setFullName(fullName);
         result.setCompany(company);
+        result.setLocale(locale);
         final String emailValidationSecret = result.startEmailValidation();
         // don't replicate exception handling; replicate only the effect on the user store
         apply(s->s.internalStoreUser(result));

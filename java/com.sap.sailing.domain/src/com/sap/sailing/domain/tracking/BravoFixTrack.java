@@ -2,11 +2,10 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
@@ -72,5 +71,32 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     /**
      * The distance sailed foiling during the time range provided
      */
-    Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint from, TimePoint to);
+    Distance getDistanceSpentFoiling(TimePoint from, TimePoint to);
+    
+    /**
+     * Returns {@code true}, if the track contains {@link BravoExtendedFix} instances instead of simple {@link BravoFix BravoFixes}.
+     * It is not guaranteed that the track exclusively contains {@link BravoExtendedFix BravoExtendedFixes} if this is {@code true}.
+     * It is up to the operator to ensure, that either normal Bravo data or the extended data is imported, but it isn't enforced.
+     * If both types of fixes are contained, data may seem to have "gaps" because single fixes returned do not provide the extended data.
+     */
+    boolean hasExtendedFixes();
+    
+    Double getPortDaggerboardRakeIfAvailable(TimePoint timePoint);
+    Double getStbdDaggerboardRakeStbdIfAvailable(TimePoint timePoint);
+    Double getPortRudderRakeIfAvailable(TimePoint timePoint);
+    Double getStbdRudderRakeIfAvailable(TimePoint timePoint);
+    Bearing getMastRotationIfAvailable(TimePoint timePoint);
+    Bearing getLeewayIfAvailable(TimePoint timePoint);
+    Double getSetIfAvailable(TimePoint timePoint);
+    Bearing getDriftIfAvailable(TimePoint timePoint);
+    Distance getDepthIfAvailable(TimePoint timePoint);
+    Bearing getRudderIfAvailable(TimePoint timePoint);
+    Double getForestayLoadIfAvailable(TimePoint timePoint);
+    Double getForestayPressureIfAvailable(TimePoint timePoint);
+    Bearing getTackAngleIfAvailable(TimePoint timePoint);
+    Bearing getRakeIfAvailable(TimePoint timePoint);
+    Double getDeflectorPercentageIfAvailable(TimePoint timePoint);
+    Bearing getTargetHeelIfAvailable(TimePoint timePoint);
+    Distance getDeflectorIfAvailable(TimePoint timePoint);
+    Double getTargetBoatspeedPIfAvailable(TimePoint timePoint);
 }

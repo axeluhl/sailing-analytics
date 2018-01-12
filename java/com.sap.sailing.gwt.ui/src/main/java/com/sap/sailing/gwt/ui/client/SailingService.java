@@ -35,6 +35,8 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -49,6 +51,7 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
@@ -73,6 +76,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -193,8 +197,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
-    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
-    
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 
     StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, UUID courseAreaId);
@@ -241,11 +243,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
             List<FleetDTO> fleets);
 
-    RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
-
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
-
-    void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
     void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
@@ -453,11 +451,15 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
+    Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto);
+    
     Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
+    
+    Util.Triple<Date, Date, Integer> getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName);
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
-    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort);
+    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws Exception;
 
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 
@@ -477,6 +479,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
 
     void denoteForRaceLogTracking(String leaderboardName) throws Exception;
+    
+    void denoteForRaceLogTracking(String leaderboardName,String prefix) throws Exception;
     
     /**
      * Performs all the necessary steps to start tracking the race.
@@ -678,4 +682,31 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName);
 
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors);
+    
+    /**
+     * Used to determine for a Chart the available Detailtypes. This is for example used to only show the RideHeight as
+     * an option for charts if it actually recorded for the race.
+     */
+    List<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
+
+    List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations();
+
+    void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
+
+    void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration);
+    
+    PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
+            final int flightMultiplier)
+            throws NotFoundException, IllegalArgumentException;
+
+    PairingListDTO getPairingListFromTemplate(String leaderboardName, int flightMultiplier,
+            Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO) throws NotFoundException;
+
+    PairingListDTO getPairingListFromRaceLogs(String leaderboardName) throws NotFoundException;
+
+    void fillRaceLogsFromPairingListTemplate(String leaderboardName, int flightMultiplier,
+            Iterable<String> selectedFlightNames, PairingListDTO pairingListDTO)
+            throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;
+    
+    List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
 }

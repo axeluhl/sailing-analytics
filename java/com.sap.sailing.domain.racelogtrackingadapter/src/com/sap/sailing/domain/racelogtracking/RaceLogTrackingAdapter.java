@@ -39,8 +39,6 @@ public interface RaceLogTrackingAdapter {
      * <li>Is a {@link RaceLogRaceTracker} already listening for this racelog? If not, add one.</li>
      * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
-     * @param trackWind TODO
-     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
@@ -76,8 +74,12 @@ public interface RaceLogTrackingAdapter {
      * Denotes the entire {@link Leaderboard} for racelog-tracking, by calling the
      * {@link #denoteRaceForRaceLogTracking(RacingEventService, Leaderboard, RaceColumn, Fleet, String)} method for each
      * {@link RaceLog}.
+     * 
+     * @param prefix Use this parameter to set the racename in the denoteEvent. The prefix will be used for all races. 
+     * Additional to the prefix there will be a serial number that gives every race a individual name. You can pass null 
+     * to get the default denote name. The default looks like: regatta name + racecolumn name + race name.
      */
-    void denoteAllRacesForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
+    void denoteAllRacesForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, String prefix)
             throws NotDenotableForRaceLogTrackingException;
 
     /**

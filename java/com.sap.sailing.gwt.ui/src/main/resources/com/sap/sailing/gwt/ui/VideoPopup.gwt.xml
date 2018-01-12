@@ -8,10 +8,6 @@
   	<inherits name="com.sap.sse.security.ui.LoginPanel" />
   	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
-  	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
-	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   	
 	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />

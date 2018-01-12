@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
@@ -58,7 +59,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
         boolean oneEventStarted = false;
         boolean oneEventLive = false;
         boolean allFinished = true;
-        if (HomeServiceUtil.isFakeSeries(o)) {
+        if (EventUtil.isFakeSeries(o)) {
             LeaderboardGroup overallLeaderboardGroup = o.getLeaderboardGroups().iterator().next();
             dto.setDisplayName(overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() : overallLeaderboardGroup.getName());
 

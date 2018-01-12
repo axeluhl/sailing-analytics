@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -477,10 +476,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
-                    }
-
-                    @Override
                     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
                         return null;
                     }
@@ -554,6 +549,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void setControlTrackingFromStartAndFinishTimes(
                             boolean controlTrackingFromStartAndFinishTimes) {
+                    }
+
+                    @Override
+                    public void setFleetsCanRunInParallelToTrue() {
                     }
                 };
             }
@@ -676,6 +675,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Duration getDurationFoiled(Competitor competitor, TimePoint timePoint) {
         return null;
     }
 
@@ -1147,6 +1156,23 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
+        return null;
+    }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
 }

@@ -1,4 +1,4 @@
-﻿# Welcome to the SAP Sailing Wiki
+﻿﻿# Welcome to the SAP Sailing Wiki
 
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
@@ -33,6 +33,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
+  * [[Creating a webserver EC2 image from scratch|wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch]]
   * [[EC2 mail relaying|wiki/info/landscape/mail-relaying]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
@@ -70,6 +71,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Security
   * [[Fortify Tests|wiki/info/security/fortify]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
+  * [[Permission Concept|wiki/info/security/permission-concept]]
 
 ### Miscellaneous
 
@@ -109,10 +111,13 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Operating Igtimi WindBots|wiki/howto/eventmanagers/windbot-operations]]
 * [[Linking Race Videos|wiki/howto/eventmanagers/linking-race-videos]]
 * [[Import official results|wiki/howto/eventmanagers/results-import]]
+* [[Pairing lists|wiki/howto/eventmanagers/pairing-lists]]
+* [[Manage media content|wiki/howto/eventmanagers/Manage-media-content]]
 
 ### Setup
 
 * [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
+* [[Setup local webserver to serve 360° videos|wiki/howto/setup/webserver/chrome-webserver]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
 ### Miscellaneous
@@ -137,6 +142,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Kieler Woche event page|wiki/events/kieler-woche-2015]]
 * [[Charleston Race Week 2016|wiki/events/Charleston-Race-Week-2016]]
 * [[Sailing Leagues 2016|wiki/events/sailing-Leagues-2016]]
+* [[Media Content|wiki/events/Sailing-events-media-content]]
 
 ## Planning
 * [[Overview|https://wiki.sapsailing.com/pages/wiki/planning/]]

@@ -30,7 +30,7 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
 
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(nationality), null, null)), null);
         DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);

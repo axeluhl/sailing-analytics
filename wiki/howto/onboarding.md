@@ -13,12 +13,12 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin/tree/gpe-fork using http://storage.googleapis.com/gwt-eclipse-plugin/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. Git for Windows v2.12.2), http://git-scm.com / https://git-for-windows.github.io/
-4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
-5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
-6. JDK 1.7 (Java SE 7), http://jdk7.java.net
-7. JDK 1.8 (Java SE 8), http://jdk8.java.net
+4. MongoDB (e.g. Production Release 2.6.7), download: https://www.mongodb.com/
+5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8 is the link.
+6. JDK 1.7 (Java SE 7), http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
+7. JDK 1.8 (Java SE 8), http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 8. Maven 3.1.1 (or higher), http://maven.apache.org
-9. GWT SDK 2.8.1 (http://www.gwtproject.org/download.html)
+9. GWT SDK 2.8.2 (http://www.gwtproject.org/download.html)
 10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
 
 #### Automatic Eclipse plugin installation
@@ -40,14 +40,14 @@ Be aware hat the installation may take several minutes depending on your Interne
 1. Cygwin, http://www.cygwin.com/
 2. Eclipse Mylyn Bugzilla extension
 3. kdiff3 (git tool)
-4. Firebug (javascript & .css debugging)
+4. Firebug (javascript & .css debugging, included in Firefox Developer Tools in newer versions of Firefox by default)
 
 #### Accounts
 
 1. Git Account
+The primary Git repository for the project is hosted on sapsailing.com. It is mirrored on an hourly basis into SAP's internal Git/Gerrit repository, but branches from the external Git end up under the remote ``sapsailing.com`` in the internal repository, thus do not automatically merge into their branch counterparts. Conversely, commits pushed onto branches of the SAP-internal Gerrit will not by themselves end up on the external Git at sapsailing.com.
   * For access to the external git at ssh://trac@sapsailing.com/home/trac/git please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead.
-  * Register yourself as a Git user in the SAP-Git under: https://git.wdf.sap.corp:8080/
-  * Ask the Git administrator (Axel Uhl) to get on the list of enabled committers
+  * Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: https://git.wdf.sap.corp:8080/; ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 2. Bugzilla
   * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
   * Bugzilla url: http://bugzilla.sapsailing.com/bugzilla/

@@ -46,6 +46,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -233,6 +234,11 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @return the track associated to the given Competitor and name or <code>null</code> if there is none.
      */
     <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
+    
+    /**
+     * Returns all contained {@link SensorFixTrack SensorFixTracks} for the given trackName and associated to any competitor.
+     */
+    <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(String trackName);
 
     /**
      * Tells the leg on which the <code>competitor</code> was at time <code>at</code>. If the competitor hasn't passed
@@ -606,7 +612,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
             boolean notifyAboutGPSFixesAlreadyLoaded);
 
     void removeListener(RaceChangeListener listener);
-
+    
     /**
      * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
      * or if the competitor has not finished one of the legs in the race.
@@ -617,6 +623,18 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * See {@link TrackedLegOfCompetitor#getDistanceTraveledConsideringGateStart(TimePoint)}
      */
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
+     */
+    Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
+     */
+    Duration getDurationFoiled(Competitor competitor, TimePoint timePoint);
 
     /**
      * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
@@ -1007,4 +1025,51 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     Iterable<RaceLog> getAttachedRaceLogs();
 
+    /**
+     * Computes the average speed over ground for a {@link Competitor} based on times and distances for all
+     * {@link TrackedLegOfCompetitor legs} the competitor {@link TrackedLegOfCompetitor#hasStartedLeg(TimePoint) has
+     * started} already at {@code timePoint}.
+     * 
+     * @param timePoint
+     *            time point up and until to compute the speed
+     */
+    Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * Computes the competitor's speed projected onto the wind (if wind data is available and the competitor is not
+     * between start and finish (not racing) or not on a {@link LegType#REACHING reaching} leg; if outside a race and no
+     * wind information is available, {@code null} is returned. Otherwise, the speed at {@code timePoint} is projected
+     * onto the course. The wind direction at the {@link WindPositionMode#EXACT exact} competitor position at
+     * {@code timePoint} is used for the calculation.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint) {
+        return getVelocityMadeGood(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a {@link WindPositionMode}
+     * other than the default {@link WindPositionMode#EXACT}. If {@link WindPositionMode#LEG_MIDDLE} is used and the
+     * competitor is not currently sailing on a leg (hasn't started or has already finished), {@code null} is returned.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
+        return getVelocityMadeGood(competitor, timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
+     * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getVelocityMadeGood(competitor, timePoint, WindPositionMode.EXACT, cache);
+    }
+
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a
+     * {@link WindPositionMode} other than the default {@link WindPositionMode#EXACT} as well as a cache that can
+     * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing. If
+     * {@link WindPositionMode#LEG_MIDDLE} is used and the competitor is not currently sailing on a leg (hasn't started
+     * or has already finished), {@code null} is returned.
+     */
+    SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache);
 }

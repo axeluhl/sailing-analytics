@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSetti
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
@@ -42,12 +43,14 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
 
-        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(null, null, raceDetails, overallDetails,
-                null, null, null, RaceColumnSelectionStrategies.EXPLICIT,true, false,
-                true,
-                false, true);
+        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, raceDetails, overallDetails,
+                /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */ null,
+                /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.EXPLICIT,
+                /* showAddedScores */ true, /* showCompetitorSailIdColumn */ true,
+                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ true);
 
-        timer = new com.sap.sse.gwt.client.player.Timer(
+        timer = new Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
@@ -61,9 +64,11 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                             String overallLeaderboardName = result.get(0);
                             CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
                             
-                            MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null,null,cf.getSailingService(),
-                                    new AsyncActionsExecutor(), leaderboardSettings,false, provider,timer,null, overallLeaderboardName, cf.getErrorReporter(),
-                                    StringMessages.INSTANCE,  false,null,false,null,false,true,false,false,false,new SixtyInchLeaderBoardStyle(true));
+                            MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
+                                    cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
+                                    provider, timer, null, overallLeaderboardName, cf.getErrorReporter(),
+                                    StringMessages.INSTANCE, false, null, false, null, false, true, false, false, false,
+                                    new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get());
 
                             IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
 

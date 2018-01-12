@@ -39,7 +39,6 @@ public class ConcurrencyTestsUtil extends TestsUtil {
 
     public static <ResultDataType> void verifyResultData(Map<GroupKey, ResultDataType> resultData, Map<GroupKey, ResultDataType> expectedResultData) {
         assertThat("No aggregation has been received.", resultData, notNullValue());
-        
         for (Entry<GroupKey, ResultDataType> expectedReceivedAggregationEntry : expectedResultData.entrySet()) {
             assertThat("The expected aggregation entry '" + expectedReceivedAggregationEntry + "' wasn't received.",
                     resultData.containsKey(expectedReceivedAggregationEntry.getKey()), is(true));

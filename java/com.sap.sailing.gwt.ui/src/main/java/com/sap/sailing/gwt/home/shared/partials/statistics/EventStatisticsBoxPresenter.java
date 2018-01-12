@@ -1,14 +1,5 @@
 package com.sap.sailing.gwt.home.shared.partials.statistics;
 
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_COMPATITORS_COUNT;
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_FASTEST_SAILOR;
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_RACES_COUNT;
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_RAW_GPS_FIX;
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_REGATTAS_FOUGHT;
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_SUM_MILES;
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_TRACKED_COUNT;
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_WIND_FIX;
-
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -28,15 +19,15 @@ public class EventStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter 
     public void setData(EventStatisticsDTO statistics) {
         clear();
         if (showRegattaInformation) {
-            addItem(ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getRegattasFoughtCount());
+            addItem(StatisticsBoxResources.INSTANCE.regattasFought(), MSG.regattas(), statistics.getRegattasFoughtCount());
         }
-        addItemIfNotNull(ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
-        addItem(ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
-        addItem(ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
-        addItemWithCompactFormat(ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
-        addItemWithCompactFormat(ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
-        addItemWithCompactFormat(ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled() == null ? null : statistics.getTotalDistanceTraveled().getSeaMiles());
-        addCompetitorItem(ICON_FASTEST_SAILOR, MSG.fastestSailor(), statistics.getFastestCompetitor());
-        addKnotsItem(ICON_FASTEST_SAILOR, MSG.highestSpeed(), statistics.getFastestCompetitorSpeedInKnots());
+        addItemIfNotNull(StatisticsBoxResources.INSTANCE.averageSpeed(), MSG.competitors(), statistics.getCompetitorsCount());
+        addItem(StatisticsBoxResources.INSTANCE.racesCount(), MSG.races(), statistics.getRacesRunCount());
+        addItem(StatisticsBoxResources.INSTANCE.trackedCount(), MSG.trackedRaces(), statistics.getTrackedRacesCount());
+        addItemWithCompactFormat(StatisticsBoxResources.INSTANCE.gpsFixes(), MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
+        addItemWithCompactFormat(StatisticsBoxResources.INSTANCE.strongestWind(), MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
+        addItemWithCompactFormat(StatisticsBoxResources.INSTANCE.sumMiles(), MSG.sailedMiles(), statistics.getTotalDistanceTraveled() == null ? null : statistics.getTotalDistanceTraveled().getSeaMiles());
+        addCompetitorItem(StatisticsBoxResources.INSTANCE.fastestSailor(), MSG.fastestSailor(), statistics.getFastestCompetitor());
+        addKnotsItem(StatisticsBoxResources.INSTANCE.maxSpeed(), MSG.highestSpeed(), statistics.getFastestCompetitorSpeedInKnots());
     }
 }

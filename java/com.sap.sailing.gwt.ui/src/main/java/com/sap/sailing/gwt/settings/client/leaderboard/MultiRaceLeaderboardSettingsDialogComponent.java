@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
@@ -39,53 +38,31 @@ public class MultiRaceLeaderboardSettingsDialogComponent
 
     @Override
     public MultiRaceLeaderboardSettings getResult() {
-        List<DetailType> maneuverDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : maneuverDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                maneuverDetailsToShow.add(entry.getKey());
-            }
-        }
-        List<DetailType> overallDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : overallDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                overallDetailsToShow.add(entry.getKey());
-            }
-        }
-        List<DetailType> raceDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : raceDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                raceDetailsToShow.add(entry.getKey());
-            }
-        }
-        List<DetailType> legDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : legDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                legDetailsToShow.add(entry.getKey());
-            }
-        }
+        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes);
+        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes);
+        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes);
+        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes);
         List<String> namesOfRaceColumnsToShow = null;
         if (activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
             namesOfRaceColumnsToShow = new ArrayList<String>();
             for (Map.Entry<String, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
                 if (entry.getValue().getValue()) {
                     namesOfRaceColumnsToShow.add(entry.getKey());
+          
                 }
             }
         }
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N
                 ? numberOfLastRacesToShowBox.getValue() : null;
-        MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(maneuverDetailsToShow,
+        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow, namesOfRaceColumnsToShow,
                 lastNRacesToShowValue,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
-                /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
-                        .getValue().booleanValue(),
                 showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
                 isCompetitorNationalityColumnVisible.getValue());
-        SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }
 
