@@ -6965,7 +6965,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
         final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
-        if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null || trackedRace.getStartOfTracking() == null) {
+        if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
+                || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
             return false;
         }
         
@@ -6975,6 +6976,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return false;
         }
         return true;
+    }
+    
+    private boolean isSmartphoneTrackingEnabled(DynamicTrackedRace trackedRace) {
+        // TODO not sure if this check is sufficient
+        for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+            RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
+            if (raceLogTrackingState.isForTracking()) {
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override
