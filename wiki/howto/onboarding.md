@@ -19,7 +19,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 7. JDK 1.8 (Java SE 8), http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 8. Maven 3.1.1 (or higher), http://maven.apache.org
 9. GWT SDK 2.8.2 (http://www.gwtproject.org/download.html)
-10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
+10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/).
 
 #### Automatic Eclipse plugin installation
 
