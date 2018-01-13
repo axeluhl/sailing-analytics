@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.MethodRule;
 import org.junit.rules.Timeout;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -33,7 +32,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class TestDeadlockInRegattaListener {
     @Rule
-    public MethodRule globalTimeout = new Timeout(5000); // fail after 1s
+    public Timeout globalTimeout = new Timeout(5000); // fail after 1s
 
     @Test
     public void testDeadlockInRegattaListener() throws InterruptedException, BrokenBarrierException {
