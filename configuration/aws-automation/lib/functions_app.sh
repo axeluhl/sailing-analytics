@@ -47,8 +47,7 @@ function change_admin_password(){
 # -----------------------------------------------------------
 function create_new_user(){
 	local_echo "Creating new user \"$4\" with password \"$5\"..."
-	curl_wrapper -X POST -H "Authorization: Bearer $1" "http://$2:$3/security/api/restsecurity/create_user" \
-	--data "username=$4" --data "password=$5"
+	curl_wrapper -X POST -H "Authorization: Bearer $1" "http://$2:$3/security/api/restsecurity/create_user?username=$4&password=$5"
 }
 
 # -----------------------------------------------------------
