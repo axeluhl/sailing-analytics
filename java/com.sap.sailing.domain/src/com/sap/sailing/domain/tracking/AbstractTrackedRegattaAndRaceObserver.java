@@ -71,6 +71,13 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
         }
     }
 
+    /**
+     * The method is called when a {@link TrackedRace} has been added to a {@link TrackedRegatta} that was
+     * {@link #regattaAdded(TrackedRegatta) added} to this listener.<p>
+     * 
+     * The method is called {@code synchronized} under the {@link RegattaListener}'s monitor. This means
+     * in particular that implementations need to take care
+     */
     protected abstract void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
             DynamicTrackedRace trackedRace);
 
@@ -120,7 +127,7 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
 
         /**
          * Called by {@link AbstractTrackedRegattaAndRaceObserver} when the {@link TrackedRegatta} was removed or the
-         * {@link TrackedRegatta} shouldn't be tracked anymore (this is e.g. the case in replication state.
+         * {@link TrackedRegatta} shouldn't be tracked anymore (this is e.g. the case in replication state).
          */
         public synchronized void stop() {
             trackedRegatta.removeRaceListener(raceListener);

@@ -135,11 +135,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         LockUtil.lockForWrite(trackedRacesLock);
         try {
             trackedRaces.remove(trackedRace.getRace());
-            for (RaceListener listener : raceListeners.keySet()) {
-                listener.raceRemoved(trackedRace);
-            }
         } finally {
             LockUtil.unlockAfterWrite(trackedRacesLock);
+        }
+        for (RaceListener listener : raceListeners.keySet()) {
+            listener.raceRemoved(trackedRace);
         }
     }
 
