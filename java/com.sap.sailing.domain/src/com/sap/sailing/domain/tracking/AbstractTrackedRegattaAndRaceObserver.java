@@ -75,12 +75,17 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
      * The method is called when a {@link TrackedRace} has been added to a {@link TrackedRegatta} that was
      * {@link #regattaAdded(TrackedRegatta) added} to this listener.<p>
      * 
-     * The method is called {@code synchronized} under the {@link RegattaListener}'s monitor. This means
-     * in particular that implementations need to take care
+     * The method is called {@code synchronized} under the {@link RegattaListener}'s monitor.
      */
     protected abstract void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
             DynamicTrackedRace trackedRace);
 
+    /**
+     * The method is called when a {@link TrackedRace} has been removed from a {@link TrackedRegatta} that was
+     * {@link #regattaRemoved(TrackedRegatta) removed} from this listener.<p>
+     * 
+     * The method is called {@code synchronized} under the {@link RegattaListener}'s monitor.
+     */
     protected abstract void onRaceRemoved(DynamicTrackedRace trackedRace);
 
     private class RegattaListener {
