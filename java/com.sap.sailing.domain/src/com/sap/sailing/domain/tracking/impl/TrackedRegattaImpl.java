@@ -114,9 +114,13 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             unlockTrackedRacesAfterWrite();
         }
         if (oldTrackedRace != trackedRace) {
-            for (RaceListener listener : raceListeners.keySet()) {
-                listener.raceAdded(trackedRace);
-            }
+            notifyListenersAboutTrackedRaceAdded(trackedRace);
+        }
+    }
+
+    protected void notifyListenersAboutTrackedRaceAdded(TrackedRace trackedRace) {
+        for (RaceListener listener : raceListeners.keySet()) {
+            listener.raceAdded(trackedRace);
         }
     }
     
@@ -139,6 +143,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             unlockTrackedRacesAfterWrite();
         }
         notifyListenersAboutTrackedRaceRemoved(trackedRace);
+        // Fix for bug4414: put this into a separate thread to avoid deadlock caused by
+        // a synchronized RegattaListener.raceRemoved while holding the TrackedRegattaImpl.trackedRacesLock's write lock
+        // acquired in RacingEventServiceImpl.removeRace
+//        new Thread(()->notifyListenersAboutTrackedRaceRemoved(trackedRace)).start();
     }
 
     protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace) {

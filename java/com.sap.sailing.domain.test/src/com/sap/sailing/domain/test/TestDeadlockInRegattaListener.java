@@ -3,6 +3,8 @@ package com.sap.sailing.domain.test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.UUID;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -10,9 +12,10 @@ import java.util.function.Consumer;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.Timeout;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -35,7 +38,7 @@ public class TestDeadlockInRegattaListener {
     public Timeout globalTimeout = new Timeout(5000); // fail after 1s
 
     @Test
-    public void testDeadlockInRegattaListener() throws InterruptedException, BrokenBarrierException {
+    public void testDeadlockInRegattaListener() throws InterruptedException, BrokenBarrierException, MalformedURLException, IOException {
         CyclicBarrier latch = new CyclicBarrier(2);
         CyclicBarrier monitorOnRegattaListenerLatch = new CyclicBarrier(2);
         @SuppressWarnings("unchecked")
@@ -84,16 +87,32 @@ public class TestDeadlockInRegattaListener {
                     return super.getOrCreateTrackedRegatta(r);
                 }
             }
+            @Override
+            public DynamicTrackedRegatta getTrackedRegatta(Regatta r) {
+                if (r == regatta) {
+                    return trackedRegatta;
+                } else {
+                    return super.getTrackedRegatta(regatta);
+                }
+            }
         };
         when(racingEventServiceTracker.getService()).thenReturn(racingEventService);
         RegattaLogFixTrackerRegattaListener listener = new RegattaLogFixTrackerRegattaListener(
                 racingEventServiceTracker, null);
 
         racingEventService.addRegattaWithoutReplication(trackedRegatta.getRegatta());
-        TrackedRace trackedRace1 = mock(DynamicTrackedRaceImpl.class);
-        TrackedRace trackedRace2 = mock(DynamicTrackedRaceImpl.class);
         String raceName1 = "R1";
         String raceName2 = "R2";
+        TrackedRace trackedRace1 = mock(DynamicTrackedRaceImpl.class);
+        RaceDefinition race1 = mock(RaceDefinition.class);
+        when(race1.getName()).thenReturn(raceName1);
+        when(race1.getCourse()).thenReturn(mock(Course.class));
+        when(trackedRace1.getRace()).thenReturn(race1);
+        TrackedRace trackedRace2 = mock(DynamicTrackedRaceImpl.class);
+        RaceDefinition race2 = mock(RaceDefinition.class);
+        when(race2.getCourse()).thenReturn(mock(Course.class));
+        when(race2.getName()).thenReturn(raceName2);
+        when(trackedRace2.getRace()).thenReturn(race2);
         when(trackedRace1.getRaceIdentifier()).thenReturn(new RegattaNameAndRaceName(regattaName, raceName1));
         when(trackedRace2.getRaceIdentifier()).thenReturn(new RegattaNameAndRaceName(regattaName, raceName2));
         listener.regattaAdded(trackedRegatta);
@@ -114,6 +133,6 @@ public class TestDeadlockInRegattaListener {
         // after the write lock has been obtained but before the synchronized RegattaListener.raceRemoved method
         // is called. Before the fix for bug4414 the TrackedRegattaImpl.removeTrackedRace method calls the
         // listeners while still holding the write lock. 
-        trackedRegatta.removeTrackedRace(trackedRace1);
+        racingEventService.removeRace(regatta, trackedRace1.getRace());
     }
 }
