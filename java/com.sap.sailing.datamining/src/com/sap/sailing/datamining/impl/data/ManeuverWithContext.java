@@ -188,4 +188,43 @@ public class ManeuverWithContext implements HasManeuverContext {
         return trackedRace.getTrack(competitor);
     }
 
+    @Override
+    public Double getDurationBetweenStableSpeedWithCourseAndMainCurveBeginningSeconds() {
+        return maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore()
+                .until(maneuver.getMainCurveBoundaries().getTimePointBefore()).asSeconds();
+    }
+
+    @Override
+    public Double getSpeedRatioBetweenStableSpeedWithCourseAndMainCurveBeginning() {
+        return maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore().getKnots()
+                / maneuver.getMainCurveBoundaries().getSpeedWithBearingBefore().getKnots();
+    }
+
+    @Override
+    public Double getAbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveBeginningInDegrees() {
+        return Math.abs(
+                maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore().getBearing()
+                        .getDifferenceTo(maneuver.getMainCurveBoundaries().getSpeedWithBearingBefore().getBearing())
+                        .getDegrees());
+    }
+
+    @Override
+    public Double getDurationBetweenStableSpeedWithCourseAndMainCurveEndInSeconds() {
+        return maneuver.getMainCurveBoundaries().getTimePointAfter()
+                .until(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter()).asSeconds();
+    }
+
+    @Override
+    public Double getSpeedRatioBetweenStableSpeedWithCourseAndMainCurveEnd() {
+        return maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter().getKnots()
+                / maneuver.getMainCurveBoundaries().getSpeedWithBearingAfter().getKnots();
+    }
+
+    @Override
+    public Double getAbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveEndInDegrees() {
+        return Math.abs(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter()
+                .getBearing().getDifferenceTo(maneuver.getMainCurveBoundaries().getSpeedWithBearingAfter().getBearing())
+                .getDegrees());
+    }
+
 }

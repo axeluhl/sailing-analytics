@@ -51,7 +51,25 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "ManeuverExitingSpeedInKnots", ordinal = 18, resultDecimals = 2)
     Double getManeuverExitingSpeed();
-    
+
+    @Statistic(messageKey = "DurationBetweenStableSpeedWithCourseAndMainCurveBeginningInSeconds", ordinal = 20, resultDecimals = 2)
+    Double getDurationBetweenStableSpeedWithCourseAndMainCurveBeginningSeconds();
+
+    @Statistic(messageKey = "SpeedRatioBetweenStableSpeedWithCourseAndMainCurveBeginning", ordinal = 21, resultDecimals = 2)
+    Double getSpeedRatioBetweenStableSpeedWithCourseAndMainCurveBeginning();
+
+    @Statistic(messageKey = "AbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveBeginningInDegrees", ordinal = 22, resultDecimals = 2)
+    Double getAbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveBeginningInDegrees();
+
+    @Statistic(messageKey = "DurationBetweenStableSpeedWithCourseAndMainCurveEndInSeconds", ordinal = 23, resultDecimals = 2)
+    Double getDurationBetweenStableSpeedWithCourseAndMainCurveEndInSeconds();
+
+    @Statistic(messageKey = "SpeedRatioBetweenStableSpeedWithCourseAndMainCurveEnd", ordinal = 24, resultDecimals = 2)
+    Double getSpeedRatioBetweenStableSpeedWithCourseAndMainCurveEnd();
+
+    @Statistic(messageKey = "AbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveEndInDegrees", ordinal = 25, resultDecimals = 2)
+    Double getAbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveEndInDegrees();
+
     TimePoint getTimePointBeforeForAnalysis();
 
     TimePoint getTimePointAfterForAnalysis();
