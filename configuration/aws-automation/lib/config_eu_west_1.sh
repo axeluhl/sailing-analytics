@@ -13,3 +13,4 @@ certificate_arn='arn:aws:acm:eu-west-1:017363970217:certificate/67a1515a-81be-47
 elb_security_group_ids=
 mongodb_host=54.76.64.42
 mongodb_port=27017
+alb_domain='sapsailing.com'

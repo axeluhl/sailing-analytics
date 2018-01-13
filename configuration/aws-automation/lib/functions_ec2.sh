@@ -26,7 +26,7 @@ function get_default_vpc_id(){
 # -----------------------------------------------------------
 function get_instance_id(){
 	local_echo "Querying for the instance id..."
-	aws_wrapper aws ec2 describe-instances --query "Reservations[*].Instances[?PublicDnsName=='$1'].InstanceId" --output text
+	aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[?PublicDnsName=='$1'].InstanceId" --output text
 }
 
 # -----------------------------------------------------------

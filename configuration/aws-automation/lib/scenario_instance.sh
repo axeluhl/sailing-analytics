@@ -18,6 +18,7 @@ function instance_require(){
 	require_instance_type
 	require_instance_name
 	require_instance_short_name
+	require_build_version
 	require_key_name
 	require_key_file
 	require_new_admin_password

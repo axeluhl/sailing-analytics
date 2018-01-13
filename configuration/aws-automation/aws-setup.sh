@@ -113,7 +113,8 @@ usage() {
   -l, --instance-short-name     Short name for instance (e.g. subdomain \"wcs17\")
   -a, --new-admin-password      New password for the admin user
   -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
-  -p, --super-instance          Dns name of superior instance (e.g. base instance for sub instances)
+  -z, --super-instance          Dns name of superior instance (e.g. base instance for sub instances)
+  -b, --build                   Build version to use (leave empty for latest)
   -w, --description             Description of sub instance
   -c, --contact-person          Contact person
   -e, --contact-email           Email of contact person
@@ -220,6 +221,7 @@ while [[ $1 = -?* ]]; do
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
   -b|--super-instance) shift; super_instance_param=${1} ;;
+  -z|--build) shift; build_version_param=${1} ;;
   -w|--description) shift; description_param=${1} ;;
   -c|--contact-person) shift; contact_person_param=${1} ;;
   -e|--contact-email) shift; contact_email_param=${1} ;;

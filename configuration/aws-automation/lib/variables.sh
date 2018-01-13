@@ -25,6 +25,7 @@ default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
 default_user_username=newuser
 default_user_password=newpassword
+latest_release=$(get_latest_release)
 hosted_zone_id=Z1R8UBAEXAMPLE
 
 # Other Variables

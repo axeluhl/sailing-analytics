@@ -20,6 +20,7 @@ function sub_instance_require(){
 	require_key_file
 	require_instance_name
 	require_instance_short_name
+	require_build_version
 	require_new_admin_password
 	require_user_username
 	require_user_password
@@ -30,8 +31,9 @@ function sub_instance_require(){
 }
 
 function sub_instance_execute() {
-  local servers_dir="/home/sailing/servers/"
-	local server_dir="$servers_dir$instance_short_name"
+	local sailing_dir="/home/sailing"
+  local servers_dir="$sailing_dir/servers"
+	local server_dir="$servers_dir/$instance_short_name"
 	local server_env_file="$server_dir/env.sh"
 	local comment_out_line_in_env_with_pattern='JAVA_HOME=\/opt\/jdk1.8.0_20'
 	local comment_in_line_in_env_with_pattern='sapjvm_gc'
@@ -40,11 +42,10 @@ function sub_instance_execute() {
 	execute_remote mkdir $server_dir
 
 	# copy refreshInstance.sh from /servers/server to sub instance directory
-	execute_remote cp /home/sailing/servers/server/refreshInstance.sh $server_dir
+	execute_remote cp /home/sailing/code/java/target/refreshInstance.sh $server_dir
 
 	# Execute refreshInstance.sh
-	local latest_release=$(get_latest_release)
-	execute_remote "export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $latest_release;"
+	execute_remote "export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version;"
 
 	# uncommenting lines containing pattern
 	execute_remote "sed -i '/$comment_in_line_in_env_with_pattern/s/^#//g' $server_env_file"

@@ -120,6 +120,10 @@ function require_contact_email(){
 	require_variable "$contact_email_param" contact_email "" "$contact_email_message"
 }
 
+function require_build_version(){
+	require_variable "$build_version_param" build_version "$latest_release" "$build_version_message"
+}
+
 
 region_ask_message="Please enter the region for the instance: "
 instance_type_ask_message="Please enter the instance type: "
@@ -138,3 +142,4 @@ super_instance_message="Please enter the dns name of the superior instance: "
 description_message="Please enter a description for the server: "
 contact_person_message="Please enter the name of a contact person: "
 contact_email_message="Please enter the email of the contact person: "
+build_version_message="Please enter a build version to use (releases.sapsailng.com): "
