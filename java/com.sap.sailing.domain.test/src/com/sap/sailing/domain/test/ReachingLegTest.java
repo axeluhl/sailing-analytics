@@ -63,10 +63,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ReachingLegTest extends TrackBasedTest {
     private Map<Competitor,Boat> competitorsAndBoats;
-    private Competitor plattner;
-    private Competitor hunger;
+    private CompetitorWithBoat plattner;
+    private CompetitorWithBoat hunger;
     private MillisecondsTimePoint start;
-    private Competitor schomaeker;
+    private CompetitorWithBoat schomaeker;
 
     /**
      * Creates the race and two competitors ({@link #plattner} and {@link #hunger}) and sets the start line passing for both of them
@@ -75,11 +75,11 @@ public class ReachingLegTest extends TrackBasedTest {
     @Before
     public void setUp() {
         competitorsAndBoats = new LinkedHashMap<>();
-        CompetitorWithBoat hunger = createCompetitorWithBoat("Wolfgang Hunger"); 
+        hunger = createCompetitorWithBoat("Wolfgang Hunger"); 
         competitorsAndBoats.put(hunger, hunger.getBoat());
-        CompetitorWithBoat plattner = createCompetitorWithBoat("Dr. Hasso Plattner");
+        plattner = createCompetitorWithBoat("Dr. Hasso Plattner");
         competitorsAndBoats.put(plattner, plattner.getBoat());
-        CompetitorWithBoat schomaeker = createCompetitorWithBoat("Meike Schom�ker");
+        schomaeker = createCompetitorWithBoat("Meike Schom�ker");
         competitorsAndBoats.put(schomaeker, schomaeker.getBoat());
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         setTrackedRace(createTrackedRace("Kieler Woche", "505 Race 2", "505", competitorsAndBoats, start));
