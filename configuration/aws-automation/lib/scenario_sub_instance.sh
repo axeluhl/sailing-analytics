@@ -25,9 +25,9 @@ function sub_instance_require(){
 	require_user_username
 	require_user_password
 
-	# require_description
-	# require_contact_person
-	# require_contact_email
+	require_contact_person
+	require_contact_email
+	require_description
 }
 
 function sub_instance_execute() {
@@ -35,6 +35,7 @@ function sub_instance_execute() {
   local servers_dir="$sailing_dir/servers"
 	local server_dir="$servers_dir/$instance_short_name"
 	local server_env_file="$server_dir/env.sh"
+	local readme_file="$servers_dir/README"
 	local comment_out_line_in_env_with_pattern='JAVA_HOME=\/opt\/jdk1.8.0_20'
 	local comment_in_line_in_env_with_pattern='sapjvm_gc'
 
@@ -59,12 +60,15 @@ function sub_instance_execute() {
 
 	# TODO: Append description to README
 
-	local patch=$(build_configuration "# PATCH $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
+	local env_patch=$(build_configuration "# PATCH $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
 	"SERVER_PORT=$server_port" "EXPEDITION_PORT=$expedition_port" "MONGODB_NAME=$(alphanumeric $instance_name)" "MONGODB_HOST=$mongodb_host" \
 	"MONGODB_PORT=$mongodb_port" "DEPLOY_TO=$instance_short_name")
 
 	# append patch to env.sh
-	execute_remote "echo -e \"$patch\" >> $server_env_file"
+	execute_remote "echo -e \"$env_patch\" >> $server_env_file"
+
+	exceute_remote touch $readme_file
+	execute_remote "echo -e \"\n# $instance_short_name ($description, $contact_person, $contact_email)\n$env_patch\" >> $readme_file"
 
 	# start server and redirect both stderr and stdout to /dev/null (&>/dev/null). Send command to background by &. Do this to avoid blocking.
 	execute_remote -f "sh -c \"cd $server_dir; nohup ./start > /dev/null 2>&1 &\""

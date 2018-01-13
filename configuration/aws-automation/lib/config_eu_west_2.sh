@@ -14,3 +14,5 @@ elb_security_group_ids=sg-871732ee
 mongodb_host=35.176.143.232
 mongodb_port=27017
 alb_domain='dummy2.sapsailing.com'
+
+super_instance='ec2-35-177-132-223.eu-west-2.compute.amazonaws.com'
