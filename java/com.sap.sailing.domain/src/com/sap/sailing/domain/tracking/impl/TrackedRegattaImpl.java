@@ -122,24 +122,28 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     
     @Override
     public void removeTrackedRace(RaceDefinition raceDefinition) {
-        LockUtil.lockForWrite(trackedRacesLock);
+        lockTrackedRacesForWrite();
         try {
             trackedRaces.remove(raceDefinition);
         } finally {
-            LockUtil.unlockAfterWrite(trackedRacesLock);
+            unlockTrackedRacesAfterWrite();
         }
     }
     
     @Override
     public void removeTrackedRace(TrackedRace trackedRace) {
-        LockUtil.lockForWrite(trackedRacesLock);
+        lockTrackedRacesForWrite();
         try {
             trackedRaces.remove(trackedRace.getRace());
-            for (RaceListener listener : raceListeners.keySet()) {
-                listener.raceRemoved(trackedRace);
-            }
+            notifyListenersAboutTrackedRaceRemoved(trackedRace);
         } finally {
-            LockUtil.unlockAfterWrite(trackedRacesLock);
+            unlockTrackedRacesAfterWrite();
+        }
+    }
+
+    protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace) {
+        for (RaceListener listener : raceListeners.keySet()) {
+            listener.raceRemoved(trackedRace);
         }
     }
 
