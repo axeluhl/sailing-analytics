@@ -433,8 +433,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             sideToWhichWaypointWasPassed = maneuverDirection;
             // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
             maneuvers.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
-                    maneuverLoss, markPassingTimePoint, maneuverDetails.extractEnteringAndExistingDetailsOnly(),
-                    maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
+                    maneuverLoss, markPassingTimePoint, maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
+                    maneuverDetails.extractEnteringAndExistingDetailsOnly(),
                     maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), waypointPassed,
                     sideToWhichWaypointWasPassed));
         } else {
