@@ -135,10 +135,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         lockTrackedRacesForWrite();
         try {
             trackedRaces.remove(trackedRace.getRace());
-            notifyListenersAboutTrackedRaceRemoved(trackedRace);
         } finally {
             unlockTrackedRacesAfterWrite();
         }
+        notifyListenersAboutTrackedRaceRemoved(trackedRace);
     }
 
     protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace) {
