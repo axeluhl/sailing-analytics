@@ -11,7 +11,12 @@ This is an add-on to the regular EC2 image set-up described [here](https://wiki.
 Then carry out these steps:
 
 * install additional packages: `yum install fail2ban git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
-* activate NFS by calling `chkconfig nfs on`; launch the NFS service once using `service nfs start`
+* activate NFS by calling `chkconfig nfs on`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
+```
+/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
+/home/scores 172.31.0.0/16(rw,nohide,no_root_squash)
+```
+* launch the NFS service once using `service nfs start`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
 cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl
