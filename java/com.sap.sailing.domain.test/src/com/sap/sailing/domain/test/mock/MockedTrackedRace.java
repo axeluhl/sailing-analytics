@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -653,6 +654,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
+    
+    @Override
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
+        return null;
+    }
 
     @Override
     public boolean raceIsKnownToStartUpwind() {
@@ -1167,6 +1173,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException {
         return null;
     }
 

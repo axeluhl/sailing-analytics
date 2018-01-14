@@ -11,6 +11,12 @@ This is an add-on to the regular EC2 image set-up described [here](https://wiki.
 Then carry out these steps:
 
 * install additional packages: `yum install fail2ban git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel`
+* activate NFS by calling `chkconfig nfs on`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
+```
+/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
+/home/scores 172.31.0.0/16(rw,nohide,no_root_squash)
+```
+* launch the NFS service once using `service nfs start`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
 cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl
@@ -58,6 +64,7 @@ mv welcome.conf welcome.conf.org
 * install bugzilla to `/usr/share/bugzilla` and `/var/lib/bugzilla`
 * create `/etc/bugzilla/localconfig`
 * set up crontab for user `wiki` as `*/10 * * * * /home/wiki/syncgit` and make sure the script is in place
+* ensure that `https://git.sapsailing.com/git` delivers the git content, with password credentials defined in `/etc/httpd/conf/passwd.git`. Sasa Zivkov (sasa.zivkov@sap.com) has been our point of contact of the SAP Gerrit group helping us with replicating our Git repository to the SAP-internal git.wdf.sap.corp one.
 * comment `lbmethod_heartbeat_module` in /etc/httpd/conf.modules.d/00-proxy.conf because we don't need this sort of load balancing across origin servers and it causes a warning message in error_log
 * install awstats to `/usr/share/awstats`, establish `/etc/httpd/conf/passwd.awstats`, establish a configuration under `/etc/awstats`, establish AWStats data directory under `/var/lib/awstats` and create /etc/cron.weekly/awstats as follows:
 ```
