@@ -7,36 +7,38 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.TimePoint;
 
 /**
  * @author Axel Uhl (d043530)
  *
  */
-public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
+public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private static final long serialVersionUID = -5317959066507472580L;
     private final ManeuverType type;
     private final Tack newTack;
     private final Position position;
     private final TimePoint timePoint;
-    private final SpeedWithBearing speedWithBearingBefore;
-    private final SpeedWithBearing speedWithBearingAfter;
-    private final double directionChangeInDegrees;
     private final Distance maneuverLoss;
+    private final double maxAngularVelocityInDegreesPerSecond;
+    private final ManeuverCurveBoundaries mainCurveBoundaries;
+    private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
 
-    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint, SpeedWithBearing speedWithBearingBefore,
-            SpeedWithBearing speedWithBearingAfter, double directionChangeInDegrees, Distance maneuverLoss) {
-        super();
+    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
+            ManeuverCurveBoundaries mainCurveBoundaries,
+            ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
+            double maxAngularVelocityInDegreesPerSecond) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
-        this.timePoint = timePoint;
-        this.speedWithBearingBefore = speedWithBearingBefore;
-        this.speedWithBearingAfter = speedWithBearingAfter;
-        this.directionChangeInDegrees = directionChangeInDegrees;
         this.maneuverLoss = maneuverLoss;
+        this.timePoint = timePoint;
+        this.mainCurveBoundaries = mainCurveBoundaries;
+        this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
+        this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
     }
-    
+
     @Override
     public ManeuverType getType() {
         return type;
@@ -53,18 +55,13 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     }
 
     @Override
-    public SpeedWithBearing getSpeedWithBearingBefore() {
-        return speedWithBearingBefore;
+    public ManeuverCurveBoundaries getMainCurveBoundaries() {
+        return mainCurveBoundaries;
     }
 
     @Override
-    public SpeedWithBearing getSpeedWithBearingAfter() {
-        return speedWithBearingAfter;
-    }
-
-    @Override
-    public double getDirectionChangeInDegrees() {
-        return directionChangeInDegrees;
+    public ManeuverCurveBoundaries getManeuverCurveWithStableSpeedAndCourseBoundaries() {
+        return maneuverCurveWithStableSpeedAndCourseBoundaries;
     }
 
     @Override
@@ -78,10 +75,31 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     }
 
     @Override
+    public double getDirectionChangeInDegrees() {
+        return getManeuverBoundaries().getDirectionChangeInDegrees();
+    }
+
+    @Override
+    public SpeedWithBearing getSpeedWithBearingBefore() {
+        return getManeuverBoundaries().getSpeedWithBearingBefore();
+    }
+
+    @Override
+    public SpeedWithBearing getSpeedWithBearingAfter() {
+        return getManeuverBoundaries().getSpeedWithBearingAfter();
+    }
+
+    @Override
     public String toString() {
         return super.toString() + " " + type + " on new tack " + newTack + " on position " + position
-                + " at time point " + timePoint + ". " + "Speed before maneuver " + speedWithBearingBefore
-                + " speed after maneuver " + speedWithBearingAfter + ". The maneuver changed the course by "
-                + directionChangeInDegrees + "deg." + (getManeuverLoss() == null ? "" : " Lost approximately "+getManeuverLoss());
+                + " at time point " + timePoint + ", " + getManeuverBoundaries() + ", max. angular velocity: "
+                + maxAngularVelocityInDegreesPerSecond
+                + (getManeuverLoss() == null ? "" : " Lost approximately " + getManeuverLoss());
     }
+
+    @Override
+    public double getMaxAngularVelocityInDegreesPerSecond() {
+        return maxAngularVelocityInDegreesPerSecond;
+    }
+
 }
