@@ -14,7 +14,6 @@ function query_public_dns_name(){
 # @return    default vpc id
 # -----------------------------------------------------------
 function get_default_vpc_id(){
-	local_echo "Querying for the default vpc id..."
 	aws_wrapper ec2 describe-vpcs --query 'Vpcs[?IsDefault==`true`].VpcId' --output text
 }
 
@@ -24,7 +23,7 @@ function get_default_vpc_id(){
 # @return    instance id
 # -----------------------------------------------------------
 function get_instance_id(){
-	local_echo "Querying for the instance id..."
+	local_echo "Querying for the instance id of $1..."
 	aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[?PublicDnsName=='$1'].InstanceId" --output text
 }
 
@@ -70,14 +69,11 @@ function wait_instance_exists(){
 # -----------------------------------------------------------
 function wait_for_ssh_connection(){
 	local_echo -n "Connecting to $1@$2..."
-	while ! ssh_wrapper -q $1@$2 true 1>&2; do
+	while ! ssh_prewrapper -q $1@$2 true 1>&2; do
   	echo -n .
 		sleep 2
 	done
-	echo ""
-	success "[ SSH Connection established ]"
 }
-
 
 function run_instance(){
 	local user_data=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \

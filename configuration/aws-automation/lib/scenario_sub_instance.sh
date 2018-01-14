@@ -67,33 +67,37 @@ function sub_instance_execute() {
 	execute_remote "export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version > /dev/null 2>&1;"
 
 	# uncommenting lines containing pattern
-	local_echo "Commenting in $comment_in_line_in_env_with_pattern with $server_env_file..."
+	local_echo "Commenting in $comment_in_line_in_env_with_pattern inside $server_env_file..."
 	execute_remote "sed -i '/$comment_in_line_in_env_with_pattern/s/^#//g' $server_env_file"
 
 	# commenting out lines containing pattern
-	local_echo "Commenting out $comment_out_line_in_env_with_pattern with $server_env_file..."
+	local_echo "Commenting out $comment_out_line_in_env_with_pattern inside $server_env_file..."
 	execute_remote "sed -i '/$comment_out_line_in_env_with_pattern/s/^/#/g' $server_env_file"
 
-	local_echo "Searching for free server, telnet and expedition ports..."
+	local_echo "Getting next unused SERVER_PORT..."
 	local server_port=$(find_first_unused_number_for_variable "SERVER_PORT" $default_server_port)
+
+	local_echo "Getting next unused TELNET_PORT..."
 	local telnet_port=$(find_first_unused_number_for_variable "TELNET_PORT" $default_telnet_port)
+
+	local_echo "Getting next unused EXPEDITION_PORT..."
 	local expedition_port=$(find_first_unused_number_for_variable "EXPEDITION_PORT" $default_expedition_port)
-
-
-	# TODO: Append description to README
 
 	local env_patch=$(build_configuration "# PATCH $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
 	"SERVER_PORT=$server_port" "EXPEDITION_PORT=$expedition_port" "MONGODB_NAME=$(alphanumeric $instance_name)" "MONGODB_HOST=$mongodb_host" \
 	"MONGODB_PORT=$mongodb_port" "DEPLOY_TO=$instance_short_name")
 
-	# append patch to env.sh
+	local_echo "Configuring $server_env_file..."
 	execute_remote "echo -e \"$env_patch\" >> $server_env_file"
 
-	# append patch to README file
+	local_echo "Checking for existance of README file..."
 	execute_remote touch $readme_file
+
+	local_echo "Appending patch to README file..."
 	execute_remote "echo -e \"\n# $instance_short_name ($description, $contact_person, $contact_email)\n$env_patch\" >> $readme_file"
 
 	# start server and redirect both stderr and stdout to /dev/null (&>/dev/null). Send command to background by &. Do this to avoid blocking.
+	local_echo "Starting server..."
 	execute_remote -f "sh -c \"cd $server_dir; nohup ./start > /dev/null 2>&1 &\""
 
 	header "Event and user creation"
@@ -102,7 +106,7 @@ function sub_instance_execute() {
 	access_token=$(get_access_token $admin_username $admin_password $super_instance $server_port)
 
 	# create event
-	event=$(create_event $access_token $super_instance $server_port $instance_name)
+	event_id=$(create_event $access_token $super_instance $server_port $instance_name)
 
 	# change admin password
 	change_admin_password $access_token $super_instance $server_port $admin_username $new_admin_password
@@ -120,6 +124,10 @@ function sub_instance_execute() {
 	header "Configuring Apache"
 
 	append_event_ssl_macro_to_001_events_conf $domain $event_id $ssh_user $super_instance $server_port
+
+	header "Conclusion"
+
+	success "Sub instance should be reachable through https://$domain."
 }
 
 # -----------------------------------------------------------
@@ -142,5 +150,5 @@ function execute_remote(){
 }
 
 function find_all_distinct_values_of_variable_inside_env_files(){
-	execute_remote "grep -Roh --include=env.sh "$1=.*" $servers_dir | tr -d "$1=" | sort | uniq
+	execute_remote "for i in /home/sailing/servers/*/env.sh; do cat \$i | grep '^ *$1=' | tr -d '$1='; done | sort -n | tail -1"
 }

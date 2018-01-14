@@ -43,20 +43,22 @@ function aws_wrapper(){
   fi
 }
 
+function ssh_prewrapper(){
+  if [ -z $key_file ]; then
+    ssh -o StrictHostKeyChecking=no "$@"
+  else
+    ssh -o StrictHostKeyChecking=no -i $key_file "$@"
+  fi
+}
 
 # -----------------------------------------------------------
 # Automatically uses key file for ssh if possible.
 # -----------------------------------------------------------
 function ssh_wrapper(){
-  if [ -z $key_file ]; then
-    out=$(ssh -o StrictHostKeyChecking=no "$@")
-  else
-    out=$(ssh -o StrictHostKeyChecking=no -i $key_file "$@")
-  fi
-
+  out=$(ssh_prewrapper "$@")
   if command_was_successful $?; then
     success ${out:-"[ OK ]"}
-    echo $out | sanitize
+    echo $out
   else
     error "[ ERROR ] $out"
     return 1

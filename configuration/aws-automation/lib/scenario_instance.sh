@@ -42,7 +42,7 @@ function instance_execute() {
 	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\
 	--output table)
 
-	if [ command_was_successful $0 ]; then
+	if command_was_successful $?; then
 		success $description
 	fi
 
@@ -54,7 +54,6 @@ function instance_execute() {
 	fi
 
 	header "Event and user creation"
-
 	port="8888"
 	access_token=$(get_access_token $admin_username $admin_password $public_dns_name $port)
 	event_id=$(create_event $access_token $public_dns_name $port $instance_name)

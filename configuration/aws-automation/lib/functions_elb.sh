@@ -45,7 +45,7 @@ function set_target_group_tag(){
 # -----------------------------------------------------------
 function register_targets(){
 	local_echo "Register instance within target group..."
-	aws elbv2 register-targets --target-group-arn $1 --targets Id=$2
+	aws_wrapper elbv2 register-targets --target-group-arn $1 --targets Id=$2
 }
 
 # -----------------------------------------------------------
@@ -60,8 +60,9 @@ function create_rule(){
 	local subdomain=$(alphanumeric "$2")
 	local priority=$(($(get_rule_with_highest_priority $1) + 1))
 	local domain="$subdomain.$alb_domain"
-	aws_wrapper elbv2 create-rule --listener-arn $1 --priority $priority \
-	--conditions Field=host-header,Values=$domain --actions Type=forward,TargetGroupArn=$3 1>&2
+	rule=$(aws_wrapper elbv2 create-rule --listener-arn $1 --priority $priority \
+	--conditions Field=host-header,Values=$domain --actions Type=forward,TargetGroupArn=$3)
+	echo $domain
 }
 
 # -----------------------------------------------------------
@@ -70,11 +71,10 @@ function create_rule(){
 # @return    highest priority
 # -----------------------------------------------------------
 function get_rule_with_highest_priority(){
-	local max_priority=$(aws_wrapper elbv2 describe-rules --listener-arn $1 \
-	--query "sort_by(Rules, &Priority)[*].{P: Priority} | [-2:-1]" --output text)
+	local max_priority=$(aws elbv2 describe-rules --listener-arn $1 --query "Rules[*].{P:Priority}" --output text | sanitize | sort -n | tail -1)
 	if is_number $max_priority; then
 		echo $max_priority
 	else
-		echo 1
+		echo 0
 	fi
 }

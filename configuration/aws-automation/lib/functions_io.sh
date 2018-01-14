@@ -113,17 +113,16 @@ function require_description(){
 }
 
 function require_contact_person(){
-	require_variable "$contact_person_param" contact_person "" "$contact_person_message"
+	require_variable "$contact_person_param" contact_person "$default_contact_person" "$contact_person_message"
 }
 
 function require_contact_email(){
-	require_variable "$contact_email_param" contact_email "" "$contact_email_message"
+	require_variable "$contact_email_param" contact_email "$default_contact_email" "$contact_email_message"
 }
 
 function require_build_version(){
 	require_variable "$build_version_param" build_version "$latest_release" "$build_version_message"
 }
-
 
 region_ask_message="Please enter the region for the instance: "
 instance_type_ask_message="Please enter the instance type: "
