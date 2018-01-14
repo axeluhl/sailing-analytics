@@ -142,11 +142,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         } finally {
             unlockTrackedRacesAfterWrite();
         }
-        notifyListenersAboutTrackedRaceRemoved(trackedRace);
         // Fix for bug4414: put this into a separate thread to avoid deadlock caused by
         // a synchronized RegattaListener.raceRemoved while holding the TrackedRegattaImpl.trackedRacesLock's write lock
         // acquired in RacingEventServiceImpl.removeRace
-//        new Thread(()->notifyListenersAboutTrackedRaceRemoved(trackedRace)).start();
+        new Thread(()->notifyListenersAboutTrackedRaceRemoved(trackedRace)).start();
     }
 
     protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace) {
