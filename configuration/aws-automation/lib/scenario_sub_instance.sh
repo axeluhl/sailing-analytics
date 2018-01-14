@@ -5,6 +5,7 @@
 
 function sub_instance_start(){
 	sub_instance_require
+	sub_instance_check_preconditions
 	sub_instance_execute
 }
 
@@ -30,33 +31,54 @@ function sub_instance_require(){
 	require_description
 }
 
+function sub_instance_check_preconditions(){
+	sailing_dir="/home/sailing"
+	servers_dir="$sailing_dir/servers"
+	server_dir="$servers_dir/$instance_short_name"
+
+	header "Checking preconditions"
+
+	echo "Checking if directory $server_dir exists already..."
+	execute_remote "[ ! -d $server_dir ]"
+
+	echo "Checking if ssh connection $ssh_user@$super_instance is working..."
+	execute_remote ls
+}
+
 function sub_instance_execute() {
-	local sailing_dir="/home/sailing"
-  local servers_dir="$sailing_dir/servers"
-	local server_dir="$servers_dir/$instance_short_name"
 	local server_env_file="$server_dir/env.sh"
 	local readme_file="$servers_dir/README"
 	local comment_out_line_in_env_with_pattern='JAVA_HOME=\/opt\/jdk1.8.0_20'
 	local comment_in_line_in_env_with_pattern='sapjvm_gc'
+	local refreshInstance_file='/home/sailing/code/java/target/refreshInstance.sh'
+
+	header "Sub instance setup"
 
 	# create sub instance server directory
+	local_echo "Creating directory $server_dir ..."
 	execute_remote mkdir $server_dir
 
 	# copy refreshInstance.sh from /servers/server to sub instance directory
-	execute_remote cp /home/sailing/code/java/target/refreshInstance.sh $server_dir
+	local_echo "Copying $refreshInstance_file to $server_dir..."
+	execute_remote cp $refreshInstance_file $server_dir
 
 	# Execute refreshInstance.sh
-	execute_remote "export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version;"
+	local_echo "Executing refreshInstance.sh with build version $build_version ..."
+	execute_remote "export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version > /dev/null 2>&1;"
 
 	# uncommenting lines containing pattern
+	local_echo "Commenting in $comment_in_line_in_env_with_pattern with $server_env_file..."
 	execute_remote "sed -i '/$comment_in_line_in_env_with_pattern/s/^#//g' $server_env_file"
 
 	# commenting out lines containing pattern
+	local_echo "Commenting out $comment_out_line_in_env_with_pattern with $server_env_file..."
 	execute_remote "sed -i '/$comment_out_line_in_env_with_pattern/s/^/#/g' $server_env_file"
 
-	local server_port=$(find_first_unused_number_for_variable "SERVER_PORT" "8880")
-	local telnet_port=$(find_first_unused_number_for_variable "TELNET_PORT" "14900")
-	local expedition_port=$(find_first_unused_number_for_variable "EXPEDITION_PORT" "2000")
+	local_echo "Searching for free server, telnet and expedition ports..."
+	local server_port=$(find_first_unused_number_for_variable "SERVER_PORT" $default_server_port)
+	local telnet_port=$(find_first_unused_number_for_variable "TELNET_PORT" $default_telnet_port)
+	local expedition_port=$(find_first_unused_number_for_variable "EXPEDITION_PORT" $default_expedition_port)
+
 
 	# TODO: Append description to README
 
@@ -67,34 +89,37 @@ function sub_instance_execute() {
 	# append patch to env.sh
 	execute_remote "echo -e \"$env_patch\" >> $server_env_file"
 
-	exceute_remote touch $readme_file
+	# append patch to README file
+	execute_remote touch $readme_file
 	execute_remote "echo -e \"\n# $instance_short_name ($description, $contact_person, $contact_email)\n$env_patch\" >> $readme_file"
 
 	# start server and redirect both stderr and stdout to /dev/null (&>/dev/null). Send command to background by &. Do this to avoid blocking.
 	execute_remote -f "sh -c \"cd $server_dir; nohup ./start > /dev/null 2>&1 &\""
 
+	header "Event and user creation"
+
 	# get access token
 	access_token=$(get_access_token $admin_username $admin_password $super_instance $server_port)
 
 	# create event
-	event_id=$(create_event $access_token $super_instance $server_port $instance_name)
+	event=$(create_event $access_token $super_instance $server_port $instance_name)
 
 	# change admin password
 	change_admin_password $access_token $super_instance $server_port $admin_username $new_admin_password
 
 	# create new user
-	create_new_user $access_token $super_instance $server_port $user_username $user_password
+	user=$(create_new_user $access_token $super_instance $server_port $user_username $user_password)
 
-	# TODO: handle situation if super instance is not inside application load balancer
+	header "Configuring ALB"
 
 	local target_group_arn=$(create_target_group $instance_name)
 	register_targets $target_group_arn $(get_instance_id $super_instance)
 
 	local domain=$(create_rule $listener_arn $instance_short_name $target_group_arn)
 
-	append_event_ssl_macro_to_001_events_conf $domain $event_id $ssh_user $super_instance $server_port
+	header "Configuring Apache"
 
-	# TODO: write email
+	append_event_ssl_macro_to_001_events_conf $domain $event_id $ssh_user $super_instance $server_port
 }
 
 # -----------------------------------------------------------
@@ -117,5 +142,5 @@ function execute_remote(){
 }
 
 function find_all_distinct_values_of_variable_inside_env_files(){
-	execute_remote grep -Roh --include=env.sh "$1=.*" $servers_dir | tr -d "$1=" | sort | uniq
+	execute_remote "grep -Roh --include=env.sh "$1=.*" $servers_dir | tr -d "$1=" | sort | uniq
 }

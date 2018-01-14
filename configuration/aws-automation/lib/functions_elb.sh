@@ -6,7 +6,7 @@
 # @return    json result
 # -----------------------------------------------------------
 function create_target_group(){
-	local_echo "Creating target group..."
+	local_echo "Creating target group $1..."
 	local target_group_name=$(alphanumeric $1)
 	local vpc_id=$(get_default_vpc_id)
 	aws_wrapper elbv2 create-target-group --name $target_group_name --protocol $target_group_protocol \
@@ -62,7 +62,6 @@ function create_rule(){
 	local domain="$subdomain.$alb_domain"
 	aws_wrapper elbv2 create-rule --listener-arn $1 --priority $priority \
 	--conditions Field=host-header,Values=$domain --actions Type=forward,TargetGroupArn=$3 1>&2
-	echo $domain
 }
 
 # -----------------------------------------------------------

@@ -58,7 +58,6 @@ function create_new_user(){
 # @param $4  port
 # -----------------------------------------------------------
 function wait_for_access_token_resource(){
-	local_echo -n "Wait until resource \"/security/api/restsecurity/access_token\" is available..."
 	curl_until_http_200 http://$1:$2@$3:$4/security/api/restsecurity/access_token
 }
 
@@ -71,8 +70,8 @@ function wait_for_access_token_resource(){
 # @return    access token
 # -----------------------------------------------------------
 function get_access_token(){
-	local_echo "Getting access token..."
-	wait_for_access_token_resource $1 $2 $3 $4 1>&2
+	local_echo -n "Get access token for user $1..."
+	wait_for_access_token_resource $1 $2 $3 $4
 	curl_wrapper -X GET "http://$1:$2@$3:$4/security/api/restsecurity/access_token" | get_attribute '.access_token'
 }
 
@@ -83,7 +82,6 @@ function get_access_token(){
 # @param $2  port
 # -----------------------------------------------------------
 function wait_for_create_event_resource(){
-	local_echo -n 'Wait until resource "/sailingserver/api/v1/events/createEvent" is available...'
 	curl_until_http_401 http://$1:$2/sailingserver/api/v1/events/createEvent
 }
 
@@ -96,8 +94,8 @@ function wait_for_create_event_resource(){
 # @return    event_id of created event
 # -----------------------------------------------------------
 function create_event(){
-	local_echo "Creating event with name $4..."
-	wait_for_create_event_resource $2 $3 1>&2
+	local_echo -n "Creating event with name $4..."
+	wait_for_create_event_resource $2 $3
   curl_wrapper -X POST -H "Authorization: Bearer $1" "http://$2:$3/sailingserver/api/v1/events/createEvent" \
 	--data "eventName=$4" --data "venuename=Default" --data "createregatta=false" | get_attribute '.eventid'
 }
@@ -111,6 +109,7 @@ function create_event(){
 # @param $5  port
 # -----------------------------------------------------------
 function append_event_ssl_macro_to_001_events_conf(){
+	local_echo 
 	wait_for_ssh_connection $3 $4
 	wait_for_001_events_patch $3 $4
 	ssh_wrapper $3@$4 "echo -e \"Use Event-SSL $1 \\\"$2\\\" 127.0.0.1 $5\" >> $events_conf"
@@ -121,10 +120,8 @@ function append_event_ssl_macro_to_001_events_conf(){
 # Waits till 001-events.conf exists on the server
 # -----------------------------------------------------------
 function wait_for_001_events_patch(){
-	echo -n "Waiting for 001-events.conf to be created..."
 	while [[ $(ssh_wrapper $1@$2 test -f $events_conf && echo "ok") != "ok" ]]; do
 		echo -n .
 		sleep 2
 	done
-	success "001-events.conf now exists. Appending macros..."
 }

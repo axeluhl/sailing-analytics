@@ -18,11 +18,11 @@ function curl_wrapper(){
     local message=$(get_http_code_message $status_code)
 
     if is_http_ok $status_code; then
-        success "[ OK ]"
+        success ${response:-"[ OK ]"}
         echo $response
       else
         error "[ ERROR ]"
-        notice "Function (${FUNCNAME[1]}): [$status_code] $message\n\n$command"
+        notice "Function (${FUNCNAME[1]}): [$status_code] $message $response\n\n$command"
         return 1
       fi
 }
@@ -35,22 +35,31 @@ function aws_wrapper(){
   local out;
   out=$(aws --region $region "$@")
   if command_was_successful $?; then
-    success "[ OK ]"
+    success ${out:-"[ OK ]"}
     echo $out | sanitize
   else
-    error "[ ERROR ]"
+    error "[ ERROR ] $out"
     return 1
   fi
 }
+
 
 # -----------------------------------------------------------
 # Automatically uses key file for ssh if possible.
 # -----------------------------------------------------------
 function ssh_wrapper(){
   if [ -z $key_file ]; then
-    ssh -o StrictHostKeyChecking=no "$@"
+    out=$(ssh -o StrictHostKeyChecking=no "$@")
   else
-    ssh -o StrictHostKeyChecking=no -i $key_file "$@"
+    out=$(ssh -o StrictHostKeyChecking=no -i $key_file "$@")
+  fi
+
+  if command_was_successful $?; then
+    success ${out:-"[ OK ]"}
+    echo $out | sanitize
+  else
+    error "[ ERROR ] $out"
+    return 1
   fi
 }
 
@@ -60,11 +69,10 @@ function ssh_wrapper(){
 function curl_until_http_200(){
 	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "200" ]];
 	do
-		echo -n "."
+		local_echo -n "."
 		sleep $http_retry_interval;
 	done
-	echo ""
-  success "[ OK ]"
+	local_echo ""
 }
 
 # -----------------------------------------------------------
@@ -74,9 +82,8 @@ function curl_until_http_200(){
 function curl_until_http_401(){
 	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "401" ]];
 	do
-		echo -n "."
+		local_echo -n "."
 		sleep $http_retry_interval;
 	done
-	echo ""
-  success "[ OK ]"
+	local_echo ""
 }
