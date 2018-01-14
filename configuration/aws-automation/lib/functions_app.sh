@@ -109,7 +109,7 @@ function create_event(){
 # @param $5  port
 # -----------------------------------------------------------
 function append_event_ssl_macro_to_001_events_conf(){
-	local_echo 
+	local_echo "Appending Event-SSL macro to apache config..."
 	wait_for_ssh_connection $3 $4
 	wait_for_001_events_patch $3 $4
 	ssh_wrapper $3@$4 "echo -e \"Use Event-SSL $1 \\\"$2\\\" 127.0.0.1 $5\" >> $events_conf"
