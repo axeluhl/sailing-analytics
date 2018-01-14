@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Course;
