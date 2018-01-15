@@ -17,6 +17,7 @@ public class EmptyRegattaConfiguration extends RegattaConfigurationImpl implemen
     public RegattaConfiguration load() {
         setDefaultRacingProcedureType(RacingProcedureType.UNKNOWN);
         setDefaultCourseDesignerMode(CourseDesignerMode.UNKNOWN);
+        setDefaultProtestTimeDuration(90);
         setRRS26Configuration(new RRS26ConfigurationImpl());
         setSWCStartConfiguration(new SWCStartConfigurationImpl());
         setGateStartConfiguration(new GateStartConfigurationImpl());

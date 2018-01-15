@@ -48,6 +48,7 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         
         configuration.setDefaultRacingProcedureType(preferences.getDefaultRacingProcedureType());
         configuration.setDefaultCourseDesignerMode(preferences.getDefaultCourseDesignerMode());
+        configuration.setDefaultProtestTimeDuration(preferences.getProtestTimeDuration());
         
         RRS26ConfigurationImpl rrs26 = new RRS26ConfigurationImpl();
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
@@ -102,6 +103,10 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         
         if (configuration.getDefaultCourseDesignerMode() != null) {
             preferences.setDefaultCourseDesignerMode(configuration.getDefaultCourseDesignerMode());
+        }
+
+        if (configuration.getDefaultProtestTimeDuration() != null) {
+            preferences.setDefaultProtestTimeDuration(configuration.getDefaultProtestTimeDuration());
         }
 
         if (configuration.getRRS26Configuration() != null) {

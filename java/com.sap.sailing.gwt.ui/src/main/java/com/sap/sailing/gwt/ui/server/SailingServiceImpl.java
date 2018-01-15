@@ -5041,6 +5041,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
         dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
+        dto.defaultProtestTimeDuration = configuration.getDefaultProtestTimeDuration();
         
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
@@ -5098,6 +5099,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
         configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
         configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
+        configuration.setDefaultProtestTimeDuration(dto.defaultProtestTimeDuration);
         if (dto.rrs26Configuration != null) {
             RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
             applyGeneralRacingProcedureConfigProperties(dto.rrs26Configuration, config);

@@ -17,7 +17,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 
 public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<RegattaConfiguration> {
-    
+
     public static RegattaConfigurationJsonDeserializer create() {
         return new RegattaConfigurationJsonDeserializer(RRS26ConfigurationJsonDeserializer.create(), SWCStartConfigurationJsonDeserializer.create(),
                 GateStartConfigurationJsonDeserializer.create(), ESSConfigurationJsonDeserializer.create(),
@@ -30,8 +30,8 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
     private final ESSConfigurationJsonDeserializer essDeserializer;
     private final RacingProcedureConfigurationJsonDeserializer basicDeserializer;
     private final LeagueConfigurationJsonDeserializer leagueDeserializer;
-    
-    public RegattaConfigurationJsonDeserializer(RRS26ConfigurationJsonDeserializer rrs26, SWCStartConfigurationJsonDeserializer swcStart, 
+
+    public RegattaConfigurationJsonDeserializer(RRS26ConfigurationJsonDeserializer rrs26, SWCStartConfigurationJsonDeserializer swcStart,
             GateStartConfigurationJsonDeserializer gateStart, ESSConfigurationJsonDeserializer ess,
             RacingProcedureConfigurationJsonDeserializer basicDeserializer, LeagueConfigurationJsonDeserializer leagueDeserializer) {
         this.rrs26Deserializer = rrs26;
@@ -41,7 +41,7 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
         this.basicDeserializer = basicDeserializer;
         this.leagueDeserializer = leagueDeserializer;
     }
-    
+
     @Override
     public RegattaConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
         RegattaConfigurationImpl configuration = createConfiguration();
@@ -57,7 +57,13 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
                     RegattaConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE).toString());
             configuration.setDefaultCourseDesignerMode(mode);
         }
-        
+
+        if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_DEFAULT_PROTEST_TIME_DURATION)) {
+            Integer protestTimeDuration = Integer.parseInt(object.get(
+                    RegattaConfigurationJsonSerializer.FIELD_DEFAULT_PROTEST_TIME_DURATION).toString());
+            configuration.setDefaultProtestTimeDuration(protestTimeDuration);
+        }
+
         if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_RRS26)) {
             RRS26Configuration rrs26Configuration = rrs26Deserializer.deserialize(
                     Helpers.getNestedObjectSafe(object, RegattaConfigurationJsonSerializer.FIELD_RRS26));
@@ -71,18 +77,18 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
         }
 
         if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_GATE_START)) {
-            GateStartConfiguration gateStartConfiguration = 
+            GateStartConfiguration gateStartConfiguration =
                     gateStartDeserializer.deserialize(
                             Helpers.getNestedObjectSafe(object, RegattaConfigurationJsonSerializer.FIELD_GATE_START));
             configuration.setGateStartConfiguration(gateStartConfiguration);
         }
-        
+
         if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_ESS)) {
             ESSConfiguration essConfiguration = essDeserializer.deserialize(
                     Helpers.getNestedObjectSafe(object, RegattaConfigurationJsonSerializer.FIELD_ESS));
             configuration.setESSConfiguration(essConfiguration);
         }
-        
+
         if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_BASIC)) {
             RacingProcedureConfiguration basicConfiguration = basicDeserializer.deserialize(
                     Helpers.getNestedObjectSafe(object, RegattaConfigurationJsonSerializer.FIELD_BASIC));
@@ -94,10 +100,10 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
                 Helpers.getNestedObjectSafe(object, RegattaConfigurationJsonSerializer.FIELD_LEAGUE));
             configuration.setLeagueConfiguration(leagueConfiguration);
         }
-        
+
         return configuration;
     }
-    
+
     protected RegattaConfigurationImpl createConfiguration() {
         return new RegattaConfigurationImpl();
     }

@@ -37,10 +37,10 @@ public class DeviceConfigurationDTO implements IsSerializable {
             public Flags classFlag;
             public Boolean hasIndividualRecall;
             public Boolean isResultEntryEnabled;
-            public Integer protestTime;
         }
         public RacingProcedureType defaultRacingProcedureType;
         public CourseDesignerMode defaultCourseDesignerMode;
+        public Integer defaultProtestTimeDuration;
         
         public RRS26ConfigurationDTO rrs26Configuration;
         public SWCStartConfigurationDTO swcStartConfiguration;

@@ -449,7 +449,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     int value = Integer.parseInt(duration.getText().toString());
-                    mPreferences.setProtestTimeDuration(value);
+                    mPreferences.setDefaultProtestTimeDuration(value);
                     updateProtestRange();
                 }
             });

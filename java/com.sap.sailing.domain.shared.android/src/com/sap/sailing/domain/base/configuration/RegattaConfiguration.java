@@ -26,6 +26,11 @@ public interface RegattaConfiguration extends Serializable, Cloneable {
      * Gets the default {@link RacingProcedureType} for races configured.
      */
     RacingProcedureType getDefaultRacingProcedureType();
+
+    /**
+     * Gets the default protest time duration (in minutes)
+     */
+    Integer getDefaultProtestTimeDuration();
     
     /**
      * Gets the configuration for RRS26 races.
