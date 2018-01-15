@@ -6991,7 +6991,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
-            TimeRange timeRange) {
+            TimePoint sliceFrom, TimePoint sliceTo) {
         if (!canSliceRace(raceIdentifier)) {
             throw new RuntimeException("Can not slice race");
         }
@@ -7001,7 +7001,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
         final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
         final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
-        if (startOfTrackingOfRaceToSlice.after(timeRange.from()) || (endOfTrackingOfRaceToSlice != null && endOfTrackingOfRaceToSlice.before(timeRange.to()))) {
+        if (sliceFrom == null || sliceTo == null || startOfTrackingOfRaceToSlice.after(sliceFrom)
+                || (endOfTrackingOfRaceToSlice != null && endOfTrackingOfRaceToSlice.before(sliceTo))) {
             throw new RuntimeException("The TimeRange to slice is not part of the race");
         }
         
@@ -7021,11 +7022,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         final AbstractLogEventAuthor author = getService().getServerAuthor();
         
-        final TimePoint startOfTracking = timeRange.from();
-        final TimePoint endOfTracking = timeRange.to();
+        final TimePoint startOfTracking = sliceFrom;
+        final TimePoint endOfTracking = sliceTo;
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
         
+        final TimeRange timeRange = new TimeRangeImpl(sliceFrom, sliceTo);
         for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
             raceLogEvent.accept(new BaseRaceLogEventVisitor() {
                 @Override
