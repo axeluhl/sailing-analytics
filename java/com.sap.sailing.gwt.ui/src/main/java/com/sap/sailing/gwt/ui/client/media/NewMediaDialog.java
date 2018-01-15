@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
+import com.google.gwt.typedarrays.shared.Int8Array;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -344,8 +346,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         this.setUiEnabled(false);
         remoteMp4WasStarted = true;
         remoteMp4WasFinished = false;
-        infoLabel.setWidget(new Label(stringMessages.processingMP4()));
-        mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+        Label lbl = new Label(stringMessages.processingMP4());
+        infoLabel.setWidget(lbl);
+        checkMetadata(mediaTrack.url,lbl, new AsyncCallback<VideoMetadataDTO>() {
 
             @Override
             public void onSuccess(VideoMetadataDTO result) {
@@ -359,6 +362,39 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 setUiEnabled(true);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack);
+            }
+        });
+    }
+
+    private void checkMetadata(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
+        JSDownloadUtils.getData(url, new JSDownloadCallback() {
+            
+            @Override
+            public void progress(Double current, Double total) {
+                lbl.setText("downloading " + Math.round(current/1024/1024) + "/" + Math.round(total/1024/1024) + " MB");
+                infoLabel.setWidget(lbl);
+            }
+
+            @Override
+            public void error(Object msg) {
+                asyncCallback.onFailure(new RuntimeException("error determining " + msg));
+                Window.alert("error determining " + msg);
+            }
+
+            @Override
+            public void complete(Int8Array start, Int8Array end, Double skipped) {
+                lbl.setText("Analysing on server");
+                infoLabel.setWidget(lbl);
+                byte[] jStart = new byte[start.byteLength()];
+                for(int i = 0;i<start.byteLength();i++){
+                    jStart[i] = start.get(i);
+                }
+                byte[] jEnd = new byte[end.byteLength()];
+                for(int i = 0;i<end.byteLength();i++){
+                    jEnd[i] = end.get(i);
+                }
+                
+                mediaService.checkMetadata(jStart,jEnd,skipped, asyncCallback);
             }
         });
     }
