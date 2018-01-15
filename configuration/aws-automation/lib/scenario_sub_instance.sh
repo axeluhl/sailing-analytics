@@ -116,7 +116,7 @@ function sub_instance_execute() {
 
 	header "Configuring ALB"
 
-	local target_group_arn=$(create_target_group $instance_name)
+	local target_group_arn=$(create_target_group "S-shared-$instance_name")
 	register_targets $target_group_arn $(get_instance_id $super_instance)
 
 	local domain=$(create_rule $listener_arn $instance_short_name $target_group_arn)

@@ -15,12 +15,12 @@ function associate_alb_start(){
 # -----------------------------------------------------------
 function associate_alb_require(){
 	# will only be executed after instance creation
-	:	
+	:
 }
 
 function associate_alb_execute() {
 	# create target group for instance
-	local target_group_arn=$(create_target_group $instance_name)
+	local target_group_arn=$(create_target_group "S-dedicated-$instance_name")
 
 	# add instance to target group
 	register_targets $target_group_arn $instance_id
