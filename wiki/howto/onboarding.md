@@ -131,7 +131,7 @@ To ensure that all components of the Analysis Suite are working, you should also
   - In Eclipse click Help -> Install New Software -> Add and enter https://dl-ssl.google.com/android/eclipse/
   - Select the Developer Tools and install
   - After restarting Eclipse the "Welcome to Android Development" window should help you with installing the Android SDK
-  - It is also possible to download the Android SDK separately from http://developer.android.com/sdk/index.html ("Use an existing IDE")
+  - It is also possible to download the Android SDK separately from https://developer.android.com/studio/index.html#downloads ("Use an existing IDE")
 2. Setup the Android SDK
   * In Eclipse press Window -> Android SDK Manager
   * Ensure that everything of "Tools" is installed
