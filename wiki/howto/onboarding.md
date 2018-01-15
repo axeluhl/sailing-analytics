@@ -138,7 +138,7 @@ To ensure that all components of the Analysis Suite are working, you should also
   * Install everything of "Android 3.2 API 13"
   * Install everything of "Android 5.1.1 API 22"
   * Optional: it's a good idea to install the newest API Version
-  * Install "Android Support Library" (Extras), "Google Play Services" (Extras) and "Google USB Driver" (Extras)
+  * Install "Android Support Repository" (Extras), "Google Repository" (Extras), "Google Play Services" (Extras) and "Google USB Driver" (Extras)
 3. Import the Android projects into your workspace
   * Android projects can be found in the /mobile subdirectory
 
