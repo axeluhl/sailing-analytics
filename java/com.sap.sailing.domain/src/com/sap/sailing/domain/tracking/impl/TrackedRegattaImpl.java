@@ -114,32 +114,43 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             unlockTrackedRacesAfterWrite();
         }
         if (oldTrackedRace != trackedRace) {
-            for (RaceListener listener : raceListeners.keySet()) {
-                listener.raceAdded(trackedRace);
-            }
+            notifyListenersAboutTrackedRaceAdded(trackedRace);
+        }
+    }
+
+    protected void notifyListenersAboutTrackedRaceAdded(TrackedRace trackedRace) {
+        for (RaceListener listener : raceListeners.keySet()) {
+            listener.raceAdded(trackedRace);
         }
     }
     
     @Override
     public void removeTrackedRace(RaceDefinition raceDefinition) {
-        LockUtil.lockForWrite(trackedRacesLock);
+        lockTrackedRacesForWrite();
         try {
             trackedRaces.remove(raceDefinition);
         } finally {
-            LockUtil.unlockAfterWrite(trackedRacesLock);
+            unlockTrackedRacesAfterWrite();
         }
     }
     
     @Override
     public void removeTrackedRace(TrackedRace trackedRace) {
-        LockUtil.lockForWrite(trackedRacesLock);
+        lockTrackedRacesForWrite();
         try {
             trackedRaces.remove(trackedRace.getRace());
-            for (RaceListener listener : raceListeners.keySet()) {
-                listener.raceRemoved(trackedRace);
-            }
         } finally {
-            LockUtil.unlockAfterWrite(trackedRacesLock);
+            unlockTrackedRacesAfterWrite();
+        }
+        // Fix for bug4414: put this into a separate thread to avoid deadlock caused by
+        // a synchronized RegattaListener.raceRemoved while holding the TrackedRegattaImpl.trackedRacesLock's write lock
+        // acquired in RacingEventServiceImpl.removeRace
+        new Thread(()->notifyListenersAboutTrackedRaceRemoved(trackedRace)).start();
+    }
+
+    protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace) {
+        for (RaceListener listener : raceListeners.keySet()) {
+            listener.raceRemoved(trackedRace);
         }
     }
 
