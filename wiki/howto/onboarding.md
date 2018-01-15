@@ -19,7 +19,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 7. JDK 1.8 (Java SE 8), http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 8. Maven 3.1.1 (or higher), http://maven.apache.org
 9. GWT SDK 2.8.2 (http://www.gwtproject.org/download.html)
-10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/).
+10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/).
 
 #### Automatic Eclipse plugin installation
 
@@ -66,7 +66,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
   * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
-  * Install the Google Android SDK from the same Google Plugin for Eclipse update site
+  * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
@@ -79,7 +79,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard "Git"->"Projects from Git" in Eclipse, and additionally make sure to scan for nested projects!)
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard "Git->Projects from Git" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
