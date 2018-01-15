@@ -161,13 +161,13 @@ If you are working with a linux-system and you get the error message `error whil
    * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`
    * In DebugConfigurations => Classpaths, Add Sourcefolder where classes are you want to user from the module
 2. For Maven Build
-   * pom.xml , Add Dependency to used module ie.     
-`<dependency>
-<groupId>com.sap.sailing</groupId>
-<artifactId>com.sap.sailing.domain.common</artifactId>
-<version>1.0.0-SNAPSHOT</version>
-<classifier>sources</classifier>
-</dependency>`
+   * pom.xml , Add Dependency to used module ie.    
+`<dependency>`    
+`<groupId>com.sap.sailing</groupId>`    
+`<artifactId>com.sap.sailing.domain.common</artifactId>`    
+`<version>1.0.0-SNAPSHOT</version>`    
+`<classifier>sources</classifier>`    
+`</dependency>`
 
 #### Using Android Studio for Development
 
