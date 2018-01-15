@@ -21,6 +21,13 @@ Then carry out these steps:
 ```
 cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl
 ```
+The libraries end up under `/root/perl5/lib/perl5`. For use by AWStats, read access to this path is required for the Apache web server. In particular, ensure that `/root` has read permissions for all.
+* Ensure that `/root/perl5/lib/perl5` is part of the `PERL5LIB` variable setting in the AWStats virtual host configuration in `/etc/httpd/conf.d/awstats.conf` as follows:
+```
+        <IfModule mod_env.c>
+            SetEnv PERL5LIB /usr/share/awstats/lib:/usr/share/awstats/plugins:/root/perl5/lib/perl5
+        </IfModule>
+```
 * make sure `/etc/alternatives/ruby` and `/etc/alternatives/gem` point to `/usr/bin/[ruby|gem]2.4`
 * run the following commands to install gollum and uninstall a too current rack version 2.0.3:
 ```
