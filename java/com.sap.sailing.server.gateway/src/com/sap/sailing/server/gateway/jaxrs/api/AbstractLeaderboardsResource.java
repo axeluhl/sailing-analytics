@@ -28,7 +28,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardsResource.class.getName());
 
     public enum ResultStates {
-        Live, Preliminary, Final
+        Live, Final
     };
 
     protected boolean isValidLeaderboard(Leaderboard leaderboard) {
@@ -143,7 +143,6 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 result = MillisecondsTimePoint.now();
             }
             break;
-        case Preliminary:
         case Final:
             if (leaderboard.getScoreCorrection() != null
                     && leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity() != null) {
