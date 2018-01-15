@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -46,7 +45,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
-    private static final Logger logger = Logger.getLogger(LeaderboardsResourceV2.class.getName());
+    // private static final Logger logger = Logger.getLogger(LeaderboardsResourceV2.class.getName());
 
     @GET
     @Produces("application/json;charset=UTF-8")
@@ -188,14 +187,17 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 jsonEntry.put("isCorrected", leaderboardEntry.hasScoreCorrection());
 
                 // if we have no fleet information there is no way to know in which fleet the competitor was racing
+                Integer rank = null;
                 if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
                     Map<String, Map<CompetitorDTO, Integer>> rcMap = competitorRanksPerRaceColumnsAndFleets.get(raceColumnName);
-                    Map<CompetitorDTO, Integer> rankMap = rcMap.get(fleetOfCompetitor.getName());
-                    Integer rank = rankMap.get(competitor);
-                    jsonEntry.put("rank", rank);
-                } else {
-                    jsonEntry.put("rank", null);
+                    if (rcMap != null && !rcMap.isEmpty()) {
+                        Map<CompetitorDTO, Integer> rankMap = rcMap.get(fleetOfCompetitor.getName());
+                        if (rankMap != null && !rankMap.isEmpty()) {
+                            rank = rankMap.get(competitor);
+                        }
+                    }
                 }
+                jsonEntry.put("rank", rank);
 
                 LegEntryDTO detailsOfLastAvailableLeg =  getDetailsOfLastAvailableLeg(leaderboardEntry);
                 jsonEntry.put("trackedRank", detailsOfLastAvailableLeg != null ? detailsOfLastAvailableLeg.rank : null);
