@@ -681,8 +681,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               }
 
               if (isSimulationEnabled) {
-            	  // determine availability of polar diagram
-            	  setHasPolar();
+                  // determine availability of polar diagram
+                  setHasPolar();
                   // initialize simulation canvas
                   simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
                   simulationOverlay.addToMap();
@@ -723,7 +723,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     @Override
                     public void onSuccess(Boolean result) {
                         // store results
-                    	hasPolar = result.booleanValue();
+                        hasPolar = result.booleanValue();
                     }
                 }));
 
@@ -1022,7 +1022,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         quickRanksDTOProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
                         if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
-                        	simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
+                                simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
                         // Do boat specific actions
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
@@ -2141,8 +2141,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     private void showWindSensorInfoWindow(final WindSensorOverlay windSensorOverlay) {
-    	WindSource windSource = windSensorOverlay.getWindSource();
-    	WindTrackInfoDTO windTrackInfoDTO = windSensorOverlay.getWindTrackInfoDTO();
+        WindSource windSource = windSensorOverlay.getWindSource();
+        WindTrackInfoDTO windTrackInfoDTO = windSensorOverlay.getWindTrackInfoDTO();
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
         if(windDTO != null && windDTO.position != null) {
             if(lastInfoWindow != null) {
@@ -2159,7 +2159,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private Widget createInfoWindowLabelAndValue(String labelName, String value) {
-    	FlowPanel flowPanel = new FlowPanel();
+        FlowPanel flowPanel = new FlowPanel();
         Label label = new Label(labelName + ":");
         label.setWordWrap(false);
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -2192,9 +2192,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(),
                 DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.directionChange(),
-                ((int) maneuver.directionChangeInDegrees) + " " + stringMessages.degreesShort() + " ("
-                        + ((int) before.bearingInDegrees) + " " + stringMessages.degreesShort() + " -> "
-                        + ((int) after.bearingInDegrees) + " " + stringMessages.degreesShort() + ")"));
+                ((int) Math.round(maneuver.directionChangeInDegrees)) + " " + stringMessages.degreesShort() + " ("
+                        + ((int) Math.round(before.bearingInDegrees)) + " " + stringMessages.degreesShort() + " -> "
+                        + ((int) Math.round(after.bearingInDegrees)) + " " + stringMessages.degreesShort() + ")"));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speedChange(),
                 NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "
                         + stringMessages.knotsUnit() + " ("

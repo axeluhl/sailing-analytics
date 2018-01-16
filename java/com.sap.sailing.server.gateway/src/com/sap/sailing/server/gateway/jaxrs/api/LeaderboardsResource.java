@@ -898,7 +898,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 getRaceLogTrackingAdapter().pingMark(regattaLog, startBoat, new GPSFixImpl(startBoatPosition, when), getService());
                 getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, when), getService());
                 final ControlPoint startLineControlPoint = getService().getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
-                        UUID.randomUUID(), "Auto Start Line", pinEnd, startBoat);
+                        UUID.randomUUID(), "Auto "+waypointName+" Line", pinEnd, startBoat);
                 result = getService().getBaseDomainFactory().createWaypoint(startLineControlPoint, PassingInstruction.Line);
             } else {
                 result = null;

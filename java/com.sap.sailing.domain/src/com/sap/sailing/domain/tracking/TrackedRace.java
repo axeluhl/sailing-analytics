@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -530,6 +531,16 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the
+     * <code>boatBearing</code> to the wind's bearing at that time and place and determined the tack.
+     * 
+     * @throws NoWindException
+     *             in case the wind cannot be determined because without a wind direction, the tack cannot be determined
+     *             either
+     */
+    Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException;
 
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
@@ -572,6 +583,14 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *         for the <code>key</code> is still ongoing, the result of that ongoing re-calculation is returned.
      */
     Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest);
+    
+    /**
+     * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
+     *         this race. Depending on <code>waitForLatest</code> the result is taken from the cache straight away
+     *         (<code>waitForLatest==false</code>) or, if a re-calculation for the <code>key</code> is still ongoing,
+     *         the result of that ongoing re-calculation is returned.
+     */
+    Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest);
 
     /**
      * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg. If this is
@@ -1037,6 +1056,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *            time point up and until to compute the speed
      */
     Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
+
     
     /**
      * Computes the competitor's speed projected onto the wind (if wind data is available and the competitor is not
