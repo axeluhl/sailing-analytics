@@ -24,8 +24,6 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
     public static final String FIELD_LEAGUE = "league";
     public static final String FIELD_BASIC = "basic";
     
-    public static final Integer FIELD_DEFAULT_PROTEST_TIME_DURATION_VALUE = 90; // FIXME where can I find/store the default value
-
     private final JsonSerializer<RacingProcedureConfiguration> rrs26Serializer;
     private final JsonSerializer<RacingProcedureConfiguration> swcStartSerializer;
     private final JsonSerializer<RacingProcedureConfiguration> gateStartSerializer;
