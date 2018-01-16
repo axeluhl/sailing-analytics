@@ -198,6 +198,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     protected boolean isValidCompetitorWithBoat(Competitor competitor) {
+        assert competitor != null;
         return competitor.hasBoat();
     }
 
@@ -206,7 +207,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorCache.get(competitorId);
-            if (isValidCompetitorWithBoat(competitor)) {
+            if (competitor != null && isValidCompetitorWithBoat(competitor)) {
                 return (CompetitorWithBoat) competitor;
             } else {
                 return null;
@@ -221,7 +222,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorsByIdAsString.get(competitorIdAsString);
-            if (isValidCompetitorWithBoat(competitor)) {
+            if (competitor != null && isValidCompetitorWithBoat(competitor)) {
                 return (CompetitorWithBoat) competitor;
             } else {
                 return null;
