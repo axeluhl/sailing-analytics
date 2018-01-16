@@ -405,7 +405,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
-            mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
+            if(result.getRecordStartedTime() != null){
+                mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
+            }
             refreshUI();
         }
     }
