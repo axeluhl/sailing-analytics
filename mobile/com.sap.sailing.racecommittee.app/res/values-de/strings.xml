@@ -529,4 +529,7 @@
     <string name="publish_clicked">Ergebnisliste veröffentlicht</string>
     <string name="competitor_count">%d</string>
 
+    <string name="hello_call_error_title">Verbindungsfehler</string>
+    <string name="hello_call_error_message">Es trat ein Verbindungsfehler auf. Sie sind vielleicht Offline. Wiederholen?</string>
+
 </resources>

@@ -558,4 +558,7 @@
     <string name="publish_clicked">Results published</string>
     <string name="competitor_count">%d</string>
 
+    <string name="hello_call_error_title">Error While Connecting</string>
+    <string name="hello_call_error_message">There was an error while connecting. Maybe you are offline. Retry?</string>
+
 </resources>
