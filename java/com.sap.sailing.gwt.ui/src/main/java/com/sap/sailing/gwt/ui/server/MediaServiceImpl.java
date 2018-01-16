@@ -105,23 +105,22 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public VideoMetadataDTO checkMetadata(byte[] start,byte[] end , Double skipped) {
+    public VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped) {
         File tmp = null;
-        boolean canDownload = false;
         boolean spherical = false;
         Date recordStartedTimer = null;
         String message = "";
         try {
             tmp = File.createTempFile("upload", "metadataCheck");
-            try(FileOutputStream fw = new FileOutputStream(tmp)){
+            try (FileOutputStream fw = new FileOutputStream(tmp)) {
                 fw.write(start);
-                while(skipped > 0){
-                    //allow large files and keep memory useage somewhat constant
-                    if(skipped > 10000000){
+                while (skipped > 0) {
+                    // ensure that no absurd amount of memory is required, and that more then 4gb files can be analysed
+                    if (skipped > 10000000) {
                         byte[] dummy = new byte[10000000];
                         fw.write(dummy);
                         skipped = skipped - 10000000;
-                    }else{
+                    } else {
                         byte[] dummy = new byte[skipped.intValue()];
                         fw.write(dummy);
                         skipped = skipped - skipped.intValue();
@@ -129,9 +128,8 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                 }
                 fw.write(end);
             }
-            
+
             try (IsoFile isof = new IsoFile(tmp)) {
-                canDownload = true;
                 // MovieHeaderBox movieHeaderBox = Path.getPath(isof, "moov[0]/mvhd");
                 // System.out.println(movieHeaderBox.getCreationTime());
                 UserBox uuidBox = Path.getPath(isof, "moov[0]/trak[0]/uuid");
@@ -144,11 +142,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                     }
                 }
 
-                if(uuidBox != null){
+                if (uuidBox != null) {
                     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
                     DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                     Document doc = dBuilder.parse(new ByteArrayInputStream(uuidBox.getData()));
-                    
+
                     NodeList childs = doc.getDocumentElement().getChildNodes();
                     for (int i = 0; i < childs.getLength(); i++) {
                         Node child = childs.item(i);
@@ -161,12 +159,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             throw new RuntimeException("remote error test");
         } catch (Exception e) {
             message = e.getMessage();
-        }
-        finally{
-            if(tmp != null){
+        } finally {
+            if (tmp != null) {
                 tmp.delete();
             }
         }
-        return new VideoMetadataDTO(canDownload, spherical, recordStartedTimer, message);
+        return new VideoMetadataDTO(true, spherical, recordStartedTimer, message);
     }
 }

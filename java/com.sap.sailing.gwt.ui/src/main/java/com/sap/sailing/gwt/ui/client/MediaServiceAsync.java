@@ -29,6 +29,6 @@ public interface MediaServiceAsync {
 
     void updateRace(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 
-    void checkMetadata(byte[] jStart, byte[] jEnd, Double skipped, AsyncCallback<VideoMetadataDTO> asyncCallback);
+    void checkMetadata(byte[] jStart, byte[] jEnd, Long skipped, AsyncCallback<VideoMetadataDTO> asyncCallback);
 
 }

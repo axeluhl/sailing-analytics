@@ -27,6 +27,6 @@ public interface MediaService extends RemoteService {
 
     void updateRace(MediaTrack mediaTrack);
 
-    VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Double skipped);
+    VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped);
 
 }

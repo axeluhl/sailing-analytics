@@ -282,11 +282,12 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 		setTimeout(
 				function() {
 					//Remove temporary script element.
-					if (window != null && window.youtubeMetadataCallbackScript != null) {
-					    document.body
-							.removeChild(window.youtubeMetadataCallbackScript);
-							
-					    delete window.youtubeMetadataCallbackScript;
+					if (window != null
+							&& window.youtubeMetadataCallbackScript != null) {
+						document.body
+								.removeChild(window.youtubeMetadataCallbackScript);
+
+						delete window.youtubeMetadataCallbackScript;
 					}
 					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
 				}, 2000);
@@ -297,8 +298,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         setUiEnabled(true);
         mediaTrack.title = title;
         try {
-            long duration = (long) Math.round(1000 * Double
-                    .valueOf(durationInSeconds));
+            long duration = (long) Math.round(1000 * Double.valueOf(durationInSeconds));
             if (duration > 0) {
                 mediaTrack.duration = new MillisecondsDurationImpl(duration);
             } else {
@@ -330,7 +330,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             }
         }
-        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
+        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime;
         String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());
 
         startTimeBox.setText(startTimeText);
@@ -348,7 +348,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         remoteMp4WasFinished = false;
         Label lbl = new Label(stringMessages.processingMP4());
         infoLabel.setWidget(lbl);
-        checkMetadata(mediaTrack.url,lbl, new AsyncCallback<VideoMetadataDTO>() {
+        checkMetadata(mediaTrack.url, lbl, new AsyncCallback<VideoMetadataDTO>() {
 
             @Override
             public void onSuccess(VideoMetadataDTO result) {
@@ -368,33 +368,33 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     private void checkMetadata(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
         JSDownloadUtils.getData(url, new JSDownloadCallback() {
-            
+
             @Override
             public void progress(Double current, Double total) {
-                lbl.setText("downloading " + Math.round(current/1024/1024) + "/" + Math.round(total/1024/1024) + " MB");
+                lbl.setText(stringMessages.transferStarted() + Math.round(current / 1024 / 1024) + "/"
+                        + Math.round(total / 1024 / 1024) + " MB");
                 infoLabel.setWidget(lbl);
             }
 
             @Override
             public void error(Object msg) {
-                asyncCallback.onFailure(new RuntimeException("error determining " + msg));
-                Window.alert("error determining " + msg);
+                asyncCallback.onSuccess(new VideoMetadataDTO(false, false, null, msg == null ? "" : msg.toString()));
             }
 
             @Override
             public void complete(Int8Array start, Int8Array end, Double skipped) {
-                lbl.setText("Analysing on server");
+                lbl.setText(stringMessages.analyze());
                 infoLabel.setWidget(lbl);
                 byte[] jStart = new byte[start.byteLength()];
-                for(int i = 0;i<start.byteLength();i++){
+                for (int i = 0; i < start.byteLength(); i++) {
                     jStart[i] = start.get(i);
                 }
                 byte[] jEnd = new byte[end.byteLength()];
-                for(int i = 0;i<end.byteLength();i++){
+                for (int i = 0; i < end.byteLength(); i++) {
                     jEnd[i] = end.get(i);
                 }
-                
-                mediaService.checkMetadata(jStart,jEnd,skipped, asyncCallback);
+                // Due to js represeting everything as 64double, the max safe file is around 4 petabytes
+                mediaService.checkMetadata(jStart, jEnd, skipped.longValue(), asyncCallback);
             }
         });
     }
@@ -426,7 +426,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
             }
         });
-        mimeTypeListBox.setSelectedIndex(MimeType.mp4.equals(mediaTrack.mimeType)?0:1);
+        mimeTypeListBox.setSelectedIndex(MimeType.mp4.equals(mediaTrack.mimeType) ? 0 : 1);
         fp.add(mimeTypeListBox);
         infoLabel.setWidget(fp);
     }

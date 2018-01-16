@@ -2,11 +2,18 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.typedarrays.shared.Int8Array;
 
+/**
+ * Helper class to obtain the last and the first REQUIRED_SIZE of a ressource given a url 
+ */
 public class JSDownloadUtils {
+    private static final int REQUIRED_SIZE = 1000000;
+    
+    
+    interface JSDownloadCallback {
+        void progress(Double current, Double total);
 
-    interface JSDownloadCallback{
-        void progress(Double current,Double total);
         void error(Object msg);
+
         void complete(Int8Array start, Int8Array end, Double skipped);
     }
     
@@ -21,7 +28,7 @@ public class JSDownloadUtils {
             xhr.open("GET", url, true);
             xhr.responseType = "arraybuffer";
             xhr.onprogress = function(evt) {
-               callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded,evt.total);
+                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
             }
             xhr.error = function(error) {
                 callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
@@ -29,17 +36,13 @@ public class JSDownloadUtils {
             
             xhr.onreadystatechange = function() {
             var state = xhr.readyState;
-                if (state == 4){
-                    if(xhr.response){
+                if (state == 4) {
+                    if (xhr.response) {
                         var length = xhr.response.byteLength;
-                        alert(length);
-                        var start = new Int8Array(xhr.response.slice(0,1000000));
-                        alert(start)
-                        var end = new Int8Array(xhr.response.slice(length-1000000));
-                        alert(end)
-                        var sparse = length-2*1000000;
-                        alert("sparse " + sparse)
-                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::complete(Lcom/google/gwt/typedarrays/shared/Int8Array;Lcom/google/gwt/typedarrays/shared/Int8Array;Ljava/lang/Double;)(start,end,sparse);
+                        var start = new Int8Array(xhr.response.slice(0, REQUIRED_SIZE));
+                        var end = new Int8Array(xhr.response.slice(length - REQUIRED_SIZE));
+                        var sparse = length - 2 * REQUIRED_SIZE;
+                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::complete(Lcom/google/gwt/typedarrays/shared/Int8Array;Lcom/google/gwt/typedarrays/shared/Int8Array;Ljava/lang/Double;)(start, end, sparse);
                     }
                 }
             };
