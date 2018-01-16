@@ -514,8 +514,10 @@ public class TrackingListFragment extends BaseFragment
 
     private void moveCompetitorToFinishList(Competitor competitor) {
         String name = "";
-        name += competitor.getShortInfo();
-        name += " - " + competitor.getName();
+        if (competitor.getShortInfo() != null) {
+            name += competitor.getShortInfo() + " - ";
+        }
+        name += competitor.getName();
         int pos = mAdapter.getFirstRankZeroPosition();
         // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted! I just wonder how the position shown in the app seems correct...
         int greatestOneBasedRankSoFar = 0;
@@ -828,8 +830,10 @@ public class TrackingListFragment extends BaseFragment
             } else {
                 for (Competitor competitor : mCompetitorData) {
                     String name = "";
-                    name += competitor.getShortInfo();
-                    name += " - " + competitor.getName();
+                    if (competitor.getShortInfo() != null) {
+                        name += competitor.getShortInfo() + " - ";
+                    }
+                    name += competitor.getName();
                     if (StringHelper.on(getActivity()).containsIgnoreCase(name, mFilter)) {
                         mFilteredCompetitorData.add(competitor);
                     }
