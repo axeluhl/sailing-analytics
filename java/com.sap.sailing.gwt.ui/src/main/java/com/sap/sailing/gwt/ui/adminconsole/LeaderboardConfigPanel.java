@@ -620,7 +620,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
         ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService, 
                 stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, raceName);
-        dialog.show();
+        dialog.center();
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {

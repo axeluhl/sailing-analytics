@@ -922,7 +922,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService, 
                 stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, 
                 raceName);
-        dialog.show();
+        dialog.center();
     }
 
     private String getLocaleInfo() {
