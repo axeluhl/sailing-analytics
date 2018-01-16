@@ -24,22 +24,28 @@ public interface HasManeuverBoundariesContext {
     @Dimension(messageKey = "ManeuverType", ordinal = 4)
     ManeuverType getManeuverType();
 
-    @Statistic(messageKey = "ManeuverBoundarySpeedDeviationRatioFromAvg", ordinal = 1, resultDecimals = 4)
-    Double getManeuverBoundarySpeedDeviationRatioFromAvgStatistic();
+    @Statistic(messageKey = "ManeuverStartSpeedDeviationRatioFromAvg", ordinal = 1, resultDecimals = 4)
+    Double getManeuverStartSpeedDeviationRatioFromAvgStatistic();
     
-    @Statistic(messageKey = "ManeuverBoundaryCogDeviationFromAvgInDegrees", ordinal = 2, resultDecimals = 4)
-    Double getManeuverBoundaryCogDeviationFromAvgInDegreesStatistic();
+    @Statistic(messageKey = "ManeuverStartCogDeviationFromAvgInDegrees", ordinal = 2, resultDecimals = 4)
+    Double getManeuverStartCogDeviationFromAvgInDegreesStatistic();
     
-    @Statistic(messageKey = "DurationToNextManeuverInSeconds", ordinal = 3, resultDecimals = 4)
+    @Statistic(messageKey = "ManeuverEndSpeedDeviationRatioFromAvg", ordinal = 3, resultDecimals = 4)
+    Double getManeuverEndSpeedDeviationRatioFromAvgStatistic();
+    
+    @Statistic(messageKey = "ManeuverEndCogDeviationFromAvgInDegrees", ordinal = 4, resultDecimals = 4)
+    Double getManeuverEndCogDeviationFromAvgInDegreesStatistic();
+    
+    @Statistic(messageKey = "DurationToNextManeuverInSeconds", ordinal = 5, resultDecimals = 4)
     Double getDurationToNextManeuverInSecondsStatistic();
     
-    @Statistic(messageKey = "DurationFromPreviousManeuverInSeconds", ordinal = 4, resultDecimals = 4)
+    @Statistic(messageKey = "DurationFromPreviousManeuverInSeconds", ordinal = 6, resultDecimals = 4)
     Double getDurationFromPreviousManeuverInSecondsStatistic();
     
-    @Statistic(messageKey = "NextManeuverAtLeastOneSecondInFront", ordinal = 5)
+    @Statistic(messageKey = "NextManeuverAtLeastOneSecondInFront", ordinal = 7)
     boolean isNextManeuverAtLeastOneSecondInFront();
     
-    @Statistic(messageKey = "PreviousManeuverAtLeastOneSecondBehind", ordinal = 6)
+    @Statistic(messageKey = "PreviousManeuverAtLeastOneSecondBehind", ordinal = 8)
     boolean isPreviousManeuverAtLeastOneSecondBehind();
 
 }

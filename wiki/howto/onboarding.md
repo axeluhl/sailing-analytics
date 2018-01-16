@@ -130,14 +130,15 @@ To ensure that all components of the Analysis Suite are working, you should also
 1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
   - In Eclipse click Help -> Install New Software -> Add and enter https://dl-ssl.google.com/android/eclipse/
   - Select the Developer Tools and install
-  - After restarting Eclipse the "Welcome to Android Development" window should help you with installing the Android SDK
-  - It is also possible to download the Android SDK separately from https://developer.android.com/studio/index.html#downloads ("Use an existing IDE")
+  - After restarting Eclipse the "Welcome to Android Development"-window should help you with installing the Android SDK
+  - It is also possible to download the Android SDK separately from the official Google download website. However, as of Revision 25.0.0 of the Android SDK Tools, the SDK Manager became an integrated part of Android Studio. Therefore, Revisions newer than 24.4.1 will not come with a standalone SDK Manager. Since it is absolutely essential if you want to use Eclipse, please download the Android SDK from the following link: https://dl.google.com/android/installer_r24.4.1-windows.exe
 2. Setup the Android SDK
   * In Eclipse press Window -> Android SDK Manager
   * Ensure that everything of "Tools" is installed
   * Install everything of "Android 3.2 API 13"
-  * Optional: it's a good idea to install the newest API Version
-  * Install "Android Support Library" (Extras), "Google Play Services" (Extras) and "Google USB Driver" (Extras)
+  * Install everything of "Android 5.1.1 API 22"
+  * Install "Android Support Repository" (Extras) **or** alternatively "Android Support Library" (Extras). Additionally install "Google Play Services" (Extras) **and** "Google USB Driver" (Extras)
+  * Please note that versions of the Android SDK Build Tools from 24.0.0 onwards might cause problems for your Eclipse IDE. The same goes for API versions from 24 onwards. If you get errors containing the message "refusing to generate code from aidl file defining parcelable", a workaround for now is to uninstall these newer versions of the Build Tools and the API. In the future however, this temporary solution may not be available anymore for compability reasons.
 3. Import the Android projects into your workspace
   * Android projects can be found in the /mobile subdirectory
 
@@ -161,13 +162,13 @@ If you are working with a linux-system and you get the error message `error whil
    * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`
    * In DebugConfigurations => Classpaths, Add Sourcefolder where classes are you want to user from the module
 2. For Maven Build
-   * pom.xml , Add Dependency to used module ie.     
-`<dependency>
-<groupId>com.sap.sailing</groupId>
-<artifactId>com.sap.sailing.domain.common</artifactId>
-<version>1.0.0-SNAPSHOT</version>
-<classifier>sources</classifier>
-</dependency>`
+   * pom.xml , Add Dependency to used module ie.    
+`<dependency>`    
+`<groupId>com.sap.sailing</groupId>`    
+`<artifactId>com.sap.sailing.domain.common</artifactId>`    
+`<version>1.0.0-SNAPSHOT</version>`    
+`<classifier>sources</classifier>`    
+`</dependency>`
 
 #### Using Android Studio for Development
 
