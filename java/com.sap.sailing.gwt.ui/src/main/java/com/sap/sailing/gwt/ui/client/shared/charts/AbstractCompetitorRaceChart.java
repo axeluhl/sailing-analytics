@@ -37,6 +37,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -111,6 +112,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             String leaderboardGroupName, String leaderboardName) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
+        
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -131,6 +133,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         }
     }
 
+    protected void createExtraToolbarElements(FlowPanel panel) {
+        panel.add(new Label("X"));
+    }
+    
     /**
      * Creates a new chart.
      * Attention: We can't reuse the old chart when the detail changes because HighChart does not support the inverting of the Y-Axis  
@@ -838,4 +844,5 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         private Long timeOfLatestRequestInMillis;
     }
 
+    
 }

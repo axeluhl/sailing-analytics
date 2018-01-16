@@ -13,10 +13,13 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
@@ -90,6 +93,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     private final SimpleBusyIndicator busyIndicator;
     
     private final Button settingsButton;
+    private final FlowPanel toolbar = new FlowPanel();
     
     protected AbstractRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
@@ -113,7 +117,10 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         settingsButton = createSettingsButton();
         settingsButton.setStyleName(chartsCss.settingsButtonStyle());
         settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
+        GWT.debugger();
         add(settingsButton);
+        toolbar.addStyleName(chartsCss.toolbar());
+            add(toolbar);
         initWidget(rootPanel);
         getElement().getStyle().setMarginRight(12, Unit.PX);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
@@ -124,6 +131,15 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
      * This class's constructor will add the {@link ChartsCss#settingsButtonStyle()} and the {@link ChartsCss#settingsButtonBackgroundImage()}.
      */
     protected abstract Button createSettingsButton();
+    
+    protected void createExtraToolbarElements(FlowPanel panel) {        
+    }
+    
+    @Override
+    protected final void onLoad() {
+        createExtraToolbarElements(toolbar);
+        super.onLoad();
+    }
     
     /**
      * Subclasses need to provide a settings button which will be displayed at a useful position in the layout of this
@@ -145,7 +161,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             Widget child = i.next();
             if (child == widget) {
                 foundWidget = true;
-            } else if (child != settingsButton) {
+            } else if (child != settingsButton && child != toolbar) {
                 i.remove();
             }
         }
@@ -178,8 +194,13 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             }
             //Set a minute as max time zoom just as for chart
             if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
-                timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
+                Date rangeStart = new Date(xAxisMin);
+                Date rangeEnd = new Date(xAxisMax);
+                timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd, this);
+                fireEvent(new ChartZoomChangedEvent(rangeStart, rangeEnd));
+                
             } else {
+                fireEvent(new ChartZoomResetEvent());
                 return false;
             }
         } catch (Exception e) {
@@ -192,12 +213,13 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
                     // redraw is triggered by the call to onTimeZoomReset() and therefore not necessary again here
                     // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
                     ignoreNextClickEvent = true;
+                    fireEvent(new ChartZoomResetEvent());
                 }
             });
         }
         return true;
     }
-
+        
     protected boolean onClick(ChartClickEvent chartClickEvent) {
         if (ignoreNextClickEvent) {
             ignoreNextClickEvent = false;
@@ -292,5 +314,13 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     protected boolean shouldShowLoading(Long timestamp) {
         return timestamp == null
                 || (timer.getPlayState() != PlayStates.Playing && timer.getPlayMode() != PlayModes.Live);
+    }
+    
+    public HandlerRegistration addChartZoomChangedHandler(ChartZoomChangedEvent.Handler handler) {
+        return addHandler(handler, ChartZoomChangedEvent.TYPE);
+    }
+    
+    public HandlerRegistration addChartZoomResetHandler(ChartZoomResetEvent.Handler handler) {
+        return addHandler(handler, ChartZoomResetEvent.TYPE);
     }
 }

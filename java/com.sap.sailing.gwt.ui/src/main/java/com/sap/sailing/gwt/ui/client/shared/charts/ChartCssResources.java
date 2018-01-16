@@ -24,5 +24,7 @@ public interface ChartCssResources extends ClientBundle {
         String settingsButtonBackgroundImage();
         
         String chartStyle();
+        
+        String toolbar();
     }
 }

@@ -32,6 +32,17 @@
 	top: 0px;
 }
 
+.toolbar {
+	position: absolute;
+	right: 2.6em;
+	height: 2em;
+	width: 200px;
+	bottom: 4px;
+	
+	text-align: right;
+    z-index: 1;
+}
+
 @sprite .settingsButtonBackgroundImage {
 	gwt-image: "settingsButton";
 	width: 2em;

@@ -1,11 +1,18 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -30,6 +37,12 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
     private final MultiCompetitorRaceChartLifecycle lifecycle;
+    /**
+     * TODO: i18n button label
+     */
+    private final Button splitButtonUi = new Button("SPLIT");  
+
+    private TimeRange visibleRange;
     
     /**
      * Creates a Chart used for example in the Raceboard to display various additional data.
@@ -48,7 +61,55 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
         this.lifecycle = lifecycle;
+        
+        splitButtonUi.setVisible(false);
+        addChartZoomChangedHandler((e)->checkIfMaySliceSelectedRegattaAndRace(e));
+        addChartZoomResetHandler((e)->splitButtonUi.setVisible(false));
+        splitButtonUi.addClickHandler((e)->doSlice());
     }
+    
+    private void doSlice() {
+        if (visibleRange != null) {            
+            sailingService.sliceRace(selectedRaceIdentifier, "Slice", visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Caught: " + caught.getMessage());
+                    
+                }
+
+                @Override
+                public void onSuccess(RegattaAndRaceIdentifier result) {
+                    // TODO: goto result?!?
+                    
+                }
+            });
+        }
+    }
+    
+    private void checkIfMaySliceSelectedRegattaAndRace(final ChartZoomChangedEvent e) {
+        // TODO: we could cache result 
+        visibleRange = null;
+        sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {           
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result == null) {
+                    splitButtonUi.setVisible(false);
+                } 
+                boolean yesWeCan = result.booleanValue();
+                splitButtonUi.setVisible(yesWeCan);
+                if (yesWeCan) {
+                    visibleRange = new TimeRangeImpl(new MillisecondsTimePoint(e.getRangeStart()), new MillisecondsTimePoint(e.getRangeEnd()));
+                }
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                splitButtonUi.setVisible(false);                
+            }
+        });        
+    }
+    
     
     @Override
     protected Button createSettingsButton() {
@@ -56,6 +117,12 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         return settingsButton;
     }
 
+    @Override
+    protected void createExtraToolbarElements(FlowPanel panel) {       
+        panel.add(splitButtonUi);
+    }
+   
+    
     @Override
     public MultiCompetitorRaceChartSettings getSettings() {
         return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
