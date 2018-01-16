@@ -13,13 +13,13 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin/tree/gpe-fork using http://storage.googleapis.com/gwt-eclipse-plugin/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. Git for Windows v2.12.2), http://git-scm.com / https://git-for-windows.github.io/
-4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
+4. MongoDB (e.g. Production Release 2.6.7), download: https://www.mongodb.com/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8 is the link.
-6. JDK 1.7 (Java SE 7), http://jdk7.java.net
-7. JDK 1.8 (Java SE 8), http://jdk8.java.net
+6. JDK 1.7 (Java SE 7), http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
+7. JDK 1.8 (Java SE 8), http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 8. Maven 3.1.1 (or higher), http://maven.apache.org
 9. GWT SDK 2.8.2 (http://www.gwtproject.org/download.html)
-10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
+10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/).
 
 #### Automatic Eclipse plugin installation
 
@@ -40,7 +40,7 @@ Be aware hat the installation may take several minutes depending on your Interne
 1. Cygwin, http://www.cygwin.com/
 2. Eclipse Mylyn Bugzilla extension
 3. kdiff3 (git tool)
-4. Firebug (javascript & .css debugging)
+4. Firebug (javascript & .css debugging, included in Firefox Developer Tools in newer versions of Firefox by default)
 
 #### Accounts
 
@@ -61,11 +61,12 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 1. Get the content of the git repository
   * Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Cygwin Terminal (Not with Putty!!!)
   * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys.
+  * Please note that when using one of the newer versions of Cygwin, your Cygwin home folder setting might differ from your Windows home folder. This will likely lead to problems when issuing certain commands. For troubleshooting, take a look at the following thread: https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
   * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
-  * Install the Google Android SDK from the same Google Plugin for Eclipse update site
+  * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
@@ -78,7 +79,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse) (make sure to scan for nested projects)
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard "Git->Projects from Git" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
@@ -129,14 +130,15 @@ To ensure that all components of the Analysis Suite are working, you should also
 1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
   - In Eclipse click Help -> Install New Software -> Add and enter https://dl-ssl.google.com/android/eclipse/
   - Select the Developer Tools and install
-  - After restarting Eclipse the "Welcome to Android Development" window should help you with installing the Android SDK
-  - It is also possible to download the Android SDK separately from http://developer.android.com/sdk/index.html ("Use an existing IDE")
+  - After restarting Eclipse the "Welcome to Android Development"-window should help you with installing the Android SDK
+  - It is also possible to download the Android SDK separately from the official Google download website. However, as of Revision 25.0.0 of the Android SDK Tools, the SDK Manager became an integrated part of Android Studio. Therefore, Revisions newer than 24.4.1 will not come with a standalone SDK Manager. Since it is absolutely essential if you want to use Eclipse, please download the Android SDK from the following link: https://dl.google.com/android/installer_r24.4.1-windows.exe
 2. Setup the Android SDK
   * In Eclipse press Window -> Android SDK Manager
   * Ensure that everything of "Tools" is installed
   * Install everything of "Android 3.2 API 13"
-  * Optional: it's a good idea to install the newest API Version
-  * Install "Android Support Library" (Extras), "Google Play Services" (Extras) and "Google USB Driver" (Extras)
+  * Install everything of "Android 5.1.1 API 22"
+  * Install "Android Support Repository" (Extras) **or** alternatively "Android Support Library" (Extras). Additionally install "Google Play Services" (Extras) **and** "Google USB Driver" (Extras)
+  * Please note that versions of the Android SDK Build Tools from 24.0.0 onwards might cause problems for your Eclipse IDE. The same goes for API versions from 24 onwards. If you get errors containing the message "refusing to generate code from aidl file defining parcelable", a workaround for now is to uninstall these newer versions of the Build Tools and the API. In the future however, this temporary solution may not be available anymore for compability reasons.
 3. Import the Android projects into your workspace
   * Android projects can be found in the /mobile subdirectory
 
@@ -160,13 +162,13 @@ If you are working with a linux-system and you get the error message `error whil
    * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`
    * In DebugConfigurations => Classpaths, Add Sourcefolder where classes are you want to user from the module
 2. For Maven Build
-   * pom.xml , Add Dependency to used module ie.     
-`<dependency>
-<groupId>com.sap.sailing</groupId>
-<artifactId>com.sap.sailing.domain.common</artifactId>
-<version>1.0.0-SNAPSHOT</version>
-<classifier>sources</classifier>
-</dependency>`
+   * pom.xml , Add Dependency to used module ie.    
+`<dependency>`    
+`<groupId>com.sap.sailing</groupId>`    
+`<artifactId>com.sap.sailing.domain.common</artifactId>`    
+`<version>1.0.0-SNAPSHOT</version>`    
+`<classifier>sources</classifier>`    
+`</dependency>`
 
 #### Using Android Studio for Development
 

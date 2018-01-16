@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -38,8 +39,11 @@ import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -1074,5 +1078,84 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     
     public static Speed getDefaultMaxSpeedForSmoothing() {
         return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
+    }
+    
+    @Override
+    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint) {
+        List<SpeedWithBearingStep> speedWithBearingSteps = new ArrayList<>();
+        Bearing lastCourse = null;
+        TimePoint lastTimePoint = null;
+        double lastCourseChangeAngleInDegrees = 0;
+        TimePoint fixTimePointAfterToTimePoint = null;
+        try {
+            lockForRead();
+            TimePoint timePoint = fromTimePoint;
+            for (Iterator<FixType> iterator = getFixesIterator(fromTimePoint, false); iterator
+                    .hasNext(); timePoint = iterator.next().getTimePoint()) {
+                if (timePoint == null) {
+                    continue;
+                }
+                if (timePoint.after(toTimePoint)) {
+                    fixTimePointAfterToTimePoint = timePoint;
+                    timePoint = toTimePoint;
+                }
+                SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
+                if (estimatedSpeed != null) {
+                    Bearing course = estimatedSpeed.getBearing();
+                    /*
+                     * First bearing step supposed to have 0 as course change as it does not have any previous steps
+                     * with bearings to compute bearing difference. If the condition is not met, the existing code which
+                     * uses ManeuverBearingStep class will break.
+                     */
+                    double courseChangeAngleInDegrees = lastCourse == null ? 0
+                            : lastCourse.getDifferenceTo(course, new DegreeBearingImpl(lastCourseChangeAngleInDegrees))
+                                    .getDegrees();
+
+                    // Fix distorted angular velocity due to inappropriate interpolation of getEstimatedSpeed() at first
+                    // and last step
+                    double courseChangeInDegreesForAngularVelocityCalculation = courseChangeAngleInDegrees;
+                    Duration durationBetweenStepsForAngularVelocityCalculation = lastTimePoint == null ? null
+                            : lastTimePoint.until(timePoint);
+                    if (fromTimePoint.equals(lastTimePoint)) {
+                        FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
+                        if (firstFix != null && !firstFix.getTimePoint().equals(fromTimePoint)) {
+                            SpeedWithBearing firstFixEstimatedSpeed = getEstimatedSpeed(firstFix.getTimePoint());
+                            if (firstFixEstimatedSpeed != null) {
+                                durationBetweenStepsForAngularVelocityCalculation = firstFix.getTimePoint()
+                                        .until(timePoint);
+                                courseChangeInDegreesForAngularVelocityCalculation = courseChangeAngleInDegrees
+                                        + firstFixEstimatedSpeed.getBearing().getDifferenceTo(lastCourse).getDegrees();
+                            }
+                        }
+                    } else if (fixTimePointAfterToTimePoint != null && lastCourse != null) {
+                        SpeedWithBearing lastFixEstimatedSpeed = getEstimatedSpeed(fixTimePointAfterToTimePoint);
+                        if (lastFixEstimatedSpeed != null) {
+                            durationBetweenStepsForAngularVelocityCalculation = lastTimePoint == null ? null
+                                    : lastTimePoint.until(fixTimePointAfterToTimePoint);
+                            courseChangeInDegreesForAngularVelocityCalculation = courseChangeAngleInDegrees
+                                    + estimatedSpeed.getBearing().getDifferenceTo(lastFixEstimatedSpeed.getBearing())
+                                            .getDegrees();
+                        }
+                    }
+
+                    double angularVelocityInDegreesPerSecond = durationBetweenStepsForAngularVelocityCalculation == null
+                            ? 0
+                            : Math.abs(courseChangeInDegreesForAngularVelocityCalculation
+                                    / durationBetweenStepsForAngularVelocityCalculation.asSeconds());
+
+                    speedWithBearingSteps.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed,
+                            courseChangeAngleInDegrees, angularVelocityInDegreesPerSecond));
+                    lastCourse = course;
+                    lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
+                    lastTimePoint = timePoint;
+                }
+                if (!timePoint.before(toTimePoint)) {
+                    break;
+                }
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return new SpeedWithBearingStepsIterable(speedWithBearingSteps);
     }
 }

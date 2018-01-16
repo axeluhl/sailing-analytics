@@ -29,15 +29,15 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class TabbedResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
-    
+
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
-    
+
     private final StringMessages stringMessages;
-    
+
     private final ScrolledTabLayoutPanel tabPanel;
     private final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
     private final DrillDownCallback drillDownCallback;
-    
+
     public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback,
             StringMessages stringMessages) {
         super(parent, context);
@@ -47,7 +47,7 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
         tabPanel.setAnimationDuration(0);
         tabPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         presentersMappedByHeader = new HashMap<>();
-        
+
         addNewTabTab();
         addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback, stringMessages));
     }
@@ -82,6 +82,12 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
                 addTabAndFocus(new PolarBackendResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
                         stringMessages));
                 removeTab(oldHeader);
+            } else if (result.getResultType()
+                    .equals("com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation")) {
+                CloseableTabHeader oldHeader = getSelectedHeader();
+                addTabAndFocus(new ManeuverSpeedDetailsResultsPresenter(TabbedResultsPresenter.this,
+                        getComponentContext(), stringMessages));
+                removeTab(oldHeader);
             } else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();
@@ -111,12 +117,12 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
         getSelectedHeader().setText(stringMessages.runningQuery());
         getSelectedPresenter().showBusyIndicator();
     }
-    
+
     @Override
     public QueryResultDTO<?> getCurrentResult() {
         return getSelectedPresenter().getCurrentResult();
     }
-    
+
     private CloseableTabHeader getSelectedHeader() {
         return (CloseableTabHeader) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
     }
@@ -128,13 +134,13 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     private void addTabAndFocus(ResultsPresenter<?> tabPresenter) {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
         presentersMappedByHeader.put(tabHeader, tabPresenter);
-        
+
         tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
         int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);
         tabPanel.scrollToTab(presenterIndex);
     }
-    
+
     private void removeTab(CloseableTabHeader header) {
         header.removeFromParent();
         presentersMappedByHeader.remove(header);
@@ -184,11 +190,11 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     public String getDependentCssClassName() {
         return "tabbedResultsPresenters";
     }
-    
+
     private class CloseableTabHeader extends HorizontalPanel {
-        
+
         private final HTML label;
-        
+
         public CloseableTabHeader() {
             label = new HTML(stringMessages.empty());
             label.getElement().getStyle().setMarginRight(5, Unit.PX);
@@ -204,12 +210,12 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
             });
             this.add(closeImage);
         }
-        
+
         public void setText(String text) {
             label.setText(text);
             tabPanel.checkIfScrollButtonsNecessary();
         }
-        
+
     }
 
     @Override

@@ -102,7 +102,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         c.set(2011, 6-1, 23, 16, 20, 1);
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
         c.set(2011, 6-1, 23, 16, 22, 25);
-        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
     }
 
     private void assertManeuver(Iterable<Maneuver> maneuvers, ManeuverType type, Tack newTack,
