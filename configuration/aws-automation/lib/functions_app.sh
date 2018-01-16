@@ -87,11 +87,9 @@ function create_new_user(){
 function append_event_ssl_macro_to_001_events_conf(){
 	wait_for_ssh_connection $3 $4
 	wait_for_001_events_patch $3 $4
-	local patched_content="Use Event-SSL $1 \"$2\" 127.0.0.1 $5"
+	local patched_content="Use Event-SSL $1 \\\"$2\\\" 127.0.0.1 $5"
 	local_echo "Appending´\"$patched_content\" to $events_conf..."
 	ssh_wrapper $3@$4 echo "$patched_content >> $events_conf"
-	local_echo "Reloading httpd..."
-	out=$(ssh_wrapper $3@$4 "/etc/init.d/httpd reload")
 }
 
 function wait_for_001_events_patch(){

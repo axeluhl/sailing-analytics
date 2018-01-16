@@ -16,4 +16,4 @@ mongodb_port=27017
 alb_domain='sapsailing.com'
 
 #SL Multi-Instance Sailing Server
-super_instance='ec2-34-250-136-229.eu-west-1.compute.amazonaws.com'
+default_super_instance='ec2-34-250-136-229.eu-west-1.compute.amazonaws.com'

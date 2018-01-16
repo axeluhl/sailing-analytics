@@ -105,7 +105,7 @@ function require_ssh_user(){
 }
 
 function require_super_instance(){
-	require_variable "$super_instance_param" super_instance "" "$super_instance_message"
+	require_variable "$super_instance_param" super_instance "$default_super_instance" "$super_instance_message"
 }
 
 function require_description(){

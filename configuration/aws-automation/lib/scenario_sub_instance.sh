@@ -116,7 +116,7 @@ function sub_instance_execute() {
 
 	header "Configuring ALB"
 
-	local target_group_arn=$(create_target_group "S-shared-$instance_name")
+	local target_group_arn=$(create_target_group "S-shared-$instance_short_name")
 	register_targets $target_group_arn $(get_instance_id $super_instance)
 
 	local domain=$(create_rule $listener_arn $instance_short_name $target_group_arn)
@@ -124,6 +124,9 @@ function sub_instance_execute() {
 	header "Configuring Apache"
 
 	append_event_ssl_macro_to_001_events_conf $domain $event_id $ssh_user $super_instance $server_port
+
+	local_echo "Reloading httpd..."
+	out=$(execute_remote "/etc/init.d/httpd reload")
 
 	header "Conclusion"
 

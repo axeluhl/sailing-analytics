@@ -92,6 +92,7 @@ function alphanumeric(){
 	lower_trim $1 | only_letters_and_numbers
 }
 
+
 # ------------------------------------------------------
 # The following functions were part of a bash template
 # and could be useful in the future

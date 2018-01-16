@@ -87,7 +87,7 @@ do
       continue
     fi
 
-    # Don't source config files for now
+    # Don't source region config files (desired file already sourced)
     if [[ "${utility_file}" == *"config_"* ]]; then
       continue
     fi
