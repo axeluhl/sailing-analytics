@@ -170,8 +170,9 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         if (closestTwsTwa == null) {
             result = new Pair<>(0.0, null);
         } else {
-            double minDiffDeg = Math.abs(Math.abs(Math.abs(closestTwsTwa.getObject().getBearing().getDegrees() * 2)
-                    - Math.abs(courseChangeDeg)));
+            double minDiffDeg = Math.abs(
+                    Math.abs(Math.abs(getManeuverAngleFromTwa(maneuverType, closestTwsTwa.getObject().getBearing()))
+                            - Math.abs(courseChangeDeg)));
             result = new Pair<>(1. / (1. + (minDiffDeg / 10.) * (minDiffDeg / 10.)), closestTwsTwa);
         }
         return result;
@@ -186,14 +187,25 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                 boatClass, speedAtManeuverStart, type == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND,
                 type == ManeuverType.TACK ? courseChangeDeg >= 0 ? Tack.PORT : Tack.STARBOARD
                         : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
-            double diff = Math.abs(trueWindSpeedAndAngle.getObject().getBearing().getDegrees() * 2)
-                    - Math.abs(courseChangeDeg);
+            double diff = Math.abs(getManeuverAngleFromTwa(type, trueWindSpeedAndAngle.getObject().getBearing())
+                    - Math.abs(courseChangeDeg));
             if (diff < minDiff) {
                 minDiff = diff;
                 closestTwsTwa = trueWindSpeedAndAngle;
             }
         }
         return closestTwsTwa;
+    }
+
+    private double getManeuverAngleFromTwa(ManeuverType type, Bearing twa) {
+        assert type == ManeuverType.TACK || type == ManeuverType.JIBE;
+        double maneuverAngle;
+        if (type == ManeuverType.TACK) {
+            maneuverAngle = Math.abs(twa.getDegrees() * 2);
+        } else {
+            maneuverAngle = (180 - Math.abs(twa.getDegrees())) * 2.0;
+        }
+        return maneuverAngle;
     }
 
     @Override
