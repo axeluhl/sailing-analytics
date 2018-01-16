@@ -42,11 +42,14 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
 
     @Override
     public String getShortInfo() {
-        String result = null;
-        if (getShortName() != null) {
-            result = getShortName(); 
-        } else if (boat != null) {
-            result = boat.getSailID() != null ? boat.getSailID() : getBoat().getName();
+        final String superResult = super.getShortInfo();
+        final String result;
+        if (superResult != null) {
+            result = superResult; 
+        } else if (getBoat() != null) {
+            result = getBoat().getSailID() != null ? getBoat().getSailID() : getBoat().getName();
+        } else {
+            result = null;
         }
         return result;
     }

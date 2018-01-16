@@ -22,7 +22,6 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -61,9 +60,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -515,12 +514,7 @@ public class TrackingListFragment extends BaseFragment
 
     private void moveCompetitorToFinishList(Competitor competitor) {
         String name = "";
-        if (competitor instanceof CompetitorWithBoat) {
-            CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) competitor;
-            if (competitorWithBoat.getBoat() != null) {
-                name += competitorWithBoat.getBoat().getSailID();
-            }
-        }
+        name += competitor.getShortInfo();
         name += " - " + competitor.getName();
         int pos = mAdapter.getFirstRankZeroPosition();
         // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted! I just wonder how the position shown in the app seems correct...
@@ -834,12 +828,7 @@ public class TrackingListFragment extends BaseFragment
             } else {
                 for (Competitor competitor : mCompetitorData) {
                     String name = "";
-                    if (competitor instanceof CompetitorWithBoat) {
-                        CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) competitor;
-                        if (competitorWithBoat.getBoat() != null) {
-                            name += competitorWithBoat.getBoat().getSailID();
-                        }
-                    }
+                    name += competitor.getShortInfo();
                     name += " - " + competitor.getName();
                     if (StringHelper.on(getActivity()).containsIgnoreCase(name, mFilter)) {
                         mFilteredCompetitorData.add(competitor);

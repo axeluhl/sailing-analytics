@@ -248,7 +248,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public void updateCompetitor(ICompetitor competitor) {
         Competitor domainCompetitor = this.resolveCompetitor(competitor);
         if (domainCompetitor != null) {
-            if (domainCompetitor instanceof CompetitorWithBoat) {
+            if (domainCompetitor.hasBoat()) {
                 getOrCreateCompetitorWithBoat(competitor);
             } else {
                 getOrCreateCompetitor(competitor);

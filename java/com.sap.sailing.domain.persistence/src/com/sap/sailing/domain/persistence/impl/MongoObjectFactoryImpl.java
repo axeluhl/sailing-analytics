@@ -1313,7 +1313,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     @Override
     public void storeCompetitor(Competitor competitor) {
-        if (competitor instanceof CompetitorWithBoat) {
+        if (competitor.hasBoat()) {
             storeCompetitorWithBoat((CompetitorWithBoat) competitor); 
         } else {
             storeCompetitorWithoutBoat(competitor);
@@ -1342,7 +1342,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             List<Competitor> competitorsWithoutBoat = new ArrayList<>();
             List<CompetitorWithBoat> competitorsWithBoat = new ArrayList<>();
             for (Competitor competitor : competitors) {
-                if (competitor instanceof CompetitorWithBoat) {
+                if (competitor.hasBoat()) {
                     competitorsWithBoat.add((CompetitorWithBoat) competitor);
                 } else {
                     competitorsWithoutBoat.add(competitor);

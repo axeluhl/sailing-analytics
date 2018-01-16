@@ -22,7 +22,6 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -387,12 +386,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mCompetitorResults.clear();
         for (Competitor item : data) { // add loaded competitors
             String name = "";
-            if (item instanceof CompetitorWithBoat) {
-                CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) item;
-                if (competitorWithBoat.getBoat() != null) {
-                    name += competitorWithBoat.getBoat().getSailID();
-                }
-            }
+            name += item.getShortInfo();
             name += " - " + item.getName();
             CompetitorResult result = new CompetitorResultImpl(item.getId(), name, 0, MaxPointsReason.NONE,
                     /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK); // TODO handle merge state

@@ -29,7 +29,7 @@ public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, 
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
         this.twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
         this.flagImageURL = competitor.getFlagImage() == null ? null : competitor.getFlagImage().toString();
-        if (competitor instanceof CompetitorWithBoat) {
+        if (competitor.hasBoat()) {
             this.shortInfo = ((CompetitorWithBoat) competitor).getShortInfo();
         } else {
             this.shortInfo = competitor.getShortName() != null ? competitor.getShortName() : competitor.getName(); 

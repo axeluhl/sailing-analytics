@@ -5646,9 +5646,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
         // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
-        for (Competitor competitorToRegister: competitorsToRegister) {
-            if (competitorToRegister instanceof CompetitorWithBoat) {
+        for (Competitor competitorToRegister : competitorsToRegister) {
+            if (competitorToRegister.hasBoat()) {
                 raceColumn.registerCompetitor((CompetitorWithBoat) competitorToRegister, fleet);  
+            } else {
+                logger.warning("The competitor "+competitorToRegister.getName()+" does not have a boat associated but should have; "+
+                        "competitor is not registered for race log of race "+raceColumnName+" in leaderboard "+leaderboardName+" for fleet "+fleetName);
             }
         }
     }

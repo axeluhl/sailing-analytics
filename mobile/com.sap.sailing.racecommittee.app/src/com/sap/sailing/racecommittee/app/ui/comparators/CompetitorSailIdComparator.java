@@ -18,8 +18,8 @@ public class CompetitorSailIdComparator implements Comparator<Competitor> {
 
     @Override
     public int compare(Competitor leftCompetitor, Competitor rightCompetitor) {
-        if (leftCompetitor != null && leftCompetitor instanceof CompetitorWithBoat &&
-            rightCompetitor != null && rightCompetitor instanceof CompetitorWithBoat) {
+        if (leftCompetitor != null && leftCompetitor.hasBoat() &&
+            rightCompetitor != null && rightCompetitor.hasBoat()) {
             Boat left = ((CompetitorWithBoat) leftCompetitor).getBoat();
             Boat right = ((CompetitorWithBoat) rightCompetitor).getBoat();
             

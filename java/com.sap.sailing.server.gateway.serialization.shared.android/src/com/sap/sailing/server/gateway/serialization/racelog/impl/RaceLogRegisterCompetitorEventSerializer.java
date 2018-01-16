@@ -37,7 +37,7 @@ public class RaceLogRegisterCompetitorEventSerializer extends BaseRaceLogEventSe
         RaceLogRegisterCompetitorEvent registerCompetitorEvent = (RaceLogRegisterCompetitorEvent) object;
         
         JSONObject result = super.serialize(registerCompetitorEvent);
-        if (registerCompetitorEvent.getCompetitor() instanceof CompetitorWithBoat) {
+        if (registerCompetitorEvent.getCompetitor().hasBoat()) {
             CompetitorWithBoat competitorWithBoat =  (CompetitorWithBoat) registerCompetitorEvent.getCompetitor();
             result.put(FIELD_COMPETITOR_WITHBOAT, competitorWithBoatSerializer.serialize(competitorWithBoat));
         } else {

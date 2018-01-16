@@ -59,6 +59,17 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
 
     @Override
+    public String getShortInfo() {
+        final String result;
+        if (getShortName() != null) {
+            result = getShortName(); 
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
     public boolean hasBoat() {
         return false;
     }

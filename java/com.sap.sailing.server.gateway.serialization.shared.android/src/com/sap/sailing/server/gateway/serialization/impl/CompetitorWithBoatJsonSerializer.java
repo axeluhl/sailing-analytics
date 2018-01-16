@@ -28,9 +28,7 @@ public class CompetitorWithBoatJsonSerializer implements JsonSerializer<Competit
     @Override
     public JSONObject serialize(CompetitorWithBoat competitor) {
         JSONObject serializedCompetitor = competitorJsonSerializer.serialize(competitor);
-        
         serializedCompetitor.put(CompetitorJsonConstants.FIELD_SAIL_ID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
-
         if (boatJsonSerializer != null && competitor.getBoat() != null) {
             serializedCompetitor.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
         }

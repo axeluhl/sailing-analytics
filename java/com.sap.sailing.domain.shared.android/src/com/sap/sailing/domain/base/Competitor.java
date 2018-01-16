@@ -28,6 +28,14 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     String getShortName();
 
     /**
+     * Returns a derived short information about a competitor depending on the information available
+     * If we have a short name set on the competitor this name will be returned.
+     * If no short name exist but a boat the either the sailId or the boat name will returned.
+     * If all these attributes have no value null is returned.   
+     */
+    String getShortInfo();
+
+    /**
      * A helper to know if the competitor has a boat attached.
      * See {@link CompetitorWithBoat}
      */

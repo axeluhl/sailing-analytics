@@ -35,7 +35,7 @@ public class CompetitorsAndBoatsInLogAnalyzer<LogT extends AbstractLog<EventT, V
             for (EventT event : getLog().getUnrevokedEvents()) {
                 if (event instanceof RegattaLogRegisterCompetitorEvent) {
                     RegattaLogRegisterCompetitorEvent regattaLogCompetitorEvent = (RegattaLogRegisterCompetitorEvent) event;
-                    if (regattaLogCompetitorEvent.getCompetitor() instanceof CompetitorWithBoat) {
+                    if (regattaLogCompetitorEvent.getCompetitor().hasBoat()) {
                         CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) regattaLogCompetitorEvent.getCompetitor();
                         result.put(competitorWithBoat, competitorWithBoat.getBoat());
                     }
