@@ -42,7 +42,7 @@ public class JSDownloadUtils {
     try {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
-        xhr.setRequestHeader("Range", "bytes=0-"+REQUIRED_SIZE);
+        xhr.setRequestHeader("Range", "bytes=0-" + REQUIRED_SIZE);
         xhr.responseType = "arraybuffer";
         xhr.onprogress = function(evt) {
             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
@@ -62,7 +62,7 @@ public class JSDownloadUtils {
                     try {
                         var xhr2 = new XMLHttpRequest();
                         xhr2.open("GET", url, true);
-                        xhr2.setRequestHeader("Range", "bytes="+(length-REQUIRED_SIZE));
+                        xhr2.setRequestHeader("Range", "bytes=" + (length - REQUIRED_SIZE));
                         xhr2.responseType = "arraybuffer";
                         xhr2.onprogress = function(evt) {
                             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
@@ -153,6 +153,8 @@ public class JSDownloadUtils {
                         var end = new Int8Array(xhr.response.slice(length - REQUIRED_SIZE));
                         var sparse = length - 2 * REQUIRED_SIZE;
                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::complete(Lcom/google/gwt/typedarrays/shared/Int8Array;Lcom/google/gwt/typedarrays/shared/Int8Array;Ljava/lang/Double;)(start, end, sparse);
+                    } else {
+                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)("No result");
                     }
                 }
             };

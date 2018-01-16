@@ -371,7 +371,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
             @Override
             public void progress(Double current, Double total) {
-                lbl.setText(stringMessages.transferStarted() + Math.round(current / 1024 / 1024) + "/"
+                lbl.setText(stringMessages.transferStarted() + " " + Math.round(current / 1024 / 1024) + "/"
                         + Math.round(total / 1024 / 1024) + " MB");
                 infoLabel.setWidget(lbl);
             }
@@ -401,7 +401,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     protected void mp4MetadataResult(VideoMetadataDTO result) {
         if (!result.isDownloadable()) {
-            Window.alert("Could not download file " + mediaTrack.url);
+            Window.alert(stringMessages.couldNotDownload(mediaTrack.url));
             manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
