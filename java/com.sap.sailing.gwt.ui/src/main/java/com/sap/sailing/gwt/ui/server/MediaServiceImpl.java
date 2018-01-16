@@ -156,7 +156,6 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                     }
                 }
             }
-            throw new RuntimeException("remote error test");
         } catch (Exception e) {
             message = e.getMessage();
         } finally {
