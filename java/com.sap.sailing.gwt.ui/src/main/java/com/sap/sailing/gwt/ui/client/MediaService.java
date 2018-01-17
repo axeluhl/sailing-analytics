@@ -29,4 +29,5 @@ public interface MediaService extends RemoteService {
 
     VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped);
 
+    VideoMetadataDTO checkMetadata(String url);
 }

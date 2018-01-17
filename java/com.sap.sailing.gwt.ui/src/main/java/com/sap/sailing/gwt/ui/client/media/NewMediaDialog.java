@@ -346,7 +346,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         this.setUiEnabled(false);
         remoteMp4WasStarted = true;
         remoteMp4WasFinished = false;
-        Label lbl = new Label(stringMessages.processingMP4());
+        Label lbl = new Label(stringMessages.processingMP4() +"@"+stringMessages.localServer() );
         infoLabel.setWidget(lbl);
         checkMetadata(mediaTrack.url, lbl, new AsyncCallback<VideoMetadataDTO>() {
 
@@ -367,34 +367,50 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     private void checkMetadata(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
-        JSDownloadUtils.getData(url, new JSDownloadCallback() {
+        // check on server first
+        mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
 
             @Override
-            public void progress(Double current, Double total) {
-                lbl.setText(stringMessages.transferStarted() + " " + Math.round(current / 1024 / 1024) + "/"
-                        + Math.round(total / 1024 / 1024) + " MB");
-                infoLabel.setWidget(lbl);
+            public void onSuccess(VideoMetadataDTO result) {
+                setUiEnabled(true);
+                remoteMp4WasFinished = true;
+                mp4MetadataResult(result);
             }
 
             @Override
-            public void error(Object msg) {
-                asyncCallback.onSuccess(new VideoMetadataDTO(false, false, null, msg == null ? "" : msg.toString()));
-            }
+            public void onFailure(Throwable caught) {
+                // try on client instead
+                JSDownloadUtils.getData(url, new JSDownloadCallback() {
 
-            @Override
-            public void complete(Int8Array start, Int8Array end, Double skipped) {
-                lbl.setText(stringMessages.analyze());
-                infoLabel.setWidget(lbl);
-                byte[] jStart = new byte[start.byteLength()];
-                for (int i = 0; i < start.byteLength(); i++) {
-                    jStart[i] = start.get(i);
-                }
-                byte[] jEnd = new byte[end.byteLength()];
-                for (int i = 0; i < end.byteLength(); i++) {
-                    jEnd[i] = end.get(i);
-                }
-                // Due to js represeting everything as 64double, the max safe file is around 4 petabytes
-                mediaService.checkMetadata(jStart, jEnd, skipped.longValue(), asyncCallback);
+                    @Override
+                    public void progress(Double current, Double total) {
+                        lbl.setText(stringMessages.transferStarted() + " " + Math.round(current / 1024 / 1024) + "/"
+                                + Math.round(total / 1024 / 1024) + " MB");
+                        infoLabel.setWidget(lbl);
+                    }
+
+                    @Override
+                    public void error(Object msg) {
+                        asyncCallback
+                                .onSuccess(new VideoMetadataDTO(false, false, null, msg == null ? "" : msg.toString()));
+                    }
+
+                    @Override
+                    public void complete(Int8Array start, Int8Array end, Double skipped) {
+                        lbl.setText(stringMessages.analyze());
+                        infoLabel.setWidget(lbl);
+                        byte[] jStart = new byte[start.byteLength()];
+                        for (int i = 0; i < start.byteLength(); i++) {
+                            jStart[i] = start.get(i);
+                        }
+                        byte[] jEnd = new byte[end.byteLength()];
+                        for (int i = 0; i < end.byteLength(); i++) {
+                            jEnd[i] = end.get(i);
+                        }
+                        // Due to js represeting everything as 64double, the max safe file is around 4 petabytes
+                        mediaService.checkMetadata(jStart, jEnd, skipped.longValue(), asyncCallback);
+                    }
+                });
             }
         });
     }

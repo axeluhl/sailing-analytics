@@ -1,14 +1,23 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.nio.channels.Channels;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.mp4parser.IsoFile;
 import org.mp4parser.boxes.UserBox;
@@ -20,6 +29,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -30,12 +40,12 @@ import com.sap.sailing.server.RacingEventService;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
 
-//     private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
+    // private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-
+    private static final int REQUIRED_SIZE = 1000000;
     private static final long serialVersionUID = -8917349579281305977L;
 
     public MediaServiceImpl() {
@@ -49,12 +59,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private RacingEventService racingEventService() {
         return racingEventServiceTracker.getService();
     }
-    
+
     @Override
     public Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
     }
-    
+
     @Override
     public Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
@@ -105,56 +115,97 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
+    public VideoMetadataDTO checkMetadata(String url) {
+        VideoMetadataDTO response = null;
+        try {
+            URL input = new URL(url);
+            // check size and do rangerequests if possible
+            long fileSize = determineFileSize(input);
+            if (fileSize > 0) {
+                response = checkMetadataByPartialDownloads(input, fileSize);
+            } else {
+                response = checkMetadataByFullFileDownload(input);
+            }
+        } catch (Exception e) {
+            response = new VideoMetadataDTO(false, false, null, e.getMessage());
+        }
+        return response;
+    }
+
+    private long determineFileSize(URL input) throws IOException, ProtocolException {
+        //we need the size for efficient downloading
+        HttpURLConnection connection = (HttpURLConnection) input.openConnection();
+        connection.setConnectTimeout(5);
+        connection.setRequestMethod("HEAD");
+        long fileSize = -1;
+        try (InputStream inStream = connection.getInputStream()) {
+            fileSize = connection.getContentLengthLong();
+        } finally {
+            connection.disconnect();
+        }
+        
+        connection = (HttpURLConnection) input.openConnection();
+        connection.setConnectTimeout(5);
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Range", "bytes=0-100");
+        try (InputStream inStream = connection.getInputStream()) {
+            if(connection.getResponseCode() != 206){
+                fileSize = -1;
+            }
+        } finally {
+            connection.disconnect();
+        }
+        return fileSize;
+    }
+
+    private VideoMetadataDTO checkMetadataByPartialDownloads(URL input, long fileSize)
+            throws IOException, ProtocolException {
+        byte[] start = new byte[REQUIRED_SIZE];
+        byte[] end = new byte[REQUIRED_SIZE];
+        downloadPartOfFile(input, start, "bytes=0-" + REQUIRED_SIZE);
+        downloadPartOfFile(input, end, "bytes=" + (fileSize - REQUIRED_SIZE) + "-");
+        long skipped = fileSize - start.length - end.length;
+        return checkMetadata(start, end, skipped);
+    }
+
+    private void downloadPartOfFile(URL input, byte[] store, String range) throws IOException, ProtocolException {
+        HttpURLConnection connection;
+        connection = (HttpURLConnection) input.openConnection();
+        connection.setConnectTimeout(5);
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Range", range);
+        try (InputStream inStream = connection.getInputStream()) {
+            DataInputStream dataInStream = new DataInputStream(inStream);
+            dataInStream.readFully(store);
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private VideoMetadataDTO checkMetadataByFullFileDownload(URL input)
+            throws ParserConfigurationException, SAXException, IOException {
+        boolean canDownload;
+        boolean spherical;
+        Date recordStartedTimer;
+        try (IsoFile isof = new IsoFile(Channels.newChannel(input.openStream()))) {
+            canDownload = true;
+            recordStartedTimer = determineRecordingStart(isof);
+            spherical = determine360(isof);
+            return new VideoMetadataDTO(canDownload, spherical, recordStartedTimer, "");
+        }
+    }
+
+    @Override
     public VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped) {
         File tmp = null;
         boolean spherical = false;
         Date recordStartedTimer = null;
         String message = "";
         try {
-            tmp = File.createTempFile("upload", "metadataCheck");
-            try (FileOutputStream fw = new FileOutputStream(tmp)) {
-                fw.write(start);
-                while (skipped > 0) {
-                    // ensure that no absurd amount of memory is required, and that more then 4gb files can be analysed
-                    if (skipped > 10000000) {
-                        byte[] dummy = new byte[10000000];
-                        fw.write(dummy);
-                        skipped = skipped - 10000000;
-                    } else {
-                        byte[] dummy = new byte[skipped.intValue()];
-                        fw.write(dummy);
-                        skipped = skipped - skipped.intValue();
-                    }
-                }
-                fw.write(end);
-            }
-
+            tmp = createFileFromData(start, end, skipped);
             try (IsoFile isof = new IsoFile(tmp)) {
-                // MovieHeaderBox movieHeaderBox = Path.getPath(isof, "moov[0]/mvhd");
-                // System.out.println(movieHeaderBox.getCreationTime());
-                UserBox uuidBox = Path.getPath(isof, "moov[0]/trak[0]/uuid");
-
-                MovieBox mbox = isof.getMovieBox();
-                if (mbox != null) {
-                    MovieHeaderBox mhb = mbox.getMovieHeaderBox();
-                    if (mhb != null) {
-                        recordStartedTimer = mhb.getCreationTime();
-                    }
-                }
-
-                if (uuidBox != null) {
-                    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                    Document doc = dBuilder.parse(new ByteArrayInputStream(uuidBox.getData()));
-
-                    NodeList childs = doc.getDocumentElement().getChildNodes();
-                    for (int i = 0; i < childs.getLength(); i++) {
-                        Node child = childs.item(i);
-                        if (child.getNodeName().toLowerCase().contains(":spherical")) {
-                            spherical = true;
-                        }
-                    }
-                }
+                recordStartedTimer = determineRecordingStart(isof);
+                spherical = determine360(isof);
             }
         } catch (Exception e) {
             message = e.getMessage();
@@ -164,5 +215,62 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             }
         }
         return new VideoMetadataDTO(true, spherical, recordStartedTimer, message);
+    }
+
+    /**
+     * Creates a dummy mp4 file, only containing the start and the end, the middle is filled with 0 so that all file
+     * internal pointers from start to end are working
+     */
+    private File createFileFromData(byte[] start, byte[] end, Long skipped) throws IOException, FileNotFoundException {
+        File tmp;
+        tmp = File.createTempFile("upload", "metadataCheck");
+        try (FileOutputStream fw = new FileOutputStream(tmp)) {
+            fw.write(start);
+            while (skipped > 0) {
+                // ensure that no absurd amount of memory is required, and that more then 4gb files can be analysed
+                if (skipped > 10000000) {
+                    byte[] dummy = new byte[10000000];
+                    fw.write(dummy);
+                    skipped = skipped - 10000000;
+                } else {
+                    byte[] dummy = new byte[skipped.intValue()];
+                    fw.write(dummy);
+                    skipped = skipped - skipped.intValue();
+                }
+            }
+            fw.write(end);
+        }
+        return tmp;
+    }
+
+    private boolean determine360(IsoFile isof) throws ParserConfigurationException, SAXException, IOException {
+        boolean spherical = false;
+        UserBox uuidBox = Path.getPath(isof, "moov[0]/trak[0]/uuid");
+        if (uuidBox != null) {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(new ByteArrayInputStream(uuidBox.getData()));
+
+            NodeList childs = doc.getDocumentElement().getChildNodes();
+            for (int i = 0; i < childs.getLength(); i++) {
+                Node child = childs.item(i);
+                if (child.getNodeName().toLowerCase().contains(":spherical")) {
+                    spherical = true;
+                }
+            }
+        }
+        return spherical;
+    }
+
+    private Date determineRecordingStart(IsoFile isof) {
+        Date creationTime = null;
+        MovieBox mbox = isof.getMovieBox();
+        if (mbox != null) {
+            MovieHeaderBox mhb = mbox.getMovieHeaderBox();
+            if (mhb != null) {
+                creationTime = mhb.getCreationTime();
+            }
+        }
+        return creationTime;
     }
 }

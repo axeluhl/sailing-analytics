@@ -31,4 +31,6 @@ public interface MediaServiceAsync {
 
     void checkMetadata(byte[] jStart, byte[] jEnd, Long skipped, AsyncCallback<VideoMetadataDTO> asyncCallback);
 
+    void checkMetadata(String url, AsyncCallback<VideoMetadataDTO> asyncCallback);
+
 }
