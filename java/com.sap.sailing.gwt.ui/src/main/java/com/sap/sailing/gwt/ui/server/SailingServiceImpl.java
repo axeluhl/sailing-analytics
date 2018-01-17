@@ -72,6 +72,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
@@ -91,6 +92,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEvent
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
@@ -7099,6 +7101,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     if (isLatestPassAndInSlicedTrackingInterval(event)) {
                         raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
                                 raceLog.getCurrentPassId(), event.getCourseAreaId()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogStartProcedureChangedEvent event) {
+                    if (isLatestPassAndInSlicedTrackingInterval(event)) {
+                        raceLog.add(new RaceLogStartProcedureChangedEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), event.getStartProcedureType()));
                     }
                 }
                 
