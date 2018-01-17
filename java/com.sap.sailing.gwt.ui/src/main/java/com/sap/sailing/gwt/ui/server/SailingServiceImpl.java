@@ -7083,8 +7083,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             
             for (WindSource windSourceToCopy : trackedRaceToSlice.getWindSources(WindSourceType.EXPEDITION)) {
                 final WindTrack windTrackToCopyFrom = trackedRaceToSlice.getOrCreateWindTrack(windSourceToCopy);
-                for (Wind windToCopy : windTrackToCopyFrom.getFixes(startOfTracking, true, endOfTracking, true)) {
-                    trackedRace.recordWind(windToCopy, windSourceToCopy);
+                windTrackToCopyFrom.lockForRead();
+                try {
+                    for (Wind windToCopy : windTrackToCopyFrom.getFixes(startOfTracking, true, endOfTracking, true)) {
+                        trackedRace.recordWind(windToCopy, windSourceToCopy);
+                    }
+                } finally {
+                    windTrackToCopyFrom.unlockAfterRead();
                 }
             }
             return trackedRace.getRaceIdentifier();
