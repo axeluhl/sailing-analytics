@@ -1,12 +1,10 @@
 package com.sap.sailing.polars.datamining.data.impl;
 
-import java.util.Set;
-
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 
@@ -31,29 +29,19 @@ public class BoatClassWithBackendPolarContext implements HasBackendPolarBoatClas
     }
     
     public Double getTargetBeatAngle() {
-        Set<SpeedWithBearingWithConfidence<Void>> set = polarDataService.getAverageTrueWindSpeedAndAngleCandidates(boatClass, new KnotSpeedImpl(15), LegType.UPWIND, Tack.STARBOARD);
-        Double bestConfidence = -1.0;
-        Double bestBeatAngle = null;
-        for (SpeedWithBearingWithConfidence<Void> element : set) {
-            if(element.getConfidence() > bestConfidence) {
-                bestBeatAngle = element.getObject().getBearing().getDegrees();
-                bestConfidence = element.getConfidence();
-            }
+        try {
+            return polarDataService.getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(12), LegType.UPWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            return null;
         }
-        return bestBeatAngle;
     }
     
     public Double getTargetRunawayAngle() {
-        Set<SpeedWithBearingWithConfidence<Void>> set = polarDataService.getAverageTrueWindSpeedAndAngleCandidates(boatClass, new KnotSpeedImpl(15), LegType.DOWNWIND, Tack.PORT);
-        Double bestConfidence = -1.0;
-        Double bestBeatAngle = null;
-        for (SpeedWithBearingWithConfidence<Void> element : set) {
-            if(element.getConfidence() > bestConfidence) {
-                bestBeatAngle = element.getObject().getBearing().getDegrees();
-                bestConfidence = element.getConfidence();
-            }
+        try {
+            return polarDataService.getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(12), LegType.DOWNWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            return null;
         }
-        return bestBeatAngle;
     }
 
     @Override
