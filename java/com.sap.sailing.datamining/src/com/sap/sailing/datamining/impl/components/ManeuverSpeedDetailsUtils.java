@@ -14,24 +14,6 @@ import com.sap.sailing.domain.common.NauticalSide;
 public class ManeuverSpeedDetailsUtils {
 
     /**
-     * Determines the maneuver direction by evaluating the difference between two bearings.
-     * 
-     * @param firstBearingAngle
-     *            The first bearing
-     * @param nextBearingAngle
-     *            The next bearing
-     * @return The direction with the least course change between the two provided bearings
-     */
-    public static NauticalSide determineNauticalSideByClosestAngleDistance(double firstBearingAngle,
-            double nextBearingAngle) {
-        if (firstBearingAngle < nextBearingAngle) {
-            return nextBearingAngle - firstBearingAngle <= 180 ? NauticalSide.STARBOARD : NauticalSide.PORT;
-        } else {
-            return firstBearingAngle - nextBearingAngle <= 180 ? NauticalSide.PORT : NauticalSide.STARBOARD;
-        }
-    }
-
-    /**
      * Gets a function which either increments or decrements its TWA parameter encoded as [0; 359] depending on the
      * provided maneuver direction.
      * 
@@ -40,7 +22,7 @@ public class ManeuverSpeedDetailsUtils {
      *            decrement its parameter
      * @return The function which either increments, or decrements its paramter
      */
-    public static Function<Integer, Integer> getNextTWAFunctionForManeuverDirection(NauticalSide maneuverDirection) {
+    public static Function<Integer, Integer> getTWAIterationFunctionForManeuverDirection(NauticalSide maneuverDirection) {
         Function<Integer, Integer> forNextTWA = null;
         switch (maneuverDirection) {
         case STARBOARD:

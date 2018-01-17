@@ -44,10 +44,10 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedSlopePerTWA = new double[360];
         double lastSpeedValue = 0;
 
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils
-                .getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide());
+        Function<Integer, Integer> twaIterationFunction = ManeuverSpeedDetailsUtils
+                .getTWAIterationFunctionForManeuverDirection(maneuverContext.getToSide());
 
-        for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
+        for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = twaIterationFunction.apply(twa)) {
             if (maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {
                 speedSlopePerTWA[twa] = 0;
             } else {
@@ -63,10 +63,10 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedRatioToBeginningSpeedPerTWA = new double[360];
         double firstSpeedValue = maneuverContext.getManeuverEnteringSpeed();
 
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils
-                .getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide());
+        Function<Integer, Integer> twaIterationFunction = ManeuverSpeedDetailsUtils
+                .getTWAIterationFunctionForManeuverDirection(maneuverContext.getToSide());
 
-        for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
+        for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = twaIterationFunction.apply(twa)) {
             if (firstSpeedValue == 0) {
                 firstSpeedValue = maneuverSpeedPerTWA[twa];
             }
@@ -84,10 +84,10 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedRatioToPreviousSpeedPerTWA = new double[360];
         double lastSpeedValue = 0;
 
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils
-                .getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide());
+        Function<Integer, Integer> twaIterationFunction = ManeuverSpeedDetailsUtils
+                .getTWAIterationFunctionForManeuverDirection(maneuverContext.getToSide());
 
-        for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
+        for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = twaIterationFunction.apply(twa)) {
             if (maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {
                 speedRatioToPreviousSpeedPerTWA[twa] = 0;
             } else {
