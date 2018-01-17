@@ -386,8 +386,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mCompetitorResults.clear();
         for (Competitor item : data) { // add loaded competitors
             String name = "";
-            name += item.getShortInfo();
-            name += " - " + item.getName();
+            if (item.getShortInfo() != null) {
+                name += item.getShortInfo() + " - ";
+            }
+            name += item.getName();
             CompetitorResult result = new CompetitorResultImpl(item.getId(), name, 0, MaxPointsReason.NONE,
                     /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK); // TODO handle merge state
             mCompetitorResults.add(new CompetitorResultEditableImpl(result));
