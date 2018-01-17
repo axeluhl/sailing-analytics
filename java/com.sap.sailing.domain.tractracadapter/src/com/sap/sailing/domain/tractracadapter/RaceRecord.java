@@ -19,6 +19,7 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.DateParser;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class RaceRecord {
     private static final Logger logger = Logger.getLogger(RaceRecord.class.getName());
@@ -129,7 +130,8 @@ public class RaceRecord {
     private Map<String, String> parseParams(URL paramURL) throws IOException {
         Map<String, String> result = new HashMap<String, String>();
         Pattern pattern = Pattern.compile("^([^:]*):(.*)$");
-        BufferedReader r = new BufferedReader(new InputStreamReader(paramURL.openStream()));
+        BufferedReader r = new BufferedReader(new InputStreamReader(
+                HttpUrlConnectionHelper.redirectConnection(paramURL).getInputStream()));
         String line;
         while ((line = r.readLine()) != null) {
             Matcher matcher = pattern.matcher(line);
