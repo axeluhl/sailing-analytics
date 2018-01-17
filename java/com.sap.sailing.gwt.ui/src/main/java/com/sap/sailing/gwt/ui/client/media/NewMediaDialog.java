@@ -6,6 +6,8 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -223,9 +225,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             mediaTrack.url = url;
             loadMediaDuration();
-            String simpleUrl = sliceBefore(mediaTrack.url, "?");
-            simpleUrl = sliceBefore(simpleUrl, "#");
-            String lastPathSegment = simpleUrl.substring(simpleUrl.lastIndexOf('/') + 1);
+            AnchorElement anchor = Document.get().createAnchorElement();
+            anchor.setHref(url);
+            //remove trailing / as well
+            String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
             int dotPos = lastPathSegment.lastIndexOf('.');
             if (dotPos >= 0) {
                 mediaTrack.title = lastPathSegment.substring(0, dotPos);
