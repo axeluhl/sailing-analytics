@@ -9,7 +9,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -70,20 +69,22 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private void doSlice() {
         if (visibleRange != null) {
-            sailingService.sliceRace(selectedRaceIdentifier, "Slice", visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Caught: " + caught.getMessage());
+            String slicedRaceName = Window.prompt("TODO: Race column name", "Slice");
+            if (slicedRaceName != null) {
+                sailingService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
                     
-                }
-
-                @Override
-                public void onSuccess(RegattaAndRaceIdentifier result) {
-                    // TODO: goto result?!?
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Caught: " + caught.getMessage());
+                    }
                     
-                }
-            });
+                    @Override
+                    public void onSuccess(RegattaAndRaceIdentifier result) {
+                        // TODO: goto result?!?
+                        
+                    }
+                });
+            }
         }
     }
     
