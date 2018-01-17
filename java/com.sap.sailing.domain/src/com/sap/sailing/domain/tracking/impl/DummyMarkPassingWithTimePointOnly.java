@@ -114,6 +114,11 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             public String getSearchTag() {
                 return null;
             }
+
+            @Override
+            public String getShortInfo() {
+                return getShortName();
+            }
         };
     }
 
