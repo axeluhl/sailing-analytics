@@ -88,7 +88,8 @@ public class ManeuverSpeedDetailsRetrievalProcessor
         double directionChangeForAnalysisSignum = Math.signum(directionChangeInDegreesForAnalysis);
         for (SpeedWithBearingStep bearingStep : maneuverBearingSteps) {
             currentDirectionChangeSumInDegrees += bearingStep.getCourseChangeInDegrees();
-            if (Math.signum(currentDirectionChangeSumInDegrees) != directionChangeForAnalysisSignum
+            if (previousRoundedTWA != -1
+                    && Math.signum(currentDirectionChangeSumInDegrees) != directionChangeForAnalysisSignum
                     || currentDirectionChangeSumInDegrees
                             * directionChangeForAnalysisSignum < currentMaxDirectionChangeSumInDegrees
                                     * directionChangeForAnalysisSignum) {
