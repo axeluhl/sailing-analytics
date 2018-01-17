@@ -65,6 +65,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -83,9 +84,11 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderRes
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesEventFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
@@ -7080,6 +7083,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 event.getAuthor(), raceLog.getCurrentPassId(), event.getCourseDesign(),
                                 event.getCourseDesignerMode()));
                     }
+                }
+                
+                @Override
+                public void visit(RaceLogFlagEvent event) {
+                    if (isLatestPassAndInSlicedTrackingInterval(event)) {
+                        raceLog.add(new RaceLogFlagEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), event.getUpperFlag(), event.getLowerFlag(),
+                                event.isDisplayed()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogCourseAreaChangedEvent event) {
+                    if (isLatestPassAndInSlicedTrackingInterval(event)) {
+                        raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), event.getCourseAreaId()));
+                    }
+                }
+                
+                private boolean isLatestPassAndInSlicedTrackingInterval(RaceLogEvent event) {
+                    if (event.getPassId() != raceLogOfRaceToSlice.getCurrentPassId()) {
+                        return false;
+                    }
+                    return timeRange.includes(event.getLogicalTimePoint());
                 }
                 // TODO do we need to copy more events?
             });
