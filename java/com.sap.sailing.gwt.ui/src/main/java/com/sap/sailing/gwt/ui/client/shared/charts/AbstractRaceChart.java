@@ -132,7 +132,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
      */
     protected abstract Button createSettingsButton();
     
-    protected void createExtraToolbarElements(FlowPanel panel) {        
+    protected void createExtraToolbarElements(FlowPanel panel) {
     }
     
     @Override

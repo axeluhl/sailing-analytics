@@ -69,7 +69,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
     
     private void doSlice() {
-        if (visibleRange != null) {            
+        if (visibleRange != null) {
             sailingService.sliceRace(selectedRaceIdentifier, "Slice", visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
 
                 @Override
@@ -90,7 +90,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     private void checkIfMaySliceSelectedRegattaAndRace(final ChartZoomChangedEvent e) {
         // TODO: we could cache result 
         visibleRange = null;
-        sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {           
+        sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 if (result == null) {
@@ -105,9 +105,9 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
             
             @Override
             public void onFailure(Throwable caught) {
-                splitButtonUi.setVisible(false);                
+                splitButtonUi.setVisible(false);
             }
-        });        
+        });
     }
     
     
@@ -118,7 +118,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
 
     @Override
-    protected void createExtraToolbarElements(FlowPanel panel) {       
+    protected void createExtraToolbarElements(FlowPanel panel) {
         panel.add(splitButtonUi);
     }
    
