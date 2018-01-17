@@ -223,7 +223,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             mediaTrack.url = url;
             loadMediaDuration();
-            String lastPathSegment = mediaTrack.url.substring(mediaTrack.url.lastIndexOf('/') + 1);
+            String simpleUrl = sliceBefore(mediaTrack.url, "?");
+            simpleUrl = sliceBefore(simpleUrl, "#");
+            String lastPathSegment = simpleUrl.substring(simpleUrl.lastIndexOf('/') + 1);
             int dotPos = lastPathSegment.lastIndexOf('.');
             if (dotPos >= 0) {
                 mediaTrack.title = lastPathSegment.substring(0, dotPos);
@@ -237,6 +239,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         remoteMp4WasStarted = false;
         remoteMp4WasFinished = false;
         refreshUI();
+    }
+
+    private String sliceBefore(String lastPathSegment, String slicer) {
+        int paramSegment = lastPathSegment.indexOf(slicer);
+        if (paramSegment > 0) {
+            return lastPathSegment.substring(0, paramSegment);
+        }
+        return lastPathSegment;
     }
 
     protected void setUiEnabled(boolean isEnabled) {
