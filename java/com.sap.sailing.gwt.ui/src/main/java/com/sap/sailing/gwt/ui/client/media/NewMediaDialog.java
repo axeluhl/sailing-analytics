@@ -224,6 +224,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             mediaTrack.url = url;
             loadMediaDuration();
             String lastPathSegment = mediaTrack.url.substring(mediaTrack.url.lastIndexOf('/') + 1);
+            int paramSegment = lastPathSegment.indexOf("?");
+            if(paramSegment>0){
+                lastPathSegment = lastPathSegment.substring(0, paramSegment);
+            }
+            int paramSegment2 = lastPathSegment.indexOf("?");
+            if(paramSegment2>0){
+                lastPathSegment = lastPathSegment.substring(0, paramSegment);
+            }
             int dotPos = lastPathSegment.lastIndexOf('.');
             if (dotPos >= 0) {
                 mediaTrack.title = lastPathSegment.substring(0, dotPos);
