@@ -383,13 +383,13 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
                     builder.setTitle(R.string.hello_call_error_title);
                     builder.setMessage(R.string.hello_call_error_message);
-                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.hello_call_error_positive, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
                         }
                     });
-                    builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(R.string.hello_call_error_negative, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             getActivity().finish();

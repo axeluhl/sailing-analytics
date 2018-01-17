@@ -529,7 +529,9 @@
     <string name="publish_clicked">Ergebnisliste veröffentlicht</string>
     <string name="competitor_count">%d</string>
 
-    <string name="hello_call_error_title">Verbindungsfehler</string>
-    <string name="hello_call_error_message">Es trat ein Verbindungsfehler auf. Sie sind vielleicht Offline. Wiederholen?</string>
+    <string name="hello_call_error_title">Keine Verbindung zu SAP</string>
+    <string name="hello_call_error_message">Es konnte keine Verbindung mit SAP Sailing hergestellt werden.\nPrüfen Sie bitte, ob Sie eine stabile Mobilfunkverbindung haben.\nWollen Sie es erneut versuchen?</string>
+    <string name="hello_call_error_positive">Wiederholen</string>
+    <string name="hello_call_error_negative">Beenden</string>
 
 </resources>
