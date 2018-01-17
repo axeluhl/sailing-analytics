@@ -74,15 +74,21 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesEventFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -7028,6 +7034,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
         
         final TimeRange timeRange = new TimeRangeImpl(sliceFrom, sliceTo);
+        final StartTimeFinderResult startTimeFinderResult = new StartTimeFinder(getService(), raceLogOfRaceToSlice).analyze();
+        final TimePoint startTime = startTimeFinderResult.getStartTime();
+        if (startTime != null && timeRange.includes(startTime)) {
+            // we do not support depdendent start times here
+            raceLog.add(new RaceLogStartTimeEventImpl(startTimeFinderResult.getStartTime(), author,
+                    raceLog.getCurrentPassId(), startTimeFinderResult.getStartTime()));
+            final TimePoint finishingTime = new FinishingTimeFinder(raceLog).analyze();
+            if (finishingTime != null && timeRange.includes(finishingTime)) {
+                raceLog.add(new RaceLogRaceStatusEventImpl(finishingTime, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING));
+                final TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+                if (finishedTime != null && timeRange.includes(finishedTime)) {
+                    raceLog.add(new RaceLogRaceStatusEventImpl(finishedTime, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED));
+                }
+            }
+        }
+        
         for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
             raceLogEvent.accept(new BaseRaceLogEventVisitor() {
                 @Override
