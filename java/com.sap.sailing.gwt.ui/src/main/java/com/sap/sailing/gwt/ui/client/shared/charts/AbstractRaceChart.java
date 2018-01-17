@@ -13,7 +13,6 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -117,7 +116,6 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         settingsButton = createSettingsButton();
         settingsButton.setStyleName(chartsCss.settingsButtonStyle());
         settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
-        GWT.debugger();
         add(settingsButton);
         toolbar.addStyleName(chartsCss.toolbar());
             add(toolbar);
