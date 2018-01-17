@@ -21,6 +21,7 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
@@ -39,7 +40,11 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     
     private transient TimeRangeCache<Distance> foilingDistanceCache;
     
-    private transient TimeRangeCache<Distance> averageRideHeightCache;
+    /**
+     * Caches the sum of the ride height of all fixes in the interval, paired with the number of fixes
+     * that constituted the basis for the ride height sum.
+     */
+    private transient TimeRangeCache<Pair<Distance, Long>> averageRideHeightCache;
     
     /**
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
@@ -112,7 +117,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
     }
 
-    private TimeRangeCache<Distance> createAverageRideHeightCache(ItemType trackedItem) {
+    private TimeRangeCache<Pair<Distance, Long>> createAverageRideHeightCache(ItemType trackedItem) {
         return createTimeRangeCache(trackedItem, "averageRideHeightCache");
     }
 
@@ -177,13 +182,15 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Distance getAverageRideHeight(TimePoint from, TimePoint to) {
-        return getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, averageRideHeightCache,
-                /* valueCalculator */ new Track.TimeRangeValueCalculator<Distance>() {
+        final Pair<Distance, Long> nullElement = new Pair<>(Distance.NULL, 0l);
+        Pair<Distance, Long> rideHeightSumAndCount = getValueSum(from, to, nullElement,
+                (a, b)->new Pair<>(a.getA().add(b.getA()), a.getB()+b.getB()),
+                averageRideHeightCache,
+                /* valueCalculator */ new Track.TimeRangeValueCalculator<Pair<Distance, Long>>() {
             @Override
-            public Distance calculate(TimePoint from, TimePoint to) {
-                Distance result;
+            public Pair<Distance, Long> calculate(TimePoint from, TimePoint to) {
                 Distance sum = Distance.NULL;
-                int count = 0;
+                long count = 0;
                 for (final BravoFix fix : getFixes(from, true, to, true)) {
                     final Distance rideHeight = fix.getRideHeight();
                     if (rideHeight != null) {
@@ -191,14 +198,10 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                         count++;
                     }
                 }
-                if (count > 0) {
-                    result = sum.scale(1./count);
-                } else {
-                    result = null;
-                }
-                return result;
+                return new Pair<>(sum, count);
             }
         });
+        return rideHeightSumAndCount.getB() == 0l ? null : rideHeightSumAndCount.getA().scale(1./(double) rideHeightSumAndCount.getB());
     }
     
     private boolean isFoiling(BravoFix fix) {

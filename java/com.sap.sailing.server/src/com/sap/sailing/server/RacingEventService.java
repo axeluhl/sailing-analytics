@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -96,6 +97,8 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
 import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.pairinglist.PairingList;
+import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -173,27 +176,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param willBeRemoved TODO
      */
     void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
-
-    /**
-     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}
-     * from this service. If it was the last {@link RaceDefinition} in its {@link Regatta} and the regatta
-     * {@link Regatta#isPersistent() is not stored persistently}, the <code>regatta</code> is removed as well and will no
-     * longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for <code>race</code>.
-     * <p>
-     * 
-     * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
-     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop(boolean) stopped}.
-     * 
-     * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
-     * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
-     * {@link RaceColumn#getTrackedRace(Fleet)}.
-     * 
-     * @param regatta
-     *            the regatta from which to remove the race
-     * @param race
-     *            the race to remove
-     */
-    void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
 
     /**
      * @param port
@@ -814,4 +796,25 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * anniversary races only.
      */
     AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
+    
+    /**
+     * Returns a calculated {@link PairingListTemplate}, specified by flights, groups and competitors.
+     *
+     * @param leaderboardName the name of the leaderboard
+     * @param competitorsCount count of competitor
+     * @param flightMultiplier specifies how often the flights will be cloned
+     * @return calculated {@link PairingListTemplate}
+     */
+    PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount,
+            final int competitorsCount, final int flightMultiplier);
+    
+    /**
+     * Matches the competitors of a leaderboard to the {@link PairingList}
+     * 
+     * @param pairingListTemplate the returned {@link PairingList} is based upon it 
+     * @param leaderboardName name of the leaderboard
+     * @return {@link PairingList} that contains competitor objects matched to {@link RaceColumn}s and {@link Fleet}s
+     */
+    PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
+            final String leaderboardName, final Iterable<RaceColumn> selectedFlights);
 }

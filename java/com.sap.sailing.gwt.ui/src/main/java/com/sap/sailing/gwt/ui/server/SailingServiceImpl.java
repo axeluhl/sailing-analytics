@@ -57,7 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -85,6 +84,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
@@ -114,6 +114,7 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.PairingListLeaderboardAdapter;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -194,11 +195,14 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PairingListDTO;
+import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
@@ -267,6 +271,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -492,6 +497,9 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.pairinglist.PairingList;
+import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
@@ -1770,7 +1778,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 competitorDTOsMap.put(competitorDTO.getIdAsString(), competitorDTO);
             }
             for (Competitor competitor : race.getCompetitors()) {
-                Boat boatOfCompetitor = race.getBoatOfCompetitorById(competitor.getId());
+                Boat boatOfCompetitor = race.getBoatOfCompetitor(competitor);
                 if (boatOfCompetitor != null) {
                     BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(),
                             boatOfCompetitor.getColor());
@@ -4115,20 +4123,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
-        Regatta regatta = getService().getRegatta(regattaIdentifier);
-        if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
-        }
-        RaceColumnInSeriesDTO result = null;
-        RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
-        if(raceColumnInSeries != null) {
-            result = convertToRaceColumnInSeriesDTO(raceColumnInSeries);
-        }
-        return result;
-    }
-
-    @Override
     public void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
@@ -4137,15 +4131,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for(String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
-    }
-
-    @Override
-    public void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
-        Regatta regatta = getService().getRegatta(regattaIdentifier);
-        if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
-        }
-        getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
@@ -5418,14 +5403,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
+        denoteForRaceLogTracking(leaderboardName, /* race name prefix */ null);
+    }
+    
+    @Override
+    public void denoteForRaceLogTracking(String leaderboardName, String prefix) throws Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
-        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard);
+        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard, prefix);
     }
     
     /**
-     * @param triple leaderboard and racecolumn and fleet names
-     * @return
-     * @throws NotFoundException 
+     * @param triple
+     *            leaderboard and racecolumn and fleet names
      */
     private RaceLog getRaceLog(com.sap.sse.common.Util.Triple<String, String, String> triple) throws NotFoundException {
         return getRaceLog(triple.getA(), triple.getB(), triple.getC());
@@ -6758,7 +6747,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return availableDetailsTypes;
     }
-    
+
     @Override
     public List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations() {
         final List<ExpeditionDeviceConfiguration> result = new ArrayList<>();
@@ -6785,5 +6774,176 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (expeditionConnector != null) {
             expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
         }
+    }
+    
+    @Override
+    public PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount,
+            final int competitorCount, final int flightMultiplier) {
+        PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
+                flightMultiplier);
+        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, 
+                template.getPairingListTemplate(), template.getQuality());
+    }
+    
+    @Override
+    public PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
+            final Iterable<String> selectedRaceColumnNames, PairingListTemplateDTO templateDTO) 
+            throws NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
+        for (String raceColumnName : selectedRaceColumnNames) {
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                if (raceColumnName.equalsIgnoreCase(raceColumn.getName())) {
+                    selectedRaces.add(raceColumn);
+                }
+            }
+        }
+        PairingListTemplate pairingListTemplate = new PairingListTemplateImpl(templateDTO.getPairingListTemplate(),
+                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
+        PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = getService()
+                .getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
+        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
+        for (RaceColumn raceColumn : selectedRaces) {
+            List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
+            for (Fleet fleet : raceColumn.getFleets()) {
+                List<Pair<CompetitorDTO, BoatDTO>> fleetList = new ArrayList<>();
+                for (Pair<Competitor, Boat> competitorAndBoatPair : pairingList.getCompetitors(raceColumn, fleet)) {
+                    if (competitorAndBoatPair.getA() != null) {
+                        fleetList.add(new Pair<CompetitorDTO, BoatDTO>(
+                                baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
+                                new BoatDTO(competitorAndBoatPair.getB().getName(),
+                                        competitorAndBoatPair.getB().getSailID(),
+                                        competitorAndBoatPair.getB().getColor())));
+                    } else {
+                        fleetList.add(new Pair<CompetitorDTO, BoatDTO>(new CompetitorDTOImpl(),
+                                new BoatDTO(competitorAndBoatPair.getB().getName(),
+                                        competitorAndBoatPair.getB().getSailID(),
+                                        competitorAndBoatPair.getB().getColor())));
+                    }
+                }
+                raceColumnList.add(fleetList);
+            }
+            result.add(raceColumnList);
+        }
+        return new PairingListDTO(result, Util.asList(selectedRaceColumnNames));
+    }
+    
+    @Override
+    public PairingListDTO getPairingListFromRaceLogs(final String leaderboardName) throws NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        
+        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
+        List<String> raceColumnNames = new ArrayList<>();
+        PairingListLeaderboardAdapter adapter = new PairingListLeaderboardAdapter();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (!raceColumn.isMedalRace()) {
+                List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    List<Pair<CompetitorDTO, BoatDTO>> fleetList = new ArrayList<>();
+                    for (Pair<Competitor, Boat> competitorAndBoatPair : adapter.getCompetitors(raceColumn, fleet)) {
+                        fleetList.add(new Pair<CompetitorDTO, BoatDTO>(baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
+                                new BoatDTO(competitorAndBoatPair.getB().getName(), competitorAndBoatPair.getB().getSailID(), 
+                                        competitorAndBoatPair.getB().getColor())));
+                    }
+                    if (fleetList.size() > 0) {
+                        raceColumnList.add(fleetList);
+                    }
+                }
+                if (raceColumnList.size() > 0) {
+                    result.add(raceColumnList);
+                    
+                    if (!raceColumnNames.contains(raceColumn.getName())) {
+                        raceColumnNames.add(raceColumn.getName());
+                    }
+                }
+            }
+        }
+        
+        return new PairingListDTO(result, raceColumnNames);
+    }
+    
+    @Override
+    public void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
+            final Iterable<String> selectedFlightNames, final PairingListDTO pairingListDTO)
+            throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        int flightCount = 0;
+        int groupCount = 0;
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (Util.contains(selectedFlightNames, raceColumn.getName())) {
+                groupCount = 0;
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
+                    Set<CompetitorDTO> competitors = new HashSet<>();
+                    List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
+                            .get(flightCount).get(groupCount);
+                    for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
+                        if (competitorAndBoatPair.getA() != null && competitorAndBoatPair.getA().getName() != null) {
+                            competitors.add(competitorAndBoatPair.getA());
+                        }
+                    }
+                    // TODO set boat and competitors in race logs (bug4403)
+                    // TODO add Javadoc to setCompetitorRegistrationsInRacelog
+                    this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
+                            fleet.getName(), competitors);
+                    groupCount++;
+                }
+                flightCount++;
+            } else {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
+                            fleet.getName(), new HashSet<CompetitorDTO>());
+                }
+            }
+        }
+        if (leaderboard instanceof LeaderboardThatHasRegattaLike && flightMultiplier > 1) {
+            final IsRegattaLike regattaLike = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike();
+            logger.info("Updating regatta "+regattaLike.getRegattaLikeIdentifier().getName()+
+                    ", setting flag that fleets can run in parallel because a pairing list with flight multiplier "+
+                    flightMultiplier+" has been used.");
+            regattaLike.setFleetsCanRunInParallelToTrue();
+        }
+    }
+    
+    public List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName,List<String> raceColumnNames) throws NotFoundException{
+        Leaderboard leaderboard=this.getLeaderboardByName(leaderboardName);
+        List<String> result=new ArrayList<>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if(raceColumn.hasTrackedRaces()){
+                if (raceColumnNames.contains(raceColumn.getName())) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        if(raceColumn.getTrackedRace(fleet) != null && raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null){
+                            result.add(raceColumn.getTrackedRace(fleet).getRaceIdentifier().getRaceName());
+                        }
+                    }
+                }
+            }else{
+                break;
+            }
+        }
+        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
+            return result;
+        }
+        result.clear();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
+                for(Fleet fleet: raceColumn.getFleets()){
+                    NavigableSet<RaceLogEvent> set=raceColumn.getRaceLog(fleet).getUnrevokedEvents();
+                    for (RaceLogEvent raceLogEvent : set) {
+                        if(raceLogEvent instanceof RaceLogDenoteForTrackingEvent){
+                            RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
+                            result.add(denoteEvent.getRaceName());
+                            break;
+                        }
+                    }
+                }
+        }
+        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
+            return result;
+        }
+        result.clear();
+        for(int count=1;count<=raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets());count++){
+            result.add("Race "+count);
+        }
+        return result;
     }
 }
