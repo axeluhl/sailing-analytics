@@ -14,7 +14,9 @@ import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
+import com.sap.sailing.datamining.data.HasManeuverBoundariesContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
+import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
@@ -23,6 +25,8 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.data.HasWindFixContext;
 import com.sap.sailing.datamining.data.HasWindTrackContext;
+import com.sap.sailing.datamining.impl.components.aggregators.ManeuverSpeedDetailsStatisticAvgAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ManeuverSpeedDetailsStatisticMedianAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingAverageDegreesAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMaxAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMinAggregationProcessor;
@@ -47,12 +51,12 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries {
-    
+
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Sailing_StringMessages";
     private static final SailingClusterGroups clusterGroups = new SailingClusterGroups();
-    
+
     private static Activator INSTANCE;
-    
+
     private BundleContext context = null;
 
     private final ResourceBundleStringMessages sailingServerStringMessages;
@@ -60,7 +64,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
     private final SailingPredefinedQueries predefinedQueries;
     private Collection<DataSourceProvider<?>> dataSourceProviders;
     private boolean dataSourceProvidersHaveBeenInitialized;
-    
+
     public Activator() {
         sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClassLoader(),
                 StandardCharsets.UTF_8.name());
@@ -82,7 +86,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         INSTANCE = null;
         super.stop(context);
     }
-    
+
     @Override
     public ResourceBundleStringMessages getStringMessages() {
         return sailingServerStringMessages;
@@ -102,6 +106,8 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasBravoFixTrackContext.class);
         internalClasses.add(HasFoilingSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
+        internalClasses.add(HasManeuverSpeedDetailsContext.class);
+        internalClasses.add(HasManeuverBoundariesContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
         internalClasses.add(HasLeaderboardGroupContext.class);
@@ -113,7 +119,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions.get();
     }
-    
+
     @Override
     public Iterable<DataSourceProvider<?>> getDataSourceProviders() {
         if (!dataSourceProvidersHaveBeenInitialized) {
@@ -122,7 +128,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         }
         return dataSourceProviders;
     }
-    
+
     @Override
     public Iterable<AggregationProcessorDefinition<?, ?>> getAggregationProcessorDefinitions() {
         HashSet<AggregationProcessorDefinition<?, ?>> aggregators = new HashSet<>();
@@ -139,23 +145,25 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         aggregators.add(ParallelBearingAverageDegreesAggregationProcessor.getDefinition());
         aggregators.add(ParallelBearingMaxAggregationProcessor.getDefinition());
         aggregators.add(ParallelBearingMinAggregationProcessor.getDefinition());
+        aggregators.add(ManeuverSpeedDetailsStatisticAvgAggregationProcessor.getDefinition());
+        aggregators.add(ManeuverSpeedDetailsStatisticMedianAggregationProcessor.getDefinition());
         return aggregators;
     }
-    
+
     @Override
     public Map<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> getPredefinedQueries() {
         return predefinedQueries.getQueries();
     }
-    
+
     private void initializeDataSourceProviders() {
         dataSourceProviders = new HashSet<>();
         dataSourceProviders.add(new RacingEventServiceProvider(context));
     }
-    
+
     public static SailingClusterGroups getClusterGroups() {
         return clusterGroups;
     }
-    
+
     public static Activator getDefault() {
         if (INSTANCE == null) {
             INSTANCE = new Activator(); // probably non-OSGi case, as in test execution

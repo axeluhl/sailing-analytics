@@ -86,8 +86,12 @@ import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSer
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveBoundariesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverWindJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuversJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuversWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPassingsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -1017,6 +1021,51 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorJsonSerializer(),
                         new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
+                JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
+                String json = jsonMarkPassings.toJSONString();
+                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        }
+        return response;
+    }
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/maneuversWithFullEstimationData")
+    public Response getManeuversWithFullEstimationData(@PathParam("regattaname") String regattaName,
+            @PathParam("racename") String raceName) {
+        return getManeuversWithEstimationData(regattaName, raceName, true);
+    }
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/maneuversWithEstimationData")
+    public Response getManeuversWithEstimationData(@PathParam("regattaname") String regattaName,
+            @PathParam("racename") String raceName) {
+        return getManeuversWithEstimationData(regattaName, raceName, false);
+    }
+    
+    private Response getManeuversWithEstimationData(String regattaName,
+            String raceName, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            } else {
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                ManeuversWithEstimationDataJsonSerializer serializer = new ManeuversWithEstimationDataJsonSerializer(
+                        new BoatClassJsonSerializer(),
+                        new ManeuverWithEstimationDataJsonSerializer(new GPSFixJsonSerializer(),
+                                new ManeuverCurveBoundariesJsonSerializer(),
+                                new ManeuverWindJsonSerializer(), avgSpeedAndCogCalculationBeforeAndAfterManeuver), avgSpeedAndCogCalculationBeforeAndAfterManeuver);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
