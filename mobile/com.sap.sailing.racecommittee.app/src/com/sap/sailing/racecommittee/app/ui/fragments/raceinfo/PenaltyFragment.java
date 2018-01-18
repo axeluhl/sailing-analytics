@@ -358,7 +358,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now(), results);
         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
         initLocalData();
-        loadCompetitors();
+        setPublishButton();
     }
 
     private String[] getAllMaxPointsReasons() {
