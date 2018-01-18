@@ -144,4 +144,50 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         return highestSpeedRatio - lowestSpeedRatio;
     }
 
+    @Override
+    public Double getAbsTwaAtLowestRatioToEnteringSpeedStatistic() {
+        double[] speedRatioPerTWA = getRatioToEnteringSpeedStatistic().getManeuverValuePerTWA();
+        double lowestSpeedRatio = 1;
+        double twaAtLowestSpeedRatio = -1;
+        for (int encodedTwa = 0; encodedTwa < 360; encodedTwa++) {
+            double speedRatio = speedRatioPerTWA[encodedTwa];
+            if (speedRatio != 0) {
+                if (speedRatio < lowestSpeedRatio) {
+                    lowestSpeedRatio = speedRatio;
+                    twaAtLowestSpeedRatio = encodedTwa;
+                }
+            }
+        }
+        if (twaAtLowestSpeedRatio == -1) {
+            return null;
+        }
+        if (twaAtLowestSpeedRatio > 180) {
+            twaAtLowestSpeedRatio = 360 - twaAtLowestSpeedRatio;
+        }
+        return twaAtLowestSpeedRatio;
+    }
+
+    @Override
+    public Double getAbsTwaAtHighestRatioToEnteringSpeedStatistic() {
+        double[] speedRatioPerTWA = getRatioToEnteringSpeedStatistic().getManeuverValuePerTWA();
+        double highestSpeedRatio = 1;
+        double twaAtHighestSpeedRatio = -1;
+        for (int encodedTwa = 0; encodedTwa < 360; encodedTwa++) {
+            double speedRatio = speedRatioPerTWA[encodedTwa];
+            if (speedRatio != 0) {
+                if (speedRatio > highestSpeedRatio) {
+                    highestSpeedRatio = speedRatio;
+                    twaAtHighestSpeedRatio = encodedTwa;
+                }
+            }
+        }
+        if (twaAtHighestSpeedRatio == -1) {
+            return null;
+        }
+        if (twaAtHighestSpeedRatio > 180) {
+            twaAtHighestSpeedRatio = 360 - twaAtHighestSpeedRatio;
+        }
+        return twaAtHighestSpeedRatio;
+    }
+
 }
