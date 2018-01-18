@@ -788,7 +788,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             PenaltyFragment fragment = mReference.get();
             if (fragment != null) {
                 fragment.initConfirmedData();
-                fragment.mergeData(state.getConfirmedFinishPositioningList(), false);
+                fragment.mergeData(state.getConfirmedFinishPositioningList(), true);
                 fragment.setPublishButton();
             }
         }
