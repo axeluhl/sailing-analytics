@@ -215,6 +215,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private void setReason(String reason) {
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
             if (item.isChecked()) {
+                item.setMergeState(MergeState.OK);
                 item.setMaxPointsReason(MaxPointsReason.valueOf(reason));
                 item.setChecked(false);
                 item.setDirty(true);
