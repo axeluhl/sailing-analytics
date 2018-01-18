@@ -324,6 +324,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+         
+   <plugin
+         id="com.sap.sailing.windestimation"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="com.sap.sailing.polars.datamining"
