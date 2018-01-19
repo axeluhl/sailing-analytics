@@ -52,6 +52,7 @@ import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -271,7 +272,10 @@ public class TrackingListFragment extends BaseFragment
                 mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now(), getCompetitorResultsDiff(mConfirmedData));
+                        TimePoint now = MillisecondsTimePoint.now();
+                        CompetitorResults result = getCompetitorResultsDiff(mConfirmedData);
+                        getRaceState().setFinishPositioningListChanged(now, result);
+                        getRaceState().setFinishPositioningConfirmed(now, result);
                         initLocalData();
                         Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -1076,7 +1080,16 @@ public class TrackingListFragment extends BaseFragment
                     item = updateChangedItem(changedCompetitor, item, newItem);
                 }
             } else { // unknown result, so it will be added
-                mFinishedData.add(new CompetitorResultWithIdImpl(mFinishedData.size(), result));
+                if (result.getOneBasedRank() != 0 || result.getMaxPointsReason() != MaxPointsReason.NONE) {
+                    for (Competitor competitor : mCompetitorData) {
+                        if (competitor.getId().equals(result.getCompetitorId())) {
+                            removeCompetitorFromList(competitor);
+                            break;
+                        }
+                    }
+                    mFinishedData.add(new CompetitorResultWithIdImpl(mFinishedData.size(), result));
+                    Collections.sort(mFinishedData, new DefaultCompetitorResultComparator(/* lowPoint TODO where to get this from? */ true));
+                }
             }
         }
         setPublishButton();
