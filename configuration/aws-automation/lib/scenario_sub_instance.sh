@@ -58,13 +58,22 @@ function sub_instance_execute() {
 	local_echo "Creating directory $server_dir ..."
 	execute_remote mkdir $server_dir
 
+	local_echo "Getting next unused SERVER_PORT..."
+	local server_port=$(find_first_unused_port "SERVER_PORT" $default_server_port)
+
+	local_echo "Getting next unused TELNET_PORT..."
+	local telnet_port=$(find_first_unused_port "TELNET_PORT" $default_telnet_port)
+
+	local_echo "Getting next unused EXPEDITION_PORT..."
+	local expedition_port=$(find_first_unused_port "EXPEDITION_PORT" $default_expedition_port)
+
 	# copy refreshInstance.sh from /servers/server to sub instance directory
 	local_echo "Copying $refreshInstance_file to $server_dir..."
 	execute_remote cp $refreshInstance_file $server_dir
 
 	# Execute refreshInstance.sh
 	local_echo "Executing refreshInstance.sh with build version $build_version ..."
-	execute_remote "export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version > /dev/null 2>&1;"
+	execute_remote "set -o pipefail;export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version > /dev/null 2>&1;"
 
 	# uncommenting lines containing pattern
 	local_echo "Commenting in $comment_in_line_in_env_with_pattern inside $server_env_file..."
@@ -74,15 +83,6 @@ function sub_instance_execute() {
 	local_echo "Commenting out $comment_out_line_in_env_with_pattern inside $server_env_file..."
 	execute_remote "sed -i '/$comment_out_line_in_env_with_pattern/s/^/#/g' $server_env_file"
 
-	local_echo "Getting next unused SERVER_PORT..."
-	local server_port=$(find_first_unused_number_for_variable "SERVER_PORT" $default_server_port)
-
-	local_echo "Getting next unused TELNET_PORT..."
-	local telnet_port=$(find_first_unused_number_for_variable "TELNET_PORT" $default_telnet_port)
-
-	local_echo "Getting next unused EXPEDITION_PORT..."
-	local expedition_port=$(find_first_unused_number_for_variable "EXPEDITION_PORT" $default_expedition_port)
-
 	local env_patch=$(build_configuration "# PATCH $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
 	"SERVER_PORT=$server_port" "EXPEDITION_PORT=$expedition_port" "MONGODB_NAME=$(alphanumeric $instance_name)" "MONGODB_HOST=$mongodb_host" \
 	"MONGODB_PORT=$mongodb_port" "DEPLOY_TO=$instance_short_name")
@@ -90,7 +90,7 @@ function sub_instance_execute() {
 	local_echo "Configuring $server_env_file..."
 	execute_remote "echo -e \"$env_patch\" >> $server_env_file"
 
-	local_echo "Checking for existance of README file..."
+	local_echo "Creating README file if it does not exist already..."
 	execute_remote touch $readme_file
 
 	local_echo "Appending patch to README file..."
@@ -98,7 +98,7 @@ function sub_instance_execute() {
 
 	# start server and redirect both stderr and stdout to /dev/null (&>/dev/null). Send command to background by &. Do this to avoid blocking.
 	local_echo "Starting server..."
-	execute_remote -f "sh -c \"cd $server_dir; nohup ./start > /dev/null 2>&1 &\""
+	execute_remote -f "set -o pipefail;sh -c \"cd $server_dir; nohup ./start > /dev/null 2>&1 &\""
 
 	header "Event and user creation"
 
@@ -137,21 +137,23 @@ function sub_instance_execute() {
 # For a given variable name, find first number that is not already used within all env.sh files inside /home/sailing/servers.
 # If no number is found, return $2
 # @param $1  variable name (e.g. SERVER_PORT)
-# @param $2  default number (e.g. 8888)
+# @param $2  default number (e.g. 8880)
 # -----------------------------------------------------------
-function find_first_unused_number_for_variable(){
-	numbers=($(find_all_distinct_values_of_variable_inside_env_files "$1"))
-	if [ ${#numbers[@]} -eq 0 ]; then
-		echo "$2"
+function find_first_unused_port(){
+	last_port=($(get_last_used_port "$1"))
+	if [ $? -ne 0 ]; then
+		port_to_use=$2
 	else
-		find_first_missing_number_in_array "${numbers[@]}"
+		port_to_use=$(($last_port+1))
 	fi
+	success $port_to_use
+	echo $port_to_use
 }
 
 function execute_remote(){
 	ssh_wrapper $ssh_user@$super_instance "$@"
 }
 
-function find_all_distinct_values_of_variable_inside_env_files(){
-	execute_remote "for i in /home/sailing/servers/*/env.sh; do cat \$i | grep '^ *$1=' | tr -d '$1='; done | sort -n | tail -1"
+function get_last_used_port(){
+	ssh_prewrapper $ssh_user@$super_instance "set -o pipefail; for i in /home/sailing/servers/*/env.sh; do cat \$i | grep '^ *$1=' | tr -d '$1='; done | sort -n | tail -1"
 }
