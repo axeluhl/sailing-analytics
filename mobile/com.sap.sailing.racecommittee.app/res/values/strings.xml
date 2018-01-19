@@ -566,4 +566,6 @@
     <string name="hello_call_error_positive">Retry</string>
     <string name="hello_call_error_negative">Exit</string>
 
+    <string name="competitor_merge_error_message">This competitor was changed from another device and you have changed the same data. Please be sure, that this data is correct now.</string>
+
 </resources>

@@ -537,4 +537,6 @@
     <string name="hello_call_error_positive">Wiederholen</string>
     <string name="hello_call_error_negative">Beenden</string>
 
+    <string name="competitor_merge_error_message">Dieser Teilnehmer wurde an einem anderen Gerät verändert und hat überschneidende Änderungen. Bitte stellen Sie sicher, dass die Daten korrekt sind.</string>
+
 </resources>

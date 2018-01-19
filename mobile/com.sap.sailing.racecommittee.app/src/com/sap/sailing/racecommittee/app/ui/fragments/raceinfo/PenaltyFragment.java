@@ -679,7 +679,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition() +
                 /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
-            (item.getOneBasedRank() == 0 ? 1 : 0));
+            (item.getOneBasedRank() == 0 ? 1 : 0), competitor.getMergeState() == MergeState.ERROR);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
