@@ -6,7 +6,7 @@ import com.sap.sailing.windestimation.ManeuverBasedWindDirectionEstimator;
 public class CompetitorManeuverBasedWindDirectionEstimator implements ManeuverBasedWindDirectionEstimator {
 
     @Override
-    public Iterable<WindDirectionCandidatesForTimePoint> computeWindDirectionCandidates(Iterable<Maneuver> competitorManeuvers) {
+    public Iterable<WindDirectionCandidatesForManeuver> computeWindDirectionCandidates(Iterable<Maneuver> competitorManeuvers) {
         return null;
     }
 

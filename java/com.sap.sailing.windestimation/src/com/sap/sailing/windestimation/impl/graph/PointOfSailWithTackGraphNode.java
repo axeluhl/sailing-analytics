@@ -1,11 +1,11 @@
 package com.sap.sailing.windestimation.impl.graph;
 
-public class PointOfSailAfterManeuverGraphNode {
+public class PointOfSailWithTackGraphNode {
 
     private final double lowestSpeedPointRefersUpwind;
     private final double lowestSpeedPointRefersDownwind;
 
-    public PointOfSailAfterManeuverGraphNode(double lowestSpeedPointRefersUpwind,
+    public PointOfSailWithTackGraphNode(double lowestSpeedPointRefersUpwind,
             double lowestSpeedPointRefersDownwind) {
         this.lowestSpeedPointRefersUpwind = lowestSpeedPointRefersUpwind;
         this.lowestSpeedPointRefersDownwind = lowestSpeedPointRefersDownwind;
