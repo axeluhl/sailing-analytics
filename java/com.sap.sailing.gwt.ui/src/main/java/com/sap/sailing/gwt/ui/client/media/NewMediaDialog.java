@@ -142,13 +142,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     native void addLoadMetadataHandler(MediaElement mediaElement) /*-{
-		var that = this;
-		mediaElement
-				.addEventListener(
-						'loadedmetadata',
-						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
-						});
+        var that = this;
+        mediaElement.addEventListener('loadedmetadata',
+            function() {
+                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
+            });
     }-*/;
 
     public void loadedmetadata(MediaElement mediaElement) {
@@ -272,13 +270,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     private native void registerNativeMethods() /*-{
-		var that = this;
-		window.youtubeMetadataCallback = function(metadata) {
-			var title = metadata.entry.media$group.media$title.$t;
-			var duration = metadata.entry.media$group.yt$duration.seconds;
-			var description = metadata.entry.media$group.media$description.$t;
-			that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
-		}
+        var that = this;
+        window.youtubeMetadataCallback = function(metadata) {
+            var title = metadata.entry.media$group.media$title.$t;
+            var duration = metadata.entry.media$group.yt$duration.seconds;
+            var description = metadata.entry.media$group.media$description.$t;
+            that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
+        }
     }-*/;
 
     /**
@@ -287,28 +285,24 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
      * @param youtubeId
      */
     public native void loadYoutubeMetadata(String youtubeId) /*-{
-		var that = this;
+        var that = this;
+        //Create temporary script element.
+        window.youtubeMetadataCallbackScript = document.createElement("script");
+        window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
+                + youtubeId
+                + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
+        document.body.appendChild(window.youtubeMetadataCallbackScript);
 
-		//Create temporary script element.
-		window.youtubeMetadataCallbackScript = document.createElement("script");
-		window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
-				+ youtubeId
-				+ "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
-		document.body.appendChild(window.youtubeMetadataCallbackScript);
-
-		// Cancel meta data capturing after has 2-seconds timeout.
-		setTimeout(
-				function() {
-					//Remove temporary script element.
-					if (window != null && window.youtubeMetadataCallbackScript != null) {
-					    document.body
-							.removeChild(window.youtubeMetadataCallbackScript);
-							
-					    delete window.youtubeMetadataCallbackScript;
-					}
-					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
-				}, 2000);
-
+        // Cancel meta data capturing after has 2-seconds timeout.
+        setTimeout(
+            function() {
+                //Remove temporary script element.
+                if (window != null && window.youtubeMetadataCallbackScript != null) {
+                    document.body.removeChild(window.youtubeMetadataCallbackScript);
+                    delete window.youtubeMetadataCallbackScript;
+                }
+                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
+            }, 2000);
     }-*/;
 
     public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
@@ -384,6 +378,12 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         });
     }
 
+    /**
+     * For a given url that points to an mp4 video, attempts are made to parse the header, to determine the actual
+     * starttime of the video and to check for a 360° flag. The video will be analyzed by the backendserver, either via
+     * direct download, or proxied by the client, if a video is only available locally. If the video header cannot be
+     * read, default values are used instead.
+     */
     private void checkMetadata(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
         // check on server first
         mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
