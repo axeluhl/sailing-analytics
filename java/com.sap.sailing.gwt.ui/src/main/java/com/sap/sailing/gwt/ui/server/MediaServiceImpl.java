@@ -270,7 +270,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         if (mbox != null) {
             MovieHeaderBox mhb = mbox.getMovieHeaderBox();
             if (mhb != null) {
-                duration = new MillisecondsDurationImpl(mhb.getDuration());
+                duration = new MillisecondsDurationImpl(mhb.getDuration()*1000 / mhb.getTimescale());
             }
         }
         return duration;
