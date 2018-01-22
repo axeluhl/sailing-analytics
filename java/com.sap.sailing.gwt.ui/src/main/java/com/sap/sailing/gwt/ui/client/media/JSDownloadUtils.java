@@ -116,7 +116,7 @@ public class JSDownloadUtils {
                     if (xhr.response) {
                         var length = xhr.getResponseHeader("Content-Length");
                         var range = xhr.getResponseHeader("Content-Range");
-                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSSizeCallback::size(Ljava/lang/Double;)(length);                        
+                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSSizeCallback::size(Ljava/lang/Double;)(length);
                     } else {
                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSSizeCallback::size(Ljava/lang/Double;)(-1.0);
                     }

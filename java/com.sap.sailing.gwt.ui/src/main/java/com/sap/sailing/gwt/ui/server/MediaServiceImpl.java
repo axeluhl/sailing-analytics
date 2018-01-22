@@ -44,6 +44,8 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     // private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
+    private static final int METADATA_CONNECTION_TIMEOUT = 10000;
+
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
@@ -137,7 +139,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private long determineFileSize(URL input) throws IOException, ProtocolException {
         //we need the size for efficient downloading
         HttpURLConnection connection = (HttpURLConnection) input.openConnection();
-        connection.setConnectTimeout(10000);
+        connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
         connection.setRequestMethod("HEAD");
         long fileSize = -1;
         try (InputStream inStream = connection.getInputStream()) {
@@ -147,7 +149,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         }
         
         connection = (HttpURLConnection) input.openConnection();
-        connection.setConnectTimeout(10000);
+        connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Range", "bytes=0-100");
         try (InputStream inStream = connection.getInputStream()) {
@@ -173,7 +175,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private void downloadPartOfFile(URL input, byte[] store, String range) throws IOException, ProtocolException {
         HttpURLConnection connection;
         connection = (HttpURLConnection) input.openConnection();
-        connection.setConnectTimeout(10000);
+        connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Range", range);
         try (InputStream inStream = connection.getInputStream()) {
