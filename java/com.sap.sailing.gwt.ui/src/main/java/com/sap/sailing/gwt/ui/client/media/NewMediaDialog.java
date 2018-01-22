@@ -6,6 +6,8 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -157,7 +159,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             mediaTrack.duration = null;
         }
-        setUiEnabled(true);
         refreshUI();
     }
 
@@ -225,9 +226,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             loadYoutubeMetadata(youtubeId);
         } else {
             mediaTrack.url = url;
-            String simpleUrl = sliceBefore(mediaTrack.url, "?");
-            simpleUrl = sliceBefore(simpleUrl, "#");
-            String lastPathSegment = simpleUrl.substring(simpleUrl.lastIndexOf('/') + 1);
+            loadMediaDuration();
+            AnchorElement anchor = Document.get().createAnchorElement();
+            anchor.setHref(url);
+            //remove trailing / as well
+            String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
             int dotPos = lastPathSegment.lastIndexOf('.');
             if (dotPos >= 0) {
                 mediaTrack.title = lastPathSegment.substring(0, dotPos);
@@ -297,12 +300,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 		setTimeout(
 				function() {
 					//Remove temporary script element.
-					if (window != null
-							&& window.youtubeMetadataCallbackScript != null) {
-						document.body
-								.removeChild(window.youtubeMetadataCallbackScript);
-
-						delete window.youtubeMetadataCallbackScript;
+					if (window != null && window.youtubeMetadataCallbackScript != null) {
+					    document.body
+							.removeChild(window.youtubeMetadataCallbackScript);
+							
+					    delete window.youtubeMetadataCallbackScript;
 					}
 					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
 				}, 2000);
@@ -313,7 +315,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         setUiEnabled(true);
         mediaTrack.title = title;
         try {
-            long duration = (long) Math.round(1000 * Double.valueOf(durationInSeconds));
+            long duration = (long) Math.round(1000 * Double
+                    .valueOf(durationInSeconds));
             if (duration > 0) {
                 mediaTrack.duration = new MillisecondsDurationImpl(duration);
             } else {
@@ -334,7 +337,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
             if (mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama) {
-                if (remoteMp4WasFinished) {
+                if (!remoteMp4WasStarted) {
+                    processMp4(mediaTrack);
+                } else if (remoteMp4WasFinished) {
                     manualMimeTypeSelection(null, mediaTrack);
                 } else {
                     infoLabel.setWidget(new Label(stringMessages.processingMP4()));
@@ -343,7 +348,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             }
         }
-        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime;
+        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
         String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());
 
         startTimeBox.setText(startTimeText);
@@ -359,9 +364,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         this.setUiEnabled(false);
         remoteMp4WasStarted = true;
         remoteMp4WasFinished = false;
-        Label lbl = new Label(stringMessages.processingMP4() +"@"+stringMessages.localServer() );
-        infoLabel.setWidget(lbl);
-        checkMetadata(mediaTrack.url, lbl, new AsyncCallback<VideoMetadataDTO>() {
+        infoLabel.setWidget(new Label(stringMessages.processingMP4()));
+        mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
 
             @Override
             public void onSuccess(VideoMetadataDTO result) {
@@ -372,6 +376,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
             @Override
             public void onFailure(Throwable caught) {
+                setUiEnabled(true);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack);
                 loadMediaDuration();
