@@ -157,6 +157,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             mediaTrack.duration = null;
         }
+        setUiEnabled(true);
         refreshUI();
     }
 
@@ -224,7 +225,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             loadYoutubeMetadata(youtubeId);
         } else {
             mediaTrack.url = url;
-            loadMediaDuration();
             String simpleUrl = sliceBefore(mediaTrack.url, "?");
             simpleUrl = sliceBefore(simpleUrl, "#");
             String lastPathSegment = simpleUrl.substring(simpleUrl.lastIndexOf('/') + 1);
@@ -241,6 +241,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         remoteMp4WasStarted = false;
         remoteMp4WasFinished = false;
         refreshUI();
+        if (MimeType.mp4.equals(mediaTrack.mimeType)) {
+            processMp4(mediaTrack);
+        } else {
+            loadMediaDuration();
+        }
     }
 
     private String sliceBefore(String lastPathSegment, String slicer) {
@@ -329,9 +334,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
             if (mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama) {
-                if (!remoteMp4WasStarted) {
-                    processMp4(mediaTrack);
-                } else if (remoteMp4WasFinished) {
+                if (remoteMp4WasFinished) {
                     manualMimeTypeSelection(null, mediaTrack);
                 } else {
                     infoLabel.setWidget(new Label(stringMessages.processingMP4()));
@@ -369,9 +372,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
             @Override
             public void onFailure(Throwable caught) {
-                setUiEnabled(true);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack);
+                loadMediaDuration();
             }
         });
     }
@@ -382,14 +385,22 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
             @Override
             public void onSuccess(VideoMetadataDTO result) {
-                setUiEnabled(true);
                 remoteMp4WasFinished = true;
-                mp4MetadataResult(result);
+                if (result.isDownloadable()) {
+                    setUiEnabled(true);
+                    mp4MetadataResult(result);
+                } else {
+                    checkMetadataOnClient(url, lbl, asyncCallback);
+                }
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 // try on client instead
+                checkMetadataOnClient(url, lbl, asyncCallback);
+            }
+
+            private void checkMetadataOnClient(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
                 JSDownloadUtils.getData(url, new JSDownloadCallback() {
 
                     @Override
@@ -402,7 +413,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                     @Override
                     public void error(Object msg) {
                         asyncCallback
-                                .onSuccess(new VideoMetadataDTO(false, false, null, msg == null ? "" : msg.toString()));
+                                .onSuccess(new VideoMetadataDTO(false, null, false, null, msg == null ? "" : msg.toString()));
                     }
 
                     @Override
@@ -430,6 +441,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             Window.alert(stringMessages.couldNotDownload(mediaTrack.url));
             manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
+            mediaTrack.duration = result.getDuration();
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
             if(result.getRecordStartedTime() != null){
                 mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());

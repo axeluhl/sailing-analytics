@@ -37,6 +37,8 @@ import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
 
@@ -127,7 +129,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                 response = checkMetadataByFullFileDownload(input);
             }
         } catch (Exception e) {
-            response = new VideoMetadataDTO(false, false, null, e.getMessage());
+            response = new VideoMetadataDTO(false, null, false, null, e.getMessage());
         }
         return response;
     }
@@ -135,7 +137,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private long determineFileSize(URL input) throws IOException, ProtocolException {
         //we need the size for efficient downloading
         HttpURLConnection connection = (HttpURLConnection) input.openConnection();
-        connection.setConnectTimeout(5);
+        connection.setConnectTimeout(10000);
         connection.setRequestMethod("HEAD");
         long fileSize = -1;
         try (InputStream inStream = connection.getInputStream()) {
@@ -145,7 +147,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         }
         
         connection = (HttpURLConnection) input.openConnection();
-        connection.setConnectTimeout(5);
+        connection.setConnectTimeout(10000);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Range", "bytes=0-100");
         try (InputStream inStream = connection.getInputStream()) {
@@ -171,7 +173,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private void downloadPartOfFile(URL input, byte[] store, String range) throws IOException, ProtocolException {
         HttpURLConnection connection;
         connection = (HttpURLConnection) input.openConnection();
-        connection.setConnectTimeout(5);
+        connection.setConnectTimeout(10000);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Range", range);
         try (InputStream inStream = connection.getInputStream()) {
@@ -184,14 +186,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     private VideoMetadataDTO checkMetadataByFullFileDownload(URL input)
             throws ParserConfigurationException, SAXException, IOException {
-        boolean canDownload;
-        boolean spherical;
-        Date recordStartedTimer;
         try (IsoFile isof = new IsoFile(Channels.newChannel(input.openStream()))) {
-            canDownload = true;
-            recordStartedTimer = determineRecordingStart(isof);
-            spherical = determine360(isof);
-            return new VideoMetadataDTO(canDownload, spherical, recordStartedTimer, "");
+            boolean canDownload = true;
+            Date recordStartedTimer = determineRecordingStart(isof);
+            Duration duration = determineDuration(isof);
+            boolean spherical = determine360(isof);
+            return new VideoMetadataDTO(canDownload, duration, spherical, recordStartedTimer, "");
         }
     }
 
@@ -199,6 +199,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped) {
         File tmp = null;
         boolean spherical = false;
+        Duration duration = null;
         Date recordStartedTimer = null;
         String message = "";
         try {
@@ -206,6 +207,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             try (IsoFile isof = new IsoFile(tmp)) {
                 recordStartedTimer = determineRecordingStart(isof);
                 spherical = determine360(isof);
+                duration = determineDuration(isof);
             }
         } catch (Exception e) {
             message = e.getMessage();
@@ -214,7 +216,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                 tmp.delete();
             }
         }
-        return new VideoMetadataDTO(true, spherical, recordStartedTimer, message);
+        return new VideoMetadataDTO(true, duration, spherical, recordStartedTimer, message);
     }
 
     /**
@@ -262,6 +264,18 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         return spherical;
     }
 
+    private Duration determineDuration(IsoFile isof) {
+        Duration duration = null;
+        MovieBox mbox = isof.getMovieBox();
+        if (mbox != null) {
+            MovieHeaderBox mhb = mbox.getMovieHeaderBox();
+            if (mhb != null) {
+                duration = new MillisecondsDurationImpl(mhb.getDuration());
+            }
+        }
+        return duration;
+    }
+    
     private Date determineRecordingStart(IsoFile isof) {
         Date creationTime = null;
         MovieBox mbox = isof.getMovieBox();
