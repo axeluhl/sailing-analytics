@@ -4,12 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -20,20 +17,21 @@ public class ManeuverSequenceGraph {
 
     private final PolarDataService polarService;
     private final BoatClass boatClass;
+    private final IManeuverSpeedRetriever maneuverSpeedRetriever;
+    private final SingleManeuverClassifier singleManeuverClassifier;
 
     private final Map<GraphNode, Double> distance = new HashMap<>();
     private final Map<GraphNode, GraphNode> predecessor = new HashMap<>();
 
     private GraphLevel firstGraphLevel = null;
     private GraphLevel lastGraphLevel = null;
-    private ILowestSpeedWithinManeuverMainCurveRetriever lowestSpeedWithinManeuverMainCurveRetriever;
 
     public ManeuverSequenceGraph(BoatClass boatClass, PolarDataService polarService,
-            ILowestSpeedWithinManeuverMainCurveRetriever lowestSpeedWithinManeuverMainCurveRetriever,
-            Iterable<Maneuver> maneuverSequence) {
+            IManeuverSpeedRetriever maneuverSpeedRetriever, Iterable<Maneuver> maneuverSequence) {
         this.boatClass = boatClass;
         this.polarService = polarService;
-        this.lowestSpeedWithinManeuverMainCurveRetriever = lowestSpeedWithinManeuverMainCurveRetriever;
+        this.maneuverSpeedRetriever = maneuverSpeedRetriever;
+        singleManeuverClassifier = new SingleManeuverClassifier(boatClass, polarService, maneuverSpeedRetriever);
         for (Maneuver maneuver : maneuverSequence) {
             // if (checkManeuverEligibleForGraphLevel(maneuver)) {
             appendManeuverAsGraphLevel(maneuver);
@@ -63,9 +61,7 @@ public class ManeuverSequenceGraph {
     // }
 
     private void appendManeuverAsGraphLevel(Maneuver maneuver) {
-        SpeedWithBearing lowestSpeedWithinMainCurve = lowestSpeedWithinManeuverMainCurveRetriever
-                .getLowestSpeedWithinManeuverMainCurve(maneuver);
-        lastGraphLevel = new GraphLevel(maneuver, lowestSpeedWithinMainCurve, lastGraphLevel);
+        lastGraphLevel = new GraphLevel(maneuver, singleManeuverClassifier, lastGraphLevel);
         if (firstGraphLevel == null) {
             firstGraphLevel = lastGraphLevel;
         }
@@ -74,13 +70,6 @@ public class ManeuverSequenceGraph {
     public void computePossiblePathsWithDistances() {
         GraphLevel currentLevel = firstGraphLevel;
         while (currentLevel != null) {
-            Maneuver maneuver = currentLevel.getManeuver();
-            SpeedWithBearing speedWithBearingBefore = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                    .getSpeedWithBearingBefore();
-            SpeedWithBearing speedWithBearingAfter = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                    .getSpeedWithBearingAfter();
-            double courseChangeDeg = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                    .getDirectionChangeInDegrees();
             GraphLevel previousLevel = currentLevel.getPreviousLevel();
             GraphLevel nextLevel = currentLevel.getNextLevel();
             boolean markPassingIsNeighbour = false;
@@ -88,27 +77,21 @@ public class ManeuverSequenceGraph {
                     || nextLevel != null && nextLevel.getManeuver().getType() == ManeuverType.MARK_PASSING) {
                 markPassingIsNeighbour = true;
             }
-            if (Math.abs(courseChangeDeg) > 120) {
-                // not ordinary maneuver
-                double ratio = currentLevel.getLowestSpeedWithinMainCurve().getKnots()
-                        / maneuver.getMainCurveBoundaries().getSpeedWithBearingBefore().getKnots();
-                if (courseChangeDeg <= 180 && ratio > 0.93) {
-                    // no jibe or tack within maneuver
-                } else if (courseChangeDeg < 350) {
-                    // lowest speed can either within jibing or tacking
-                } else {
-                    // the maneuver is a penalty circle
-                    // => course at lowest speed refers upwind
-                }
-            } else {
-                Pair<Double, SpeedWithBearingWithConfidence<Void>> tackLikelihookWithTwaTws = polarService
-                        .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore, courseChangeDeg,
-                                ManeuverType.TACK);
-                Pair<Double, SpeedWithBearingWithConfidence<Void>> jibeLikelihookWithTwaTws = polarService
-                        .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore, courseChangeDeg,
-                                ManeuverType.JIBE);
+            boolean collisionWithOtherManeuver = false;
+            if (previousLevel != null
+                    && previousLevel.getManeuver().getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                            .getTimePointAfter()
+                            .until(currentLevel.getManeuver().getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                                    .getTimePointBefore())
+                            .asSeconds() < 2
+                    || nextLevel != null
+                            && currentLevel.getManeuver().getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                                    .getTimePointAfter().until(nextLevel.getManeuver()
+                                            .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())
+                                    .asSeconds() < 2) {
+                collisionWithOtherManeuver = true;
             }
-            
+
             for (GraphNode graphNode : currentLevel.getNodes()) {
                 PointOfSail pointOfSailBeforeManeuver = graphNode.getPointOfSailBeforeManeuver();
 

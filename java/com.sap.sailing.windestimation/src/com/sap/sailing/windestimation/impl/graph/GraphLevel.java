@@ -1,6 +1,5 @@
 package com.sap.sailing.windestimation.impl.graph;
 
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 /**
@@ -14,17 +13,17 @@ public class GraphLevel {
     private GraphLevel nextLevel = null;
 
     private final Maneuver maneuver;
-    private final SpeedWithBearing lowestSpeedWithinMainCurve;
+    private final SingleManeuverClassificationResult maneuverClassificationResult;
 
     private final GraphNode[] nodes = new GraphNode[PointOfSail.values().length];
 
-    public GraphLevel(Maneuver maneuver, SpeedWithBearing lowestSpeedWithinMainCurve, GraphLevel previousLevel) {
+    public GraphLevel(Maneuver maneuver, SingleManeuverClassifier singleManeuverClassifier, GraphLevel previousLevel) {
         this.maneuver = maneuver;
-        this.lowestSpeedWithinMainCurve = lowestSpeedWithinMainCurve;
         if (previousLevel != null) {
             this.previousLevel = previousLevel;
             previousLevel.setNextLevel(this);
         }
+        maneuverClassificationResult = singleManeuverClassifier.computeClassificationResult(maneuver);
         constructGraphNodes();
     }
 
@@ -57,9 +56,9 @@ public class GraphLevel {
     public GraphNode[] getNodes() {
         return nodes;
     }
-    
-    public SpeedWithBearing getLowestSpeedWithinMainCurve() {
-        return lowestSpeedWithinMainCurve;
+
+    public SingleManeuverClassificationResult getManeuverClassificationResult() {
+        return maneuverClassificationResult;
     }
 
 }

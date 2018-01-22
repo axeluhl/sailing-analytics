@@ -9,7 +9,13 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public enum PointOfSail {
-    UPWIND_STARBOARD, UPWIND_PORT, REACHING_STARBOARD, REACHING_PORT, DOWNWIND_STARBOARD, DOWNWIND_PORT;
+    UPWIND_STARBOARD(45), UPWIND_PORT(315), REACHING_STARBOARD(90), REACHING_PORT(270), DOWNWIND_STARBOARD(145), DOWNWIND_PORT(215);
+    
+    private final int encodedTwaReference;
+    
+    private PointOfSail(int twaReference) {
+        this.encodedTwaReference = twaReference;
+    }
 
     public LegType getLegType() {
         switch (this) {
@@ -38,5 +44,9 @@ public enum PointOfSail {
             return Tack.STARBOARD;
         }
         return null;
+    }
+    
+    public int getEncodedTwaReference() {
+        return encodedTwaReference;
     }
 }
