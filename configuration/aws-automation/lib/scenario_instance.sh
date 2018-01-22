@@ -48,11 +48,6 @@ function instance_execute() {
 
 	wait_for_ssh_connection $ssh_user $public_dns_name
 
-	# if --tail option is passed then tail logfiles of instance within tmux
-	if $tail; then
-		tail_start
-	fi
-
 	header "Event and user creation"
 	port="8888"
 	access_token=$(get_access_token $admin_username $admin_password $public_dns_name $port)

@@ -127,7 +127,6 @@ usage() {
   --associate-alb               Associate instance with existing application load balancer whos
                                 listener is defined in variables_aws.sh. Automatically
                                 create necessary target group and host name rule.
-  --tail                        Tail logs from instance using tmux
 
   ${bold}Other:${reset}
   --version                  Output version information and exit
@@ -140,12 +139,8 @@ usage() {
   Associate application load balancer:
   > ./aws-setup.sh --instance --associate-alb
 
-  Associate instance with application load balancer while
-  automatically tailing important log files (tmux required):
-  > ./aws-setup.sh --instance --associate-alb --tail
-
-  Tail logfiles of running instance with dns name:
-  > ./aws-setup.sh --tail --public-dns-name ec2-x.compute.amazonaws.com
+  Associate instance with application load balancer:
+  > ./aws-setup.sh --instance --associate-alb
 
   Create instance and use default values:
   > ./aws-setup.sh --instance --force
@@ -202,7 +197,6 @@ unset options
 associate_alb=false
 instance=false
 sub_instance=false
-tail=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -230,7 +224,6 @@ while [[ $1 = -?* ]]; do
   --instance) instance=true ;;
   --sub-instance) sub_instance=true ;;
   --associate-alb) associate_alb=true ;;
-	--tail) tail=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac

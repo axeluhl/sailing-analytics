@@ -80,7 +80,7 @@ function check_dependencies() {
 
 function check_environment() {
 	if ! inside_tmux_session; then
-		echo "To tail instance log files, please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
+		echo "Please run this script inside a tmux session. To do so enter \"tmux\" into the console and start the script from there."
 		safeExit
 	fi
 }
