@@ -33,3 +33,5 @@ First of all, you'll need a web server running locally which allows you to make 
 More specifically, [[this section|https://wiki.sapsailing.com/wiki/howto/setup/webserver/chrome-webserver#setup-locally-hosted-360-videos_adding-a-360-video]] then explains how to link a panoramic 360° video, choosing the correct file type.
 
 ### Uploading through AdminConsole
+
+When you have a video that you would like to make available and you don't want to upload it to YouTube then there is also a way to upload it to the SAP Sailing Analytics. When your server has a file storage configured properly, you can go into the edit page of your event (AdminConsole's "Events" tab, then clicking that little pen/paper icon in the Actions column), go to the "Videos" tab in the event editing popup dialog and click on "Add gallery video." Use the "Choose File" and then the "Send" button to upload a file.
