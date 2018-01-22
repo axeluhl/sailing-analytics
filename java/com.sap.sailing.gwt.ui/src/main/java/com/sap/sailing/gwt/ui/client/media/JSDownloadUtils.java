@@ -3,11 +3,10 @@ package com.sap.sailing.gwt.ui.client.media;
 import com.google.gwt.typedarrays.shared.Int8Array;
 
 /**
- * Helper class to obtain the last and the first REQUIRED_SIZE of a ressource given a url 
+ * Helper class to obtain the last and the first REQUIRED_SIZE bytes of a resource defined by a given url. 
  */
 public class JSDownloadUtils {
     private static final Double REQUIRED_SIZE = 1000000.0;
-    
     
     interface JSDownloadCallback {
         void progress(Double current, Double total);
@@ -21,16 +20,18 @@ public class JSDownloadUtils {
         void size(Double total);
     }
     
-    
+    /**
+     * Downloads the required parts of the file, or if necessary the full file and slices the required parts from it. 
+     */
     public static void getData(String url, JSDownloadCallback callback){
         getFileSizeIfFastPath(url, new JSSizeCallback() {
             
             @Override
             public void size(Double total) {
-                if(total != 0 && total > 0){
+                if (total != 0 && total > 0) {
                     //used if range and accept headers are set correctly
                     getDataFast(url, callback, total, REQUIRED_SIZE);
-                }else{
+                } else {
                     //fallback will always work, if cors is supported, does not require any other server configuration
                     getDataSlow(url, callback, REQUIRED_SIZE);
                 }
@@ -38,6 +39,9 @@ public class JSDownloadUtils {
         });
     }
     
+    /**
+     * Fast file download method based on range requests, only the first and the last REQUIRED_SIZE is loaded.
+     */
     private native static void getDataFast(String url, JSDownloadCallback callback, Double length, Double REQUIRED_SIZE) /*-{
     try {
         var xhr = new XMLHttpRequest();
@@ -48,12 +52,11 @@ public class JSDownloadUtils {
             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
         }
         xhr.error = function(error) {
-            alert(error)
             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
         }
         
         xhr.onreadystatechange = function() {
-        var state = xhr.readyState;
+            var state = xhr.readyState;
             if (state == 4) {
                 if (xhr.response) {
                     var startLength = xhr.response.byteLength;
@@ -68,7 +71,6 @@ public class JSDownloadUtils {
                             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
                         }
                         xhr2.error = function(error) {
-                            alert(error)
                             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
                         }
                         
@@ -85,7 +87,6 @@ public class JSDownloadUtils {
                         };
                         xhr2.send();
                     } catch (error) {
-                        alert(error);
                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
                     }
                 }
@@ -93,13 +94,12 @@ public class JSDownloadUtils {
         };
         xhr.send();
     } catch (error) {
-        alert(error);
         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::error(Ljava/lang/Object;)(error);
     }
 }-*/;
     
     /**
-     * If content lenght works, it is most likely that range will also work 
+     * Determines if a server can deliver a file with range requests, and if so returns the size of the file
      */
     private native static void getFileSizeIfFastPath(String url, JSSizeCallback callback) /*-{
                 try {
@@ -129,8 +129,7 @@ public class JSDownloadUtils {
     }-*/;
 
     /**
-     *  Starts a download to get the native progess response from the browser (due to cors, it is problematic to use the Content-Length header)
-     *  Aborts download as soon as possible. Save for filesize until 9007199254740991 bytes, see MAX_SAFE_INTEGER for reasons
+     * If range requests are not possible, the whole file is downloaded and then slices to the required parts 
      */
     private native static void getDataSlow(String url, JSDownloadCallback callback, Double REQUIRED_SIZE) /*-{
         try {
