@@ -49,24 +49,3 @@ function instance_execute() {
 	response=$(change_admin_password $access_token $public_dns_name $port $admin_username $new_admin_password)
 	user=$(create_new_user $access_token $public_dns_name $port $user_username $user_password)
 }
-
-# -----------------------------------------------------------
-# Create instance and output response
-# @param $1  user data
-# -----------------------------------------------------------
-function create_instance(){
-	instance_id=$(run_instance "$1")
-
-	# wait till instance is recognized by aws
-	wait_instance_exists $instance_id
-
-	description=$(aws ec2 describe-instances --instance-ids $instance_id \
-	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\
-	--output table)
-
-	if command_was_successful $?; then
-		success $description
-	fi
-
-	echo $instance_id
-}

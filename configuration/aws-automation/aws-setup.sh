@@ -67,6 +67,8 @@ function mainScript() {
 echo -n
 
 source_region_config_file
+master_instance_start
+safeExit
 
 if $instance; then
 	instance_start
