@@ -64,16 +64,16 @@ function wait_instance_exists(){
 
 # -----------------------------------------------------------
 # Wait until ssh connection is established
-# @param $1  ssh user
-# @param $2  dns name of instance
+# @param $1  instance id
 # -----------------------------------------------------------
 function wait_for_ssh_connection(){
-	local_echo -n "Connecting to $1@$2..."
-	do_until_true ssh_prewrapper -q $1@$2 true 1>&2
+	public_dns_name=$(query_public_dns_name $1)
+	local_echo -n "Connecting to $ssh_user@$public_dns_name..."
+	do_until_true ssh_prewrapper -q $ssh_user@$public_dns_name true 1>&2
 }
 
 function run_instance(){
-	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n$1\n"
+	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n${1}\n"
 
 	json_instance=$(aws_wrapper ec2 run-instances --image-id $image_id --count $instance_count --instance-type $instance_type --key-name $key_name \
 	--security-group-ids $instance_security_group_ids --user-data "$1" \

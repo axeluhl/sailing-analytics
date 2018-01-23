@@ -26,6 +26,10 @@ function instance_require(){
 	require_user_password
 }
 
+# -----------------------------------------------------------
+# Execute instance scenario
+# @param $1  user data
+# -----------------------------------------------------------
 function instance_execute() {
 	header "Instance Initialization"
 
@@ -33,14 +37,28 @@ function instance_execute() {
 	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
 	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
 
-	# create instance
-	instance_id=$(run_instance "$user_data")
+	instance_id=$(create_instance "$user_data")
+
+	wait_for_ssh_connection $instance_id
+
+	header "Event and user creation"
+
+	port="8888"
+	access_token=$(get_access_token $admin_username $admin_password $public_dns_name $port)
+	event_id=$(create_event $access_token $public_dns_name $port $instance_name)
+	response=$(change_admin_password $access_token $public_dns_name $port $admin_username $new_admin_password)
+	user=$(create_new_user $access_token $public_dns_name $port $user_username $user_password)
+}
+
+# -----------------------------------------------------------
+# Create instance and output response
+# @param $1  user data
+# -----------------------------------------------------------
+function create_instance(){
+	instance_id=$(run_instance "$1")
 
 	# wait till instance is recognized by aws
 	wait_instance_exists $instance_id
-
-	# get public dns name of instance
-	public_dns_name=$(query_public_dns_name $instance_id)
 
 	description=$(aws ec2 describe-instances --instance-ids $instance_id \
 	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\
@@ -50,12 +68,5 @@ function instance_execute() {
 		success $description
 	fi
 
-	wait_for_ssh_connection $ssh_user $public_dns_name
-
-	header "Event and user creation"
-	port="8888"
-	access_token=$(get_access_token $admin_username $admin_password $public_dns_name $port)
-	event_id=$(create_event $access_token $public_dns_name $port $instance_name)
-	response=$(change_admin_password $access_token $public_dns_name $port $admin_username $new_admin_password)
-	user=$(create_new_user $access_token $public_dns_name $port $user_username $user_password)
+	echo $instance_id
 }

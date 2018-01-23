@@ -113,7 +113,8 @@ usage() {
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
-  --shared-instance                Create sub instance
+  --shared-instance             Create sub instance
+  --master-instance             Create master instance
   --associate-alb               Associate instance with existing application load balancer whos
                                 listener is defined in variables_aws.sh. Automatically
                                 create necessary target group and host name rule.
@@ -187,6 +188,7 @@ unset options
 associate_alb=false
 instance=false
 shared_instance=false
+master_instance=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -213,6 +215,7 @@ while [[ $1 = -?* ]]; do
 	-d|--debug) debug=true ;;
   --instance) instance=true ;;
   --shared-instance) shared_instance=true ;;
+  --master-instance) master_instance=true ;;
   --associate-alb) associate_alb=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
