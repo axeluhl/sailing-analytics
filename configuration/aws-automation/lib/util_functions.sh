@@ -92,6 +92,10 @@ function alphanumeric(){
 	lower_trim $1 | only_letters_and_numbers
 }
 
+function only_letters_numbers_dash(){
+	echo $1 | trim | tr -d -c '[:alnum:]-'
+}
+
 
 # ------------------------------------------------------
 # The following functions were part of a bash template

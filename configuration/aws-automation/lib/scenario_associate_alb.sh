@@ -21,6 +21,7 @@ function associate_alb_require(){
 function associate_alb_execute() {
 	# create target group for instance
 	local target_group_arn=$(create_target_group "S-dedicated-$instance_short_name")
+	set_target_group_health_check "$target_group_arn" "HTTP" "/index.html" "80" "5" "4" "2" "2"
 
 	# add instance to target group
 	register_targets $target_group_arn $instance_id

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-# Scenario for creating a sub instance
+# Scenario for creating a shared instance
 # ------------------------------------------------------
 
-function sub_instance_start(){
-	sub_instance_require
-	sub_instance_check_preconditions
-	sub_instance_execute
+function shared_instance_start(){
+	shared_instance_require
+	shared_instance_check_preconditions
+	shared_instance_execute
 }
 
 # -----------------------------------------------------------
@@ -14,7 +14,7 @@ function sub_instance_start(){
 # If one variable is not assigned or passed by parameter
 # the user will be prompted to enter a value
 # -----------------------------------------------------------
-function sub_instance_require(){
+function shared_instance_require(){
 	require_super_instance
 
 	require_key_name
@@ -31,7 +31,7 @@ function sub_instance_require(){
 	require_description
 }
 
-function sub_instance_check_preconditions(){
+function shared_instance_check_preconditions(){
 	sailing_dir="/home/sailing"
 	servers_dir="$sailing_dir/servers"
 	server_dir="$servers_dir/$instance_short_name"
@@ -45,7 +45,7 @@ function sub_instance_check_preconditions(){
 	execute_remote ls
 }
 
-function sub_instance_execute() {
+function shared_instance_execute() {
 	local server_env_file="$server_dir/env.sh"
 	local readme_file="$servers_dir/README"
 	local comment_out_line_in_env_with_pattern='JAVA_HOME=\/opt\/jdk1.8.0_20'
@@ -117,6 +117,8 @@ function sub_instance_execute() {
 	header "Configuring ALB"
 
 	local target_group_arn=$(create_target_group "S-shared-$instance_short_name")
+	set_target_group_health_check "$target_group_arn" "HTTP" "/index.html" "$server_port" "5" "4" "2" "2"
+
 	register_targets $target_group_arn $(get_instance_id $super_instance)
 
 	local domain=$(create_rule $listener_arn $instance_short_name $target_group_arn)

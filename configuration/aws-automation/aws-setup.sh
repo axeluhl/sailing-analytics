@@ -77,8 +77,8 @@ if $instance; then
 	safeExit
 fi
 
-if $sub_instance; then
-  sub_instance_start
+if $shared_instance; then
+  shared_instance_start
   confirm_reset_panes
 	safeExit
 fi
@@ -113,7 +113,7 @@ usage() {
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
-  --sub-instance                Create sub instance
+  --shared-instance                Create sub instance
   --associate-alb               Associate instance with existing application load balancer whos
                                 listener is defined in variables_aws.sh. Automatically
                                 create necessary target group and host name rule.
@@ -186,7 +186,7 @@ unset options
 # Set default value of variable without parameter value to false
 associate_alb=false
 instance=false
-sub_instance=false
+shared_instance=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -212,7 +212,7 @@ while [[ $1 = -?* ]]; do
   -f|--force) force=true ;;
 	-d|--debug) debug=true ;;
   --instance) instance=true ;;
-  --sub-instance) sub_instance=true ;;
+  --shared-instance) shared_instance=true ;;
   --associate-alb) associate_alb=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;

@@ -7,7 +7,7 @@
 # -----------------------------------------------------------
 function create_target_group(){
 	local_echo "Creating target group $1..."
-	local target_group_name=$(alphanumeric $1)
+	local target_group_name=$(only_letters_numbers_dash $1)
 	local vpc_id=$(get_default_vpc_id)
 	aws_wrapper elbv2 create-target-group --name $target_group_name --protocol $target_group_protocol \
 	--port $target_group_port --vpc-id $vpc_id | get_attribute '.TargetGroups[0].TargetGroupArn'
@@ -18,14 +18,16 @@ function create_target_group(){
 # @param $1  target group arn
 # @param $2  health check protocol (e.g. "HTTP")
 # @param $3  health check path (e.g. "/index.html")
-# @param $4  health check interval seconds (e.g. "5")
-# @param $5  health check timeouts seconds (e.g. "4")
-# @param $6  healthy threshold count (e.g. "2")
-# @param $7  unhealthy threshold count (e.g. "2")
+# @param $4  health check port (e.g. "443")
+# @param $5  health check interval seconds (e.g. "5")
+# @param $6  health check timeouts seconds (e.g. "4")
+# @param $7  healthy threshold count (e.g. "2")
+# @param $8  unhealthy threshold count (e.g. "2")
 # -----------------------------------------------------------
 function set_target_group_health_check(){
-	aws_wrapper elbv2 modify-target-group --target-group-arn $1 --health-check-protocol $2 --health-check-path $3 \
-	--health-check-interval-seconds $4 --health-check-timeout-seconds $5 --healthy-threshold-count $6 --unhealthy-threshold-count $7
+	local_echo "Setting target group health check (protocol: $2, path: $3, port: $4, interval seconds: $5, timeout seconds: $6, unhealthy-count: $7, healthy-count: $8)..."
+	aws_wrapper elbv2 modify-target-group --target-group-arn $1 --health-check-protocol $2 --health-check-path $3 --health-check-port $4\
+	--health-check-interval-seconds $5 --health-check-timeout-seconds $6 --healthy-threshold-count $7 --unhealthy-threshold-count $8
 }
 
 # -----------------------------------------------------------
