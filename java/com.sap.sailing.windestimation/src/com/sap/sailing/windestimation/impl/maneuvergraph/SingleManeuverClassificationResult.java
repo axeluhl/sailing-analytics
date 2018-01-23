@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.graph;
+package com.sap.sailing.windestimation.impl.maneuvergraph;
 
 public class SingleManeuverClassificationResult {
 
@@ -8,14 +8,13 @@ public class SingleManeuverClassificationResult {
     private final double courseChangeDeg;
     private final double[] presumedManeuverTypeLikelihoodsByAngleAnalysis;
     private final double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis;
-    private final double[] presumedTrueWindCourseInDeg;
     private final double presumedTwsInKnotsIfTack;
     private final double presumedTwsInKnotsIfJibe;
 
     public SingleManeuverClassificationResult(double lowestSpeedWithBeginningSpeedRatio,
             double highestSpeedWithBeginningSpeedRatio, double enteringExitingSpeedRatio, double courseChangeDeg,
             double[] presumedManeuverTypeLikelihoodsByAngleAnalysis,
-            double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis, double[] presumedTrueWindCourseInDeg,
+            double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis,
             double presumedTwsInKnotsIfTack, double presumedTwsInKnotsIfJibe) {
         this.lowestSpeedWithBeginningSpeedRatio = lowestSpeedWithBeginningSpeedRatio;
         this.highestSpeedWithBeginningSpeedRatio = highestSpeedWithBeginningSpeedRatio;
@@ -23,7 +22,6 @@ public class SingleManeuverClassificationResult {
         this.courseChangeDeg = courseChangeDeg;
         this.presumedManeuverTypeLikelihoodsByAngleAnalysis = presumedManeuverTypeLikelihoodsByAngleAnalysis;
         this.presumedManeuverTypeLikelihoodsBySpeedAnalysis = presumedManeuverTypeLikelihoodsBySpeedAnalysis;
-        this.presumedTrueWindCourseInDeg = presumedTrueWindCourseInDeg;
         this.presumedTwsInKnotsIfTack = presumedTwsInKnotsIfTack;
         this.presumedTwsInKnotsIfJibe = presumedTwsInKnotsIfJibe;
     }
@@ -52,16 +50,30 @@ public class SingleManeuverClassificationResult {
         return presumedManeuverTypeLikelihoodsBySpeedAnalysis;
     }
 
-    public double[] getPresumedTrueWindCourseInDeg() {
-        return presumedTrueWindCourseInDeg;
-    }
-
     public double getPresumedTwsInKnotsIfTack() {
         return presumedTwsInKnotsIfTack;
     }
 
     public double getPresumedTwsInKnotsIfJibe() {
         return presumedTwsInKnotsIfJibe;
+    }
+
+    public double getLikelihoodForPointOfSailBeforeManeuver(PresumedPointOfSail pointOfSailBeforeManeuver, boolean markPassingIsNeighbour) {
+        double likelihoodSums = 0;
+        double sumandsCount = 0;
+        //TODO generate likelihood for pointOfSailBefore and after
+        for(PresumedManeuverType maneuverType : PresumedManeuverType.values()) {
+            if(presumedManeuverTypeLikelihoodsByAngleAnalysis[maneuverType.ordinal()] != 0) {
+                switch(maneuverType) {
+                case TACK:
+                    if(courseChangeDeg < 0 && pointOfSailBeforeManeuver == PresumedPointOfSail.UPWIND_STARBOARD) {
+                        likelihoodSums += presumedManeuverTypeLikelihoodsByAngleAnalysis[maneuverType.ordinal()] + presumedManeuverTypeLikelihoodsBySpeedAnalysis[maneuverType.ordinal()];
+                        
+                    }
+                }
+            }
+        }
+        return 0;
     }
 
 }

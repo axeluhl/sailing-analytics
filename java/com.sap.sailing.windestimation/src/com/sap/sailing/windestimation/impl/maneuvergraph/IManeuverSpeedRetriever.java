@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.graph;
+package com.sap.sailing.windestimation.impl.maneuvergraph;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.Maneuver;

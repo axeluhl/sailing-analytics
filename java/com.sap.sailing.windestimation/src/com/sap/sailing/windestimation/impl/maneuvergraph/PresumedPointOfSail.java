@@ -1,20 +1,22 @@
-package com.sap.sailing.windestimation.impl.graph;
+package com.sap.sailing.windestimation.impl.maneuvergraph;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public enum PointOfSail {
+public enum PresumedPointOfSail {
     UPWIND_STARBOARD(45), UPWIND_PORT(315), REACHING_STARBOARD(90), REACHING_PORT(270), DOWNWIND_STARBOARD(145), DOWNWIND_PORT(215);
     
-    private final int encodedTwaReference;
+    private final Bearing referenceTwa;
     
-    private PointOfSail(int twaReference) {
-        this.encodedTwaReference = twaReference;
+    private PresumedPointOfSail(int referenceTwa) {
+        this.referenceTwa = new DegreeBearingImpl(referenceTwa);
     }
 
     public LegType getLegType() {
@@ -46,7 +48,8 @@ public enum PointOfSail {
         return null;
     }
     
-    public int getEncodedTwaReference() {
-        return encodedTwaReference;
+    public Bearing getReferenceTwa() {
+        return referenceTwa;
     }
+    
 }
