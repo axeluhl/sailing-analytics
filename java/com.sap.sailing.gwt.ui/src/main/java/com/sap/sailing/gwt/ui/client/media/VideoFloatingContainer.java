@@ -14,6 +14,7 @@ import com.sap.sse.gwt.client.dialog.WindowBox;
 
 public class VideoFloatingContainer extends AbstractVideoContainer implements VideoContainer {
 
+    private static final int MIN_WIDTH = 420;
     private final WindowBox dialogBox;
     private final MediaSynchControl mediaSynchControl;
     private final PopupPositionProvider popupPositionProvider;
@@ -45,6 +46,8 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
 
             }
         });
+        //values required for js and youtube player to stay useable
+        dialogBox.setMinWidth(MIN_WIDTH);
         dialogBox.addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
