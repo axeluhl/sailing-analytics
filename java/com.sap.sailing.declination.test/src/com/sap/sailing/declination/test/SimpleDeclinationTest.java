@@ -11,13 +11,14 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
+import com.sap.sailing.declination.impl.DeclinationImporter;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class SimpleDeclinationTest extends AbstractDeclinationTest {
+public abstract class SimpleDeclinationTest<I extends DeclinationImporter> extends AbstractDeclinationTest<I> {
     @Test
     public void testSimpleCorrection() throws IOException, ParseException, ParserConfigurationException, SAXException {
         final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(simpleDateFormat.parse("2019-05-27").getTime());
