@@ -31,9 +31,15 @@ public interface HasManeuverSpeedDetailsContext {
 
     @Statistic(messageKey = "LowestRatioToEnteringSpeed", ordinal = 2, resultDecimals = 4)
     Double getLowestRatioToEnteringSpeedStatistic();
+    
+    @Statistic(messageKey = "AbsTwaAtLowestRatioToEnteringSpeed", ordinal = 5, resultDecimals = 4)
+    Double getAbsTwaAtLowestRatioToEnteringSpeedStatistic();
 
     @Statistic(messageKey = "HighestRatioToEnteringSpeed", ordinal = 3, resultDecimals = 4)
     Double getHighestRatioToEnteringSpeedStatistic();
+    
+    @Statistic(messageKey = "AbsTwaAtHighestRatioToEnteringSpeed", ordinal = 6, resultDecimals = 4)
+    Double getAbsTwaAtHighestRatioToEnteringSpeedStatistic();
 
     @Statistic(messageKey = "HighestRatioToEnteringSpeedMinusLowest", ordinal = 4, resultDecimals = 4)
     Double getHighestRatioToEnteringSpeedMinusLowestStatistic();
