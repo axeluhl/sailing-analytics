@@ -89,3 +89,11 @@ function curl_until_http_401(){
 	done
 	local_echo ""
 }
+
+function do_until_true(){
+  until "$@"
+	do
+		echo -n .
+		sleep $http_retry_interval
+	done
+}

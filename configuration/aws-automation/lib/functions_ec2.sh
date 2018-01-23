@@ -69,26 +69,17 @@ function wait_instance_exists(){
 # -----------------------------------------------------------
 function wait_for_ssh_connection(){
 	local_echo -n "Connecting to $1@$2..."
-	while ! ssh_prewrapper -q $1@$2 true 1>&2; do
-  	echo -n .
-		sleep 2
-	done
+	do_until_true ssh_prewrapper -q $1@$2 true 1>&2
 }
 
 function run_instance(){
-	local user_data=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
-	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
-	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
-
-	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n$user_data\n"
+	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n$1\n"
 
 	json_instance=$(aws_wrapper ec2 run-instances --image-id $image_id --count $instance_count --instance-type $instance_type --key-name $key_name \
-	--security-group-ids $instance_security_group_ids --user-data "$user_data" \
+	--security-group-ids $instance_security_group_ids --user-data "$1" \
 	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]") || { safeExit; }
 
-	local instance_id=$(echo "$json_instance" | get_attribute '.Instances[0].InstanceId')
-
-	echo $instance_id
+	echo "$json_instance" | get_attribute '.Instances[0].InstanceId'
 }
 
 # -----------------------------------------------------------

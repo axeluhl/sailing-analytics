@@ -85,8 +85,8 @@ function create_new_user(){
 # @param $5  server port
 # -----------------------------------------------------------
 function append_event_ssl_macro_to_001_events_conf(){
-	wait_for_ssh_connection $3 $4
 	wait_for_001_events_patch $3 $4
+
 	local patched_content="Use Event-SSL $1 \\\"$2\\\" 127.0.0.1 $5"
 	local_echo "Appending´\"$patched_content\" to $events_conf..."
 	ssh_wrapper $3@$4 echo "$patched_content >> $events_conf"
@@ -94,9 +94,6 @@ function append_event_ssl_macro_to_001_events_conf(){
 
 function wait_for_001_events_patch(){
 	echo "Waiting for 001-events.conf to be created..."
-	until ssh_wrapper $1@$2 test -f $events_conf
-	do
-		echo -n .
-		sleep 2
-	done
+	wait_for_ssh_connection $1 $2
+	do_until_true ssh_wrapper $1@$2 test -f $events_conf
 }

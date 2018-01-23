@@ -68,10 +68,6 @@ echo -n
 
 source_region_config_file
 
-if $tail; then
-  check_if_tmux_is_used
-fi
-
 if $instance; then
 	instance_start
   if $associate_alb; then
@@ -83,12 +79,6 @@ fi
 
 if $sub_instance; then
   sub_instance_start
-  confirm_reset_panes
-	safeExit
-fi
-
-if $tail ; then
-	tail_start
   confirm_reset_panes
 	safeExit
 fi

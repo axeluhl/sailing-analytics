@@ -29,8 +29,12 @@ function instance_require(){
 function instance_execute() {
 	header "Instance Initialization"
 
+	local user_data=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
+	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
+	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
+
 	# create instance
-	instance_id=$(run_instance)
+	instance_id=$(run_instance "$user_data")
 
 	# wait till instance is recognized by aws
 	wait_instance_exists $instance_id
