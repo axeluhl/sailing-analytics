@@ -40,5 +40,4 @@ public abstract class SimpleDeclinationTest<I extends DeclinationImporter> exten
         Bearing bearing = record.getBearingCorrectedTo(oneYearEarlier);
         assertEquals(0.70594-0.14745, bearing.getDegrees(), 0.01);
     }
-
 }
