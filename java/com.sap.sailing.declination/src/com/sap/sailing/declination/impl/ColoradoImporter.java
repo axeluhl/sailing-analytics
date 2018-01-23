@@ -2,6 +2,10 @@ package com.sap.sailing.declination.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -11,8 +15,10 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.sap.sailing.declination.Declination;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -43,7 +49,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public class ColoradoImporter {
+public class ColoradoImporter extends DeclinationImporter {
+    private static final String URL_PATTERN = "http://magcalc.geomag.info/?model=WMM2015&sourcePage=oldCalc&decimalLatitude=%f&decimalLongitude=%f&minYear=%d&minMonth=%d&minDay=%d";
+    
     private static class XmlElementHandler extends DefaultHandler {
         private double dateAsDecimalYear;
         private double latDeg;
@@ -103,5 +111,14 @@ public class ColoradoImporter {
         XmlElementHandler handler = new XmlElementHandler();
         SAXParserFactory.newInstance().newSAXParser().parse(is, handler);
         return handler.getDeclination();
+    }
+
+    @Override
+    public Declination importRecord(Position position, TimePoint timePoint)
+            throws IOException, ParserConfigurationException, SAXException {
+        final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        cal.setTime(timePoint.asDate());
+        final URL url = new URL(String.format(URL_PATTERN, position.getLatDeg(), position.getLngDeg(), cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DAY_OF_MONTH)));
+        return getDeclinationFromXml(url.openStream());
     }
 }
