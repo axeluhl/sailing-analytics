@@ -3,6 +3,7 @@ package com.sap.sailing.declination;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.sap.sailing.declination.impl.DeclinationImporter;
 import com.sap.sailing.declination.impl.DeclinationServiceImpl;
 import com.sap.sailing.declination.impl.NOAAImporter;
 import com.sap.sailing.domain.common.Distance;
@@ -27,7 +28,7 @@ public interface DeclinationService {
      * {@link Declination#getBearingCorrectedTo(TimePoint)}.
      * 
      * @param timeoutForOnlineFetchInMilliseconds
-     *            see {@link NOAAImporter#getDeclination(Position, TimePoint, long)}; if 0, waits forever; only needed
+     *            see {@link DeclinationImporter#getDeclination(Position, TimePoint, long)}; if 0, waits forever; only needed
      *            if the pre-stored declinations don't fulfill the request up to the tolerance distance configured when
      *            constructing this service
      */
@@ -45,7 +46,7 @@ public interface DeclinationService {
      * The caller may do that using {@link Declination#getBearingCorrectedTo(TimePoint)}.
      * 
      * @param timeoutForOnlineFetchInMilliseconds
-     *            see {@link NOAAImporter#getDeclination(Position, TimePoint, long)}; if 0, waits forever; only needed
+     *            see {@link DeclinationImporter#getDeclination(Position, TimePoint, long)}; if 0, waits forever; only needed
      *            if the pre-stored declinations don't fulfill the request up to the tolerance distance provided by the
      *            <code>maxDistance</code> parameter
      */
