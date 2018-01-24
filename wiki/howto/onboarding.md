@@ -85,14 +85,14 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Wait until the target platform has been resolved completely
   * Rebuild all projects
 4. Run the Race Analysis Suite
-  * Start the MongoDB (cd /somePathto MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
+  * Start the MongoDB (cd /somePathTo MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
-  * Run "Security UI sdm" in the debug dropdown
+  * <del>Run "Security UI sdm" in the debug dropdown</del> (obsolete)
   * Run "SailingGWT sdm" in the debug dropdown
 5. Import races within the Race Analysis Suite
-  * Choose "Security UI sdm" in the upper left corner of the "Development Mode" Tab in Eclipse and open "...Login.html" in your browser
-  * Default Login: user "admin", password "admin"
+  * <del>Choose "Security UI sdm" in the upper left corner of the "Development Mode" Tab in Eclipse and open "...Login.html" in your browser</del> (obsolete)
   * Choose "SailingGWT sdm" in the "Development Mode" Tab and open "...AdminConsole.html..." (It is normal that the first try fails. Reload the page after the first try)
+  * Default Login: user "admin", password "admin"
   * In the list on the left, click on "Connectors"
   * For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php (all other required information will be filled in automatically)
   * Press "List Races"
