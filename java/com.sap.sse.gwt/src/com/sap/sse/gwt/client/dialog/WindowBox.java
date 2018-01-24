@@ -104,15 +104,10 @@ public class WindowBox extends DialogBox {
     private int minHeight = MIN_HEIGHT;
 
     private enum DragMode {
-        NORTH_WEST_RESIZE(true, false, true, false),
-        SOUTH_EAST_RESIZE(false, true, false, true),
-        NORTH_RESIZE    (true, false, false, false), 
-        NORTH_EAST_RESIZE(true, false, false, true), 
-        WEST_RESIZE(false, false, true, false), 
-        EAST_RESIZE(false, false, false, true), 
-        SOUTH_WEST_RESIZE(false, true, true, false), 
-        SOUTH_RESIZE(false, true, false, false),
-        MOVE(false, false, false, false);
+        NORTH_WEST_RESIZE(true, false, true, false), SOUTH_EAST_RESIZE(false, true, false, true), NORTH_RESIZE(true,
+                false, false, false), NORTH_EAST_RESIZE(true, false, false, true), WEST_RESIZE(false, false, true,
+                        false), EAST_RESIZE(false, false, false, true), SOUTH_WEST_RESIZE(false, true, true,
+                                false), SOUTH_RESIZE(false, true, false, false), MOVE(false, false, false, false);
         private boolean north;
         private boolean south;
         private boolean west;
@@ -145,6 +140,7 @@ public class WindowBox extends DialogBox {
     private DragMode dragMode;
     private PopoutHandler popoutHandler;
     private FlowPanel blocker;
+    private Grid ctrlGrid;
 
     public void setMinHeight(int minHeight) {
         this.minHeight = minHeight;
@@ -235,14 +231,15 @@ public class WindowBox extends DialogBox {
                 onPopoutClick(event);
             }
         });
-        Grid ctrlGrid = null;
+
+        ctrlGrid = null;
         if (popoutHandler != null) {
-            ctrlGrid = new Grid(1, 2);
-            ctrlGrid.setWidget(0, 0, this.minimize);
-            ctrlGrid.setWidget(0, 1, this.close);
+            ctrlGrid = new Grid(1, 3);
+            ctrlGrid.setWidget(0, 1, this.minimize);
+            ctrlGrid.setWidget(0, 2, this.close);
         } else {
-            ctrlGrid = new Grid(1, 1);
-            ctrlGrid.setWidget(0, 0, this.close);
+            ctrlGrid = new Grid(1, 2);
+            ctrlGrid.setWidget(0, 1, this.close);
         }
         this.controlsPanel = new FlowPanel();
         this.controlsPanel.setStyleName("gwt-extras-dialog-controls");
@@ -259,6 +256,10 @@ public class WindowBox extends DialogBox {
         blocker.getElement().getStyle().setBackgroundColor("grey");
         blocker.getElement().getStyle().setPosition(Position.ABSOLUTE);
         dragResizeWidget(this, 0, 0);
+    }
+
+    public void addBeforeBarButtons(Widget widget) {
+        ctrlGrid.setWidget(0, 0, widget);
     }
 
     /**
@@ -404,7 +405,7 @@ public class WindowBox extends DialogBox {
         yr = this.getRelY(resize, clientY);
         w = resize.getClientWidth();
         h = resize.getClientHeight();
-        if (yr >= 0 && yr <= h)
+        if (yr >= 0 && yr <= h && xr < w - 100)
             return DragMode.MOVE;
 
         return null;
