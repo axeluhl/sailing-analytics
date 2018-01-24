@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
+import java.util.concurrent.Future;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
@@ -89,7 +90,7 @@ public interface TrackedRegatta extends Serializable {
      */
     void addRaceListener(RaceListener listener);
     
-    void removeRaceListener(RaceListener listener);
+    Future<Boolean> removeRaceListener(RaceListener listener);
 
     int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
