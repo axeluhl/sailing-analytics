@@ -16,7 +16,7 @@ public interface DeclinationService {
      * A default implementation with a spatial default precision of 1 {@link Mile#METERS_PER_GEOGRAPHICAL_MILE
      * geographical mile} which equals the length of an arc with one degree on a meridian.
      */
-    DeclinationService INSTANCE = new DeclinationServiceImpl(new CentralAngleDistance(1./180.*Math.PI));
+    DeclinationService INSTANCE = new DeclinationServiceImpl(new CentralAngleDistance(1./180.*Math.PI), new NOAAImporter());
     
     /**
      * Obtains declination information with the default precision of this declination service in time and space
