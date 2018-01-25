@@ -25,12 +25,15 @@ public class DurationConverter implements ValueConverter<Duration> {
 
     @Override
     public String toStringValue(Duration value) {
-        return value == null ? null : Long.toString(value.asMillis());
+        // String value is used in URL where we accept the formats matching [[hh:]mm:]ss
+        // and the number of digits per element is not restricted to 2.
+        // This makes an integer number to simply be parsed as seconds value.
+        return value == null ? null : Long.toString((long)value.asSeconds());
     }
 
     @Override
     public Duration fromStringValue(String stringValue) {
-        return stringValue == null ? null : new MillisecondsDurationImpl(Long.parseLong(stringValue));
+        return stringValue == null ? null : parseDuration(stringValue);
     }
 
     @Override
@@ -42,5 +45,23 @@ public class DurationConverter implements ValueConverter<Duration> {
     @Override
     public Value toValue(Duration value) {
         return value == null ? null : new LongValue(value.asMillis());
+    }
+    
+    /**
+     * Understands [[hh:]mm:]ss and parses into a {@link Duration}. If {@code durationAsString} is {@code null} then
+     * so is the result.
+     */
+    private static Duration parseDuration(String durationAsString) {
+        final Duration result;
+        if (durationAsString == null) {
+            result = null;
+        } else {
+            long seconds = 0;
+            for (final String hhmmss : durationAsString.split(":")) {
+                seconds = 60*seconds + Long.valueOf(hhmmss);
+            }
+            result = new MillisecondsDurationImpl(1000l * seconds);
+        }
+        return result;
     }
 }
