@@ -51,7 +51,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.showCompetitorsChart = new BooleanSetting("showCompetitorsChart", this, false);
         this.activeCompetitorsFilterSetName = new StringSetting("activeCompetitorsFilterSetName", this, null);
         this.canReplayDuringLiveRaces = new BooleanSetting("canReplayDuringLiveRaces", this, false);
-        this.initialDurationAfterRaceStartInReplay = new DurationSetting("initialDurationAfterRaceStartInReplay", this, null);
+        this.initialDurationAfterRaceStartInReplay = new DurationSetting(PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, this, null);
     }
 
     public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,

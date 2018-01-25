@@ -24,6 +24,10 @@
     
                     <h2 class="articleSubheadline">January 2018</h2>
                     <ul class="bulletList">
+                        <li>The auto detection for the media add dialog was improved. It will now attempt to only load the parts of a video, that are required to parse the tags. Additionally if the server cannot reach a video, the client (browser) will make an attempt to load the video. This allows to analyze locally hosted videos without the need to upload them.</li>
+                        <li>In the raceboard the floating video box was improved, leading to a more solid resizing and moving behavior.</li>
+                        <li>In the raceboard, the adding of videos has now an additional fallback startDate, if no startOfRace could be determined, and the file did not contain a proper creationtime tag, startOfTracking is used.</li>
+                        <li>In the raceboard, the floating video box will now only display an edit button in the header, next to close and minimize. Upon clicking it, the box will expand and show the prior always shown editing buttons. This saves a lot of screenspace for logged in admin enabled users.
                         <li>Events have now an additional "WindFinder" tab in their configuration dialog.
                             WindFinder can provide reviewed subsets of their measurement spots and
                             gives an ID for such a reviewed spot collection. Enter one or more of such
@@ -39,12 +43,12 @@
     
                     <h2 class="articleSubheadline">December 2017</h2>
                     <ul class="bulletList">
-                        <li>In the raceboard it is now possible to upload 360� videos in addition to the already supported video types. 
-                        360° Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
+                        <li>In the raceboard it is now possible to upload 360&deg; videos in addition to the already supported video types. 
+                        360&deg; Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
                         The dialog will try an auto-detection for the mimetype upon entering the link.
-                        Additionally, for mp4  videos it is now possible to use the start time, written in the file, as
-                        an start time preset for the mediatrack, simplifying the video linking.</li>
-                        <li> In Home it is now also possible to use 360� videos, for example as an highlight video</li>
+                        Additionally, for mp4 videos it is now possible to use the start time, written in the file, as
+                        a start time preset for the mediatrack, simplifying the video linking.</li>
+                        <li>In Home it is now also possible to use 360&deg; videos, for example as a highlight video</li>
                         <li>Various Fix importers can now properly report errors and other states</li>
                         <li>Pairing list generation is now supported. Add competitors to a regatta, then use the new
                             action icons in the Leaderboards/Leaderboards panel in the administration console to generate
@@ -212,7 +216,7 @@
                     	    64-bit "double" value for all components such at latitude, longitude, speed over ground or course over
                     	    ground, "smaller" data types such as "int" and "short" are now employed. The reduction of accuracy
                     	    that this brings about is negligible given the accuracy of the tracking systems used. For example,
-                    	    the latitude values are encoded such that while covering the full range from -90° to +90°, the
+                    	    the latitude values are encoded such that while covering the full range from -90Â° to +90Â°, the
                     	    resolution is at 4.6mm. Similarly, speeds are represented in their compact form in such a way
                     	    that speeds up to 500kts can be represented at a resolution of 0.015kts.
                     	</li>
