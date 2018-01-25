@@ -15,7 +15,7 @@ public class PerHostnameEntry {
     private final String dateString;
     private final String userAgent;
     private final int year;
-    private final int month;
+    private final int zeroBasedMonth;
     
     /**
      * Parses a line of format "66.249.66.14 17/Dec/2017 Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
@@ -35,16 +35,16 @@ public class PerHostnameEntry {
         userAgent = userAgentBuilder.toString();
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         int tmpYear;
-        int tmpMonth;
+        int tmpZeroBasedMonth;
         try {
             cal.setTime(dateFormat.parse(dateString));
             tmpYear = cal.get(Calendar.YEAR);
-            tmpMonth = cal.get(Calendar.MONTH);
+            tmpZeroBasedMonth = cal.get(Calendar.MONTH);
         } catch (ParseException e) {
             tmpYear = 0;
-            tmpMonth = 0;
+            tmpZeroBasedMonth = 0;
         }
-        month = tmpMonth;
+        zeroBasedMonth = tmpZeroBasedMonth;
         year = tmpYear;
     }
 
@@ -64,7 +64,7 @@ public class PerHostnameEntry {
         return year;
     }
 
-    public int getMonth() {
-        return month;
+    public int getZeroBasedMonth() {
+        return zeroBasedMonth;
     }
 }

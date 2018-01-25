@@ -52,6 +52,7 @@ public class UniqueIPsPerReferrer {
     private static final Logger logger = Logger.getLogger(UniqueIPsPerReferrer.class.getName());
     private static final String HOSTNAME_FILE_EXTENSION = ".ips";
     private static final String UNIQUE_SUFFIX = ".unique";
+    private static final char YEAR_MONTH_SEPARATOR = '_';
     private final File CACHE;
     private final File VISITED_FILES;
     private final File STATS;
@@ -124,11 +125,13 @@ public class UniqueIPsPerReferrer {
     private void appendHitsToHostnameSpecificFiles(String... filenames) throws IOException {
         final Set<String> visitedFileNames = getVisitedFileNames();
         for (final String filename : filenames) {
-            logger.info("Analyzing log file "+filename);
             if (!containsIgnoringDifferenceInCompression(visitedFileNames, filename)) {
+                logger.info("Analyzing log file "+filename);
                 appendHitsToHostnameSpecificFiles(new File(filename));
                 visitedFileNames.add(filename);
                 addVisitedFile(filename);
+            } else {
+                logger.info("Not analyzing log file "+filename+" as it has already been analyzed before");
             }
         }
     }
@@ -148,7 +151,7 @@ public class UniqueIPsPerReferrer {
      */
     private void cleanUpOldResults() throws IOException {
         logger.info("Cleanign up old results");
-        deleteDirectoryContentsRecursively(MONTHS.toPath(), "....-..\\.gz");
+        deleteDirectoryContentsRecursively(MONTHS.toPath(), "...."+YEAR_MONTH_SEPARATOR+"..\\.gz");
         deleteDirectoryContentsRecursively(YEARS.toPath(), "....\\.gz");
         EVENTTOTALS.delete();
         TOTALS.delete();
@@ -168,11 +171,11 @@ public class UniqueIPsPerReferrer {
                 while ((line=r.readLine()) != null) {
                     final PerHostnameEntry entry = new PerHostnameEntry(line);
                     if (entry.getYear() != 0) {
-                        final String monthFileBasename = ""+entry.getYear()+"_"+entry.getMonth();
+                        final String monthFileBasename = String.format("%04d"+YEAR_MONTH_SEPARATOR+"%02d", entry.getYear(), entry.getZeroBasedMonth()+1);
                         final Writer monthFileWriter = getFileWriter(monthFileBasename, monthFileWritersPerFileBaseName, this::getMonthFileCompressed, /* gzipCompressed */ true, /* append */ false);
                         final String combinedLine = hostname+" "+line+"\n";
                         monthFileWriter.write(combinedLine);
-                        final String yearFileBasename = ""+entry.getYear();
+                        final String yearFileBasename = String.format("%04d", entry.getYear());
                         final Writer yearFileWriter = getFileWriter(yearFileBasename, yearFileWritersPerFileBaseName, this::getYearFileCompressed, /* gzipCompressed */ true, /* append */ false);
                         yearFileWriter.write(combinedLine);
                     }

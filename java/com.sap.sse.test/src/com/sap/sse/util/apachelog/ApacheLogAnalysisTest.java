@@ -35,4 +35,11 @@ public class ApacheLogAnalysisTest {
         assertEquals("https://ess2017.sapsailing.com/gwt/RaceBoard.html?regattaName=ESS+2017+Los+Cabos&raceName=Race+1&leaderboardName=ESS+2017+Los+Cabos&leaderboardGroupName=Extreme+Sailing+Series+2017&eventId=6eb987e5-1334-45f9-b54a-8b772a3fbb5b&mode=PLAYER", entry.getReferrer());
         assertEquals("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36", entry.getUserAgent());
     }
+    
+    @Test
+    public void testPadding() {
+        assertEquals("00", String.format("%02d", 0));
+        assertEquals("01", String.format("%02d", 1));
+        assertEquals("12", String.format("%02d", 12));
+    }
 }
