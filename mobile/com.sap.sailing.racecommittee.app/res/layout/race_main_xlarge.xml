@@ -46,4 +46,10 @@
         android:id="@+id/protest_time_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <fragment
+        android:id="@+id/demo_overlay_fragment"
+        class="com.sap.sailing.racecommittee.app.ui.fragments.DemoOverlayFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </RelativeLayout>

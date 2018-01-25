@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Production:
-CACHE=/var/log/old/cache/unique-ips-per-referrer
+#CACHE=/var/log/old/cache/unique-ips-per-referrer
 # Test:
-#CACHE=/var/log/old/cache/unique-ips-per-referrer/test
+CACHE=/var/log/old/cache/unique-ips-per-referrer/test
 VISITED_FILES=$CACHE/visited
 STATS=$CACHE/stats
 OUTPUT=$STATS/results

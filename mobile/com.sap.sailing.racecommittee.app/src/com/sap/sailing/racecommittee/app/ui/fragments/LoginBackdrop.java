@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import com.sap.sailing.android.shared.data.LoginData;
@@ -367,18 +368,38 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
 
     private void onException(Exception exception) {
         if (login != null) {
-            if (login.getVisibility() == View.VISIBLE) {
+            if (login.getVisibility() == View.VISIBLE) { // login call
                 if (exception instanceof UnauthorizedException) {
                     Toast.makeText(getActivity(), R.string.wrong_credentials, Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getActivity(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
                 }
-            } else {
+            } else { // hello call
                 server = null;
-                if (exception instanceof UnauthorizedException) {
+                if (exception instanceof UnauthorizedException) { // wrong credentials (access token)
                     server = exception.getMessage().split("=")[1];
                 }
-                BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
+                if (exception instanceof IOException) { // connection error
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    builder.setTitle(R.string.hello_call_error_title);
+                    builder.setMessage(R.string.hello_call_error_message);
+                    builder.setPositiveButton(R.string.hello_call_error_positive, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
+                        }
+                    });
+                    builder.setNegativeButton(R.string.hello_call_error_negative, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            getActivity().finish();
+                        }
+                    });
+                    builder.setCancelable(false);
+                    builder.show();
+                } else { // unknown error -> show user credential input
+                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
+                }
             }
         }
     }
