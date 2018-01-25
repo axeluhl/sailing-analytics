@@ -54,7 +54,7 @@ public class WindFinderReportParser {
         return new SpotImpl(jsonOfSingleSpot.get("n").toString(),
                 jsonOfSingleSpot.get("id").toString(),
                 jsonOfSingleSpot.get("kw").toString(),
-                jsonOfSingleSpot.get("c").toString(),
+                jsonOfSingleSpot.get("c") == null ? null : jsonOfSingleSpot.get("c").toString(),
                 new DegreePosition(((Number) jsonOfSingleSpot.get("lat")).doubleValue(),
                                 ((Number) jsonOfSingleSpot.get("lon")).doubleValue()), this, reviewedSpotsCollection);
     }

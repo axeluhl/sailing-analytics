@@ -46,6 +46,15 @@ public class WindFinderReportParserTest {
         assertEquals(331.0, wind.getFrom().getDegrees(), 0.0000001);
         assertPositionEquals(new DegreePosition(54.47, 10.28), wind.getPosition(), 0.000001);
     }
+
+    @Test
+    public void testOtherSpots() throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
+        assertEquals(4, Util.size(new ReviewedSpotsCollectionImpl("kielerfoerde").getSpots(/* cached */ false)));
+        assertEquals(3, Util.size(new ReviewedSpotsCollectionImpl("chiemsee").getSpots(/* cached */ false)));
+        assertEquals(1, Util.size(new ReviewedSpotsCollectionImpl("starnbergersee").getSpots(/* cached */ false)));
+        assertEquals(1, Util.size(new ReviewedSpotsCollectionImpl("wannsee").getSpots(/* cached */ false)));
+        assertEquals(4, Util.size(new ReviewedSpotsCollectionImpl("travemuende").getSpots(/* cached */ false)));
+    }
     
     @Test
     public void testReadingSpotDescriptions() throws IOException, ParseException {

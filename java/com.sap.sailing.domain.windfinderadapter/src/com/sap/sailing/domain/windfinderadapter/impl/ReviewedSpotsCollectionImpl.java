@@ -40,6 +40,7 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     
     public ReviewedSpotsCollectionImpl(String id) {
         this.id = id;
+        this.parser = new WindFinderReportParser();
         this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(()->{
             final ConcurrentMap<String, Spot> result = new ConcurrentHashMap<>();
             for (final Spot spot : loadSpots()) {
@@ -47,7 +48,6 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
             }
             return result;
         }, /* delay */ 0, TimeUnit.MILLISECONDS);
-        this.parser = new WindFinderReportParser();
     }
 
     @Override
