@@ -44,7 +44,6 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         boolean result = getTrackedRace().recordWind(new WindImpl(/* position */null, getTrackedRace().getStartOfRace(), new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
                 new WindSourceImpl(WindSourceType.WEB));
         assert result==true;
-
     }
     
     protected String getExpectedEventName() {
@@ -70,7 +69,8 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         }
         String resultData = leaderboardData.getResultXML();
         assertNotNull(resultData);
-        assertTrue(resultData.length()>261000);
+        int resultDataLength = resultData.length();
+        assertTrue("resultData length was " + resultDataLength + ", but expected to be > 261000", resultDataLength > 261000);
     }
 
 }
