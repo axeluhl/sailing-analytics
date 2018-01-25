@@ -3,11 +3,14 @@ package com.sap.sse.util.apachelog;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +25,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -31,11 +35,20 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * already visited, computes an updated version of the stats that tell which hostname received how many unique visitors
  * per month and per year. This is intended to replace Bash script that has horrible performance. We're hoping to speed
  * things up considerably by using Java for this task.
+ * <p>
+ * 
+ * To use from a command line, e.g., on a server, export the {@code com.sap.sse} project from Eclipse into a single JAR
+ * using a launch configuration for this class's {@link #main(String[])} method and bundle all dependencies into that
+ * JAR. Move the JAR file to your server environment and launch using
+ * {@code java -jar com.sap.sse.jar <dir-name> logfile1 logfile2 ...}.
+ * 
+ * @see #main(String[])
  * 
  * @author Axel Uhl (D043530)
  *
  */
 public class UniqueIPsPerReferrer {
+    private static final String GZIP_EXTENSION = ".gz";
     private static final Logger logger = Logger.getLogger(UniqueIPsPerReferrer.class.getName());
     private static final String HOSTNAME_FILE_EXTENSION = ".ips";
     private static final String UNIQUE_SUFFIX = ".unique";
@@ -47,6 +60,7 @@ public class UniqueIPsPerReferrer {
     private final File YEARS;
     private final File TOTALS;
     private final File EVENTTOTALS;
+    private final File TOTALS_UNIQUE;
 
     public UniqueIPsPerReferrer() {
         this("/var/log/old/cache/unique-ips-per-referrer/test");
@@ -59,8 +73,9 @@ public class UniqueIPsPerReferrer {
         OUTPUT = new File(STATS + "/results");
         MONTHS = new File(OUTPUT + "/permonth");
         YEARS = new File(OUTPUT + "/peryear");
-        TOTALS = new File(OUTPUT + "/totals");
-        EVENTTOTALS = new File(OUTPUT + "/eventtotals");
+        TOTALS = new File(OUTPUT + "/totals.gz");
+        EVENTTOTALS = new File(OUTPUT + "/eventtotals.gz");
+        TOTALS_UNIQUE = new File(OUTPUT + "/totals"+UNIQUE_SUFFIX);
         ensureDirectoriesExist();
     }
     
@@ -110,12 +125,21 @@ public class UniqueIPsPerReferrer {
         final Set<String> visitedFileNames = getVisitedFileNames();
         for (final String filename : filenames) {
             logger.info("Analyzing log file "+filename);
-            if (!visitedFileNames.contains(filename)) {
+            if (!containsIgnoringDifferenceInCompression(visitedFileNames, filename)) {
                 appendHitsToHostnameSpecificFiles(new File(filename));
                 visitedFileNames.add(filename);
                 addVisitedFile(filename);
             }
         }
+    }
+
+    /**
+     * Returns {@code true} if and only if {@code visitedFileNames} contains a filename that equals
+     * {@code filename}, ignoring any ".gz" ending on either side.
+     */
+    private boolean containsIgnoringDifferenceInCompression(final Set<String> visitedFileNames, final String filename) {
+        return filename.toLowerCase().endsWith(GZIP_EXTENSION) && (visitedFileNames.contains(filename) || visitedFileNames.contains(filename.substring(0, filename.length()-GZIP_EXTENSION.length())))
+                || !filename.toLowerCase().endsWith(GZIP_EXTENSION) && (visitedFileNames.contains(filename) || visitedFileNames.contains(filename+GZIP_EXTENSION));
     }
     
     /**
@@ -124,17 +148,17 @@ public class UniqueIPsPerReferrer {
      */
     private void cleanUpOldResults() throws IOException {
         logger.info("Cleanign up old results");
-        deleteDirectoryContentsRecursively(MONTHS.toPath(), "....-..");
-        deleteDirectoryContentsRecursively(YEARS.toPath(), "....");
+        deleteDirectoryContentsRecursively(MONTHS.toPath(), "....-..\\.gz");
+        deleteDirectoryContentsRecursively(YEARS.toPath(), "....\\.gz");
         EVENTTOTALS.delete();
         TOTALS.delete();
     }
     
     private void computePerMonthPerYearPerEventAndTotals() throws IOException, ParseException {
-        final Map<String, FileWriter> monthFileWritersPerFileBaseName = new HashMap<>();
-        final Map<String, FileWriter> yearFileWritersPerFileBaseName = new HashMap<>();
-        final FileWriter eventTotalsWriter = new FileWriter(EVENTTOTALS);
-        final FileWriter totalsWriter = new FileWriter(TOTALS);
+        final Map<String, Writer> monthFileWritersPerFileBaseName = new HashMap<>();
+        final Map<String, Writer> yearFileWritersPerFileBaseName = new HashMap<>();
+        final Writer eventTotalsWriter = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(EVENTTOTALS)));
+        final Writer totalsWriter = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(TOTALS)));
         for (final File perHostnameFile : getAllHostnameFiles()) {
             final String hostname = perHostnameFile.getName().substring(0, perHostnameFile.getName().length()-HOSTNAME_FILE_EXTENSION.length());
             logger.info("Extracting per-month and per-year stats for hostname "+hostname);
@@ -145,11 +169,11 @@ public class UniqueIPsPerReferrer {
                     final PerHostnameEntry entry = new PerHostnameEntry(line);
                     if (entry.getYear() != 0) {
                         final String monthFileBasename = ""+entry.getYear()+"_"+entry.getMonth();
-                        final FileWriter monthFileWriter = getFileWriter(monthFileBasename, monthFileWritersPerFileBaseName, this::getMonthFile);
+                        final Writer monthFileWriter = getFileWriter(monthFileBasename, monthFileWritersPerFileBaseName, this::getMonthFileCompressed, /* gzipCompressed */ true, /* append */ false);
                         final String combinedLine = hostname+" "+line+"\n";
                         monthFileWriter.write(combinedLine);
                         final String yearFileBasename = ""+entry.getYear();
-                        final FileWriter yearFileWriter = getFileWriter(yearFileBasename, yearFileWritersPerFileBaseName, this::getYearFile);
+                        final Writer yearFileWriter = getFileWriter(yearFileBasename, yearFileWritersPerFileBaseName, this::getYearFileCompressed, /* gzipCompressed */ true, /* append */ false);
                         yearFileWriter.write(combinedLine);
                     }
                     eventTotalsWriter.write(hostname+" "+line+"\n");
@@ -159,29 +183,29 @@ public class UniqueIPsPerReferrer {
                 r.close();
             }
         }
-        for (final FileWriter monthFileWriter : monthFileWritersPerFileBaseName.values()) {
+        for (final Writer monthFileWriter : monthFileWritersPerFileBaseName.values()) {
             monthFileWriter.close();
         }
-        for (final FileWriter yearFileWriter : yearFileWritersPerFileBaseName.values()) {
+        for (final Writer yearFileWriter : yearFileWritersPerFileBaseName.values()) {
             yearFileWriter.close();
         }
         eventTotalsWriter.close();
         totalsWriter.close();
     }
     
-    private File getMonthFile(String monthFileBaseName) {
-        return new File(MONTHS, monthFileBaseName);
+    private File getMonthFileCompressed(String monthFileBaseName) {
+        return new File(MONTHS, monthFileBaseName+GZIP_EXTENSION);
     }
     
-    private File getYearFile(String yearFileBaseName) {
-        return new File(YEARS, yearFileBaseName);
+    private File getYearFileCompressed(String yearFileBaseName) {
+        return new File(YEARS, yearFileBaseName+GZIP_EXTENSION);
     }
 
     private void countUniqueEventOccurrencesPerMonthAndPerYearAndOverall() throws IOException {
         logger.info("Counting unique visitors per host for per-month files");
-        countUniqueVisitorsPerHostname(MONTHS.listFiles((dir, filename)->filename.matches("...._..")));
+        countUniqueVisitorsPerHostname(MONTHS.listFiles((dir, filename)->filename.matches("...._..\\.gz")));
         logger.info("Counting unique visitors per host for per-year files");
-        countUniqueVisitorsPerHostname(YEARS.listFiles((dir, filename)->filename.matches("....")));
+        countUniqueVisitorsPerHostname(YEARS.listFiles((dir, filename)->filename.matches("....\\.gz")));
         logger.info("Counting unique visitors per host for event totals");
         countUniqueVisitorsPerHostname(new File[] { EVENTTOTALS });
     }
@@ -190,16 +214,18 @@ public class UniqueIPsPerReferrer {
      * For each file in {@code files} produces a ".unique" file next to it that counts the distinct unique visitors for
      * each hostname found in the first column of the respective file.
      * 
-     * @param files
+     * @param gzippedFiles
      *            files that contain lines of the form "yes2015.sapsailing.com 66.249.66.14 17/Dec/2017 Mozilla/5.0
      *            (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" where the first element is the hostname
      *            and the rest is the "unique visitor" information consisting of the IP address, day and user agent
      *            string.
      */
-    private void countUniqueVisitorsPerHostname(final File[] files) throws IOException {
-        for (final File file : files) {
-            final File uniqueFile = new File(file.getCanonicalFile()+UNIQUE_SUFFIX);
-            final Set<String> uniqueLinesFromFile = readDistinctLines(file);
+    private void countUniqueVisitorsPerHostname(final File[] gzippedFiles) throws IOException {
+        for (final File gzippedFile : gzippedFiles) {
+            final String canonicalPathOfGzippedFile = gzippedFile.getCanonicalPath();
+            final String canonicalPathWithoutGzipExtension = canonicalPathOfGzippedFile.substring(0, canonicalPathOfGzippedFile.length()-GZIP_EXTENSION.length());
+            final File uniqueFile = new File(canonicalPathWithoutGzipExtension+UNIQUE_SUFFIX);
+            final Set<String> uniqueLinesFromFile = readDistinctLinesFromGzippedFile(gzippedFile);
             final FileWriter uniqueFileWriter = new FileWriter(uniqueFile);
             final Map<String, Integer> hostnameCounts = new HashMap<>();
             for (final String uniqueLineFromMonthFile : uniqueLinesFromFile) {
@@ -221,15 +247,15 @@ public class UniqueIPsPerReferrer {
 
     private void countTotalHits() throws IOException {
         logger.info("Counting total number of unique visitors");
-        final FileWriter totalsCountWriter = new FileWriter(new File(TOTALS.getCanonicalPath()+UNIQUE_SUFFIX));
-        final Set<String> uniqueTotalLines = readDistinctLines(TOTALS);
+        final FileWriter totalsCountWriter = new FileWriter(TOTALS_UNIQUE);
+        final Set<String> uniqueTotalLines = readDistinctLinesFromGzippedFile(TOTALS);
         totalsCountWriter.write(uniqueTotalLines.size()+"\n");
         totalsCountWriter.close();
     }
     
-    private Set<String> readDistinctLines(File fromFile) throws IOException {
+    private Set<String> readDistinctLinesFromGzippedFile(File gzippedFile) throws IOException {
         final Set<String> result = new HashSet<>();
-        final BufferedReader br = new BufferedReader(new FileReader(fromFile));
+        final BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(gzippedFile))));
         try {
             String line;
             while ((line = br.readLine()) != null) {
@@ -269,7 +295,7 @@ public class UniqueIPsPerReferrer {
 
     private void appendHitsToHostnameSpecificFiles(File logfileWhichMayUseGzipCompression) throws IOException {
         final Reader reader;
-        if (logfileWhichMayUseGzipCompression.getName().toLowerCase().endsWith(".gz")) {
+        if (logfileWhichMayUseGzipCompression.getName().toLowerCase().endsWith(GZIP_EXTENSION)) {
             reader = new InputStreamReader(new GZIPInputStream(new FileInputStream(logfileWhichMayUseGzipCompression)));
         } else {
             reader = new FileReader(logfileWhichMayUseGzipCompression);
@@ -278,26 +304,36 @@ public class UniqueIPsPerReferrer {
     }
 
     private void appendHitsToHostnameSpecificFiles(Reader logfileReader) throws IOException {
-        final Map<String, FileWriter> fileWritersPerHostname = new HashMap<>();
+        final Map<String, Writer> fileWritersPerHostname = new HashMap<>();
         final BufferedReader br = new BufferedReader(logfileReader);
         String line;
         while ((line=br.readLine()) != null) {
             final LogEntry entry = new LogEntry(line);
             final String hostname = entry.getHostname();
-            final FileWriter fileWriterForHostname = getFileWriter(hostname, fileWritersPerHostname, this::getHostnameSpecificFile);
+            final Writer fileWriterForHostname = getFileWriter(hostname, fileWritersPerHostname, this::getHostnameSpecificFile, /* gzipCompressed */ false, /* append */ true);
             fileWriterForHostname.write(entry.getRequestorIpString()+" "+entry.getDateString()+" "+entry.getUserAgent()+"\n");
         }
-        for (final FileWriter fw : fileWritersPerHostname.values()) {
+        for (final Writer fw : fileWritersPerHostname.values()) {
             fw.close();
         }
     }
     
-    private FileWriter getFileWriter(String key, Map<String, FileWriter> fileWriterCache, Function<String, File> fileConstructor) throws IOException {
-        final FileWriter fileWriterForHostname;
+    /**
+     * @param append if the file is not found in {@code fileWriterCache}, this parameter controls whether the file is then opened for appending or not;
+     * note that appending cannot be used in conjunction with GZIP compression.
+     */
+    private Writer getFileWriter(String key, Map<String, Writer> fileWriterCache, Function<String, File> fileConstructor, boolean gzipCompressed, boolean append) throws IOException {
+        assert !gzipCompressed || !append;
+        final Writer fileWriterForHostname;
         if (fileWriterCache.containsKey(key)) {
             fileWriterForHostname = fileWriterCache.get(key);
         } else {
-            fileWriterForHostname = new FileWriter(fileConstructor.apply(key), /* append */ true);
+            final File file = fileConstructor.apply(key);
+            if (gzipCompressed) {
+                fileWriterForHostname = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(file)));
+            } else {
+                fileWriterForHostname = new FileWriter(file, append);
+            }
             fileWriterCache.put(key, fileWriterForHostname);
         }
         return fileWriterForHostname;
