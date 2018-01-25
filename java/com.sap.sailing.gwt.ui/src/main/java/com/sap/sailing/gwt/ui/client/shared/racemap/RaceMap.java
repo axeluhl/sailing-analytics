@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -2767,12 +2768,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             Collection<WindSensorOverlay> marksToZoom = forMap.windSensorOverlays.values();
             if (marksToZoom != null) {
                 for (WindSensorOverlay windSensorOverlay : marksToZoom) {
-                    if (BoundsUtil.getAsPosition(windSensorOverlay.getLatLngPosition()) != null) {
-                        LatLngBounds bounds = BoundsUtil.getAsBounds(windSensorOverlay.getLatLngPosition());
+                    final LatLng latLngPosition = windSensorOverlay.getLatLngPosition();
+                    if (Objects.nonNull(latLngPosition) && BoundsUtil.getAsPosition(latLngPosition) != null) {
+                        LatLngBounds bounds = BoundsUtil.getAsBounds(latLngPosition);
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds = newBounds.extend(windSensorOverlay.getLatLngPosition());
+                            newBounds = newBounds.extend(latLngPosition);
                         }
                     }
                 }
