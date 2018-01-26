@@ -88,7 +88,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ## HowTo
 
 * [[Onboarding|wiki/howto/onboarding]]
-
+* [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 
 ### Development
 

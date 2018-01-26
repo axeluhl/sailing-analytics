@@ -47,6 +47,7 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -102,6 +103,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     @Nullable
     @Override
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
         mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());

@@ -40,7 +40,7 @@ public class ManeuverBoundariesWithContext implements HasManeuverBoundariesConte
     }
 
     @Override
-    public Double getManeuverBoundarySpeedDeviationRatioFromAvgStatistic() {
+    public Double getManeuverStartSpeedDeviationRatioFromAvgStatistic() {
         SpeedWithBearing speedWithBearingBeforeManeuver = maneuverWithEstimationData.getManeuver()
                 .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore();
         SpeedWithBearing averageSpeedWithBearingBeforeManeuver = maneuverWithEstimationData
@@ -56,13 +56,41 @@ public class ManeuverBoundariesWithContext implements HasManeuverBoundariesConte
     }
 
     @Override
-    public Double getManeuverBoundaryCogDeviationFromAvgInDegreesStatistic() {
+    public Double getManeuverStartCogDeviationFromAvgInDegreesStatistic() {
         SpeedWithBearing speedWithBearingBeforeManeuver = maneuverWithEstimationData.getManeuver()
                 .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore();
         SpeedWithBearing averageSpeedWithBearingBeforeManeuver = maneuverWithEstimationData
                 .getAverageSpeedWithBearingBefore();
         if (speedWithBearingBeforeManeuver != null && averageSpeedWithBearingBeforeManeuver != null) {
             return Math.abs(averageSpeedWithBearingBeforeManeuver.getBearing().getDifferenceTo(speedWithBearingBeforeManeuver.getBearing()).getDegrees());
+        }
+        return null;
+    }
+    
+    @Override
+    public Double getManeuverEndSpeedDeviationRatioFromAvgStatistic() {
+        SpeedWithBearing speedWithBearingAfterManeuver = maneuverWithEstimationData.getManeuver()
+                .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter();
+        SpeedWithBearing averageSpeedWithBearingAfterManeuver = maneuverWithEstimationData
+                .getAverageSpeedWithBearingAfter();
+        if (speedWithBearingAfterManeuver != null && averageSpeedWithBearingAfterManeuver != null) {
+            if(speedWithBearingAfterManeuver.getKnots() < averageSpeedWithBearingAfterManeuver.getKnots()) {
+                return averageSpeedWithBearingAfterManeuver.getKnots() / speedWithBearingAfterManeuver.getKnots();
+            } else {
+                return speedWithBearingAfterManeuver.getKnots() / averageSpeedWithBearingAfterManeuver.getKnots();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Double getManeuverEndCogDeviationFromAvgInDegreesStatistic() {
+        SpeedWithBearing speedWithBearingAfterManeuver = maneuverWithEstimationData.getManeuver()
+                .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter();
+        SpeedWithBearing averageSpeedWithBearingAfterManeuver = maneuverWithEstimationData
+                .getAverageSpeedWithBearingAfter();
+        if (speedWithBearingAfterManeuver != null && averageSpeedWithBearingAfterManeuver != null) {
+            return Math.abs(averageSpeedWithBearingAfterManeuver.getBearing().getDifferenceTo(speedWithBearingAfterManeuver.getBearing()).getDegrees());
         }
         return null;
     }

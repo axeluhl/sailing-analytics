@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,8 +30,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -39,13 +38,14 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.ranking.RankingMetricConstructor;
-import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -57,6 +57,10 @@ import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
 import com.sap.sailing.server.gateway.windimport.expedition.WindImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
+import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
+import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
@@ -202,28 +206,34 @@ public class ExpeditionAllInOneImporter {
                 UUID.randomUUID());
         service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
 
-        final Series series = new SeriesImpl(seriesName, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
-                Collections.singleton(new FleetImpl(fleetName)), Collections.emptySet(),
-                /* trackedRegattaRegistry */ service);
         final ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
-        final RankingMetricConstructor rankingMetricConstructor = RankingMetricsFactory
-                .getRankingMetricConstructor(rankingMetric);
-        final Regatta regatta = service.createRegatta(regattaNameAndleaderboardName, boatClassName,
+        
+        final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
+        final List<FleetDTO> fleets = new ArrayList<>();
+        fleets.add(new FleetDTO(fleetName, 0, null));
+        seriesCreationParameters.put(seriesName,
+                new SeriesCreationParametersDTO(fleets, /*isMedal*/ false,
+                        /* isFleetsCanRunInParallel */ false, /*isStartsWithZeroScore*/ false, /*firstColumnIsNonDiscardableCarryForward*/false, /*discardingThresholds*/ null,
+                        /*hasSplitFleetContiguousScoring*/ false, /*maximumNumberOfDiscards*/ null));
+        final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(
+                seriesCreationParameters);
+        
+        final Regatta regatta = service.apply(new AddSpecificRegatta(regattaNameAndleaderboardName, boatClassName,
                 /* can boats of competitors change */ false,
                 /* start date */ null, /* end date */ null, UUID.randomUUID(),
-                Collections.singleton(series), true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
-                false, rankingMetricConstructor);
+                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
+                false, rankingMetric));
         this.ensureBoatClassDetermination(regatta);
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
-        final RegattaLeaderboard regattaLeaderboard = service.addRegattaLeaderboard(regattaIdentifier, null,
-                discardThresholds);
+        final RegattaLeaderboard regattaLeaderboard = service.apply(new CreateRegattaLeaderboard(regattaIdentifier, null,
+                discardThresholds));
 
-        final LeaderboardGroup leaderboardGroup = service.addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName,
-                description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null);
-        service.updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
+        final LeaderboardGroup leaderboardGroup = service.apply(new CreateLeaderboardGroup(leaderboardGroupName,
+                description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null));
+        service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
                 Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
-                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos());
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos()));
 
         final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
         final Fleet fleet = raceColumn.getFleets().iterator().next();

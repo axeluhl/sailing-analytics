@@ -19,6 +19,7 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.DateParser;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class RaceRecord {
     private static final Logger logger = Logger.getLogger(RaceRecord.class.getName());
@@ -89,16 +90,13 @@ public class RaceRecord {
         }
         this.racestarttime = tp;
         
-        String jsonURLAsString = jsonURL.toString();
-        int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
-        int indexOfLastButOneSlash = jsonURLAsString.lastIndexOf('/', indexOfLastSlash-1);
-        String technicalEventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
-        final String baseURL = jsonURLAsString.substring(0, indexOfLastSlash);
+        String technicalEventName = getTechnicalEventName(jsonURL);
+        final String baseJsonURL = getBaseURL(jsonURL);
         
         try {
             if (paramURLAsString == null || paramURLAsString.isEmpty()) {
                 // for backward compatibility (the param_url field was not always in the JSON document) and perhaps for live mode
-                paramURL = new URL(baseURL + "/clientparams.php?event="
+                paramURL = new URL(baseJsonURL + "/clientparams.php?event="
                         + technicalEventName + "&race=" + ID);
             } else {
                 paramURL = new URL(paramURLAsString);
@@ -117,7 +115,7 @@ public class RaceRecord {
                     storedURIAsString.startsWith("https:")) {
                 storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
             } else {
-                storedURI = new URI(baseURL+"/"+storedURIAsString);
+                storedURI = new URI(getBaseURL(paramURL)+"/"+storedURIAsString);
             }
         } else {
             paramURLAsString = null;
@@ -126,10 +124,26 @@ public class RaceRecord {
         }
     }
 
+    private String getBaseURL(URL url) {
+        String jsonURLAsString = url.toString();
+        int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
+        final String baseURL = jsonURLAsString.substring(0, indexOfLastSlash);
+        return baseURL;
+    }
+    
+    private String getTechnicalEventName(URL jsonUrl) {
+        String jsonURLAsString = jsonUrl.toString();
+        int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
+        int indexOfLastButOneSlash = jsonURLAsString.lastIndexOf('/', indexOfLastSlash-1);
+        String technicalEventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
+        return technicalEventName;
+    }
+    
     private Map<String, String> parseParams(URL paramURL) throws IOException {
         Map<String, String> result = new HashMap<String, String>();
         Pattern pattern = Pattern.compile("^([^:]*):(.*)$");
-        BufferedReader r = new BufferedReader(new InputStreamReader(paramURL.openStream()));
+        BufferedReader r = new BufferedReader(new InputStreamReader(
+                HttpUrlConnectionHelper.redirectConnection(paramURL).getInputStream()));
         String line;
         while ((line = r.readLine()) != null) {
             Matcher matcher = pattern.matcher(line);

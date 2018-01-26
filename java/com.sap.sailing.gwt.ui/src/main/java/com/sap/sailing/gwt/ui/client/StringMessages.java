@@ -2076,4 +2076,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorCalculatingPairingListTemplate(String message);
     String errorCreatingPairingList(String message);
     String unexpectedErrorDuringFileImport();
+    String couldNotDownload(String url);
 }
