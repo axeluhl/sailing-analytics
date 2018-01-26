@@ -69,7 +69,7 @@ public class PlayerMode extends AbstractRaceBoardMode {
             }
             if (startPlayingAt != null) {
                 timerAdjusted = true;
-                getTimer().setTime(startPlayingAt.asMillis());
+                setTimerOrUseCustomStart(startPlayingAt);
                 getTimer().play();
                 // we've done our adjustments; remove listener and let go
                 stopReceivingRaceTimesInfos();
