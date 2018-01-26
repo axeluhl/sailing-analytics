@@ -67,21 +67,22 @@ function mainScript() {
 echo -n
 
 source_region_config_file
-master_instance_start
-safeExit
 
 if $instance; then
 	instance_start
   if $associate_alb; then
   	associate_alb_start
   fi
-  confirm_reset_panes
 	safeExit
 fi
 
 if $shared_instance; then
   shared_instance_start
-  confirm_reset_panes
+	safeExit
+fi
+
+if $master_instance; then
+  master_instance_start
 	safeExit
 fi
 

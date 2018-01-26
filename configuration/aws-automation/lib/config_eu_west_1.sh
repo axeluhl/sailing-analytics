@@ -1,5 +1,8 @@
 # Variables for region "eu-west-1" (Ireland)
 
+default_key_name=Leon
+default_key_file='/cygdrive/c/Users/d069485/.ssh/Leon.pem'
+
 # HTTPS Listener of Application Load Balancer Sailing-eu-west-1
 listener_arn='arn:aws:elasticloadbalancing:eu-west-1:017363970217:listener/app/Sailing-eu-west-1/32b89dbfe7f75097/f9212223209ac042'
 

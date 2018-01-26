@@ -27,6 +27,11 @@ function get_instance_id(){
 	aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[?PublicDnsName=='$1'].InstanceId" --output text
 }
 
+function get_public_ip(){
+	local_echo "Querying for the public ip of $1..."
+	aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[?PublicIpAddress=='$1'].InstanceId" --output text
+}
+
 # -----------------------------------------------------------
 # Allocates an elastic ip address
 # @return  elastic ip
@@ -88,7 +93,7 @@ function create_instance(){
 	# wait till instance is recognized by aws
 	wait_instance_exists $instance_id
 
-	description=$(aws ec2 describe-instances --instance-ids $instance_id \
+	description=$(aws --region $region ec2 describe-instances --instance-ids $instance_id \
 	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\
 	--output table)
 
