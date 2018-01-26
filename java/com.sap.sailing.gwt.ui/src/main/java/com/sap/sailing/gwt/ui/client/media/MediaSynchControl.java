@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -19,10 +20,10 @@ public class MediaSynchControl implements EditFlag {
 
     private static final int FAST = 1000;
     private static final int SLOW = 100;
-    
+
     private final MediaServiceAsync mediaService;
     private final MediaSynchAdapter mediaSynchAdapter;
-    private final  ErrorReporter errorReporter;
+    private final ErrorReporter errorReporter;
     private final MediaTrack backupVideoTrack;
 
     private final FlowPanel mainPanel;
@@ -31,19 +32,32 @@ public class MediaSynchControl implements EditFlag {
     private final FlowPanel fineTuningPanel;
 
     private final TextBox titleEdit;
-    private final Button editButton;
+    private final EditButtonProxy editButton;
     private final Button previewButton;
     private final Button saveButton;
     private final Button discardButton;
 
     private boolean isEditing = false;
-    
-    public MediaSynchControl(MediaSynchAdapter mediaSynchAdapter, MediaServiceAsync mediaService, ErrorReporter errorReporter) {
+
+    /**
+     * We dont want to force the caller to use a specific button or anchor class for future flexibility
+     */
+    interface EditButtonProxy {
+        void addAction(Runnable runnable);
+
+        void setTitle(String string);
+
+        void setEnabled(boolean b);
+    }
+
+    public MediaSynchControl(MediaSynchAdapter mediaSynchAdapter, MediaServiceAsync mediaService,
+            ErrorReporter errorReporter, EditButtonProxy editButtonProxy) {
         this.mediaService = mediaService;
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
-        MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack(); 
-        backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration, videoTrack.mimeType, videoTrack.assignedRaces);
+        MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack();
+        backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration,
+                videoTrack.mimeType, videoTrack.assignedRaces);
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("main-panel");
         editPanel = new FlowPanel();
@@ -51,12 +65,14 @@ public class MediaSynchControl implements EditFlag {
         fineTuningPanel.addStyleName("finetuning-panel");
         commitPanel = new FlowPanel();
         commitPanel.addStyleName("button-panel");
-        
+
+        this.editButton = editButtonProxy;
+
         titleEdit = new TextBox();
         titleEdit.setText(videoTrack.title);
         titleEdit.addStyleName("title-edit");
         titleEdit.addKeyUpHandler(new KeyUpHandler() {
-            
+
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 String text = titleEdit.getText();
@@ -64,7 +80,7 @@ public class MediaSynchControl implements EditFlag {
                 updateUiState();
             }
         });
-        
+
         Button fastRewindButton = new Button("-1s &#171;", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -89,22 +105,25 @@ public class MediaSynchControl implements EditFlag {
                 fastForward();
             }
         });
-        editButton = new Button("Edit", new ClickHandler() {
+        editButton.addAction(new Runnable() {
+
             @Override
-            public void onClick(ClickEvent event) {
+            public void run() {
                 edit();
             }
         });
-        editButton.setTitle("Pauses race and decouples race from video playback. Use video controls, race time slider or fine tuning buttons for time alignment, then press Preview to re-couple race and video playback.");
-        
+        editButton.setTitle(
+                "Pauses race and decouples race from video playback. Use video controls, race time slider or fine tuning buttons for time alignment, then press Preview to re-couple race and video playback.");
+
         previewButton = new Button("Preview", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 preview();
             }
         });
-        previewButton.setTitle("Re-couples race and video playback. If ok, press Save to write changes back to database. Press Cancel to reset the changes.");
-        
+        previewButton.setTitle(
+                "Re-couples race and video playback. If ok, press Save to write changes back to database. Press Cancel to reset the changes.");
+
         saveButton = new Button("Save", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -123,17 +142,15 @@ public class MediaSynchControl implements EditFlag {
         fineTuningPanel.add(slowRewindButton);
         fineTuningPanel.add(slowForwardButton);
         fineTuningPanel.add(fastForwardButton);
-        
+
         mainPanel.add(titleEdit);
-        editPanel.add(editButton);
         editPanel.add(previewButton);
         mainPanel.add(editPanel);
         mainPanel.add(fineTuningPanel);
-        
+
         commitPanel.add(saveButton);
         commitPanel.add(discardButton);
-        
-        
+
         mainPanel.add(commitPanel);
 
         updateUiState();
@@ -166,14 +183,14 @@ public class MediaSynchControl implements EditFlag {
         pausePlayback();
         mediaSynchAdapter.forceAlign();
         updateUiState();
-// For now, only start time can be changed.        
-//      getMediaTrack().title = backupVideoTrack.title;
-//      getMediaTrack().url = backupVideoTrack.url;
-//      getMediaTrack().duration = backupVideoTrack.duration;
+        // For now, only start time can be changed.
+        // getMediaTrack().title = backupVideoTrack.title;
+        // getMediaTrack().url = backupVideoTrack.url;
+        // getMediaTrack().duration = backupVideoTrack.duration;
     }
 
     private void save() {
-        
+
         if (!backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime)) {
             mediaService.updateStartTime(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
 
@@ -216,17 +233,19 @@ public class MediaSynchControl implements EditFlag {
             }
         }
         mediaSynchAdapter.setControlsVisible(isEditing);
-        
+
         editButton.setEnabled(!isEditing);
         previewButton.setEnabled(isEditing);
-        
+
+        mainPanel.getElement().getStyle().setDisplay(this.isEditing() ? Display.BLOCK : Display.NONE);
         boolean isDirty = isDirty();
-        saveButton.setEnabled(!isEditing && isDirty);
+        saveButton.setEnabled(isEditing || isDirty);
         discardButton.setEnabled(isEditing || isDirty);
     }
 
     private boolean isDirty() {
-        return !backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime) || !backupVideoTrack.title.equals(titleEdit.getText());
+        return !backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime)
+                || !backupVideoTrack.title.equals(titleEdit.getText());
     }
 
     private void fastForward() {

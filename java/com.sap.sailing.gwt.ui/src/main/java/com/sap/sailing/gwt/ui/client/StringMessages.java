@@ -2049,4 +2049,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String importFinishedGotoEvent();
     String chooseAName();
     String unexpectedErrorDuringFileImport();
+    String couldNotDownload(String url);
 }
