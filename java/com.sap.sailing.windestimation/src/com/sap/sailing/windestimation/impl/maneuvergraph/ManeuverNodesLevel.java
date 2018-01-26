@@ -1,6 +1,5 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
-import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -18,10 +17,10 @@ public class ManeuverNodesLevel {
     private final Maneuver maneuver;
     private final SingleManeuverClassificationResult maneuverClassificationResult;
 
-    private final double[] bestDistancesFromStart = new double[PresumedPointOfSail.values().length];
+    private final double[] bestDistancesFromStart = new double[FineGrainedPointOfSail.values().length];
     private final double[] bestDistancesFromEnd = new double[bestDistancesFromStart.length];
-    private final PresumedPointOfSail[] bestPrecedingNodesForThisNodes = new PresumedPointOfSail[bestDistancesFromStart.length];
-    private final PresumedPointOfSail[] bestFollowingNodesForThisNodes = new PresumedPointOfSail[bestDistancesFromStart.length];
+    private final FineGrainedPointOfSail[] bestPrecedingNodesForThisNodes = new FineGrainedPointOfSail[bestDistancesFromStart.length];
+    private final FineGrainedPointOfSail[] bestFollowingNodesForThisNodes = new FineGrainedPointOfSail[bestDistancesFromStart.length];
 
     public ManeuverNodesLevel(Maneuver maneuver, SingleManeuverClassifier singleManeuverClassifier,
             ManeuverNodesLevel previousLevel) {
@@ -57,11 +56,11 @@ public class ManeuverNodesLevel {
         return maneuverClassificationResult;
     }
 
-    public double getDistanceToNodeFromStart(PresumedPointOfSail node) {
+    public double getDistanceToNodeFromStart(FineGrainedPointOfSail node) {
         return bestDistancesFromStart[node.ordinal()];
     }
 
-    public double getDistanceToNodeFromEnd(PresumedPointOfSail node) {
+    public double getDistanceToNodeFromEnd(FineGrainedPointOfSail node) {
         return bestDistancesFromEnd[node.ordinal()];
     }
 
@@ -77,7 +76,7 @@ public class ManeuverNodesLevel {
         final double[] bestDistances;
         final double[] previousLevelBestDistances;
         final ManeuverNodesLevel previousLevel;
-        final PresumedPointOfSail[] bestPrecidingNodes;
+        final FineGrainedPointOfSail[] bestPrecidingNodes;
         if (fromEnd) {
             bestDistances = this.bestDistancesFromEnd;
             previousLevelBestDistances = this.nextLevel.bestDistancesFromEnd;
@@ -90,10 +89,11 @@ public class ManeuverNodesLevel {
             bestPrecidingNodes = this.bestPrecedingNodesForThisNodes;
         }
         boolean markPassingIsNeighbour = isMarkPassingNeighbour();
-        for (PresumedPointOfSail pointOfSailBeforeManeuver : PresumedPointOfSail.values()) {
+        for (FineGrainedPointOfSail pointOfSailBeforeManeuver : FineGrainedPointOfSail.values()) {
             double likelihoodForPointOfSailBeforeManeuver = markPassingIsNeighbour
-                    ? 1 / PresumedPointOfSail.values().length
-                    : maneuverClassificationResult.getLikelihoodForPointOfSailBeforeManeuver(pointOfSailBeforeManeuver);
+                    ? 1 / CoarseGrainedPointOfSail.values().length
+                    : maneuverClassificationResult.getLikelihoodForPointOfSailBeforeManeuver(
+                            pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail());
             if (previousLevel == null) {
                 bestDistances[pointOfSailBeforeManeuver.ordinal()] = convertLikelihoodToDistance(
                         likelihoodForPointOfSailBeforeManeuver);
@@ -104,8 +104,8 @@ public class ManeuverNodesLevel {
                                 .getSpeedWithBearingBefore().getBearing())
                         .getDegrees();
                 double bestDistanceThroughPreviousLevel = Double.MAX_VALUE;
-                PresumedPointOfSail bestPreviousLevelPointOfSailBeforeManeuver = null;
-                for (PresumedPointOfSail previousLevelPointOfSailBeforeManeuver : PresumedPointOfSail.values()) {
+                FineGrainedPointOfSail bestPreviousLevelPointOfSailBeforeManeuver = null;
+                for (FineGrainedPointOfSail previousLevelPointOfSailBeforeManeuver : FineGrainedPointOfSail.values()) {
                     double likelihoodForPointOfSailTransition = getLikelihoodForPointOfSailTransition(
                             previousLevelPointOfSailBeforeManeuver, pointOfSailBeforeManeuver,
                             courseChangeDegFromPreviousPointOfSailBefore, likelihoodForPointOfSailBeforeManeuver);
@@ -122,42 +122,50 @@ public class ManeuverNodesLevel {
         }
     }
 
-    private double getLikelihoodForPointOfSailTransition(PresumedPointOfSail previousLevelPointOfSailBeforeManeuver,
-            PresumedPointOfSail pointOfSailBeforeManeuver, double courseChangeDegFromPreviousPointOfSailBefore,
+    private double getLikelihoodForPointOfSailTransition(FineGrainedPointOfSail previousLevelPointOfSailBeforeManeuver,
+            FineGrainedPointOfSail pointOfSailBeforeManeuver, double courseChangeDegFromPreviousPointOfSailBefore,
             double likelihoodForPointOfSailBeforeManeuver) {
-        PresumedPointOfSail lastIteratedPointOfSail = previousLevelPointOfSailBeforeManeuver;
-        PresumedPointOfSail nextIteratedPointOfSail;
+        FineGrainedPointOfSail previousIteratedPointOfSail;
+        FineGrainedPointOfSail currentIteratedPointOfSail = previousLevelPointOfSailBeforeManeuver;
+        FineGrainedPointOfSail nextIteratedPointOfSail;
         double courseChangeDegLeft = courseChangeDegFromPreviousPointOfSailBefore;
         NauticalSide maneuverDirection;
         int courseChangeSignum;
         if (courseChangeDegFromPreviousPointOfSailBefore < 0) {
+            previousIteratedPointOfSail = currentIteratedPointOfSail.getNextPointOfSail(NauticalSide.STARBOARD);
             maneuverDirection = NauticalSide.PORT;
             courseChangeSignum = -1;
         } else {
+            previousIteratedPointOfSail = currentIteratedPointOfSail.getNextPointOfSail(NauticalSide.PORT);
             maneuverDirection = NauticalSide.STARBOARD;
             courseChangeSignum = 1;
         }
-        nextIteratedPointOfSail = lastIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
+        nextIteratedPointOfSail = currentIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
         do {
-            courseChangeDegLeft += lastIteratedPointOfSail.getDifferenceInDegrees(nextIteratedPointOfSail)
+            courseChangeDegLeft += currentIteratedPointOfSail.getDifferenceInDegrees(nextIteratedPointOfSail)
                     * courseChangeSignum;
             if (courseChangeDegLeft * courseChangeSignum > 0) {
-                lastIteratedPointOfSail = nextIteratedPointOfSail;
+                previousIteratedPointOfSail = currentIteratedPointOfSail;
+                currentIteratedPointOfSail = nextIteratedPointOfSail;
                 nextIteratedPointOfSail = nextIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
             } else {
                 break;
             }
         } while (true);
         if (pointOfSailBeforeManeuver == nextIteratedPointOfSail
-                || pointOfSailBeforeManeuver == lastIteratedPointOfSail) {
+                || pointOfSailBeforeManeuver == currentIteratedPointOfSail) {
             return likelihoodForPointOfSailBeforeManeuver + 0.001;
         }
-        if (Math.abs(courseChangeDegFromPreviousPointOfSailBefore) <= 20
-                && previousLevelPointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND
-                && pointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND) {
-            return 0.5 * likelihoodForPointOfSailBeforeManeuver + 0.001;
+        if (pointOfSailBeforeManeuver == previousIteratedPointOfSail && Math.abs(courseChangeDegLeft) <= 10) {
+            return 0.6 * likelihoodForPointOfSailBeforeManeuver + 0.001;
         }
-        return 0.05 * likelihoodForPointOfSailBeforeManeuver + 0.001;
+        double targetCourseChangeDeviation = currentIteratedPointOfSail.getTwa() - pointOfSailBeforeManeuver.getTwa();
+        if (targetCourseChangeDeviation <= -180) {
+            targetCourseChangeDeviation += 180;
+        } else if (targetCourseChangeDeviation > 180) {
+            targetCourseChangeDeviation -= 180;
+        }
+        return 1 / (1 + (targetCourseChangeDeviation / 5)) * likelihoodForPointOfSailBeforeManeuver + 0.001;
     }
 
     private boolean isMarkPassingNeighbour() {

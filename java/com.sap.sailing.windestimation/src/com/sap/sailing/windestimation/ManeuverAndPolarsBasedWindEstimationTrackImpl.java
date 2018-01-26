@@ -20,7 +20,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.windestimation.impl.CompetitorManeuverBasedWindDirectionEstimator;
 import com.sap.sailing.windestimation.impl.WindDirectionCandidatesForManeuver;
 import com.sap.sailing.windestimation.impl.WindDirectionCandidatesForTimePointIterationHelper;
-import com.sap.sailing.windestimation.impl.maneuvergraph.PresumedPointOfSail;
+import com.sap.sailing.windestimation.impl.maneuvergraph.CoarseGrainedPointOfSail;
 import com.sap.sse.common.TimePoint;
 
 public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl {
@@ -119,9 +119,9 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
 
         private final BoatClass boatClass;
         private final Speed speed;
-        private final PresumedPointOfSail pointOfSail;
+        private final CoarseGrainedPointOfSail pointOfSail;
 
-        public BoatClassWithSpeedAndPointOfSail(BoatClass boatClass, Speed speed, PresumedPointOfSail pointOfSail) {
+        public BoatClassWithSpeedAndPointOfSail(BoatClass boatClass, Speed speed, CoarseGrainedPointOfSail pointOfSail) {
             this.boatClass = boatClass;
             this.speed = speed;
             this.pointOfSail = pointOfSail;
@@ -135,7 +135,7 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
             return speed;
         }
 
-        public PresumedPointOfSail getPointOfSail() {
+        public CoarseGrainedPointOfSail getPointOfSail() {
             return pointOfSail;
         }
 
