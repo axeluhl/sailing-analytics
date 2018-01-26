@@ -1,9 +1,8 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 /**
  * 
@@ -11,22 +10,42 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
  *
  */
 public enum PresumedPointOfSail {
-    UPWIND_STARBOARD(45), UPWIND_PORT(315), REACHING_STARBOARD(90), REACHING_PORT(270), DOWNWIND_STARBOARD(145), DOWNWIND_PORT(215);
+    UPWIND_STARBOARD(45), DOWNWIND_STARBOARD(135), DOWNWIND_PORT(225), UPWIND_PORT(315);
     
-    private final Bearing referenceTwa;
-    
-    private PresumedPointOfSail(int referenceTwa) {
-        this.referenceTwa = new DegreeBearingImpl(referenceTwa);
-    }
+    private final int twa;
 
+    private PresumedPointOfSail(int twa) {
+        this.twa = twa;
+    }
+    
+    public PresumedPointOfSail getNextPointOfSail(NauticalSide toSide) {
+        int nextOrdinal = 0;
+        switch (toSide) {
+        case STARBOARD:
+            nextOrdinal = (this.ordinal() + 1) % PresumedPointOfSail.values().length;
+            break;
+        case PORT:
+            nextOrdinal = (this.ordinal() - 1 + PresumedPointOfSail.values().length) % PresumedPointOfSail.values().length;
+            break;
+        }
+        return PresumedPointOfSail.values()[nextOrdinal];
+    }
+    
+    public int getDifferenceInDegrees(PresumedPointOfSail otherPointOfSail) {
+        int deviationDeg = this.getTwa() - otherPointOfSail.getTwa();
+        if (deviationDeg < -180) {
+            deviationDeg += 360;
+        } else if (deviationDeg > 180) {
+            deviationDeg -= 360;
+        }
+        return deviationDeg;
+    }
+    
     public LegType getLegType() {
         switch (this) {
         case DOWNWIND_PORT:
         case DOWNWIND_STARBOARD:
             return LegType.DOWNWIND;
-        case REACHING_PORT:
-        case REACHING_STARBOARD:
-            return LegType.REACHING;
         case UPWIND_PORT:
         case UPWIND_STARBOARD:
             return LegType.UPWIND;
@@ -37,19 +56,29 @@ public enum PresumedPointOfSail {
     public Tack getTack() {
         switch (this) {
         case DOWNWIND_PORT:
-        case REACHING_PORT:
-        case UPWIND_PORT:
-            return Tack.PORT;
-        case DOWNWIND_STARBOARD:
-        case REACHING_STARBOARD:
         case UPWIND_STARBOARD:
+            return Tack.STARBOARD;
+        case DOWNWIND_STARBOARD:
+        case UPWIND_PORT:
             return Tack.STARBOARD;
         }
         return null;
     }
     
-    public Bearing getReferenceTwa() {
-        return referenceTwa;
+    public NauticalSide getSide() {
+        switch (this) {
+        case DOWNWIND_PORT:
+        case UPWIND_PORT:
+            return NauticalSide.PORT;
+        case DOWNWIND_STARBOARD:
+        case UPWIND_STARBOARD:
+            return NauticalSide.STARBOARD;
+        }
+        return null;
+    }
+    
+    public int getTwa() {
+        return twa;
     }
     
 }

@@ -526,6 +526,15 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             return null;
         }
     }
+    
+    private TimePoint getTrackingStartTime() {
+        Date startOfTracking = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).startOfTracking;
+        if (startOfTracking != null) {
+            return new MillisecondsTimePoint(startOfTracking);
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public void closeFloatingVideo(MediaTrack videoTrack) {
@@ -606,8 +615,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void addMediaTrack() {
-        TimePoint raceStartTime = getRaceStartTime();
-        TimePoint defaultStartTime = raceStartTime;
+        TimePoint defaultStartTime = getRaceStartTime();
+        if (defaultStartTime == null) {
+            defaultStartTime = getTrackingStartTime();
+        }
         NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
                 MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
                 new DialogCallback<MediaTrack>() {

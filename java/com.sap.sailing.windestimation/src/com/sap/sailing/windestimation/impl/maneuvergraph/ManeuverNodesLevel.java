@@ -1,6 +1,8 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 /**
@@ -21,7 +23,8 @@ public class ManeuverNodesLevel {
     private final PresumedPointOfSail[] bestPrecedingNodesForThisNodes = new PresumedPointOfSail[bestDistancesFromStart.length];
     private final PresumedPointOfSail[] bestFollowingNodesForThisNodes = new PresumedPointOfSail[bestDistancesFromStart.length];
 
-    public ManeuverNodesLevel(Maneuver maneuver, SingleManeuverClassifier singleManeuverClassifier, ManeuverNodesLevel previousLevel) {
+    public ManeuverNodesLevel(Maneuver maneuver, SingleManeuverClassifier singleManeuverClassifier,
+            ManeuverNodesLevel previousLevel) {
         this.maneuver = maneuver;
         if (previousLevel != null) {
             this.previousLevel = previousLevel;
@@ -88,8 +91,9 @@ public class ManeuverNodesLevel {
         }
         boolean markPassingIsNeighbour = isMarkPassingNeighbour();
         for (PresumedPointOfSail pointOfSailBeforeManeuver : PresumedPointOfSail.values()) {
-            double likelihoodForPointOfSailBeforeManeuver = maneuverClassificationResult
-                    .getLikelihoodForPointOfSailBeforeManeuver(pointOfSailBeforeManeuver, markPassingIsNeighbour);
+            double likelihoodForPointOfSailBeforeManeuver = markPassingIsNeighbour
+                    ? 1 / PresumedPointOfSail.values().length
+                    : maneuverClassificationResult.getLikelihoodForPointOfSailBeforeManeuver(pointOfSailBeforeManeuver);
             if (previousLevel == null) {
                 bestDistances[pointOfSailBeforeManeuver.ordinal()] = convertLikelihoodToDistance(
                         likelihoodForPointOfSailBeforeManeuver);
@@ -121,16 +125,52 @@ public class ManeuverNodesLevel {
     private double getLikelihoodForPointOfSailTransition(PresumedPointOfSail previousLevelPointOfSailBeforeManeuver,
             PresumedPointOfSail pointOfSailBeforeManeuver, double courseChangeDegFromPreviousPointOfSailBefore,
             double likelihoodForPointOfSailBeforeManeuver) {
-        if(previousLevelPointOfSailBeforeManeuver == pointOfSailBeforeManeuver) {
-            
+        PresumedPointOfSail lastIteratedPointOfSail = previousLevelPointOfSailBeforeManeuver;
+        PresumedPointOfSail nextIteratedPointOfSail;
+        double courseChangeDegLeft = courseChangeDegFromPreviousPointOfSailBefore;
+        NauticalSide maneuverDirection;
+        int courseChangeSignum;
+        if (courseChangeDegFromPreviousPointOfSailBefore < 0) {
+            maneuverDirection = NauticalSide.PORT;
+            courseChangeSignum = -1;
+        } else {
+            maneuverDirection = NauticalSide.STARBOARD;
+            courseChangeSignum = 1;
         }
-        return 0;
+        nextIteratedPointOfSail = lastIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
+        do {
+            courseChangeDegLeft += lastIteratedPointOfSail.getDifferenceInDegrees(nextIteratedPointOfSail)
+                    * courseChangeSignum;
+            if (courseChangeDegLeft * courseChangeSignum > 0) {
+                lastIteratedPointOfSail = nextIteratedPointOfSail;
+                nextIteratedPointOfSail = nextIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
+            } else {
+                break;
+            }
+        } while (true);
+        if (pointOfSailBeforeManeuver == nextIteratedPointOfSail
+                || pointOfSailBeforeManeuver == lastIteratedPointOfSail) {
+            return likelihoodForPointOfSailBeforeManeuver + 0.001;
+        }
+        if (Math.abs(courseChangeDegFromPreviousPointOfSailBefore) <= 20
+                && previousLevelPointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND
+                && pointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND) {
+            return 0.5 * likelihoodForPointOfSailBeforeManeuver + 0.001;
+        }
+        return 0.05 * likelihoodForPointOfSailBeforeManeuver + 0.001;
     }
 
     private boolean isMarkPassingNeighbour() {
         boolean markPassingIsNeighbour = false;
         if (previousLevel != null && previousLevel.getManeuver().getType() == ManeuverType.MARK_PASSING
-                || nextLevel != null && nextLevel.getManeuver().getType() == ManeuverType.MARK_PASSING) {
+                && previousLevel.getManeuver().getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter()
+                        .until(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())
+                        .asSeconds() <= 24
+                || nextLevel != null && nextLevel.getManeuver().getType() == ManeuverType.MARK_PASSING
+                        && maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                                .getTimePointAfter().until(nextLevel.getManeuver()
+                                        .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())
+                                .asSeconds() <= 24) {
             markPassingIsNeighbour = true;
         }
         return markPassingIsNeighbour;
