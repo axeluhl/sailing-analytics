@@ -1,6 +1,8 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 /**
@@ -123,23 +125,39 @@ public class ManeuverNodesLevel {
     private double getLikelihoodForPointOfSailTransition(PresumedPointOfSail previousLevelPointOfSailBeforeManeuver,
             PresumedPointOfSail pointOfSailBeforeManeuver, double courseChangeDegFromPreviousPointOfSailBefore,
             double likelihoodForPointOfSailBeforeManeuver) {
-        double newTwa = previousLevelPointOfSailBeforeManeuver.getTwa() + courseChangeDegFromPreviousPointOfSailBefore;
-        while (newTwa < 0) {
-            newTwa += 360;
+        PresumedPointOfSail lastIteratedPointOfSail = previousLevelPointOfSailBeforeManeuver;
+        PresumedPointOfSail nextIteratedPointOfSail;
+        double courseChangeDegLeft = courseChangeDegFromPreviousPointOfSailBefore;
+        NauticalSide maneuverDirection;
+        int courseChangeSignum;
+        if (courseChangeDegFromPreviousPointOfSailBefore < 0) {
+            maneuverDirection = NauticalSide.PORT;
+            courseChangeSignum = -1;
+        } else {
+            maneuverDirection = NauticalSide.STARBOARD;
+            courseChangeSignum = 1;
         }
-        newTwa %= 360;
-        double deviationDeg = pointOfSailBeforeManeuver.getTwa() - newTwa;
-        if (deviationDeg <= -180) {
-            deviationDeg += 360;
-        } else if (deviationDeg > 180) {
-            deviationDeg -= 360;
-        }
-        double absDeviationDeg = Math.abs(deviationDeg);
-        if (absDeviationDeg <= 90) {
+        nextIteratedPointOfSail = lastIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
+        do {
+            courseChangeDegLeft += lastIteratedPointOfSail.getDifferenceInDegrees(nextIteratedPointOfSail)
+                    * courseChangeSignum;
+            if (courseChangeDegLeft * courseChangeSignum > 0) {
+                lastIteratedPointOfSail = nextIteratedPointOfSail;
+                nextIteratedPointOfSail = nextIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
+            } else {
+                break;
+            }
+        } while (true);
+        if (pointOfSailBeforeManeuver == nextIteratedPointOfSail
+                || pointOfSailBeforeManeuver == lastIteratedPointOfSail) {
             return likelihoodForPointOfSailBeforeManeuver + 0.001;
         }
-        return 1 / (1 + ((absDeviationDeg - 90) / 20) * ((absDeviationDeg - 90) / 20))
-                * likelihoodForPointOfSailBeforeManeuver + 0.001;
+        if (Math.abs(courseChangeDegFromPreviousPointOfSailBefore) <= 20
+                && previousLevelPointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND
+                && pointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND) {
+            return 0.5 * likelihoodForPointOfSailBeforeManeuver + 0.001;
+        }
+        return 0.05 * likelihoodForPointOfSailBeforeManeuver + 0.001;
     }
 
     private boolean isMarkPassingNeighbour() {
