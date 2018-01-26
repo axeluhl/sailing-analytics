@@ -123,11 +123,23 @@ public class ManeuverNodesLevel {
     private double getLikelihoodForPointOfSailTransition(PresumedPointOfSail previousLevelPointOfSailBeforeManeuver,
             PresumedPointOfSail pointOfSailBeforeManeuver, double courseChangeDegFromPreviousPointOfSailBefore,
             double likelihoodForPointOfSailBeforeManeuver) {
-        if (previousLevelPointOfSailBeforeManeuver == pointOfSailBeforeManeuver) {
-            //consider median avg course/speed before and after, angular velocity, lowest speed with entering speed ratio
-            // and direction change from last course till this course...
+        double newTwa = previousLevelPointOfSailBeforeManeuver.getTwa() + courseChangeDegFromPreviousPointOfSailBefore;
+        while (newTwa < 0) {
+            newTwa += 360;
         }
-        return 0;
+        newTwa %= 360;
+        double deviationDeg = pointOfSailBeforeManeuver.getTwa() - newTwa;
+        if (deviationDeg <= -180) {
+            deviationDeg += 360;
+        } else if (deviationDeg > 180) {
+            deviationDeg -= 360;
+        }
+        double absDeviationDeg = Math.abs(deviationDeg);
+        if (absDeviationDeg <= 90) {
+            return likelihoodForPointOfSailBeforeManeuver + 0.001;
+        }
+        return 1 / (1 + ((absDeviationDeg - 90) / 20) * ((absDeviationDeg - 90) / 20))
+                * likelihoodForPointOfSailBeforeManeuver + 0.001;
     }
 
     private boolean isMarkPassingNeighbour() {

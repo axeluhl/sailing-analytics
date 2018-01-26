@@ -94,8 +94,7 @@ public class SingleManeuverClassificationResult {
                             addLikelihood = true;
                         }
                         break;
-                    case BEAR_AWAY:
-                    case HEAD_UP:
+                    case HEAD_UP_BEAR_AWAY:
                     case _180:
                         addLikelihood = true;
                         break;

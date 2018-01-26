@@ -10,7 +10,14 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public enum PresumedPointOfSail {
-    UPWIND_STARBOARD, UPWIND_PORT, DOWNWIND_STARBOARD, DOWNWIND_PORT;
+    UPWIND_STARBOARD(45), UPWIND_PORT(315), DOWNWIND_STARBOARD(135), DOWNWIND_PORT(225);
+    
+    private final int twa;
+
+    private PresumedPointOfSail(int twa) {
+        this.twa = twa;
+        
+    }
     
     public LegType getLegType() {
         switch (this) {
@@ -46,6 +53,10 @@ public enum PresumedPointOfSail {
             return NauticalSide.STARBOARD;
         }
         return null;
+    }
+    
+    public int getTwa() {
+        return twa;
     }
     
 }

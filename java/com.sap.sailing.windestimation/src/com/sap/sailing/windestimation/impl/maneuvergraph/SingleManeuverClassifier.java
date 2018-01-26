@@ -53,18 +53,7 @@ public class SingleManeuverClassifier {
                             maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore(),
                             courseChangeDeg, ManeuverType.JIBE);
             if (jibeLikelihoodWithTwaTws.getA() == 0) {
-                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.BEAR_AWAY.ordinal()] = 0.5;
-                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP.ordinal()] = 0.5;
-                double bearAwayLikelihookBonus = (highestSpeedWithBeginningSpeedRatio - 1) * 5;
-                if (bearAwayLikelihookBonus > 0.3) {
-                    bearAwayLikelihookBonus = 0.3;
-                } else if (bearAwayLikelihookBonus < -0.3) {
-                    bearAwayLikelihookBonus = -0.3;
-                }
-                presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.BEAR_AWAY.ordinal()] = 0.5
-                        + bearAwayLikelihookBonus;
-                presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.HEAD_UP.ordinal()] = 0.5
-                        - bearAwayLikelihookBonus;
+                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = 1.0;
             } else {
                 double jibeLikelihoodBonus = jibeLikelihoodWithTwaTws.getA() - 0.5;
                 if (jibeLikelihoodBonus < -0.2) {
@@ -72,11 +61,9 @@ public class SingleManeuverClassifier {
                 } else if (jibeLikelihoodBonus > 0.4) {
                     jibeLikelihoodBonus = 0.4;
                 }
-                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.BEAR_AWAY.ordinal()] = 0.33
-                        - jibeLikelihoodBonus / 2;
-                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP.ordinal()] = 0.33
-                        - jibeLikelihoodBonus / 2;
-                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.JIBE.ordinal()] = 0.34
+                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = 0.5
+                        - jibeLikelihoodBonus;
+                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.JIBE.ordinal()] = 0.5
                         + jibeLikelihoodBonus;
                 presumedTwsInKnotsIfJibe = jibeLikelihoodWithTwaTws.getB().getObject().getKnots();
             }
@@ -104,12 +91,10 @@ public class SingleManeuverClassifier {
 
             double tackLikelihood = tackLikelihoodWithTwaTws.getA();
             double jibeLikelihood = jibeLikelihoodWithTwaTws.getA();
-            double likelihoodSum = markPassingLikelihood * 2 + headUpBearAwayLikelihood * 2 + tackLikelihood
+            double likelihoodSum = markPassingLikelihood * 2 + headUpBearAwayLikelihood + tackLikelihood
                     + jibeLikelihood;
 
-            presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.BEAR_AWAY
-                    .ordinal()] = headUpBearAwayLikelihood / likelihoodSum;
-            presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP
+            presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY
                     .ordinal()] = headUpBearAwayLikelihood / likelihoodSum;
             presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.TACK.ordinal()] = tackLikelihood
                     / likelihoodSum;
@@ -138,22 +123,21 @@ public class SingleManeuverClassifier {
 
             tackLikelihood = 0.5 + -markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
             jibeLikelihood = tackLikelihood;
-            double headUpLikelihood = 0.5 + markPassingLeeLikelihoodBonus - markPassingLuvLikelihoodBonus;
-            double bearAwayLikelihood = 0.5 + markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
-            likelihoodSum = tackLikelihood + jibeLikelihood + headUpLikelihood * 2 + bearAwayLikelihood * 2;
+            double markPassingLeeLikelihood = 0.5 + markPassingLeeLikelihoodBonus - markPassingLuvLikelihoodBonus;
+            double markPassingLuvLikelihood = 0.5 + markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
+            headUpBearAwayLikelihood = 0.1 + Math.max(markPassingLuvLikelihood, markPassingLeeLikelihood);
+            likelihoodSum = tackLikelihood + jibeLikelihood + markPassingLeeLikelihood + markPassingLeeLikelihood + headUpBearAwayLikelihood;
 
-            presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.BEAR_AWAY
-                    .ordinal()] = bearAwayLikelihood / likelihoodSum;
-            presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.HEAD_UP.ordinal()] = headUpLikelihood
+            presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = headUpBearAwayLikelihood
                     / likelihoodSum;
             presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.TACK.ordinal()] = tackLikelihood
                     / likelihoodSum;
             presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.JIBE.ordinal()] = jibeLikelihood
                     / likelihoodSum;
             presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.MARK_PASSING_LEE
-                    .ordinal()] = headUpLikelihood / likelihoodSum;
+                    .ordinal()] = markPassingLeeLikelihood / likelihoodSum;
             presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.MARK_PASSING_LUV
-                    .ordinal()] = bearAwayLikelihood / likelihoodSum;
+                    .ordinal()] = markPassingLuvLikelihood / likelihoodSum;
 
         } else if (absCourseChangeDeg <= 140) {
             // mark passing, or wider jibe, wider tack
