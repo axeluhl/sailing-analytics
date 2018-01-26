@@ -7,7 +7,6 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -181,7 +180,6 @@ public class MediaSynchControl implements EditFlag {
                 if (event.isAttached()) {
                     userservice.addUserStatusEventHandler(userHandler);
                 } else {
-                    Window.alert("removing userhandler");
                     userservice.removeUserStatusEventHandler(userHandler);
                 }
             }
