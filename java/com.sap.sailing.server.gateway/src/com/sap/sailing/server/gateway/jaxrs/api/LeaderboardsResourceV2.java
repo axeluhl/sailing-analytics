@@ -39,7 +39,6 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -75,10 +74,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                             .type(MediaType.TEXT_PLAIN).build();
                 }
                 JSONObject jsonLeaderboard;
-                if (resultTimePoint != null) {
-                    Util.Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new Util.Triple<>(
-                            resultTimePoint, resultState, maxCompetitorsCount);
-                    jsonLeaderboard = getLeaderboardJson(leaderboard, resultStateAndTimePoint, raceColumnNames,
+                if (resultTimePoint != null || resultState == ResultStates.Live) {
+                    jsonLeaderboard = getLeaderboardJson(leaderboard, resultTimePoint, resultState, maxCompetitorsCount, raceColumnNames,
                             regattaDetails, raceDetails);
                 } else {
                     jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
@@ -99,8 +96,22 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return response;
     }
 
+    @Override
+    protected TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {
+        TimePoint result = null;
+        switch (resultState) {
+            case Live:
+                result = null;
+                break;
+            case Final:
+                result = super.calculateTimePointForResultState(leaderboard, resultState);
+                break;
+        }   
+        return result;
+    }     
+
     private JSONObject getLeaderboardJson(Leaderboard leaderboard,
-            Util.Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount,
+            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
             List<String> raceColumnNames, List<String> regattaDetailNames,            
             List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
@@ -109,14 +120,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
 
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
-                timePointAndResultStateAndMaxCompetitorsCount.getA(), raceColumnsToShow, /* addOverallDetails */
+                resultTimePoint, raceColumnsToShow, /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
-
-        TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
-        ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
-        Integer maxCompetitorsCount = timePointAndResultStateAndMaxCompetitorsCount.getC();       
-
         
         JSONObject jsonLeaderboard = new JSONObject();
               
