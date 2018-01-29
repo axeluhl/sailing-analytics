@@ -14,9 +14,11 @@ import java.util.Set;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 
 public class User implements NamedWithID {
     private static final long serialVersionUID = 1788215575606546042L;
@@ -267,6 +269,18 @@ public class User implements NamedWithID {
 
     public String getValidationSecret() {
         return validationSecret;
+    }
+
+    public boolean hasPermission(String stringPermission, PermissionsForRoleProvider provider) {
+        if (hasPermission(stringPermission)) {
+            return true;
+        }
+        for (String role : getRoles()) {
+            if (Util.contains(provider.getPermissions(role), stringPermission)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -36,14 +36,13 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
-import com.sap.sse.security.shared.DefaultRoles;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
 
@@ -98,9 +97,9 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         if (user == null) {
             throw new IllegalStateException("User is missing permission to MANAGER_MEDIA");
         }
-        boolean isAdmin = Util.contains(user.getRoles(), DefaultRoles.ADMIN.getRolename());
-        boolean hasPermission = user.hasPermission(Permission.MANAGE_MEDIA.getStringPermission());
-        if (!hasPermission && !isAdmin) {
+        boolean hasPermission = user.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE);
+        if (!hasPermission) {
             throw new IllegalStateException("User is missing permission to MANAGER_MEDIA");
         }
     }

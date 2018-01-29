@@ -206,6 +206,7 @@ public class UserService {
             // we remember that a user was authenticated to suppress the hint for some time
             setUserLoginHintToStorage();
         }
+        GWT.debugger();
         currentUser = result;
         preAuthenticated = (!userInitiallyLoaded && result != null);
         userInitiallyLoaded = true;
