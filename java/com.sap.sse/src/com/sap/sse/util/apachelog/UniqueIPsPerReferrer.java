@@ -150,7 +150,7 @@ public class UniqueIPsPerReferrer {
      * files for totals and per-event totals.
      */
     private void cleanUpOldResults() throws IOException {
-        logger.info("Cleanign up old results");
+        logger.info("Cleaning up old results");
         deleteDirectoryContentsRecursively(MONTHS.toPath(), "...."+YEAR_MONTH_SEPARATOR+"..\\.gz");
         deleteDirectoryContentsRecursively(YEARS.toPath(), "....\\.gz");
         EVENTTOTALS.delete();
