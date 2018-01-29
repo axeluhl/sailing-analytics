@@ -1,8 +1,11 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WorkQueue {
+    private static final Logger LOG = Logger.getLogger(WorkQueue.class.getName());
     
     private final LinkedBlockingQueue<Runnable> queue;
     private Thread workThread;
@@ -33,7 +36,7 @@ public class WorkQueue {
                 try {
                     workToDo.run();
                 } catch (Exception e) {
-                    // TODO: handle exception
+                    LOG.log(Level.SEVERE, "Error while executing work in queue", e);
                 }
             }
         }
