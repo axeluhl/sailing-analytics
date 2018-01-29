@@ -273,13 +273,13 @@ public class User implements NamedWithID {
 
     public boolean hasPermission(String stringPermission, PermissionsForRoleProvider provider) {
         WildcardPermission requested = new WildcardPermission(stringPermission);
-        for(String permission:getPermissions()){
+        for (String permission : getPermissions()) {
             if (new WildcardPermission(permission).implies(requested)) {
                 return true;
             }
         }
         for (String role : getRoles()) {
-            for(String permission:provider.getPermissions(role)){
+            for (String permission : provider.getPermissions(role)) {
                 if (new WildcardPermission(permission).implies(requested)) {
                     return true;
                 }
