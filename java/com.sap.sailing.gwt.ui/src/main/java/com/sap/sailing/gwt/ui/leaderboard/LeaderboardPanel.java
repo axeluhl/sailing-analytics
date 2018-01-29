@@ -753,19 +753,19 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
         if (newSettings.getRaceDetailsToShow() != null) {
             List<DetailType> allRaceDetailsTypes = new ArrayList<>();
-            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceDetailColumnTypes()));
-            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceStartAnalysisColumnTypes()));
-            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(),
-                    allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]), selectedRaceDetails);
+            allRaceDetailsTypes.addAll(getAvailableRaceDetailColumnTypes());
+            allRaceDetailsTypes.addAll(getAvailableRaceStartAnalysisColumnTypes());
+            GWT.log("selected race details " + selectedRaceDetails);
+            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(),allRaceDetailsTypes, selectedRaceDetails);
         }
     }
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
 
-    private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet, DetailType[] referenceOrder,
+    private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet, List<DetailType> referenceOrder,
             List<DetailType> collectionToSetValuesTo) {
         collectionToSetValuesTo.clear();
-        collectionToSetValuesTo.addAll(Arrays.asList(referenceOrder));
+        collectionToSetValuesTo.addAll(referenceOrder);
         collectionToSetValuesTo.retainAll(valuesToSet);
     }
 
@@ -1099,8 +1099,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    public static DetailType[] getAvailableRaceDetailColumnTypes() {
-        return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+    public static List<DetailType> getAvailableRaceDetailColumnTypes() {
+        DetailType[] details = new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TRAVELED,
                 DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START, DetailType.RACE_TIME_TRAVELED,
                 DetailType.RACE_CALCULATED_TIME_TRAVELED,
@@ -1112,25 +1112,31 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL };
+        List<DetailType> exp = DetailType.getExpeditionTypes();
+        for(DetailType d:details){
+            exp.add(d);
+        }
+        return exp;
+        
     }
 
     public abstract boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb);
 
-    public static DetailType[] getAvailableRaceStartAnalysisColumnTypes() {
-        return new DetailType[] { DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
+    public static List<DetailType> getAvailableRaceStartAnalysisColumnTypes() {
+        return Arrays.asList(new DetailType[] { DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
                 DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, DetailType.DISTANCE_TO_START_AT_RACE_START,
                 DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                 DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, DetailType.START_TACK };
+                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, DetailType.START_TACK });
     }
 
-    public static DetailType[] getAvailableOverallDetailColumnTypes() {
-        return new DetailType[] { DetailType.REGATTA_RANK, DetailType.TOTAL_DISTANCE_TRAVELED,
+    public static List<DetailType> getAvailableOverallDetailColumnTypes() {
+        return Arrays.asList(new DetailType[] { DetailType.REGATTA_RANK, DetailType.TOTAL_DISTANCE_TRAVELED,
                 DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
                 DetailType.TOTAL_DURATION_FOILED_IN_SECONDS, DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
                 DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, DetailType.TIME_ON_TIME_FACTOR,
                 DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
-                DetailType.TOTAL_SCORED_RACE_COUNT };
+                DetailType.TOTAL_SCORED_RACE_COUNT });
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -1267,8 +1273,325 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                             new RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.AWA, new FormattedDoubleDetailTypeColumn(DetailType.AWA, new AWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                        LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.AWS, new FormattedDoubleDetailTypeColumn(DetailType.AWS, new AWSDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TWA, new FormattedDoubleDetailTypeColumn(DetailType.TWA, new TWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TWS, new FormattedDoubleDetailTypeColumn(DetailType.TWS, new TWSDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TWD, new FormattedDoubleDetailTypeColumn(DetailType.TWD, new TWDDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TARG_TWA, new FormattedDoubleDetailTypeColumn(DetailType.TARG_TWA, new TargTWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.BOAT_SPEED, new BoatSpeedDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TARG_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.TARG_BOAT_SPEED, new TargBoatSpeedDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.BS_SOG, new FormattedDoubleDetailTypeColumn(DetailType.BS_SOG, new BSSOGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.SOG, new FormattedDoubleDetailTypeColumn(DetailType.SOG, new SOGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.COG, new FormattedDoubleDetailTypeColumn(DetailType.COG, new COGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.FORESTAY_LOAD, new FormattedDoubleDetailTypeColumn(DetailType.FORESTAY_LOAD, new ForestayLoadDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RAKE, new FormattedDoubleDetailTypeColumn(DetailType.RAKE, new RakeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.COURSE, new FormattedDoubleDetailTypeColumn(DetailType.COURSE, new CourseDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.HEADING, new FormattedDoubleDetailTypeColumn(DetailType.HEADING, new HeadingDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.VMG, new FormattedDoubleDetailTypeColumn(DetailType.VMG, new VMGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.VMG_TARG_VMG_DELTA, new FormattedDoubleDetailTypeColumn(DetailType.VMG_TARG_VMG_DELTA, new VMGTargVMGDeltaDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RATE_OF_TURN, new FormattedDoubleDetailTypeColumn(DetailType.RATE_OF_TURN, new RateOfTurnDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RUDDER_ANGLE, new FormattedDoubleDetailTypeColumn(DetailType.RUDDER_ANGLE, new RudderAngleDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.HEEL, new FormattedDoubleDetailTypeColumn(DetailType.HEEL, new HeelDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TARGET_HEEL, new FormattedDoubleDetailTypeColumn(DetailType.TARGET_HEEL, new TargetHeelDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_PORT_LAYLINE, new TimeToPortLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_STB_LAYLINE, new TimeToStbLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.DIST_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.DIST_TO_PORT_LAYLINE, new DistToPortLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.DIST_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.DIST_TO_STB_LAYLINE, new DistToStbLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_GUN, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_GUN, new TimeToGUNDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_COMMITTEE_BOAT, new TimeToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_PIN, new TimeToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_BURN_TO_LINE, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_BURN_TO_LINE, new TimeToBurnToLineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_BURN_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_BURN_TO_COMMITTEE_BOAT, new TimeToBurnToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_TO_BURN_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.TIME_TO_BURN_TO_PIN, new TimeToBurnToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.DISTANCE_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_COMMITTEE_BOAT, new DistanceToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.DISTANCE_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_PIN, new DistanceToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.DISTANCE_BELOW_LINE, new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_BELOW_LINE, new DistanceBelowLineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.LINE_SQUARE_FOR_WIND_DIRECTION, new FormattedDoubleDetailTypeColumn(DetailType.LINE_SQUARE_FOR_WIND_DIRECTION, new LineSquareForWindDirectionDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
         }
+    
+        private class AWADetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class AWSDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class BoatSpeedDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class BSSOGDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class COGDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class CourseDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class DistanceBelowLineDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class DistanceToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class DistanceToPinDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class DistToPortLaylineDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class VMGTargVMGDeltaDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class DistToStbLaylineDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class VMGDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TWSDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TWDDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TWADetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToStbLaylineDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToPortLaylineDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToPinDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToGUNDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToBurnToPinDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToBurnToLineDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TimeToBurnToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TargTWADetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TargetHeelDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class TargBoatSpeedDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class SOGDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class RudderAngleDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class RateOfTurnDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class RakeDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class LineSquareForWindDirectionDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class HeelDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class HeadingDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        private class ForestayLoadDetailTypeExtractor implements LegDetailField<Double>{
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                return 1337.0;
+            }
+        }
+        
 
         @Override
         protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren() {
@@ -1592,7 +1915,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 return result;
             }
         }
-
+        
         /**
          * Accumulates the distance traveled over all legs of a race and considers the specifics of a gate start. The
          * first leg of a gate start gets as additional distance traveled the distance from the port side of the line to

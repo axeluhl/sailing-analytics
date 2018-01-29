@@ -202,8 +202,78 @@ public class DetailTypeFormatter {
             return stringMessages.courseOverGroundTrueDegrees();
         case TOTAL_SCORED_RACE_COUNT:
             return stringMessages.racesScored();
+        case AWA:
+            return stringMessages.expeditionAwa();
+        case AWS:
+            return stringMessages.expeditionAws();
+        case TWA:
+            return stringMessages.expeditionTwa();
+        case TWS:
+            return stringMessages.expeditionTws();
+        case TWD:
+            return stringMessages.expeditionTwd();
+        case TARG_TWA:
+            return stringMessages.expeditionTargTwa();
+        case BOAT_SPEED:
+            return stringMessages.expeditionBoatSpeed();
+        case TARG_BOAT_SPEED:
+            return stringMessages.expeditionTargBoatSpeed();
+        case BS_SOG:
+            return stringMessages.expeditionBsSog();
+        case SOG:
+            return stringMessages.expeditionSOG();
+        case COG:
+            return stringMessages.expeditionCOG();
+        case FORESTAY_LOAD:
+            return stringMessages.expeditionForestayLoad();
+        case RAKE:
+            return stringMessages.expeditionRake();
+        case COURSE:
+            return stringMessages.expeditionCourse();
+        case HEADING:
+            return stringMessages.expeditionHeading();
+        case VMG:
+            return stringMessages.expeditionVmg();
+        case VMG_TARG_VMG_DELTA:
+            return stringMessages.expeditionVmgTargVmgDelta();
+        case RATE_OF_TURN:
+            return stringMessages.expeditionRateOfTurn();
+        case RUDDER_ANGLE:
+            return stringMessages.expeditionRudderAngle();
+        case HEEL:
+            return stringMessages.expeditionHeel();
+        case TARGET_HEEL:
+            return stringMessages.expeditionTargetHeel();
+        case TIME_TO_PORT_LAYLINE:
+            return stringMessages.expeditionTimeToPortLayline();
+        case TIME_TO_STB_LAYLINE:
+            return stringMessages.expeditionTimeToStbLayline();
+        case DIST_TO_PORT_LAYLINE:
+            return stringMessages.expeditionDistToPortLayline();
+        case DIST_TO_STB_LAYLINE:
+            return stringMessages.expeditionDistToStbLayline();
+        case TIME_TO_GUN:
+            return stringMessages.expeditionTimeToGun();
+        case TIME_TO_COMMITTEE_BOAT:
+            return stringMessages.expeditionTimeToCommitteeBoat();
+        case TIME_TO_PIN:
+            return stringMessages.expeditionTimeToPin();
+        case TIME_TO_BURN_TO_LINE:
+            return stringMessages.expeditionTimeToBurnToLine();
+        case TIME_TO_BURN_TO_COMMITTEE_BOAT:
+            return stringMessages.expeditionTimeToBurnToCommitteeBoat();
+        case TIME_TO_BURN_TO_PIN:
+            return stringMessages.expeditionTimeToBurnToPin();
+        case DISTANCE_TO_COMMITTEE_BOAT:
+            return stringMessages.expeditionDistanceToCommitteeBoat();
+        case DISTANCE_TO_PIN:
+            return stringMessages.expeditionDistanceToPin();
+        case DISTANCE_BELOW_LINE:
+            return stringMessages.expeditionDistanceBelowLine();
+        case LINE_SQUARE_FOR_WIND_DIRECTION:
+            return stringMessages.expeditionLineSquareForWindDirection();
         }
-        return null;
+        return detailType.name();
     }
     
     /**
@@ -335,6 +405,41 @@ public class DetailTypeFormatter {
         case BEAT_ANGLE:
         case TIME_ON_TIME_FACTOR:
         case TOTAL_SCORED_RACE_COUNT:
+        case AWA:
+        case AWS:
+        case TWA:
+        case TWS:
+        case TWD:
+        case TARG_TWA:
+        case BOAT_SPEED:
+        case TARG_BOAT_SPEED:
+        case BS_SOG:
+        case SOG:
+        case COG:
+        case FORESTAY_LOAD:
+        case RAKE:
+        case COURSE:
+        case HEADING:
+        case VMG:
+        case VMG_TARG_VMG_DELTA:
+        case RATE_OF_TURN:
+        case RUDDER_ANGLE:
+        case HEEL:
+        case TARGET_HEEL:
+        case TIME_TO_PORT_LAYLINE:
+        case TIME_TO_STB_LAYLINE:
+        case DIST_TO_PORT_LAYLINE:
+        case DIST_TO_STB_LAYLINE:
+        case TIME_TO_GUN:
+        case TIME_TO_COMMITTEE_BOAT:
+        case TIME_TO_PIN:
+        case TIME_TO_BURN_TO_LINE:
+        case TIME_TO_BURN_TO_COMMITTEE_BOAT:
+        case TIME_TO_BURN_TO_PIN:
+        case DISTANCE_TO_COMMITTEE_BOAT:
+        case DISTANCE_TO_PIN:
+        case DISTANCE_BELOW_LINE:
+        case LINE_SQUARE_FOR_WIND_DIRECTION:
             return "";
         default:
             break;
@@ -542,6 +647,44 @@ public class DetailTypeFormatter {
             return stringMessages.courseOverGroundTrueDegreesTooltip();
         case TOTAL_SCORED_RACE_COUNT:
             return "";
+        case AWA:
+        case AWS:
+        case BOAT_SPEED:
+        case BS_SOG:
+        case COG:
+        case COURSE:
+        case DISTANCE_BELOW_LINE:
+        case DISTANCE_TO_COMMITTEE_BOAT:
+        case DISTANCE_TO_PIN:
+        case DIST_TO_PORT_LAYLINE:
+        case DIST_TO_STB_LAYLINE:
+        case FORESTAY_LOAD:
+        case HEADING:
+        case HEEL:
+        case LINE_SQUARE_FOR_WIND_DIRECTION:
+        case RAKE:
+        case RATE_OF_TURN:
+        case RUDDER_ANGLE:
+        case SOG:
+        case TARGET_HEEL:
+        case TARG_BOAT_SPEED:
+        case TARG_TWA:
+        case TIME_TO_BURN_TO_COMMITTEE_BOAT:
+        case TIME_TO_BURN_TO_LINE:
+        case TIME_TO_BURN_TO_PIN:
+        case TIME_TO_COMMITTEE_BOAT:
+        case TIME_TO_GUN:
+        case TIME_TO_PIN:
+        case TIME_TO_PORT_LAYLINE:
+        case TIME_TO_STB_LAYLINE:
+        case TWA:
+        case TWD:
+        case TWS:
+        case VMG:
+        case VMG_TARG_VMG_DELTA:
+            return "";
+        default:
+            break;
         }
         
         return "";

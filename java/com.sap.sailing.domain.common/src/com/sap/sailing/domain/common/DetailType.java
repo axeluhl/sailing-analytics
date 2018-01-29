@@ -75,7 +75,42 @@ public enum DetailType implements Serializable {
     RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START(2, DESCENDING),
     RACE_CALCULATED_TIME_TRAVELED(0, ASCENDING), RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD(0, ASCENDING),
     RACE_TIME_TRAVELED(0, ASCENDING), RACE_TIME_TRAVELED_UPWIND(0, ASCENDING), RACE_TIME_TRAVELED_DOWNWIND(0, ASCENDING), RACE_TIME_TRAVELED_REACHING(0, ASCENDING),
-    DISTANCE_TO_START_LINE(0, ASCENDING), BEAT_ANGLE(0, ASCENDING), COURSE_OVER_GROUND_TRUE_DEGREES(0, ASCENDING), TOTAL_SCORED_RACE_COUNT(0, ASCENDING);
+    DISTANCE_TO_START_LINE(0, ASCENDING), BEAT_ANGLE(0, ASCENDING), COURSE_OVER_GROUND_TRUE_DEGREES(0, ASCENDING), TOTAL_SCORED_RACE_COUNT(0, ASCENDING),
+    AWA(0, ASCENDING),
+    AWS(0, ASCENDING),
+    TWA(0, ASCENDING),
+    TWS(0, ASCENDING),
+    TWD(0, ASCENDING),
+    TARG_TWA(0, ASCENDING),
+    BOAT_SPEED(0, ASCENDING),
+    TARG_BOAT_SPEED(0, ASCENDING),
+    BS_SOG(0, ASCENDING),
+    SOG(0, ASCENDING),
+    COG(0, ASCENDING),
+    FORESTAY_LOAD(0, ASCENDING),
+    RAKE(0, ASCENDING),
+    COURSE(0, ASCENDING),
+    HEADING(0, ASCENDING),
+    VMG(0, ASCENDING),
+    VMG_TARG_VMG_DELTA(0, ASCENDING),
+    RATE_OF_TURN(0, ASCENDING),
+    RUDDER_ANGLE(0, ASCENDING),
+    HEEL(0, ASCENDING),
+    TARGET_HEEL(0, ASCENDING),
+    TIME_TO_PORT_LAYLINE(0, ASCENDING),
+    TIME_TO_STB_LAYLINE(0, ASCENDING),
+    DIST_TO_PORT_LAYLINE(0, ASCENDING),
+    DIST_TO_STB_LAYLINE(0, ASCENDING),
+    TIME_TO_GUN(0, ASCENDING),
+    TIME_TO_COMMITTEE_BOAT(0, ASCENDING),
+    TIME_TO_PIN(0, ASCENDING),
+    TIME_TO_BURN_TO_LINE(0, ASCENDING),
+    TIME_TO_BURN_TO_COMMITTEE_BOAT(0, ASCENDING),
+    TIME_TO_BURN_TO_PIN (0, ASCENDING),
+    DISTANCE_TO_COMMITTEE_BOAT(0, ASCENDING),
+    DISTANCE_TO_PIN(0, ASCENDING),
+    DISTANCE_BELOW_LINE(0, ASCENDING),
+    LINE_SQUARE_FOR_WIND_DIRECTION(0, ASCENDING);
     
     private int precision;
     
@@ -111,6 +146,46 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.BEAT_ANGLE);
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
+        return availableDetailsTypes;
+    }
+    
+    public static List<DetailType> getExpeditionTypes(){
+        List<DetailType> availableDetailsTypes = new ArrayList<>();
+        availableDetailsTypes.add(AWA);
+        availableDetailsTypes.add(AWS);
+        availableDetailsTypes.add(TWA);
+        availableDetailsTypes.add(TWS);
+        availableDetailsTypes.add(TWD);
+        availableDetailsTypes.add(TARG_TWA);
+        availableDetailsTypes.add(BOAT_SPEED);
+        availableDetailsTypes.add(TARG_BOAT_SPEED);
+        availableDetailsTypes.add(BS_SOG);
+        availableDetailsTypes.add(SOG);
+        availableDetailsTypes.add(COG);
+        availableDetailsTypes.add(FORESTAY_LOAD);
+        availableDetailsTypes.add(RAKE);
+        availableDetailsTypes.add(COURSE);
+        availableDetailsTypes.add(HEADING);
+        availableDetailsTypes.add(VMG);
+        availableDetailsTypes.add(VMG_TARG_VMG_DELTA);
+        availableDetailsTypes.add(RATE_OF_TURN);
+        availableDetailsTypes.add(RUDDER_ANGLE);
+        availableDetailsTypes.add(HEEL);
+        availableDetailsTypes.add(TARGET_HEEL);
+        availableDetailsTypes.add(TIME_TO_PORT_LAYLINE);
+        availableDetailsTypes.add(TIME_TO_STB_LAYLINE);
+        availableDetailsTypes.add(DIST_TO_PORT_LAYLINE);
+        availableDetailsTypes.add(DIST_TO_STB_LAYLINE);
+        availableDetailsTypes.add(TIME_TO_GUN);
+        availableDetailsTypes.add(TIME_TO_COMMITTEE_BOAT);
+        availableDetailsTypes.add(TIME_TO_PIN);
+        availableDetailsTypes.add(TIME_TO_BURN_TO_LINE);
+        availableDetailsTypes.add(TIME_TO_BURN_TO_COMMITTEE_BOAT);
+        availableDetailsTypes.add(TIME_TO_BURN_TO_PIN);
+        availableDetailsTypes.add(DISTANCE_TO_COMMITTEE_BOAT);
+        availableDetailsTypes.add(DISTANCE_TO_PIN);
+        availableDetailsTypes.add(DISTANCE_BELOW_LINE);
+        availableDetailsTypes.add(LINE_SQUARE_FOR_WIND_DIRECTION);
         return availableDetailsTypes;
     }
 
