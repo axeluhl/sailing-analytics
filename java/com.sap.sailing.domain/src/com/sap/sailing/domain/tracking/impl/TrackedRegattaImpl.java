@@ -55,6 +55,22 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     
     private transient ConcurrentMap<RaceListener, RaceListener> raceListeners;
     
+    /**
+     * This {@link WorkQueue} is used to do all event related work. This ensures that e.g. events are fired in order.
+     * The following cases need to be handles through this queue:
+     * <ul>
+     * <li>Firing events when adding/removing {@link TrackedRace} instances (see {@link #enqueEvent}). The list of
+     * listeners to fire the event to need to be the list of listeners existing when enqueuing the event. This ensures
+     * that newly added listeners only receive events after the initial {@link TrackedRace} instances are delivered to
+     * this listener.</li>
+     * <li>Firing events for the already existing {@link TrackedRace} instances when adding a new listener (see
+     * {@link #addRaceListener(RaceListener)}). This ensures that all events are correctly fired to this listener that
+     * are triggered after the listener was added while suppressing inconsistent events before/while the initial
+     * {@link TrackedRace} instances are delivered to this listener.</li>
+     * <li>Completing the future returned by {@link #removeRaceListener(RaceListener)} to ensure that the receiver gets
+     * to know when it is guaranteed that no more event will be fired to the listener.
+     * </ul>
+     */
     private transient WorkQueue eventQueue;
 
     public TrackedRegattaImpl(Regatta regatta) {

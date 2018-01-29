@@ -90,6 +90,10 @@ public interface TrackedRegatta extends Serializable {
      */
     void addRaceListener(RaceListener listener);
     
+    /**
+     * Removes the given listener and returns a {@link Future} that will be completed
+     * when it is guaranteed that no more events will be fired to the listener.
+     */
     Future<Boolean> removeRaceListener(RaceListener listener);
 
     int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
