@@ -18,8 +18,7 @@ class CreateTrainingViewController: UIViewController {
     
     weak var delegate: CreateTrainingViewControllerDelegate?
 
-    weak var trainingController: TrainingController!
-    weak var trainingCoreDataManager: TrainingCoreDataManager!
+    weak var coreDataManager: CoreDataManager!
 
     @IBOutlet var boatClassPickerView: UIPickerView!
     @IBOutlet var boatClassNameLabel: UILabel!
@@ -36,7 +35,6 @@ class CreateTrainingViewController: UIViewController {
     fileprivate func setup() {
         setupButtons()
         setupLocalization()
-        setupNavigationBar()
     }
     
     fileprivate func setupButtons() {
@@ -47,10 +45,6 @@ class CreateTrainingViewController: UIViewController {
         navigationItem.title = Translation.CreateTrainingView.Title.String
         boatClassNameLabel.text = Translation.CreateTrainingView.BoatClassNameLabel.Text.String
         createTrainingButton.setTitle(Translation.CreateTrainingView.CreateTrainingButton.Title.String, for: .normal)
-    }
-    
-    fileprivate func setupNavigationBar() {
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
 
     // MARK: - Login
@@ -112,7 +106,11 @@ class CreateTrainingViewController: UIViewController {
     }()
 
     fileprivate lazy var trainingCheckInController: TrainingCheckInController = {
-        return TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
+        return TrainingCheckInController(coreDataManager: self.coreDataManager)
+    }()
+
+    fileprivate lazy var trainingController: TrainingController = {
+        return TrainingController(coreDataManager: self.coreDataManager, baseURLString: Preferences.trainingEndpoint)
     }()
 
     // MARK: - Helper

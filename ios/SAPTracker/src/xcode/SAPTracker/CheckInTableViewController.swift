@@ -9,37 +9,21 @@
 import UIKit
 import CoreData
 
-protocol CheckInTableViewControllerDelegate: class {
-    
-    var coreDataManager: CoreDataManager { get }
-    
-    var checkInController: CheckInController { get }
-
-    var isFooterViewHidden: Bool { get }
-
-    func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn)
-    
-    func checkInTableViewController(
-        _ controller: CheckInTableViewController,
-        prepareForSegue segue: UIStoryboardSegue,
-        andCompetitorCheckIn competitorCheckIn: CompetitorCheckIn)
-    
-    func checkInTableViewController(
-        _ controller: CheckInTableViewController,
-        prepareForSegue segue: UIStoryboardSegue,
-        andMarkCheckIn markCheckIn: MarkCheckIn)
-    
-}
-
 class CheckInTableViewController: UIViewController {
-    
+
     struct CheckInSegue {
-        static let Competitor = "Competitor"
-        static let Mark = "Mark"
+        static let NewCheckIn = "NewCheckIn"
+        static let RegattaCompetitor = "RegattaCompetitor"
+        static let RegattaMark = "RegattaMark"
+        static let TrainingCompetitor = "TrainingCompetitor"
+        static let TrainingMark = "TrainingMark"
     }
-    
-    weak var delegate: CheckInTableViewControllerDelegate?
-    
+
+    struct CheckInSegues {
+        static let competitor = [CheckInSegue.RegattaCompetitor, CheckInSegue.TrainingCompetitor]
+        static let mark = [CheckInSegue.RegattaMark, CheckInSegue.TrainingMark]
+    }
+
     var segueCheckIn: CheckIn?
 
     // Strong reference needed to avoid deallocation when not attached to table view
@@ -53,13 +37,30 @@ class CheckInTableViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
+        subscribeForTrainingEndpointChangedNotifications()
     }
-    
+
+    deinit {
+        unsubscribeFromTrainingEndpointChangedNotifications()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tableViewDeselectRow()
+        titleView.setSubtitle(subtitle: signUpController.userName ?? "")
     }
-    
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        review()
+        subscribeForNewCheckInURLNotifications()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        unsubscribeFromNewCheckInURLNotifications()
+        super.viewWillDisappear(animated)
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         layout()
@@ -68,12 +69,26 @@ class CheckInTableViewController: UIViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
+        setupLocalization()
+        setupNavigationBar()
         setupTableView()
         setupTableViewDataSource()
         setupTableViewHeader()
         setupTableViewFooter()
     }
-    
+
+    fileprivate func setupLocalization() {
+        navigationItem.title = Translation.RegattaCheckInListView.Title.String
+        headerTitleLabel.text = Translation.RegattaCheckInListView.HeaderTitleLabel.Text.String
+        footerTextView.text = Translation.RegattaCheckInListView.FooterTextView.Text.String
+    }
+
+    fileprivate func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+        navigationItem.titleView = titleView
+        navigationController?.navigationBar.setNeedsLayout()
+    }
+
     fileprivate func setupTableView() {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 140
@@ -96,13 +111,169 @@ class CheckInTableViewController: UIViewController {
     }
 
     fileprivate func setupTableViewFooter() {
-        tableView.tableFooterView?.isHidden = delegate?.isFooterViewHidden ?? false
+        tableView.tableFooterView?.isHidden = false
+    }
+
+    // MARK: - Review
+
+    fileprivate func review() {
+        reviewTerms(completion: { [weak self] in
+            logInfo(name: "\(#function)", info: "Review terms done.")
+            self?.reviewCodeConvention(completion: { [weak self] in
+                logInfo(name: "\(#function)", info: "Review code convention done.")
+                self?.reviewGPSFixes(completion: { [weak self] in
+                    logInfo(name: "\(#function)", info: "Review GPS fixes done.")
+                    self?.reviewNewCheckIn(completion: { [weak self] (checkIn) in
+                        logInfo(name: "\(#function)", info: "Review new check-in done.")
+                        self?.performSegue(forCheckIn: checkIn)
+                    })
+                })
+            })
+        })
+    }
+
+    // MARK: 1. Review Terms
+
+    fileprivate func reviewTerms(completion: @escaping () -> Void) {
+        guard Preferences.termsAccepted == false else {
+            completion()
+            return
+        }
+        let alertController = UIAlertController(
+            title: Translation.RegattaCheckInListView.TermsAlert.Title.String,
+            message: Translation.RegattaCheckInListView.TermsAlert.Message.String,
+            preferredStyle: .alert
+        )
+        let showTermsAction = UIAlertAction(title: Translation.RegattaCheckInListView.TermsAlert.ShowTermsAction.Title.String, style: .default) { [weak self] (action) in
+            UIApplication.shared.openURL(URLs.Terms)
+            self?.reviewTerms(completion: completion) // Review terms until user accepted terms
+        }
+        let acceptTermsAction = UIAlertAction(title: Translation.RegattaCheckInListView.TermsAlert.AcceptTermsAction.Title.String, style: .default) { (action) in
+            Preferences.termsAccepted = true
+            completion() // Terms accepted
+        }
+        alertController.addAction(showTermsAction)
+        alertController.addAction(acceptTermsAction)
+        present(alertController, animated: true, completion: nil)
+    }
+
+    // MARK: 2. Review Code Convention
+
+    fileprivate func reviewCodeConvention(completion: @escaping () -> Void) {
+        #if DEBUG
+            guard Preferences.codeConventionRead == false else { completion(); return }
+            let alertController = UIAlertController(
+                title: "Code Convention",
+                message: "Please try to respect the code convention which is used for this project.",
+                preferredStyle: .alert
+            )
+            let showCodeConventionAction = UIAlertAction(title: "Code Convention", style: .default) { [weak self] (action) in
+                UIApplication.shared.openURL(URLs.CodeConvention)
+                self?.reviewCodeConvention(completion: completion)
+            }
+            let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                Preferences.codeConventionRead = true
+                completion()
+            }
+            alertController.addAction(showCodeConventionAction)
+            alertController.addAction(okAction)
+            present(alertController, animated: true, completion: nil)
+        #else
+            completion()
+        #endif
+    }
+
+    // MARK: 3. Review GPS Fixes
+
+    fileprivate func reviewGPSFixes(completion: @escaping () -> Void) {
+        SVProgressHUD.show()
+        let checkIns = coreDataManager.fetchCheckIns() ?? []
+        reviewGPSFixes(checkIns: checkIns) { [weak self] in
+            self?.reviewGPSFixesCompleted(completion: completion)
+        }
+    }
+
+    fileprivate func reviewGPSFixes(checkIns: [CheckIn], completion: @escaping () -> Void) {
+        guard checkIns.count > 0 else { completion(); return }
+        let gpsFixController = GPSFixController.init(checkIn: checkIns[0], coreDataManager: coreDataManager)
+        gpsFixController.sendAll(completion: { [weak self] (withSuccess) in
+            self?.reviewGPSFixes(checkIns: Array(checkIns[1..<checkIns.count]), completion: completion)
+        })
+    }
+
+    fileprivate func reviewGPSFixesCompleted(completion: () -> Void) {
+        SVProgressHUD.popActivity()
+        completion()
+    }
+
+    fileprivate func reviewNewCheckIn(completion: @escaping (_ checkIn: CheckIn?) -> Void) {
+        guard let urlString = Preferences.newCheckInURL else { completion(nil); return }
+        guard let checkInData = CheckInData(urlString: urlString) else { completion(nil); return }
+        regattaCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { (checkIn) in
+            Preferences.newCheckInURL = nil
+            completion(checkIn)
+        }) { (error) in
+            Preferences.newCheckInURL = nil // TODO: Ask user for retry, retry later or dismiss before deleting check-in url
+            completion(nil)
+        }
+    }
+
+    // MARK: - Notifications
+
+    fileprivate func subscribeForNewCheckInURLNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(CheckInTableViewController.newCheckInURLNotification(_:)),
+            name: NSNotification.Name(rawValue: Preferences.NotificationType.NewCheckInURLChanged),
+            object: nil
+        )
+    }
+
+    fileprivate func unsubscribeFromNewCheckInURLNotifications() {
+        NotificationCenter.default.removeObserver(
+            self,
+            name: NSNotification.Name(rawValue: Preferences.NotificationType.NewCheckInURLChanged),
+            object: nil
+        )
+    }
+
+    @objc fileprivate func newCheckInURLNotification(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
+            self.reviewNewCheckIn(completion: { checkIn in
+                logInfo(name: "\(#function)", info: "Review new check-in done.")
+                self.performSegue(forCheckIn: checkIn)
+            })
+        })
+    }
+
+    fileprivate func subscribeForTrainingEndpointChangedNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(trainingEndpointChanged(_:)),
+            name: NSNotification.Name(rawValue: Preferences.NotificationType.TrainingEndpointChanged),
+            object: nil
+        )
+    }
+
+    fileprivate func unsubscribeFromTrainingEndpointChangedNotifications() {
+        NotificationCenter.default.removeObserver(
+            self,
+            name: NSNotification.Name(rawValue: Preferences.NotificationType.TrainingEndpointChanged),
+            object: nil
+        )
+    }
+
+    @objc fileprivate func trainingEndpointChanged(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
+            guard let trainingEndpoint = notification.userInfo?[Preferences.UserInfo.TrainingEndpoint] as? String else { return }
+            self.signUpController = SignUpController(baseURLString: trainingEndpoint)
+        })
     }
 
     // MARK: - Layout
     
     fileprivate func layout() {
-        self.layoutFooterView()
+        layoutFooterView()
     }
     
     fileprivate func layoutFooterView() {
@@ -127,23 +298,31 @@ class CheckInTableViewController: UIViewController {
     
     func performSegue(forCheckIn checkIn: CheckIn?) {
         segueCheckIn = checkIn
-        guard segueCheckIn != nil else {
+        guard let checkIn = checkIn else {
             logInfo(name: "\(#function)", info: "check-in is nil")
             return
         }
-        if (segueCheckIn is CompetitorCheckIn) {
-            performSegue(withIdentifier: CheckInSegue.Competitor, sender: self)
-        } else if (segueCheckIn is MarkCheckIn) {
-            performSegue(withIdentifier: CheckInSegue.Mark, sender: self)
+        if checkIn is CompetitorCheckIn {
+            if checkIn.isTraining.boolValue {
+                performSegue(withIdentifier: CheckInSegue.TrainingCompetitor, sender: self)
+            } else {
+                performSegue(withIdentifier: CheckInSegue.RegattaCompetitor, sender: self)
+            }
+        } else if (checkIn is MarkCheckIn) {
+            if checkIn.isTraining.boolValue {
+                performSegue(withIdentifier: CheckInSegue.TrainingMark, sender: self)
+            } else {
+                performSegue(withIdentifier: CheckInSegue.TrainingCompetitor, sender: self)
+            }
         } else {
             logInfo(name: "\(#function)", info: "unknown check-in type")
         }
     }
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        if (identifier == CheckInSegue.Competitor) {
+        if CheckInSegues.competitor.contains(identifier) {
             return segueCheckIn != nil && segueCheckIn is CompetitorCheckIn
-        } else if (identifier == CheckInSegue.Mark) {
+        } else if CheckInSegues.mark.contains(identifier) {
             return segueCheckIn != nil && segueCheckIn is MarkCheckIn
         }
         return true
@@ -151,25 +330,83 @@ class CheckInTableViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
-        if (segue.identifier == CheckInSegue.Competitor) {
-            if let competitorCheckIn = segueCheckIn as? CompetitorCheckIn {
-                delegate?.checkInTableViewController(self, prepareForSegue: segue, andCompetitorCheckIn: competitorCheckIn)
-            }
-        } else if (segue.identifier == CheckInSegue.Mark) {
-            if let markCheckIn = segueCheckIn as? MarkCheckIn {
-                delegate?.checkInTableViewController(self, prepareForSegue: segue, andMarkCheckIn: markCheckIn)
+        if let identifier = segue.identifier {
+            if CheckInSegues.competitor.contains(identifier) {
+                if let competitorCheckIn = segueCheckIn as? CompetitorCheckIn {
+                    if let regattaCompetitorVC = segue.destination as? RegattaCompetitorViewController {
+                        regattaCompetitorVC.competitorCheckIn = competitorCheckIn
+                        regattaCompetitorVC.competitorCoreDataManager = coreDataManager
+                    } else if let trainingCompetitorVC = segue.destination as? TrainingCompetitorViewController {
+                        trainingCompetitorVC.competitorCheckIn = competitorCheckIn
+                        trainingCompetitorVC.competitorCoreDataManager = coreDataManager
+                    }                    
+                }
+            } else if CheckInSegues.mark.contains(identifier) {
+                if let markCheckIn = segueCheckIn as? MarkCheckIn {
+                    if let regattaMarkVC = segue.destination as? RegattaMarkViewController {
+                        regattaMarkVC.markCheckIn = markCheckIn
+                        regattaMarkVC.markCoreDataManager = coreDataManager
+                    } else if let trainingMarkVC = segue.destination as? TrainingMarkViewController {
+                        trainingMarkVC.markCheckIn = markCheckIn
+                        trainingMarkVC.markCoreDataManager = coreDataManager
+                    }
+                }
+            } else if (identifier == CheckInSegue.NewCheckIn) {
+                guard let newCheckInNC = segue.destination as? UINavigationController else { return }
+                guard let newCheckInVC = newCheckInNC.viewControllers[0] as? NewCheckInViewController else { return }
+                newCheckInVC.coreDataManager = coreDataManager
+                newCheckInVC.delegate = self
             }
         }
     }
-    
+
+    // MARK: - Actions
+
+    @IBAction func optionButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = sender as? UIBarButtonItem
+        }
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
+            self?.presentSettingsViewController()
+        }
+        let infoAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
+            self?.presentAboutViewController()
+        }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(infoAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+    }
+
     // MARK: - Properties
-        
+
+    fileprivate lazy var titleView: TitleView = {
+        return TitleView(
+            title: Translation.TrainingCheckInListView.Title.String,
+            subtitle: self.signUpController.userName ?? ""
+        )
+    }()
+
     lazy var fetchedResultsController: NSFetchedResultsController<CheckIn>? = {
-        let fetchedResultsController = self.delegate?.coreDataManager.checkInFetchedResultsController()
-        fetchedResultsController?.delegate = self
+        let fetchedResultsController = self.coreDataManager.checkInFetchedResultsController()
+        fetchedResultsController.delegate = self
         return fetchedResultsController
     }()
-    
+
+    lazy var regattaCheckInController: RegattaCheckInController = {
+        return RegattaCheckInController(coreDataManager: self.coreDataManager)
+    }()
+
+    lazy var signUpController: SignUpController = {
+        return SignUpController(baseURLString: Preferences.trainingEndpoint)
+    }()
+
+    lazy var coreDataManager: CoreDataManager = {
+        return CoreDataManager(name: "CoreData")
+    }()
+
 }
 
 // MARK: - UITableViewDataSource
@@ -183,11 +420,18 @@ extension CheckInTableViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") ?? UITableViewCell()
         if let checkIn = fetchedResultsController?.object(at: indexPath) {
-            delegate?.checkInTableViewController(self, configureCell: cell, forCheckIn: checkIn)
+            configureCell(cell, forCheckIn: checkIn)
         }
         return cell
     }
-    
+
+    func configureCell(_ cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
+        guard let regattaCheckInTableViewCell = cell as? CheckInTableViewCell else { return }
+        regattaCheckInTableViewCell.eventLabel.text = checkIn.event.name
+        regattaCheckInTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
+        regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
+    }
+
 }
 
 // MARK: - UITableViewDelegate
@@ -211,7 +455,7 @@ extension CheckInTableViewController: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
-    
+
     func controller(
         _ controller: NSFetchedResultsController<NSFetchRequestResult>,
         didChange object: Any,
@@ -227,7 +471,7 @@ extension CheckInTableViewController: NSFetchedResultsControllerDelegate {
         case .update:
             if let cell = tableView.cellForRow(at: indexPath!) {
                 if let checkIn = fetchedResultsController?.object(at: indexPath!) {
-                    delegate?.checkInTableViewController(self, configureCell: cell, forCheckIn: checkIn)
+                    configureCell(cell, forCheckIn: checkIn)
                 }
                 tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
             }
@@ -245,4 +489,14 @@ extension CheckInTableViewController: NSFetchedResultsControllerDelegate {
         setupTableViewFooter()
     }
     
+}
+
+// MARK: - NewCheckInViewControllerDelegate
+
+extension CheckInTableViewController: NewCheckInViewControllerDelegate {
+
+    func newCheckInViewController(_ controller: NewCheckInViewController, didCheckIn checkIn: CheckIn) {
+        performSegue(forCheckIn: checkIn)
+    }
+
 }

@@ -26,7 +26,14 @@ class CoreDataManager: NSObject {
         self.name = name
         super.init()
     }
-    
+
+    class var shared: CoreDataManager {
+        struct Singleton {
+            static let shared = CoreDataManager(name: "CoreData")
+        }
+        return Singleton.shared
+    }
+
     // MARK: - Fetch
     
     func fetchCheckIns() -> [CheckIn]? {

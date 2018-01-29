@@ -69,6 +69,7 @@ class SettingsViewController: UITableViewController {
 
     fileprivate func setupTrainingEndpointTextField() {
         trainingEndpointTextField.text = Preferences.trainingEndpoint
+        trainingEndpointTextField.delegate = self
     }
 
     // MARK: - Actions
@@ -106,4 +107,15 @@ class SettingsViewController: UITableViewController {
         return UITableViewAutomaticDimension
     }
     
+}
+
+// MARK: - <UITextFieldDelegate>
+
+extension SettingsViewController: UITextFieldDelegate {
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return false
+    }
+
 }

@@ -123,11 +123,18 @@ class Preferences: NSObject {
 
     class var trainingEndpoint: String {
         get {
-            return preferences.string(forKey: PreferenceKey.TrainingEndpoint) ?? Translation.Endpoint.Training.String
+            if let url = URL(string: preferences.string(forKey: PreferenceKey.TrainingEndpoint) ?? "") {
+                return url.absoluteString
+            } else {
+                return Translation.Endpoint.Training.String
+            }
         }
         set (value) {
-            guard let url = URL(string: value) else { return }
-            preferences.set(url.absoluteString, forKey:PreferenceKey.TrainingEndpoint)
+            if let url = URL(string: value) {
+                preferences.set(url.absoluteString, forKey: PreferenceKey.TrainingEndpoint)
+            } else {
+                preferences.set(Translation.Endpoint.Training.String, forKey: PreferenceKey.TrainingEndpoint)
+            }
             preferences.synchronize()
 
             // Send notification

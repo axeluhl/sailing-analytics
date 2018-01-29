@@ -1,5 +1,5 @@
 //
-//  RegattaCheckInTableViewCell.swift
+//  CheckInTableViewCell.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 26.07.16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class RegattaCheckInTableViewCell: UITableViewCell {
+class CheckInTableViewCell: UITableViewCell {
     
     @IBOutlet weak var eventLabel: UILabel!
     @IBOutlet weak var leaderboardLabel: UILabel!
