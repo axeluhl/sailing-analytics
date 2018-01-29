@@ -14,11 +14,11 @@ import java.util.Set;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import com.sap.sse.common.NamedWithID;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class User implements NamedWithID {
     private static final long serialVersionUID = 1788215575606546042L;
@@ -272,12 +272,17 @@ public class User implements NamedWithID {
     }
 
     public boolean hasPermission(String stringPermission, PermissionsForRoleProvider provider) {
-        if (hasPermission(stringPermission)) {
-            return true;
+        WildcardPermission requested = new WildcardPermission(stringPermission);
+        for(String permission:getPermissions()){
+            if (new WildcardPermission(permission).implies(requested)) {
+                return true;
+            }
         }
         for (String role : getRoles()) {
-            if (Util.contains(provider.getPermissions(role), stringPermission)) {
-                return true;
+            for(String permission:provider.getPermissions(role)){
+                if (new WildcardPermission(permission).implies(requested)) {
+                    return true;
+                }
             }
         }
         return false;
