@@ -78,7 +78,7 @@ public final class EventActionUtil {
             }
         }
         if (leaderboardGroups.isEmpty()) {
-            throw new DispatchException("The leaderboard is not part of the given event.");
+            throw new DispatchException("The leaderboard '" + leaderboardId + "' is not part of the given event '" + eventId + "'.");
         }
         return new LeaderboardContext(context, event, leaderboardGroups, leaderboard);
     }
