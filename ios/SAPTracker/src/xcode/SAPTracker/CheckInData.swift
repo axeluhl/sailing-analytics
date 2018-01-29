@@ -27,6 +27,7 @@ class CheckInData: NSObject {
     let leaderboardName: String
     let competitorID: String?
     let markID: String?
+    let isTraining: Bool
     let type: CheckInDataType
 
     var eventData = EventData()
@@ -38,13 +39,15 @@ class CheckInData: NSObject {
     init(serverURL: String,
          eventID: String,
          leaderboardName: String,
-         competitorID: String)
+         competitorID: String,
+         isTraining: Bool)
     {
         self.competitorID = competitorID
         self.eventID = eventID
         self.leaderboardName = leaderboardName
         self.markID = nil
         self.serverURL = serverURL
+        self.isTraining = isTraining
         self.type = CheckInDataType.competitor
         super.init()
     }
@@ -52,13 +55,15 @@ class CheckInData: NSObject {
     init(serverURL: String,
          eventID: String,
          leaderboardName: String,
-         markID: String)
+         markID: String,
+         isTraining: Bool)
     {
         self.competitorID = nil
         self.eventID = eventID
         self.leaderboardName = leaderboardName
         self.markID = markID
         self.serverURL = serverURL
+        self.isTraining = isTraining
         type = CheckInDataType.mark
         super.init()
     }
@@ -68,7 +73,8 @@ class CheckInData: NSObject {
             serverURL: competitorCheckIn.serverURL,
             eventID: competitorCheckIn.event.eventID,
             leaderboardName: competitorCheckIn.leaderboard.name,
-            competitorID: competitorCheckIn.competitorID
+            competitorID: competitorCheckIn.competitorID,
+            isTraining: competitorCheckIn.isTraining.boolValue
         )
     }
 
@@ -77,7 +83,8 @@ class CheckInData: NSObject {
             serverURL: markCheckIn.serverURL,
             eventID: markCheckIn.event.eventID,
             leaderboardName: markCheckIn.leaderboard.name,
-            markID: markCheckIn.markID
+            markID: markCheckIn.markID,
+            isTraining: markCheckIn.isTraining.boolValue
         )
     }
 
@@ -100,14 +107,16 @@ class CheckInData: NSObject {
                 serverURL: serverURL,
                 eventID: eventID,
                 leaderboardName: leaderboardName,
-                competitorID: competitorID
+                competitorID: competitorID,
+                isTraining: false
             )
         } else if let markID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.MarkID) {
             self.init(
                 serverURL: serverURL,
                 eventID: eventID,
                 leaderboardName: leaderboardName,
-                markID: markID
+                markID: markID,
+                isTraining: false
             )
         } else {
             logError(name: "\(#function)", error: "unknown check-in type")
@@ -141,7 +150,8 @@ class CheckInData: NSObject {
             serverURL: createTrainingData.serverURL,
             eventID: eventID,
             leaderboardName: leaderboardName,
-            competitorID: competitorID
+            competitorID: competitorID,
+            isTraining: true
         )
     }
     

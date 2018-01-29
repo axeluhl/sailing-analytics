@@ -730,6 +730,7 @@
 		C843D48B1EBCB36900250F01 /* SessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
 		C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = "CoreData2-3.xcmappingmodel"; sourceTree = "<group>"; };
 		C843D4901EC0A93600250F01 /* CoreData1-3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = "CoreData1-3.xcmappingmodel"; sourceTree = "<group>"; };
+		C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 4.xcdatamodel"; sourceTree = "<group>"; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C84936281D47645F000F30E8 /* RegattaCheckInTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCheckInTableViewCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -2401,11 +2402,12 @@
 		7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */,
 				C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */,
 				C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */,
 				7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */,
 			);
-			currentVersion = C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */;
+			currentVersion = C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */;
 			path = CoreData.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

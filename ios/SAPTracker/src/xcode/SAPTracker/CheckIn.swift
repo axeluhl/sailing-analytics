@@ -13,6 +13,7 @@ import CoreData
 class CheckIn: NSManagedObject {
 
     func updateWithCheckInData(checkInData: CheckInData) {
+        isTraining = NSNumber(booleanLiteral: checkInData.isTraining)
         serverURL = checkInData.serverURL
         event.updateWithEventData(eventData: checkInData.eventData)
         leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
