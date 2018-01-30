@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog;
+import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -79,15 +80,15 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private void doSlice() {
         if (visibleRange != null) {
-            sailingService.proposeSlicedRaceName(selectedRaceIdentifier, new AsyncCallback<String>() {
+            sailingService.prepareForSlicingOfRace(selectedRaceIdentifier, new AsyncCallback<SliceRacePreperationDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     Window.alert("Caught: " + caught.getMessage());
                 }
 
                 @Override
-                public void onSuccess(String proposedRaceName) {
-                    new SlicedRaceNameDialog(proposedRaceName, slicedRaceName -> {
+                public void onSuccess(SliceRacePreperationDTO sliceRacePreperatioData) {
+                    new SlicedRaceNameDialog(sliceRacePreperatioData, slicedRaceName -> {
                         sailingService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
                             
                             @Override
@@ -205,12 +206,15 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         
         private final TextBox raceNameInput;
         
-        public SlicedRaceNameDialog(String initialValue, Consumer<String> okCallback) {
+        public SlicedRaceNameDialog(final SliceRacePreperationDTO sliceRacePreperatioData, final Consumer<String> okCallback) {
             super("TODO: Slice race", "TODO: Please enter a name for the sliced race", StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), new Validator<String>() {
                 @Override
                 public String getErrorMessage(String valueToValidate) {
                     if (valueToValidate == null || valueToValidate.isEmpty()) {
                         return "TODO: the race name must not be empty";
+                    }
+                    if (sliceRacePreperatioData.getAlreadyUsedNames().contains(valueToValidate)) {
+                        return "The race name is already used in the same leaderboard";
                     }
                     return null;
                 }
@@ -224,7 +228,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                 public void cancel() {
                 }
             });
-            raceNameInput = createTextBox(initialValue);
+            raceNameInput = createTextBox(sliceRacePreperatioData.getProposedRaceName());
             raceNameInput.addAttachHandler(e -> {
                 if (e.isAttached()) {
                     Scheduler.get().scheduleDeferred(() -> raceNameInput.setFocus(true));
@@ -239,7 +243,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         
         @Override
         protected String getResult() {
-            return raceNameInput.getValue();
+            return raceNameInput.getValue().trim();
         }
     }
 }

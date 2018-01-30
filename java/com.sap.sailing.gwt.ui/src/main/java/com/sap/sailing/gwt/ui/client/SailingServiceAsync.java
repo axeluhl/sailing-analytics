@@ -79,6 +79,7 @@ import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
@@ -933,5 +934,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
             AsyncCallback<RegattaAndRaceIdentifier> callback);
 
-    void proposeSlicedRaceName(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<String> callback);
+    void prepareForSlicingOfRace(RegattaAndRaceIdentifier raceIdentifier,
+            AsyncCallback<SliceRacePreperationDTO> callback);
 }

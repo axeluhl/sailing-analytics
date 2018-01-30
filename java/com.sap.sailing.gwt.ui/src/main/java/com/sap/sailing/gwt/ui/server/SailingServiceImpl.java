@@ -403,6 +403,7 @@ import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
+import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -7000,13 +7001,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return false;
     }
     
-    public String proposeSlicedRaceName(final RegattaAndRaceIdentifier raceIdentifier) {
+    @Override
+    public SliceRacePreperationDTO prepareForSlicingOfRace(final RegattaAndRaceIdentifier raceIdentifier) {
         final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         
         String prefix = null;
         int currentCount = 0;
         final Pattern pattern = Pattern.compile("^([a-zA-Z]+)([0-9]+)$");
+        final HashSet<String> alreadyUsedRaceNames = new HashSet<>();
         for (RaceColumn column : regattaLeaderboard.getRaceColumns()) {
+            alreadyUsedRaceNames.add(column.getName());
             final Matcher matcher = pattern.matcher(column.getName());
             if (matcher.matches()) {
                 prefix = matcher.group(1);
@@ -7018,7 +7022,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             prefix = "R";
         }
         currentCount++;
-        return prefix + currentCount;
+        return new SliceRacePreperationDTO(prefix + currentCount, alreadyUsedRaceNames);
     }
     
     
@@ -7032,6 +7036,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final String trackedRaceName = newRaceColumnName;
         final RegattaIdentifier regattaIdentifier = new RegattaName(raceIdentifier.getRegattaName());
         final Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta.getRaceColumnByName(newRaceColumnName) != null) {
+            throw new RuntimeException("The race column name is already used in the given regatta");
+        }
         final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
         final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
         final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
