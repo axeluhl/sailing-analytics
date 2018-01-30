@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -17,6 +21,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -82,8 +87,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
                 @Override
                 public void onSuccess(String proposedRaceName) {
-                    final String slicedRaceName = Window.prompt("TODO: Race column name", proposedRaceName);
-                    if (slicedRaceName != null) {
+                    new SlicedRaceNameDialog(proposedRaceName, slicedRaceName -> {
                         sailingService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
                             
                             @Override
@@ -93,13 +97,13 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                             
                             @Override
                             public void onSuccess(RegattaAndRaceIdentifier result) {
-                                        new TrackedRaceCreationResultDialog("TODO: slice finished",
-                                                "TODO: slicing succeeded, you can show the sliced race using the links below",
-                                                eventId, result.getRegattaName(), result.getRaceName(),
-                                                leaderboardName, leaderboardGroupName).show();
+                                new TrackedRaceCreationResultDialog("TODO: slice finished",
+                                        "TODO: slicing succeeded, you can show the sliced race using the links below",
+                                        eventId, result.getRegattaName(), result.getRaceName(),
+                                        leaderboardName, leaderboardGroupName).show();
                             }
                         });
-                    }
+                    }).show();
                 }
             });
         }
@@ -196,5 +200,46 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     public String getId() {
         return lifecycle.getComponentId();
     }
+    
+    private static class SlicedRaceNameDialog extends DataEntryDialog<String> {
+        
+        private final TextBox raceNameInput;
+        
+        public SlicedRaceNameDialog(String initialValue, Consumer<String> okCallback) {
+            super("TODO: Slice race", "TODO: Please enter a name for the sliced race", StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), new Validator<String>() {
+                @Override
+                public String getErrorMessage(String valueToValidate) {
+                    if (valueToValidate == null || valueToValidate.isEmpty()) {
+                        return "TODO: the race name must not be empty";
+                    }
+                    return null;
+                }
+            }, new DialogCallback<String>() {
+                @Override
+                public void ok(String editedObject) {
+                    okCallback.accept(editedObject);
+                }
 
+                @Override
+                public void cancel() {
+                }
+            });
+            raceNameInput = createTextBox(initialValue);
+            raceNameInput.addAttachHandler(e -> {
+                if (e.isAttached()) {
+                    Scheduler.get().scheduleDeferred(() -> raceNameInput.setFocus(true));
+                }
+            });
+        }
+        
+        @Override
+        protected Widget getAdditionalWidget() {
+            return raceNameInput;
+        }
+        
+        @Override
+        protected String getResult() {
+            return raceNameInput.getValue();
+        }
+    }
 }
