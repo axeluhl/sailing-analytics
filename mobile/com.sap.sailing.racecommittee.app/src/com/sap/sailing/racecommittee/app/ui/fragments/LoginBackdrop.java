@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -378,8 +379,8 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 server = null;
                 if (exception instanceof UnauthorizedException) { // wrong credentials (access token)
                     server = exception.getMessage().split("=")[1];
-                }
-                if (exception instanceof IOException) { // connection error
+                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
+                } else if (exception instanceof IOException && !(exception instanceof FileNotFoundException)) { // connection error
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
                     builder.setTitle(R.string.hello_call_error_title);
                     builder.setMessage(R.string.hello_call_error_message);
@@ -397,8 +398,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                     });
                     builder.setCancelable(false);
                     builder.show();
-                } else { // unknown error -> show user credential input
-                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
                 }
             }
         }

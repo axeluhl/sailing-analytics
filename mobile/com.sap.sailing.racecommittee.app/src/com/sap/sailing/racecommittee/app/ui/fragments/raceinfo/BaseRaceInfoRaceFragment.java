@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.app.FragmentTransaction;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.IdRes;
-
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -12,7 +7,6 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -20,6 +14,11 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.FlagPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
+
+import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
@@ -107,6 +106,9 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     }
                     break;
 
+                case RUNNING:
+                    break;
+
                 default:
                     showMainContent();
                     break;
@@ -143,8 +145,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
             setupUi();
 
-            if (getRaceState().getStatus() == RaceLogRaceStatus.SCHEDULED) {
-                showMainContent();
+            switch (getRaceState().getStatus()) {
+                case SCHEDULED:
+                    showMainContent();
+                    break;
+
+                default:
+                    // nothing
+                    break;
             }
         }
 
