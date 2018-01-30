@@ -111,10 +111,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
-                if (result == null) {
-                    splitButtonUi.setVisible(false);
-                } 
-                boolean yesWeCan = result.booleanValue();
+                boolean yesWeCan = Boolean.TRUE.equals(result);
                 splitButtonUi.setVisible(yesWeCan);
                 if (yesWeCan) {
                     visibleRange = new TimeRangeImpl(new MillisecondsTimePoint(e.getRangeStart()), new MillisecondsTimePoint(e.getRangeEnd()));
