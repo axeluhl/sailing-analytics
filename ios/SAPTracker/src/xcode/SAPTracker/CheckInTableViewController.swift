@@ -97,6 +97,7 @@ class CheckInTableViewController: UIViewController {
     fileprivate func setupTableViewDataSource() {
         do {
             try fetchedResultsController?.performFetch()
+            tableView.reloadData()
         } catch {
             logError(name: "\(#function)", error: error)
         }
@@ -312,7 +313,7 @@ class CheckInTableViewController: UIViewController {
             if checkIn.isTraining.boolValue {
                 performSegue(withIdentifier: CheckInSegue.TrainingMark, sender: self)
             } else {
-                performSegue(withIdentifier: CheckInSegue.TrainingCompetitor, sender: self)
+                performSegue(withIdentifier: CheckInSegue.RegattaMark, sender: self)
             }
         } else {
             logInfo(name: "\(#function)", info: "unknown check-in type")
@@ -378,6 +379,43 @@ class CheckInTableViewController: UIViewController {
         alertController.addAction(infoAction)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
+    }
+
+    @IBAction func sortButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = sender as? UIBarButtonItem
+        }
+        let dateAction = UIAlertAction(title: "DATE", style: .default) { [weak self] action in
+            self?.sortByDate()
+        }
+        let leaderboardAction = UIAlertAction(title: "LEADERBOARD", style: .default) { [weak self] action in
+            self?.sortByLeaderboard()
+        }
+        let competitorAction = UIAlertAction(title: "COMPETITOR", style: .default) { [weak self] action in
+            self?.sortByCompetitor()
+        }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+        alertController.addAction(dateAction)
+        alertController.addAction(leaderboardAction)
+        alertController.addAction(competitorAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+    }
+
+    func sortByDate() {
+        fetchedResultsController?.fetchRequest.sortDescriptors = [NSSortDescriptor(key: "event.startDate", ascending: true)]
+        setupTableViewDataSource()
+    }
+
+    func sortByLeaderboard() {
+        fetchedResultsController?.fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderboard.name", ascending: true)]
+        setupTableViewDataSource()
+    }
+
+    func sortByCompetitor() {
+        fetchedResultsController?.fetchRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+        setupTableViewDataSource()
     }
 
     // MARK: - Properties

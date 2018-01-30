@@ -35,11 +35,20 @@
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Zc-4U-CG5">
+                                            <rect key="frame" x="276" y="11" width="79" height="30"/>
+                                            <state key="normal" title="Sort Button"/>
+                                            <connections>
+                                                <action selector="sortButtonTapped:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Kjf-c7-vcf"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                     <constraints>
+                                        <constraint firstItem="9Zc-4U-CG5" firstAttribute="centerY" secondItem="mhw-sY-eah" secondAttribute="centerY" id="GM1-6P-rTC"/>
                                         <constraint firstAttribute="height" constant="52" id="UBQ-1a-QOe"/>
                                         <constraint firstItem="lc2-1P-oDt" firstAttribute="top" secondItem="mhw-sY-eah" secondAttribute="top" id="UZv-cq-0C9"/>
                                         <constraint firstAttribute="bottom" secondItem="lc2-1P-oDt" secondAttribute="bottom" id="VXo-ML-3LT"/>
+                                        <constraint firstAttribute="trailing" secondItem="9Zc-4U-CG5" secondAttribute="trailing" constant="20" id="qhU-rv-Kv9"/>
                                         <constraint firstAttribute="trailing" secondItem="lc2-1P-oDt" secondAttribute="trailing" id="rfl-6n-9rQ"/>
                                         <constraint firstItem="lc2-1P-oDt" firstAttribute="leading" secondItem="mhw-sY-eah" secondAttribute="leading" constant="20" id="uqT-sU-EdP"/>
                                     </constraints>
