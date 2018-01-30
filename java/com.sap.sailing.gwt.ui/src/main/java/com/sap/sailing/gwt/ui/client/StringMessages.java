@@ -2050,4 +2050,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chooseAName();
     String unexpectedErrorDuringFileImport();
     String couldNotDownload(String url);
+    String sliceRace();
+    String slicingARaceWasSuccessful();
+    String enterNameForSlicedRace();
+    String raceNameIsRequired();
+    String raceNameIsAlreadyUsed();
+    String errorWhilePreparingToSliceARace();
+    String errorWhileSlicingARace();
 }

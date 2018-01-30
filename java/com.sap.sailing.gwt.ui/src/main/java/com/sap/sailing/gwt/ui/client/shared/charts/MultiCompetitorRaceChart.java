@@ -4,7 +4,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -45,10 +44,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
     private final MultiCompetitorRaceChartLifecycle lifecycle;
-    /**
-     * TODO: i18n button label
-     */
-    private final Button splitButtonUi = new Button("TODO: slice");  
+    private final Button splitButtonUi = new Button(StringMessages.INSTANCE.sliceRace());
 
     private TimeRange visibleRange;
     private final UUID eventId;
@@ -83,7 +79,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
             sailingService.prepareForSlicingOfRace(selectedRaceIdentifier, new AsyncCallback<SliceRacePreperationDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Caught: " + caught.getMessage());
+                    errorReporter.reportError(StringMessages.INSTANCE.errorWhilePreparingToSliceARace());
                 }
 
                 @Override
@@ -93,13 +89,13 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                             
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert("Caught: " + caught.getMessage());
+                                errorReporter.reportError(StringMessages.INSTANCE.errorWhileSlicingARace());
                             }
                             
                             @Override
                             public void onSuccess(RegattaAndRaceIdentifier result) {
-                                new TrackedRaceCreationResultDialog("TODO: slice finished",
-                                        "TODO: slicing succeeded, you can show the sliced race using the links below",
+                                new TrackedRaceCreationResultDialog(StringMessages.INSTANCE.sliceRace(),
+                                        StringMessages.INSTANCE.slicingARaceWasSuccessful(),
                                         eventId, result.getRegattaName(), result.getRaceName(),
                                         leaderboardName, leaderboardGroupName).show();
                             }
@@ -207,14 +203,14 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         private final TextBox raceNameInput;
         
         public SlicedRaceNameDialog(final SliceRacePreperationDTO sliceRacePreperatioData, final Consumer<String> okCallback) {
-            super("TODO: Slice race", "TODO: Please enter a name for the sliced race", StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), new Validator<String>() {
+            super(StringMessages.INSTANCE.sliceRace(), StringMessages.INSTANCE.enterNameForSlicedRace(), StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), new Validator<String>() {
                 @Override
                 public String getErrorMessage(String valueToValidate) {
                     if (valueToValidate == null || valueToValidate.isEmpty()) {
-                        return "TODO: the race name must not be empty";
+                        return StringMessages.INSTANCE.raceNameIsRequired();
                     }
                     if (sliceRacePreperatioData.getAlreadyUsedNames().contains(valueToValidate)) {
-                        return "The race name is already used in the same leaderboard";
+                        return StringMessages.INSTANCE.raceNameIsAlreadyUsed();
                     }
                     return null;
                 }
