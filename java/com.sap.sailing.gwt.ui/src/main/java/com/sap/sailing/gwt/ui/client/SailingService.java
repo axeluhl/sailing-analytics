@@ -713,4 +713,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier);
     
     RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo);
+
+    String proposeSlicedRaceName(RegattaAndRaceIdentifier raceIdentifier);
 }

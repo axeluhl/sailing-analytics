@@ -69,22 +69,32 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private void doSlice() {
         if (visibleRange != null) {
-            String slicedRaceName = Window.prompt("TODO: Race column name", "Slice");
-            if (slicedRaceName != null) {
-                sailingService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Caught: " + caught.getMessage());
+            sailingService.proposeSlicedRaceName(selectedRaceIdentifier, new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Caught: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(String proposedRaceName) {
+                    final String slicedRaceName = Window.prompt("TODO: Race column name", proposedRaceName);
+                    if (slicedRaceName != null) {
+                        sailingService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
+                            
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert("Caught: " + caught.getMessage());
+                            }
+                            
+                            @Override
+                            public void onSuccess(RegattaAndRaceIdentifier result) {
+                                // TODO: goto result?!?
+                                
+                            }
+                        });
                     }
-                    
-                    @Override
-                    public void onSuccess(RegattaAndRaceIdentifier result) {
-                        // TODO: goto result?!?
-                        
-                    }
-                });
-            }
+                }
+            });
         }
     }
     

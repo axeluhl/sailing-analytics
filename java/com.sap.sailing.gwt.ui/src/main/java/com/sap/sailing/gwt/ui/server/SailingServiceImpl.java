@@ -7000,6 +7000,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return false;
     }
     
+    public String proposeSlicedRaceName(final RegattaAndRaceIdentifier raceIdentifier) {
+        final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
+        
+        String prefix = null;
+        int currentCount = 0;
+        final Pattern pattern = Pattern.compile("^([a-zA-Z]+)([0-9]+)$");
+        for (RaceColumn column : regattaLeaderboard.getRaceColumns()) {
+            final Matcher matcher = pattern.matcher(column.getName());
+            if (matcher.matches()) {
+                prefix = matcher.group(1);
+                currentCount = Integer.parseInt(matcher.group(2));
+            }
+        }
+        
+        if (prefix == null) {
+            prefix = "R";
+        }
+        currentCount++;
+        return prefix + currentCount;
+    }
+    
+    
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
             TimePoint sliceFrom, TimePoint sliceTo) {
@@ -7155,6 +7177,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (Exception e) {
             throw new RuntimeException("Error while slicing race");
         }
-        
     }
 }

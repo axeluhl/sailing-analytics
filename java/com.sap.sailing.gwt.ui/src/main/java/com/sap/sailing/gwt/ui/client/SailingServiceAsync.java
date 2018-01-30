@@ -932,4 +932,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
             AsyncCallback<RegattaAndRaceIdentifier> callback);
+
+    void proposeSlicedRaceName(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<String> callback);
 }
