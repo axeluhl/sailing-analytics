@@ -33,14 +33,21 @@ class CreateTrainingViewController: UIViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
+        setupBoatClassPickerView()
         setupButtons()
         setupLocalization()
     }
-    
+
+    fileprivate func setupBoatClassPickerView() {
+        if let row = BoatClassNames.index(of: Preferences.boatClassName) {
+            boatClassPickerView.selectRow(row, inComponent: 0, animated: true)
+        }
+    }
+
     fileprivate func setupButtons() {
         makeBlue(button: createTrainingButton)
     }
-    
+
     fileprivate func setupLocalization() {
         navigationItem.title = Translation.CreateTrainingView.Title.String
         boatClassNameLabel.text = Translation.CreateTrainingView.BoatClassNameLabel.Text.String
@@ -82,6 +89,7 @@ class CreateTrainingViewController: UIViewController {
     {
         SVProgressHUD.show()
         self.trainingController.createTraining(forBoatClassName: boatClassName, sailID: sailID, nationality: nationality, success: { checkInData in
+            Preferences.boatClassName = boatClassName
             self.trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] (checkIn) in
                 SVProgressHUD.dismiss()
                 if let strongSelf = self {

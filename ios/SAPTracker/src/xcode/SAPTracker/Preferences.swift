@@ -26,6 +26,7 @@ class Preferences: NSObject {
         static let ActiveTrainingRaceData = "ActiveTrainingRaceData"
         static let CodeConventionRead = "CodeConventionRead"
         static let BatterySaving = "BatterySaving"
+        static let BoatClassName = "BoatClassName"
         static let NewCheckInURL = "NewCheckInURL"
         static let TrainingEndpoint = "TrainingEndpoint"
         static let TermsAccepted = "TermsAccepted"
@@ -120,6 +121,20 @@ class Preferences: NSObject {
             NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
         }
     }
+
+    // MARK: - BoatClassName
+
+    class var boatClassName: String {
+        get {
+            return preferences.string(forKey: PreferenceKey.BoatClassName) ?? ""
+        }
+        set(value) {
+            preferences.set(value, forKey: PreferenceKey.BoatClassName)
+            preferences.synchronize()
+        }
+    }
+
+    // MARK: - TrainingEndpoint
 
     class var trainingEndpoint: String {
         get {
