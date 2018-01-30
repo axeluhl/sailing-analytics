@@ -361,7 +361,7 @@ public class RaceBoardPanel
                     sailingService,
                     asyncActionsExecutor,
                     competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomModel, stringMessages,
-                    errorReporter, true, true, leaderboardGroupName, leaderboardName);
+                    errorReporter, true, true, leaderboardGroupName, leaderboardName, eventId);
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);

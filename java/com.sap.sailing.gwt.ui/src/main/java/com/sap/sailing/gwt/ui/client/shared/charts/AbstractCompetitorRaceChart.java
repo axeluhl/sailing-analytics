@@ -94,8 +94,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     private boolean compactChart;
     private final boolean allowTimeAdjust;
-    private final String leaderboardGroupName;
-    private final String leaderboardName;
+    protected final String leaderboardGroupName;
+    protected final String leaderboardName;
     private long stepSizeInMillis = DEFAULT_STEPSIZE;
     private final Map<Pair<CompetitorDTO, DetailType>, Series> dataSeriesForDetailTypeAndCompetitor = new HashMap<>();
     private final Map<Pair<CompetitorDTO, DetailType>, Series> markPassingSeriesByCompetitor = new HashMap<>();

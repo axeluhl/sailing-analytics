@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.UUID;
+
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -9,6 +11,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -39,9 +42,10 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     /**
      * TODO: i18n button label
      */
-    private final Button splitButtonUi = new Button("SPLIT");  
+    private final Button splitButtonUi = new Button("TODO: slice");  
 
     private TimeRange visibleRange;
+    private final UUID eventId;
     
     /**
      * Creates a Chart used for example in the Raceboard to display various additional data.
@@ -53,13 +57,14 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
-            final String leaderboardGroupName, String leaderboardName) {
+            final String leaderboardGroupName, String leaderboardName, UUID eventId) {
         super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
                 selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter,
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
         this.lifecycle = lifecycle;
+        this.eventId = eventId;
         
         splitButtonUi.setVisible(false);
         addChartZoomChangedHandler((e)->checkIfMaySliceSelectedRegattaAndRace(e));
@@ -88,8 +93,10 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                             
                             @Override
                             public void onSuccess(RegattaAndRaceIdentifier result) {
-                                // TODO: goto result?!?
-                                
+                                        new TrackedRaceCreationResultDialog("TODO: slice finished",
+                                                "TODO: slicing succeeded, you can show the sliced race using the links below",
+                                                eventId, result.getRegattaName(), result.getRaceName(),
+                                                leaderboardName, leaderboardGroupName).show();
                             }
                         });
                     }
