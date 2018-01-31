@@ -6,13 +6,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
-import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
-import com.sap.sailing.gwt.home.mobile.places.morelogininformation.MoreLoginInformationActivity;
+import com.sap.sailing.gwt.home.mobile.places.events.EventsActivity;
+import com.sap.sailing.gwt.home.mobile.places.morelogininformation.MoreLoginInformationActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.SeriesActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.solutions.SolutionsActivityProxy;
-import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.mobile.places.start.StartActivity;
 import com.sap.sailing.gwt.home.mobile.places.user.authentication.AuthenticationActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.user.authentication.AuthenticationPlace;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.UserProfileActivityProxy;
@@ -55,9 +55,9 @@ public class MobileActivityMapper implements ActivityMapper {
         if (place instanceof ErrorPlace) {
             return new ErrorActivityProxy((ErrorPlace) place, clientFactory);
         } else if (place instanceof StartPlace) {
-            return new StartActivityProxy((StartPlace) place, clientFactory);
+            return new StartActivity((StartPlace) place, clientFactory);
         } else if (place instanceof EventsPlace) {
-            return new EventsActivityProxy((EventsPlace) place, clientFactory);
+            return new EventsActivity((EventsPlace) place, clientFactory);
         } else if (place instanceof AbstractEventPlace) {
             return new EventActivityProxy((AbstractEventPlace) place, clientFactory);
         } else if (place instanceof SeriesMiniOverallLeaderboardPlace) {
@@ -78,8 +78,6 @@ public class MobileActivityMapper implements ActivityMapper {
             return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
-        } else if (place instanceof AuthenticationPlace) {
-            return new AuthenticationActivityProxy((AuthenticationPlace) place, clientFactory);
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else if (place instanceof PasswordResetPlace) {
@@ -87,7 +85,7 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof ImprintPlace) {
             return new ImprintActivityProxy((ImprintPlace) place);
         } else if (place instanceof MoreLoginInformationPlace) {
-            return new MoreLoginInformationActivity(place);
+            return new MoreLoginInformationActivityProxy((MoreLoginInformationPlace) place, clientFactory);
         } else {
             return null;
         }

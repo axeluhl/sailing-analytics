@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.github.gwtbootstrap.client.ui.ProgressBar;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -22,6 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -36,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.controls.progressbar.CustomProgressBar;
 
 public class MasterDataImportPanel extends VerticalPanel {
 
@@ -125,12 +125,12 @@ public class MasterDataImportPanel extends VerticalPanel {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
-        final ProgressBar overallProgressBar = new ProgressBar(Style.ANIMATED);
+        final CustomProgressBar overallProgressBar = CustomProgressBar.determinate();
         overallProgressBar.ensureDebugId("overallProgressBar");
         this.add(overallProgressBar);
         final Label subProgressName = new Label();
         this.add(subProgressName);
-        final ProgressBar subProgressBar = new ProgressBar(Style.ANIMATED);
+        final CustomProgressBar subProgressBar = CustomProgressBar.determinate();
         this.add(subProgressBar);
         if (groupNames.length >= 1) {
             disableAllButtons();
@@ -183,12 +183,10 @@ public class MasterDataImportPanel extends VerticalPanel {
                                                                 subProgressName, subProgressBar);
                                                         showCreationMessage(creationCount);
                                                     } else {
-                                                        overallProgressBar.setPercent((int) (result
-                                                                .getOverallProgressPct() * 100));
+                                                        overallProgressBar.setValue(result.getOverallProgressPct());
                                                         subProgressName.setText(result.getCurrentSubProgress()
                                                                 .getMessage(stringMessages));
-                                                        subProgressBar.setPercent((int) (result
-                                                                .getCurrentSubProgressPct() * 100));
+                                                        subProgressBar.setValue(result.getCurrentSubProgressPct());
                                                     }
                                                 }
                                             }
@@ -415,12 +413,8 @@ public class MasterDataImportPanel extends VerticalPanel {
         changeButtonStateAccordingToApplicationState();
     }
 
-    private void deleteProgressIndication(final Label overallName, final ProgressBar overallProgressBar,
-            final Label subProgressName, final ProgressBar subProgressBar) {
-        this.remove(overallProgressBar);
-        this.remove(subProgressBar);
-        this.remove(subProgressName);
-        this.remove(overallName);
+    private void deleteProgressIndication(IsWidget... widgetsToRemove) {
+        Arrays.asList(widgetsToRemove).forEach(this::remove);
     }
 
 }

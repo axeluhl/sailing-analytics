@@ -34,6 +34,15 @@ public interface Bearing extends Serializable, Comparable<Bearing> {
      * and <code>350.getDifferenceTo(10)==20</code>, and <code>10.getDifferenceTo(350)==-20</code>
      */
     Bearing getDifferenceTo(Bearing b);
+    
+    /**
+     * Like {@link #getDifferenceTo(Bearing)}, with the exception that the absolute number of degrees of the resulting
+     * bearing will be > 180 in cases, when abs(lastDifference.getDegrees() - getDifferenceTo(b)) >= 180). Especially
+     * for penalty circles, it is more likely to have a course change step sequence like 20, 70, 120, 200, 90, 20 which
+     * produces 520 degrees total course change than a sequence with 20, 70, 120, -160, 90, 20 which produces 160
+     * degrees total course change.
+     */
+    Bearing getDifferenceTo(Bearing b, Bearing lastDifference);
 
     /**
      * Finds the middle between this bearing and the <code>other</code> bearing. For degree differences

@@ -38,25 +38,21 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     
     protected BooleanSetting showCompetitorSailIdColumn;
     protected BooleanSetting showCompetitorFullNameColumn;
-    /**
-     * Show a column with total number of races completed
-     */
-    protected BooleanSetting showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
     
     @Override
     protected void addChildSettings() {
         isShowCompetitorNationality = new BooleanSetting("showCompetitorNationality", this, false);
-        List<DetailType> maneuverDetails = new ArrayList<DetailType>();
+        List<DetailType> maneuverDetails = new ArrayList<>();
         maneuverDetails.add(DetailType.TACK);
         maneuverDetails.add(DetailType.JIBE);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
         maneuverDetailsToShow = new EnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOf);
-        List<DetailType> legDetails = new ArrayList<DetailType>();
+        List<DetailType> legDetails = new ArrayList<>();
         legDetails.add(DetailType.DISTANCE_TRAVELED);
         legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.RANK_GAIN);
         legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOf);
-        List<DetailType> raceDetails = new ArrayList<DetailType>();
+        List<DetailType> raceDetails = new ArrayList<>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
         raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOf);
         List<DetailType> overallDetails = new ArrayList<>();
@@ -66,7 +62,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
-        showOverallColumnWithNumberOfRacesCompletedPerCompetitor = new BooleanSetting("showOverallColumnWithNumberOfRacesCompletedPerCompetitor", this, false);
     }
     
     public LeaderboardSettings() {
@@ -77,10 +72,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
-            Long delayBetweenAutoAdvancesInMilliseconds, 
-            boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
-            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
-            boolean isCompetitorNationalityColumnVisible) {
+            Long delayBetweenAutoAdvancesInMilliseconds, boolean showAddedScores, boolean showCompetitorSailIdColumn,
+            boolean showCompetitorFullNameColumn, boolean isCompetitorNationalityColumnVisible) {
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
         this.overallDetailsToShow.setValues(overallDetailsToShow);
@@ -89,7 +82,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         this.showAddedScores.setValue(showAddedScores);
         this.showCompetitorSailIdColumn.setValue(showCompetitorSailIdColumn);
         this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
-        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(showOverallColumnWithNumberOfRacesCompletedPerCompetitor);
         this.isShowCompetitorNationality.setValue(isCompetitorNationalityColumnVisible);
     }
   
@@ -132,10 +124,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
 
     public boolean isShowAddedScores() {
         return showAddedScores.getValue();
-    }
-    
-    public boolean isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor() {
-        return showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getValue();
     }
     
     public boolean isShowCompetitorSailIdColumn() {

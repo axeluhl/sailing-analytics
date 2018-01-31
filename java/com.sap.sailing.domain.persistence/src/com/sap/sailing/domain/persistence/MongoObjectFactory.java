@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -167,7 +168,7 @@ public interface MongoObjectFactory {
      * 
      * @see #addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
-    void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params);
+    void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) throws MalformedURLException;
     
     /**
      * Updates the database such that the next call to

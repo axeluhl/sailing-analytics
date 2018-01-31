@@ -148,7 +148,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertManeuver(maneuvers, ManeuverType.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:28:21")), TACK_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.TACK,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:31:29")), TACK_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:31:36")), TACK_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:38:00")), TACK_TOLERANCE);
 

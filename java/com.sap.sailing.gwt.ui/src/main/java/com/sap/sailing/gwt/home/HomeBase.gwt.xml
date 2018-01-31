@@ -22,10 +22,6 @@
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
   	<inherits name='com.google.gwt.maps.Maps' />
   	
-  	<!--  Bootstrap API -->
-  	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-  	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-
     <!-- module containing locale configuration -->
 	<inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 	
@@ -42,6 +38,7 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceActions'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceSimulator'/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
+    <!-- TODO: probably only used for flag images. Move RegattaRaceStatesFlagsResources to shared -->
 	<inherits name="com.sap.sailing.gwt.regattaoverview.SourceRegattaOverview"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
     <inherits name="com.sap.sailing.gwt.ui.SourceRaceboard"/>

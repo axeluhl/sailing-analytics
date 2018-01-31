@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -609,7 +610,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.markPassingReceived(competitor, oldMarkPassings, markPassings));
     }
     
-    private void notifyListeners(DynamicSensorFixTrack<Competitor, ?> track) {
+    private void notifyListenersAboutSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
         notifyListeners(listener -> listener.competitorSensorTrackAdded(track));
     }
     
@@ -1206,7 +1207,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    protected <FixT extends SensorFix> void addSensorTrackInternal(Pair<Competitor, String> key,
+    protected <FixT extends SensorFix> Optional<Runnable> addSensorTrackInternal(Pair<Competitor, String> key,
             DynamicSensorFixTrack<Competitor, FixT> track) {
         super.addSensorTrackInternal(key, track);
         track.addListener(new SensorFixTrackListener<Competitor, FixT>() {
@@ -1222,6 +1223,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 notifyListeners(item, trackName, fix);
             }
         });
-        notifyListeners(track);
+        return Optional.of(()->notifyListenersAboutSensorTrackAdded(track));
     }
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -45,11 +46,13 @@ import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.test.PositionAssert;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.CompetitorBravoFixTrackImpl;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
@@ -136,6 +139,25 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         } finally {
             competitorTrack.unlockAfterRead();
         }
+    }
+
+    /**
+     * See also bug4387: test that after replicating the TrackedRace the CompetitorBravoFixTrackImpl's gpsTrack object
+     * points to the track from the TrackedRace to which the CompetitorBravoFixTrackImpl belongs.
+     */
+    @Test
+    public void testBravoFixTrackReplication() throws InterruptedException {
+        trackedRace.getOrCreateSensorTrack(competitor, BravoFixTrack.TRACK_NAME, () -> new CompetitorBravoFixTrackImpl(competitor, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ false,
+                trackedRace.getTrack(competitor)));
+        Thread.sleep(1000);
+        DynamicTrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        Competitor replicaCompetitor = replicaTrackedRace.getRace().getCompetitors().iterator().next();
+        assertNotNull(replicaCompetitor);
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = replicaTrackedRace.getTrack(replicaCompetitor);
+        CompetitorBravoFixTrackImpl competitorSensorTrack = replicaTrackedRace.getOrCreateSensorTrack(
+                replicaCompetitor, BravoFixTrack.TRACK_NAME, () -> new CompetitorBravoFixTrackImpl(replicaCompetitor, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ false,
+                        replicaTrackedRace.getTrack(replicaCompetitor)));
+        assertSame(competitorTrack, competitorSensorTrack.getGpsTrack());
     }
 
     @Test

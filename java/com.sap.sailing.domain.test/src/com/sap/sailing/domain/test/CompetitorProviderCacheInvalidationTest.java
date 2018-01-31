@@ -207,27 +207,29 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         for (Competitor c : compLists[1]) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), 1, c));
         }
+        Set<Competitor> allCompetitors = new HashSet<>();
+        allCompetitors.addAll(compLists[0]);
+        allCompetitors.addAll(compLists[1]);
         // expected are only the competitors in the RaceLog, because only one RaceColumn is
         // registered, which has the competitors registered in the RaceLog.
-        assertRegattaAndRaceCompetitors(new HashSet<>(compLists[1]));
+        assertRegattaAndRaceCompetitors(allCompetitors, new HashSet<>(compLists[1]));
         // Now we revoke that the race log provides the competitors for R1; the competitors should then
         // snap back to those competitors taken from the regatta log for both, the rentire leaderboard
         // as well as for the race column
         raceLog.revokeEvent(author, usesCompetitorsFromRaceLogEvent);
-        assertRegattaAndRaceCompetitors(new HashSet<>(compLists[0]));
+        assertRegattaAndRaceCompetitors(new HashSet<>(compLists[0]), new HashSet<>(compLists[0]));
         // And now re-introduce per-race competitors and validate again that the cache adjusts properly:
         raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID.randomUUID(), passId));
-        assertRegattaAndRaceCompetitors(new HashSet<>(compLists[1]));
+        assertRegattaAndRaceCompetitors(allCompetitors, new HashSet<>(compLists[1]));
     }
 
-    private void assertRegattaAndRaceCompetitors(Set<Competitor> expected) {
+    private void assertRegattaAndRaceCompetitors(Set<Competitor> expectedAllCompetitors, Set<Competitor> expectedForRace) {
         Set<Competitor> actual = new HashSet<>();
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(), actual);
-        assertEquals(expected, actual);
+        assertEquals(expectedAllCompetitors, actual);
         Set<Competitor> actualForRace = new HashSet<>();
         
-        //For the race only the competitors registered on RaceLog as RaceLogUseCompetitorsFromRaceLogEvent is present
-        Set<Competitor> expectedForRace = new HashSet<>(expected);
+        // For the race only the competitors registered on RaceLog as RaceLogUseCompetitorsFromRaceLogEvent is present
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(
                 flexibleLeaderboard.getRaceColumnByName("R1"),
                 flexibleLeaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), actualForRace);

@@ -30,7 +30,7 @@
           </nav>
         </div>
         <div ui:field="searchUi" class="{local_res.css.header_search}">
-          <img src="images/mobile/search-icon.svg"  class="{local_res.css.header_search_icon}"></img>
+          <img src="{local_res.search.getSafeUri}" class="{local_res.css.header_search_icon}"></img>
         </div>
 <!--         <div class="{local_res.css.header_searchbox}"> -->
 <!--           <form action="search-results.html" name="sitesearch" autocomplete="off" class="{local_res.css.header_searchbox_form}"> -->

@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -38,7 +39,11 @@ import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -116,7 +121,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
      * Once the {@link #getDistanceTraveled(TimePoint, TimePoint)} has computed its value, it adds the result to the
      * cache.
      */
-    private transient DistanceCache distanceCache;
+    private transient TimeRangeCache<Distance> distanceCache;
     
     private transient MaxSpeedCache<ItemType, FixType> maxSpeedCache;
     
@@ -155,7 +160,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new TrackListenerCollection<ItemType, FixType, GPSTrackListener<ItemType,FixType>>();
-        this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
+        this.distanceCache = new TimeRangeCache<>(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = createMaxSpeedCache();
         this.validityCachingSuspended = false;
         this.losslessCompaction = losslessCompaction;
@@ -190,7 +195,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        distanceCache = new DistanceCache(getTrackedItem().toString());
+        distanceCache = new TimeRangeCache<>(getTrackedItem().toString());
         maxSpeedCache = createMaxSpeedCache();
     }
     
@@ -506,76 +511,33 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
 
     @Override
     public Distance getDistanceTraveled(TimePoint from, TimePoint to) {
-        return getDistanceTraveledRecursively(from, to, 0);
-    }
-    
-    private Distance getDistanceTraveledRecursively(TimePoint from, TimePoint to, int recursionDepth) {
-        Distance result;
-        if (!from.before(to)) {
-            result = Distance.NULL;
-        } else {
-            boolean perfectCacheHit = false;
-            lockForRead();
-            try {
-                Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache()
-                        .getEarliestFromAndDistanceAtOrAfterFrom(from, to);
-                if (bestCacheEntry != null) {
-                    perfectCacheHit = true; // potentially a cache hit; but if it doesn't span the full interval, it's not perfect; see below
-                    // compute the missing stretches between best cache entry's "from" and our "from" and the cache
-                    // entry's "to" and our "to"
-                    Distance distanceFromFromToBeginningOfCacheEntry = Distance.NULL;
-                    Distance distanceFromEndOfCacheEntryToTo = Distance.NULL;
-                    if (!bestCacheEntry.getB().getA().equals(from)) {
-                        assert bestCacheEntry.getB().getA().after(from);
-                        perfectCacheHit = false;
-                        distanceFromFromToBeginningOfCacheEntry = getDistanceTraveledRecursively(from, bestCacheEntry
-                                .getB().getA(), recursionDepth + 1);
-                    }
-                    if (!bestCacheEntry.getA().equals(to)) {
-                        assert bestCacheEntry.getA().before(to);
-                        perfectCacheHit = false;
-                        distanceFromEndOfCacheEntryToTo = getDistanceTraveledRecursively(bestCacheEntry.getA(), to,
-                                recursionDepth + 1);
-                    }
-                    result = distanceFromFromToBeginningOfCacheEntry.add(bestCacheEntry.getB().getB()).add(
-                            distanceFromEndOfCacheEntryToTo);
-                } else {
-                    double distanceInNauticalMiles = 0;
-                    if (from.compareTo(to) < 0) {
+        return getValueSum(from, to, /* nullElement */ Distance.NULL, Distance::add, getDistanceCache(),
+                /* valueCalculator */ new Track.TimeRangeValueCalculator<Distance>() {
+                    @Override
+                    public Distance calculate(TimePoint from, TimePoint to) {
                         // getEstimatedPosition's current implementation returns a position equal to that of a fix at
                         // "from" if there is one with exactly that time stamp
+                        Distance distance = Distance.NULL;
                         Position fromPos = getEstimatedPosition(from, /* extrapolate */false);
-                        if (fromPos == null) {
-                            result = Distance.NULL;
-                        } else {
+                        if (fromPos != null) {
                             // TODO bug 4122: idea: use the subset to determine fromPos and toPos in one go, eliminating two expensive getEstimatedPosition calls
                             NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
                             /* fromInclusive */false, new DummyGPSFix(to),
                             /* toInclusive */false);
                             for (GPSFix fix : subset) {
-                                double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
-                                        fix.getPosition()).getNauticalMiles();
-                                distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                                Distance distanceBetweenAdjacentFixes = fromPos.getDistance(
+                                        fix.getPosition());
+                                distance = distance.add(distanceBetweenAdjacentFixes);
                                 fromPos = fix.getPosition();
                             }
                             Position toPos = getEstimatedPosition(to, false);
-                            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
-                            result = new NauticalMileDistance(distanceInNauticalMiles);
+                            distance = distance.add(fromPos.getDistance(toPos));
                         }
-                    } else {
-                        result = Distance.NULL;
+                        return distance;
                     }
-                }
-            } finally {
-                unlockAfterRead();
-            }
-            if (!perfectCacheHit && recursionDepth == 0) {
-                getDistanceCache().cache(from, to, result);
-            }
-        }
-        return result;
+                });
     }
-
+    
     @Override
     public Distance getRawDistanceTraveled(TimePoint from, TimePoint to) {
         lockForRead();
@@ -1065,7 +1027,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         }
     }
 
-    protected DistanceCache getDistanceCache() {
+    protected TimeRangeCache<Distance> getDistanceCache() {
         return distanceCache;
     }
 
@@ -1116,5 +1078,84 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     
     public static Speed getDefaultMaxSpeedForSmoothing() {
         return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
+    }
+    
+    @Override
+    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint) {
+        List<SpeedWithBearingStep> speedWithBearingSteps = new ArrayList<>();
+        Bearing lastCourse = null;
+        TimePoint lastTimePoint = null;
+        double lastCourseChangeAngleInDegrees = 0;
+        TimePoint fixTimePointAfterToTimePoint = null;
+        try {
+            lockForRead();
+            TimePoint timePoint = fromTimePoint;
+            for (Iterator<FixType> iterator = getFixesIterator(fromTimePoint, false); iterator
+                    .hasNext(); timePoint = iterator.next().getTimePoint()) {
+                if (timePoint == null) {
+                    continue;
+                }
+                if (timePoint.after(toTimePoint)) {
+                    fixTimePointAfterToTimePoint = timePoint;
+                    timePoint = toTimePoint;
+                }
+                SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
+                if (estimatedSpeed != null) {
+                    Bearing course = estimatedSpeed.getBearing();
+                    /*
+                     * First bearing step supposed to have 0 as course change as it does not have any previous steps
+                     * with bearings to compute bearing difference. If the condition is not met, the existing code which
+                     * uses ManeuverBearingStep class will break.
+                     */
+                    double courseChangeAngleInDegrees = lastCourse == null ? 0
+                            : lastCourse.getDifferenceTo(course, new DegreeBearingImpl(lastCourseChangeAngleInDegrees))
+                                    .getDegrees();
+
+                    // Fix distorted angular velocity due to inappropriate interpolation of getEstimatedSpeed() at first
+                    // and last step
+                    double courseChangeInDegreesForAngularVelocityCalculation = courseChangeAngleInDegrees;
+                    Duration durationBetweenStepsForAngularVelocityCalculation = lastTimePoint == null ? null
+                            : lastTimePoint.until(timePoint);
+                    if (fromTimePoint.equals(lastTimePoint)) {
+                        FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
+                        if (firstFix != null && !firstFix.getTimePoint().equals(fromTimePoint)) {
+                            SpeedWithBearing firstFixEstimatedSpeed = getEstimatedSpeed(firstFix.getTimePoint());
+                            if (firstFixEstimatedSpeed != null) {
+                                durationBetweenStepsForAngularVelocityCalculation = firstFix.getTimePoint()
+                                        .until(timePoint);
+                                courseChangeInDegreesForAngularVelocityCalculation = courseChangeAngleInDegrees
+                                        + firstFixEstimatedSpeed.getBearing().getDifferenceTo(lastCourse).getDegrees();
+                            }
+                        }
+                    } else if (fixTimePointAfterToTimePoint != null && lastCourse != null) {
+                        SpeedWithBearing lastFixEstimatedSpeed = getEstimatedSpeed(fixTimePointAfterToTimePoint);
+                        if (lastFixEstimatedSpeed != null) {
+                            durationBetweenStepsForAngularVelocityCalculation = lastTimePoint == null ? null
+                                    : lastTimePoint.until(fixTimePointAfterToTimePoint);
+                            courseChangeInDegreesForAngularVelocityCalculation = courseChangeAngleInDegrees
+                                    + estimatedSpeed.getBearing().getDifferenceTo(lastFixEstimatedSpeed.getBearing())
+                                            .getDegrees();
+                        }
+                    }
+
+                    double angularVelocityInDegreesPerSecond = durationBetweenStepsForAngularVelocityCalculation == null
+                            ? 0
+                            : Math.abs(courseChangeInDegreesForAngularVelocityCalculation
+                                    / durationBetweenStepsForAngularVelocityCalculation.asSeconds());
+
+                    speedWithBearingSteps.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed,
+                            courseChangeAngleInDegrees, angularVelocityInDegreesPerSecond));
+                    lastCourse = course;
+                    lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
+                    lastTimePoint = timePoint;
+                }
+                if (!timePoint.before(toTimePoint)) {
+                    break;
+                }
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return new SpeedWithBearingStepsIterable(speedWithBearingSteps);
     }
 }

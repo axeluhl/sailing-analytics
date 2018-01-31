@@ -1,0 +1,11 @@
+#!/bin/bash
+JAVA_HOME=/opt/sapjvm_8
+VARLOGOLD=/var/log/old
+# Production:
+CACHE=$VARLOGOLD/cache/unique-ips-per-referrer
+# Test:
+#CACHE=$VARLOGOLD/cache/unique-ips-per-referrer/test
+
+JAR_FILE=$VARLOGOLD/com.sap.sse.jar
+
+$JAVA_HOME/bin/java -jar $JAR_FILE $CACHE $*

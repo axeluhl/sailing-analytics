@@ -78,7 +78,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
         }
 
         @Override
-        public Boat getBoatOfCompetitorById(Serializable competitorID) {
+        public Boat getBoatOfCompetitor(Competitor competitor) {
             return null;
         }
 

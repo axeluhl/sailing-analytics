@@ -47,6 +47,16 @@ public class BearingTest {
     }
     
     @Test
+    public void testNegativeAngle() {
+        assertEquals(-10., new DegreeBearingImpl(-10.).getDegrees(), 0.000001);
+    }
+    
+    @Test
+    public void testNegativeAngleOverflow() {
+        assertEquals(-10., new DegreeBearingImpl(-370.).getDegrees(), 0.000001);
+    }
+    
+    @Test
     public void testZeroConfidenceLeadsToNullBearingAverage() {
         BearingWithConfidenceCluster<Void> cluster = new BearingWithConfidenceCluster<Void>(null);
         cluster.add(new BearingWithConfidenceImpl<Void>(new DegreeBearingImpl(355), /* confidence */ 0., null));
