@@ -202,9 +202,9 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void setFinishPositioningConfirmed(TimePoint timePoint) {
+    public void setFinishPositioningConfirmed(TimePoint timePoint, CompetitorResults positionedCompetitors) {
         raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(
-                timePoint, author, raceLog.getCurrentPassId(), getFinishPositioningList()));
+                timePoint, author, raceLog.getCurrentPassId(), positionedCompetitors));
     }
 
     @Override
