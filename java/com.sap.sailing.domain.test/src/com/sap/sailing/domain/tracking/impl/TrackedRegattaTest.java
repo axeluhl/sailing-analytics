@@ -81,7 +81,10 @@ public class TrackedRegattaTest {
             regatta.addTrackedRace(race1);
         });
         thread1.start();
-        // This ensures, that the add event is being processed but is not finished
+        // This ensures, that the add event is being processed but is not finished because
+        // this unblocks the first arriveAndAwaitAdvance() in raceAdded, but not the second.
+        // This way, the raceRemoved(...) call is expected to not be started because it has
+        // to wait for the raceAdded(...) call to have finished.
         addPhaser.arriveAndAwaitAdvance();
         
         Thread thread2 = new Thread(() -> {
