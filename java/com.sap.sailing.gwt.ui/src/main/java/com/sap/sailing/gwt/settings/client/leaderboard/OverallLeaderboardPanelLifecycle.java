@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
+import java.util.Collection;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -11,8 +14,8 @@ public class OverallLeaderboardPanelLifecycle extends MultiRaceLeaderboardPanelL
 
     public static final String ID = "olb";
 
-    public OverallLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        super(leaderboard, stringMessages);
+    public OverallLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+        super(leaderboard, stringMessages, availableDetailTypes);
     }
 
     @Override

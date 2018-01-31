@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -582,15 +583,16 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
      * checkbox for driving the {@link #LeaderboardUrlSettings.PARAM_EMBEDDED} field.
      * 
      * @param leaderboard
+     * @param availableDetailType 
      * 
      * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
-    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard) {
+    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard, Collection<DetailType> availableDetailType) {
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
         if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
         } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
         }
         final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(leaderboard.name,
                 leaderboard.getDisplayName());

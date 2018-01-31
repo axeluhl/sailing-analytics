@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
@@ -38,25 +39,38 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                         .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
                 final String leaderboardName = settings.getLeaderboardName();
                 if (leaderboardNames.contains(leaderboardName)) {
-                    
-                    SAPHeaderWithAuthentication header = initHeader();
-                    GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-                    AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-                    authorizedContentDecorator.setPermissionToCheck(Permission.MANAGE_LEADERBOARD_RESULTS, SailingPermissionsForRoleProvider.INSTANCE);
-                    authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+
                         @Override
-                        public Widget get() {
-                            EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
-                                    LeaderboardEditPage.this, getStringMessages(), userAgent);
-                            leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
-                            return leaderboardPanel;
+                        public void onFailure(Throwable caught) {
+                            // TODO Auto-generated method stub
+                            
+                        }
+
+                        @Override
+                        public void onSuccess(List<DetailType> result) {
+                            SAPHeaderWithAuthentication header = initHeader();
+                            GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+                            AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
+                            authorizedContentDecorator.setPermissionToCheck(Permission.MANAGE_LEADERBOARD_RESULTS, SailingPermissionsForRoleProvider.INSTANCE);
+                            authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+                                @Override
+                                public Widget get() {
+                                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
+                                            LeaderboardEditPage.this, getStringMessages(), userAgent, result);
+                                    leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
+                                    return leaderboardPanel;
+                                }
+                            });
+                            
+                            DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+                            RootLayoutPanel.get().add(mainPanel);
+                            mainPanel.addNorth(header, 75);
+                            mainPanel.add(new ScrollPanel(authorizedContentDecorator));
                         }
                     });
                     
-                    DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
-                    RootLayoutPanel.get().add(mainPanel);
-                    mainPanel.addNorth(header, 75);
-                    mainPanel.add(new ScrollPanel(authorizedContentDecorator));
+                    
                 } else {
                     RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                 }

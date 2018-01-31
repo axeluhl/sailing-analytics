@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -74,7 +76,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
-                FlagImageResolverImpl.get());
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
         
         int competitorCount = getPlace().getStatistic().getCompetitors();

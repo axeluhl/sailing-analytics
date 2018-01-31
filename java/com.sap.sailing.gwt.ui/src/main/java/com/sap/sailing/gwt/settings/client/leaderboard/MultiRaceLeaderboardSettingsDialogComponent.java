@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
 
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
-            List<String> allRaceColumnNames, StringMessages stringMessages) {
+            List<String> allRaceColumnNames, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
         super(initialSettings, stringMessages);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         this.raceAllRaceColumnNames = allRaceColumnNames;
@@ -176,7 +177,8 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         dialogPanel.ensureDebugId("LeaderboardSettingsPanel");
         dialogPanel.add(createSelectedRacesPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
-        dialogPanel.add(createRaceDetailPanel(dialog));
+        DetailType.getRaceDetailTypes().retainAll(availableDetailTypes);
+        dialogPanel.add(createRaceDetailPanel(dialog, reduceToAvailableTypes(DetailType.getRaceDetailTypes()) ));
         dialogPanel.add(createRaceStartAnalysisPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
         dialogPanel.add(createManeuverDetailsPanel(dialog));

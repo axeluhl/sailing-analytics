@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Collection;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.OverallLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -22,12 +25,12 @@ public class OverallLeaderboardPanel extends MultiRaceLeaderboardPanel {
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller, FlagImageResolver flagImageResolver) {
+            boolean showCompetitorFilterStatus, boolean enableSyncScroller, FlagImageResolver flagImageResolver, Collection<DetailType> availableDetailTypes) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller,new ClassicLeaderboardStyle(), flagImageResolver);
+                showCompetitorFilterStatus, enableSyncScroller,new ClassicLeaderboardStyle(), flagImageResolver, availableDetailTypes);
     }
 
     @Override

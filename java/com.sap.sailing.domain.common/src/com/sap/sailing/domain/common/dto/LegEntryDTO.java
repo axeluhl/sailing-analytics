@@ -69,6 +69,42 @@ public class LegEntryDTO implements Serializable {
      */
     public Duration correctedTotalTime;
     
+    public Double expeditionAWA;
+    public Double expeditionAWS;
+    public Double expeditionBoatSpeed;
+    public Double expeditionBSSOG;
+    public Double expeditionCOG;
+    public Double expeditionCourse;
+    public Double expeditionDistance;
+    public Double expeditionDistanceToCommitteeBoat;
+    public Double expeditionDistanceToPin;
+    public Double expeditionDistanceToPortLayline;
+    public Double expeditionVMGTargetVMGDelta;
+    public Double expeditionDistanceToStarboardLayline;
+    public Double expeditionVMG;
+    public Double expeditionTWS;
+    public Double expeditionTWD;
+    public Double expeditionTWA;
+    public Double expeditionTimeToStarboardLayline;
+    public Double expeditionTimeToPortLayline;
+    public Double expeditionTimeToPin;
+    public Double expeditiontimeToGUN;
+    public Double expeditionTimeToCommiteeBoat;
+    public Double expeditionTimeToBurnToPin;
+    public Double expeditionTimeToBurnToLine;
+    public Double expeditionTimeToBurnToCommitteeBoat;
+    public Double expeditionTargetTWA;
+    public Double expeditionTargetHeel;
+    public Double expeditionTargetBoatSpeed;
+    public Double expeditionSOG;
+    public Double expeditionRudderAngle;
+    public Double expeditionRateOfTurn;
+    public Double expeditionRake;
+    public Double expeditionLineSquareForWindDirection;
+    public Double expeditionHeel;
+    public Double expeditionHeading;
+    public Double expeditionForestayLoad;
+    
     @Override
     public int hashCode() {
         final int prime = 31;

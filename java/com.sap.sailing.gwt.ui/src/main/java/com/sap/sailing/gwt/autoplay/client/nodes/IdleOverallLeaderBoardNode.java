@@ -64,18 +64,29 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                             String overallLeaderboardName = result.get(0);
                             CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
                             
-                            MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
-                                    cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
-                                    provider, timer, null, overallLeaderboardName, cf.getErrorReporter(),
-                                    StringMessages.INSTANCE, false, null, false, null, false, true, false, false, false,
-                                    new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get());
+                            cf.getSailingService().getAvailableDetailTypesForLeaderboard(overallLeaderboardName, new AsyncCallback<List<DetailType>>() {
 
-                            IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    // DO NOTHING
+                                }
 
-                            setPlaceToGo(place);
-                            firePlaceChangeAndStartTimer();
-                            getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
-                                    cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
+                                @Override
+                                public void onSuccess(List<DetailType> result) {
+                                    MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
+                                            cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
+                                            provider, timer, null, overallLeaderboardName, cf.getErrorReporter(),
+                                            StringMessages.INSTANCE, false, null, false, null, false, true, false, false, false,
+                                            new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(), result);
+
+                                    IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
+
+                                    setPlaceToGo(place);
+                                    firePlaceChangeAndStartTimer();
+                                    getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
+                                            cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));                                    
+                                }
+                            });
                         } else {
                             GWT.log("Not found any overleaderboardname");
                         }

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class EventSeriesAnalyticsDataManager {
     public MultiRaceLeaderboardPanel createMultiRaceOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
-            boolean autoExpandLastRaceColumn) {
+            boolean autoExpandLastRaceColumn, Collection<DetailType> availableDetailTypes) {
         if(overallLeaderboardPanel == null) {
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
@@ -72,7 +73,7 @@ public class EventSeriesAnalyticsDataManager {
                     /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
-                    flagImageResolver);
+                    flagImageResolver, availableDetailTypes);
         }
         return overallLeaderboardPanel;
     }

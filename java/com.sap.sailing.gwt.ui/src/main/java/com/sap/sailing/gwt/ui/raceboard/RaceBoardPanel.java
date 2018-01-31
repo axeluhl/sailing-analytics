@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -173,6 +175,7 @@ public class RaceBoardPanel
      *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark 
      *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
      *            aligns its right border with that of the chart. Otherwise those components will be hidden.
+     * @param availableDetailTypes 
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
@@ -183,7 +186,7 @@ public class RaceBoardPanel
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
-            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel) {
+            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel, Collection<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -286,7 +289,7 @@ public class RaceBoardPanel
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, leaderboardName, leaderboardGroupName,
-                competitorSearchTextBox);
+                competitorSearchTextBox, availableDetailTypes);
         addChildComponent(leaderboardPanel);
         leaderboardPanel.addVisibilityListener(visible->{
             quickRanksDTOProvider.setLeaderboardNotCurrentlyUpdating(!visible);
@@ -440,7 +443,7 @@ public class RaceBoardPanel
     private SingleRaceLeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName,
-            CompetitorFilterPanel competitorSearchTextBox) {
+            CompetitorFilterPanel competitorSearchTextBox, Collection<DetailType> availableDetailTypes) {
         SingleRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
         SingleRaceLeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
@@ -452,7 +455,7 @@ public class RaceBoardPanel
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,
-                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get());
+                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get(), availableDetailTypes);
     }
 
     private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {

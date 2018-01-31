@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.autoplay.client.configs.impl;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayContextImpl;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
@@ -22,6 +25,8 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
 
+    private Collection<DetailType> availableDetailTypes;
+
     @Override
     public void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
             PerspectiveCompositeSettings<?> settings) {
@@ -31,15 +36,26 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             @SuppressWarnings("unchecked")
             @Override
             public void onSuccess(final EventDTO event) {
-                StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(event,
-                        context.getLeaderboardName());
-                AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO);
-                cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
-                        (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
-                        AutoPlayClassicConfiguration.this, context));
-                // start sixty inch slide loop nodes...
-                RootNodeClassic root = new RootNodeClassic(cf);
-                root.start(cf.getEventBus());
+                cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<List<DetailType>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        caught.printStackTrace();                        
+                    }
+
+                    @Override
+                    public void onSuccess(List<DetailType> result) {
+                        StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(event,
+                                context.getLeaderboardName());
+                        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO, result);
+                        cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
+                                (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
+                                AutoPlayClassicConfiguration.this, context));
+                        // start sixty inch slide loop nodes...
+                        RootNodeClassic root = new RootNodeClassic(cf);
+                        root.start(cf.getEventBus());                        
+                    }
+                });
             }
 
             @Override
@@ -63,7 +79,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             public void cancel() {
             }
         };
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, availableDetailTypes);
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = autoplayLifecycle
                 .createDefaultSettings();
         LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
@@ -74,7 +90,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     @Override
     public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
             OnSettingsCallback settingsCallback) {
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, availableDetailTypes);
         settingsCallback.newSettings(autoplayLifecycle.createDefaultSettings());
     }
 

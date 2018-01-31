@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 
+import java.util.Collection;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
@@ -19,9 +22,9 @@ public class LeaderboardWithZoomingPerspectiveLifecycle extends AbstractPerspect
     
     public static final String ID = "lbwh";
 
-    public LeaderboardWithZoomingPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+    public LeaderboardWithZoomingPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
         this.stringMessages = stringMessages;
-        this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages);
+        this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
                 (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName()),
                         stringMessages);

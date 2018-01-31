@@ -132,6 +132,76 @@ public class LeaderboardEntryDTO implements Serializable {
      */
     public FleetDTO fleet;
 
+    public Double expeditionAWA;
+
+    public Double expeditionAWS;
+
+    public Double expeditionBoatSpeed;
+
+    public Double expeditionBSSOG;
+
+    public Double expeditionCOG;
+
+    public Double expeditionDistanceBelowLine;
+
+    public Double expeditionDistanceToCommitteeBoat;
+
+    public Double expeditionDistToPortLayline;
+
+    public Double expeditionDistToStbLayline;
+
+    public Double expeditionVMG;
+
+    public Double expeditionTWS;
+
+    public Double expeditionTWD;
+
+    public Double expeditionTWA;
+
+    public Double expeditionTimeToStbLayline;
+
+    public Double expeditionTimeToPortLayline;
+
+    public Double expeditionTimeToPin;
+
+    public Double expeditionTimeToGUN;
+
+    public Double expeditionTimeToCommitteeBoat;
+
+    public Double expeditionTimeToBurnToPin;
+
+    public Double expeditionTargTWA;
+
+    public Double expeditionTimeToBurnToCommitteeBoat;
+
+    public Double expeditionTimeToBurnToLine;
+
+    public Double expeditionTargetHeel;
+
+    public Double expeditionTargBoatSpeed;
+
+    public Double expeditionSOG;
+
+    public Double expeditionRudderAngle;
+
+    public Double expeditionRateOfTurn;
+
+    public Double expeditionRake;
+
+    public Double expeditionLineSquareForWindDirection;
+
+    public Double expeditionHeading;
+
+    public Double expeditionForestayLoad;
+
+    public Double expeditionHeel;
+
+    public Double expeditionCourseDetail;
+
+    public Double expeditionDistanceToPinDetail;
+
+    public Double expeditionVMGTargVMGDelta;
+
     public LeaderboardEntryDTO() { }
     
     public boolean hasScoreCorrection() {

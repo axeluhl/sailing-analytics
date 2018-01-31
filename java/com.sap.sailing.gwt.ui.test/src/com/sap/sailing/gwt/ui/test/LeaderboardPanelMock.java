@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.test;
 
+import java.util.Arrays;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -24,7 +27,7 @@ public class LeaderboardPanelMock extends MultiRaceLeaderboardPanel {
                 new CompetitorSelectionModel(
                         /* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
-                FlagImageResolverImpl.get());
+                FlagImageResolverImpl.get(),Arrays.asList(DetailType.values()));
     }
 
     @Override

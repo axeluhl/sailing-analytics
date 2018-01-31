@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
+import java.util.Collection;
+
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
@@ -51,7 +53,7 @@ public class RegattaAnalyticsDataManager {
     public MultiRaceLeaderboardPanel createMultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
-            boolean autoExpandLastRaceColumn) {
+            boolean autoExpandLastRaceColumn, Collection<DetailType> availableDetailTypes) {
         if (leaderboardPanel == null) {
             leaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService,
                     asyncActionsExecutor,
@@ -61,7 +63,7 @@ public class RegattaAnalyticsDataManager {
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
                     /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true,
-                    new ClassicLeaderboardStyle(), flagImageResolver);
+                    new ClassicLeaderboardStyle(), flagImageResolver, availableDetailTypes);
         }
         return leaderboardPanel;
     }

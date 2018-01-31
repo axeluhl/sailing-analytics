@@ -119,7 +119,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             };
             if(leaderboardPanel == null) {
                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
-                        currentPresenter.getUserService(), /* FIXME placeToken */ null, leaderboardConsumer);
+                        currentPresenter.getUserService(), /* FIXME placeToken */ null, leaderboardConsumer, availableDetailTypes);
             } else if( /*FIXME placeToken not empty */ false) {
                 createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
                         /* FIXME placeToken */ null)

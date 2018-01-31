@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.dom.client.Document;
@@ -17,8 +18,8 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
 
-    public SingleRaceLeaderboardPanelLifecycle(StringMessages stringMessages) {
-        super(stringMessages);
+    public SingleRaceLeaderboardPanelLifecycle(StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+        super(stringMessages, availableDetailTypes);
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
     }
     
@@ -80,7 +81,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
 
     @Override
     public SingleRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(SingleRaceLeaderboardSettings settings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages);
+        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages, availableDetailTypes);
     }
 
 }

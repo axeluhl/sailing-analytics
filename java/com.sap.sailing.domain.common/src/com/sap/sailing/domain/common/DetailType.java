@@ -76,41 +76,41 @@ public enum DetailType implements Serializable {
     RACE_CALCULATED_TIME_TRAVELED(0, ASCENDING), RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD(0, ASCENDING),
     RACE_TIME_TRAVELED(0, ASCENDING), RACE_TIME_TRAVELED_UPWIND(0, ASCENDING), RACE_TIME_TRAVELED_DOWNWIND(0, ASCENDING), RACE_TIME_TRAVELED_REACHING(0, ASCENDING),
     DISTANCE_TO_START_LINE(0, ASCENDING), BEAT_ANGLE(0, ASCENDING), COURSE_OVER_GROUND_TRUE_DEGREES(0, ASCENDING), TOTAL_SCORED_RACE_COUNT(0, ASCENDING),
-    AWA(0, ASCENDING),
-    AWS(0, ASCENDING),
-    TWA(0, ASCENDING),
-    TWS(0, ASCENDING),
-    TWD(0, ASCENDING),
-    TARG_TWA(0, ASCENDING),
-    BOAT_SPEED(0, ASCENDING),
-    TARG_BOAT_SPEED(0, ASCENDING),
-    BS_SOG(0, ASCENDING),
-    SOG(0, ASCENDING),
-    COG(0, ASCENDING),
-    FORESTAY_LOAD(0, ASCENDING),
-    RAKE(0, ASCENDING),
-    COURSE(0, ASCENDING),
-    HEADING(0, ASCENDING),
-    VMG(0, ASCENDING),
-    VMG_TARG_VMG_DELTA(0, ASCENDING),
-    RATE_OF_TURN(0, ASCENDING),
-    RUDDER_ANGLE(0, ASCENDING),
-    HEEL(0, ASCENDING),
-    TARGET_HEEL(0, ASCENDING),
-    TIME_TO_PORT_LAYLINE(0, ASCENDING),
-    TIME_TO_STB_LAYLINE(0, ASCENDING),
-    DIST_TO_PORT_LAYLINE(0, ASCENDING),
-    DIST_TO_STB_LAYLINE(0, ASCENDING),
-    TIME_TO_GUN(0, ASCENDING),
-    TIME_TO_COMMITTEE_BOAT(0, ASCENDING),
-    TIME_TO_PIN(0, ASCENDING),
-    TIME_TO_BURN_TO_LINE(0, ASCENDING),
-    TIME_TO_BURN_TO_COMMITTEE_BOAT(0, ASCENDING),
-    TIME_TO_BURN_TO_PIN (0, ASCENDING),
-    DISTANCE_TO_COMMITTEE_BOAT(0, ASCENDING),
-    DISTANCE_TO_PIN(0, ASCENDING),
-    DISTANCE_BELOW_LINE(0, ASCENDING),
-    LINE_SQUARE_FOR_WIND_DIRECTION(0, ASCENDING);
+    RACE_AWA(0, ASCENDING),
+    RACE_AWS(0, ASCENDING),
+    RACE_TWA(0, ASCENDING),
+    RACE_TWS(0, ASCENDING),
+    RACE_TWD(0, ASCENDING),
+    RACE_TARG_TWA(0, ASCENDING),
+    RACE_BOAT_SPEED(0, ASCENDING),
+    RACE_TARG_BOAT_SPEED(0, ASCENDING),
+    RACE_BS_SOG(0, ASCENDING),
+    RACE_SOG(0, ASCENDING),
+    RACE_COG(0, ASCENDING),
+    RACE_FORESTAY_LOAD(0, ASCENDING),
+    RACE_RAKE(0, ASCENDING),
+    RACE_COURSE(0, ASCENDING),
+    RACE_HEADING(0, ASCENDING),
+    RACE_VMG(0, ASCENDING),
+    RACE_VMG_TARG_VMG_DELTA(0, ASCENDING),
+    RACE_RATE_OF_TURN(0, ASCENDING),
+    RACE_RUDDER_ANGLE(0, ASCENDING),
+    RACE_HEEL(0, ASCENDING),
+    RACE_TARGET_HEEL(0, ASCENDING),
+    RACE_TIME_TO_PORT_LAYLINE(0, ASCENDING),
+    RACE_TIME_TO_STB_LAYLINE(0, ASCENDING),
+    RACE_DIST_TO_PORT_LAYLINE(0, ASCENDING),
+    RACE_DIST_TO_STB_LAYLINE(0, ASCENDING),
+    RACE_TIME_TO_GUN(0, ASCENDING),
+    RACE_TIME_TO_COMMITTEE_BOAT(0, ASCENDING),
+    RACE_TIME_TO_PIN(0, ASCENDING),
+    RACE_TIME_TO_BURN_TO_LINE(0, ASCENDING),
+    RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT(0, ASCENDING),
+    RACE_TIME_TO_BURN_TO_PIN (0, ASCENDING),
+    RACE_DISTANCE_TO_COMMITTEE_BOAT(0, ASCENDING),
+    RACE_DISTANCE_TO_PIN(0, ASCENDING),
+    RACE_DISTANCE_BELOW_LINE(0, ASCENDING),
+    RACE_LINE_SQUARE_FOR_WIND_DIRECTION(0, ASCENDING);
     
     private int precision;
     
@@ -148,46 +148,6 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
         return availableDetailsTypes;
     }
-    
-    public static List<DetailType> getExpeditionTypes(){
-        List<DetailType> availableDetailsTypes = new ArrayList<>();
-        availableDetailsTypes.add(AWA);
-        availableDetailsTypes.add(AWS);
-        availableDetailsTypes.add(TWA);
-        availableDetailsTypes.add(TWS);
-        availableDetailsTypes.add(TWD);
-        availableDetailsTypes.add(TARG_TWA);
-        availableDetailsTypes.add(BOAT_SPEED);
-        availableDetailsTypes.add(TARG_BOAT_SPEED);
-        availableDetailsTypes.add(BS_SOG);
-        availableDetailsTypes.add(SOG);
-        availableDetailsTypes.add(COG);
-        availableDetailsTypes.add(FORESTAY_LOAD);
-        availableDetailsTypes.add(RAKE);
-        availableDetailsTypes.add(COURSE);
-        availableDetailsTypes.add(HEADING);
-        availableDetailsTypes.add(VMG);
-        availableDetailsTypes.add(VMG_TARG_VMG_DELTA);
-        availableDetailsTypes.add(RATE_OF_TURN);
-        availableDetailsTypes.add(RUDDER_ANGLE);
-        availableDetailsTypes.add(HEEL);
-        availableDetailsTypes.add(TARGET_HEEL);
-        availableDetailsTypes.add(TIME_TO_PORT_LAYLINE);
-        availableDetailsTypes.add(TIME_TO_STB_LAYLINE);
-        availableDetailsTypes.add(DIST_TO_PORT_LAYLINE);
-        availableDetailsTypes.add(DIST_TO_STB_LAYLINE);
-        availableDetailsTypes.add(TIME_TO_GUN);
-        availableDetailsTypes.add(TIME_TO_COMMITTEE_BOAT);
-        availableDetailsTypes.add(TIME_TO_PIN);
-        availableDetailsTypes.add(TIME_TO_BURN_TO_LINE);
-        availableDetailsTypes.add(TIME_TO_BURN_TO_COMMITTEE_BOAT);
-        availableDetailsTypes.add(TIME_TO_BURN_TO_PIN);
-        availableDetailsTypes.add(DISTANCE_TO_COMMITTEE_BOAT);
-        availableDetailsTypes.add(DISTANCE_TO_PIN);
-        availableDetailsTypes.add(DISTANCE_BELOW_LINE);
-        availableDetailsTypes.add(LINE_SQUARE_FOR_WIND_DIRECTION);
-        return availableDetailsTypes;
-    }
 
     /**
      * Special List of DetailTypes, that allows operators to select for example the RideHeight, that is usually only selectable, if it already has data.
@@ -198,5 +158,63 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
         availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
         return availableDetailsTypes;
+    }
+
+    public static List<DetailType> getRaceDetailTypes() {
+        ArrayList<DetailType> allowed = new ArrayList<>();
+        allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
+        allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        allowed.add(RACE_DISTANCE_TRAVELED);
+        allowed.add(RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START);
+        allowed.add(RACE_TIME_TRAVELED);
+        allowed.add(RACE_CALCULATED_TIME_TRAVELED);
+        allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
+        allowed.add(RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+        allowed.add(RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
+        allowed.add(RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
+        allowed.add(NUMBER_OF_MANEUVERS);
+        allowed.add(DISPLAY_LEGS);
+        allowed.add(RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS);
+        allowed.add(RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
+        allowed.add(RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL);
+        allowed.add(CURRENT_LEG);
+        allowed.add(RACE_AWA);
+        allowed.add(RACE_AWS);
+        allowed.add(RACE_TWA);
+        allowed.add(RACE_TWS);
+        allowed.add(RACE_TWD);
+        allowed.add(RACE_TARG_TWA);
+        allowed.add(RACE_BOAT_SPEED);
+        allowed.add(RACE_TARG_BOAT_SPEED);
+        allowed.add(RACE_BS_SOG);
+        allowed.add(RACE_SOG);
+        allowed.add(RACE_COG);
+        allowed.add(RACE_FORESTAY_LOAD);
+        allowed.add(RACE_RAKE);
+        allowed.add(RACE_COURSE);
+        allowed.add(RACE_HEADING);
+        allowed.add(RACE_VMG);
+        allowed.add(RACE_VMG_TARG_VMG_DELTA);
+        allowed.add(RACE_RATE_OF_TURN);
+        allowed.add(RACE_RUDDER_ANGLE);
+        allowed.add(RACE_HEEL);
+        allowed.add(RACE_TARGET_HEEL);
+        allowed.add(RACE_TIME_TO_PORT_LAYLINE);
+        allowed.add(RACE_TIME_TO_STB_LAYLINE);
+        allowed.add(RACE_DIST_TO_PORT_LAYLINE);
+        allowed.add(RACE_DIST_TO_STB_LAYLINE);
+        allowed.add(RACE_TIME_TO_GUN);
+        allowed.add(RACE_TIME_TO_COMMITTEE_BOAT);
+        allowed.add(RACE_TIME_TO_PIN);
+        allowed.add(RACE_TIME_TO_BURN_TO_LINE);
+        allowed.add(RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT);
+        allowed.add(RACE_TIME_TO_BURN_TO_PIN);
+        allowed.add(RACE_DISTANCE_TO_COMMITTEE_BOAT);
+        allowed.add(RACE_DISTANCE_TO_PIN);
+        allowed.add(RACE_DISTANCE_BELOW_LINE);
+        allowed.add(RACE_LINE_SQUARE_FOR_WIND_DIRECTION);
+        return allowed;
     }
 }

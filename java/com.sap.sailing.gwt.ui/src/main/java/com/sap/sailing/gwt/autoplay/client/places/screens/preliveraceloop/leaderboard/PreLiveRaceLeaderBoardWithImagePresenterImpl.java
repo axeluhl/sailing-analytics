@@ -1,12 +1,14 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -112,7 +114,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
                 leaderboardSettings, true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(false),
-                FlagImageResolverImpl.get());
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
 

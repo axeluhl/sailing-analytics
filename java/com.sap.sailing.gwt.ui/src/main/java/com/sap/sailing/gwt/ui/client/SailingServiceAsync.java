@@ -103,6 +103,7 @@ import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
+import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 
 /**
@@ -927,4 +928,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
     
     void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+
+    void getAvailableDetailTypesForLeaderboard(String leaderboardName,
+            AsyncCallback<List<DetailType>> asyncCallback);
 }

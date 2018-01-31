@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
+import java.util.Collection;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -8,8 +11,8 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardPerspectiveOwnSettings> {
 
     protected AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages,
-            AbstractLeaderboardDTO leaderboard, boolean isOverall) {
-        addLifeCycle(new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages));
+            AbstractLeaderboardDTO leaderboard, boolean isOverall, Collection<DetailType> availableDetailTypes) {
+        addLifeCycle(new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes));
         addLifeCycle(new MultiCompetitorLeaderboardChartLifecycle(isOverall));
     }
     

@@ -202,75 +202,75 @@ public class DetailTypeFormatter {
             return stringMessages.courseOverGroundTrueDegrees();
         case TOTAL_SCORED_RACE_COUNT:
             return stringMessages.racesScored();
-        case AWA:
+        case RACE_AWA:
             return stringMessages.expeditionAwa();
-        case AWS:
+        case RACE_AWS:
             return stringMessages.expeditionAws();
-        case TWA:
+        case RACE_TWA:
             return stringMessages.expeditionTwa();
-        case TWS:
+        case RACE_TWS:
             return stringMessages.expeditionTws();
-        case TWD:
+        case RACE_TWD:
             return stringMessages.expeditionTwd();
-        case TARG_TWA:
+        case RACE_TARG_TWA:
             return stringMessages.expeditionTargTwa();
-        case BOAT_SPEED:
+        case RACE_BOAT_SPEED:
             return stringMessages.expeditionBoatSpeed();
-        case TARG_BOAT_SPEED:
+        case RACE_TARG_BOAT_SPEED:
             return stringMessages.expeditionTargBoatSpeed();
-        case BS_SOG:
+        case RACE_BS_SOG:
             return stringMessages.expeditionBsSog();
-        case SOG:
+        case RACE_SOG:
             return stringMessages.expeditionSOG();
-        case COG:
+        case RACE_COG:
             return stringMessages.expeditionCOG();
-        case FORESTAY_LOAD:
+        case RACE_FORESTAY_LOAD:
             return stringMessages.expeditionForestayLoad();
-        case RAKE:
+        case RACE_RAKE:
             return stringMessages.expeditionRake();
-        case COURSE:
+        case RACE_COURSE:
             return stringMessages.expeditionCourse();
-        case HEADING:
+        case RACE_HEADING:
             return stringMessages.expeditionHeading();
-        case VMG:
+        case RACE_VMG:
             return stringMessages.expeditionVmg();
-        case VMG_TARG_VMG_DELTA:
+        case RACE_VMG_TARG_VMG_DELTA:
             return stringMessages.expeditionVmgTargVmgDelta();
-        case RATE_OF_TURN:
+        case RACE_RATE_OF_TURN:
             return stringMessages.expeditionRateOfTurn();
-        case RUDDER_ANGLE:
+        case RACE_RUDDER_ANGLE:
             return stringMessages.expeditionRudderAngle();
-        case HEEL:
+        case RACE_HEEL:
             return stringMessages.expeditionHeel();
-        case TARGET_HEEL:
+        case RACE_TARGET_HEEL:
             return stringMessages.expeditionTargetHeel();
-        case TIME_TO_PORT_LAYLINE:
+        case RACE_TIME_TO_PORT_LAYLINE:
             return stringMessages.expeditionTimeToPortLayline();
-        case TIME_TO_STB_LAYLINE:
+        case RACE_TIME_TO_STB_LAYLINE:
             return stringMessages.expeditionTimeToStbLayline();
-        case DIST_TO_PORT_LAYLINE:
+        case RACE_DIST_TO_PORT_LAYLINE:
             return stringMessages.expeditionDistToPortLayline();
-        case DIST_TO_STB_LAYLINE:
+        case RACE_DIST_TO_STB_LAYLINE:
             return stringMessages.expeditionDistToStbLayline();
-        case TIME_TO_GUN:
+        case RACE_TIME_TO_GUN:
             return stringMessages.expeditionTimeToGun();
-        case TIME_TO_COMMITTEE_BOAT:
+        case RACE_TIME_TO_COMMITTEE_BOAT:
             return stringMessages.expeditionTimeToCommitteeBoat();
-        case TIME_TO_PIN:
+        case RACE_TIME_TO_PIN:
             return stringMessages.expeditionTimeToPin();
-        case TIME_TO_BURN_TO_LINE:
+        case RACE_TIME_TO_BURN_TO_LINE:
             return stringMessages.expeditionTimeToBurnToLine();
-        case TIME_TO_BURN_TO_COMMITTEE_BOAT:
+        case RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT:
             return stringMessages.expeditionTimeToBurnToCommitteeBoat();
-        case TIME_TO_BURN_TO_PIN:
+        case RACE_TIME_TO_BURN_TO_PIN:
             return stringMessages.expeditionTimeToBurnToPin();
-        case DISTANCE_TO_COMMITTEE_BOAT:
+        case RACE_DISTANCE_TO_COMMITTEE_BOAT:
             return stringMessages.expeditionDistanceToCommitteeBoat();
-        case DISTANCE_TO_PIN:
+        case RACE_DISTANCE_TO_PIN:
             return stringMessages.expeditionDistanceToPin();
-        case DISTANCE_BELOW_LINE:
+        case RACE_DISTANCE_BELOW_LINE:
             return stringMessages.expeditionDistanceBelowLine();
-        case LINE_SQUARE_FOR_WIND_DIRECTION:
+        case RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
             return stringMessages.expeditionLineSquareForWindDirection();
         }
         return detailType.name();
@@ -405,41 +405,41 @@ public class DetailTypeFormatter {
         case BEAT_ANGLE:
         case TIME_ON_TIME_FACTOR:
         case TOTAL_SCORED_RACE_COUNT:
-        case AWA:
-        case AWS:
-        case TWA:
-        case TWS:
-        case TWD:
-        case TARG_TWA:
-        case BOAT_SPEED:
-        case TARG_BOAT_SPEED:
-        case BS_SOG:
-        case SOG:
-        case COG:
-        case FORESTAY_LOAD:
-        case RAKE:
-        case COURSE:
-        case HEADING:
-        case VMG:
-        case VMG_TARG_VMG_DELTA:
-        case RATE_OF_TURN:
-        case RUDDER_ANGLE:
-        case HEEL:
-        case TARGET_HEEL:
-        case TIME_TO_PORT_LAYLINE:
-        case TIME_TO_STB_LAYLINE:
-        case DIST_TO_PORT_LAYLINE:
-        case DIST_TO_STB_LAYLINE:
-        case TIME_TO_GUN:
-        case TIME_TO_COMMITTEE_BOAT:
-        case TIME_TO_PIN:
-        case TIME_TO_BURN_TO_LINE:
-        case TIME_TO_BURN_TO_COMMITTEE_BOAT:
-        case TIME_TO_BURN_TO_PIN:
-        case DISTANCE_TO_COMMITTEE_BOAT:
-        case DISTANCE_TO_PIN:
-        case DISTANCE_BELOW_LINE:
-        case LINE_SQUARE_FOR_WIND_DIRECTION:
+        case RACE_AWA:
+        case RACE_AWS:
+        case RACE_TWA:
+        case RACE_TWS:
+        case RACE_TWD:
+        case RACE_TARG_TWA:
+        case RACE_BOAT_SPEED:
+        case RACE_TARG_BOAT_SPEED:
+        case RACE_BS_SOG:
+        case RACE_SOG:
+        case RACE_COG:
+        case RACE_FORESTAY_LOAD:
+        case RACE_RAKE:
+        case RACE_COURSE:
+        case RACE_HEADING:
+        case RACE_VMG:
+        case RACE_VMG_TARG_VMG_DELTA:
+        case RACE_RATE_OF_TURN:
+        case RACE_RUDDER_ANGLE:
+        case RACE_HEEL:
+        case RACE_TARGET_HEEL:
+        case RACE_TIME_TO_PORT_LAYLINE:
+        case RACE_TIME_TO_STB_LAYLINE:
+        case RACE_DIST_TO_PORT_LAYLINE:
+        case RACE_DIST_TO_STB_LAYLINE:
+        case RACE_TIME_TO_GUN:
+        case RACE_TIME_TO_COMMITTEE_BOAT:
+        case RACE_TIME_TO_PIN:
+        case RACE_TIME_TO_BURN_TO_LINE:
+        case RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT:
+        case RACE_TIME_TO_BURN_TO_PIN:
+        case RACE_DISTANCE_TO_COMMITTEE_BOAT:
+        case RACE_DISTANCE_TO_PIN:
+        case RACE_DISTANCE_BELOW_LINE:
+        case RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
             return "";
         default:
             break;
@@ -647,41 +647,41 @@ public class DetailTypeFormatter {
             return stringMessages.courseOverGroundTrueDegreesTooltip();
         case TOTAL_SCORED_RACE_COUNT:
             return "";
-        case AWA:
-        case AWS:
-        case BOAT_SPEED:
-        case BS_SOG:
-        case COG:
-        case COURSE:
-        case DISTANCE_BELOW_LINE:
-        case DISTANCE_TO_COMMITTEE_BOAT:
-        case DISTANCE_TO_PIN:
-        case DIST_TO_PORT_LAYLINE:
-        case DIST_TO_STB_LAYLINE:
-        case FORESTAY_LOAD:
-        case HEADING:
-        case HEEL:
-        case LINE_SQUARE_FOR_WIND_DIRECTION:
-        case RAKE:
-        case RATE_OF_TURN:
-        case RUDDER_ANGLE:
-        case SOG:
-        case TARGET_HEEL:
-        case TARG_BOAT_SPEED:
-        case TARG_TWA:
-        case TIME_TO_BURN_TO_COMMITTEE_BOAT:
-        case TIME_TO_BURN_TO_LINE:
-        case TIME_TO_BURN_TO_PIN:
-        case TIME_TO_COMMITTEE_BOAT:
-        case TIME_TO_GUN:
-        case TIME_TO_PIN:
-        case TIME_TO_PORT_LAYLINE:
-        case TIME_TO_STB_LAYLINE:
-        case TWA:
-        case TWD:
-        case TWS:
-        case VMG:
-        case VMG_TARG_VMG_DELTA:
+        case RACE_AWA:
+        case RACE_AWS:
+        case RACE_BOAT_SPEED:
+        case RACE_BS_SOG:
+        case RACE_COG:
+        case RACE_COURSE:
+        case RACE_DISTANCE_BELOW_LINE:
+        case RACE_DISTANCE_TO_COMMITTEE_BOAT:
+        case RACE_DISTANCE_TO_PIN:
+        case RACE_DIST_TO_PORT_LAYLINE:
+        case RACE_DIST_TO_STB_LAYLINE:
+        case RACE_FORESTAY_LOAD:
+        case RACE_HEADING:
+        case RACE_HEEL:
+        case RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
+        case RACE_RAKE:
+        case RACE_RATE_OF_TURN:
+        case RACE_RUDDER_ANGLE:
+        case RACE_SOG:
+        case RACE_TARGET_HEEL:
+        case RACE_TARG_BOAT_SPEED:
+        case RACE_TARG_TWA:
+        case RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT:
+        case RACE_TIME_TO_BURN_TO_LINE:
+        case RACE_TIME_TO_BURN_TO_PIN:
+        case RACE_TIME_TO_COMMITTEE_BOAT:
+        case RACE_TIME_TO_GUN:
+        case RACE_TIME_TO_PIN:
+        case RACE_TIME_TO_PORT_LAYLINE:
+        case RACE_TIME_TO_STB_LAYLINE:
+        case RACE_TWA:
+        case RACE_TWD:
+        case RACE_TWS:
+        case RACE_VMG:
+        case RACE_VMG_TARG_VMG_DELTA:
             return "";
         default:
             break;

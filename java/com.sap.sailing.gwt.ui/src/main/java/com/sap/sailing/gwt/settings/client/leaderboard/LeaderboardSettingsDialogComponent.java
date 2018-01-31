@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,9 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected CheckBox showCompetitorFullNameColumnCheckBox;
     protected CheckBox isCompetitorNationalityColumnVisible;
     protected T initialSettings;
+    protected Collection<DetailType> availableDetailTypes;
 
-    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages) {
+    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         
@@ -51,6 +53,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
+        this.availableDetailTypes = Collections.unmodifiableCollection(availableDetailTypes);
+    }
+    
+    public List<DetailType> reduceToAvailableTypes(Collection<DetailType> toFilter) {
+        //keeping this function pure
+        ArrayList<DetailType> returnValue = new ArrayList<>(toFilter);
+        returnValue.retainAll(availableDetailTypes);
+        return returnValue;
     }
 
     protected FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
@@ -96,7 +106,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return timingPanel;
     }
 
-    protected FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
+    protected FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog, Collection<DetailType> raceDetails) {
         FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.ensureDebugId("RaceDetailsSettingsPanel");
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
@@ -104,7 +114,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         int detailCountInCurrentFlowPanel = 0;
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
-        for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
+        for (DetailType type : raceDetails) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Collection;
+
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -40,11 +42,11 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, String preselectedLeaderboardName,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
-            StringMessages stringMessages, DetailType chartDetailType) {
+            StringMessages stringMessages, DetailType chartDetailType, Collection<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
                 preselectedLeaderboardName, leaderboardGroupName, metaLeaderboardName,
-                errorReporter, stringMessages, chartDetailType);
+                errorReporter, stringMessages, chartDetailType, availableDetailTypes);
     }
     
     private MetaLeaderboardViewer(Component<?> parent,
@@ -55,7 +57,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
             String preselectedLeaderboardName, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            DetailType chartDetailType) {
+            DetailType chartDetailType, Collection<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
 
@@ -68,7 +70,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                         /* autoApplyTopNFilter */ false,
                         /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
-                        FlagImageResolverImpl.get()));
+                        FlagImageResolverImpl.get(), availableDetailTypes));
         
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
