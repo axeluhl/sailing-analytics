@@ -157,16 +157,6 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
     
     @Override
-    public void removeTrackedRace(RaceDefinition raceDefinition) {
-        lockTrackedRacesForWrite();
-        try {
-            trackedRaces.remove(raceDefinition);
-        } finally {
-            unlockTrackedRacesAfterWrite();
-        }
-    }
-    
-    @Override
     public void removeTrackedRace(TrackedRace trackedRace) {
         lockTrackedRacesForWrite();
         try {

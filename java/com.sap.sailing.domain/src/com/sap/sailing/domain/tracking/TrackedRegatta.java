@@ -98,6 +98,4 @@ public interface TrackedRegatta extends Serializable {
 
     int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
-    void removeTrackedRace(RaceDefinition raceDefinition);
-
 }
