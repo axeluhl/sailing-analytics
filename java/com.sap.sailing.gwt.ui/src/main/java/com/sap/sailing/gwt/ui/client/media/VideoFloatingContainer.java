@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseL
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.WindowBox;
+import com.sap.sse.security.ui.client.UserService;
 
 public class VideoFloatingContainer extends AbstractVideoContainer implements VideoContainer {
     VideoContainerRessource res = GWT.create(VideoContainerRessource.class);
@@ -28,7 +29,7 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
     private Anchor edit;
 
     public VideoFloatingContainer(VideoSynchPlayer videoPlayer, PopupPositionProvider popupPositionProvider,
-            boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+            UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
             PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
         super(new FlowPanel(), videoPlayer, popoutListener, playerCloseListener);
 
@@ -37,38 +38,33 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
         rootPanel.addStyleName("video-root-panel");
         rootPanel.add(videoPlayer.getWidget());
 
+        this.edit = new Anchor();
+        this.edit.getElement().getStyle().setBackgroundImage("url('" + res.editIcon().getSafeUri().asString() + "')");
+        EditButtonProxy proxy = new EditButtonProxy() {
 
-        if (showSynchControls) {
-            this.edit = new Anchor();
-            this.edit.getElement().getStyle().setBackgroundImage("url('" + res.editIcon().getSafeUri().asString() + "')");
-            EditButtonProxy proxy = new EditButtonProxy() {
+            @Override
+            public void setTitle(String string) {
+                edit.setTitle(string);
+            }
 
-                @Override
-                public void setTitle(String string) {
-                    edit.setTitle(string);
-                }
+            @Override
+            public void addAction(Runnable runnable) {
+                edit.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        runnable.run();
+                    }
+                });
+            }
 
-                @Override
-                public void addAction(Runnable runnable) {
-                    edit.addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            runnable.run();
-                        }
-                    });
-                }
-
-                @Override
-                public void setEnabled(boolean b) {
-                    edit.getElement().getStyle().setDisplay(b ? Display.BLOCK : Display.NONE);
-                }
-            };
-            mediaSynchControl = new MediaSynchControl(this.videoPlayer, mediaService, errorReporter, proxy);
-            mediaSynchControl.widget().addStyleName("media-synch-control");
-            rootPanel.add(mediaSynchControl.widget());
-        } else {
-            mediaSynchControl = null;
-        }
+            @Override
+            public void setEnabled(boolean b) {
+                edit.getElement().getStyle().setDisplay(b ? Display.BLOCK : Display.NONE);
+            }
+        };
+        mediaSynchControl = new MediaSynchControl(this.videoPlayer, mediaService, errorReporter, proxy, userservice);
+        mediaSynchControl.widget().addStyleName("media-synch-control");
+        rootPanel.add(mediaSynchControl.widget());
 
         videoPlayer.setEditFlag(mediaSynchControl);
 
@@ -83,7 +79,7 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
                 });
         // values required for js and youtube player to stay useable
         dialogBox.setMinWidth(MIN_WIDTH);
-        if(edit != null){
+        if (edit != null) {
             dialogBox.addBeforeBarButtons(edit);
         }
         dialogBox.addCloseHandler(new CloseHandler<PopupPanel>() {
