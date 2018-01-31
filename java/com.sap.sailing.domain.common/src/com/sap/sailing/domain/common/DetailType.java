@@ -6,6 +6,8 @@ import static com.sap.sailing.domain.common.SortingOrder.NONE;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -159,27 +161,9 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
         return availableDetailsTypes;
     }
-
-    public static List<DetailType> getRaceDetailTypes() {
+    
+    public static List<DetailType> getRaceExpeditionDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
-        allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
-        allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
-        allowed.add(RACE_DISTANCE_TRAVELED);
-        allowed.add(RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START);
-        allowed.add(RACE_TIME_TRAVELED);
-        allowed.add(RACE_CALCULATED_TIME_TRAVELED);
-        allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
-        allowed.add(RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
-        allowed.add(RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
-        allowed.add(RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
-        allowed.add(RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
-        allowed.add(RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
-        allowed.add(NUMBER_OF_MANEUVERS);
-        allowed.add(DISPLAY_LEGS);
-        allowed.add(RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS);
-        allowed.add(RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
-        allowed.add(RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL);
-        allowed.add(CURRENT_LEG);
         allowed.add(RACE_AWA);
         allowed.add(RACE_AWS);
         allowed.add(RACE_TWA);
@@ -216,5 +200,70 @@ public enum DetailType implements Serializable {
         allowed.add(RACE_DISTANCE_BELOW_LINE);
         allowed.add(RACE_LINE_SQUARE_FOR_WIND_DIRECTION);
         return allowed;
+    }
+    
+    public static List<DetailType> getRaceExtendedBravoDetailTypes() {
+        ArrayList<DetailType> allowed = new ArrayList<>();
+        allowed.add(DetailType.CURRENT_PORT_DAGGERBOARD_RAKE);
+        allowed.add(DetailType.CURRENT_STBD_DAGGERBOARD_RAKE);
+        allowed.add(DetailType.CURRENT_PORT_RUDDER_RAKE);
+        allowed.add(DetailType.CURRENT_STBD_RUDDER_RAKE);
+        allowed.add(DetailType.CURRENT_MAST_ROTATION_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_LEEWAY_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_SET);
+        allowed.add(DetailType.CURRENT_DRIFT_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_DEPTH_IN_METERS);
+        allowed.add(DetailType.CURRENT_RUDDER_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_TACK_ANGLE_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_DEFLECTOR_PERCENTAGE);
+        allowed.add(DetailType.CURRENT_DEFLECTOR_IN_MILLIMETERS);
+        allowed.add(DetailType.CURRENT_RAKE_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_FORESTAY_LOAD);
+        allowed.add(DetailType.CURRENT_FORESTAY_PRESSURE);
+        allowed.add(DetailType.CURRENT_TARGET_BOATSPEED_PERCENTAGE);
+        return allowed;
+    }
+    
+    public static List<DetailType> getRaceBravoDetailTypes() {
+        ArrayList<DetailType> allowed = new ArrayList<>();
+        allowed.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(DetailType.CURRENT_HEEL_IN_DEGREES);
+        allowed.add(DetailType.CURRENT_PITCH_IN_DEGREES);
+        return allowed;
+    }
+
+    public static List<DetailType> getRaceDetailTypes() {
+        ArrayList<DetailType> allowed = new ArrayList<>();
+        allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
+        allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        allowed.add(RACE_DISTANCE_TRAVELED);
+        allowed.add(RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START);
+        allowed.add(RACE_TIME_TRAVELED);
+        allowed.add(RACE_CALCULATED_TIME_TRAVELED);
+        allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
+        allowed.add(RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+        allowed.add(RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
+        allowed.add(RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
+        allowed.add(NUMBER_OF_MANEUVERS);
+        allowed.add(DISPLAY_LEGS);
+        allowed.add(RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS);
+        allowed.add(RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
+        allowed.add(RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL);
+        allowed.add(CURRENT_LEG);
+        allowed.addAll(getRaceExpeditionDetailTypes());
+        allowed.addAll(getRaceBravoDetailTypes());
+        allowed.addAll(getRaceExtendedBravoDetailTypes());
+        return allowed;
+    }
+
+    public static Collection<DetailType> getBaseDetailTypes() {
+        List<DetailType> all = new ArrayList<>(Arrays.asList(values()));
+        all.removeAll(getRaceBravoDetailTypes());
+        all.removeAll(getRaceExpeditionDetailTypes());
+        all.removeAll(getRaceExtendedBravoDetailTypes());
+        return all;
     }
 }

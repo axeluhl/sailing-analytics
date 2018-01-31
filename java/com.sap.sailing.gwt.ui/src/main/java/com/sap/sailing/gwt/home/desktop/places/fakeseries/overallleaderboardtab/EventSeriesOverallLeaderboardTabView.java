@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -61,33 +65,51 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
         contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
-            EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
-            final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
+            currentPresenter.getCtx().getAnalyticsManager().getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+                
                 @Override
-                public void consume(MultiRaceLeaderboardPanel leaderboardPanel) {
-                    initWidget(ourUiBinder.createAndBindUi(EventSeriesOverallLeaderboardTabView.this));
-                    leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
-                    eventSeriesAnalyticsManager.hideCompetitorChart();
-                    contentArea.setWidget(EventSeriesOverallLeaderboardTabView.this);
-                    if(leaderboardPanel.getLeaderboard() != null) {
-                        leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
-                    }
-                }
-            };
-            MultiRaceLeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 
-            if(leaderboardPanel == null) {
-                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer);
-            } else if( /*FIXME placeToken not empty */ false) {
-                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
-                    @Override
-                    public void onSuccess(MultiRaceLeaderboardSettings settings) {
-                        leaderboardPanel.updateSettings(settings);
+                public void onSuccess(List<DetailType> result) {
+                    EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
+                    final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
+                        @Override
+                        public void consume(MultiRaceLeaderboardPanel leaderboardPanel) {
+                            initWidget(ourUiBinder.createAndBindUi(EventSeriesOverallLeaderboardTabView.this));
+                            leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
+                            eventSeriesAnalyticsManager.hideCompetitorChart();
+                            contentArea.setWidget(EventSeriesOverallLeaderboardTabView.this);
+                            if(leaderboardPanel.getLeaderboard() != null) {
+                                leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
+                            }
+                        }
+                    };
+                    MultiRaceLeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 
+                    if(leaderboardPanel == null) {
+                        createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer, result);
+                    } else if( /*FIXME placeToken not empty */ false) {
+                        createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null, result).getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
+                            @Override
+                            public void onSuccess(MultiRaceLeaderboardSettings settings) {
+                                leaderboardPanel.updateSettings(settings);
+                                leaderboardConsumer.consume(leaderboardPanel);
+                            }
+                        });
+                    } else {
                         leaderboardConsumer.consume(leaderboardPanel);
-                    }
-                });
-            } else {
-                leaderboardConsumer.consume(leaderboardPanel);
-            }
+                    }                    
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    caught.printStackTrace();
+                    contentArea.setWidget(new Label("Could not load detailType list"));
+                    new com.google.gwt.user.client.Timer() {
+                        @Override
+                        public void run() {
+                            currentPresenter.getHomeNavigation().goToPlace();
+                        }
+                    }.schedule(3000);
+                }
+            });
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
             new com.google.gwt.user.client.Timer() {

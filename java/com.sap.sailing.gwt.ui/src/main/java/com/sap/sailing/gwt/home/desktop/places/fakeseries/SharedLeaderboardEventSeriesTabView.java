@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
+import java.util.Collection;
+
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
@@ -29,21 +32,21 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
 
     protected void createSharedLeaderboardPanel(String leaderboardName,
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer) {
+            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Collection<DetailType> availableDetailTypes) {
         
         // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils
                 .getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
 
         final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, userService,
-                placeToken);
+                placeToken, availableDetailTypes);
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
             @Override
             public void onSuccess(MultiRaceLeaderboardSettings leaderboardSettings) {
                 MultiRaceLeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createMultiRaceOverallLeaderboardPanel(null,
                         componentContext, leaderboardSettings,  "leaderboardGroupName",
                         leaderboardName, true, // this information came from place, now hard coded. check with frank
-                        autoExpandLastRaceColumn);
+                        autoExpandLastRaceColumn, availableDetailTypes);
                 leaderboardPanel.addAttachHandler(new Handler() {
 
                     @Override
@@ -61,8 +64,8 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
     }
 
     protected ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
-            String placeToken) {
-        final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+            String placeToken, Collection<DetailType> availableDetailTypes) {
+        final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesOverallLeaderboard(leaderboardName);
 
         final ComponentContext<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(

@@ -97,7 +97,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                 asyncActionsExecutor, timer, false /* isEmbedded */,
                 preselectedLeaderboardName,  errorReporter, stringMessages,
                 perspectiveSettings.isShowRaceDetails(), perspectiveSettings.isAutoExpandLastRaceColumn(),
-                leaderboardSettings, FlagImageResolverImpl.get());
+                leaderboardSettings, FlagImageResolverImpl.get(), availableDetailTypes);
         multiLeaderboardPanel.setVisible(perspectiveSettings.isShowSeriesLeaderboards());
         mainPanel.add(getLeaderboardPanel());
         mainPanel.add(multiCompetitorChart);

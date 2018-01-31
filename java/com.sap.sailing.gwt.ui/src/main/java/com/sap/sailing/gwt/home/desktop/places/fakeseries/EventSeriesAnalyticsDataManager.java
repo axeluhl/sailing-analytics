@@ -60,6 +60,10 @@ public class EventSeriesAnalyticsDataManager {
         this.overallLeaderboardPanel = null;
         this.multiCompetitorChart = null;
     }
+    
+    public SailingServiceAsync getSailingService() {
+        return sailingService;
+    }
 
     public MultiRaceLeaderboardPanel createMultiRaceOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final MultiRaceLeaderboardSettings leaderboardSettings,
@@ -94,12 +98,12 @@ public class EventSeriesAnalyticsDataManager {
     public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             MultiRaceLeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName,  String leaderboardGroupName,
-            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
+            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn, Collection<DetailType> availableDetailTypes) {
         if(multiLeaderboardPanel == null) {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,
-                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver);
+                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver, availableDetailTypes);
         }
         return multiLeaderboardPanel;
     }

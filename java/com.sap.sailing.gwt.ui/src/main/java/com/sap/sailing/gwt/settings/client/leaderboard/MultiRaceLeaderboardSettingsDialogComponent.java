@@ -31,7 +31,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
 
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
             List<String> allRaceColumnNames, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
-        super(initialSettings, stringMessages);
+        super(initialSettings, stringMessages, availableDetailTypes);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         this.raceAllRaceColumnNames = allRaceColumnNames;
         raceColumnCheckboxes = new LinkedHashMap<>();
@@ -39,17 +39,16 @@ public class MultiRaceLeaderboardSettingsDialogComponent
 
     @Override
     public MultiRaceLeaderboardSettings getResult() {
-        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes);
-        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes);
-        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes);
-        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes);
+        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes, initialSettings.getManeuverDetailsToShow());
+        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, initialSettings.getOverallDetailsToShow());
+        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes, initialSettings.getRaceDetailsToShow());
+        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes, initialSettings.getLegDetailsToShow());
         List<String> namesOfRaceColumnsToShow = null;
         if (activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
             namesOfRaceColumnsToShow = new ArrayList<String>();
             for (Map.Entry<String, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
                 if (entry.getValue().getValue()) {
                     namesOfRaceColumnsToShow.add(entry.getKey());
-          
                 }
             }
         }

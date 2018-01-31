@@ -1,6 +1,7 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -116,27 +117,45 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
 
                             @Override
                             public void onSuccess(List<DetailType> result) {
-                                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
-                                        StringMessages.INSTANCE, result);
-                                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle,
-                                        getUserService(), storageDefinition);
+                                sailingService.getAvailableDetailTypesForLeaderboard(
+                                        raceboardContextDefinition.getLeaderboardName(),
+                                        new AsyncCallback<List<DetailType>>() {
 
-                                componentContext.getInitialSettings(
-                                        new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                                             @Override
-                                            public void onSuccess(
-                                                    PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
-                                                Timer timer = new Timer(PlayModes.Replay, 1000l);
-                                                final RaceBoardPanel raceBoardPanel = createPerspectivePage(null,
-                                                        componentContext, initialSettings, raceboardData,
-                                                        showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
-                                                if (finalMode != null) {
-                                                    finalMode.getMode().applyTo(raceBoardPanel);
-                                                }
+                                            public void onFailure(Throwable caught) {
+                                                reportError(
+                                                        "Error trying to create the raceboard: " + caught.getMessage());
+                                            }
+
+                                            @Override
+                                            public void onSuccess(List<DetailType> availableDetailTypes) {
+                                                // TODO Auto-generated method stub
+                                                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
+                                                        StringMessages.INSTANCE, result, availableDetailTypes);
+                                                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(
+                                                        lifeCycle, getUserService(), storageDefinition);
+
+                                                componentContext.getInitialSettings(
+                                                        new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
+                                                            @Override
+                                                            public void onSuccess(
+                                                                    PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
+                                                                Timer timer = new Timer(PlayModes.Replay, 1000l);
+                                                                final RaceBoardPanel raceBoardPanel = createPerspectivePage(
+                                                                        null, componentContext, initialSettings,
+                                                                        raceboardData,
+                                                                        showChartMarkEditMediaButtonsAndVideo,
+                                                                        lifeCycle, timer, availableDetailTypes);
+                                                                if (finalMode != null) {
+                                                                    finalMode.getMode().applyTo(raceBoardPanel);
+                                                                }
+                                                            }
+                                                        });
                                             }
                                         });
                             }
                         });
+
                 
             }
             
@@ -168,7 +187,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceBoardPanel createPerspectivePage(Component<?> parent,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
-            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle, Timer timer) {
+            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle, Timer timer, Collection<DetailType> availableDetailTypes) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
@@ -182,7 +201,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
-                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo,true);
+                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo,true, availableDetailTypes);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         return raceBoardPerspective;
     }  

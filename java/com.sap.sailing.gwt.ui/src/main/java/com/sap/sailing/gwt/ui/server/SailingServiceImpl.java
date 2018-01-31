@@ -6715,29 +6715,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             if (hasBravoTrack) {
-                availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
-                availableDetailsTypes.add(DetailType.CURRENT_HEEL_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_PITCH_IN_DEGREES);
+                availableDetailsTypes.addAll(DetailType.getRaceBravoDetailTypes());
             }
             if (hasExtendedBravoFixes) {
-                availableDetailsTypes.add(DetailType.CURRENT_PORT_DAGGERBOARD_RAKE);
-                availableDetailsTypes.add(DetailType.CURRENT_STBD_DAGGERBOARD_RAKE);
-                availableDetailsTypes.add(DetailType.CURRENT_PORT_RUDDER_RAKE);
-                availableDetailsTypes.add(DetailType.CURRENT_STBD_RUDDER_RAKE);
-                availableDetailsTypes.add(DetailType.CURRENT_MAST_ROTATION_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_LEEWAY_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_SET);
-                availableDetailsTypes.add(DetailType.CURRENT_DRIFT_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_DEPTH_IN_METERS);
-                availableDetailsTypes.add(DetailType.CURRENT_RUDDER_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_TACK_ANGLE_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_DEFLECTOR_PERCENTAGE);
-                availableDetailsTypes.add(DetailType.CURRENT_DEFLECTOR_IN_MILLIMETERS);
-                availableDetailsTypes.add(DetailType.CURRENT_RAKE_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES);
-                availableDetailsTypes.add(DetailType.CURRENT_FORESTAY_LOAD);
-                availableDetailsTypes.add(DetailType.CURRENT_FORESTAY_PRESSURE);
-                availableDetailsTypes.add(DetailType.CURRENT_TARGET_BOATSPEED_PERCENTAGE);
+                availableDetailsTypes.addAll(DetailType.getRaceExtendedBravoDetailTypes());
             }
         }
         if (leaderboardGroupName != null) {
@@ -6949,30 +6930,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<DetailType> getAvailableDetailTypesForLeaderboard(
-            String leaderboardName) {
-        DetailType[] details = new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
-                DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TRAVELED,
-                DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START, DetailType.RACE_TIME_TRAVELED,
-                DetailType.RACE_CALCULATED_TIME_TRAVELED,
-                DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
-                DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
-                DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS, DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS,
-                DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
-                DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
-                DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL };
-        List<DetailType> exp = DetailType.getRaceDetailTypes();
-        for(DetailType d:details){
-            exp.add(d);
+    public List<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName) {
+        List<DetailType> allowed = new ArrayList<>();
+        allowed.addAll(DetailType.getBaseDetailTypes());
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            boolean hasBravoTrack = false;
+            boolean hasExtendedBravoFixes = false;
+            for (RaceColumn race : leaderboard.getRaceColumns()) {
+                for (Fleet fleet : race.getFleets()) {
+                    TrackedRace trace = race.getTrackedRace(fleet);
+                    if(trace != null){
+                        final DynamicTrackedRace trackedRace = getService().getTrackedRace(trace.getRaceIdentifier());
+                        if (trackedRace != null) {
+                            for (BravoFixTrack<Competitor> track : trackedRace
+                                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTracks(BravoFixTrack.TRACK_NAME)) {
+                                hasBravoTrack = true;
+                                if (track.hasExtendedFixes()) {
+                                    hasExtendedBravoFixes = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            System.out.println("Getting available types for " + leaderboardName + " " + hasBravoTrack + " " + hasExtendedBravoFixes);
+            if(hasBravoTrack){
+                allowed.addAll(DetailType.getRaceBravoDetailTypes());
+            }
+            if(hasExtendedBravoFixes){
+                allowed.addAll(DetailType.getRaceExpeditionDetailTypes());
+            }
+        } else {
+            System.out.println("Returning fallback detailtypes");
         }
-        exp.addAll(Arrays.asList(new DetailType[] { DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
-                DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, DetailType.DISTANCE_TO_START_AT_RACE_START,
-                DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
-                DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, DetailType.START_TACK }));
-        
-        return exp;
+        return allowed;
     }
 }

@@ -24,10 +24,10 @@ public class SingleRaceLeaderboardSettingsDialogComponent
 
     @Override
     public SingleRaceLeaderboardSettings getResult() {
-        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes);
-        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes);
-        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes);
-        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes);
+        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes, initialSettings.getManeuverDetailsToShow());
+        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, initialSettings.getOverallDetailsToShow());
+        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes, initialSettings.getRaceDetailsToShow());
+        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes, initialSettings.getLegDetailsToShow());
                 
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,

@@ -8,6 +8,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.domain.common.DetailType;
@@ -77,34 +78,46 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            final Runnable callback = new Runnable() {
+            currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+                
                 @Override
-                public void run() {
-                    leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
-                    leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaCompetitorAnalyticsTabView.this);
-                    initWidget(ourUiBinder.createAndBindUi(RegattaCompetitorAnalyticsTabView.this));
-                    
-                    DetailType initialDetailType = DetailType.REGATTA_RANK;
-                    if (regattaAnalyticsManager.getMultiCompetitorChart() == null) {
-                        regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
-                    }
-                    competitorCharts.setChart(regattaAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(),
-                            initialDetailType);
-                    
-                    regattaAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
-                    contentArea.setWidget(RegattaCompetitorAnalyticsTabView.this);
-                }
-            };
-            if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
-                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<MultiRaceLeaderboardPanel>() {
-                    @Override
-                    public void consume(MultiRaceLeaderboardPanel object) {
+                public void onSuccess(List<DetailType> result) {
+                    final Runnable callback = new Runnable() {
+                        @Override
+                        public void run() {
+                            leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
+                            leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaCompetitorAnalyticsTabView.this);
+                            initWidget(ourUiBinder.createAndBindUi(RegattaCompetitorAnalyticsTabView.this));
+                            
+                            DetailType initialDetailType = DetailType.REGATTA_RANK;
+                            if (regattaAnalyticsManager.getMultiCompetitorChart() == null) {
+                                regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
+                            }
+                            competitorCharts.setChart(regattaAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(),
+                                    initialDetailType);
+                            
+                            regattaAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
+                            contentArea.setWidget(RegattaCompetitorAnalyticsTabView.this);
+                        }
+                    };
+                    if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
+                        createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<MultiRaceLeaderboardPanel>() {
+                            @Override
+                            public void consume(MultiRaceLeaderboardPanel object) {
+                                callback.run();
+                            }
+                        }, result);
+                    } else {
                         callback.run();
-                    }
-                });
-            } else {
-                callback.run();
-            }
+                    }                    
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    // TODO Auto-generated method stub
+                    
+                }
+            });
         }
     }
 

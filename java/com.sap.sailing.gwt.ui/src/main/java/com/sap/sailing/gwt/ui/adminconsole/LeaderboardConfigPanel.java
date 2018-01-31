@@ -323,7 +323,18 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     editCompetitorsDialog.show();
 
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    openLeaderboardUrlConfigDialog(leaderboardDTO);
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<List<DetailType>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            caught.printStackTrace();
+                        }
+
+                        @Override
+                        public void onSuccess(List<DetailType> result) {
+                            openLeaderboardUrlConfigDialog(leaderboardDTO, result);
+                        }
+                    });
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
                     Window.open(UriUtils.fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name).asString(), "", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD.equals(value)) {

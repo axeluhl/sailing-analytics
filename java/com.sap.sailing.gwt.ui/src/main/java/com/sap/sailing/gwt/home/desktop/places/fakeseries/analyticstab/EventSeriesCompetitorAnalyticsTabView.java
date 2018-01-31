@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -64,29 +65,46 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
-            final Runnable callback = new Runnable() {
+            eventSeriesAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+                
                 @Override
-                public void run() {
-                    initWidget(ourUiBinder.createAndBindUi(EventSeriesCompetitorAnalyticsTabView.this));
-                    DetailType initialDetailType = DetailType.OVERALL_RANK;
-                    if (eventSeriesAnalyticsManager.getMultiCompetitorChart() == null) {
-                        eventSeriesAnalyticsManager.createMultiCompetitorChart(null, null, leaderboardName, initialDetailType);
-                    }
-                    competitorCharts.setChart(eventSeriesAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(), initialDetailType);
-                    eventSeriesAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
-                    contentArea.setWidget(EventSeriesCompetitorAnalyticsTabView.this);
-                }
-            };
-            if(eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
-                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<MultiRaceLeaderboardPanel>() {
-                    @Override
-                    public void consume(MultiRaceLeaderboardPanel object) {
+                public void onSuccess(List<DetailType> result) {
+                    final Runnable callback = new Runnable() {
+                        @Override
+                        public void run() {
+                            initWidget(ourUiBinder.createAndBindUi(EventSeriesCompetitorAnalyticsTabView.this));
+                            DetailType initialDetailType = DetailType.OVERALL_RANK;
+                            if (eventSeriesAnalyticsManager.getMultiCompetitorChart() == null) {
+                                eventSeriesAnalyticsManager.createMultiCompetitorChart(null, null, leaderboardName, initialDetailType);
+                            }
+                            competitorCharts.setChart(eventSeriesAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(), initialDetailType);
+                            eventSeriesAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
+                            contentArea.setWidget(EventSeriesCompetitorAnalyticsTabView.this);
+                        }
+                    };
+                    if(eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
+                        createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<MultiRaceLeaderboardPanel>() {
+                            @Override
+                            public void consume(MultiRaceLeaderboardPanel object) {
+                                callback.run();
+                            }
+                        }, result);
+                    } else {
                         callback.run();
-                    }
-                });
-            } else {
-                callback.run();
-            }
+                    }                    
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    contentArea.setWidget(new Label("Could not load detailType list"));
+                    new com.google.gwt.user.client.Timer() {
+                        @Override
+                        public void run() {
+                            currentPresenter.getHomeNavigation().goToPlace();
+                        }
+                    }.schedule(3000);
+                }
+            });
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
             new com.google.gwt.user.client.Timer() {

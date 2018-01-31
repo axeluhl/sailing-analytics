@@ -37,7 +37,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     }
 
     public void createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer) {
+            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Collection<DetailType> availableDetailTypes) {
         
         // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(

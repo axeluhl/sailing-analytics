@@ -260,13 +260,17 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return result;
     }
     
-    protected List<DetailType> getSelected(Map<DetailType, CheckBox> checkBoxes) {
+    protected List<DetailType> getSelected(Map<DetailType, CheckBox> checkBoxes, Collection<DetailType> initialValues) {
         List<DetailType> selectedDetails = new ArrayList<DetailType>();
+        ArrayList<DetailType> safeInitialValues = new ArrayList<>(initialValues);
         for (Map.Entry<DetailType, CheckBox> entry : checkBoxes.entrySet()) {
+            safeInitialValues.remove(entry.getKey());
             if (entry.getValue().getValue()) {
                 selectedDetails.add(entry.getKey());
             }
         }
+        //all values that are not currently settable (eg hidden checkboxes) but might be set via defaults ect. Keep them.
+        selectedDetails.addAll(safeInitialValues);
         return selectedDetails;
     }
 }
