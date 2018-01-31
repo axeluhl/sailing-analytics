@@ -45,7 +45,7 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         FlowPanel dialogPanel = new FlowPanel();
         dialogPanel.ensureDebugId("LeaderboardSettingsPanel");
         dialogPanel.add(createOverallDetailPanel(dialog));
-        dialogPanel.add(createRaceDetailPanel(dialog, reduceToAvailableTypes(DetailType.getRaceDetailTypes())));
+        dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createRaceStartAnalysisPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
         dialogPanel.add(createManeuverDetailsPanel(dialog));

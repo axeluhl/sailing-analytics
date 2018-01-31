@@ -167,7 +167,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
         return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings,
-                leaderboard.getNamesOfRaceColumns(), stringMessages, DetailType.getRaceDetailTypes());
+                leaderboard.getNamesOfRaceColumns(), stringMessages, availableDetailTypes);
     }
 
     @Override

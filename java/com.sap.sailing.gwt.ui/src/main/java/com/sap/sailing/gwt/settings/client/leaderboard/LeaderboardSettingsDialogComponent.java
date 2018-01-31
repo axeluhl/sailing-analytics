@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -53,6 +54,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
+        GWT.debugger();
         this.availableDetailTypes = Collections.unmodifiableCollection(availableDetailTypes);
     }
     
@@ -71,7 +73,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel meneuverContent = new FlowPanel();
         meneuverContent.addStyleName("dialogInnerContent");
         Collection<DetailType> currentMeneuverDetailSelection = initialSettings.getManeuverDetailsToShow();
-        for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
+        for (DetailType detailType : reduceToAvailableTypes(ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes())) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, detailType,
                     currentMeneuverDetailSelection.contains(detailType), maneuverDetailCheckboxes);
             
@@ -106,7 +108,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return timingPanel;
     }
 
-    protected FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog, Collection<DetailType> raceDetails) {
+    protected FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.ensureDebugId("RaceDetailsSettingsPanel");
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
@@ -114,7 +116,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         int detailCountInCurrentFlowPanel = 0;
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
-        for (DetailType type : raceDetails) {
+        GWT.debugger();
+        for (DetailType type : reduceToAvailableTypes(DetailType.getRaceDetailTypes())) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
@@ -144,7 +147,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         int detailCountInCurrentFlowPanel = 0;
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceStartAnalysisDialogContent = null;
-        for (DetailType type : LeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes()) {
+        for (DetailType type : reduceToAvailableTypes(LeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes())) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceStartAnalysisDialogContent = new FlowPanel();
                 raceStartAnalysisDialogContent.addStyleName("dialogInnerContent");
@@ -166,7 +169,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         Collection<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
-        for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
+        for (DetailType type : reduceToAvailableTypes(LeaderboardPanel.getAvailableOverallDetailColumnTypes())) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
@@ -199,7 +202,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel legDetailsContent = null;
         Collection<DetailType> currentLegDetailSelection = initialSettings.getLegDetailsToShow();
         int detailCountInCurrentFlowPanel = 0;
-        for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
+        for (DetailType type : reduceToAvailableTypes(LegColumn.getAvailableLegDetailColumnTypes())) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 legDetailsContent = new FlowPanel();
                 legDetailsContent.addStyleName("dialogInnerContent");
