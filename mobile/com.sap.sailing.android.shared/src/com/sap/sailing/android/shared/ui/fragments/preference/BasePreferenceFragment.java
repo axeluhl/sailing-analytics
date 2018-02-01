@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
@@ -13,9 +16,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-
-import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
-import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 
 /**
  * Created by I074137 on 18.09.13.
@@ -53,30 +53,30 @@ public class BasePreferenceFragment extends PreferenceFragment {
         }
     };
 
-    protected static void bindPreferenceSummaryToValue(Preference preference) {
+    protected static void bindPreferenceSummaryToValue(PreferenceManager preferenceManager, Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
+                preferenceManager
+                        .getSharedPreferences()
                         .getString(preference.getKey(), ""));
     }
     
-    protected static void bindPreferenceSummaryToInteger(Preference preference) {
+    protected static void bindPreferenceSummaryToInteger(PreferenceManager preferenceManager, Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
+                preferenceManager
+                        .getSharedPreferences()
                         .getInt(preference.getKey(), 0));
     }
     
-    protected static void bindPreferenceSummaryToSet(Preference preference) {
+    protected static void bindPreferenceSummaryToSet(PreferenceManager preferenceManager, Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
+                preferenceManager
+                        .getSharedPreferences()
                         .getStringSet(preference.getKey(), new HashSet<String>()));
     }
 
