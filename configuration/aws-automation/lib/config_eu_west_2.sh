@@ -11,7 +11,6 @@ instance_security_group_ids=sg-871732ee
 
 # SAP Sailing Analytics App HVM 1.56
 image_id=ami-39f3e25d
-image_ssh_user="root"
 
 certificate_arn='arn:aws:acm:eu-west-2:017363970217:certificate/d2ae17b0-75ed-4b56-ac12-a80f9e5c493d'
 elb_security_group_ids=sg-871732ee
@@ -20,4 +19,4 @@ mongodb_port=27017
 alb_domain='dummy2.sapsailing.com'
 
 default_super_instance_dns_name=''
-default_ssh_user=$image_ssh_user
+default_ssh_user="root"
