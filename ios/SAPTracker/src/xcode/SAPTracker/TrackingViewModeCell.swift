@@ -25,38 +25,39 @@ class TrackingViewModeCell: UITableViewCell {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupLocalization()
-        setupModeLabel(GPSFixController.Mode.None)
+        setupModeLabel(mode: GPSFixController.Mode.None)
     }
     
-    private func setupLocalization() {
+    fileprivate func setupLocalization() {
         modeTitleLabel.text = Translation.GPSFixController.Mode.String
     }
     
-    private func setupModeLabel(mode: GPSFixController.Mode) {
+    fileprivate func setupModeLabel(mode: GPSFixController.Mode) {
         modeLabel.text = mode.description
     }
     
     // MARK: - Notifications
 
-    private func subscribeForNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(regattaControllerModeChanged),
-                                                         name:GPSFixController.NotificationType.ModeChanged,
-                                                         object: nil
+    fileprivate func subscribeForNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(gpsFixControllerModeChanged),
+            name: NSNotification.Name(rawValue: GPSFixController.NotificationType.ModeChanged),
+            object: nil
         )
     }
     
-    private func unsubscribeFromNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+    fileprivate func unsubscribeFromNotifications() {
+        NotificationCenter.default.removeObserver(self)
     }
     
-    @objc private func regattaControllerModeChanged(notification: NSNotification) {
-        dispatch_async(dispatch_get_main_queue(), {
+    @objc fileprivate func gpsFixControllerModeChanged(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
             guard let rawValue = notification.userInfo?[GPSFixController.UserInfo.Mode] as? String else { return }
             guard let mode = GPSFixController.Mode(rawValue: rawValue) else { return }
-            self.setupModeLabel(mode)
+            self.setupModeLabel(mode: mode)
         })
     }
     

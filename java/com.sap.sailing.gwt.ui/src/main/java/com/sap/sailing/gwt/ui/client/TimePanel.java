@@ -33,11 +33,13 @@ import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
@@ -97,8 +99,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
      *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
      */
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+    public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
+            TimeRangeWithZoomProvider timeRangeProvider,
+            StringMessages stringMessages,
             boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {
+        super(parent, context);
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
@@ -290,7 +295,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
        
         timePanelCss.ensureInjected();
         controlsPanel.add(createSettingsButton());
-        setWidget(timePanelInnerWrapper);
+        initWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
         controlsPanel.add(playSpeedControlPanel);
@@ -591,8 +596,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     }
 
     @Override
-    public SettingsDialogComponent<T> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages);
     }
 
     @Override
@@ -642,7 +647,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public String getId() {
-        return getLocalizedShortName();
+        return "TimePanel";
     }
 
 }

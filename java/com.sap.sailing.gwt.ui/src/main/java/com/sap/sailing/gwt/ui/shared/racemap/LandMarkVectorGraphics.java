@@ -2,10 +2,11 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sse.common.Color;
 
 public class LandMarkVectorGraphics extends AbstractMarkVectorGraphics implements MarkVectorGraphics {
 
-    public LandMarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
+    public LandMarkVectorGraphics(MarkType type, Color color, String shape, String pattern) {
         super(type, color, shape, pattern);
     }
 

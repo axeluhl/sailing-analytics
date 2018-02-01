@@ -9,16 +9,15 @@ UPDATE_ANDROID_MANIFEST_VERSIONS=1
 UPDATE_POM_VERSIONS=1
 PERFORM_GIT_OPERATIONS=1
 
-increment_version_code() {
+increment_version_code_and_set_version_name() {
   MANIFEST=$1
+  NEW_VERSION_NAME=$2
   echo "Incrementing version code and version name for $MANIFEST"
   OLD_VERSION_CODE=`grep 'android:versionCode="[0-9]*"' $MANIFEST | sed -e 's/^.*android:versionCode="\([0-9]*\)".*$/\1/'`
   NEW_VERSION_CODE=$(($OLD_VERSION_CODE + 1))
   echo $MANIFEST: OLD_VERSION_CODE is $OLD_VERSION_CODE, NEW_VERSION_CODE is $NEW_VERSION_CODE
-  OLD_MINOR_VERSION=`grep 'android:versionName="[0-9]*\.[0-9]*"' $MANIFEST | sed -e 's/^.*android:versionName="\([0-9]*\)\.\([0-9]*\)".*$/\2/'`
-  NEW_MINOR_VERSION=$((OLD_MINOR_VERSION + 1))
-  echo $MANIFEST: OLD_MINOR_VERSION is $OLD_MINOR_VERSION, NEW_MINOR_VERSION is $NEW_MINOR_VERSION
-  sed --in-place -e "s/android:versionCode=\"$OLD_VERSION_CODE\"/android:versionCode=\"$NEW_VERSION_CODE\"/" -e "s/android:versionName=\"\([0-9]*\)\.$OLD_MINOR_VERSION\"/android:versionName=\"\1.$NEW_MINOR_VERSION\"/" "$MANIFEST"
+  echo $MANIFEST: Using versionName=\"$NEW_VERSION_NAME\"
+  sed --in-place -e "s/android:versionCode=\"$OLD_VERSION_CODE\"/android:versionCode=\"$NEW_VERSION_CODE\"/" -e "s/android:versionName=\"\([^\"]*\)\"/android:versionName=\"$NEW_VERSION_NAME\"/" "$MANIFEST"
 }
 
 upgrade_pom_and_manifest_versions() {
@@ -85,15 +84,8 @@ git checkout $ANDROID_RELEASE_BRANCH
 git merge -m "Merging $GIT_REMOTE/$ANDROID_RELEASE_BRANCH" $GIT_REMOTE/$ANDROID_RELEASE_BRANCH
 git fetch $GIT_REMOTE $RELEASE_BRANCH:$RELEASE_BRANCH
 git merge -m "Merging $RELEASE_BRANCH into $ANDROID_RELEASE_BRANCH, probably incorporating version setting to -SNAPSHOT" $GIT_REMOTE/$RELEASE_BRANCH
-git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
-
-# Patch the AndroidManifest.xml files to upgrade the android:versionCode sequential counter relevant for the PlayStore
-# and the android:versionName which is what the user sees and which we expect to follow a major.minor version scheme,
-# where this script increments the minor version by one
-if [ "$UPDATE_ANDROID_MANIFEST_VERSIONS" = "1" ]; then
-  for m in $APP_MANIFESTS; do
-    increment_version_code $m
-  done
+if [ "$PERFORM_GIT_OPERATIONS" = "1" ]; then
+  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
 fi
 
 # Determine the version in the root pom.xml; if a -SNAPSHOT version, simply remove the -SNAPSHOT;
@@ -112,6 +104,15 @@ fi
 echo OLD_POM_VERSION is $OLD_POM_VERSION, NEW_POM_VERSION is $NEW_POM_VERSION
 if [ "$UPDATE_POM_VERSIONS" = "1" ]; then
   upgrade_pom_and_manifest_versions pom.xml $NEW_POM_VERSION
+fi
+
+# Patch the AndroidManifest.xml files to upgrade the android:versionCode sequential counter relevant for the PlayStore
+# and the android:versionName which is what the user sees and which we expect to follow a major.minor version scheme,
+# where this script increments the minor version by one
+if [ "$UPDATE_ANDROID_MANIFEST_VERSIONS" = "1" ]; then
+  for m in $APP_MANIFESTS; do
+    increment_version_code_and_set_version_name $m $NEW_POM_VERSION
+  done
 fi
 
 # Now commit the version changes and amend the commit using the change request ID tag:

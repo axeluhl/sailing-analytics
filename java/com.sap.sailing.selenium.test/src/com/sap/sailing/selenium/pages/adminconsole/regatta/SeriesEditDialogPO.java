@@ -92,6 +92,15 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
         pressAddRaces();
     }
     
+    public void addSingleRace(String raceName) {
+        setFromNumberOfRacesToAdd(1);
+        setToNumberOfRacesToAdd(1);
+        pressAddRaces();
+        final WebElement raceNameElement = findElementBySeleniumId("ValueTextBox");
+        raceNameElement.clear();
+        raceNameElement.sendKeys(raceName);
+    }
+    
     public void renameRace(String race, String newName) {
         for(WebElement editorRow : getRaceNameEditors()) {
             WebElement valueTextBox = findElementBySeleniumId(editorRow, "ValueTextBox");
@@ -124,5 +133,11 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
         WebElement raceNamesGrid = findElementBySeleniumId(raceNamesEditor, "ExpandedValuesGrid");
         
         return raceNamesGrid.findElements(By.tagName("tr"));
+    }
+    
+    public void setMedalSeries(boolean medal) {
+        if(medalSeriesCheckbox.isSelected() != medal) {
+            medalSeriesCheckbox.click();
+        }
     }
 }

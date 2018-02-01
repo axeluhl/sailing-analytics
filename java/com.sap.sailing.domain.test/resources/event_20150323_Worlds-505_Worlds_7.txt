@@ -1,0 +1,983 @@
+//stored-uri:datafiles/66ccec10-b77d-0132-26ea-60a44ce903c3.mtb
+StartReplay:1
+
+// Input from params_static:
+
+// Input from event_parameters:
+
+DefaultPanel:
+ReCalcDirAndSpeed:1
+CompMarkerUUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+CodanIsSponsor:0
+DefaultTailLength:60
+EnableResults:1
+ResultsLayout:[{"key":"Order","header":"#","description":"Position","printable":true,"align":"right","collapsible":false},{"key":"Name","header":"Name","description":"Competitor's name","printable":true,"align":"left","collapsible":false},{"key":"ShortName","header":"Short Name","description":"Competitor's short name","printable":true,"align":"left","collapsible":true},{"key":"LegTime","header":"Leg","description":"Leg time","printable":false,"align":"right","collapsible":true},{"key":"LegPosition","header":"#","description":"Leg position","printable":false,"align":"right","collapsible":true},{"key":"Time","header":"Total","description":"Total time","printable":true,"align":"right","collapsible":false},{"key":"After","header":"Total &Delta;","description":"Total &Delta;","printable":true,"align":"right","collapsible":false}]
+PerformanceTableLayout:[{"key":"Pos","header":"Pos"},{"key":"Name","header":"Name"},{"key":"Short","header":"Short"},{"key":"Country","header":"Country"},{"key":"After","header":"After"},{"key":"Leg pos","header":"Leg pos"},{"key":"Leg time","header":"Leg time"},{"key":"SOG","header":"SOG"},{"key":"VMG","header":"VMG"},{"key":"Top speed","header":"Top Speed"},{"key":"Distance","header":"Distance"}]
+APzoomChangeTime:2500
+disableAutoProduce:0
+autoProduce:0
+APstartLineShowOfLeg:0.25
+APsideOfStartLine:0.30
+APstartSwitch:0.8
+APwholeLegBehindMarks:0.15
+APmarkSwitch:0.13
+APmarkZoomBehindMarks:0.10
+APmarkZoomInFrontOfMarks:0.20
+PopupMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+ManualUrl:http://www.tractrac.com/files/userguide_sailing.pdf
+Marker1UUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+Marker1Type:RGBMarkerFactory
+Marker1Directional:1
+Marker1Image:markers/boat_FF0000_big.png
+Marker1Length:5
+Marker1MinPixelSize:30
+Startlocation:25.66219980468759,-33.95794373375933
+MaxDiffTime:1200
+MaxMetersPerSecond:20
+PrecisionMeters:20
+ShortAvgTime:180
+LongAvgTime:900
+TimeZone:2
+CompMarkerTimeout:60
+FramesPerSecond:8
+replayspeedup:5
+MatchRaceClock:0
+MatchRaceClockNo:3
+MatchRaceClockSpacing:300
+Minimap:1
+MinimapUseLayers:2
+Minimapgeorect:25.537683105468773,-33.741288381182635,26.19746406249999,-34.12630292526923
+MinimapMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4UUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4Type:RGBmarkerFactory
+Marker4Directional:1
+Marker4Image:markers/boat_FF0000_small.png
+MetersPerPixel:18
+MetersPerPixelMax:30
+MetersPerPixelMin:0.2
+isMatchRace:0
+DefaultDistanceUnits:meters
+weatherEnabled:0
+DefaultSpeedUnits:Knots
+showRaceClock:1
+BackGroundImage:graphics/background.jpg
+DisableRotation:0
+ControlPointMarkerRadius:13
+disableselection:0
+disableleaderline:0
+StartTimeType:Race
+ResultColumn5SpeedIn:Knots
+DisableChangeRace:0
+DisableLatestRoundings:0
+//live-uri:tcp://secondary.traclive.dk:4400
+//stored-uri:tcp://secondary.traclive.dk:4401
+PopUpRow1Name:
+PopUpRow1Type:Name
+PopUpRow2Name:Knots
+PopUpRow2Type:BoatSpeed
+PopUpRow3Name:Ranking
+PopUpRow3Type:RowNumber
+PopUpRow4Name:Sail
+PopUpRow4Type:Ini
+PopUpRow5Name:After
+PopUpRow5Type:BoatAfter
+WindEstimator:0
+MapUrl:http://tile.traclive.dk/ttm
+ResultColumn1Name:#
+ResultColumn1Size:20
+ResultColumn1Type:RowNumber
+ResultColumn2Name:sail
+ResultColumn2Size:60
+ResultColumn2Type:Ini
+ResultColumn3Name:name
+ResultColumn3Size:110
+ResultColumn3Type:Name
+ResultColumn4Name:after
+ResultColumn4Size:45
+ResultColumn4Type:BoatAfter
+ResultColumn5Name:kts
+ResultColumn5Size:40
+ResultColumn5Type:BoatSpeed
+DisableLeaderboard:0
+DisableAnalysis:0
+TableFontSize:11
+compInitialsFontSize:11
+AutoRotate:0
+MassStart:0
+SegmentFile:segments.php
+RaceHandicapSystem:NONE
+TeamCompetitionType:NONE
+LiveDelaySecs: 10
+
+//-------- AUTO GENERATED PARAMETERS START ----------------
+
+EventID:b07bb320-b10c-0132-0752-60a44ce903c3
+EventName:505 Worlds 2015
+EventDB:event_20150323_Worlds
+EventStartTime:2015-03-22 22:00:00
+EventEndTime:2015-04-03 21:00:00
+EventType:a1b74ca0-fdd8-11dc-8811-005056c00008
+
+RaceID:66ccec10-b77d-0132-26ea-60a44ce903c3
+RaceName:Worlds 7
+RaceStartTime:2015-04-02 12:40:00
+RaceEndTime:
+RaceTrackingStartTime:2015-04-02 12:36:00
+RaceTrackingEndTime:2015-04-02 15:10:00
+RaceDefaultRouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+RaceHandicapSystem:NONE
+
+Image1UUID:53955ea0-b10f-0132-075b-60a44ce903c3
+Image1Type:Logo
+Image1Description:banner
+Image1Image:pictures/53955ea0-b10f-0132-075b-60a44ce903c3/original_53955ea0-b10f-0132-075b-60a44ce903c3.png
+
+Class1UUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Class1Name:5O5
+
+Team1UUID:5f8d2600-b4fc-0132-1da5-60a44ce903c3
+Team1Name:0
+
+Team2UUID:94c361d0-b4db-0132-1cde-60a44ce903c3
+Team2Name:?
+
+Team3UUID:ac8787b0-b377-0132-11d3-60a44ce903c3
+Team3Name:Aaron Ross
+
+Team4UUID:94cd2760-b4db-0132-1ce2-60a44ce903c3
+Team4Name:Aeolians
+Team4Comp1UUID:94d00ef0-b4db-0132-1ce3-60a44ce903c3
+
+Team5UUID:9589e150-b4db-0132-1d1d-60a44ce903c3
+Team5Name:Alamitos Bay Yacht Club
+Team5Comp1UUID:958bd200-b4db-0132-1d1e-60a44ce903c3
+
+Team6UUID:ac6fff40-b377-0132-11b9-60a44ce903c3
+Team6Name:Albrecht Holm
+
+Team7UUID:ac6d2a40-b377-0132-11b1-60a44ce903c3
+Team7Name:Alexander Ham
+
+Team8UUID:951939c0-b4db-0132-1cfa-60a44ce903c3
+Team8Name:Algoa Bay Yacht Club
+Team8Comp1UUID:951a3330-b4db-0132-1cfb-60a44ce903c3
+
+Team9UUID:ac6c7560-b377-0132-11af-60a44ce903c3
+Team9Name:Andrew Arthur
+
+Team10UUID:ac6b0950-b377-0132-11ab-60a44ce903c3
+Team10Name:Angela Stenger
+
+Team11UUID:ac6e8e60-b377-0132-11b5-60a44ce903c3
+Team11Name:Anthony Parker
+
+Team12UUID:948565c0-b4db-0132-1cca-60a44ce903c3
+Team12Name:B&SYC
+Team12Comp1UUID:94865d50-b4db-0132-1ccb-60a44ce903c3
+
+Team13UUID:ac61c890-b377-0132-1195-60a44ce903c3
+Team13Name:Brett Bowden
+
+Team14UUID:ac861d30-b377-0132-11cf-60a44ce903c3
+Team14Name:Bronwen KlaasÂ 
+
+Team15UUID:c5bcd7f0-b377-0132-11de-60a44ce903c3
+Team15Name:Bronwen Klaas 
+
+Team16UUID:9470c9c0-b4db-0132-1cc2-60a44ce903c3
+Team16Name:BSYC
+Team16Comp1UUID:9471bf20-b4db-0132-1cc3-60a44ce903c3
+
+Team17UUID:45679ec0-b6e4-0132-227e-60a44ce903c3
+Team17Name:BYC
+Team17Comp1UUID:4568fe80-b6e4-0132-227f-60a44ce903c3
+
+Team18UUID:94e4cf90-b4db-0132-1ce6-60a44ce903c3
+Team18Name:Emarentia Sailing Club
+Team18Comp1UUID:94e60210-b4db-0132-1ce7-60a44ce903c3
+
+Team19UUID:ac7415b0-b377-0132-11c5-60a44ce903c3
+Team19Name:Euan Hurter
+
+Team20UUID:ac691ca0-b377-0132-11a5-60a44ce903c3
+Team20Name:Georg Mittermayer
+
+Team21UUID:3c5056f0-b5c5-0132-2049-60a44ce903c3
+Team21Name:George Lakes Yacht Club
+Team21Comp1UUID:3c51d930-b5c5-0132-204a-60a44ce903c3
+
+Team22UUID:ac6ddae0-b377-0132-11b3-60a44ce903c3
+Team22Name:Gideon Snyman
+
+Team23UUID:ac83e910-b377-0132-11c9-60a44ce903c3
+Team23Name:Grant Ballentyne
+
+Team24UUID:ac84a3d0-b377-0132-11cb-60a44ce903c3
+Team24Name:Hans Rogotski
+
+Team25UUID:5f848520-b4fc-0132-1da1-60a44ce903c3
+Team25Name:Hellerup
+
+Team26UUID:9491d840-b4db-0132-1cce-60a44ce903c3
+Team26Name:HISC
+Team26Comp1UUID:949331b0-b4db-0132-1ccf-60a44ce903c3
+
+Team27UUID:ac8b0a60-b377-0132-11d7-60a44ce903c3
+Team27Name:Howard HamlinÂ 
+
+Team28UUID:c5bfb860-b377-0132-11e2-60a44ce903c3
+Team28Name:Howard Hamlin 
+
+Team29UUID:467d1590-b6e4-0132-22b9-60a44ce903c3
+Team29Name:HS
+Team29Comp1UUID:5f853dc0-b4fc-0132-1da2-60a44ce903c3
+
+Team30UUID:460cd720-b6e4-0132-22a6-60a44ce903c3
+Team30Name:HYC
+Team30Comp1UUID:94c44e80-b4db-0132-1cdf-60a44ce903c3
+
+Team31UUID:ac669050-b377-0132-11a3-60a44ce903c3
+Team31Name:Ian Pinnel
+
+Team32UUID:45b19e00-b6e4-0132-2290-60a44ce903c3
+Team32Name:Imperial Yacht Club
+Team32Comp1UUID:45b290d0-b6e4-0132-2291-60a44ce903c3
+
+Team33UUID:ac70ad50-b377-0132-11bb-60a44ce903c3
+Team33Name:James Largier
+
+Team34UUID:ac647920-b377-0132-119d-60a44ce903c3
+Team34Name:Jan Saugmann
+
+Team35UUID:ac86d340-b377-0132-11d1-60a44ce903c3
+Team35Name:Jay D'EngleÂ 
+
+Team36UUID:c5bdbd80-b377-0132-11e0-60a44ce903c3
+Team36Name:Jay D'Engle 
+
+Team37UUID:ac72b370-b377-0132-11c1-60a44ce903c3
+Team37Name:Jonathan Ham
+
+Team38UUID:ac6a5be0-b377-0132-11a9-60a44ce903c3
+Team38Name:Katharina Menge
+
+Team39UUID:ac720620-b377-0132-11bf-60a44ce903c3
+Team39Name:Kevin Foreman
+
+Team40UUID:ac856100-b377-0132-11cd-60a44ce903c3
+Team40Name:Kobus HoltzhausenÂ 
+
+Team41UUID:c5bc0100-b377-0132-11dc-60a44ce903c3
+Team41Name:Kobus Holtzhausen 
+
+Team42UUID:ac831b90-b377-0132-11c7-60a44ce903c3
+Team42Name:Kristina Plattner
+
+Team43UUID:ac6f46b0-b377-0132-11b7-60a44ce903c3
+Team43Name:Kyle Klaas
+
+Team44UUID:ac6277f0-b377-0132-1197-60a44ce903c3
+Team44Name:Malcolm Higgins
+
+Team45UUID:94eefa70-b4db-0132-1cea-60a44ce903c3
+Team45Name:Maties
+
+Team46UUID:ac5951f0-b377-0132-1192-60a44ce903c3
+Team46Name:Michale Quirk
+
+Team47UUID:ac884150-b377-0132-11d5-60a44ce903c3
+Team47Name:Mike Holt
+
+Team48UUID:95975fe0-b4db-0132-1d21-60a44ce903c3
+Team48Name:NHYC 
+Team48Comp1UUID:95984f80-b4db-0132-1d22-60a44ce903c3
+
+Team49UUID:94b16cf0-b4db-0132-1cda-60a44ce903c3
+Team49Name:Ostsee-Segler-Gemeinschaft
+
+Team50UUID:ac6bbce0-b377-0132-11ad-60a44ce903c3
+Team50Name:Peter Funke
+
+Team51UUID:95357460-b4db-0132-1d06-60a44ce903c3
+Team51Name:Point Yacht Club
+Team51Comp1UUID:95368d50-b4db-0132-1d07-60a44ce903c3
+
+Team52UUID:955fbdc0-b4db-0132-1d11-60a44ce903c3
+Team52Name:Point YC 
+Team52Comp1UUID:956a8030-b4db-0132-1d12-60a44ce903c3
+
+Team53UUID:947bc310-b4db-0132-1cc6-60a44ce903c3
+Team53Name:Port Kembla SC
+Team53Comp1UUID:947c7c10-b4db-0132-1cc7-60a44ce903c3
+
+Team54UUID:950350e0-b4db-0132-1cf2-60a44ce903c3
+Team54Name:Pretoria Sailing Club
+Team54Comp1UUID:95044100-b4db-0132-1cf3-60a44ce903c3
+
+Team55UUID:9575e320-b4db-0132-1d15-60a44ce903c3
+Team55Name:Pretoria SC 
+
+Team56UUID:95226ee0-b4db-0132-1cfe-60a44ce903c3
+Team56Name:PSC
+Team56Comp1UUID:45750710-b6e4-0132-2282-60a44ce903c3
+Team56Comp2UUID:2a9a8a70-b689-0132-2213-60a44ce903c3
+Team56Comp3UUID:952360a0-b4db-0132-1cff-60a44ce903c3
+
+Team57UUID:957fedb0-b4db-0132-1d19-60a44ce903c3
+Team57Name:RCYC 
+Team57Comp1UUID:9580e450-b4db-0132-1d1a-60a44ce903c3
+
+Team58UUID:ac7360e0-b377-0132-11c3-60a44ce903c3
+Team58Name:Ricky Robinson
+
+Team59UUID:f1a55510-b500-0132-1e66-60a44ce903c3
+Team59Name:Rock Sailing Club
+Team59Comp1UUID:f1a864c0-b500-0132-1e67-60a44ce903c3
+
+Team60UUID:ac653090-b377-0132-119f-60a44ce903c3
+Team60Name:Rodger Deane
+
+Team61UUID:946600a0-b4db-0132-1cbe-60a44ce903c3
+Team61Name:Royal Brighton Yacht Club
+Team61Comp1UUID:946739e0-b4db-0132-1cbf-60a44ce903c3
+
+Team62UUID:950e5de0-b4db-0132-1cf6-60a44ce903c3
+Team62Name:Royal Cape Yacht Club
+Team62Comp1UUID:950fd6e0-b4db-0132-1cf7-60a44ce903c3
+
+Team63UUID:952ba070-b4db-0132-1d02-60a44ce903c3
+Team63Name:Royal Natal Yacht Club
+Team63Comp1UUID:952c9010-b4db-0132-1d03-60a44ce903c3
+
+Team64UUID:9445a600-b4db-0132-1cba-60a44ce903c3
+Team64Name:RPEYC
+Team64Comp1UUID:944a7e00-b4db-0132-1cbb-60a44ce903c3
+
+Team65UUID:ac6312c0-b377-0132-1199-60a44ce903c3
+Team65Name:Sam Cronin
+
+Team66UUID:ac63c0c0-b377-0132-119b-60a44ce903c3
+Team66Name:Sandy HigginsÂ 
+
+Team67UUID:c5a0f950-b377-0132-11d9-60a44ce903c3
+Team67Name:Sandy Higgins 
+
+Team68UUID:5f647e40-b4fc-0132-1d9d-60a44ce903c3
+Team68Name:Santa Cruz Yacht Club
+Team68Comp1UUID:5f8e1890-b4fc-0132-1da6-60a44ce903c3
+Team68Comp2UUID:5f757d60-b4fc-0132-1d9e-60a44ce903c3
+
+Team69UUID:949b6070-b4db-0132-1cd2-60a44ce903c3
+Team69Name:SCLL
+Team69Comp1UUID:949c2dc0-b4db-0132-1cd3-60a44ce903c3
+
+Team70UUID:94a5f800-b4db-0132-1cd6-60a44ce903c3
+Team70Name:Segel-Club Ville
+Team70Comp1UUID:94a6ea50-b4db-0132-1cd7-60a44ce903c3
+
+Team71UUID:459b10a0-b6e4-0132-228b-60a44ce903c3
+Team71Name:SGJ
+Team71Comp1UUID:94b25480-b4db-0132-1cdb-60a44ce903c3
+
+Team72UUID:3c5a3440-b5c5-0132-204d-60a44ce903c3
+Team72Name:Shotley Sailing Club
+Team72Comp1UUID:f0941b50-b5ec-0132-20fb-60a44ce903c3
+
+Team73UUID:ac715a70-b377-0132-11bd-60a44ce903c3
+Team73Name:Sigi Bailes
+
+Team74UUID:ac69c0c0-b377-0132-11a7-60a44ce903c3
+Team74Name:Stefan Bohm
+
+Team75UUID:b8ae7900-b10c-0132-075a-60a44ce903c3
+Team75Name:team
+
+Team76UUID:ac65e030-b377-0132-11a1-60a44ce903c3
+Team76Name:Terry Scutcher
+
+Team77UUID:453f5410-b6e4-0132-2277-60a44ce903c3
+Team77Name:USYC
+Team77Comp1UUID:94eff380-b4db-0132-1ceb-60a44ce903c3
+
+Team78UUID:94f918c0-b4db-0132-1cee-60a44ce903c3
+Team78Name:Vogelvlei Yacht Club
+Team78Comp1UUID:954a24b0-b4db-0132-1d0e-60a44ce903c3
+Team78Comp2UUID:94fa1150-b4db-0132-1cef-60a44ce903c3
+
+Team79UUID:953f9670-b4db-0132-1d0a-60a44ce903c3
+Team79Name: RCYC
+Team79Comp1UUID:95407f70-b4db-0132-1d0b-60a44ce903c3
+
+Comp1UUID:944a7e00-b4db-0132-1cbb-60a44ce903c3
+Comp1Name:Quirk / Payne
+Comp1NameShort:AUS 9134
+Comp1Color:FFFF00
+Comp1Nationality:AUS
+Comp1Description:Michael Quirk/Luke Payne
+Comp1Handicap:1.0000000000
+Comp1HandicapDistance:0.00000
+Comp1StartTime:2015-04-02 12:40:00
+Comp1ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp1RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp2UUID:946739e0-b4db-0132-1cbf-60a44ce903c3
+Comp2Name:Bowden / Bath
+Comp2NameShort:AUS 9018
+Comp2Color:0000FF
+Comp2Nationality:AUS
+Comp2Description:Brett Bowden/Robert Bath
+Comp2Handicap:1.0000000000
+Comp2HandicapDistance:0.00000
+Comp2StartTime:2015-04-02 12:40:00
+Comp2ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp2RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp3UUID:9471bf20-b4db-0132-1cc3-60a44ce903c3
+Comp3Name:Higgins / Johnston
+Comp3NameShort:AUS 8890
+Comp3Color:008000
+Comp3Nationality:AUS
+Comp3Description:Malcolm Higgins/Nick Johnston
+Comp3Handicap:1.0000000000
+Comp3HandicapDistance:0.00000
+Comp3StartTime:2015-04-02 12:40:00
+Comp3ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp3RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp4UUID:947c7c10-b4db-0132-1cc7-60a44ce903c3
+Comp4Name:Cronin / Whitbread
+Comp4NameShort:AUS 8637
+Comp4Color:000000
+Comp4Nationality:AUS
+Comp4Description:Sam Cronin/Kevin Whitbread
+Comp4Handicap:1.0000000000
+Comp4HandicapDistance:0.00000
+Comp4StartTime:2015-04-02 12:40:00
+Comp4ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp4RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp5UUID:94865d50-b4db-0132-1ccb-60a44ce903c3
+Comp5Name:Higgins  / Marsh 
+Comp5NameShort:AUS 8946
+Comp5Color:008000
+Comp5Nationality:AUS
+Comp5Description:Sandy Higgins /Paul Marsh 
+Comp5Handicap:1.0000000000
+Comp5HandicapDistance:0.00000
+Comp5StartTime:2015-04-02 12:40:00
+Comp5ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp5RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp6UUID:949331b0-b4db-0132-1ccf-60a44ce903c3
+Comp6Name:Pinnell / Tellen
+Comp6NameShort:GBR 9136
+Comp6Color:800080
+Comp6Nationality:GBR
+Comp6Description:Ian Pinnell/Johannes Tellen
+Comp6Handicap:1.0000000000
+Comp6HandicapDistance:0.00000
+Comp6StartTime:2015-04-02 12:40:00
+Comp6ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp6RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp7UUID:949c2dc0-b4db-0132-1cd3-60a44ce903c3
+Comp7Name:Mittermayer / Barteldt
+Comp7NameShort:GER 8988
+Comp7Color:800080
+Comp7Nationality:GER
+Comp7Description:Georg Mittermayer/Dirk Barteldt
+Comp7Handicap:1.0000000000
+Comp7HandicapDistance:0.00000
+Comp7StartTime:2015-04-02 12:40:00
+Comp7ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp7RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp8UUID:94a6ea50-b4db-0132-1cd7-60a44ce903c3
+Comp8Name:Bohm / Roos
+Comp8NameShort:GER 9135
+Comp8Color:008000
+Comp8Nationality:GER
+Comp8Description:Stefan Bohm/Gerald Roos
+Comp8Handicap:1.0000000000
+Comp8HandicapDistance:0.00000
+Comp8StartTime:2015-04-02 12:40:00
+Comp8ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp8RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp9UUID:94b25480-b4db-0132-1cdb-60a44ce903c3
+Comp9Name:Menge / Wilts
+Comp9NameShort:GER 9000
+Comp9Color:808000
+Comp9Nationality:GER
+Comp9Description:Katharina Menge/Enno Wilts
+Comp9Handicap:1.0000000000
+Comp9HandicapDistance:0.00000
+Comp9StartTime:2015-04-02 12:40:00
+Comp9ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp9RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp10UUID:94c44e80-b4db-0132-1cdf-60a44ce903c3
+Comp10Name:Stenger / Birkner
+Comp10NameShort:GER 9043
+Comp10Color:008080
+Comp10Nationality:GER
+Comp10Description:Angela Stenger/Nicola Birkner
+Comp10Handicap:1.0000000000
+Comp10HandicapDistance:0.00000
+Comp10StartTime:2015-04-02 12:40:00
+Comp10ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp10RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp11UUID:94d00ef0-b4db-0132-1ce3-60a44ce903c3
+Comp11Name:Funke / Funke
+Comp11NameShort:RSA 9094
+Comp11Color:191970
+Comp11Nationality:RSA
+Comp11Description:Peter Funke/Thomas Funke
+Comp11Handicap:1.0000000000
+Comp11HandicapDistance:0.00000
+Comp11StartTime:2015-04-02 12:40:00
+Comp11ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp11RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp12UUID:94e60210-b4db-0132-1ce7-60a44ce903c3
+Comp12Name:Arthur / Anderson
+Comp12NameShort:RSA 6266
+Comp12Color:FFFF00
+Comp12Nationality:RSA
+Comp12Description:Andrew Arthur/John Anderson
+Comp12Handicap:1.0000000000
+Comp12HandicapDistance:0.00000
+Comp12StartTime:2015-04-02 12:40:00
+Comp12ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp12RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp13UUID:94eff380-b4db-0132-1ceb-60a44ce903c3
+Comp13Name:Ham / Ham
+Comp13NameShort:RSA 8719
+Comp13Color:FF0000
+Comp13Nationality:RSA
+Comp13Description:Alexander Ham/Warwick Ham
+Comp13Handicap:1.0000000000
+Comp13HandicapDistance:0.00000
+Comp13StartTime:2015-04-02 12:40:00
+Comp13ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp13RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp14UUID:94fa1150-b4db-0132-1cef-60a44ce903c3
+Comp14Name:Snyman / Ballantyne
+Comp14NameShort:RSA 8091
+Comp14Color:800000
+Comp14Nationality:RSA
+Comp14Description:Gideon Snyman/Courtney Ballantyne
+Comp14Handicap:1.0000000000
+Comp14HandicapDistance:0.00000
+Comp14StartTime:2015-04-02 12:40:00
+Comp14ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp14RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp15UUID:95044100-b4db-0132-1cf3-60a44ce903c3
+Comp15Name:Holm / Fourie
+Comp15NameShort:RSA 8707
+Comp15Color:191970
+Comp15Nationality:RSA
+Comp15Description:Albrecht Holm/Marius Fourie
+Comp15Handicap:1.0000000000
+Comp15HandicapDistance:0.00000
+Comp15StartTime:2015-04-02 12:40:00
+Comp15ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp15RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp16UUID:950fd6e0-b4db-0132-1cf7-60a44ce903c3
+Comp16Name:Largier / Hutton-Squire
+Comp16NameShort:RSA 9063
+Comp16Color:008080
+Comp16Nationality:RSA
+Comp16Description:James Largier/Richard Hutton-Squire
+Comp16Handicap:1.0000000000
+Comp16HandicapDistance:0.00000
+Comp16StartTime:2015-04-02 12:40:00
+Comp16ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp16RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp17UUID:951a3330-b4db-0132-1cfb-60a44ce903c3
+Comp17Name:Bailes / Isaac
+Comp17NameShort:RSA 7608
+Comp17Color:808000
+Comp17Nationality:RSA
+Comp17Description:Sigi Bailes/Dudley Isaac
+Comp17Handicap:1.0000000000
+Comp17HandicapDistance:0.00000
+Comp17StartTime:2015-04-02 12:40:00
+Comp17ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp17RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp18UUID:952360a0-b4db-0132-1cff-60a44ce903c3
+Comp18Name:Ham / Robinson
+Comp18NameShort:RSA 8789
+Comp18Color:FFFF00
+Comp18Nationality:GBR
+Comp18Description:Jonathan Ham / Michaela Robinson
+Comp18Handicap:1.0000000000
+Comp18HandicapDistance:0.00000
+Comp18StartTime:2015-04-02 12:40:00
+Comp18ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp18RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp19UUID:952c9010-b4db-0132-1d03-60a44ce903c3
+Comp19Name:Robinson / Robinson
+Comp19NameShort:RSA 8486
+Comp19Color:800000
+Comp19Nationality:RSA
+Comp19Description:Ricky Robinson/Brennan Robinson
+Comp19Handicap:1.0000000000
+Comp19HandicapDistance:0.00000
+Comp19StartTime:2015-04-02 12:40:00
+Comp19ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp19RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp20UUID:95368d50-b4db-0132-1d07-60a44ce903c3
+Comp20Name:Hurter / May
+Comp20NameShort:RSA 8675
+Comp20Color:0000FF
+Comp20Nationality:RSA
+Comp20Description:Euan Hurter/Murray May
+Comp20Handicap:1.0000000000
+Comp20HandicapDistance:0.00000
+Comp20StartTime:2015-04-02 12:40:00
+Comp20ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp20RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp21UUID:95407f70-b4db-0132-1d0b-60a44ce903c3
+Comp21Name:Plattner / Shelton
+Comp21NameShort:RSA 9026
+Comp21Color:800080
+Comp21Nationality:RSA
+Comp21Description:Tina Plattner/David Shelton
+Comp21Handicap:1.0000000000
+Comp21HandicapDistance:0.00000
+Comp21StartTime:2015-04-02 12:40:00
+Comp21ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp21RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp22UUID:954a24b0-b4db-0132-1d0e-60a44ce903c3
+Comp22Name:Ballantyne / Groenewald
+Comp22NameShort:RSA 4437
+Comp22Color:FF8C00
+Comp22Nationality:RSA
+Comp22Description:Grant Ballantyne/Evert Groenewald
+Comp22Handicap:1.0000000000
+Comp22HandicapDistance:0.00000
+Comp22StartTime:2015-04-02 12:40:00
+Comp22ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp22RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp23UUID:956a8030-b4db-0132-1d12-60a44ce903c3
+Comp23Name:Rogotzki / Roos 
+Comp23NameShort:RSA 8584
+Comp23Color:FF8C00
+Comp23Nationality:RSA
+Comp23Description:Hans Rogotzki/Peter Roos 
+Comp23Handicap:1.0000000000
+Comp23HandicapDistance:0.00000
+Comp23StartTime:2015-04-02 12:40:00
+Comp23ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp23RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp24UUID:9580e450-b4db-0132-1d1a-60a44ce903c3
+Comp24Name:D'Engle  / Nel 
+Comp24NameShort:RSA 8520
+Comp24Color:00FF00
+Comp24Nationality:RSA
+Comp24Description:Jay D'Engle /De-Wet Nel 
+Comp24Handicap:1.0000000000
+Comp24HandicapDistance:0.00000
+Comp24StartTime:2015-04-02 12:40:00
+Comp24ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp24RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp25UUID:958bd200-b4db-0132-1d1e-60a44ce903c3
+Comp25Name:Ross / Waterman
+Comp25NameShort:USA 8084
+Comp25Color:FF00FF
+Comp25Nationality:USA
+Comp25Description:Aaron Ross/Rob Waterman
+Comp25Handicap:1.0000000000
+Comp25HandicapDistance:0.00000
+Comp25StartTime:2015-04-02 12:40:00
+Comp25ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp25RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp26UUID:95984f80-b4db-0132-1d22-60a44ce903c3
+Comp26Name:Hamlin  / Nelson
+Comp26NameShort:USA 9153
+Comp26Color:800000
+Comp26Nationality:USA
+Comp26Description:Howard Hamlin / Jeff Nelson
+Comp26Handicap:1.0000000000
+Comp26HandicapDistance:0.00000
+Comp26StartTime:2015-04-02 12:40:00
+Comp26ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp26RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp27UUID:5f757d60-b4fc-0132-1d9e-60a44ce903c3
+Comp27Name:Holt / Smit
+Comp27NameShort:USA 9072
+Comp27Color:00FF00
+Comp27Nationality:USA
+Comp27Description:Mike Holt/Carl Smit
+Comp27Handicap:1.0000000000
+Comp27HandicapDistance:0.00000
+Comp27StartTime:2015-04-02 12:40:00
+Comp27ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp27RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp28UUID:5f853dc0-b4fc-0132-1da2-60a44ce903c3
+Comp28Name:Saugmann / Karbo
+Comp28NameShort:DEN 9118
+Comp28Color:008080
+Comp28Nationality:DEN
+Comp28Description:Jan Saugmann/Jakob Karbo
+Comp28Handicap:1.0000000000
+Comp28HandicapDistance:0.00000
+Comp28StartTime:2015-04-02 12:40:00
+Comp28ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp28RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp29UUID:5f8e1890-b4fc-0132-1da6-60a44ce903c3
+Comp29Name:Conrads / Haines
+Comp29NameShort:USA 9091
+Comp29Color:00FF00
+Comp29Nationality:USA
+Comp29Description:Ted Conrads/Brian Haines
+Comp29Handicap:1.0000000000
+Comp29HandicapDistance:0.00000
+Comp29StartTime:2015-04-02 12:40:00
+Comp29ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp29RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp30UUID:f1a864c0-b500-0132-1e67-60a44ce903c3
+Comp30Name:Deane / Deane
+Comp30NameShort:GBR 9125
+Comp30Color:191970
+Comp30Nationality:GBR
+Comp30Description:Roger Deane/Nigel Deane
+Comp30Handicap:1.0000000000
+Comp30HandicapDistance:0.00000
+Comp30StartTime:2015-04-02 12:40:00
+Comp30ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp30RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp31UUID:3c51d930-b5c5-0132-204a-60a44ce903c3
+Comp31Name:Parker / Holm
+Comp31NameShort:RSA 8948
+Comp31Color:FF00FF
+Comp31Nationality:RSA
+Comp31Description:Anthony Parker / Dietmar Holm
+Comp31Handicap:1.0000000000
+Comp31HandicapDistance:0.00000
+Comp31StartTime:2015-04-02 12:40:00
+Comp31ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp31RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp32UUID:f0941b50-b5ec-0132-20fb-60a44ce903c3
+Comp32Name:Scutcher / Diebitsch
+Comp32NameShort:GBR 9124
+Comp32Color:FF0000
+Comp32Nationality:GBR
+Comp32Description:Terry Scutcher/Christian Diebitsch
+Comp32Handicap:1.0000000000
+Comp32HandicapDistance:0.00000
+Comp32StartTime:2015-04-02 12:40:00
+Comp32ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp32RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp33UUID:2a9a8a70-b689-0132-2213-60a44ce903c3
+Comp33Name:Klaas  / Tellen
+Comp33NameShort:RSA 7822
+Comp33Color:000000
+Comp33Nationality:RSA
+Comp33Description:Bronwen Klaas /Aron Tellen
+Comp33Handicap:1.0000000000
+Comp33HandicapDistance:0.00000
+Comp33StartTime:2015-04-02 12:40:00
+Comp33ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp33RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp34UUID:4568fe80-b6e4-0132-227f-60a44ce903c3
+Comp34Name:Holtshauzen  / Kirchner
+Comp34NameShort:RSA 8121
+Comp34Color:0000FF
+Comp34Nationality:RSA
+Comp34Description:Kobus Holtshauzen /Danie Kirchner
+Comp34Handicap:1.0000000000
+Comp34HandicapDistance:0.00000
+Comp34StartTime:2015-04-02 12:40:00
+Comp34ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp34RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp35UUID:45750710-b6e4-0132-2282-60a44ce903c3
+Comp35Name:Klaas / Von Gruenewaldt
+Comp35NameShort:RSA 8445
+Comp35Color:FF8C00
+Comp35Nationality:RSA
+Comp35Description:Kyle Klaas/Robert Von Gruenewaldt
+Comp35Handicap:1.0000000000
+Comp35HandicapDistance:0.00000
+Comp35StartTime:2015-04-02 12:40:00
+Comp35ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp35RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+Comp36UUID:45b290d0-b6e4-0132-2291-60a44ce903c3
+Comp36Name:Foreman / Van Der Ploeg
+Comp36NameShort:RSA 8537
+Comp36Color:808000
+Comp36Nationality:RSA
+Comp36Description:Kevin Foreman/Adam Van Der Ploeg
+Comp36Handicap:1.0000000000
+Comp36HandicapDistance:0.00000
+Comp36StartTime:2015-04-02 12:40:00
+Comp36ClassUUID:ac5ab750-b377-0132-1193-60a44ce903c3
+Comp36RouteUUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+
+ControlPoint1UUID:25f25a90-b906-0132-2954-60a44ce903c3
+ControlPoint1Name:Windward-F-30
+ControlPoint1HasTwoPoints:0
+ControlPoint1ShortName:1R
+ControlPoint1Mark1Lon:25.694404
+ControlPoint1Mark1Lat:-33.957179
+ControlPoint1Mark1Static:1
+
+ControlPoint2UUID:26126690-b4de-0132-1d39-60a44ce903c3
+ControlPoint2Name:Replacement mark
+ControlPoint2HasTwoPoints:0
+ControlPoint2ShortName:Re
+ControlPoint2Mark1Lon:25.687969
+ControlPoint2Mark1Lat:-33.949951
+ControlPoint2Mark1Static:0
+
+ControlPoint3UUID:3fe5f360-b52a-0132-1f57-60a44ce903c3
+ControlPoint3Name:Leeward gate PreW
+ControlPoint3HasTwoPoints:1
+ControlPoint3ShortName:3
+ControlPoint3Mark1Lon:25.633739
+ControlPoint3Mark1Lat:-33.967300
+ControlPoint3Mark1Static:0
+ControlPoint3Mark2Lon:25.633644
+ControlPoint3Mark2Lat:-33.967327
+ControlPoint3Mark2Static:0
+
+ControlPoint4UUID:69c13f40-b37c-0132-1211-60a44ce903c3
+ControlPoint4Name:Wing
+ControlPoint4HasTwoPoints:0
+ControlPoint4ShortName:2
+ControlPoint4Mark1Lon:25.689110
+ControlPoint4Mark1Lat:-33.970020
+ControlPoint4Mark1Static:0
+
+ControlPoint5UUID:8f54b350-b767-0132-2455-60a44ce903c3
+ControlPoint5Name:3 Worlds 1
+ControlPoint5HasTwoPoints:1
+ControlPoint5ShortName:3
+ControlPoint5Mark1Lon:25.665367
+ControlPoint5Mark1Lat:-33.961881
+ControlPoint5Mark1Static:1
+ControlPoint5Mark2Lon:25.665457
+ControlPoint5Mark2Lat:-33.962330
+ControlPoint5Mark2Static:1
+
+ControlPoint6UUID:9ca100f0-b68c-0132-2216-60a44ce903c3
+ControlPoint6Name:3p
+ControlPoint6HasTwoPoints:0
+ControlPoint6ShortName:3p
+ControlPoint6Mark1Lon:25.683989
+ControlPoint6Mark1Lat:-33.954403
+ControlPoint6Mark1Static:0
+
+ControlPoint7UUID:ab8077c0-b37c-0132-1218-60a44ce903c3
+ControlPoint7Name:Finish
+ControlPoint7HasTwoPoints:1
+ControlPoint7ShortName:F
+ControlPoint7Mark1Lon:25.687019
+ControlPoint7Mark1Lat:-33.950874
+ControlPoint7Mark1Static:0
+ControlPoint7Mark2Lon:25.688251
+ControlPoint7Mark2Lat:-33.950226
+ControlPoint7Mark2Static:0
+
+ControlPoint8UUID:af1bb4f0-b68c-0132-2219-60a44ce903c3
+ControlPoint8Name:3s
+ControlPoint8HasTwoPoints:0
+ControlPoint8ShortName:3S
+ControlPoint8Mark1Lon:25.684313
+ControlPoint8Mark1Lat:-33.954788
+ControlPoint8Mark1Static:0
+
+ControlPoint9UUID:b10792d0-b5e2-0132-20f9-60a44ce903c3
+ControlPoint9Name:Fin R2
+ControlPoint9HasTwoPoints:1
+ControlPoint9ShortName:Fi
+ControlPoint9Mark1Lon:25.724152
+ControlPoint9Mark1Lat:-34.001356
+ControlPoint9Mark1Static:1
+ControlPoint9Mark2Lon:25.723793
+ControlPoint9Mark2Lat:-34.001524
+ControlPoint9Mark2Static:1
+
+ControlPoint10UUID:cf64f6d0-b4dd-0132-1d2c-60a44ce903c3
+ControlPoint10Name:Start
+ControlPoint10HasTwoPoints:1
+ControlPoint10ShortName:St
+ControlPoint10Mark1Lon:25.686090
+ControlPoint10Mark1Lat:-33.950943
+ControlPoint10Mark1Static:0
+ControlPoint10Mark2Lon:25.687042
+ControlPoint10Mark2Lat:-33.950867
+ControlPoint10Mark2Static:0
+
+ControlPoint11UUID:d742d1b0-b68c-0132-221c-60a44ce903c3
+ControlPoint11Name:Leeward gate Worlds
+ControlPoint11HasTwoPoints:1
+ControlPoint11ShortName:3
+ControlPoint11DataSheet:P1.UUID=af1bb4f0-b68c-0132-2219-60a44ce903c3###BREAKLINE###P2.UUID=9ca100f0-b68c-0132-2216-60a44ce903c3###BREAKLINE###
+ControlPoint11Mark1Lon:25.684313
+ControlPoint11Mark1Lat:-33.954788
+ControlPoint11Mark1Static:0
+ControlPoint11Mark2Lon:25.683989
+ControlPoint11Mark2Lat:-33.954403
+ControlPoint11Mark2Static:0
+
+ControlPoint12UUID:e6879b90-b4dd-0132-1d30-60a44ce903c3
+ControlPoint12Name:Windward
+ControlPoint12HasTwoPoints:0
+ControlPoint12ShortName:1
+ControlPoint12Mark1Lon:25.668341
+ControlPoint12Mark1Lat:-33.968086
+ControlPoint12Mark1Static:0
+
+ControlPoint13UUID:f6f60d80-b4dd-0132-1d33-60a44ce903c3
+ControlPoint13Name:Spreader
+ControlPoint13HasTwoPoints:0
+ControlPoint13ShortName:1a
+ControlPoint13Mark1Lon:25.669888
+ControlPoint13Mark1Lat:-33.968563
+ControlPoint13Mark1Static:0
+
+SegmentFile:segments.php
+Route1UUID:66ccabb0-b77d-0132-26e9-60a44ce903c3
+Route1Description:Worlds 7
+Route1Length:0
+Route1ControlPoint1UUID:cf64f6d0-b4dd-0132-1d2c-60a44ce903c3
+Route1ControlPoint2UUID:e6879b90-b4dd-0132-1d30-60a44ce903c3
+Route1ControlPoint3UUID:f6f60d80-b4dd-0132-1d33-60a44ce903c3
+Route1ControlPoint4UUID:d742d1b0-b68c-0132-221c-60a44ce903c3
+Route1ControlPoint5UUID:e6879b90-b4dd-0132-1d30-60a44ce903c3
+Route1ControlPoint6UUID:f6f60d80-b4dd-0132-1d33-60a44ce903c3
+Route1ControlPoint7UUID:69c13f40-b37c-0132-1211-60a44ce903c3
+Route1ControlPoint8UUID:d742d1b0-b68c-0132-221c-60a44ce903c3
+Route1ControlPoint9UUID:e6879b90-b4dd-0132-1d30-60a44ce903c3
+Route1ControlPoint10UUID:f6f60d80-b4dd-0132-1d33-60a44ce903c3
+Route1ControlPoint11UUID:d742d1b0-b68c-0132-221c-60a44ce903c3
+Route1ControlPoint12UUID:ab8077c0-b37c-0132-1218-60a44ce903c3
+
+//-------- AUTO GENERATED PARAMETERS END ------------------

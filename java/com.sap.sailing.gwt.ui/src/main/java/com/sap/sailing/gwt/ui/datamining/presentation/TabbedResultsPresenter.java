@@ -18,32 +18,38 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart.DrillDownCallback;
 import com.sap.sailing.gwt.ui.polarmining.PolarBackendResultsPresenter;
 import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class TabbedResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
-    
+
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
-    
+
     private final StringMessages stringMessages;
-    
+
     private final ScrolledTabLayoutPanel tabPanel;
     private final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
-    
-    public TabbedResultsPresenter(StringMessages stringMessages) {
+    private final DrillDownCallback drillDownCallback;
+
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback,
+            StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
-        
+        this.drillDownCallback = drillDownCallback;
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
         tabPanel.setAnimationDuration(0);
         tabPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         presentersMappedByHeader = new HashMap<>();
-        
+
         addNewTabTab();
-        addTabAndFocus(new MultiResultsPresenter(stringMessages));
+        addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback, stringMessages));
     }
 
     private void addNewTabTab() {
@@ -56,7 +62,8 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
             public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
                 if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                     event.cancel();
-                    addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                    addTabAndFocus(new MultiResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
+                            drillDownCallback, stringMessages));
                 }
             }
         });
@@ -67,16 +74,24 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
         if (result != null) {
             if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new PolarResultsPresenter(stringMessages));
+                addTabAndFocus(
+                        new PolarResultsPresenter(TabbedResultsPresenter.this, getComponentContext(), stringMessages));
                 removeTab(oldHeader);
             } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new PolarBackendResultsPresenter(stringMessages));
+                addTabAndFocus(new PolarBackendResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
+                        stringMessages));
+                removeTab(oldHeader);
+            } else if (result.getResultType()
+                    .equals("com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation")) {
+                CloseableTabHeader oldHeader = getSelectedHeader();
+                addTabAndFocus(new ManeuverSpeedDetailsResultsPresenter(TabbedResultsPresenter.this,
+                        getComponentContext(), stringMessages));
                 removeTab(oldHeader);
             } else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();
-                    addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                    addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback, stringMessages));
                     removeTab(oldHeader);
                 }
             }
@@ -102,12 +117,12 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
         getSelectedHeader().setText(stringMessages.runningQuery());
         getSelectedPresenter().showBusyIndicator();
     }
-    
+
     @Override
     public QueryResultDTO<?> getCurrentResult() {
         return getSelectedPresenter().getCurrentResult();
     }
-    
+
     private CloseableTabHeader getSelectedHeader() {
         return (CloseableTabHeader) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
     }
@@ -119,13 +134,13 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     private void addTabAndFocus(ResultsPresenter<?> tabPresenter) {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
         presentersMappedByHeader.put(tabHeader, tabPresenter);
-        
+
         tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
         int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);
         tabPanel.scrollToTab(presenterIndex);
     }
-    
+
     private void removeTab(CloseableTabHeader header) {
         header.removeFromParent();
         presentersMappedByHeader.remove(header);
@@ -157,7 +172,7 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
@@ -175,11 +190,11 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     public String getDependentCssClassName() {
         return "tabbedResultsPresenters";
     }
-    
+
     private class CloseableTabHeader extends HorizontalPanel {
-        
+
         private final HTML label;
-        
+
         public CloseableTabHeader() {
             label = new HTML(stringMessages.empty());
             label.getElement().getStyle().setMarginRight(5, Unit.PX);
@@ -195,11 +210,16 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
             });
             this.add(closeImage);
         }
-        
+
         public void setText(String text) {
             label.setText(text);
             tabPanel.checkIfScrollButtonsNecessary();
         }
-        
+
+    }
+
+    @Override
+    public String getId() {
+        return "TabbedResultsPresenter";
     }
 }

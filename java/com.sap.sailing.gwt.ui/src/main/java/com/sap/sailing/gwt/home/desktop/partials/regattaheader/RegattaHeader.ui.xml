@@ -8,13 +8,14 @@
         <div>
             <div class="{res.mediaCss.grid}">
                 <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                    <a class="{local_res.css.regattaheader_logo}" ui:field="logoUi"></a>
                     <a class="{local_res.css.regattaheader} {local_res.css.regattaheaderpadding}" ui:field="headerBodyUi"></a>
                     <a class="{local_res.css.regattaheader_indicators}" ui:field="dataIndicatorsUi">
                         <div style="pointer-events: none;">
-                            <div style="pointer-events: none; background-image:url('images/home/raw_gps_fixes.png');" ui:field="gpsDataIndicatorUi"></div>
-                            <div style="pointer-events: none; background-image:url('images/home/icon-wind.png');" ui:field="windDataIndicatorUi"></div>
-                            <div style="pointer-events: none; background-image:url('images/home/icon-video.png');" ui:field="videoDataIndicatorUi"></div>
-                            <div style="pointer-events: none; background-image:url('images/home/icon-audio.png');" ui:field="audioDataIndicatorUi"></div>
+                            <div class="{local_res.css.iconHeaderGPS}" ui:field="gpsDataIndicatorUi"></div>
+                            <div class="{local_res.css.iconHeaderWind}" ui:field="windDataIndicatorUi"></div>
+                            <div class="{local_res.css.iconHeaderVideo}" ui:field="videoDataIndicatorUi"></div>
+                            <div class="{local_res.css.iconHeaderAudio}" ui:field="audioDataIndicatorUi"></div>
                         </div>
                     </a>
                     <a class="{local_res.css.regattaheader_arrow}" style="display:none;" ui:field="headerArrowUi"></a>

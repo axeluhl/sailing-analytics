@@ -18,6 +18,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 
 public interface DataMiningServiceAsync {
 
@@ -31,10 +32,8 @@ public interface DataMiningServiceAsync {
             AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);
 
     void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
-    void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
-            AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
-    public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
-            AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
+    void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
+            String localeInfoName, AsyncCallback<ReducedDimensionsDTO> callback);
     
     void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>> asyncCallback);
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
@@ -45,10 +44,14 @@ public interface DataMiningServiceAsync {
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 
-    <ResultType> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
+    <ResultType extends Serializable> void runQuery(DataMiningSession session,
+            StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
 
     void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
-    <ResultType> void runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName, AsyncCallback<QueryResultDTO<ResultType>> callback);
+
+    <ResultType extends Serializable> void runPredefinedQuery(DataMiningSession session,
+            PredefinedQueryIdentifier identifier, String localeInfoName,
+            AsyncCallback<QueryResultDTO<ResultType>> callback);
     
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining
@@ -57,5 +60,4 @@ public interface DataMiningServiceAsync {
      * look at bug 1503.<br />
      */
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
-
 }

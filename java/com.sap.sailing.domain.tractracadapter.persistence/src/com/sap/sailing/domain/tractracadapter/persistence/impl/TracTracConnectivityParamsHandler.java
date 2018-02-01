@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
@@ -7,10 +8,12 @@ import java.util.Map;
 
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracRaceTrackerImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -51,7 +54,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     }
 
     @Override
-    public Map<String, Object> mapFrom(RaceTrackingConnectivityParameters params) {
+    public Map<String, Object> mapFrom(RaceTrackingConnectivityParameters params) throws MalformedURLException {
         assert params instanceof RaceTrackingConnectivityParametersImpl;
         final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
         final Map<String, Object> result = getKey(params);
@@ -88,16 +91,17 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 map.get(TRAC_TRAC_PASSWORD)==null?null:map.get(TRAC_TRAC_PASSWORD).toString(),
                 map.get(RACE_STATUS)==null?null:map.get(RACE_STATUS).toString(),
                 map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
-                isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true);
+                isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true,
+                /* default timeout for obtaining IRace object from params URL */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
     }
 
     @Override
-    public Map<String, Object> getKey(RaceTrackingConnectivityParameters params) {
+    public Map<String, Object> getKey(RaceTrackingConnectivityParameters params) throws MalformedURLException {
         assert params instanceof RaceTrackingConnectivityParametersImpl;
         final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
         final Map<String, Object> result = new HashMap<>();
         result.put(TypeBasedServiceFinder.TYPE, params.getTypeIdentifier());
-        result.put(PARAM_URL, ttParams.getParamURL().toString());
+        result.put(PARAM_URL, TracTracRaceTrackerImpl.getParamURLStrippedOfRandomParam(new URL(ttParams.getParamURL().toString())).toString());
         return result;
     }
 }

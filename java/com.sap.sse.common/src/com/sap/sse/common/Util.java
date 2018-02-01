@@ -310,6 +310,24 @@ public class Util {
         }
         return list;
     }
+    
+    public static <T> Set<T> createSet(Iterable<T> iterable) {
+        Set<T> set = new HashSet<>();
+        Iterator<T> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            set.add(iterator.next());
+        }
+        return set;
+    }
+    
+    public static interface Mapper<S, T> { T map(S s); }
+    public static <S, T> Iterable<T> map(Iterable<S> iterable, Mapper<S, T> mapper) {
+        List<T> result = new ArrayList<>();
+        for (final S s : iterable) {
+            result.add(mapper.map(s));
+        }
+        return result;
+    }
 
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method
@@ -329,6 +347,26 @@ public class Util {
             }
             return false;
         }
+    }
+
+    /**
+     * Checks whether for all elements from {@code what} the method {@link #contains(Iterable, Object)}
+     * returns {@code true}. In case {@code what} is empty or {@code null}, {@code true} is returned if and only
+     * if {@code ts} is not {@code null}.
+     */
+    public static <T> boolean containsAll(Iterable<T> ts, Iterable<T> what) {
+        if (ts == null) {
+            return false;
+        }
+        if (what == null) {
+            return true;
+        }
+        for (final T w : what) {
+            if (!contains(ts, w)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static <T> boolean isEmpty(Iterable<T> ts) {
@@ -505,7 +543,7 @@ public class Util {
      * {@link #isEmpty(Iterable) isEmpty(splitAlongWhitespaceRespectingDoubleQuotedPhrases(" \n\t  "))
      * </pre>
      * 
-     * @return if {@code s==null}, then {@code null}, else a non-{@code null} but possibly empty sequence of {@link Strings} whose iteration order corresponds with
+     * @return if {@code s==null}, then {@code null}, else a non-{@code null} but possibly empty sequence of {@link String} whose iteration order corresponds with
      *         the occurrence of the split results, left to right, in {@code s}
      */
     public static Iterable<String> splitAlongWhitespaceRespectingDoubleQuotedPhrases(String s) {
@@ -724,5 +762,22 @@ public class Util {
     @SafeVarargs
     public static <T extends Comparable<T>> T max(T... elements) {
         return Collections.max(Arrays.asList(elements));
+    }
+
+    /**
+     * Checks if the given map is null, and if, returns an empty map.
+     */
+    public static <K, V> Map<K, V> nullToEmptyMap(Map<K, V> map) {
+        if (map == null) {
+            return Collections.emptyMap();
+        }
+        return map;
+    }
+
+    public static String toStringOrNull(Object toStringOrNull) {
+        if (toStringOrNull == null) {
+            return null;
+        }
+        return toStringOrNull.toString();
     }
 }

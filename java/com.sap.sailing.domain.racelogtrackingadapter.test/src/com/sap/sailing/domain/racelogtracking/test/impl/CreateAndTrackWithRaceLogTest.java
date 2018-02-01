@@ -7,18 +7,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.UUID;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
 
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -46,10 +48,10 @@ import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RaceLogFixTrackerManager;
+import com.sap.sailing.domain.racelogtracking.test.RaceLogTrackingTestHelper;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
@@ -60,7 +62,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CreateAndTrackWithRaceLogTest {
+public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     private RacingEventService service;
 
     private final Fleet fleet = new FleetImpl("fleet");
@@ -68,7 +70,6 @@ public class CreateAndTrackWithRaceLogTest {
     private RegattaLeaderboard leaderboard;
     private RaceLogTrackingAdapter adapter;
     private Regatta regatta;
-    private AbstractLogEventAuthor author;
     private SensorFixStore sensorFixStore;
 
     private long time = 0;
@@ -85,11 +86,16 @@ public class CreateAndTrackWithRaceLogTest {
         Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
                 service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
-        /* startDate */null, /* endDate */null, UUID.randomUUID(), Collections.<Series> singletonList(series), false,
+        /* startDate */null, /* endDate */null, UUID.randomUUID(), Collections.<Series> singletonList(series), /* persistent */ true,
                 new HighPoint(), UUID.randomUUID(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE);
+    }
+    
+    @After
+    public void tearDown() throws MalformedURLException, IOException, InterruptedException {
+        service.removeRegatta(regatta);
     }
 
     @Test
@@ -203,16 +209,54 @@ public class CreateAndTrackWithRaceLogTest {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(false);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
+    }
+    
+    /**
+     * See bug 4114: when the regatta is set to control the tracking times from start / finish times,
+     * we don't want this to override start/end tracking times set explicitly in the race log unless
+     * they have low priority. This could happen when the start time is adjusted manually or when
+     * the race log is detached / attached again with a start time event in the race log.
+     */
+    @Test
+    public void testStartOfTrackingTimes() throws NotDenotedForRaceLogTrackingException, Exception {
+        regatta.setControlTrackingFromStartAndFinishTimes(true);
+        RaceColumn column = leaderboard.getRaceColumnByName(columnName);
+        raceLog = column.getRaceLog(fleet);
+        adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
+        // start tracking
+        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        // now there is a trackedrace
+        TrackedRace race = column.getTrackedRace(fleet);
+        assertNotNull(race);
+        final TimePoint startTimeInRaceLog = new MillisecondsTimePoint(123456);
+        final TimePoint endTimeInRaceLog = new MillisecondsTimePoint(234567);
+        setStartAndEndOfRaceInRaceLog(startTimeInRaceLog, endTimeInRaceLog);
+        assertEquals(race.getStartOfRace().minus(TrackedRace.START_TRACKING_THIS_MUCH_BEFORE_RACE_START), race.getStartOfTracking());
+        final TimePoint explicitStartOfTracking = new MillisecondsTimePoint(123000); // just a bit before start of race
+        final TimePoint explicitEndOfTracking = new MillisecondsTimePoint(234600); // just a bit after end of race
+        setStartAndEndOfTrackingInRaceLog(explicitStartOfTracking, explicitEndOfTracking);
+        assertEquals(explicitStartOfTracking, race.getStartOfTracking());
+        assertEquals(explicitEndOfTracking, race.getEndOfTracking());
+        column.releaseTrackedRace(fleet);
+        column.setTrackedRace(fleet, race);
+        assertEquals(explicitStartOfTracking, race.getStartOfTracking());
+        assertEquals(explicitEndOfTracking, race.getEndOfTracking());
+        
+        // now remove the tracked race and track again; again, the explicit tracking times in the race log must prevail
+        service.removeRace(regatta, race.getRace());
+        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        TrackedRace race2 = column.getTrackedRace(fleet);
+        assertEquals(explicitStartOfTracking, race2.getStartOfTracking());
+        assertEquals(explicitEndOfTracking, race2.getEndOfTracking());
     }
 
     @Test
     public void useEventsInRegattaLog() throws NotDenotedForRaceLogTrackingException, Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
-        RaceLog raceLog = column.getRaceLog(fleet);
-
+        raceLog = column.getRaceLog(fleet);
         adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
 
         // add a mapping and one fix in, one out of mapping
@@ -245,7 +289,7 @@ public class CreateAndTrackWithRaceLogTest {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
     }
 }

@@ -6,6 +6,8 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class BoatClassImpl extends NamedImpl implements BoatClass {
@@ -69,6 +71,11 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         approximateManeuverDurationInMilliseconds = APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis();
     }    
 
+    @Override
+    public Duration getApproximateManeuverDuration() {
+        return new MillisecondsDurationImpl(getApproximateManeuverDurationInMilliseconds());
+    }
+    
     @Override
     public long getApproximateManeuverDurationInMilliseconds() {
         return approximateManeuverDurationInMilliseconds;

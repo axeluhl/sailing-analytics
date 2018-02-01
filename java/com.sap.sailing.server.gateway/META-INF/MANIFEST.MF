@@ -59,9 +59,12 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sailing.datamining,
  com.sap.sailing.server,
- com.sap.sailing.grib
+ com.sap.sailing.grib,
+ com.sap.sailing.nmeaconnector,
+ com.sap.sailing.geocoding
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,
  com.sap.sailing.server.gateway.jaxrs,
- com.sap.sailing.server.gateway.jaxrs.spi
+ com.sap.sailing.server.gateway.jaxrs.spi,
+ com.sap.sailing.server.gateway.windimport.bravo

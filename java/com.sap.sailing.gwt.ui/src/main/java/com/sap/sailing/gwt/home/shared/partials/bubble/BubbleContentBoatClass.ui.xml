@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .titleText {
+            font-weight: bold;
+        }
+    </ui:style>
+    <g:HTMLPanel>
+        <div class="{style.titleText}"><ui:text from="{i18n.boatClass}" /></div>
+        <div ui:field="boatClassNameUi"></div>
+    </g:HTMLPanel>
+</ui:UiBinder> 

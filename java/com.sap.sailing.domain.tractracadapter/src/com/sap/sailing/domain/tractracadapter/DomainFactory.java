@@ -11,11 +11,13 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -52,6 +54,8 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.route.IControlPoint;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -128,21 +132,19 @@ public interface DomainFactory {
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param timeoutInMilliseconds TODO
      */
     TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException, IOException, InterruptedException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)},
      * only that a predefined {@link Regatta} is used to hold the resulting races.
-     * @param timeoutInMilliseconds TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
-            SubscriberInitializationException;
+            SubscriberInitializationException, IOException, InterruptedException;
 
     BoatClass getOrCreateBoatClass(String competitorClassName);
 
@@ -157,7 +159,6 @@ public interface DomainFactory {
      *            must have been created before through
      *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
      *            the {@link IEvent} can't be established
-     * @param timeoutInMilliseconds TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
      *            this call
@@ -180,22 +181,28 @@ public interface DomainFactory {
      * already immediately after the notification was sent, and that the {@link RaceDefinition} is already
      * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its containing
      * {@link com.sap.sailing.domain.base.Regatta}.
+     * 
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that
      *            object.
-     * @param raceLogResolver TODO
+     * @param runBeforeExposingRace
+     *            if not {@code null} then this consumer will be passed the {@link DynamicTrackedRace} if it was
+     *            actually created by this call. This happens while still in the {@code synchronized(raceCache)} block,
+     *            therefore before calls waiting for the race (e.g., {@link #getAndWaitForRaceDefinition(UUID)}) return
+     *            the race.
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats,
-            Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver);
+            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass,
+            Map<Competitor, Boat> competitorBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid,
+            String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings,
+            RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace);
 
     /**
-     * The record may be for a single mark or a gate. If for a gate, the
-     * {@link ControlPointPositionData#getIndex() index} is used to determine
-     * which of its marks is affected.
+     * The record may be for a single mark or a gate. If for a gate, the {@link ControlPointPositionData#getIndex()
+     * index} is used to determine which of its marks is affected.
      */
     Mark getMark(TracTracControlPoint controlPoint, int zeroBasedMarkIndex);
 
@@ -205,8 +212,6 @@ public interface DomainFactory {
 
     /**
      * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
-     * @param raceLogResolver TODO
-     * @param timeoutInMilliseconds TODO
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
             long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
@@ -261,24 +266,20 @@ public interface DomainFactory {
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
-            boolean preferReplayIfAvailable) throws Exception;
+            boolean preferReplayIfAvailable, int timeoutInMillis) throws Exception;
+    
     /**
-     * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
-     * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding
-     * {@link RaceDefinition} exists, from the {@link TrackedRegatta}. If removing the race from the event, the event is
-     * removed from the event cache such that {@link #getOrCreateDefaultRegatta(IEvent, TrackedRegattaRegistry)} will have to create a new one. Similarly,
-     * if the {@link TrackedRace} that was removed from the {@link TrackedRegatta} was the last one, the
-     * {@link TrackedRegatta} is removed such that {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)}
-     * will have to create a new one.
+     * Removes all knowledge about <code>tractracRace</code> from the race cache.
      */
-    void removeRace(IEvent tractracEvent, IRace tractracRace, TrackedRegattaRegistry trackedRegattaRegistry);
+    RaceDefinition removeRace(IEvent tractracEvent, IRace tractracRace, Regatta regattaToLoadRaceInto, TrackedRegattaRegistry trackedRegattaRegistry);
 
     /**
      * Computes an ID to use for a {@link RaceDefinition} based on the TracTrac race.
      */
     Serializable getRaceID(IRace tractracRace);
 
-    JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
+    JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams)
+            throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     MetadataParser getMetadataParser();
 
@@ -292,6 +293,28 @@ public interface DomainFactory {
      * the start time and whether a race was aborted.
      */
     void addTracTracUpdateHandlers(URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername,
-            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace);
+            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace, IRace tractracRace);
+
+    /**
+     * Since TracAPI 3.6.1 the TracAPI provides a course area name for {@link IRace} objects. Furthermore, the
+     * {@link IControl} control points can now tell their {@link IControl#getCourseArea() course area}. This allows
+     * us to fetch the {@link IControl}s for a specific course area, thereby, e.g., restricting the marks of an
+     * event that we offer to the Race Manager app's course designer to those available on the course area.
+     */
+    Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
+
+    /**
+     * Since TracAPI 3.6.1 the TracAPI provides a course area name for {@link IRace} objects. Furthermore, the
+     * {@link IControl} control points can now tell their {@link IControl#getCourseArea() course area}. This allows us
+     * to fetch the {@link IControlPoint}s for a specific course area, thereby, e.g., restricting the marks of an event
+     * that we offer to the Race Manager app's course designer to those available on the course area.
+     */
+    Iterable<IControlPoint> getControlPointsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
+
+    /**
+     * Looks for an {@link IControl} in the {@code candidates} that contains two {@link IControlPoint}s that map to the
+     * {@code first} and {@code second} mark.
+     */
+    ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second);
 
 }

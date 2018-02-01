@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file datatype="javapropertyresourcebundle" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en">
+  <file datatype="javapropertyresourcebundle" original="/usr/sap/ljs/app/Converter_429408536936316109/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en">
     <header>
       <skl>
-        <internal-file crc="c8a799f35957b659646c59bd67421d2f" form="base64">H4sIAAAAAAAAAKVUTW/bMAy9+1cQ2CEbkAVpdwvgQ5YuWIChDZr2sKPs0A1XWTIk2VkQ5L+PkvNhtzZarBfbEh/f4yNlGZHiQt3jk3BO3GU/KlQuNrwJ+/EBSIGpQzDYXx0GoDNAD+Hl9WEQmZA9l4iun+Tz/tvhy5tUEsUaTaKFWZ8YGlsMGrdzmCJqJq02enuPtpTO/iL1/EBOYuw3WTbshmLtXYWmIty+xPgY6GMwQC+svOiAX0AeMFVC7iy90vZNEMdYFDHczaSw1qfMSZHd4HpVJn8wdbHfg0wb8ChIPSz0byMsZEcsfAWFZ0sgKkFSJBKjTzCewJn+VuQ4hKtJ0L9BmxoqHGnVXcB3vd7Ftw3ajiJ4fNxyEAYvoqOGoVWqDc60MeyEhU6emqyt3A6NPg+NIXdaeSH9ATepzgt05LRZMhJt3aCTl9k5GjgKD1kfJwOSFHpaUZ+NYOVC1zuPbsVg4V1y7KJV93+NIW0p9dbeM4de8c5BtLXePFaPBSeQevLH9WRmWv9VHWPdkpRgnTAOrObS3vdTDOF6Ao5y7JYNNuavxXzdDUFRFEb/pVw4lDtgJN9q7MSWyVloobhmBvBn/FuXwTX3CqliKVDaUUZpCHOvjM5hNV3Cirviw+GCcZTaETxocKVRfBtm7awhFDwki1CRJQc7XRooLRrg0jLiaXNZboP+9DxDglJvR5GPL+tw/Oixx0VEeWGIb+FF/Y74WYl0Fy/rd2SFLF1t5qeQUvumDKN/18D20lAGAAA=</internal-file>
+        <internal-file crc="8ee9f762b976b9f98d3355409c00d411" form="base64">H4sIAAAAAAAAAKVUTW/aQBC9+1eM1AOtRBFJb0g+UFJUpCpBITnkuDbjMM1619pdmyLEf+/smg9DbBU1F4xn3rw3b2a9RqQ4U4/4KpwTD9mPCpWLDQdhO9wBKTB1Cnq97c2u1wOdAXqQD9xyIDKBYSoRXTfR5+233Zer6CSKJZpEC7M8sDRCHja8rPNEUbNwsdLrR7SldPYXqbcnchJjH2T5EA1N24cKTUW4vsT4HOh9MkBPrPzSAj+BPGCshNxYeqfthyH2uShiuJtIYa0vmZIiu8Llokx+Y+piH4NMG/AoSD0szHElLGR7LHwFhUdLICpBUiQSo08wHMGR/l7k2IebUdC/Q5saKhxp1d7Ad73cxPcN2pYmeI08cxAGT6KDhqFFqg1OtDHshIUOnpqsZ7UtGl0eGktutXIh/QE3qc4LdOS0mTMSbT2gg5fJMRs4Cg9Z7jcDkhR6WlGfjWDlRNe5j3bFYOEqOXZx1vd/rSE9U+rsvWMPneKtizjX+uexei64gNSrP64HM+P6q2pZ65qkBOuEcWA1t3bdR9GH2xE4yrFdNtiYvhfzfTcERVEY/Ydy4VBugJF8tbETWyZHoZninhnAf+MXXQbXPCukiqVAaUcZpSHNszI6h8V4Dgueik+HC8ZRagfwpMGVRvF9mJ1X9aHgJVmEiiw52OjSQGnRALeWEW+b23Ir9KfnDRKUej2IfH5ep+Nnj92/RJQXhvgmntXPiH8rkW7ief2MrJClq838FFJqP5R+9Bd0t0VsXAYAAA==</internal-file>
       </skl>
       <phase-group>
-        <phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+        <phase company-name="SAP AG" date="2017-04-06T12:41:23Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
       </phase-group>
-      <tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
+      <tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Java properties Flexible File Converter" tool-version="1.1.0"/>
     </header>
     <body>
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInRegattaOfEvent" resname="raceInRegattaOfEvent">
-        <source>race <ph id="1">{0}</ph> in regatta '<ph id="2">{1}</ph>' of event '<ph id="3">{2}</ph>'</source>
+        <source>race <ph id="1">{0}</ph> in regatta ''<ph id="2">{1}</ph>'' of event ''<ph id="3">{2}</ph>''</source>
       </trans-unit>
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInFleetInRegattaOfEvent" resname="raceInFleetInRegattaOfEvent">
-        <source>race <ph id="1">{0}</ph> (<ph id="2">{3}</ph>) in regatta '<ph id="3">{1}</ph>' of event '<ph id="4">{2}</ph>'</source>
+        <source>race <ph id="1">{0}</ph> (<ph id="2">{3}</ph>) in regatta ''<ph id="3">{1}</ph>'' of event ''<ph id="4">{2}</ph>''</source>
       </trans-unit>
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardOfEvent" resname="leaderboardOfEvent">
-        <source>leaderboard '<ph id="1">{0}</ph>' of event '<ph id="2">{1}</ph>'</source>
+        <source>leaderboard ''<ph id="1">{0}</ph>'' of event ''<ph id="2">{1}</ph>''</source>
       </trans-unit>
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardShowResultsLinkTitle" resname="leaderboardShowResultsLinkTitle">
         <source>Show results</source>

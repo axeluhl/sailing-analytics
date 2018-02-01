@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -39,7 +40,7 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
     }
 
     @Test
-    public void testStoreAndLoadRaceLogTrackingParams() throws MalformedURLException, URISyntaxException, NotDenotableForRaceLogTrackingException {
+    public void testStoreAndLoadRaceLogTrackingParams() throws MalformedURLException, URISyntaxException, NotDenotableForRaceLogTrackingException, InterruptedException, ExecutionException {
         // set up
         final long delayToLiveInMillis = 3000;
         final boolean trackWind = true;
@@ -50,13 +51,14 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         final Iterable<? extends Series> series = Arrays.<Series>asList(theSeries);
         final Regatta regatta = racingEventService.createRegatta("My Regatta", "12mR", MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(Duration.ONE_DAY),
                 UUID.randomUUID(), series, /* persistent */ true, new LowPoint(), new CourseAreaImpl("Default", UUID.randomUUID()),
-                /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ true,
+                /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 OneDesignRankingMetric::new);
         theSeries.addRaceColumn("R1", racingEventService);
         theSeries.addRaceColumn("R2", racingEventService);
         theSeries.addRaceColumn("R3", racingEventService);
         final RegattaLeaderboard leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), /* leaderboardDisplayName */ null, new int[] { 5, 9 });
-        RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(domainObjectFactory.getBaseDomainFactory()).denoteAllRacesForRaceLogTracking(racingEventService, leaderboard);
+        RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(domainObjectFactory.getBaseDomainFactory()).denoteAllRacesForRaceLogTracking(racingEventService, leaderboard,
+                /* race name prefix */ null);
         final RaceLogConnectivityParams rlParams = new RaceLogConnectivityParams(
                 racingEventService, regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard,
                 delayToLiveInMillis, domainObjectFactory.getBaseDomainFactory(), trackWind,
@@ -65,7 +67,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(rlParams);
         // load
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params -> connectivityParametersForRacesToRestore.add(params))
+                .waitForCompletionOfCallbacksForAllParameters();
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -81,7 +84,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(rlParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
 }

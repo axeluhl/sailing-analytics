@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface FunctionProvider {
@@ -19,7 +20,7 @@ public interface FunctionProvider {
     
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+    public ReducedDimensions getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
 
     /**

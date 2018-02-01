@@ -2,7 +2,10 @@ package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sse.common.Duration;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -35,4 +38,15 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     @Statistic(messageKey="TimeSpentInSeconds", resultDecimals=0, ordinal=4)
     public Long getTimeTakenInSeconds();
 
+    @Dimension(messageKey = "Tack")
+    default Tack getTack() throws NoWindException {
+        return getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getTack(
+                getTrackedLegOfCompetitorContext().getCompetitor(), getTimePoint());
+    }
+    
+    @Statistic(messageKey="timeSpentFoiling", resultDecimals=1)
+    Duration getTimeSpentFoiling();
+
+    @Statistic(messageKey="FoilingDistance", resultDecimals=1)
+    Distance getDistanceSpentFoiling();
 }

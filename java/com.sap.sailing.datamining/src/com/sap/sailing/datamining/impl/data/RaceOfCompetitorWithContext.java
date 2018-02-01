@@ -21,11 +21,13 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
@@ -180,7 +182,8 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Course course = getTrackedRace().getRace().getCourse();
         Waypoint firstMark = course.getFirstLeg().getTo();
         Competitor competitor = getCompetitor();
-        int rank = getTrackedRace().getRank(competitor, getTrackedRace().getMarkPassing(competitor, firstMark).getTimePoint());
+        final MarkPassing markPassing = getTrackedRace().getMarkPassing(competitor, firstMark);
+        int rank = markPassing == null ? 0 : getTrackedRace().getRank(competitor, markPassing.getTimePoint());
         return rank == 0 ? null : Double.valueOf(rank);
     }
     
@@ -214,12 +217,31 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     private int getNumberOf(ManeuverType maneuverType) {
         TrackedRace trackedRace = getTrackedRace();
         int number = 0;
-        for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), trackedRace.getStartOfRace(), trackedRace.getEndOfTracking(), false)) {
-            if (maneuver.getType() == maneuverType) {
-                number++;
+        if (trackedRace != null && trackedRace.getStartOfRace() != null) {
+            final TimePoint end;
+            final TimePoint endOfTracking = trackedRace.getEndOfTracking();
+            if (trackedRace.getEndOfRace() != null) {
+                end = trackedRace.getEndOfRace();
+            } else {
+                final TimePoint now = MillisecondsTimePoint.now();
+                if (endOfTracking != null && endOfTracking.before(now)) {
+                    end = endOfTracking;
+                } else {
+                    end = now;
+                }
+            }
+            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), trackedRace.getStartOfRace(), end, false)) {
+                if (maneuver.getType() == maneuverType) {
+                    number++;
+                }
             }
         }
         return number;
     }
 
+    @Override
+    public Distance getDistanceTraveled() {
+        return getTrackedRace().getDistanceTraveledIncludingGateStart(getCompetitor(), MillisecondsTimePoint.now());
+    }
+    
 }

@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNa
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
@@ -29,6 +30,9 @@ public class Solutions extends Composite {
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
+    @UiField StringMessages i18n;
+    @UiField
+    Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsAnchor;
     @UiField Anchor raceAnchor;
     @UiField Anchor inSightAnchor;
@@ -44,14 +48,12 @@ public class Solutions extends Composite {
     @UiField DivElement postRaceDiv;
     @UiField DivElement simulatorDiv;
 
-    @UiField
-    Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsDetailsAnchor;
     @UiField Anchor raceCommitteeAppDetailsAnchor;
     @UiField Anchor inSightAppDetailsAnchor;
     @UiField Anchor buoyPingerAppDetailsAnchor;
     @UiField Anchor simulatorAppDetailsAnchor;
-
+    
     private final PlaceNavigation<SolutionsPlace> sapInSailingNavigation;
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
@@ -72,11 +74,9 @@ public class Solutions extends Composite {
     public Solutions(SolutionsNavigationTabs navigationTab, DesktopPlacesNavigator placesNavigator) {
         this.navigationTab = navigationTab;
         this.placesNavigator = placesNavigator;
-        
         SolutionsResources.INSTANCE.css().ensureInjected();
-
         initWidget(uiBinder.createAndBindUi(this));
-        
+
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
         inSightAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);

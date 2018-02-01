@@ -33,7 +33,7 @@ public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
     }
     
     public static int hashCode(double latDeg, double lngDeg, long timePointAsMillis) {
-        return (31 * (int) (timePointAsMillis & Integer.MAX_VALUE)) ^ (int) (latDeg*lngDeg);
+        return (31 * (int) (timePointAsMillis & Integer.MAX_VALUE)) ^ (int) (Math.round(latDeg)*Math.round(lngDeg));
     }
     /**
      * Wind hash is determined based on time point and position only to speed this up a little.

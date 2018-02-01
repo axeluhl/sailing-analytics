@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+        .liveRacesContainer {
+            margin-top: .5em; 
+        }
+        .subHeader {
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #ffffff;
+        }
+        .subHeaderContent {
+            padding: .5em .1em;
+        }
+        .subHeaderToolbar {
+            float: right;
+            text-align: right;
+        }
+        .leaderboardContainer {
+            margin-top: -10px;
+        }
+    </ui:style>
+    <g:FlowPanel>
+        <g:SimplePanel ui:field="liveRacesContainerUi" addStyleNames="{style.liveRacesContainer}"/>
+        <g:FlowPanel ui:field="subHeaderUi" addStyleNames="{style.subHeader}">
+            <g:FlowPanel ui:field="subHeaderToolbarUi" addStyleNames="{style.subHeaderToolbar}"/>
+            <g:FlowPanel ui:field="subHeaderContentUi" addStyleNames="{style.subHeaderContent}"/>
+        </g:FlowPanel>
+        <g:SimplePanel ui:field="leaderboardContainerUi" addStyleNames="{style.leaderboardContainer}"/>
+    </g:FlowPanel>
+</ui:UiBinder>

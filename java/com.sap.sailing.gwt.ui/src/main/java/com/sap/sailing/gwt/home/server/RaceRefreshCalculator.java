@@ -14,7 +14,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * TTL} can be used for as refresh interval of "Live races" sections.
  */
 @GwtIncompatible
-final class RaceRefreshCalculator implements RaceCallback {
+public final class RaceRefreshCalculator implements RaceCallback {
     private long ttl = Duration.ONE_MINUTE.times(3).asMillis();
 
     @Override

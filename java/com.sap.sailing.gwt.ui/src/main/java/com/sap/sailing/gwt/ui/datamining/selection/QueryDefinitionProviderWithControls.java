@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningComponentProvider;
@@ -37,18 +38,26 @@ import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionViewer;
 import com.sap.sailing.gwt.ui.datamining.selection.filter.ListRetrieverChainFilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettingsDialogComponent;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
+public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings>
+        implements WithControls {
 
     private static final double headerPanelHeight = 45;
     private static final double footerPanelHeight = 50;
@@ -69,12 +78,12 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
 
-    public QueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
+    public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
+            DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
             ResultsPresenter<?> resultsPresenter) {
-        super(stringMessages, dataMiningService, errorReporter);
+        super(parent, context, stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
-        
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("definitionProviderControls");
@@ -90,9 +99,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerToggleButton.getValue());
             }
         });
-        queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages());
+        queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getStringMessages());
         addQueryDefinitionChangedListener(queryDefinitionViewer);
-        predefinedQueryRunner = new PredefinedQueryRunner(session, getStringMessages(), dataMiningService, errorReporter, resultsPresenter);
+        predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getStringMessages(),
+                dataMiningService, errorReporter, resultsPresenter);
         
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -117,7 +127,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             addControl(predefinedQueryRunner.getEntryWidget());
         }
 
-        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), settingsControl);
+        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(parent, context, getStringMessages(),
+                getDataMiningService(), getErrorReporter(), settingsControl);
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
         
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(15);
@@ -125,10 +136,12 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         headerPanel.add(controlsPanel);
         
         // Creating the footer panel, that contains the statistic provider and the grouping provider
-        statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
+        statisticProvider = new SimpleStatisticProvider(parent, context, getStringMessages(), getDataMiningService(),
+                getErrorReporter(), retrieverChainProvider);
         statisticProvider.addStatisticChangedListener(providerListener);
 
-        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
+        groupingProvider = new MultiDimensionalGroupingProvider(parent, context, getStringMessages(),
+                getDataMiningService(), getErrorReporter(), retrieverChainProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
         
         SplitLayoutPanel footerPanel = new SplitLayoutPanel(15);
@@ -140,7 +153,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         filterSplitPanel.addSouth(footerPanel, footerPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
-        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
+                stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
         
@@ -159,6 +173,89 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         providers.forEach(provider -> provider.awaitReloadComponents());
     }
     
+    /**
+     * The first {@link FunctionDTO dimension} of which the {@code groupKey} is assumed to be an instance will be
+     * removed from the {@link #groupingProvider}. A filter criterion for that dimension will be added to the
+     * {@link #filterSelectionProvider}, filtering such that only {@code groupKey} will be accepted as value. For this
+     * purpose, the retriever levels are scanned from top to bottom to find the topmost occurrence of that dimension.
+     * <p>
+     * 
+     * If the {@link #groupingProvider} had only one grouping level, a popup menu is displayed where the user must
+     * select another dimension to group by, before the query can be run again. Otherwise, the query is executed again
+     * after the first grouping level has been removed and the filter has been set.
+     * 
+     * @param onSuccessCallback
+     *            called when the drill-down process was successful, including setting the filter and removing /
+     *            replacing a grouping dimension
+     */
+    public void drillDown(GroupKey groupKey, Runnable onSuccessCallback) {
+        assert groupKey instanceof GenericGroupKey<?>;
+        final GenericGroupKey<?> groupKeyForSingleDimension = (GenericGroupKey<?>) groupKey;
+        final Collection<FunctionDTO> dimensionsToGroupBy = groupingProvider.getDimensionsToGroupBy();
+        if (!dimensionsToGroupBy.isEmpty()) {
+            final FunctionDTO firstDimension = dimensionsToGroupBy.iterator().next();
+            filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension, (Serializable) groupKeyForSingleDimension.getValue());
+            if (dimensionsToGroupBy.size() == 1) {
+                letUserSelectADifferentFirstDimension(onSuccessCallback);
+            } else {
+                groupingProvider.removeDimensionToGroupBy(firstDimension);
+                onSuccessCallback.run();
+            }
+        }
+    }
+
+    private class FirstDimensionSelectionDialog extends DataEntryDialog<FunctionDTO> {
+        private ValueListBox<FunctionDTO> dimensionChooser;
+        
+        public FirstDimensionSelectionDialog(DialogCallback<FunctionDTO> callback) {
+            super(
+                getStringMessages().chooseDifferentDimensionTitle(),
+                getStringMessages().chooseDifferentDimensionMessage(), getStringMessages().ok(),
+                getStringMessages().cancel(),
+                new DataEntryDialog.Validator<FunctionDTO>() {
+                    @Override
+                    public String getErrorMessage(FunctionDTO valueToValidate) {
+                        if (valueToValidate == null) {
+                            return getStringMessages().pleaseSelectADimension();
+                        } else {
+                            return null;
+                        }
+                    }
+                }, callback);
+            dimensionChooser = groupingProvider.createDimensionToGroupByBoxWithoutEventHandler();
+            Collection<FunctionDTO> acceptableValues = new ArrayList<>();
+            Util.addAll(groupingProvider.getAvailableDimensions(), acceptableValues);
+            acceptableValues.add(null);
+            dimensionChooser.setAcceptableValues(acceptableValues);
+            dimensionChooser.addValueChangeHandler(e->validateAndUpdate());
+        }
+        
+        @Override
+        protected Widget getAdditionalWidget() {
+            return dimensionChooser;
+        }
+
+        @Override
+        protected FunctionDTO getResult() {
+            return dimensionChooser.getValue();
+        }
+    }
+    
+    private void letUserSelectADifferentFirstDimension(final Runnable onSuccessCallback) {
+        final FirstDimensionSelectionDialog dialog = new FirstDimensionSelectionDialog(new DialogCallback<FunctionDTO>() {
+            @Override
+            public void ok(FunctionDTO dimensionToGroupBy) {
+                groupingProvider.setDimensionToGroupBy(0, dimensionToGroupBy);
+                onSuccessCallback.run();
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+        dialog.show();
+    }
+
     @Override
     public void awaitReloadComponents() {
         // Nothing to do here
@@ -211,7 +308,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         groupingProvider.applyQueryDefinition(queryDefinition);
         filterSelectionProvider.applySelection(queryDefinition);
         setBlockChangeNotification(false);
-        
         notifyQueryDefinitionChanged();
     }
 
@@ -257,7 +353,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     @Override
-    public SettingsDialogComponent<AdvancedDataMiningSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AdvancedDataMiningSettings> getSettingsDialogComponent(AdvancedDataMiningSettings settings) {
         return new AdvancedDataMiningSettingsDialogComponent(settings, getStringMessages());
     }
 
@@ -324,6 +420,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             }
         }
         
+    }
+
+    @Override
+    public String getId() {
+        return "QueryDefinitionProviderWithControls";
     }
 
 }

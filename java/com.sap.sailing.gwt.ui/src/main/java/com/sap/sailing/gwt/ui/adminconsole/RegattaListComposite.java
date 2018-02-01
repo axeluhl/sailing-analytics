@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -147,6 +147,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
+        columnSortHandler.setComparator(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getComparator());
 
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -222,6 +223,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRegatta(regatta);
                 } else if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                    
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                         removeRegatta(regatta);
                     }
@@ -357,5 +359,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     public RefreshableMultiSelectionModel<RegattaDTO> getRefreshableMultiSelectionModel() {
         return refreshableRegattaMultiSelectionModel;
+    }
+
+    public CellTable<RegattaDTO> getRegattaTable() {
+        return regattaTable;
     }
 }

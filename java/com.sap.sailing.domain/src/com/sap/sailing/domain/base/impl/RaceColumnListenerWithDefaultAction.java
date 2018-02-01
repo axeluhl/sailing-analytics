@@ -80,6 +80,11 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     }
 
     @Override
+    default void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        defaultAction();
+    }
+
+    @Override
     default void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
         defaultAction(); 
     }

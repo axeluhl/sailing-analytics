@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.ui.datamining.execution;
 
+import java.io.Serializable;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class ManagedDataMiningQueryCallback<AggregatedType> implements AsyncCallback<QueryResultDTO<AggregatedType>> {
+public abstract class ManagedDataMiningQueryCallback<AggregatedType extends Serializable>
+        implements AsyncCallback<QueryResultDTO<AggregatedType>> {
 
     private final ManagedDataMiningQueriesCounter counter;
     

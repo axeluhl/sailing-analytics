@@ -26,5 +26,6 @@ public class GetEventListViewAction implements SailingAction<EventListViewDTO>, 
 
     @Override
     public void cacheInstanceKey(StringBuilder key) {
+        // The key is empty because this action is global and does not need any key
     }
 }

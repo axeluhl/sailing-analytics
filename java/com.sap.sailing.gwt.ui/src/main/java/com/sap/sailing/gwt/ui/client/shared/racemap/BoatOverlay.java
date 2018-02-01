@@ -56,6 +56,9 @@ public class BoatOverlay extends CanvasOverlayV3 {
     private Integer lastHeight;
     private Size lastScale;
     private Color lastColor;
+    
+    public static enum DisplayMode { DEFAULT, SELECTED, NOT_SELECTED };
+    private DisplayMode displayMode;
 
     /**
      * Remembers the old drawing angle as passed to {@link #setCanvasRotation(double)} to minimize rotation angle upon
@@ -91,7 +94,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 setCanvasSize(canvasWidth, canvasHeight);
             }
             if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor, color)) {
-                boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
+                boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, getDisplayMode(), 
                         canvasWidth, canvasHeight, boatSizeScaleFactor, color);
                 lastLegType = boatFix.legType;
                 lastTack = boatFix.tack;
@@ -184,6 +187,14 @@ public class BoatOverlay extends CanvasOverlayV3 {
             boatSizeInPixel.setWidth(minBoatBeamLengthInPx * ratioHullBeanLength);
             boatSizeInPixel.setHeight(minBoatBeamLengthInPx);
         }
+    }
+
+    public DisplayMode getDisplayMode() {
+        return displayMode;
+    }
+
+    public void setDisplayMode(DisplayMode displayMode) {
+        this.displayMode = displayMode;
     }
 
 }

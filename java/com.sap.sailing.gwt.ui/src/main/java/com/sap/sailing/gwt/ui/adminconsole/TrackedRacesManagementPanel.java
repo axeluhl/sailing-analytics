@@ -43,7 +43,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                         sailingService.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                TrackedRacesManagementPanel.this.errorReporter.reportError("Error setting the received start time: " + caught.getMessage());
+                                TrackedRacesManagementPanel.this.errorReporter.reportError(stringMessages.errorSettingStartTime(caught.getMessage()));
                             }
                             @Override
                             public void onSuccess(RaceDTO result) {

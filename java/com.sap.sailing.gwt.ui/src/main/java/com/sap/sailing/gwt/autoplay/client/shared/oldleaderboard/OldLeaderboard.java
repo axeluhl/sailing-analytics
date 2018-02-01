@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 
 public class OldLeaderboard extends Composite implements LeaderboardUpdateListener {
@@ -32,9 +32,11 @@ public class OldLeaderboard extends Composite implements LeaderboardUpdateListen
     @UiField DivElement lastScoringCommentDiv;
     @UiField DivElement scoringSchemeDiv;
 
-    private LeaderboardPanel leaderboardPanel;
+    private MultiRaceLeaderboardPanel leaderboardPanel;
+    private final StringMessages stringmessages;
 
-    public OldLeaderboard(LeaderboardPanel leaderboardPanel) {
+    public OldLeaderboard(MultiRaceLeaderboardPanel leaderboardPanel, StringMessages stringmessages) {
+        this.stringmessages = stringmessages;
         this.leaderboardPanel = leaderboardPanel;
 
         OldLeaderboardResources.INSTANCE.css().ensureInjected();
@@ -51,13 +53,14 @@ public class OldLeaderboard extends Composite implements LeaderboardUpdateListen
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         if(leaderboard != null) {
             lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-            scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
+            scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null
+                    ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, stringmessages) : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
                 String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
                         + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
-                lastScoringUpdateTextDiv.setInnerText(StringMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                lastScoringUpdateTextDiv.setInnerText(stringmessages.eventRegattaLeaderboardLastScoreUpdate());
             } else {
                 lastScoringUpdateTimeDiv.setInnerText("");
                 lastScoringUpdateTextDiv.setInnerText("");

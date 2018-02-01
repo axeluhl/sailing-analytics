@@ -13,8 +13,8 @@ struct Application {
 }
 
 struct URLs {
-    static let CodeConvention = NSURL(string: "https://github.com/raywenderlich/swift-style-guide/blob/master/README.markdown") ?? NSURL()
-    static let Terms = NSURL(string: "http://www.sapsailing.com/EULA_iOS_SailingBoatTracker.html") ?? NSURL()
+    static let CodeConvention = URL(string: "https://github.com/raywenderlich/swift-style-guide/blob/master/README.markdown")!
+    static let Terms = URL(string: "http://www.sapsailing.com/EULA_iOS_SailingBoatTracker.html")!
 }
 
 struct Colors {
@@ -26,7 +26,7 @@ struct Colors {
     static let GreenHighlighted = UIColor(hex:0x08451e)
     static let Red = UIColor(hex:0xcd201b)
     static let RedHighlighted = UIColor(hex:0x991814)
-    static let NavigationBarTitleColor = UIColor.blackColor()
+    static let NavigationBarTitleColor = UIColor.black
     static let NavigationBarTintColor = UIColor(hex: 0x009de0)
 }
 
@@ -36,9 +36,9 @@ struct FontNames {
 }
 
 struct Fonts {
-    static let OpenSansBold17 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(17.0)) ?? UIFont.systemFontOfSize(17.0)
-    static let OpenSansBold13 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(13.0)) ?? UIFont.systemFontOfSize(13.0)
-    static let OpenSans10 = UIFont(name: FontNames.OpenSans, size: CGFloat(10.0)) ?? UIFont.systemFontOfSize(10.0)
+    static let OpenSansBold17 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(17.0)) ?? UIFont.systemFont(ofSize: 17.0)
+    static let OpenSansBold13 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(13.0)) ?? UIFont.systemFont(ofSize: 13.0)
+    static let OpenSans10 = UIFont(name: FontNames.OpenSans, size: CGFloat(10.0)) ?? UIFont.systemFont(ofSize: 10.0)
 }
 
 struct Images {

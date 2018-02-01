@@ -62,6 +62,8 @@ public interface TargetTimeInfo {
          * and the {@link #getLegBearing() leg bearing} at that point in time.
          */
         LegType getLegType();
+
+        Distance getExpectedDistance();
     }
     
     /**
@@ -79,8 +81,14 @@ public interface TargetTimeInfo {
     Duration getExpectedDuration();
     
     /**
-     * The per-leg information about the expected hypothetical sail around the course. The element
-     * order matches that of the {@link Course#getLegs() legs in the race course}.
+     * The expected total duration; equals the sum of the {@link LegTargetTimeInfo#getExpectedDuration() leg durations}
+     * as aggregated across {@link #getLegTargetTimes()}.
+     */
+    Distance getExpectedDistance();
+
+    /**
+     * The per-leg information about the expected hypothetical sail around the course. The element order matches that of
+     * the {@link Course#getLegs() legs in the race course}.
      */
     Iterable<LegTargetTimeInfo> getLegTargetTimes();
     

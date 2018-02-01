@@ -8,11 +8,11 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelComparableMaxAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelComparableMinAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelBearingMinAggregationProcessor extends
-    AbstractParallelComparableMaxAggregationProcessor<Bearing> {
+    AbstractParallelComparableMinAggregationProcessor<Bearing> {
     
     private static final AggregationProcessorDefinition<Bearing, Bearing> DEFINITION =
             new SimpleAggregationProcessorDefinition<>(Bearing.class, Bearing.class, "Minimum", ParallelBearingMinAggregationProcessor.class);

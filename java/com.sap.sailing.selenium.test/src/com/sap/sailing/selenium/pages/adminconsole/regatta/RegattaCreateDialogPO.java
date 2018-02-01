@@ -8,7 +8,8 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
-import com.sap.sailing.selenium.pages.gwt.BetterDateTimeBoxPO;
+import com.sap.sailing.selenium.pages.gwt.DateAndTimeInputPO;
+import com.sap.sailing.selenium.pages.gwt.ListBoxPO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
 public class RegattaCreateDialogPO extends DataEntryDialogPO {
@@ -26,10 +27,10 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
     
 //    @FindBy(how = BySeleniumId.class, using = "ScoringSchemeListBox")
 //    private WebElement scoringSystemDropDown;
-//    @FindBy(how = BySeleniumId.class, using = "EventListBox")
-//    private WebElement eventDropDown;
-//    @FindBy(how = BySeleniumId.class, using = "CourseAreaListBox")
-//    private WebElement courseAreaDropDown;
+    @FindBy(how = BySeleniumId.class, using = "EventListBox")
+    private WebElement eventDropDown;
+    @FindBy(how = BySeleniumId.class, using = "CourseAreaListBox")
+    private WebElement courseAreaDropDown;
     
     @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
     private WebElement addSeriesButton;
@@ -47,11 +48,16 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
         this.boatClassTextBox.sendKeys(boatClass);
     }
     
+    public void setEventAndCourseArea(String event, String courseArea) {
+        ListBoxPO.create(driver, eventDropDown).selectOptionByLabel(event);
+        ListBoxPO.create(driver, courseAreaDropDown).selectOptionByLabel(courseArea);
+    }
+    
     public void setValues(String name, String boatClass, Date startDate, Date endDate) {
         this.setRegattaName(name);
         this.setBoatClass(boatClass);
-        BetterDateTimeBoxPO.create(driver, startDateTimeBox).setDate(startDate);
-        BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(endDate);
+        DateAndTimeInputPO.create(driver, startDateTimeBox).setValue(startDate, false);
+        DateAndTimeInputPO.create(driver, endDateTimeBox).setValue(endDate, false);
     }
     
     // TODO: Scoring System, Event and Course Area

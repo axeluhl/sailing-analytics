@@ -88,7 +88,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
      * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
      * {@link Object#notifyAll() notified}.
      */
-    private RaceDefinition race;
+    private volatile RaceDefinition race;
     
     private Course course;
     private StartList startList;
@@ -166,9 +166,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    protected void onStop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
+    protected void onStop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         if (isTrackedRaceStillReachable()) {
-            TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+            TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, 1.0);
             trackedRace.onStatusChanged(this, newStatus);
         }
         connector.removeSailMasterListener(this);
@@ -189,10 +189,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
 
             @Override
             public RaceDefinition getRace() {
-                synchronized (this) {
+                synchronized (SwissTimingRaceTrackerImpl.this) {
                     while (race == null) {
                         try {
-                            this.wait();
+                            SwissTimingRaceTrackerImpl.this.wait();
                         } catch (InterruptedException e) {
                             logger.log(Level.SEVERE, "Interrupted wait", e);
                         }
@@ -204,14 +204,14 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public RaceDefinition getRace(long timeoutInMilliseconds) {
                 long start = System.currentTimeMillis();
-                synchronized (this) {
+                synchronized (SwissTimingRaceTrackerImpl.this) {
                     RaceDefinition preResult = race;
                     boolean interrupted = false;
                     while ((System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && preResult == null) {
                         try {
                             long timeToWait = timeoutInMilliseconds - (System.currentTimeMillis() - start);
                             if (timeToWait > 0) {
-                                this.wait(timeToWait);
+                                SwissTimingRaceTrackerImpl.this.wait(timeToWait);
                             }
                             preResult = race;
                         } catch (InterruptedException e) {
@@ -281,11 +281,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     case COMPETITOR:
                     	String boatID = fix.getBoatID();
                     	Competitor competitor = getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass);
-                    	if(competitor == null) {
-                    		// TODO: read startlist again from Manage2Sail
-                    		// use competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)
+                        if (competitor == null) {
+                            // TODO: read startlist again from Manage2Sail
+                            // use competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)
                         }
-                    	if(competitor != null) {
+                	if (competitor != null) {
                             DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                             competitorTrack.addGPSFix(gpsFix);
                     	} else {
@@ -321,8 +321,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         Competitor result = null;
         // first look into the temp cache
         result = competitorsByBoatId.get(boatID);
-        if(result == null) {
-            if(boatClass != null) {
+        if (result == null) {
+            if (boatClass != null) {
                 result = getCompetitorByBoatIDAndBoatClass(boatID, boatClass);
             } else {
                 RaceType raceType = domainFactory.getRaceTypeFromRaceID(raceID);
@@ -465,7 +465,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = new RaceImpl(raceID, raceName, raceDescription, boatClass);
-        race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
+        synchronized (this) {
+            race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
+            this.notifyAll();
+        }
         // temp
         CompetitorStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorStore();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor c : startList.getCompetitors()) {

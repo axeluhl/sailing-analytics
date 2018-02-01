@@ -10,20 +10,216 @@
 <body>
 	<div class="logoAndTitlePanel">
     	<a class="sapLogo" href="http://www.sap.com">
-        	<img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/>
+            <img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/>
     	</a>
-		<div class="sailingAnalyticsLabelPanel">
-	    	<div class="sailingAnalyticsLabel">Sailing Analytics</div>
-	      </div>
+	<div class="sailingAnalyticsLabelPanel">
+	<div class="sailingAnalyticsLabel">Sailing Analytics</div>
+	</div>
     </div>
-
 	<div class="yield_content">
 		<div class="contentWrapper">
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+    
+                    <h2 class="articleSubheadline">January 2018</h2>
+                    <ul class="bulletList">
+                        <li>The auto detection for the media add dialog was improved. It will now attempt to only load the parts of a video, that are required to parse the tags. Additionally if the server cannot reach a video, the client (browser) will make an attempt to load the video. This allows to analyze locally hosted videos without the need to upload them.</li>
+                        <li>In the raceboard the floating video box was improved, leading to a more solid resizing and moving behavior.</li>
+                        <li>In the raceboard, the adding of videos has now an additional fallback startDate, if no startOfRace could be determined, and the file did not contain a proper creationtime tag, startOfTracking is used.</li>
+                        <li>In the raceboard, the floating video box will now only display an edit button in the header, next to close and minimize. Upon clicking it, the box will expand and show the prior always shown editing buttons. This saves a lot of screenspace for logged in admin enabled users.
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">December 2017</h2>
+                    <ul class="bulletList">
+                        <li>In the raceboard it is now possible to upload 360&deg; videos in addition to the already supported video types. 
+                        360&deg; Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
+                        The dialog will try an auto-detection for the mimetype upon entering the link.
+                        Additionally, for mp4  videos it is now possible to use the start time, written in the file, as an start time preset for the mediatrack, simplifying the video linking.</li>
+                        <li> In Home it is now also possible to use 360&deg; videos, for example as an highlight video</li>
+                        <li>Various Fix importers can now properly report errors and other states</li>
+                        <li>Pairing list generation is now supported. Add competitors to a regatta, then use the new
+                            action icons in the Leaderboards/Leaderboards panel in the administration console to generate
+                            a pairing list. The result can be exported as a CSV file compatible with the TracTrac Excel
+                            spreadsheet for importing the pairing lists into their solution; printing is also enabled.
+                            For smart phone tracking it is possible to fill the pairing list into the race logs in order
+                            to record the competitor / boat assignments according to the pairing list. To allow for
+                            contiguous race numbering, in this context a new feature was introduced that allows users
+                            to pick a race name prefix during denoting all races of a regatta for smart phone tracking,
+                            producing contiguously increasing race names/numbers (R1, R2, ..., R45).</li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">November 2017</h2>
+                    <ul class="bulletList">
+                        <li>In addition to the "Set start time" dialog there's now a "Set finishing and end time dialog".
+                            This dialog makes it possible to set the finishing as well as the end time in the RaceLog.
+                            It is intended to be used in cases where a race wasn't correctly finished using the race management app.
+                        </li>
+                        <li>New GPS fix, wind and sensor data importers have been implemented: "Bravo" and "Expedition."
+                        </li>
+                        <li>An upgrade to TracAPI 3.8.0 is expected to have fixed the issue with static marks not providing
+                            a position fix within a race's tracking time interval when the tracking start is set after the
+                            static position was entered.
+                        </li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">September 2017</h2>
+                    <ul class="bulletList">
+                        <li>Authentication for Igtimi accounts is now possible with an OAuth process.
+                            Instead of having to enter the username/password combination into the
+                            administration console, a popup window will show an IFrame with Igtimi's
+                            authentication form. Redirection goes to www.sapsailing.com, together with
+                            a "state" URL parameter providing the base URL of the original server instance
+                            requesting authentication. www.sapsailing.com will then redirect to that server,
+                            removing the "state" parameter from the request and leaving only the "code"
+                            parameter in the URL which the server ultimately receiving the redirected request
+                            will use to obtain an access token and the Igtimi account details. For now, and
+                            as a fallback, the old, non-OAuth process is still supported for a while, though
+                            deprecated as of now.
+                        </li> 
+                        <li>In the process of supporting Igtimi OAuth authentication, new optional system properties for
+                            the Igtimi connector have been introduced:
+                            <ul>
+                              <li><tt>igtimi.client.redirect.protocol</tt>: the redirection protocol, usually one of http or https</li>
+                              <li><tt>igtimi.client.redirect.host</tt>: redirection host; defaults to www.sapsailing.com</li>
+                              <li><tt>igtimi.client.redirect.port</tt>: redirection port; defaults to empty, using the default port for the protocol</li>
+                            </ul>
+                        </li>
+                        <li>When using a TracTrac update URI, errors were possible due to the incorrect use of HTTP
+                            instead of HTTPS as the URI/URL's protocol. The TracTrac server responds to an HTTP
+                            request with a response code 302 (temporary redirect), but our TracTrac connector did
+                            not handle this due to redirects that change protocols are not followed by default in
+                            Java. This has now been changed, and although it is of course better to use the correct
+                            protocol (HTTPS) right away, redirects will now be handled correctly, too.
+                        </li>
+                    </ul>
 
-                    <h2 class="articleSubheadline">Febrbuary 2017</h2>
+                    <h2 class="articleSubheadline">August 2017</h2>
+                    <ul class="bulletList">
+                        <li>An NMEA wind import feature is now available under "Tracked Races -- Wind." It can be
+                            used to import .txt and .zip files containing data in NMEA-0183 format. The importer
+                            recognizes wind data provided by MWD and MDA sentences but can also use apparent and true
+                            wind readings from MWV sentences which are then combined with position, heading and motion data
+                            to obtain a true wind speed and direction. ZIP files are searched for .txt files which
+                            are then analyzed.
+                        </li>
+                        <li>A new scoring scheme "Low Point with Automatic RDG" is now available. It can help in league
+                            set-ups where one possible definition for the score of a redress given can be to average the
+                            scores of the competitor in all other flights scored, for past and coming races. This scoring
+                            scheme will apply as a default score for an RDG this average. As usual, as soon as an explicit
+                            score is provided for the race, the default calculation will no longer be applied.
+                        </li> 
+                    </ul>
+    
+                    <h2 class="articleSubheadline">July 2017</h2>
+                    <ul class="bulletList">
+                        <li>The sort order of Events/Leaderboards in event series in Home.html is now more consistent
+                            by using the declared sort order in the respective LeaderboardGroup. In addition, the flag
+                            "Display groups in reverse order" in the LeaderboardGroup dialog now affects all occurrences
+                            of Events/Leaderboards in event series in Home.html. If the flag is not set, the order is
+                            latest on top in vertical lists and latest right in horizontal lists. With this change,
+                            the operator is now fully responsible for the sort order.
+                        </li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">May 2017</h2>
+                    <ul class="bulletList">
+                        <li>The logic of the "Control tracking from start and finish times" check box now behaves slightly
+                            differently. As before, a default start of tracking time is derived from the race start time
+                            (currently five minutes before race start). Likewise, a default end of tracking time is derived
+                            from the race finish time (the time when the blue flag was lowered, or more technically,
+                            when a FINISHED race state was set in the race log) which is currently two minutes after
+                            the race has finished. However, previously, when deviating start of tracking or end of tracking times
+                            were set through other channels, such as received from TracTrac or set explicitly through
+                            the administration console, new events would have been written to the race log, fixing the
+                            start of tracking / end of tracking times according to the derivation rules.<p>
+                            This logic has caused undesired effects and has therefore been removed. For example, when
+                            an end of tracking time has been set explicitly through the administration console then
+                            it may have been overwritten by a new end-of-tracking-time event appended to the race log
+                            when the race is loaded again. Similarly, when a new start time was provided, an explicitly
+                            set start of tracking time would have been canceled. With the new behavior, explicit settings
+                            of start/end of tracking will remain untouched.<p>
+                            For "Smartphone Tracking" the check box therefore now mainly controls whether or not a start/end
+                            of tracking time is written to the race log when the user starts/stops tracking for the first time
+                            through the administration console: when the tracking times are to be controlled by the race's
+                            start and finish times, simply starting / stopping to track a race with the smartphone connector won't
+                            set the start / end of tracking times.<p>
+                            For the TracTrac connector, when the check box is set, as before messages will go out to TracTrac
+                            when the race start / finish times have changed. The feedback from TracTrac will adjust the
+                            tracking times as received by the connector, but no race log entries for the tracking times
+                            will be created anymore.</li>
+                        <li>A new type of leaderboard has been introduced: a regatta leaderboard with competitor elimination.
+                            Such a leaderboard creates a view onto a regular regatta leaderboard and allows the user to
+                            eliminate a subset of the competitors from its display. The scores of all remaining competitors
+                            are taken from the original regatta leaderboard without modification, including all
+                            corrections, penalties and the discarding rule, including the live ranks. This means,
+                            in particular, that the ranks shown for a race in such a leaderboard are not contiguous in
+                            case there are eliminated competitors. The score sum for each competitor is computed as usual.
+                            For the regatta rank, a contiguous count is applied. This way it is possible to create
+                            a new ranking for only a subset of the competitors; a practice common for championships
+                            that want to publish a separate youth leaderboard, e.g., for all competitors under a
+                            certain age.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                        <li><code>/gwt/AutoPlay.html</code> can be fully parameterized. Previously, only few of the
+                            available settings for Leaderboard and RaceBoard embedded into this view were effectively passed via URL
+                            to the views. <code>/gwt/AutoPlay.html</code> is now based on the settings framework so that specific
+                            URL parameters may have changed. Please recreate your bookmarks if you are affected by non-working parameters.
+                        </li>
+                        <li>The leaderboard configuration dialog in the admin console has been updated. Now it is possible to configure
+                        a leaderboard with the whole range of settings it supports.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Marks can now be given any valid CSS color. This will be considered also in the
+                    	    SAP Race Management app where the mark will be shown in their actual color in
+                    	    the "By Marks" course editor.
+                    	</li>
+                    	<li>Polar diagrams (also known as VPPs) will now be updated after importing wind.
+                    	</li>
+                    	<li>Competitors that the TracTrac connector declares as "non-competing" are consistently
+                    	    ignored. This may include camera boats, jury boats and other moving objects that do
+                    	    not represent competitor boats.
+                    	</li>
+                    	<li>Upgraded to TracAPI 3.6.3 which offers improvements regarding the identification of
+                    	    marks and waypoints.
+                    	</li>
+                    	<li>A bug regarding the regatta filter setting for the tracked races list has been fixed.
+                    	    The filter setting now survives a refresh cycle of the tracked races list.
+                    	</li>
+                    	<li>When using the TracTrac connector, identification of marks has slightly changed for
+                    	    gates and lines. Before, the mark IDs were constructed based on the control point's
+                    	    name. Now, the control point's ID plus a numeric suffic (1/2) is used instead,
+                    	    providing uniqueness at the same scope that TracTrac provides uniqueness regarding
+                    	    their control point IDs. 
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">March 2017</h2>
+                    <ul class="bulletList">
+                    	<li>A more compact internal storage format for GPS and Wind fixes is now being used. Instead of a full
+                    	    64-bit "double" value for all components such at latitude, longitude, speed over ground or course over
+                    	    ground, "smaller" data types such as "int" and "short" are now employed. The reduction of accuracy
+                    	    that this brings about is negligible given the accuracy of the tracking systems used. For example,
+                    	    the latitude values are encoded such that while covering the full range from -90Â° to +90Â°, the
+                    	    resolution is at 4.6mm. Similarly, speeds are represented in their compact form in such a way
+                    	    that speeds up to 500kts can be represented at a resolution of 0.015kts.
+                    	</li>
+                    	<li>When a race cannot be loaded successfully through the TracTrac connector, e.g., because its boat
+                    	    class does not match the regatta's boat class, the tracker is now stopped, and a SEVERE log message
+                    	    is written, giving the reason for the failure to load the race. This gives administrators an opportunity
+                    	    to correct any errors in the underlying data and try again. Previously, tracking such a 
+                    	    was not possible without a server re-start because the tracker continued to exist.
+                    	</li>
+                    	<li>The application's locale now switches based on the client's "Accept-Language" HTTP header field.
+                    	    This means that the application as well as all its parts, including the administration console,
+                    	    will show in the user's default language if supported, defaulting to English otherwise.
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">February 2017</h2>
                     <ul class="bulletList">
                     	<li>Wind data in GRIB format can now be imported in the "Wind" sub-tab of the "Tracked Races" tab
                     	    in the <tt>AdminConsole</tt>. When one or more races are being tracked, with a tracking time

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
+import java.util.ConcurrentModificationException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -8,10 +9,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 
 public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
@@ -21,9 +22,13 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
     /**
      * {@link MongoSensorFixStoreImpl} had broken synchronization of the listeners collection (add/removeListener
      * methods were synchronized but notifyListeners was not synchronized).
+     * <br>
+     * Changed the implementation in the context of bug 4162. Because the listeners aren't notified anymore while
+     * holding the lock, the formerly expected {@link TimoutRuntimeException} does not occur anymore. But with the given setup,
+     * we can ensure, that adding a listener does not cause a {@link ConcurrentModificationException}.
      */
-    @Test(expected = TimoutRuntimeException.class)
-    public void lockingOfGPSFixStoreListenersIsWorkingCorrectly() throws InterruptedException {
+    @Test
+    public void addingAListenerWhileNotifyingListenersDoesNotCauseConcurrentModificationExceptionOrDeadlock() throws InterruptedException {
         CyclicBarrier barrier = new CyclicBarrier(2);
         // We need 3 listener instances to guarantee that the iterator isn't finished
         // when adding another listener in the thread below.

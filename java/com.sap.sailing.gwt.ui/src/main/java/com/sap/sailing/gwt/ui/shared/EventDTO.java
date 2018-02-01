@@ -5,9 +5,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+
 public class EventDTO extends EventBaseDTO {
     private static final long serialVersionUID = -7100030301376959817L;
-    public List<RegattaDTO> regattas;
 
     private Date currentServerTime;
 
@@ -31,7 +32,6 @@ public class EventDTO extends EventBaseDTO {
         super(name, leaderboardGroups);
         this.leaderboardGroups = leaderboardGroups;
         initCurrentServerTime();
-        regattas = new ArrayList<RegattaDTO>();
     }
 
     public boolean isFakeSeries() {
@@ -68,6 +68,17 @@ public class EventDTO extends EventBaseDTO {
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
         }
         return updatedEventLeaderboardGroupIds;
+    }
+    
+    public AbstractLeaderboardDTO getLeaderboardByName(String leaderboardName) {
+        for (LeaderboardGroupDTO leaderboardGroup : this.getLeaderboardGroups()) {
+            for (StrippedLeaderboardDTO leaderboardDTO : leaderboardGroup.getLeaderboards()) {
+                if(leaderboardName.equals(leaderboardDTO.name)) {
+                    return leaderboardDTO;
+                }
+            }
+        }
+        return null;
     }
 
 }

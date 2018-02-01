@@ -25,6 +25,8 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -61,6 +63,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
@@ -85,6 +88,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.UpdateEliminatedCompetitorsInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
@@ -405,20 +409,44 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 regattaStartDate, regattaEndDate, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
         final String regattaName = regattaProxy.getName();
         Regatta regatta = res.createRegatta(regattaName, regattaProxy.getBoatClass().getName(), regattaStartDate, regattaEndDate,
-                "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                /* defaultCourseAreaId */ null, /*buoyZoneRadiusInHullLengths*/ 2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+        Competitor competitor1 = AbstractLeaderboardTest.createCompetitor("Humba1");
+        Competitor competitor2 = AbstractLeaderboardTest.createCompetitor("Humba2");
+        res.getCompetitorStore().addNewCompetitors(Arrays.asList(competitor1, competitor2));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2));
+        assertTrue(Util.contains(regatta.getAllCompetitors(), competitor1));
+        assertTrue(Util.contains(regatta.getAllCompetitors(), competitor2));
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
-        res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), null, new int[] { 3, 5 });
+        RegattaLeaderboard fullLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), null, new int[] { 3, 5 });
+        // use the set-up and add a regatta leaderboard with eliminations that wraps the regatta leaderboard
+        RegattaLeaderboardWithEliminations withEliminations = res.addRegattaLeaderboardWithEliminations("U16", /* leaderboardDisplayName */ "Display Name", fullLeaderboard);
+        res.apply(new UpdateEliminatedCompetitorsInLeaderboard(withEliminations.getName(), Collections.singleton(competitor1)));
+
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertNotNull(loadedRegatta);
         assertEquals(regatta.getName(), loadedRegatta.getName());
         assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));
         
-        Leaderboard loadedLeaderboard = dof.loadLeaderboard(regatta.getName(), res);
+        Leaderboard loadedLeaderboard = dof.loadLeaderboard(regatta.getName(), res, /* leaderboardRegistry */ null);
         assertNotNull(loadedLeaderboard);
         assertTrue(loadedLeaderboard instanceof RegattaLeaderboard);
         RegattaLeaderboard loadedRegattaLeaderboard = (RegattaLeaderboard) loadedLeaderboard;
         assertSame(regatta, loadedRegattaLeaderboard.getRegatta());
+        
+        RacingEventService res2 = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
+        // now load the thing again from the store:
+        Leaderboard loadedLeaderboardWithEliminations = res2.getLeaderboardByName(withEliminations.getName());
+        assertTrue(withEliminations != loadedLeaderboardWithEliminations);
+        assertTrue(loadedLeaderboardWithEliminations instanceof RegattaLeaderboardWithEliminations);
+        assertEquals("Display Name", loadedLeaderboardWithEliminations.getDisplayName());
+        assertEquals(withEliminations.getAllCompetitors(), loadedLeaderboardWithEliminations.getAllCompetitors());
+        assertTrue(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitor1));
+        assertFalse(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitor2));
     }
     
     @Test

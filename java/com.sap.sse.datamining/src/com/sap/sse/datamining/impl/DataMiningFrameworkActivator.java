@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -72,7 +73,8 @@ public class DataMiningFrameworkActivator implements BundleActivator {
                                                                                dataRetrieverChainDefinitionRegistry,
                                                                                aggregationProcessorDefinitionRegistry,
                                                                                queryDefinitionRegistry);
-        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, this.getClass().getClassLoader()));
+        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
+                this.getClass().getClassLoader(), StandardCharsets.UTF_8.name()));
         for (AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition : getDefaultAggregationProcessors()) {
             dataMiningServer.registerAggregationProcessor(aggregationProcessorDefinition);
         }

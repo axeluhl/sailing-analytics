@@ -6,9 +6,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public interface LeaderboardDelegate<T extends Widget> {
+public interface LeaderboardDelegate {
 
-    void setLeaderboardPanel(T leaderboardPanel);
+    void setLeaderboardPanel(Widget leaderboardPanel);
 
     void setBusyState(boolean isBusy);
 

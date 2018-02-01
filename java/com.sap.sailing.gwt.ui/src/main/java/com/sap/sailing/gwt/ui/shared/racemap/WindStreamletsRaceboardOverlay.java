@@ -144,7 +144,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         context2d.closePath();
         context2d.stroke();
         context2d.setFillStyle("white");
-        String label = "Wind Speed in Knots";
+        String label = stringMessages.windSpeedInKnots();
         TextMetrics txtmet;
         txtmet = context2d.measureText(label);
         context2d.fillText(label, x + (w*maxIdx - txtmet.getWidth())/2.0, y - 5.0);

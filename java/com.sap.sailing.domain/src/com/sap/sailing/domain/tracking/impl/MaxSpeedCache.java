@@ -294,7 +294,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     } else {
                         speedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
                     }
-                    if (speedAtFixTime != null && speedAtFixTime.compareTo(max) > 0) {
+                    // accept max speeds only if they don't exceed our validity threshold
+                    if (speedAtFixTime != null && speedAtFixTime.compareTo(GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING) < 0
+                            && speedAtFixTime.compareTo(max) > 0) {
                         max = speedAtFixTime;
                         maxSpeedFix = fix;
                     }

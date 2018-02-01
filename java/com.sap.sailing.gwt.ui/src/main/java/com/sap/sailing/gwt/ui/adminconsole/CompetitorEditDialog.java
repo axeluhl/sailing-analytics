@@ -173,7 +173,11 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         public String getAsHtml() {
             return stringMessages.invalidColor(exception.getMessage());
         }
-        
+
+        @Override
+        public Color invert() {
+            return null;
+        }
     }
 
     @Override

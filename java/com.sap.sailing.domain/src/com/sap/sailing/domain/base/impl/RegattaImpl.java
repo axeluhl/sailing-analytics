@@ -31,8 +31,6 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnaly
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -73,6 +71,7 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.NamedImpl;
 
@@ -257,6 +256,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 }
                 return null;
             }
+
+            @Override
+            public void setFleetsCanRunInParallelToTrue() {
+                RegattaImpl.this.setFleetsCanRunInParallelToTrue();
+            }
         };
         this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(raceColumnListeners));
         this.raceExecutionOrderCache = new RaceExecutionOrderCache();
@@ -417,18 +421,32 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<Competitor>();
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         if (competitorsProvider == null) {
             competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
-        Util.addAll(competitorsProvider.getAllCompetitors(), result);
-        for (RaceDefinition race : getAllRaces()) {
-            for (Competitor c : race.getCompetitors()) {
-                result.add(c);
+        final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsWithRaceDefinitionsConsidered = competitorsProvider.getAllCompetitorsWithRaceDefinitionsConsidered();
+        Set<Competitor> newResult = null;
+        Set<RaceDefinition> newRaceDefinitions = null;
+        final Iterable<RaceDefinition> racesConsideredSoFar = allCompetitorsWithRaceDefinitionsConsidered.getA();
+        for (final RaceDefinition race : getAllRaces()) {
+            if (!Util.contains(racesConsideredSoFar, race)) {
+                if (newResult == null) {
+                    newRaceDefinitions = new HashSet<>();
+                    Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getA(), newRaceDefinitions);
+                    newResult = new HashSet<>();
+                    Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getB(), newResult);
+                }
+                Util.addAll(race.getCompetitors(), newResult);
+                newRaceDefinitions.add(race);
             }
         }
-        return result;
+        return newResult == null ? allCompetitorsWithRaceDefinitionsConsidered : new Pair<>(newRaceDefinitions, newResult);
+    }
+
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
 
     @Override
@@ -506,6 +524,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         raceColumnListeners.notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        raceColumnListeners.notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
     }
 
     @Override
@@ -720,19 +743,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
     }
 
-    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
-        CourseArea defaultCourseArea = getDefaultCourseArea();
-        for (Event event : eventFetcher.getAllEvents()) {
-            event.removeRegatta(this);
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseArea != null && courseArea.getId().equals(defaultCourseArea.getId())) {
-                    event.addRegatta(this);
-                }
-            }
-        }
-
-    }
-
     @Override
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
         return raceExecutionOrderCache;
@@ -850,4 +860,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForRegatta);
         deregisterer.deregister(deregisterer.analyze());
     }
+
+    @Override
+    public void setFleetsCanRunInParallelToTrue() {
+        for (Series series : this.series) {
+            series.setIsFleetsCanRunInParallel(true);
+        }
+    }
+
 }

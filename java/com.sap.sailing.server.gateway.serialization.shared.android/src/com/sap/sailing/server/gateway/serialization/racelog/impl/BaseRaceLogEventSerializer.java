@@ -38,7 +38,9 @@ public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceL
 
         JSONArray competitors = new JSONArray();
         for (Competitor competitor : object.getInvolvedBoats()) {
-            competitors.add(competitorSerializer.serialize(competitor));
+            if (competitor != null) {
+                competitors.add(competitorSerializer.serialize(competitor));
+            }
         }
         result.put(FIELD_COMPETITORS, competitors);
         if (object.getAuthor() != null) {

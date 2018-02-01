@@ -7,7 +7,7 @@
     </declare-styleable>
 
     <declare-styleable name="PanelButton">
-        <attr name="buttonHeader" format="reference|string" />
+        <attr name="buttonCaption" format="reference|string" />
 
         <attr name="buttonType" format="enum">
             <enum name="typeValue" value="0" />
@@ -17,6 +17,7 @@
         </attr>
 
         <attr name="buttonImage" format="reference" />
+        <attr name="buttonAdditionalImage" format="reference" />
         <attr name="buttonValue" format="reference|string" />
         <attr name="buttonSwitch" format="reference|string" />
 
@@ -26,6 +27,13 @@
             <enum name="bottom" value="1" />
             <enum name="right" value="2" />
         </attr>
+
+        <attr name="captionPosition" format="enum">
+            <enum name="top" value="0" />
+            <enum name="bottom" value="1" />
+        </attr>
+
+        <attr name="imageSize" format="reference|dimension" />
 
         <attr name="showLock" format="boolean" />
     </declare-styleable>

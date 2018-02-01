@@ -22,6 +22,11 @@ public class TestI18N {
     private static final String SIMPLE_TEST_MESSAGE_KEY = "SimpleTestMessage";
     private static final String DEFAULT_TEST_MESSAGE_KEY = "DefaultTestMessage";
     private static final String TEST_MESSAGE_WITH_PARAMETERS = "TestMessageWithParameters";
+    private static final String TEST_MESSAGE_WITH_SINGLE_QUOTE = "MessageWithSingleQuote";
+    private static final String TEST_MESSAGE_WITH_OPENING_CURLY_BRACE = "MessageWithOpeningCurlyBrace";
+    private static final String TEST_MESSAGE_WITH_ESCAPED_PARAMETERS = "MessageWithEscapedParameters";
+    private static final String TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES = "MessageWithEscapedSingleQuotesAndParameters";
+    private static final String TEST_MESSAGE_WITH_MULTIPLE_OUT_OF_ORDER_PARAMS = "MessageWithMultipleParameterOccurrencesOutOfOrder";
     
     private ResourceBundleStringMessages testStringMessages;
     
@@ -30,6 +35,36 @@ public class TestI18N {
         testStringMessages = TestsUtil.getTestStringMessages();
     }
 
+    @Test
+    public void testMultipleOutOfOrderParams() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_MULTIPLE_OUT_OF_ORDER_PARAMS, "First", "Second", "Third"), is("Third Third First Second First"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_MULTIPLE_OUT_OF_ORDER_PARAMS, "First", "Second", "Third"), is("Third Third First Second First"));
+    }
+    
+    @Test
+    public void testEscapedSingleQuotesWithParameters() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES, "First", "Second"), is("'First' ' 'Second'"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES, "First", "Second"), is("'First' ' 'Second'"));
+    }
+    
+    @Test
+    public void testSingleQuoteInString() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_SINGLE_QUOTE), is("A Single ' Quote"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_SINGLE_QUOTE), is("Ein einfaches ' Anführungszeichen"));
+    }
+    
+    @Test
+    public void testCurlyBracesInString() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_OPENING_CURLY_BRACE), is("An opening { curly brace"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_OPENING_CURLY_BRACE), is("Eine öffnende { geschweifte Klammer"));
+    }
+    
+    @Test
+    public void testEscapedParametersInString() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_ESCAPED_PARAMETERS), is("{0} {1} {2}"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_ESCAPED_PARAMETERS), is("{0} {1} {2}"));
+    }
+    
     @Test
     public void testGettingASimpleMessage() {
         assertThat(testStringMessages.get(DEFAULT_LOCALE, SIMPLE_TEST_MESSAGE_KEY), is("English"));

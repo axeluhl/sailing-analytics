@@ -4,6 +4,10 @@
   border-radius: 0.333333333333333em;
   overflow: hidden;
 }
+.box_embedded {
+  border: none;
+  border-top: 1px solid #dedede;
+}
 .box_header {
   color: #333;
   font-size: 1.2em;
@@ -65,4 +69,9 @@ img.statisticsbox_item_icon {
   padding: 0.2em;
   border: 1px solid #dedede;
   border-radius: 0.333333333333333em;
+  display: inline-block;
+  max-width: 35%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

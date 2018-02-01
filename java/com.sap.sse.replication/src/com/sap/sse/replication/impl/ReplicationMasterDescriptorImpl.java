@@ -225,12 +225,15 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public synchronized void stopConnection() {
+    public synchronized void stopConnection(boolean deleteExchange) {
         try {
             if (consumer != null) {
                 // make sure to remove queue in order to avoid any exchanges filling it with messages
                 consumer.getChannel().queueUnbind(queueName, exchangeName, "");
                 consumer.getChannel().queueDelete(queueName);
+                if (deleteExchange) {
+                    consumer.getChannel().exchangeDelete(exchangeName);
+                }
                 consumer.getChannel().getConnection().close(/* timeout in millis */ 1000);
             }
         } catch (Exception ex) {
@@ -239,7 +242,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
             logger.log(Level.SEVERE, "Exception while closing replication channel consumer", ex);
         }
     }
-
+    
     /**
      * @return 0 means use default port
      */

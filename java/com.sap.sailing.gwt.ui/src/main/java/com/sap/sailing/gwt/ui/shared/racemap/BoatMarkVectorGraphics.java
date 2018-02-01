@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.Color;
 
 public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
 
@@ -24,7 +25,7 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
     private final static double BOAT_MARK_SELECTION_TRANSLATE_Y = -130;
     private final String markIdAsString;
 
-    public BoatMarkVectorGraphics(MarkType type, String color, String shape, String pattern, String markIdAsString) {
+    public BoatMarkVectorGraphics(MarkType type, Color color, String shape, String pattern, String markIdAsString) {
         super(type, color, shape, pattern);
         this.anchorPointX = BOAT_MARK_HEIGHT_IN_METERS.getMeters() / 2;
         this.anchorPointY = BOAT_MARK_WIDTH_IN_METERS.getMeters() / 2;
@@ -47,52 +48,37 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
         ctx.setLineCap("butt");
         ctx.setLineJoin("miter");
         ctx.setMiterLimit(3.0);
-        ctx.moveTo(33, 30.36);
-        ctx.quadraticCurveTo(103.47, 18.96, 194.65, 18.55);
-        ctx.quadraticCurveTo(285.83, 18.13, 370.62, 34.74);
-        ctx.quadraticCurveTo(455.42, 51.34, 520.29, 87.99);
-        ctx.quadraticCurveTo(585.16, 124.64, 603, 187.36);
-        ctx.quadraticCurveTo(584.67, 244.84, 520.84, 277.54);
-        ctx.quadraticCurveTo(457, 310.24, 372.97, 324.79);
-        ctx.quadraticCurveTo(288.94, 339.34, 197.37, 339.08);
-        ctx.quadraticCurveTo(105.8, 338.81, 32, 330.36);
-        ctx.lineTo(33, 30.362205);
+        ctx.moveTo(35, 150 + 35);
+        ctx.lineTo(35, 35);
+        ctx.quadraticCurveTo(100, 20, 200, 20);
+        ctx.quadraticCurveTo(285, 20, 370, 35);
+        ctx.quadraticCurveTo(455, 50, 520, 90);
+        ctx.quadraticCurveTo(585, 127, 600, 150 + 35);
+        ctx.quadraticCurveTo(585, 300 + 35 - 92, 520, 300 + 35 - 55);
+        ctx.quadraticCurveTo(455, 300 + 35 - 15, 370, 300 + 35);
+        ctx.quadraticCurveTo(285, 300 + 35 + 15, 200, 300 + 35 + 15);
+        ctx.quadraticCurveTo(100, 300 + 35 + 15, 35, 300 + 35);
+        ctx.lineTo(35, 150 + 35);
         ctx.fill();
         ctx.stroke();
 
         ctx.setFillStyle("#FFFFFF");
         ctx.beginPath();
-        ctx.beginPath();
         ctx.setLineWidth(1.0);
         ctx.setLineJoin("miter");
         ctx.setMiterLimit(4.0);
-        ctx.moveTo(81, 78);
-        ctx.lineTo(349, 78);
-        ctx.lineTo(349, 291);
-        ctx.lineTo(81, 291);
-        ctx.lineTo(81, 78);
+        ctx.moveTo(35 + 40, 35 + 40);
+        ctx.lineTo(350, 35 + 40);
+        ctx.lineTo(350, 335 - 40);
+        ctx.lineTo(35 + 40, 335 - 40);
+        ctx.lineTo(35 + 40, 35 + 40);
         ctx.fill();
         ctx.stroke();
 
         ctx.setFillStyle("#000000");
         ctx.beginPath();
         ctx.moveTo(337, 186.36);
-        ctx.quadraticCurveTo(337, 180.56, 334.76, 175.46);
-        ctx.quadraticCurveTo(332.52, 170.36, 328.65, 166.56);
-        ctx.quadraticCurveTo(324.78, 162.76, 319.59, 160.56);
-        ctx.quadraticCurveTo(314.4, 158.36, 308.5, 158.36);
-        ctx.quadraticCurveTo(302.6, 158.36, 297.41, 160.56);
-        ctx.quadraticCurveTo(292.22, 162.76, 288.35, 166.56);
-        ctx.quadraticCurveTo(284.48, 170.36, 282.24, 175.46);
-        ctx.quadraticCurveTo(280, 180.56, 280, 186.36);
-        ctx.quadraticCurveTo(280, 192.16, 282.24, 197.26);
-        ctx.quadraticCurveTo(284.48, 202.36, 288.35, 206.16);
-        ctx.quadraticCurveTo(292.22, 209.96, 297.41, 212.16);
-        ctx.quadraticCurveTo(302.6, 214.36, 308.5, 214.36);
-        ctx.quadraticCurveTo(314.4, 214.36, 319.59, 212.16);
-        ctx.quadraticCurveTo(324.78, 209.96, 328.65, 206.16);
-        ctx.quadraticCurveTo(332.52, 202.36, 334.76, 197.26);
-        ctx.quadraticCurveTo(337, 192.16, 337, 186.36);
+        ctx.arc(300, 150 + 35, 35, 0, 2 * Math.PI);
         ctx.stroke();
         ctx.fill();
         ctx.beginPath();

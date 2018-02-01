@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -131,7 +132,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
             ReplicableImpl master, ReplicableImpl replica) throws Exception {
         logger.info("basicSetUp for test class "+getClass().getName());
         persistenceSetUp(dropDB);
-        String exchangeName = "test-sapsailinganalytics-exchange";
+        String exchangeName = "test-sapsailinganalytics-exchange-"+new Random().nextInt();
         String exchangeHost = "localhost";
         if (System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST) != null) {
             exchangeHost = System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST);
@@ -188,7 +189,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
         if (masterDescriptor != null) {
             logger.info("before stopConnection...");
-            masterDescriptor.stopConnection();
+            masterDescriptor.stopConnection(/* deleteExchange */ true);
         }
         try {
             if (initialLoadTestServerThread != null) {
@@ -290,7 +291,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                 final String uuid = UUID.randomUUID().toString();
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 masterReplicationService.registerReplica(replicaDescriptor);
-                                pw.print(uuid.getBytes());
+                                pw.print(uuid);
                             } else if (request.contains("INITIAL_LOAD")) {
                                 Channel channel = masterReplicationService.createMasterChannel();
                                 RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,

@@ -48,13 +48,12 @@ public interface TracTracAdapter {
      * @param timeoutInMilliseconds
      *            if the race definition is not received for the race within this time, the race tracker for that race
      *            is stopped; use -1 to wait forever
-     * @param trackWind TODO
-     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis)
+                    throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are

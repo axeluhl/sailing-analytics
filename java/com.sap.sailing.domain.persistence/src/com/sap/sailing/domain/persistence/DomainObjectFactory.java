@@ -1,17 +1,18 @@
 package com.sap.sailing.domain.persistence;
 
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -24,18 +25,16 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
-import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -57,9 +56,7 @@ public interface DomainObjectFactory {
      * @return the leaderboard loaded, if successful, or <code>null</code> if the leaderboard couldn't be loaded,
      * e.g., because the regatta for a regatta leaderboard couldn't be found
      */
-    Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry);
-
-    Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
+    Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
     
@@ -146,13 +143,37 @@ public interface DomainObjectFactory {
     Map<String, Set<URL>> loadResultUrls();
     
     /**
+     * Returned by {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer)}.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    static interface ConnectivityParametersLoadingResult {
+        /**
+         * @return the number of parameter sets that were loaded from the persistent store; each of these parameter sets
+         *         describes for one race how it is to be loaded / tracked.
+         */
+        int getNumberOfParametersToLoad();
+        
+        /**
+         * For each set of parameters obtained from the persistent store,
+         * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer)} invokes a callback. This
+         * method will return only after all these callbacks have been issued for all parameters loaded from the
+         * persistent store.
+         * <p>
+         * 
+         * Note that a callback implementation may itself trigger background actions. This method does not know about
+         * those background actions and hence may return before those background actions have completed.
+         */
+        void waitForCompletionOfCallbacksForAllParameters() throws InterruptedException, ExecutionException;
+    }
+    
+    /**
      * Loads all {@link RaceTrackingConnectivityParameters} objects from the database telling how to re-load those races
      * that were {@link MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
-     * marked as to be restored} before the server got re-started. Callers that would like to use the result to
-     * re-connect to those races should take care not to flood servers with requests. Instead, ideally, callers would
-     * monitor the loading {@link TrackedRace#getStatus() status} or the resulting {@link TrackedRace}s (see
-     * {@link RaceTracker#getRaceHandle()}, {@link RaceHandle#getRace(long)}, {@link RaceHandle#getTrackedRegatta()} and
-     * {@link TrackedRegatta#getTrackedRace(RaceDefinition)}.
+     * marked as to be restored} before the server got re-started. Callers pass a {@code callback} that is invoked for
+     * each parameters object retrieved from the persistent store. The call returns immediately; loading the parameters
+     * happens in a background thread.
      * 
      * @param callback
      *            invoked for each connectivity params object successfully resolved; this pattern is preferred over a
@@ -171,6 +192,14 @@ public interface DomainObjectFactory {
      * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      * @see MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
-    int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback)
-            throws MalformedURLException, URISyntaxException;
+    ConnectivityParametersLoadingResult loadConnectivityParametersForRacesToRestore(
+            Consumer<RaceTrackingConnectivityParameters> callback);
+
+    RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(DBObject dbLeaderboard,
+            String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry);
+
+    /**
+     * Loads all stored anniversary races.
+     */
+    Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
 }

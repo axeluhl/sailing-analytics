@@ -4,39 +4,6 @@
 		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials"
 		xmlns:e="urn:import:com.sap.sailing.gwt.home.desktop.places.event.multiregatta">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:style>
-		.header {
-			position: relative;
-			width: 100%;
-			margin: 0;
-			padding: 0;
-		}
-		.mainHeader {
-			width: 66.6666666666667%;
-		}
-		.sharingHeader {
-			width: 33.3333333333333%;
-			float: right;
-			padding: 0 1rem;
-			position:
-			relative;
-			padding: 1.333333333333333em 0;
-			text-align: right;
-			background-color: maroon;
-			height: 2rem;
-		}
-		.breadcrumb, .intro {
-			box-sizing: border-box;
-			-moz-box-sizing: border-box;
-		}
-		.breadcrumb {
-			font-size: 0.866666666666667em;
-			font-weight: 600;
-		}
-		.intro {
-			height: 5em;
-		}
-	</ui:style>
 	<g:HTMLPanel>
 		<c:TabPanel ui:field="tabPanelUi">
 			<c:header>

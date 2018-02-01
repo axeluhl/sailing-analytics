@@ -22,7 +22,6 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
     private final String raceName;
     private final String fleetName;
     private final String sailNumber;
-    private final String name;
     private final CountryCode countryCode;
     private final List<PersonDTO> persons;
     private final Double timeOnTimeFactor;
@@ -39,7 +38,6 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
         this.raceName = raceName;
         this.fleetName = fleetName;
         this.sailNumber = sailNumber;
-        this.name = name;
         this.teamName = teamName;
         this.countryCode = countryCode;
         this.persons = new ArrayList<>();
@@ -72,10 +70,6 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
         return sailNumber;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public CountryCode getCountryCode() {
         return countryCode;
     }
@@ -104,7 +98,8 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
     public String toString() {
         return "CompetitorDescriptor [eventName=" + eventName + ", regattaName=" + regattaName + ", boatClassName="
                 + boatClassName + ", boatName=" + boatName + ", teamName=" + teamName + ", raceName=" + raceName
-                + ", fleetName=" + fleetName + ", sailNumber=" + sailNumber + ", name=" + name + ", countryCode="
+                + ", fleetName=" + fleetName + ", sailNumber=" + sailNumber + ", name=" + super.getName()
+                + ", countryCode="
                 + countryCode + ", persons=" + persons + ", timeOnTimeFactor=" + timeOnTimeFactor
                 + ", timeOnDistanceAllowancePerNauticalMile=" + timeOnDistanceAllowancePerNauticalMile + "]";
     }

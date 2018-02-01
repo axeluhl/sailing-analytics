@@ -22,7 +22,7 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
@@ -34,6 +34,18 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
+/**
+ * A filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
+ * order to set an initial set of competitors to display by this table, use {@link #refreshCompetitorList(Iterable)}.
+ * The selected competitors can be obtained from the {@link #getSelectionModel() selection model}. The competitor
+ * set can also be updated to that of a leaderboard by using {@link #refreshCompetitorList(String)}, providing the
+ * leaderboard name as parameter. The competitors currently in the table (regardless of the current filter settings)
+ * are returned by {@link #getAllCompetitors()}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <S>
+ */
 public class CompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     
@@ -95,9 +107,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 } else {
                     final ImageResource flagImageResource;
                     if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                        flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                        flagImageResource = FlagImageResolverImpl.get().getEmptyFlagImageResource();
                     } else {
-                        flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                        flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                     }
                     if (flagImageResource != null) {
                         sb.append(renderer.render(flagImageResource));
@@ -285,43 +297,28 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      */
     public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
             Throwable> callback) {
+        final AsyncCallback<Iterable<CompetitorDTO>> myCallback = new AsyncCallback<Iterable<CompetitorDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
+                if (callback != null) {
+                    callback.onFailure(caught);
+                }
+            }
+
+            @Override
+            public void onSuccess(Iterable<CompetitorDTO> result) {
+                getFilteredCompetitors(result);
+                refreshCompetitorList(result);
+                if (callback != null) {
+                    callback.onSuccess(result);
+                }
+            }
+        };
         if (leaderboardName != null) {
-            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
-                }
-
-                @Override
-                public void onSuccess(Iterable<CompetitorDTO> result) {
-                    refreshCompetitorList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-            });
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
-            sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
-                }
-
-                @Override
-                public void onSuccess(Iterable<CompetitorDTO> result) {
-                    getFilteredCompetitors(result);
-                    refreshCompetitorList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-            });
+            sailingService.getCompetitors(myCallback);
         }
     }
 

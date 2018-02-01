@@ -22,8 +22,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMap
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -133,7 +133,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         });
     }
     
-    protected void updateMappings() {
+    private void updateMappings() {
         try {
             updateMappingsInternal();
         } catch (Exception e) {
@@ -181,12 +181,12 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     private Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> calculateCoveredTimeRanges(
             final List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForItem) {
         final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = new HashMap<>();
-        if(mappingsForItem != null) {
+        if (mappingsForItem != null) {
             Map<Pair<DeviceIdentifier, Class<?>>, Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> groupedMappings = groupMappingsByDeviceIdAndMappingType(mappingsForItem);
             groupedMappings.entrySet().forEach(entry -> {
                 Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDeviceIdAndMappingType = entry.getValue();
                 final MultiTimeRange coveredTimeRange = getCoveredTimeRange(mappingsForDeviceIdAndMappingType);
-                if(!coveredTimeRange.isEmpty()) {
+                if (!coveredTimeRange.isEmpty()) {
                     coveredTimeRanges.put(Util.get(mappingsForDeviceIdAndMappingType, 0).getRegattaLogEvent(), coveredTimeRange);
                 }
             });

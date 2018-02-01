@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -186,16 +185,27 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * Potentially, you can create 8 threads per TTCM (connecting only with one single race)."
      */
     static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 1000;
+
+    private static final long TIMEOUT_FOR_RACE_TO_APPEAR_FOR_STOPPING_TRACKING_IN_MILLIS = Duration.ONE_MINUTE.times(5).asMillis();
     
     private final IEvent tractracEvent;
     private final IRace tractracRace;
     private final com.sap.sailing.domain.base.Regatta regatta;
     private final IEventSubscriber eventSubscriber;
     private final IRaceSubscriber raceSubscriber;
+    private final IRacesListener racesListener;
+    private final ICompetitorsListener competitorsListener;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
-    private RaceDefinition race;
+    /**
+     * Needs to be {@code volatile} because one thread (e.g., the {@link RaceCourseReceiver}) writes it, another thread
+     * such as the callback set up by the {@link #stopped(Object)} method and executed by the last {@link Receiver}
+     * emptying its queue, leading to a call to
+     * {@link AbstractLoadingQueueDoneCallBack#executeWhenAllReceiversAreDoneLoading()} will read it. We need
+     * to ensure that the reading threads always read what other writers wrote.
+     */
+    private volatile RaceDefinition race;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
     private Map<Object, Util.Pair<Integer, Float>> lastProgressPerID;
@@ -252,7 +262,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, connectivityParams, timeoutInMilliseconds);
     }
@@ -274,7 +284,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     TracTracRaceTrackerImpl(final Regatta regatta, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
         final URI liveURI = connectivityParams.getLiveURI();
@@ -322,13 +332,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // Initialize data controller using live and stored data sources
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
         eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectifeStoredURI);
-        eventSubscriber.subscribeCompetitors(new ICompetitorsListener() {
+        competitorsListener = new ICompetitorsListener() {
             @Override
             public void updateCompetitor(ICompetitor competitor) {
-                final Competitor domainCompetitor = TracTracRaceTrackerImpl.this.domainFactory.getOrCreateCompetitor(competitor);
-                logger.info("Competitor "+competitor+" was updated on TracTrac side. Maybe consider updating in competitor store as well. "+
-                            "TracTrac competitor maps to "+domainCompetitor.getName()+" with sail ID "+domainCompetitor.getBoat().getSailID()+
-                            " and boat class "+domainCompetitor.getBoat().getBoatClass().getName());
+            	if (!competitor.isNonCompeting()) {
+	                final Competitor domainCompetitor = TracTracRaceTrackerImpl.this.domainFactory.getOrCreateCompetitor(competitor);
+	                logger.info("Competitor "+competitor+" was updated on TracTrac side. Maybe consider updating in competitor store as well. "+
+	                            "TracTrac competitor maps to "+domainCompetitor.getName()+" with sail ID "+domainCompetitor.getBoat().getSailID()+
+	                            " and boat class "+domainCompetitor.getBoat().getBoatClass().getName());
+            	}
             }
             
             @Override
@@ -338,8 +350,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public void addCompetitor(ICompetitor competitor) {
             }
-        });
-        eventSubscriber.subscribeRaces(new IRacesListener() {
+        };
+        eventSubscriber.subscribeCompetitors(competitorsListener);
+        racesListener = new IRacesListener() {
             @Override public void abandonRace(UUID raceId) {}
             @Override public void addRace(IRace race) {}
             @Override public void deleteRace(UUID raceId) {}
@@ -358,7 +371,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                     }
                 }
             }
-        });
+        };
+        eventSubscriber.subscribeRaces(racesListener);
         // Start live and stored data streams
         final Regatta effectiveRegatta;
         raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, effectifeStoredURI);
@@ -370,16 +384,19 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         } else {
             effectiveRegatta = regatta;
         }
-        // removeRace may detach the domain regatta from the domain factory if that
-        // removed the last race; therefore, it's important to getOrCreate the
-        // domain regatta *after* calling removeRace
-        domainFactory.removeRace(tractracRace.getEvent(), tractracRace, trackedRegattaRegistry);
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found;
         // in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
                 raceLogStore, regattaLogStore, tractracRace, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
+        // removeRace may detach the domain regatta from the domain factory if that
+        // removed the last race; therefore, it's important to getOrCreate the
+        // domain regatta *after* calling removeRace
+        final RaceDefinition raceDefinition = domainFactory.removeRace(tractracRace.getEvent(), tractracRace, this.regatta, trackedRegattaRegistry);
+        if (raceDefinition != null) {
+            trackedRegattaRegistry.removeRace(this.regatta, raceDefinition);
+        }
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
                 simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, tractracRace,
@@ -445,7 +462,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         return trackedRegatta;
     }
 
-    public static Object createID(URL paramURL, URI liveURI, URI storedURI) {
+    public static Object createID(URL paramURL, final URI liveURI, final URI storedURI) {
+        URL paramURLStrippedOfRandomParam = getParamURLStrippedOfRandomParam(paramURL);
+        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
+    }
+
+    public static URL getParamURLStrippedOfRandomParam(URL paramURL) {
         URL paramURLStrippedOfRandomParam;
         if (paramURL == null) {
             paramURLStrippedOfRandomParam = null;
@@ -481,7 +503,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 }
             }
         }
-        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
+        return paramURLStrippedOfRandomParam;
     }
     
     @Override
@@ -518,9 +540,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
     
     @Override
-    protected void onStop(boolean stopReceiversPreemtively) throws InterruptedException {
+    protected void onStop(boolean stopReceiversPreemtively, boolean willBeRemoved) throws InterruptedException {
         if (!stopped) {
             stopped = true;
+            eventSubscriber.unsubscribeRaces(racesListener);
+            eventSubscriber.unsubscribeCompetitors(competitorsListener);
             raceSubscriber.stop();
             eventSubscriber.stop();
             raceSubscriber.unsubscribeConnectionStatus(this);
@@ -536,13 +560,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 new AbstractLoadingQueueDoneCallBack(receivers) {
                     @Override
                     protected void executeWhenAllReceiversAreDoneLoading() {
-                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                        lastStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                         updateStatusOfTrackedRaces();
                     }
                 };
             } else {
                 // queues contents were cleared preemptively; this means we're done with loading immediately
-                lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                lastStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                 updateStatusOfTrackedRaces();
             }
             if (stopReceiversPreemtively && simulator != null) {
@@ -630,9 +654,24 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void addRaceDefinition(final RaceDefinition race, final DynamicTrackedRace trackedRace) {
-        this.race = race;
+        logger.info("Setting race for tracker "+this+" with ID "+getID()+" to "+race);
+        synchronized (this) { // use synchronized to ensure the effects become visible to other threads reading later
+            this.race = race;
+        }
         updateStatusOfTrackedRace(trackedRace);
         notifyRaceCreationListeners();
+    }
+
+    /**
+     * When this tracker is informed that the race cannot be loaded, e.g., because its boat class does
+     * not match the regatta's boat class, the tracker will {@link #stop} preemptively.
+     */
+    @Override
+    public void raceNotLoaded(String reason) throws MalformedURLException, IOException, InterruptedException {
+        logger.severe("Race for tracker "+this+" with ID "+getID()+" did not load: "+reason+". Stopping tracker.");
+        if (race != null) {
+            trackedRegattaRegistry.stopTracking(regatta, race);
+        }
     }
 
     @Override
@@ -642,7 +681,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
-        logger.info("Status change in tracker "+getID()+" for race(s) "+getRace()+": "+storedDataEvent);
+        logger.info("Status change in tracker "+this+" with ID "+getID()+" for race(s) "+getRace()+": "+storedDataEvent);
         switch (storedDataEvent.getType()) {
         case Begin:
             logger.info("Stored data begin in tracker "+getID()+" for race(s) "+getRace());
@@ -667,26 +706,34 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void stopped(Object o) {
-        logger.info("stopped TracTrac tracking in tracker " + getID() + " for " + getRace() + " while in status "
-                + lastStatus);
+        logger.info("stopped TracTrac tracking in tracker " + this + " with ID " + getID() + " for " + getRace()
+                + " while in status " + lastStatus);
         new AbstractLoadingQueueDoneCallBack(receivers) {
             @Override
             protected void executeWhenAllReceiversAreDoneLoading() {
                 lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
                 updateStatusOfTrackedRaces();
                 if (!stopped) {
-                    try {
-                        if (getRace() != null) {
-                            // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
-                            // TracAPI then
-                            // all subscriptions have received all their data and it's therefore safe to stop all
-                            // subscriptions
-                            // at this point without missing any data.
-                            trackedRegattaRegistry.stopTracking(regatta, getRace());
+                    // launch background thread that may have to wait for the race to appear; wait with a generous timeout
+                    final Thread stopper = new Thread(()->{
+                        try {
+                            if (getRaceHandle().getRace(TIMEOUT_FOR_RACE_TO_APPEAR_FOR_STOPPING_TRACKING_IN_MILLIS) != null) {
+                                // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
+                                // TracAPI then all subscriptions have received all their data and it's therefore safe to stop all
+                                // subscriptions at this point without missing any data.
+                                logger.info("Calling stopTracking for tracker "+this+" with ID "+getID());
+                                trackedRegattaRegistry.stopTracking(regatta, getRace());
+                            } else {
+                                logger.warning("Didn't receive RaceDefinition for tracker "+this+" with ID "+getID()+
+                                        " within "+TIMEOUT_FOR_RACE_TO_APPEAR_FOR_STOPPING_TRACKING_IN_MILLIS+
+                                        "ms; unable to call stopTracking(...)");
+                            }
+                        } catch (InterruptedException | IOException e) {
+                            logger.log(Level.INFO, "Interrupted while trying to stop tracker " + this, e);
                         }
-                    } catch (InterruptedException | IOException e) {
-                        logger.log(Level.INFO, "Interrupted while trying to stop tracker " + this, e);
-                    }
+                    }, "Stopper for tracker "+this+" with ID " + getID());
+                    stopper.setDaemon(true);
+                    stopper.start();
                 }
             }
         };

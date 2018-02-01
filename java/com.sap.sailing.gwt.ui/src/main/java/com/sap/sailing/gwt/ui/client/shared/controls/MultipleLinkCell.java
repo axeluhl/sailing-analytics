@@ -5,15 +5,17 @@ import static com.google.gwt.dom.client.BrowserEvents.MOUSEDOWN;
 
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 
 /**
  * Represent cell with multiple links. Link is represented as static nested class {@link CellLink}.
@@ -76,7 +78,7 @@ public class MultipleLinkCell extends AbstractCell<List<MultipleLinkCell.CellLin
      */
     interface LinkTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a target=\"{0}\" href=\"{1}\">{2}</a>")
-        SafeHtml cell(String target, String href, String text);
+        SafeHtml cell(String target, SafeUri href, String text);
     }
 
     private static LinkTemplates linkTemplates = GWT.create(LinkTemplates.class);
@@ -137,7 +139,7 @@ public class MultipleLinkCell extends AbstractCell<List<MultipleLinkCell.CellLin
             } else {
                 sb.appendHtmlConstant("<br>");
             }
-            rendered = linkTemplates.cell(link.getTarget(), link.getHref(), link.getText());
+            rendered = linkTemplates.cell(link.getTarget(), UriUtils.fromString(link.getHref()), link.getText());
             sb.append(rendered);
         }
     }

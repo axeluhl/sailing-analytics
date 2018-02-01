@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.selection.filter;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,9 +37,12 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent<SerializableSettings> implements FilterSelectionProvider {
 
@@ -61,10 +65,20 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     private final ScrollPanel selectionPanel;
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
+    
+    /**
+     * When the {@link #retrieverLevelList retriever levels} have been received, this field is initialized
+     * with the mapping of dimension functions to the reduced set shown in the per-level filters. This way,
+     * an original dimension can be {@link ReducedDimensionsDTO#getReducedDimension(FunctionDTO) mapped} to
+     * its corresponding dimension from the reduced set of dimensions that are shown in the per-level filters.
+     */
+    private ReducedDimensionsDTO reducedDimensions;
 
-    public ListRetrieverChainFilterSelectionProvider(DataMiningSession session, StringMessages stringMessages,
+    public ListRetrieverChainFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
+            DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+        super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -90,7 +104,8 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         selectionPanel = new ScrollPanel();
         selectionDockLayoutPanel.add(selectionPanel);
         
-        selectionPresenter = new PlainFilterSelectionPresenter(stringMessages, retrieverChainProvider, this);
+        selectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, retrieverChainProvider,
+                this);
         selectionPresenterScrollPanel = new ScrollPanel(selectionPresenter.getEntryWidget());
         
         mainPanel = new DockLayoutPanel(Unit.PX);
@@ -98,6 +113,18 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         mainPanel.addWest(retrieverLevelListScrollPanel, 300);
         mainPanel.add(selectionDockLayoutPanel);
         mainPanel.setWidgetHidden(selectionPresenterScrollPanel, true);
+    }
+    
+    @Override
+    public void setHighestRetrieverLevelWithFilterDimension(FunctionDTO dimension, Serializable groupKey) {
+        FunctionDTO dimensionMappedToReducedDimensions = reducedDimensions == null ? dimension : reducedDimensions.getReducedDimension(dimension);
+        for (final DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
+            final RetrieverLevelFilterSelectionProvider selectionProvider = selectionProvidersMappedByRetrievedDataType.get(retrieverLevel);
+            if (selectionProvider.hasDimension(dimensionMappedToReducedDimensions)) {
+                selectionProvider.addFilter(dimensionMappedToReducedDimensions, Collections.singleton(groupKey));
+                break;
+            }
+        }
     }
     
     @Override
@@ -133,30 +160,31 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         clearContent();
         retrieverLevelDataProvider.getList().addAll(retrieverChain.getRetrieverLevels());
         retrieverLevelList.setPageSize(retrieverLevelDataProvider.getList().size());
-        
-        dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>>() {
+        dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(),
+                new AsyncCallback<ReducedDimensionsDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the dimensions of the retrieval chain from the server: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> dimensionsMappedByLevel) {
+            public void onSuccess(ReducedDimensionsDTO dimensionsMappedByLevel) {
+                ListRetrieverChainFilterSelectionProvider.this.reducedDimensions = dimensionsMappedByLevel;
                 int firstFilterableRetrieverLevel = Integer.MAX_VALUE;
-                for (Entry<DataRetrieverLevelDTO, HashSet<FunctionDTO>> dimensionsEntry : dimensionsMappedByLevel.entrySet()) {
+                for (Entry<DataRetrieverLevelDTO, HashSet<FunctionDTO>> dimensionsEntry : dimensionsMappedByLevel.getReducedDimensions().entrySet()) {
                     if (!dimensionsEntry.getValue().isEmpty()) {
                         DataRetrieverLevelDTO retrieverLevel = dimensionsEntry.getKey();
                         RetrieverLevelFilterSelectionProvider selectionProvider =
-                                new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter,
+                                        new RetrieverLevelFilterSelectionProvider(
+                                                ListRetrieverChainFilterSelectionProvider.this, getComponentContext(),
+                                                session, dataMiningService, errorReporter,
                                                                           ListRetrieverChainFilterSelectionProvider.this,
                                                                           retrieverChain,retrieverLevel);
                         selectionProvider.setAvailableDimensions(dimensionsEntry.getValue());
                         selectionProvidersMappedByRetrievedDataType.put(retrieverLevel, selectionProvider);
-                        
                         firstFilterableRetrieverLevel = retrieverLevel.getLevel() < firstFilterableRetrieverLevel ?
                                                             retrieverLevel.getLevel() : firstFilterableRetrieverLevel;
                     }
                 }
-                
                 retrieverLevelSelectionModel.setSelected(retrieverChain.getRetrieverLevel(firstFilterableRetrieverLevel), true);
             }
         });
@@ -321,7 +349,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     }
 
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
         return null;
     }
 
@@ -333,5 +361,10 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     @Override
     public SerializableSettings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "ListRetrieverChainFilterSelectionProvider";
     }
 }

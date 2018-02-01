@@ -42,7 +42,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -50,11 +50,14 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A base class for a leaderboard chart showing competitor data for all race columns of a leaderboard.
  */
-public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends AbstractSettings> extends AbstractLazyComponent<SettingsType> implements Component<SettingsType>, 
+public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends GenericSerializableSettings>
+        extends AbstractLazyComponent<SettingsType>
+        implements Component<SettingsType>, 
     CompetitorSelectionChangeListener, RequiresResize, TimeListener {
     public static final String LODA_LEADERBOARD_CHART_DATA_CATEGORY = "loadLeaderboradChartData";
     
@@ -73,9 +76,12 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
     
-    public AbstractCompetitorLeaderboardChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, String leaderboardName, 
+    public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?> context,
+            SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, String leaderboardName,
             DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             final StringMessages stringMessages, ErrorReporter errorReporter) {
+        super(parent, context);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.competitorSelectionProvider = competitorSelectionProvider;

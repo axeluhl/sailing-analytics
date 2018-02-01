@@ -10,7 +10,7 @@ public class RegattaOverviewEntryDTO implements IsSerializable {
     public String courseAreaName;
     public String regattaDisplayName;
     public RaceInfoDTO raceInfo;
-    public String regattaName;
+    public String leaderboardName;
     public String boatClassName;
     public Date currentServerTime;
     public Distance buyZoneRadius;

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -27,14 +28,15 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -48,7 +50,6 @@ import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
@@ -132,11 +133,11 @@ public class ImportMasterDataOperation extends
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
             }
+            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), creationCount, override);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
-            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), override);
             return creationCount;
         } catch (Exception e) {
-            logger.severe("Error during execution of ImportMasterDataOperation");
+            logger.log(Level.SEVERE, "Error during execution of ImportMasterDataOperation", e);
             throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             LockUtil.unlockAfterWrite(dataImportLock);
@@ -388,7 +389,7 @@ public class ImportMasterDataOperation extends
                 for (Wind fix : windTrackToReadFrom.getRawFixes()) {
                     Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
                     if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
-                            && fix.getPosition().equals(existingFix.getPosition()))) {
+                            && Util.equalsWithNull(fix.getPosition(), existingFix.getPosition()))) {
                         windTrackToWriteTo.add(fix);
                     } else {
                         logger.info("Didn't add wind fix in import, because equal fix was already there.");
@@ -415,12 +416,12 @@ public class ImportMasterDataOperation extends
                 DeviceIdentifier device = entry.getKey();
                 final Collection<Timed> fixesToAddAsBatch = new ArrayList<>(BATCH_SIZE_FOR_IMPORTING_FIXES);
                 for (Timed fixToAdd : entry.getValue()) {
-                    if (fixToAdd instanceof CompactGPSFixMovingImpl) {
-                        CompactGPSFixMovingImpl gpsFix = (CompactGPSFixMovingImpl) fixToAdd;
+                    if (fixToAdd instanceof VeryCompactGPSFixMovingImpl) {
+                        VeryCompactGPSFixMovingImpl gpsFix = (VeryCompactGPSFixMovingImpl) fixToAdd;
                         fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
-                                ((CompactGPSFixMovingImpl) fixToAdd).getSpeed());
-                    } else if (fixToAdd instanceof CompactGPSFixImpl) {
-                        CompactGPSFixImpl gpsFix = (CompactGPSFixImpl) fixToAdd;
+                                ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                    } else if (fixToAdd instanceof VeryCompactGPSFixImpl) {
+                        VeryCompactGPSFixImpl gpsFix = (VeryCompactGPSFixImpl) fixToAdd;
                         fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
                     } 
                     fixesToAddAsBatch.add(fixToAdd);

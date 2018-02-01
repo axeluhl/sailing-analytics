@@ -31,6 +31,11 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     }
 
     @Override
+    public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name) {
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY-1, size);
+    }
+
+    @Override
     public ScheduledExecutorService createForegroundTaskThreadPoolExecutor(String name) {
         return createThreadPoolExecutor(name, Thread.NORM_PRIORITY);
     }
@@ -45,7 +50,8 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     }
 
     private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority, final int size) {
-        return new NamedTracingScheduledThreadPoolExecutor(name, /* corePoolSize */ size, new ThreadFactoryWithPriority(priority, /* daemon */ true));
+        return new NamedTracingScheduledThreadPoolExecutor(name, /* corePoolSize */ size, new ThreadFactoryWithPriority(
+                name, priority, /* daemon */ true));
     }
 
     @Override

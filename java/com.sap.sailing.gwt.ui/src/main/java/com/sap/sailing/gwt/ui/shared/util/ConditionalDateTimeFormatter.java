@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.util;
 
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.hoursAndMinutesTimeFormatter;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.minutesTimeFormatter;
+
 import java.util.Date;
 
 import com.google.gwt.i18n.shared.DateTimeFormat;
@@ -8,30 +11,36 @@ import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ConditionalDateTimeFormatter {
+
     public static String format(Date newsTimestamp, Date currentTimestamp, StringMessages stringMessages) {
-        String result;
-        if (newsTimestamp.after(new Date(currentTimestamp.getTime() - 60000))) {
+        final String result;
+        if (lessThanOneMinuteAgo(currentTimestamp, newsTimestamp)) {
             result = stringMessages.now();
+        } else if (lessThanOneHourAgo(currentTimestamp, newsTimestamp)) {
+            Date timespanBetween = timespanBetween(currentTimestamp, newsTimestamp);
+            result = stringMessages.minutesAgo(minutesTimeFormatter.render(timespanBetween));
+        } else if (sameDay(currentTimestamp, newsTimestamp)) {
+            Date timespanBetween = timespanBetween(currentTimestamp, newsTimestamp);
+            result = stringMessages.hoursAgo(hoursAndMinutesTimeFormatter.render(timespanBetween));
         } else {
-            Date oneHourBeforeCurrent = new Date(currentTimestamp.getTime() - 3600000);
-            if (newsTimestamp.after(oneHourBeforeCurrent)) {
-                DateTimeFormat format = DateTimeFormat.getFormat("m");
-                Date diffTime = new Date(currentTimestamp.getTime() - newsTimestamp.getTime());
-                result = stringMessages.minutesAgo(format.format(diffTime));
-            } else {
-                if (sameDay(newsTimestamp, currentTimestamp)) {
-                    DateTimeFormat format = DateTimeFormat.getFormat("hh:mm");
-                    Date diffTime = new Date(currentTimestamp.getTime() - newsTimestamp.getTime());
-                    result = stringMessages.hoursAgo(format.format(diffTime));
-                } else {
-                    result = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(newsTimestamp);
-                }
-            }
+            result = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(newsTimestamp);
         }
         return result;
     }
 
-    private static boolean sameDay(Date timestamp1, Date timestamp2) {
-        return CalendarUtil.isSameDate(timestamp1, timestamp2);
+    private static boolean lessThanOneMinuteAgo(Date currentTimestamp, Date newsTimestamp) {
+        return newsTimestamp.after(new Date(currentTimestamp.getTime() - 60_000));
+    }
+
+    private static boolean lessThanOneHourAgo(Date currentTimestamp, Date newsTimestamp) {
+        return newsTimestamp.after(new Date(currentTimestamp.getTime() - 3_600_000));
+    }
+
+    private static Date timespanBetween(Date currentTimestamp, Date newsTimestamp) {
+        return new Date(currentTimestamp.getTime() - newsTimestamp.getTime());
+    }
+
+    private static boolean sameDay(Date currentTimestamp, Date newsTimestamp) {
+        return CalendarUtil.isSameDate(currentTimestamp, newsTimestamp);
     }
 }

@@ -161,7 +161,13 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
                     final Iterable<CompetitorDescriptor> competitorDescriptors,
                     final Iterable<CompetitorDTO> competitors) {
                 ImportCompetitorCallback importCompetitorCallback = new ImportCompetitorCallback(sailingService,
-                        errorReporter, stringMessages);
+                        errorReporter, stringMessages) {
+                    @Override
+                    public void registerCompetitors(Set<CompetitorDTO> competitorDTOs) {
+                        super.registerCompetitors(competitorDTOs);
+                        refreshCompetitorList();
+                    }
+                };
                 return new MatchImportedCompetitorsDialog(competitorDescriptors, competitors, stringMessages,
                         sailingService, errorReporter, importCompetitorCallback);
             }

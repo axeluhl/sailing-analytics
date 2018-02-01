@@ -2,6 +2,7 @@ package com.sap.sailing.server.notification.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -74,7 +75,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
             CompetitorResultsNotificationSet competitorResults) throws MalformedURLException {
         this.mailQueue = mailQueue;
         this.messages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
-                this.getClass().getClassLoader());
+                this.getClass().getClassLoader(), StandardCharsets.UTF_8.name());
         this.defaultBaseURL = new URL("https://www.sapsailing.com");
         
         toStop.add(this.boatClassResults = boatClassResults);
@@ -157,13 +158,11 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         String eventName = event.getName();
         String leaderboardDisplayName = leaderboard.getDisplayName() != null ? leaderboard.getDisplayName()
                 : leaderboard.getName();
-
         if (Util.size(raceColumn.getFleets()) > 1) {
             return messages.get(locale, "raceInFleetInRegattaOfEvent", raceName, leaderboardDisplayName, eventName,
                     fleet.getName());
         } else {
             return messages.get(locale, "raceInRegattaOfEvent", raceName, leaderboardDisplayName, eventName);
-
         }
     }
 
@@ -171,7 +170,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         String eventName = event.getName();
         String leaderboardDisplayName = leaderboard.getDisplayName() != null ? leaderboard.getDisplayName()
                 : leaderboard.getName();
-
         return messages.get(locale, "leaderboardOfEvent", leaderboardDisplayName, eventName);
     }
     
@@ -193,7 +191,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         String link = getBaseURL(event).toString() + "/gwt/RaceBoard.html?locale=" + locale.toLanguageTag()
         + "&eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
         + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
-        + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
+        + raceIdentifier.getRaceName() + "&showMapControls=true&regattaName="
         + raceIdentifier.getRegattaName() + "&mode=" + raceboardMode;
         return new Pair<String, String>(messages.get(locale, labelMessageKey), link);
     }
@@ -253,7 +251,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     public void notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(BoatClass boatClass, Leaderboard leaderboard) {
         // TODO don't send notifications when a notification for the same boatClass / leaderboard has already been sent shortly before
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
                 @Override
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
@@ -272,7 +269,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     public void notifyUserOnBoatClassUpcomingRace(BoatClass boatClass, Leaderboard leaderboard, RaceColumn raceColumn,
             Fleet fleet,  TimePoint when) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassUpcomingRace) {
                 @Override
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {

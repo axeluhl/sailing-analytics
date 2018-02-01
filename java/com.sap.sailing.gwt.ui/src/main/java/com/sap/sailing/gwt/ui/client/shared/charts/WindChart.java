@@ -57,8 +57,10 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class WindChart extends AbstractRaceChart<WindChartSettings> implements RequiresResize {
     public static final String LOAD_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
@@ -90,10 +92,13 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
      *            constructor must ensure to trigger {@link RaceSelectionChangeListener#onRaceSelectionChange(List)} at
      *            least once to ensure that this chart sets its {@link AbstractRaceChart#selectedRaceIdentifier} field.
      */
-    public WindChart(WindChartLifecycle windChartLifecycle, SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
+    public WindChart(Component<?> parent, ComponentContext<?> context, WindChartLifecycle windChartLifecycle,
+            SailingServiceAsync sailingService,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
-        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+                asyncActionsExecutor, errorReporter);
         this.windChartLifecycle = windChartLifecycle;
         this.settings = settings;
         windSourceDirectionSeries = new HashMap<WindSource, Series>();
@@ -426,8 +431,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     }
 
     @Override
-    public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        return windChartLifecycle.getSettingsDialogComponent(windChartLifecycle.cloneSettings(settings));
+    public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent(WindChartSettings settings) {
+        return windChartLifecycle.getSettingsDialogComponent(settings);
     }
 
     /**
@@ -649,5 +654,10 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     @Override
     public WindChartSettings getSettings() {
         return settings;
+    }
+
+    @Override
+    public String getId() {
+        return windChartLifecycle.getComponentId();
     }
 }

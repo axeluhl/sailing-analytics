@@ -15,6 +15,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 
 import android.app.LoaderManager;
@@ -131,7 +132,31 @@ public interface ReadonlyDataManager {
      */
     LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(ManagedRace managedRace,
         LoadClient<Collection<Competitor>> callback);
-    
+
+    /**
+     * Create a new {@link LoaderCallbacks} object for loading {@link Competitor}
+     *
+     * @param callback
+     *            {@link LoadClient} implementing your data handling code.
+     * @return {@link LoaderCallbacks} to be used in
+     *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
+     *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
+     */
+    LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createStartOrderLoader(ManagedRace managedRace,
+        LoadClient<Collection<Competitor>> callback);
+
+    /**
+     * Create a new {@link LoaderCallbacks} object for loading {@link LeaderboardResult}
+     *
+     * @param managedRace the {@link ManagedRace}
+     * @param callback {@link LoadClient} implementing your data handling code
+     * @return {@link LoaderCallbacks} to be used in
+     *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
+     *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
+     */
+    LoaderCallbacks<DataLoaderResult<LeaderboardResult>> createLeaderboardLoader(ManagedRace managedRace,
+        LoadClient<LeaderboardResult> callback);
+
     /**
      * Creates a new {@link LoaderCallbacks} object for loading a client's configuration.
      * 

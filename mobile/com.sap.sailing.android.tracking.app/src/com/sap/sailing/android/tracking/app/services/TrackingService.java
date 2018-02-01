@@ -351,18 +351,19 @@ public class TrackingService extends Service implements LocationListener {
      */ 
     @Override
     public void onLocationChanged(Location location) {
-        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
-                location.getLatitude(), location.getLongitude(), location.getAltitude());
+        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(), location.getLatitude(), location.getLongitude(), location.getAltitude());
         final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
         enqueueForSending(postUrlStr, location);
 
-        // clear message queue
-        locationWatchDog.removeMessages(NO_LOCATION);
+        if (locationWatchDog != null) {
+            // clear message queue
+            locationWatchDog.removeMessages(NO_LOCATION);
 
-        // add new message with last location
-        Message msg = locationWatchDog.obtainMessage(NO_LOCATION);
-        msg.obj = location;
-        locationWatchDog.sendMessageDelayed(msg, NO_LOCATION_CHECK);
+            // add new message with last location
+            Message msg = locationWatchDog.obtainMessage(NO_LOCATION);
+            msg.obj = location;
+            locationWatchDog.sendMessageDelayed(msg, NO_LOCATION_CHECK);
+        }
     }
 
     @Override

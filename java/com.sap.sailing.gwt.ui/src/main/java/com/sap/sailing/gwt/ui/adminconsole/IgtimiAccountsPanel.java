@@ -17,16 +17,19 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DialogBox.CaptionImpl;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -78,9 +81,9 @@ public class IgtimiAccountsPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        allAccounts = new BaseCelltable<String>(/* pageSize */10000, tableRes);
-        final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
-        ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());
+        allAccounts = new BaseCelltable<>(/* pageSize */10000, tableRes);
+        final ListDataProvider<String> filteredAccounts = new ListDataProvider<>();
+        ListHandler<String> accountColumnListHandler = new ListHandler<>(filteredAccounts.getList());
         filteredAccounts.addDataDisplay(allAccounts);
         final List<String> emptyList = Collections.emptyList();
         filterAccountsPanel = new LabeledAbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()),
@@ -91,7 +94,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 return strings;
             }
         };
-        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null,
+        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<>(null,
                 filterAccountsPanel.getAllListDataProvider());
         allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
@@ -101,7 +104,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
             @Override
             public void onClick(ClickEvent event) {
                 if (refreshableAccountsSelectionModel.getSelectedObject() != null) {
-                    if (Window.confirm("Do you really want to remove the leaderboards?")) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
                         removeAccount(refreshableAccountsSelectionModel.getSelectedObject(), filteredAccounts);
                     }
                 }
@@ -139,8 +142,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         allAccounts.addColumn(accountActionColumn, stringMessages.actions());
+        allAccounts.addColumnSortHandler(accountColumnListHandler);
         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.addIgtimiAccount());
+        addAccountButton.ensureDebugId("addIgtimiAccount");
         addAccountButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -152,7 +157,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
+                refresh(sailingService, errorReporter, stringMessages);
             }
         });
         add(refreshButton);
@@ -170,12 +175,34 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
             @Override
             public void onSuccess(String result) {
-                Anchor addIgtimiUserLink = new Anchor(stringMessages.addIgtimiUser(), UriUtils.fromString(result).asString()); 
-                controlsPanel.add(addIgtimiUserLink);
+                final Button addIgtimiUserButton = new Button(stringMessages.addIgtimiUser()+" (OAuth)");
+                addIgtimiUserButton.addClickHandler(clickEvent->{
+                    Frame frame = new Frame(UriUtils.fromString(result).asString());
+                    frame.addLoadHandler(loadEvent->refresh(sailingService, errorReporter, stringMessages));
+                    frame.setPixelSize(520, 770); 
+                    final CaptionImpl caption = new CaptionImpl();
+                    caption.setText(stringMessages.addIgtimiUser());
+                    final DialogBox dialogBox = new DialogBox(/* autoHide */ true, /* modal */ true);
+                    dialogBox.setText(stringMessages.addIgtimiUser());
+                    dialogBox.setGlassEnabled(true);
+                    final VerticalPanel panel = new VerticalPanel();
+                    dialogBox.setWidget(panel);
+                    panel.add(frame);
+                    dialogBox.addCloseHandler(event->{
+                        refresh(sailingService, errorReporter, stringMessages);
+                    });
+                    dialogBox.center();
+                });
+                controlsPanel.add(addIgtimiUserButton);
             }
         });
     }
     
+    private void refresh(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            final StringMessages stringMessages) {
+        updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
+    }
+
     private static class UserData {
         private final String eMail;
         private final String password;
@@ -236,6 +263,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                         }
 
                     });
+            ensureDebugId("AddIgtimiAccountDialog");
         }
 
         @Override
@@ -243,9 +271,11 @@ public class IgtimiAccountsPanel extends FlowPanel {
             Grid grid = new Grid(2, 2);
             grid.setWidget(0, 0, new Label(stringMessages.emailAddress()));
             eMail = createTextBox("");
+            eMail.ensureDebugId("igtimiAccountEmail");
             grid.setWidget(0, 1, eMail);
             grid.setWidget(1, 0, new Label(stringMessages.password()));
             password = createPasswordTextBox("");
+            password.ensureDebugId("igtimiAccountPassword");
             grid.setWidget(1, 1, password);
             return grid;
         }

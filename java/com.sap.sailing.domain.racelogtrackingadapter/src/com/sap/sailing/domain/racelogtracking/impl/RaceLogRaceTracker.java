@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -61,6 +63,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.Util;
@@ -73,7 +76,7 @@ import difflib.PatchFailedException;
  * Track a race using the data defined in the {@link RaceLog} and possibly the Leaderboards
  * {@link IsRegattaLike#getRegattaLog RegattaLog}. If the events suggest that the race is already in the
  * {@link RaceLogTrackingState#TRACKING} state, tracking commences immediately and existing fixes are loaded immediately
- * from the database.Thinkpad
+ * from the database.
  * <p>
  * Otherwise, the tracker waits until a {@link RaceLogStartTrackingEvent} is received to perform these tasks.
  * 
@@ -91,14 +94,14 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final WindStore windStore;
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceLogResolver raceLogResolver;
+    private final TrackedRegattaRegistry trackedRegattaRegistry;
 
-    private DynamicTrackedRace trackedRace;
-    private StartOfTrackingController startOfTrackingController;
-    private EndOfTrackingController endOfTrackingController;
+    private volatile DynamicTrackedRace trackedRace;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams) {
+            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams, TrackedRegattaRegistry trackedRegattaRegistry) {
         super(connectivityParams);
+        this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.params = params;
         this.windStore = windStore;
         this.trackedRegatta = regatta;
@@ -146,16 +149,13 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
                     public void visit(RegattaLogDefineMarkEvent event) {
                         RaceLogRaceTracker.this.onDefineMarkEvent(event);
                     }
-
                 };
                 visitors.put(log, visitor);
                 ((RegattaLog) log).addListener(visitor);
             }
         }
-
         logger.info(String.format("Created race-log tracker for: %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
-
         // load race for which tracking already started
         if (new RaceLogTrackingStateAnalyzer(params.getRaceLog()).analyze() == RaceLogTrackingState.TRACKING) {
             startTracking(null);
@@ -163,7 +163,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    protected void onStop(boolean preemptive) {
+    protected void onStop(boolean preemptive, boolean willBeRemoved) {
         RaceLog raceLog = params.getRaceLog();
         final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
         if (!trackedRegatta.getRegatta().isControlTrackingFromStartAndFinishTimes() &&
@@ -177,13 +177,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());
         }
-        if (startOfTrackingController != null && trackedRace != null) {
-            trackedRace.removeStartTimeChangedListener(startOfTrackingController);
-        }
-        if (endOfTrackingController != null && trackedRace != null) {
-            trackedRace.removeListener(endOfTrackingController);
-        }
-
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
     }
@@ -261,7 +254,11 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
                 update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
             }
             try {
-                trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
+                final Course course = trackedRace.getRace().getCourse();
+                course.update(update, params.getDomainFactory());
+                if (base.getName() != null) {
+                    course.setName(base.getName());
+                }
             } catch (PatchFailedException e) {
                 logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
             }
@@ -286,7 +283,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             courseBase = new CourseDataImpl("Default course for " + raceName);
             logger.log(Level.FINE, "Using empty course in creation of race " + raceName);
         }
-        final Course course = new CourseImpl(raceName + " course", courseBase.getWaypoints());
+        final Course course = new CourseImpl(courseBase.getName() == null ? raceName + " course" : courseBase.getName(), courseBase.getWaypoints());
         if (raceColumn.getTrackedRace(fleet) != null) {
             if (event != null) {
                 try {
@@ -308,15 +305,41 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         trackedRace = trackedRegatta.createTrackedRace(raceDef, sidelines, windStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
-        startOfTrackingController = new StartOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
-        trackedRace.addStartTimeChangedListener(startOfTrackingController);
-        endOfTrackingController = new EndOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
-        trackedRace.addListener(endOfTrackingController);
         notifyRaceCreationListeners();
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
         synchronized (this) {
             this.notifyAll();
         }
+        registerListenerThatWillRemoveThisRaceWhenTheRaceColumnIsRemoved();
+    }
+
+    private void registerListenerThatWillRemoveThisRaceWhenTheRaceColumnIsRemoved() {
+        getRegatta().addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
+            private static final long serialVersionUID = -2924864263579432528L;
+
+            @Override
+            public void defaultAction() {
+            }
+
+            @Override
+            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+                try {
+                    trackedRegattaRegistry.removeRace(getRegatta(), getRace());
+                } catch (IOException | InterruptedException e) {
+                    logger.log(Level.WARNING, "Error trying to remove smart phone / race log tracked race whose race column was deleted: "+
+                            e.getMessage(), e);
+                }
+            }
+
+            /**
+             * This listener is transient and will therefore not be serialized to any replicas or with
+             * the master data import.
+             */
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
+        });
     }
 }

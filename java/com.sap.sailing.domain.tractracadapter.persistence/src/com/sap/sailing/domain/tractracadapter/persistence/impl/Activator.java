@@ -40,11 +40,13 @@ public class Activator implements BundleActivator {
         new Thread(() -> {
             final ServiceTracker<MongoObjectFactory, MongoObjectFactory> mongoObjectFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, MongoObjectFactory.class);
             final ServiceTracker<DomainObjectFactory, DomainObjectFactory> domainObjectFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, DomainObjectFactory.class);
+            final ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tractracAdapterFactoryTracker = ServiceTrackerFactory.createAndOpen(context, TracTracAdapterFactory.class);
             try {
                 final MongoObjectFactory mongoObjectFactory = mongoObjectFactoryServiceTracker.waitForService(0);
                 final DomainObjectFactory domainObjectFactory = domainObjectFactoryServiceTracker.waitForService(0);
+                final TracTracAdapterFactory tractracAdapterFactory = tractracAdapterFactoryTracker.waitForService(0);
                 final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-                final com.sap.sailing.domain.tractracadapter.DomainFactory domainFactory = TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(
+                final com.sap.sailing.domain.tractracadapter.DomainFactory domainFactory = tractracAdapterFactory.getOrCreateTracTracAdapter(
                         domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory();
                 final TracTracConnectivityParamsHandler paramsHandler = new TracTracConnectivityParamsHandler(
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),

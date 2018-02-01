@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
+import com.sap.sse.common.Util;
 
 public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
@@ -26,7 +27,11 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
 
     @Override
     public void setName(String newName) {
+        final String oldName = this.name;
         this.name = newName;
+        if (!Util.equalsWithNull(oldName, newName)) {
+            getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(this, oldName, newName);
+        }
     }
 
     @Override

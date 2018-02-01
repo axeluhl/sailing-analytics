@@ -23,7 +23,8 @@ public class RaceLogSuppressedMarkPassingsEventDeserializer extends BaseRaceLogE
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
-        Integer indexOfFirstWaypoint = (Integer) object.get(RaceLogSuppressedMarkPassingsEventSerializer.FIELD_INDEX_OF_FIRST_SUPPRESSED_WAYPOINTS);
+        final Number indexOfFirstWaypointAsNumber = (Number) object.get(RaceLogSuppressedMarkPassingsEventSerializer.FIELD_INDEX_OF_FIRST_SUPPRESSED_WAYPOINTS);
+		Integer indexOfFirstWaypoint = indexOfFirstWaypointAsNumber==null?null:indexOfFirstWaypointAsNumber.intValue();
         return new RaceLogSuppressedMarkPassingsEventImpl(createdAt, timePoint, author, id, competitors, passId, indexOfFirstWaypoint);
     }
 }

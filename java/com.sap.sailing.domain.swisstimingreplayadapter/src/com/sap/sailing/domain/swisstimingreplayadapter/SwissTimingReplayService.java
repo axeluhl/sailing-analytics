@@ -35,14 +35,10 @@ public interface SwissTimingReplayService {
      * @param link
      *            the URL without the implicit "http://" prefix, as obtained, e.g., from
      *            {@link SwissTimingReplayRace#getLink()}.
-     * @param raceName TODO
      * @param raceID
      *            the SwissTiming ID for the race
-     * @param trackerManager TODO
      * @param useInternalMarkPassingAlgorithm
      *            use our own instead of the SwissTiming-provided mark rounding / split times
-     * @param raceLogStore TODO
-     * @param regattaLogStore TODO
      * @param boatClassNameName
      *            only required if {@code regattaToAddTo} is {@code null}; used for the retrieval/creation of a default
      *            regatta

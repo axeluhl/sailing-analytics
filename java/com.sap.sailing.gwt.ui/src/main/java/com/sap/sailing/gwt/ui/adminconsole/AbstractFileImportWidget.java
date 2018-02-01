@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,6 +11,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -19,6 +19,8 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.adminconsole.resulthandling.SensorDataImportResponse;
+import com.sap.sailing.gwt.ui.adminconsole.resulthandling.SensorDataImportResultsDialog;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -31,15 +33,23 @@ public abstract class AbstractFileImportWidget extends Composite {
     interface AbstractFileImportWidgetUiBinder extends UiBinder<Widget, AbstractFileImportWidget> {
     }
 
-    @UiField AdminConsoleResources res;
-    @UiField FileUpload fileUploadUi;
-    @UiField ListBox preferredImporterUi;
-    @UiField Button importButtonUi;
-    @UiField Image loadingImageUi;
-    @UiField FormPanel formPanelUi;
+    @UiField
+    AdminConsoleResources res;
+    @UiField
+    FileUpload fileUploadUi;
+    @UiField
+    ListBox preferredImporterUi;
+    @UiField
+    Button importButtonUi;
+    @UiField
+    Image loadingImageUi;
+    @UiField
+    CheckBox downsampleUi;
+    @UiField
+    FormPanel formPanelUi;
+
     private final TrackFileImportDeviceIdentifierTableWrapper table;
     protected final SailingServiceAsync sailingService;
-    private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private boolean shouldClearListOnNewUploadComplete = true;
 
@@ -48,7 +58,6 @@ public abstract class AbstractFileImportWidget extends Composite {
             final ErrorReporter errorReporter) {
         this.table = table;
         this.sailingService = sailingService;
-        this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         initWidget(uiBinder.createAndBindUi(this));
         importButtonUi.setText(stringMessages.importFixes());
@@ -56,9 +65,10 @@ public abstract class AbstractFileImportWidget extends Composite {
         getImporterTypes(new AsyncCallback<Collection<String>>() {
             @Override
             public void onSuccess(Collection<String> result) {
-                for (String importType : result) preferredImporterUi.addItem(importType);
+                for (String importType : result)
+                    preferredImporterUi.addItem(importType);
             }
-            
+
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Could not load importer types: " + caught.getMessage());
@@ -72,31 +82,39 @@ public abstract class AbstractFileImportWidget extends Composite {
         formPanelUi.submit();
     }
 
+    protected void setDownsampleOptionVisible(boolean visible) {
+        downsampleUi.setVisible(visible);
+    }
+    
     @UiHandler("formPanelUi")
     void onFileImportComplete(SubmitCompleteEvent event) {
         if (shouldClearListOnNewUploadComplete) {
             table.getDataProvider().getList().clear();
         }
-        String[] uuids = event.getResults().split("\\n");
-        if (uuids.length != 1 || (uuids.length > 0 && !uuids[0].isEmpty())) {
-            sailingService.getTrackFileImportDeviceIds(Arrays.asList(uuids), 
-                    new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
-                @Override
-                public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
-                    table.getDataProvider().getList().addAll(result);
-                    showLoadingImage(false);
-                }
-    
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Could not load TrackFileImportDeviceIds: " + caught.getMessage());
-                    showLoadingImage(false);
-                }
-            });
+        SensorDataImportResponse importResponse = SensorDataImportResponse.parse(event.getResults());
+        if (importResponse == null) {
+            Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
         } else {
-            showLoadingImage(false);
-            Window.alert(stringMessages.noTracksFound());
+            SensorDataImportResultsDialog.showResults(importResponse);
+            if (importResponse.didSucceedImportingAnyFile()) {
+                sailingService.getTrackFileImportDeviceIds(importResponse.getUploads(),
+                        new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                            @Override
+                            public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                                table.getDataProvider().getList().addAll(result);
+                                showLoadingImage(false);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter
+                                        .reportError("Could not load TrackFileImportDeviceIds: " + caught.getMessage());
+                                showLoadingImage(false);
+                            }
+                        });
+            }
         }
+        showLoadingImage(false);
     }
 
     protected void setMultipleFileUploadEnabled(boolean enableMultipleFileUpload) {

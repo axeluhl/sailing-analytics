@@ -15,10 +15,10 @@ class LicenseViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = Translation.LicenseView.Title.String
-        if let file = NSBundle.mainBundle().pathForResource("Acknowledgements", ofType: "markdown") {
-            let license = try? NSString(contentsOfFile: file, encoding: NSUTF8StringEncoding)
+        if let file = Bundle.main.path(forResource: "Acknowledgements", ofType: "markdown") {
+            let license = try? NSString(contentsOfFile: file, encoding: String.Encoding.utf8.rawValue)
             if (license != nil) {
-                licenseTextView.attributedText = TSMarkdownParser.standardParser().attributedStringFromMarkdown(license! as String)
+                licenseTextView.attributedText = TSMarkdownParser.standard().attributedString(fromMarkdown: license! as String)
                 licenseTextView.layoutIfNeeded()
                 licenseTextView.setContentOffset(CGPoint.zero, animated: false)
             }

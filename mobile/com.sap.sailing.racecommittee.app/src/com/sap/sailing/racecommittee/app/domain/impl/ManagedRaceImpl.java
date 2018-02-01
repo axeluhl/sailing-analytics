@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
@@ -19,7 +18,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sailing.racecommittee.app.utils.ManagedRaceCalculator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -30,7 +28,6 @@ public class ManagedRaceImpl implements ManagedRace {
     private final ManagedRaceIdentifier identifier;
     private RaceState state;
     private Collection<Competitor> competitors;
-    private List<MapMarker> mapMarkers;
     private CourseBase courseOnServer;
     private ManagedRaceCalculator calculator;
     private double factor;
@@ -134,16 +131,6 @@ public class ManagedRaceImpl implements ManagedRace {
     @Override
     public void setCompetitors(Collection<Competitor> competitors) {
         this.competitors = competitors;
-    }
-
-    @Override
-    public List<MapMarker> getMapMarkers() {
-        return mapMarkers;
-    }
-
-    @Override
-    public void setMapMarkers(List<MapMarker> markers) {
-        this.mapMarkers = markers;
     }
 
     @Override

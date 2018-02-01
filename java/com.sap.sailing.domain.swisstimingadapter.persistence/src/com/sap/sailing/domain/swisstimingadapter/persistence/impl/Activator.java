@@ -13,7 +13,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
-import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingAdapterFactoryImpl;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -31,11 +31,13 @@ public class Activator implements BundleActivator {
         new Thread(() -> {
             final ServiceTracker<MongoObjectFactory, MongoObjectFactory> mongoObjectFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, MongoObjectFactory.class);
             final ServiceTracker<DomainObjectFactory, DomainObjectFactory> domainObjectFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, DomainObjectFactory.class);
+            final ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> swissTimingAdapterFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
             try {
                 final MongoObjectFactory mongoObjectFactory = mongoObjectFactoryServiceTracker.waitForService(0);
                 final DomainObjectFactory domainObjectFactory = domainObjectFactoryServiceTracker.waitForService(0);
+                final SwissTimingAdapterFactory swissTimingAdapterFactory = swissTimingAdapterFactoryServiceTracker.waitForService(0);
                 final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-                final com.sap.sailing.domain.swisstimingadapter.DomainFactory domainFactory = new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(
+                final com.sap.sailing.domain.swisstimingadapter.DomainFactory domainFactory = swissTimingAdapterFactory.getOrCreateSwissTimingAdapter(
                         domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory();
                 final SwissTimingConnectivityParamsHandler paramsHandler = new SwissTimingConnectivityParamsHandler(
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),

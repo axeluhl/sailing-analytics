@@ -6,7 +6,7 @@
   padding: 0;
   width: 80px;
   height: 80px;
-  background-image: url("images/home/play.png");
+  background-image: resourceUrl("play");
   background-color: transparent;
   background-repeat: no-repeat; 
   background-position: center;

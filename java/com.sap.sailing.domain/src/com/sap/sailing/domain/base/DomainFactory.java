@@ -66,7 +66,7 @@ public interface DomainFactory extends SharedDomainFactory {
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
-    List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors);
+    List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors);
 
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 

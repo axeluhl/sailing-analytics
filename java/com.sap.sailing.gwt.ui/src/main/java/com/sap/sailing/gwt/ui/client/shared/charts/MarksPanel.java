@@ -9,7 +9,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -25,18 +24,20 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class MarksPanel extends SimplePanel implements Component<AbstractSettings> {
+public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
     
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
+    public MarksPanel(final EditMarkPositionPanel parent, ComponentContext<?> context,
+            final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
+        super(parent, context);
         this.markDataProvider = markDataProvider;
-        setTitle(stringMessages.marks());
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
         markTable.setStyleName("EditMarkPositionMarkTable");
         SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.NONE) {
@@ -110,7 +111,8 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         markTable.setSelectionModel(selectionModel);
         markTable.getSelectionModel().addSelectionChangeHandler(parent);
         markDataProvider.addDataDisplay(markTable);
-        setWidget(markTable);
+        initWidget(markTable);
+        setTitle(stringMessages.marks());
     }
 
 	@Override
@@ -134,7 +136,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 
@@ -171,6 +173,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
 
     @Override
     public String getId() {
-        return getLocalizedShortName();
+        return "MarksPanel";
     }
+
 }

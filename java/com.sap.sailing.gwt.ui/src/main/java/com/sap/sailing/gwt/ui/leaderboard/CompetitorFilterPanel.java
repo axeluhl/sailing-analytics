@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -44,7 +42,7 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
- * A text box that belongs to a {@link LeaderboardPanel} and allows the user to search for competitors by sail number
+ * A text box that belongs to a {@link ClassicLeaderboardPanel} and allows the user to search for competitors by sail number
  * and competitor name. When the user provides a non-empty search string, a new {@link Filter} for type {@link CompetitorDTO}
  * will be added that accepts competitors whose {@link CompetitorDTO#getSailID() sail number} or {@link CompetitorDTO#getName() name}
  * matches the user input. When the text box is emptied, 
@@ -96,6 +94,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             }
         };
         settingsButton = new Button();
+        settingsButton.ensureDebugId("leaderboardSettingsButton");
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.setStyleName(css.button());
         settingsButton.addStyleName(css.settingsButton());
@@ -197,11 +196,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
     @Override
     public boolean matches(CompetitorDTO competitor) {
-        final String[] keywords = searchTextBox.getText().split(" ");
-        final List<String> lowercaseKeywords = new ArrayList<>(keywords.length);
-        for (String keyword : keywords) {
-            lowercaseKeywords.add(keyword.toLowerCase());
-        }
+        final Iterable<String> lowercaseKeywords = Util
+                .splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchTextBox.getText().toLowerCase());
         return !Util.isEmpty(filter.applyFilter(lowercaseKeywords, Collections.singleton(competitor)));
     }
 

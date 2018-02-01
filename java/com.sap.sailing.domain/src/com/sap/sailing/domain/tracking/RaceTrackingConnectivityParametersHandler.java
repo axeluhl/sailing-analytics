@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public interface RaceTrackingConnectivityParametersHandler {
      * The types of the value objects must be restricted to thos types that MongoDB can handle as field values,
      * in particular {@link String}, {@link Number} and {@link UUID}. 
      */
-    Map<String, Object> mapFrom(RaceTrackingConnectivityParameters params);
+    Map<String, Object> mapFrom(RaceTrackingConnectivityParameters params) throws MalformedURLException;
     
     /**
      * Produces a {@link RaceTrackingConnectivityParameters} object from the contents of {@code map}, ignoring the
@@ -34,6 +35,9 @@ public interface RaceTrackingConnectivityParametersHandler {
      * finding} this service instance in the first place. The object returned is equivalent to one that has
      * produced {@code map} by passing it to this service's {@link #mapFrom(RaceTrackingConnectivityParameters)}
      * method.
+     * 
+     * @return {@code null} in case the object cannot be produced, e.g., because the leaderboard to which a
+     * race log-tracked race belonged has been deleted in the meantime.
      */
     RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws Exception;
 
@@ -42,5 +46,5 @@ public interface RaceTrackingConnectivityParametersHandler {
      *         {@link RaceTrackingConnectivityParameters#getTypeIdentifier()} as well as a non-empty set of further
      *         entries that uniquely identify the {@code params} object in the database, in particular for removing.
      */
-    Map<String, Object> getKey(RaceTrackingConnectivityParameters params);
+    Map<String, Object> getKey(RaceTrackingConnectivityParameters params) throws MalformedURLException;
 }

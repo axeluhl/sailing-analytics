@@ -16,6 +16,8 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public abstract class AbstractResultsPresenter<SettingsType extends Settings> extends AbstractComponent<SettingsType>
 implements ResultsPresenterWithControls<SettingsType> {
@@ -35,14 +37,14 @@ implements ResultsPresenterWithControls<SettingsType> {
     private QueryResultDTO<?> currentResult;
     private boolean isCurrentResultSimple;
     
-    public AbstractResultsPresenter(StringMessages stringMessages) {
+    public AbstractResultsPresenter(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
-        
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
         mainPanel.addNorth(controlsPanel, 40);
-        
         Button exportButton = new Button("Export");
         exportButton.setEnabled(false);
         exportButton.addClickHandler(new ClickHandler() {
@@ -54,16 +56,12 @@ implements ResultsPresenterWithControls<SettingsType> {
             }
         });
 //        addControl(exportButton);
-
         presentationPanel = new DeckLayoutPanel();
         mainPanel.add(presentationPanel);
-        
         errorLabel = new HTML();
         errorLabel.setStyleName("chart-importantMessage");
-        
         labeledBusyIndicator = new HTML(stringMessages.runningQuery());
         labeledBusyIndicator.setStyleName("chart-busyMessage");
-
         showError(getStringMessages().runAQuery());
     }
     
@@ -85,11 +83,9 @@ implements ResultsPresenterWithControls<SettingsType> {
                 presentationPanel.setWidget(getPresentationWidget());
                 state = ResultsPresenterState.RESULT;
             }
-            
             this.currentResult = result;
             updateCurrentResultInfo();
-            
-            internalShowResult(getCurrentResult());
+            internalShowResults(getCurrentResult());
         } else {
             this.currentResult = null;
             updateCurrentResultInfo();
@@ -97,7 +93,7 @@ implements ResultsPresenterWithControls<SettingsType> {
         }
     }
 
-    abstract protected void internalShowResult(QueryResultDTO<?> result);
+    abstract protected void internalShowResults(QueryResultDTO<?> result);
 
     protected abstract Widget getPresentationWidget();
 
@@ -108,7 +104,6 @@ implements ResultsPresenterWithControls<SettingsType> {
             errorLabel.setHTML(SafeHtmlUtils.fromString(error).asString());
             state = ResultsPresenterState.ERROR;
         }
-        
         currentResult = null;
         updateCurrentResultInfo();
         presentationPanel.setWidget(errorLabel);
@@ -130,7 +125,6 @@ implements ResultsPresenterWithControls<SettingsType> {
             presentationPanel.setWidget(labeledBusyIndicator);
             state = ResultsPresenterState.BUSY;
         }
-        
         currentResult = null;
         updateCurrentResultInfo();
     }

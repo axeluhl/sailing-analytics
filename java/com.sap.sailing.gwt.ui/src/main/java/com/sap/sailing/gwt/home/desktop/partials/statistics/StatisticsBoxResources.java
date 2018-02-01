@@ -12,6 +12,7 @@ public interface StatisticsBoxResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String box();
+        String box_embedded();
         String box_header();
         String box_content();
         String box_content_item();

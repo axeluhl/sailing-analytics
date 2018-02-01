@@ -74,7 +74,7 @@ public class RaceCompetitionFormatDataCalculator implements RaceCallback {
     }
     
     private class SeriesFleetData {
-        private final Set<SimpleRaceMetadataDTO> races = new HashSet<>();
+        private final Set<SimpleRaceMetadataDTO> races = new LinkedHashSet<>();
         private final Set<SimpleCompetitorDTO> competitors = new HashSet<>();
     }
 

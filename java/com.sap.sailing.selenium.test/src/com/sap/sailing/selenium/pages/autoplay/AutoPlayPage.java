@@ -34,7 +34,7 @@ public class AutoPlayPage extends HostPage {
      * @throws UnsupportedEncodingException 
      */
     public static AutoPlayPage goToPage(WebDriver driver, String root) {
-        driver.get(root + "gwt/AutoPlay.html?" + getGWTCodeServer()); //$NON-NLS-1$
+        driver.get(root + "gwt/AutoPlay.html?" + getGWTCodeServerAndLocale()); //$NON-NLS-1$
         
         return new AutoPlayPage(driver);
     }

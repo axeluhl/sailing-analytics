@@ -1,10 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -20,7 +18,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
@@ -32,13 +29,11 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -71,7 +66,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return trackedLeg.getLeg();
     }
     
-    private TrackedRace getTrackedRace() {
+    private TrackedRaceImpl getTrackedRace() {
         return getTrackedLeg().getTrackedRace();
     }
 
@@ -271,29 +266,28 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     /**
      * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
-     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
-     * the leg's direction.
-     * @param windPositionMode see {@link #getWind(Position, TimePoint, Set)}
+     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto the
+     * leg's direction.
      * 
-     * @throws NoWindException in case the wind direction is not known
+     * @param speed
+     *            if {@code null} then {@code null} will be returned
+     * @param windPositionMode
+     *            see {@link #getWind(Position, TimePoint, Set)}
+     * 
+     * @throws NoWindException
+     *             in case the wind direction is not known
      */
     private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, final TimePoint at, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) {
-        SpeedWithBearing result = null;
+        final SpeedWithBearing result;
         if (speed != null) {
             Bearing projectToBearing;
             try {
                 if (cache.getLegType(getTrackedLeg(), at) != LegType.REACHING) {
-                    final Wind wind;
-                    if (windPositionMode == WindPositionMode.EXACT) {
-                        wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
-                    } else {
-                        wind = getTrackedRace().getWind(
-                                getTrackedLeg().getEffectiveWindPosition(
-                                        () -> getTrackedRace().getTrack(getCompetitor())
-                                                .getEstimatedPosition(at, false), at, windPositionMode), at);
-                    }
+                    final Wind wind = getTrackedRace().getWind(windPositionMode, getTrackedLeg(), getCompetitor(), at, cache);
                     if (wind == null) {
+                        // This is not really likely to happen because wind==null would have let the call
+                        // to cache.getLegType(...) fail with a NoWindException
                         throw new NoWindException("Need at least wind direction to determine windward speed");
                     }
                     projectToBearing = wind.getBearing();
@@ -310,7 +304,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     projectToBearing = projectToBearing.reverse();
                 }
                 result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
+            } else {
+                result = null;
             }
+        } else {
+            result = null;
         }
         return result;
     }
@@ -382,14 +380,21 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
-        MarkPassing legEnd = getMarkPassingForLegEnd();
-        TimePoint end = timePoint;
-        if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
-            // timePoint is after leg finish; take leg end and end time point
-            end = legEnd.getTimePoint();
+        final Iterable<Maneuver> maneuvers;
+        MarkPassing legStart = getMarkPassingForLegStart();
+        if (legStart == null) {
+            maneuvers = Collections.emptyList();
+        } else {
+            TimePoint start = legStart.getTimePoint();
+            MarkPassing legEnd = getMarkPassingForLegEnd();
+            TimePoint end = timePoint;
+            if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
+                // timePoint is after leg finish; take leg end and end time point
+                end = legEnd.getTimePoint();
+            }
+            maneuvers = getTrackedRace().getManeuvers(getCompetitor(),
+                    start, end, waitForLatest);
         }
-        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(),
-                getMarkPassingForLegStart().getTimePoint(), end, waitForLatest);
         return maneuvers;
     }
 
@@ -456,7 +461,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             } else {
                                 Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
                                         .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
-                                result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                                if (distanceToNextMark != null) {
+                                    result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                                } else {
+                                    result = null;
+                                    break;
+                                }
                             }
                             currentPosition = nextMarkPosition;
                         } else {
@@ -643,7 +653,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    public SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         if (hasStartedLeg(at)) {
             TimePoint timePoint;
             if (hasFinishedLeg(at)) {
@@ -676,10 +686,38 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
+    public Bearing getHeel(TimePoint at) {
+        final Bearing result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getHeel(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Bearing getPitch(TimePoint at) {
+        final Bearing result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getPitch(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
     public Distance getRideHeight(TimePoint at) {
         final Distance result;
         if (hasStartedLeg(at)) {
-            TimePoint timePoint =hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
             BravoFixTrack<Competitor> track = getTrackedRace()
                     .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
             result = track == null ? null : track.getRideHeight(timePoint);
@@ -689,6 +727,37 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return result;
     }
     
+    @Override
+    public Distance getDistanceFoiled(TimePoint at) {
+        final Distance result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null
+                    : track.getDistanceSpentFoiling(getMarkPassingForLegStart().getTimePoint(),
+                            timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration getDurationFoiled(TimePoint at) {
+        final Duration result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null
+                    : track.getTimeSpentFoiling(getMarkPassingForLegStart().getTimePoint(), timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     @Override
     public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) {
         return getEstimatedTimeToNextMark(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
@@ -712,18 +781,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getManeuverLoss(TimePoint timePointBeforeManeuver,
-            TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException {
-        assert timePointBeforeManeuver != null;
-        assert timePointAfterManeuver != null;
+    public Distance getManeuverLoss(TimePoint timePointWhenSpeedStartedToDrop, TimePoint maneuverTimePoint,
+            TimePoint timePointWhenSpeedLevelledOffAfterManeuver) {
+        assert timePointWhenSpeedStartedToDrop != null;
+        assert timePointWhenSpeedLevelledOffAfterManeuver != null;
         Distance result;
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        List<GPSFixMoving> fixes = getFixesToConsiderForManeuverLossAnalysis(timePointBeforeManeuver,
-                maneuverTimePoint, timePointAfterManeuver);
-        TimePoint timePointWhenSpeedStartedToDrop = fixes.get(0).getTimePoint();
         SpeedWithBearing speedWhenSpeedStartedToDrop = track.getEstimatedSpeed(timePointWhenSpeedStartedToDrop);
         if (speedWhenSpeedStartedToDrop != null) {
-            TimePoint timePointWhenSpeedLevelledOffAfterManeuver = fixes.get(fixes.size()-1).getTimePoint();
             SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
             if (speedAfterManeuver != null) {
                 // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
@@ -750,138 +815,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return result;
     }
 
-    /**
-     * Fetches the set of fixes that encompass the maneuver. Usually, during a maneuver a boat loses speed over ground
-     * before it has reached the new tack and starts accelerating again, until the speed levels off. We assume that the
-     * <code>timePointBeforeManeuver</code> minus some excess time based on the approximate maneuver duration is the
-     * earliest time point to analyze. Starting there, we look for speed over ground minima between then and
-     * <code>timePointAfterManeuver</code> plus three times the approximate maneuver time as excess time. There may be
-     * multiple minima. We choose the one that has the best "fit" in terms of being close to the
-     * <code>maneuverTimePoint</code> and being low in terms of speed over ground. From that time point, the nearest
-     * maximum speeds over ground before and after are determined, and the fixes between them are returned.
-     */
-    private List<GPSFixMoving> getFixesToConsiderForManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
-            TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) {
-        final long EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
-        final long EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS = 3*EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS;
-        List<GPSFixMoving> fixes = new ArrayList<>();
-        NavigableSet<GPSFixMoving> maxima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
-        NavigableSet<GPSFixMoving> minima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
-        GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        Speed lastSpeed = Speed.NULL;
-        Speed lastLastSpeed = Speed.NULL;
-        GPSFixMoving lastFix = null;
-        Speed minimumSpeed = new KnotSpeedImpl(Double.MAX_VALUE);
-        track.lockForRead();
-        try {
-            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(
-                    timePointBeforeManeuver.minus(EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS), /* inclusive */true);
-            GPSFixMoving fix;
-            // The timePointAfterManeuver is determined based on the geometric shape of the boat's trajectory, not on
-            // the speed development. To understand the full maneuver loss, we need to follow the boat speed until it levels off,
-            // but no further than some reasonable threshold because the wind may continue to pick up, letting the boat accelerate
-            // over a time much longer than accounted for by the maneuver.
-            while (fixIter.hasNext()) {
-                fix = fixIter.next();
-                final SpeedWithBearing estimatedSpeedAtFix = track.getEstimatedSpeed(fix.getTimePoint());
-                if (lastFix != null && lastSpeed != null && lastLastSpeed != null && estimatedSpeedAtFix != null) {
-                    if (lastSpeed.compareTo(lastLastSpeed) > 0 && lastSpeed.compareTo(estimatedSpeedAtFix) > 0) {
-                        maxima.add(lastFix);
-                    } else if (lastSpeed.compareTo(lastLastSpeed) < 0 && lastSpeed.compareTo(estimatedSpeedAtFix) < 0) {
-                        minima.add(lastFix);
-                        if (lastSpeed.compareTo(minimumSpeed) < 0) {
-                            minimumSpeed = lastSpeed;
-                        }
-                    }
-                }
-                if (fix.getTimePoint().after(timePointAfterManeuver.plus(EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS))) {
-                    break;
-                }
-                fixes.add(fix);
-                lastLastSpeed = lastSpeed;
-                lastSpeed = estimatedSpeedAtFix;
-                lastFix = fix;
-            }
-        } finally {
-            track.unlockAfterRead();
-        }
-        GPSFixMoving fixWithLowestSpeedOverGround = getBestFittingSpeedMinimumInManeuver(minima, maxima, minimumSpeed, maneuverTimePoint);
-        if (fixWithLowestSpeedOverGround == null) {
-            fixWithLowestSpeedOverGround = fixes.get(0);
-        }
-        // now remove all fixes before the last maximum before the fix with the lowest speed over ground during the maneuver if
-        // there was such a maximum; otherwise, leave all fixes from the maneuver start on in place.
-        final long MAX_SMOOTHENING_INTERVAL_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
-        GPSFixMoving lastMaxSpeedFixBeforeLowSpeed = maxima.lower(fixWithLowestSpeedOverGround);
-        // now check if there's a greater one that's only a little bit earlier
-        if (lastMaxSpeedFixBeforeLowSpeed != null) {
-            GPSFixMoving stillGreater;
-            while ((stillGreater=maxima.lower(lastMaxSpeedFixBeforeLowSpeed)) != null &&
-                    track.getEstimatedSpeed(stillGreater.getTimePoint()).compareTo(
-                            track.getEstimatedSpeed(lastMaxSpeedFixBeforeLowSpeed.getTimePoint())) > 0 &&
-                    lastMaxSpeedFixBeforeLowSpeed.getTimePoint().asMillis()-
-                    stillGreater.getTimePoint().asMillis() < MAX_SMOOTHENING_INTERVAL_MILLIS) {
-                lastMaxSpeedFixBeforeLowSpeed = stillGreater;
-            }
-            Iterator<GPSFixMoving> i = fixes.iterator();
-            while (i.hasNext() && i.next().getTimePoint().before(lastMaxSpeedFixBeforeLowSpeed.getTimePoint())) {
-                i.remove();
-            }
-        }
-        // now remove all fixes after the first maximum after the global minimum:
-        GPSFixMoving firstMaxSpeedFixAfterLowSpeed = maxima.higher(fixWithLowestSpeedOverGround);
-        if (firstMaxSpeedFixAfterLowSpeed != null) {
-            GPSFixMoving stillGreater;
-            while ((stillGreater=maxima.higher(firstMaxSpeedFixAfterLowSpeed)) != null &&
-                    track.getEstimatedSpeed(stillGreater.getTimePoint()).compareTo(
-                            track.getEstimatedSpeed(firstMaxSpeedFixAfterLowSpeed.getTimePoint())) > 0 &&
-                    stillGreater.getTimePoint().asMillis() - firstMaxSpeedFixAfterLowSpeed.getTimePoint().asMillis()
-                     < MAX_SMOOTHENING_INTERVAL_MILLIS) {
-                firstMaxSpeedFixAfterLowSpeed = stillGreater;
-            }
-            ListIterator<GPSFixMoving> i = fixes.listIterator(fixes.size());
-            while (i.hasPrevious() && i.previous().getTimePoint().after(firstMaxSpeedFixAfterLowSpeed.getTimePoint())) {
-                i.remove();
-            }
-        }
-        return fixes;
-    }
-
-    private GPSFixMoving getBestFittingSpeedMinimumInManeuver(NavigableSet<GPSFixMoving> minima,
-            NavigableSet<GPSFixMoving> maxima, Speed minimumSpeed, TimePoint maneuverTimePoint) {
-        // Idea: being 10x the approximate maneuver duration away from maneuverTimePoint is as bad as having twice the percentage between min
-        // and max speed (min = 0%; max=100%).
-        GPSFixMoving bestSpeedMinimum = null;
-        Speed maxSpeed = null;
-        for (GPSFixMoving maximum : maxima) {
-            if (maxSpeed == null || maximum.getSpeed().getKnots() > maxSpeed.getKnots()) {
-                maxSpeed = maximum.getSpeed();
-            }
-        }
-        if (maxSpeed != null) {
-            double speedDifferenceBetweenMaxAndMinInKnots = maxSpeed.getKnots() - minimumSpeed.getKnots();
-            double lowestBadness = Double.MAX_VALUE;
-            final long approximateManeuverTimeInMillis = getCompetitor().getBoat().getBoatClass()
-                    .getApproximateManeuverDurationInMilliseconds();
-            final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-            for (GPSFixMoving minimum : minima) {
-                // best speedBadness can be 1 which represents the absolute speed minimum in the interval considered
-                double speedBadness = 1 + (track.getEstimatedSpeed(minimum.getTimePoint()).getKnots() - minimumSpeed.getKnots()) /
-                        speedDifferenceBetweenMaxAndMinInKnots;
-                // best timePointBadness can be 1 which is a minimum exactly at the maneuver time point
-                double timePointBadness = 1.
-                        + (double) Math.abs(minimum.getTimePoint().asMillis() - maneuverTimePoint.asMillis())
-                        / (double) approximateManeuverTimeInMillis / 10.;
-                final double totalBadness = speedBadness * timePointBadness;
-                if (totalBadness < lowestBadness) {
-                    bestSpeedMinimum = minimum;
-                    lowestBadness = totalBadness;
-                }
-            }
-        }
-        return bestSpeedMinimum;
-    }
-    
     @Override
     public Bearing getBeatAngle(TimePoint at) throws NoWindException {
         return getBeatAngle(at, new LeaderboardDTOCalculationReuseCache(at));
@@ -903,6 +836,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return beatAngle;
     }
     
+
     @Override
     public String toString() {
         return "TrackedLegOfCompetitor for "+getCompetitor()+" in leg "+getLeg();

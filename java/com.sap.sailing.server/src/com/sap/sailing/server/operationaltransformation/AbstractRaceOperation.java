@@ -25,4 +25,8 @@ public abstract class AbstractRaceOperation<ResultType> extends AbstractRacingEv
         return raceIdentifier;
     }
 
+    @Override
+    public String toString() {
+        return super.toString()+" [raceIdentifier=" + raceIdentifier + "]";
+    }
 }

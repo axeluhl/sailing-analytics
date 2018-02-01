@@ -17,9 +17,12 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Settings> {
     
@@ -32,9 +35,9 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     
     private final LinkedHashSet<String> signifiers;
     private final Map<GroupKey, Map<String, Number>> results;
-
-    public PlainResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+    
+    public PlainResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         signifiers = new LinkedHashSet<>();
         results = new HashMap<>();
         
@@ -46,13 +49,12 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     }
 
     @Override
-    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResults(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
         boolean appendResult = appendResultCheckBox.getValue();
         if (!appendResult) {
             signifiers.clear();
             results.clear();
         }
-        
         String currentSignifier = getCurrentResult().getResultSignifier();
         signifiers.add(currentSignifier);
         for (Entry<GroupKey, Number> entry : resultValues.entrySet()) {
@@ -79,7 +81,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
             buildList(displayBuilder);
         }
         displayBuilder.appendHtmlConstant("</table>");
-        
         resultsLabel.setHTML(displayBuilder.toSafeHtml().asString());
     }
 
@@ -118,7 +119,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
         }
         displayBuilder.appendHtmlConstant("</tr>");
     }
-
     private void buildTableRow(GroupKey rowKey, Iterable<?> orderedColumnKeys, Map<?, Number> columnValues, SafeHtmlBuilder displayBuilder) {
         displayBuilder.appendHtmlConstant("<tr>");
         displayBuilder.appendHtmlConstant("<td><b>").appendEscaped(rowKey + ":").appendHtmlConstant("</b></td>");
@@ -183,7 +183,7 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
@@ -200,5 +200,10 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     @Override
     public Settings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "prp";
     }
 }

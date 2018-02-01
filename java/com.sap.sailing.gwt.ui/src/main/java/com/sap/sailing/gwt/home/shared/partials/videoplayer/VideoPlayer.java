@@ -65,6 +65,7 @@ public class VideoPlayer extends Composite {
         playButton.setVisible(true);
     }
     
+
     public void setVideo(VideoDTO video) {
         if(!initialized) {
             initialize();
@@ -80,5 +81,9 @@ public class VideoPlayer extends Composite {
     }
     public boolean paused() {
         return videoJSPlayer.paused();
+    }
+
+    public void play() {
+        videoJSPlayer.play();
     }
 }

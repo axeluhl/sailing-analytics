@@ -27,13 +27,24 @@
     <link rel="stylesheet" type="text/css" href="LeaderboardNewHome.css">
     <link rel="stylesheet" type="text/css" href="RaceBoard.css">
     
-    <!--                                           -->
-    <!-- This script loads your compiled module.   -->
-    <!-- If you add any GWT meta tags, they must   -->
-    <!-- be added before this line.                -->
-    <!--                                           -->
-    <script type="text/javascript" src="com.sap.sailing.gwt.AutoPlay/com.sap.sailing.gwt.AutoPlay.nocache.js"></script>
+
+    <link  href="js/video-js/video-js.min.css" rel="stylesheet">
+    <link  href="js/video-js/video-js-sapsailing.css" rel="stylesheet">
+    <script src="js/video-js/video.min.js"></script>
+    <script src="js/three.js"></script>
+    <link rel="stylesheet" type="text/css" href="js/videojs-panorama.min.css"/>
+    <script src="js/videojs-panorama.v5.min.js"></script>   
+    <script src="js/Youtube.min.js"></script>
+    <script src="js/Vimeo.js"></script>
+    <script>
+        videojs.options.techOrder = ['vimeo', 'youtube',  'html5'];
+    </script>
+
+    <script type="text/javascript" src="com.sap.sailing.gwt.autoplay.AutoPlay/com.sap.sailing.gwt.autoplay.AutoPlay.nocache.js"></script>
     <script type="text/javascript" src="js/jquery-1.5.2.min.js"></script>
+
+   <!-- Client-side QR code generation -->
+   <script type="text/javascript" src="qrcode/qrcode.min.js"></script>
     
   </head>
 

@@ -4,6 +4,8 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -39,6 +41,10 @@ public class PlaceNavigation<T extends Place> {
 
     public String getTargetUrl() {
         return buildPlaceUrl();
+    }
+
+    public SafeUri getSafeTargetUrl() {
+        return UriUtils.fromString(getTargetUrl());
     }
 
     public String getHistoryUrl() {

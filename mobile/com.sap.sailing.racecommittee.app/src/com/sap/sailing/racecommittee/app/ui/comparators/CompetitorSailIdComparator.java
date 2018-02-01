@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.comparators;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
 public class CompetitorSailIdComparator implements Comparator<Competitor> {
@@ -25,6 +26,14 @@ public class CompetitorSailIdComparator implements Comparator<Competitor> {
             return 1;
         }
 
-        return comparator.compare(left.getBoat().getSailID(), right.getBoat().getSailID());
+        String leftBoat = "";
+        for (String lh : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(left.getBoat().getSailID())) {
+            leftBoat = lh;
+        }
+        String rightBoat = "";
+        for (String rh : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(right.getBoat().getSailID())) {
+            rightBoat = rh;
+        }
+        return comparator.compare(leftBoat, rightBoat);
     }
 }

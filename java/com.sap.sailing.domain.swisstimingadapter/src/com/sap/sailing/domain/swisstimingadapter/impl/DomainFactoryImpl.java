@@ -142,7 +142,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     /* dateOfBirth */ null, teamMemberName.trim()));
         }
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-        result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
+        result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), competitor.getName(), raceId, boatClass),
                 competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         return result;
@@ -153,17 +153,25 @@ public class DomainFactoryImpl implements DomainFactory {
         return createCompetitorWithoutID(new CompetitorWithoutID(boatID, threeLetterIOCCode, name), raceId, boatClass);
     }
 
-    private String getCompetitorID(String boatID, String raceId, BoatClass boatClass) {
+    private String getCompetitorID(String boatID, String name, String raceId, BoatClass boatClass) {
         String result = null;
-        if(boatClass != null) {
-            result = getCompetitorID(boatID, boatClass);
+        if (boatClass != null) {
+            result = getCompetitorID(boatID, name, boatClass);
         } else {
             RaceType raceType = getRaceTypeFromRaceID(raceId);
             if (raceType != null) {
-                result = getCompetitorID(boatID, raceType);
+                result = getCompetitorID(boatID, name, raceType);
             }
         }
         return result;
+    }
+
+    private String getCompetitorID(String boatID, String name, BoatClass boatClass) {
+        return getCompetitorID(boatID, boatClass) + "/" + name;
+    }
+
+    private String getCompetitorID(String boatID, String name, RaceType raceType) {
+        return getCompetitorID(boatID, raceType) + "/" + name;
     }
 
     @Override

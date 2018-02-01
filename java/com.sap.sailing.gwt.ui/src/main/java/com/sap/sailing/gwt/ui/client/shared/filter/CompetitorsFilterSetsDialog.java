@@ -123,7 +123,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                         filterSets.add(filterSet);
                         
                         updateCompetitorsFilterSetsGrid(mainPanel);
-                        validate();
+                        validateAndUpdate();
                     }
 
                     @Override
@@ -185,7 +185,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                         filterSets.add(changedFilterSet);                        
 
                         updateCompetitorsFilterSetsGrid(mainPanel);
-                        validate();
+                        validateAndUpdate();
                     }
 
                     @Override
@@ -224,7 +224,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                 deleteFilterSetButtons.remove(index);
                 filterSets.remove(index);
                 updateCompetitorsFilterSetsGrid(mainPanel);
-                validate();
+                validateAndUpdate();
             }
         });
         return deleteFilterSetBtn; 

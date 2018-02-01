@@ -18,10 +18,11 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -127,12 +128,13 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             public SafeHtml getValue(CompetitorDescriptor competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 ImageResourceRenderer renderer = new ImageResourceRenderer();
-                final String twoLetterIsoCountryCode = competitor.getCountryCode().getTwoLetterISOCode();
+                final CountryCode countryCode = competitor.getCountryCode();
+                final String twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
                 final ImageResource flagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
-                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                    flagImageResource = FlagImageResolverImpl.get().getEmptyFlagImageResource();
                 } else {
-                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (flagImageResource != null) {
                     sb.append(renderer.render(flagImageResource));

@@ -16,14 +16,14 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
     
     override func viewDidLoad() {
         dataSource = self
-        page1 = storyboard!.instantiateViewControllerWithIdentifier("Timer") as? TimerViewController
-        page2 = storyboard!.instantiateViewControllerWithIdentifier("Course")
-        page3 = storyboard!.instantiateViewControllerWithIdentifier("Speed")
-        setViewControllers([page1!], direction: UIPageViewControllerNavigationDirection.Forward, animated: false, completion: nil)
+        page1 = storyboard!.instantiateViewController(withIdentifier: "Timer") as? TimerViewController
+        page2 = storyboard!.instantiateViewController(withIdentifier: "Course")
+        page3 = storyboard!.instantiateViewController(withIdentifier: "Speed")
+        setViewControllers([page1!], direction: UIPageViewControllerNavigationDirection.forward, animated: false, completion: nil)
     }
     
-    func pageViewController(pageViewController: UIPageViewController,
-        viewControllerBeforeViewController viewController: UIViewController) -> UIViewController? {
+    func pageViewController(_ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController) -> UIViewController? {
             if (viewController == page1) {
                 return page3
             } else if (viewController == page2) {
@@ -34,7 +34,7 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
             return nil
     }
     
-    func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         if (viewController == page1) {
             return page2
         } else if (viewController == page2) {
@@ -45,11 +45,11 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
         return nil
     }
     
-    func presentationCountForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationCount(for pageViewController: UIPageViewController) -> Int {
         return 3
     }
     
-    func presentationIndexForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationIndex(for pageViewController: UIPageViewController) -> Int {
         return 0
     }
     

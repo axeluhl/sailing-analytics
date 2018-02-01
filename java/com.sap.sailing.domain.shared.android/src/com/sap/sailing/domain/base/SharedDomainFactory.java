@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sse.common.Color;
 
 public interface SharedDomainFactory extends CompetitorFactory {
 
@@ -44,15 +45,15 @@ public interface SharedDomainFactory extends CompetitorFactory {
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
      * and <code>shape</code> as its {@link Mark#getShape()}.
      */
-    Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern);
+    Mark getOrCreateMark(Serializable id, String name, MarkType type, Color color, String shape, String pattern);
     
     /**
      * @see #getOrCreateMark(String, String)
      */
-    Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type, String color, String shape, String pattern);
+    Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type, Color color, String shape, String pattern);
 
     /**
-     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
+     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createControlPointWithTwoMarks(Serializable, Mark, Mark, String)} instead
      */
     ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
 

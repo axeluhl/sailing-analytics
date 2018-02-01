@@ -35,6 +35,7 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -124,9 +125,9 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         result.lockForRead();
         try {
             for (Wind wind : result.getRawFixes()) {
-                assertEquals(pos, wind.getPosition());
-                assertEquals(10., wind.getKnots(), 0.000000000001);
-                assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.000000001);
+                PositionAssert.assertPositionEquals(pos, wind.getPosition(), /* deg delta */ 0.000001);
+                assertEquals(10., wind.getKnots(), 0.01);
+                assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.01);
                 myBearingDeg += 1.1;
             }
         } finally {

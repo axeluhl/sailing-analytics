@@ -33,7 +33,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
-        usersCollection.createIndex(new BasicDBObject(FieldNames.User.NAME.name(), null));
+        usersCollection.createIndex(new BasicDBObject(FieldNames.User.NAME.name(), 1));
         DBObject dbUser = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.User.NAME.name(), user.getName());
         dbUser.put(FieldNames.User.NAME.name(), user.getName());
@@ -86,7 +86,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeSettings(Map<String, Object> settings) {
         DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
-        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), null));
+        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), 1));
         DBObject dbSettings = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
@@ -98,7 +98,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storePreferences(String username, Map<String, String> userMap) {
         DBCollection settingCollection = db.getCollection(CollectionNames.PREFERENCES.name());
-        settingCollection.createIndex(new BasicDBObject(FieldNames.Preferences.USERNAME.name(), null));
+        settingCollection.createIndex(new BasicDBObject(FieldNames.Preferences.USERNAME.name(), 1));
         BasicDBList dbSettings = new BasicDBList();
         for (Entry<String, String> e : userMap.entrySet()) {
             DBObject entry = new BasicDBObject();
@@ -115,7 +115,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeSettingTypes(Map<String, Class<?>> settingTypes) {
         DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
-        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), null));
+        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), 1));
         DBObject dbSettingTypes = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());

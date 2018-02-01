@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file datatype="javapropertyresourcebundle" date="2017-04-19T13:57:12Z" original="/usr/sap/ljs/app/Converter_5099745395718684415/java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.properties" source-language="en" target-language="es">
+		<header>
+			<skl>
+				<internal-file crc="1a97a5a016bf3357b3f0613d523b2ebc" form="base64">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</internal-file>
+			</skl>
+			<phase-group>
+				<phase company-name="SAP AG" date="2016-12-09T08:12:06Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+			</phase-group>
+			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
+		</header>
+		<body>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="name" resname="name">
+				<source>Name</source>
+				<target state="signed-off">Nombre</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="company" resname="company">
+				<source>Company</source>
+				<target state="signed-off">Empresa</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="password" resname="password">
+				<source>Password</source>
+				<target state="signed-off">Clave de acceso</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordRepeat" resname="passwordRepeat">
+				<source>Repeat password</source>
+				<target state="signed-off">Repetir clave de acceso</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="loggedIn" resname="loggedIn">
+				<source>Logged in as user <ph id="1">{0}</ph>!</source>
+				<target state="signed-off">Registrado como usuario <ph id="1">{0}</ph>!</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signIn" resname="signIn">
+				<source>Sign in</source>
+				<target state="signed-off">Iniciar sesión</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signUp" resname="signUp">
+				<source>Sign up</source>
+				<target state="signed-off">Registrar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signOut" resname="signOut">
+				<source>Sign out</source>
+				<target state="signed-off">Finalizar sesión</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="invalidUsername" resname="invalidUsername">
+				<source>Invalid username</source>
+				<target state="signed-off">Nombre de usuario no válido</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="couldNotSignOut" resname="couldNotSignOut">
+				<source>Could not sign out: <ph id="1">{0}</ph></source>
+				<target state="signed-off">No se ha podido finalizar la sesión: <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="createUser" resname="createUser">
+				<source>Create user</source>
+				<target state="signed-off">Crear usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="settings" resname="settings">
+				<source>Settings</source>
+				<target state="signed-off">Opciones</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="filterUsers" resname="filterUsers">
+				<source>Filter users...</source>
+				<target state="signed-off">Filtrar usuarios...</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="welcome" resname="welcome">
+				<source>Welcome, <ph id="1">{0}</ph>!</source>
+				<target state="signed-off">Bienvenido, <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="tryingToVerifyUser" resname="tryingToVerifyUser">
+				<source>Trying to verify user...</source>
+				<target state="signed-off">Intentando verificar el usuario...</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="fetchingUserInformation" resname="fetchingUserInformation">
+				<source>Fetching user information...</source>
+				<target state="signed-off">Trayendo información del usuario...</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signedInAs" resname="signedInAs">
+				<source>Signed in as <ph id="1">{0}</ph></source>
+				<target state="signed-off">Registrado como <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signedInAsTitle" resname="signedInAsTitle">
+				<source>Signed in as:</source>
+				<target state="signed-off">Registrado como:</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="close" resname="close">
+				<source>Close</source>
+				<target state="signed-off">Cerrar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="loading" resname="loading">
+				<source>Loading...</source>
+				<target state="signed-off">Cargando...</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="user" resname="user">
+				<source>User</source>
+				<target state="signed-off">Usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="users" resname="users">
+				<source>Users</source>
+				<target state="signed-off">Usuarios</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="addURLFilter" resname="addURLFilter">
+				<source>Add URL filter</source>
+				<target state="signed-off">Añadir filtro URL</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ok" resname="ok">
+				<source>OK</source>
+				<target state="signed-off">OK</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="cancel" resname="cancel">
+				<source>Cancel</source>
+				<target state="signed-off">Cancelar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="username" resname="username">
+				<source>Username</source>
+				<target state="signed-off">Nombre de usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="email" resname="email">
+				<source>e-mail</source>
+				<target state="signed-off">Correo electrónico</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="usernameMustHaveAtLeastNCharacters" resname="usernameMustHaveAtLeastNCharacters">
+				<source>Please enter a username with at least <ph id="1">{0}</ph> characters</source>
+				<target state="signed-off">Indique un nombre de usuario con como mínimo <ph id="1">{0}</ph> caracteres</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordMustHaveAtLeastNCharacters" resname="passwordMustHaveAtLeastNCharacters">
+				<source>Please use a password that has at least <ph id="1">{0}</ph> characters</source>
+				<target state="signed-off">Utilice una clave de acceso que tenga como mínimo <ph id="1">{0}</ph> caracteres</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordsDontMatch" resname="passwordsDontMatch">
+				<source>Passwords must match</source>
+				<target state="signed-off">Las claves de acceso deben corresponderse</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="couldNotCreateUser" resname="couldNotCreateUser">
+				<source>Could not create user: <ph id="1">{0}</ph></source>
+				<target state="signed-off">No se ha podido crear el usuario: <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="changePassword" resname="changePassword">
+				<source>Change password</source>
+				<target state="signed-off">Modificar clave de acceso</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="userDetails" resname="userDetails">
+				<source>User details</source>
+				<target state="signed-off">Detalles de usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="deleteUser" resname="deleteUser">
+				<source>Delete user</source>
+				<target state="signed-off">Borrar usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="deleteUserQuestion" resname="deleteUserQuestion">
+				<source>Delete user?</source>
+				<target state="signed-off">¿Desea borrar el usuario?</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="doYouReallyWantToDeleteUser" resname="doYouReallyWantToDeleteUser">
+				<source>Do you really want to delete user <ph id="1">{0}</ph>?</source>
+				<target state="signed-off">¿Está seguro de que desea borrar el usuario <ph id="1">{0}</ph>?</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorDeletingUser" resname="errorDeletingUser">
+				<source>An error happened while deleting the user</source>
+				<target state="signed-off">Se ha producido un error al borrar el usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="account" resname="account">
+				<source><ph id="1">{0}</ph>-Account</source>
+				<target state="signed-off"><ph id="1">{0}</ph>-Cuenta</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="save" resname="save">
+				<source>Save</source>
+				<target state="signed-off">Grabar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="remove" resname="remove">
+				<source>Remove</source>
+				<target state="signed-off">Eliminar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="add" resname="add">
+				<source>Add</source>
+				<target state="signed-off">Añadir</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="edit" resname="edit">
+				<source>Edit</source>
+				<target state="signed-off">Tratar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorUpdatingRoles" resname="errorUpdatingRoles">
+				<source>Error updating roles for user <ph id="1">{0}</ph>: <ph id="2">{1}</ph></source>
+				<target state="signed-off">Error al actualizar los roles para el usuario <ph id="1">{0}</ph>: <ph id="2">{1}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorUpdatingPermissions" resname="errorUpdatingPermissions">
+				<source>Error updating permissions for user <ph id="1">{0}</ph>: <ph id="2">{1}</ph></source>
+				<target state="signed-off">Error al actualizar los permisos para el usuario <ph id="1">{0}</ph>: <ph id="2">{1}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="enterRoleName" resname="enterRoleName">
+				<source>Enter role name...</source>
+				<target state="signed-off">Indicar nombre de rol...</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="enterPermissionName" resname="enterPermissionName">
+				<source>Enter permission name...</source>
+				<target state="signed-off">Indicar nombre de permiso...</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorCreatingUser" resname="errorCreatingUser">
+				<source>Error signing up with username <ph id="1">{0}</ph>: <ph id="2">{1}</ph></source>
+				<target state="signed-off">Error al registrarse con el nombre de usuario <ph id="1">{0}</ph>: <ph id="2">{1}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signedUpSuccessfully" resname="signedUpSuccessfully">
+				<source>Successfully signed up user <ph id="1">{0}</ph>. Please check your e-mails to validate your e-mail account.</source>
+				<target state="signed-off">El usuario se ha registrado con éxito <ph id="1">{0}</ph>. Verifique sus correos electrónicos para validar su cuenta de correo electrónico.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="unknownErrorCreatingUser" resname="unknownErrorCreatingUser">
+				<source>Unknown error trying to sign up user with name <ph id="1">{0}</ph>. Perhaps another user with that name already exists.</source>
+				<target state="signed-off">Error desconocido al intentar registrar el usuario con el nombre <ph id="1">{0}</ph>. Es posible que ya exista otro usuario con ese nombre.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="userAlreadyExists" resname="userAlreadyExists">
+				<source>A user with name <ph id="1">{0}</ph> already exists</source>
+				<target state="signed-off">Ya existe un usuario con el nombre <ph id="1">{0}</ph> </target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="currentPassword" resname="currentPassword">
+				<source>Current password</source>
+				<target state="signed-off">Clave de acceso actual</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordSuccessfullyChanged" resname="passwordSuccessfullyChanged">
+				<source>Password successfully changed</source>
+				<target state="signed-off">Clave de acceso modificada con éxito</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordDoesNotMeetRequirements" resname="passwordDoesNotMeetRequirements">
+				<source>Password does not meet requirements</source>
+				<target state="signed-off">La clave de acceso no cumple los requisitos</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorChangingPassword" resname="errorChangingPassword">
+				<source>Error changing password: <ph id="1">{0}</ph></source>
+				<target state="signed-off">Error al modificar la clave de acceso: <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="invalidCredentials" resname="invalidCredentials">
+				<source>Invalid credentials</source>
+				<target state="signed-off">Credenciales no válidas</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="editEmail" resname="editEmail">
+				<source>Edit e-mail address</source>
+				<target state="signed-off">Tratar dirección de correo electrónico</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorUpdatingEmail" resname="errorUpdatingEmail">
+				<source>Error updating e-mail address: <ph id="1">{0}</ph></source>
+				<target state="signed-off">Error al actualizar la dirección de correo electrónico: <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="successfullyUpdatedEmail" resname="successfullyUpdatedEmail">
+				<source>Successfully updated e-mail address for user <ph id="1">{0}</ph>.\nValidation check sent to <ph id="2">{1}</ph>.</source>
+				<target state="signed-off">Se ha actualizado con éxito la dirección de correo electrónico <ph id="1">{0}</ph>.\nVerificación de validación enviada a <ph id="2">{1}</ph>.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorUpdatingUserProperties" resname="errorUpdatingUserProperties">
+				<source>Error updating user properties: <ph id="1">{0}</ph></source>
+				<target state="signed-off">Error al actualizar las propiedades de usuario: <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="successfullyUpdatedUserProperties" resname="successfullyUpdatedUserProperties">
+				<source>Successfully updated properties for user <ph id="1">{0}</ph>.</source>
+				<target state="signed-off">Se han actualizado con éxito las propiedades del usuario <ph id="1">{0}</ph>.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="forgotPassword" resname="forgotPassword">
+				<source>Forgot password</source>
+				<target state="signed-off">He olvidado la clave de acceso</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorDuringPasswordReset" resname="errorDuringPasswordReset">
+				<source>Error during password reset: <ph id="1">{0}</ph></source>
+				<target state="signed-off">Error al reinicializar clave de acceso: <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="cannotResetPasswordWithoutValidatedEmail" resname="cannotResetPasswordWithoutValidatedEmail">
+				<source>Cannot reset password because user <ph id="1">{0}</ph> does not have a validated e-mail address</source>
+				<target state="signed-off">No se puede reinicializar la clave de acceso porque el usuario <ph id="1">{0}</ph> no tiene una dirección de correo electrónico validada</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordResetLinkSent" resname="passwordResetLinkSent">
+				<source>A link for resetting the password has been sent to <ph id="1">{0}</ph>''s validated e-mail address</source>
+				<target state="signed-off">Se ha enviado un enlace para reinicializar la clave de acceso a la dirección de correo electrónico validada de <ph id="1">{0}</ph>''s</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorValidatingEmail" resname="errorValidatingEmail">
+				<source>Error validating e-mail address of user <ph id="1">{0}</ph>: <ph id="2">{1}</ph></source>
+				<target state="signed-off">Error al validar la dirección de correo electrónico del usuario <ph id="1">{0}</ph>: <ph id="2">{1}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="emailValidatedSuccessfully" resname="emailValidatedSuccessfully">
+				<source>e-mail address of user <ph id="1">{0}</ph> validated successfully</source>
+				<target state="signed-off">La dirección de correo electrónico del usuario <ph id="1">{0}</ph> se ha validado con éxito</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorResettingPassword" resname="errorResettingPassword">
+				<source>Error resetting password for user <ph id="1">{0}</ph>: <ph id="2">{1}</ph></source>
+				<target state="signed-off">Error al reinicializar la clave de acceso para el usuario <ph id="1">{0}</ph>: <ph id="2">{1}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="successfullyResetPassword" resname="successfullyResetPassword">
+				<source>Successfully reset password for user <ph id="1">{0}</ph>. e-Mail has been sent.</source>
+				<target state="signed-off">Se ha reinicializado con éxito la clave de acceso para el usuario <ph id="1">{0}</ph>. Se ha enviado un correo electrónico.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="failedToSignIn" resname="failedToSignIn">
+				<source>Failed to sign in. Check your credentials.</source>
+				<target state="signed-off">No se ha podido registrar. Verifique sus credenciales.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="emailValidationUnsuccessful" resname="emailValidationUnsuccessful">
+				<source>Validation of e-mail address for user <ph id="1">{0}</ph> failed. Did you really use the latest validation code?</source>
+				<target state="signed-off">No se ha podido validar la dirección de correo electrónico para el usuario <ph id="1">{0}</ph>. ¿Está seguro de que ha utilizado el último código de validación?</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="roles" resname="roles">
+				<source>Roles</source>
+				<target state="signed-off">Roles</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="permissions" resname="permissions">
+				<source>Permissions</source>
+				<target state="signed-off">Permisos:</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signInWith" resname="signInWith">
+				<source>Sign in with...</source>
+				<target state="signed-off">Registrarse con...</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="generalWelcome" resname="generalWelcome">
+				<source>Welcome!</source>
+				<target state="signed-off">Bienvenido</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="newUser" resname="newUser">
+				<source>New here?</source>
+				<target state="signed-off">¿Es nuevo aquí?</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="pleaseSignIn" resname="pleaseSignIn">
+				<source>Please sign in.</source>
+				<target state="signed-off">Regístrese</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="enterUsernameOrEmail" resname="enterUsernameOrEmail">
+				<source>Enter user name or e-mail address</source>
+				<target state="signed-off">Indique el nombre de usuario o la dirección de correo electrónico</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="serverError" resname="serverError">
+				<source>An error occurred while attempting to contact the server. Please check your network connection and try again.</source>
+				<target state="signed-off">Error al intentar conectarse con el servidor. Compruebe la conexión de red e inténtelo de nuevo.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="remoteProcedureCall" resname="remoteProcedureCall">
+				<source>Remote Procedure Call</source>
+				<target state="signed-off">Llamada de procedimiento remota</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="serverReplies" resname="serverReplies">
+				<source>Server replies</source>
+				<target state="signed-off">El servidor responde</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorCommunicatingWithServer" resname="errorCommunicatingWithServer">
+				<source>Error communicating with server</source>
+				<target state="signed-off">Error al comunicarse con el servidor</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="editProfile" resname="editProfile">
+				<source>Edit user profile</source>
+				<target state="signed-off">Tratar perfil de usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="allPermissions" resname="allPermissions">
+				<source>All permissions (including inferred from roles)</source>
+				<target state="signed-off">Todos los permisos (incluidos los inferidos de los roles)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="configuration" resname="configuration">
+				<source>Configuration</source>
+				<target state="signed-off">Configuración</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="settingsForComponent" resname="settingsForComponent">
+				<source>Settings for <ph id="1">{0}</ph></source>
+				<target state="signed-off">Opciones para <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="pleaseSelect" resname="pleaseSelect">
+				<source>Please select</source>
+				<target state="signed-off">Seleccione</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="oldPassword" resname="oldPassword">
+				<source>Old password</source>
+				<target state="signed-off">Clave de acceso anterior</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="newPasswordPlaceholder" resname="newPasswordPlaceholder">
+				<source>Type in a new password</source>
+				<target state="signed-off">Escriba una clave de acceso nueva</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="oldPasswordPlaceholder" resname="oldPasswordPlaceholder">
+				<source>Type in the old password</source>
+				<target state="signed-off">Escriba la clave de acceso anterior</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordRepeatPlaceholder" resname="passwordRepeatPlaceholder">
+				<source>Repeat the new password</source>
+				<target state="signed-off">Repita la clave de acceso nueva</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="resetPassword" resname="resetPassword">
+				<source>Reset password</source>
+				<target state="signed-off">Reinicializar clave de acceso</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="youAreNotSignedIn" resname="youAreNotSignedIn">
+				<source>You are currently not signed in.</source>
+				<target state="signed-off">Actualmente no está registrado</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="youDontHaveRequiredPermission" resname="youDontHaveRequiredPermission">
+				<source>You don''t have the required permission.</source>
+				<target state="signed-off">No tiene la autorización necesaria</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="accountConfirmation" resname="accountConfirmation">
+				<source>Account confirmation</source>
+				<target state="signed-off">Confirmación de cuenta</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="error" resname="error">
+				<source>Unknown error</source>
+				<target state="signed-off">Error desconocido</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="refresh" resname="refresh">
+				<source>Refresh</source>
+				<target state="signed-off">Actualizar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="preferredLanguage" resname="preferredLanguage">
+				<source>Preferred language</source>
+				<target state="signed-off">Idioma preferente</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="cannotResetInvalidURL" resname="cannotResetInvalidURL">
+				<source>Invalid reset URL...</source>
+				<target state="signed-off">URL de reinicialización no válida...</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

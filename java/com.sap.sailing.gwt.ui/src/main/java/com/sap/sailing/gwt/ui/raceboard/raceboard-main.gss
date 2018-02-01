@@ -5,25 +5,25 @@
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
-    background-image: url('images/home/loggedout.svg');
+    background-image: resourceUrl('loggedout');
     cursor: pointer;
     position: absolute;
     right: 10px;
     top: 6px;
 }
 .usermanagement_icon.usermanagement_open {
-	background-image: url('images/home/loggedout-open.svg');
+	background-image: resourceUrl('loggedoutOpen');
 }
 .usermanagement_icon.usermanagement_loggedin {
-	background-image: url('images/home/loggedin.svg');
+	background-image: resourceUrl('loggedin');
 }
 .usermanagement_icon.usermanagement_loggedin.usermanagement_open {
-	background-image: url('images/home/loggedin-open.svg');
+	background-image: resourceUrl('loggedinOpen');
 }
 .usermanagement_view {
-	top: 68px !important;
+	top: 60px !important;
     left: inherit !important;
-    right: 5px !important;
+    right: -0.25em !important;
     z-index: 10;
     line-height: 1.333;
 }

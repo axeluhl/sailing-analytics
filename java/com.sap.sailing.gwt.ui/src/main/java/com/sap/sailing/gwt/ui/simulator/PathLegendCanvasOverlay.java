@@ -64,8 +64,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
         if (mapProjection != null && pathOverlays != null && pathOverlays.size() > 0) {
             boolean containsPolyline = false;
             for (PathCanvasOverlay overlay : this.pathOverlays) {
-                //TODO: Make course name a constant
-                if (overlay.getName().equals("What-If Course")) {
+                if (overlay.getName().equals(PathPolyline.END_USER_NAME)) {
                     containsPolyline = true;
                     break;
                 }
@@ -74,7 +73,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 List<PathCanvasOverlay> result = new ArrayList<PathCanvasOverlay>();
                 int indexOfPolyline = 0;
                 for (int index = 0; index < this.pathOverlays.size(); index++) {
-                    if (this.pathOverlays.get(index).getName().equals("What-If Course")) {
+                    if (this.pathOverlays.get(index).getName().equals(PathPolyline.END_USER_NAME)) {
                         indexOfPolyline = index;
                     } else {
                         result.add(this.pathOverlays.get(index));

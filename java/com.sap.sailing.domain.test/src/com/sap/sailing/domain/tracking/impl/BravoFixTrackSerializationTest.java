@@ -31,7 +31,7 @@ public class BravoFixTrackSerializationTest {
     @Before
     public void setUp() {
         Competitor competitor = TrackBasedTest.createCompetitor("SAP Extreme Sailing Team");
-        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME);
+        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME, false);
     }
     
     @Test
@@ -116,10 +116,10 @@ public class BravoFixTrackSerializationTest {
         }
         
         private void addOrReplaceBravoFixToTrack(boolean replace) {
-            double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.trackColumnCount];
+            Double[] fixData = new Double[BravoSensorDataMetadata.getTrackColumnCount()];
             // fill the port/starboard columns as well because their minimum defines the true ride height
-            fixData[BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn] = rideHeight;
-            fixData[BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn] = rideHeight;
+            fixData[BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex()] = rideHeight;
+            fixData[BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex()] = rideHeight;
             track.add(new BravoFixImpl(new DoubleVectorFixImpl(timePoint, fixData)), replace);
         }
     }

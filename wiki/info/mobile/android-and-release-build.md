@@ -18,7 +18,7 @@ So to run the Android apps build you have to add "-P -with-not-android-relevant 
 
 ## Release build overview
 
-There are several differences when running the build on Lean DI. Due to this, it's necessary to implement some changes in the build. To realize the build for Lean DI there is a specific branch "android-maven-build-bug3190-release". It is intended that most of the Lean DI specific logic is implemented on "master" in specific Maven profiles. This causes the release branch to only have few differences compared to "master". The most notable differences are:
+There are several differences when running the build on Lean DI. Due to this, it's necessary to implement some changes in the build. To realize the build for Lean DI there is a specific branch "android-xmake-release". It is intended that most of the Lean DI specific logic is implemented on "master" in specific Maven profiles. This causes the release branch to only have few differences compared to "master". The most notable differences are:
 
 * Configuration of parent POM "com.sap.ldi:ldi-parent" in workspace POM
 * Versions are set to not be *-SNAPSHOT but release versions

@@ -5,8 +5,8 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 
 public class SAPSailingHeaderWithAuthentication extends SAPHeaderWithAuthentication {
     
-  private static final String SAP_SAILING_URL = "http://www.sapsailing.com";
-  private static final String SAP_SAILING_APP_NAME = StringMessages.INSTANCE.sapSailingAnalytics();
+    public static final String SAP_SAILING_URL = "http://www.sapsailing.com";
+    public static final String SAP_SAILING_APP_NAME = StringMessages.INSTANCE.sapSailingAnalytics();
 
 
     public SAPSailingHeaderWithAuthentication() {

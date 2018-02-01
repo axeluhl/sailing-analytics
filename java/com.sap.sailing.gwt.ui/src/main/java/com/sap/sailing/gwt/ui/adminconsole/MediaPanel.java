@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -47,6 +48,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -64,7 +67,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  * @author D047974
  * 
  */
-public class MediaPanel extends FlowPanel {
+public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
     private final SailingServiceAsync sailingService;
     private final LabeledAbstractFilterablePanel<MediaTrack> filterableMediaTracks;
@@ -138,7 +141,8 @@ public class MediaPanel extends FlowPanel {
         buttonAndFilterPanel.add(filterableMediaTracks);
     }
 
-    protected void loadMediaTracks() {
+    @Override
+    public void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
         mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrack>>() {
             @Override
@@ -153,8 +157,6 @@ public class MediaPanel extends FlowPanel {
                 mediaTrackListDataProvider.refresh();
             }
         });
-        
-
     }
 
     private void createMediaTracksTable() {
@@ -403,8 +405,9 @@ public class MediaPanel extends FlowPanel {
         };
         durationColumn.setSortable(true);
         sortHandler.setComparator(durationColumn, new Comparator<MediaTrack>() {
+            final Comparator<Duration> durationComparator = new NullSafeComparableComparator<>(true);
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return mediaTrack1.duration.compareTo(mediaTrack2.duration);
+                return durationComparator.compare(mediaTrack1.duration, mediaTrack2.duration);
             }
         });
         durationColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
@@ -470,9 +473,9 @@ public class MediaPanel extends FlowPanel {
     }
 
     private void addUrlMediaTrack() {
-        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(getDefaultStartTime(),
-                stringMessages, sailingService, errorReporter, regattaRefresher, regattasDisplayers,
-                new DialogCallback<MediaTrack>() {
+        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaService,
+                getDefaultStartTime(), stringMessages, sailingService, errorReporter, regattaRefresher,
+                regattasDisplayers, new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {

@@ -20,6 +20,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -72,7 +73,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
-                        /* preferReplayIfAvailable */ false);
+                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -126,16 +127,16 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
             Competitor replicaCompetitor = findCompetitor(replicaCompetitors, competitor);
             switch (competitor.getBoat().getSailID()) {
                 case boat1CompetitorName:
-                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitorById(competitor.getId()),
-                            replicaTrackedRace.getRace().getBoatOfCompetitorById(replicaCompetitor.getId()), boat1Name, boat1Color);
+                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitor(competitor),
+                            replicaTrackedRace.getRace().getBoatOfCompetitor(replicaCompetitor), boat1Name, boat1Color);
                     break;
                 case boat2CompetitorName:
-                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitorById(competitor.getId()),
-                            replicaTrackedRace.getRace().getBoatOfCompetitorById(replicaCompetitor.getId()), boat2Name, boat2Color);
+                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitor(competitor),
+                            replicaTrackedRace.getRace().getBoatOfCompetitor(replicaCompetitor), boat2Name, boat2Color);
                     break;
                 case boat3CompetitorName:
-                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitorById(competitor.getId()),
-                            replicaTrackedRace.getRace().getBoatOfCompetitorById(replicaCompetitor.getId()), boat3Name, boat3Color);
+                    compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitor(competitor),
+                            replicaTrackedRace.getRace().getBoatOfCompetitor(replicaCompetitor), boat3Name, boat3Color);
                     break;
             }
         }

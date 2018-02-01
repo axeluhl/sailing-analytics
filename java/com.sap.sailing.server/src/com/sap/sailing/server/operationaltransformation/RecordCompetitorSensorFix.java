@@ -34,8 +34,10 @@ public class RecordCompetitorSensorFix extends AbstractRaceOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        Competitor competitor = trackedRace.getRace().getCompetitorById(competitorID);
-        trackedRace.recordSensorFix(competitor, trackName, fix, /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
+	if (trackedRace != null) {
+	    Competitor competitor = trackedRace.getRace().getCompetitorById(competitorID);
+	    trackedRace.recordSensorFix(competitor, trackName, fix, /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
+	}
         return null;
     }
 

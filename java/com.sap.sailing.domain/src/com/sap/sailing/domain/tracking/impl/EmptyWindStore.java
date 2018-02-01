@@ -32,4 +32,7 @@ public class EmptyWindStore implements WindStore {
         return Collections.emptyMap();
     }
 
+    @Override
+    public void clear() {
+    }
 }

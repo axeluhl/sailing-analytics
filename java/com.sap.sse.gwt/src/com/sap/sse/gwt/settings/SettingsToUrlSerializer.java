@@ -6,6 +6,7 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.common.settings.serializer.SettingsToStringMapSerializer;
 
 /**
@@ -22,32 +23,41 @@ public class SettingsToUrlSerializer {
     
     private final SettingsToStringMapSerializer settingsToStringMapSerializer = new SettingsToStringMapSerializer();
     
-    public String serializeBasedOnCurrentLocation(GenericSerializableSettings settings) {
+    public final String serializeBasedOnCurrentLocation(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder.buildString();
     }
     
-    public String serializeBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
+    public final String serializeBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder.buildString();
     }
     
-    public UrlBuilder serializeUrlBuilderBasedOnCurrentLocation(GenericSerializableSettings settings) {
+    public final UrlBuilder serializeUrlBuilderBasedOnCurrentLocation(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder;
     }
     
-    public UrlBuilder serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
+    public final UrlBuilder serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder;
     }
 
-    public void serializeToUrlBuilder(GenericSerializableSettings settings, UrlBuilder urlBuilder) {
+    public final void serializeToUrlBuilder(GenericSerializableSettings settings, UrlBuilder urlBuilder) {
         Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
+        writeParameterMapToUrlBuilder(urlBuilder, serializedValues);
+    }
+    
+    public final void serializeSettingsMapToUrlBuilder(SettingsMap settings, UrlBuilder urlBuilder) {
+        Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
+        writeParameterMapToUrlBuilder(urlBuilder, serializedValues);
+    }
+
+    private void writeParameterMapToUrlBuilder(UrlBuilder urlBuilder, Map<String, Iterable<String>> serializedValues) {
         for(Map.Entry<String, Iterable<String>> entry : serializedValues.entrySet()) {
             Iterable<String> parameterValues = entry.getValue();
             String[] parameterValuesAsArray = Util.toArray(parameterValues, new String[Util.size(parameterValues)]);
@@ -57,10 +67,16 @@ public class SettingsToUrlSerializer {
         }
     }
     
-    public <T extends GenericSerializableSettings> T deserializeFromCurrentLocation(T settings) {
+    public final <T extends GenericSerializableSettings> T deserializeFromCurrentLocation(T settings) {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
         return settingsToStringMapSerializer.deserialize(settings, values);
+    }
+    
+    public final <T extends SettingsMap> T deserializeSettingsMapFromCurrentLocation(T settings) {
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
+        return settingsToStringMapSerializer.deserializeSettingsMap(settings, values);
     }
 
 }

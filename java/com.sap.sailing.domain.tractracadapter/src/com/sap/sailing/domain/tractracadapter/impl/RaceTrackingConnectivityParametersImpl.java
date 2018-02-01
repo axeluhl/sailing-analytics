@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -54,17 +54,24 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
      *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
      *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
      *            races if since the last connection the race was migrated to a replay file format.
+     * @param timeoutInMillis
+     *            -1 means no timeout; otherwise, this is the timeout for waiting for the {@link IRace} to be obtained
+     *            from the {@code paramURL} document. A {@link TimeoutException} will result if the timeout applied.
      */
     public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
-            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable)
+            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis)
             throws Exception {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.paramURL = paramURL;
-        this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
+        if (timeoutInMillis == -1) {
+            this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()));
+        } else {
+            this.tractracRace = ModelLocator.getEventFactory().createRace(new URI(paramURL.toString()), timeoutInMillis);
+        }
         if (preferReplayIfAvailable && isReplayRace(tractracRace) &&
                 (!Util.equalsWithNull(liveURI, tractracRace.getLiveURI()) || !Util.equalsWithNull(storedURI, tractracRace.getStoredURI()))) {
                 logger.info("Replay format available and preferred for race " + tractracRace.getName()
@@ -108,9 +115,10 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException,
-            CreateModelException, SubscriberInitializationException {
-        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws URISyntaxException,
+            CreateModelException, SubscriberInitializationException, IOException, InterruptedException {
+        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore,
+                trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
         return tracker;
     }
 

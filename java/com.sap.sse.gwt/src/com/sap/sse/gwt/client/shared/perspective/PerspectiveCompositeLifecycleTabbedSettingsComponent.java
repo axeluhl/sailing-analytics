@@ -3,7 +3,9 @@ package com.sap.sse.gwt.client.shared.perspective;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A component that contains a collection of settings components in a tabbed panel.
@@ -17,17 +19,23 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends PerspectiveLifecycle<PS>, PS extends Settings>
     extends AbstractComponent<PerspectiveCompositeSettings<PS>> {
     
-    private PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings;
     private final String title;
     private PerspectiveCompositeSettings<PS> perspectiveCompositeSettings;
+    private PL lifecycle;
     
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
-        this(perspectiveLifecycleWithAllSettings, null);
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, ComponentContext<?> context,
+            PL lifecycle,
+            PerspectiveCompositeSettings<PS> settings) {
+        this(parent, context, lifecycle, settings, null);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings, String title) {
-        this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
-        this.perspectiveCompositeSettings = perspectiveLifecycleWithAllSettings.getAllSettings(); 
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, ComponentContext<?> context,
+            PL lifecycle,
+            PerspectiveCompositeSettings<PS> settings,
+            String title) {
+        super(parent, context);
+        this.lifecycle = lifecycle;
+        this.perspectiveCompositeSettings = settings;
         this.title = title;
     }
 
@@ -37,8 +45,8 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
     }
 
     @Override
-    public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
+    public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(lifecycle, settings);
     }
 
     @Override
@@ -56,7 +64,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
         if (title != null && !title.isEmpty()) {
             return title;
         }
-        return perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getLocalizedShortName();
+        return lifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -77,5 +85,10 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
     @Override
     public String getDependentCssClassName() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "PerspectiveCompositeLifecycleTabbedSettingsComponentFor" + lifecycle.getComponentId();
     }
 }

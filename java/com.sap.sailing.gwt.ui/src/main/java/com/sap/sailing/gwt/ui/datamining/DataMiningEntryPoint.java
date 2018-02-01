@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
@@ -36,6 +37,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     
     private DataMiningSession session;
 
+    private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
+    
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
@@ -46,24 +49,29 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     }
     
     private void createDataminingPanel() {
-        SAPHeaderWithAuthentication header  = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), getStringMessages().dataMining());
+        SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING, SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+            private SimpleQueryRunner queryRunner;
+
             @Override
             public Widget get() {
-                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(getStringMessages());
-                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
-                
+                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
+                        getStringMessages());
+                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(/* parent */ null, /* context */ null,
+                        /* delegate drillDownCallback */ groupKey -> {
+                            queryDefinitionProviderWithControls.drillDown(groupKey, /* onSuccessCallback */ ()->queryRunner.runQuery());
+                        }, getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-                QueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
-                        new QueryDefinitionProviderWithControls(session, getStringMessages(),
+                queryDefinitionProviderWithControls =
+                        new QueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
                                 dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
-                
-                QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService,
+                queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
+                        dataMiningService,
                         DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);
                 queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
                 /* Running queries automatically when they've been changed is currently unnecessary, if not even counterproductive.
@@ -71,7 +79,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * Re-enable this, when this functionality is desired again.
                  */
 //                settingsControl.addSettingsComponent(queryRunner);
-                
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(selectionDockPanel);

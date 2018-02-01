@@ -457,7 +457,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         mongoObjectFactory.storeLeaderboard(leaderboard);
 
         //Check if the leaderboard updated correctly
-        final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName(), /* regattaRegistry */ null);
+        final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName(), /* regattaRegistry */ null, /* leaderboardRegistry */ null);
         final RaceColumn loadedRaceColumnByName = loadedLeaderboard.getRaceColumnByName(columnName);
         Fleet loadedFleet = loadedRaceColumnByName.getFleetByName(fleet.getName());
         Assert.assertEquals(race.getRaceIdentifier(fleet), loadedRaceColumnByName.getRaceIdentifier(loadedFleet));

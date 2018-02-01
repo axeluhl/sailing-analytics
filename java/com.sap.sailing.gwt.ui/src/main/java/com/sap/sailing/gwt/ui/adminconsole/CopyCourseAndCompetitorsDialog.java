@@ -46,7 +46,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         racesTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         courseCheckBox = new CheckBox(stringMessages.copyCourse());

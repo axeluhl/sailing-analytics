@@ -463,7 +463,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
                                 legWho.getLeg().getTo(), timePoint, cache);
                     }
-                    result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
+                    result = durationForSubsequentLegsToReachAtEqualPerformance == null ? null : toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
                 }
             }
         }
@@ -627,6 +627,11 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                                 final Position estimatedPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
                                 if (estimatedPosition != null) {
                                     final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(estimatedPosition, cache);
+                                    if (windwardDistanceFromLegStart == null) {
+                                        // probably the leg start position is not known; therefore, distance cannot be determined; return null:
+                                        d = null;
+                                        break;
+                                    }
                                     final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
                                     if (legWindwardDistance != null && legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
                                         d = d.add(legWindwardDistance);

@@ -137,7 +137,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
                     createFilterDeleteButton(newFilter);
                 }
                 updateCompetitorsFiltersGrid(mainPanel);
-                validate();
+                validateAndUpdate();
             }
         });       
        
@@ -198,7 +198,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
                 filterDeleteButtons.remove(index);
                 filterUIFactories.remove(index);
                 updateCompetitorsFiltersGrid(mainPanel);
-                validate();
+                validateAndUpdate();
             }
         });
         return filterDeleteBtn; 

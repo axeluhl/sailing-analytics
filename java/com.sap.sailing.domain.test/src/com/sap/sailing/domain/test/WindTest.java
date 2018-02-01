@@ -43,10 +43,12 @@ import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactWindImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -86,7 +88,7 @@ public class WindTest {
         track.add(wind1);
         track.add(wind2);
         Wind average = track.getAveragedWind(pos, middle);
-        assertEquals(0., average.getBearing().getDifferenceTo(new DegreeBearingImpl(0)).getDegrees(), 0.0001);
+        PositionAssert.assertBearingEquals(new DegreeBearingImpl(0), average.getBearing().getDifferenceTo(new DegreeBearingImpl(0)), 0.01);
     }
     
     @Test
@@ -109,14 +111,14 @@ public class WindTest {
             for (Wind wind : track.getFixes()) {
                 actualWind.add(wind);
             }
-            assertEquals(expectedWind, actualWind);
+            PositionAssert.assertWindEquals(expectedWind, actualWind, /* pos deg delta */ 0.000001, /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
         } finally {
             track.unlockAfterRead();
         }
     }
     
     @Test
-    public void testWindEquality() {
+    public void testWindEquality() throws CompactionNotPossibleException {
         Position p1 = new DegreePosition(1, 2);
         Position p2 = new DegreePosition(4, 5);
         TimePoint t1 = MillisecondsTimePoint.now();
@@ -124,8 +126,8 @@ public class WindTest {
         SpeedWithBearing s1 = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(3));
         SpeedWithBearing s2 = new KnotSpeedWithBearingImpl(22, new DegreeBearingImpl(123));
         Wind w1 = new WindImpl(p1, t1, s1);
-        Wind w2 = new CompactWindImpl(w1);
-        assertEquals(w1, w2);
+        Wind w2 = new VeryCompactWindImpl(w1);
+        PositionAssert.assertWindEquals(w1, w2, /* pos deg delta */ 0.000001, /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
         assertEquals(w1.hashCode(), w2.hashCode());
         Wind w3 = new WindImpl(p2, t2, s2);
         assertFalse(w1.equals(w3));
@@ -163,9 +165,9 @@ public class WindTest {
         track.add(wind7);
         
         // interval does bearely reach 20's burst because 0 has 0 length and 1000..30000 has 29000 length
-        assertEquals(20, track.getAveragedWind(pos, new MillisecondsTimePoint(1)).getKnots(), 0.00000001);
+        PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1)), 0.02);
         // interval uses the two fixes to the left (0, 1000)=1000 and three to the right (2000, 10000, 30000)=28000
-        assertEquals(20, track.getAveragedWind(pos, new MillisecondsTimePoint(1001)).getKnots(), 0.00000001);
+        PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1001)), 0.02);
         // in the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000)=10000, so 20000ms worth of wind
         final double averageFor20000 = track.getAveragedWind(pos, new MillisecondsTimePoint(20000)).getKnots();
         // value is hard to predict exactly because time difference-based confidences rate fixes closer to 20000ms higher than those further away
@@ -183,8 +185,7 @@ public class WindTest {
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
         Wind estimate = track.getAveragedWind(pos, new MillisecondsTimePoint(0));
-        assertEquals(10, estimate.getKnots(), 0.000000001);
-        assertEquals(123, estimate.getBearing().getDegrees(), 0.000000001);
+        PositionAssert.assertSpeedEquals(new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)), estimate, /* deg bearing delta */ 0.1, /* knot speed delta */ 0.01);
     }
 
     @Test
@@ -195,8 +196,8 @@ public class WindTest {
         track.add(wind);
         // we only have one measurement; this should be extrapolated because it's our best guess
         Wind estimate = track.getAveragedWind(pos, new MillisecondsTimePoint(1000));
-        assertEquals(10, estimate.getKnots(), 0.000000001);
-        assertEquals(123, estimate.getBearing().getDegrees(), 0.000000001);
+        PositionAssert.assertSpeedEquals(new KnotSpeedImpl(10), estimate, 0.01);
+        PositionAssert.assertBearingEquals(new DegreeBearingImpl(123), estimate.getBearing(), 0.01);
     }
 
     @Test
@@ -208,8 +209,7 @@ public class WindTest {
         // we only have one measurement; this should be extrapolated because it's our best guess even if
         // the last measurement was longer ago than our smoothening interval
         Wind estimate = track.getAveragedWind(pos, new MillisecondsTimePoint(AVERAGING_INTERVAL_MILLIS+1000));
-        assertEquals(10, estimate.getKnots(), 0.000000001);
-        assertEquals(123, estimate.getBearing().getDegrees(), 0.000000001);
+        PositionAssert.assertSpeedEquals(new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)), estimate, /* deg bearing delta */ 0.1, /* knot speed delta */ 0.01);
     }
 
     @Test
@@ -221,8 +221,7 @@ public class WindTest {
         Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(100)));
         track.add(wind2);
         Wind estimate = track.getAveragedWind(pos, new MillisecondsTimePoint(500));
-        assertEquals(15, estimate.getKnots(), 0.000000001);
-        assertEquals(100, estimate.getBearing().getDegrees(), 0.00000001);
+        PositionAssert.assertSpeedEquals(new KnotSpeedWithBearingImpl(15, new DegreeBearingImpl(100)), estimate, /* deg bearing delta */ 0.1, /* knot speed delta */ 0.01);
     }
 
     @Test
@@ -234,8 +233,7 @@ public class WindTest {
         Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(100)));
         track.add(wind2);
         Wind estimate = track.getAveragedWind(pos, new MillisecondsTimePoint(2000));
-        assertEquals(10, estimate.getKnots(), 0.000000001);
-        assertEquals(105, estimate.getBearing().getDegrees(), 0.6); // some tolerance needed because of time-based confidence
+        PositionAssert.assertSpeedEquals(new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(105)), estimate, /* deg bearing delta, some tolerance needed because of time-based confidence */ 0.6, /* knot speed delta */ 0.01);
     }
     
     @Test
@@ -266,7 +264,7 @@ public class WindTest {
         TimePoint timePoint = new MillisecondsTimePoint(df.parse("2009-07-11T17:31:38").getTime());
         Wind result = track.getAveragedWind(null, timePoint);
         // expectation: take two from left (because they are closer than AVERAGING_INTERVAL_MILLIS apart), one from right side:
-        assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.000000001);
+        assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.01);
         assertEquals(80., result.getBearing().getDegrees(), 5);
     }
     

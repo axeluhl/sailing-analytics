@@ -34,7 +34,7 @@ import com.sap.sse.util.ByteArrayOutputStreamWithVisibleBuffer;
 
 public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
 
-    public static final String RACE_CONFIG_URL_TEMPLATE = "http://live.ota.st-sportservice.com/configuration?_race={0}&effective=1&additional=config";
+    public static final String RACE_CONFIG_URL_TEMPLATE = "http://ota2.sportresult.com/configuration?_race={0}&effective=1&additional=config";
 
     private static final String SWISSTIMING_DATEFORMAT_PATTERN = "dd.MM.yyyy HH:mm";
     private static final TimeZone DEFAULT_TIMEZONE = TimeZone.getTimeZone("GMT");

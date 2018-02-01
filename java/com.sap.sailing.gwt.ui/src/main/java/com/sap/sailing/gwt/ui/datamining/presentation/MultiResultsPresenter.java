@@ -15,11 +15,15 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart.DrillDownCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class MultiResultsPresenter implements ResultsPresenter<Settings> {
+public class MultiResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
     
     private final StringMessages stringMessages;
     
@@ -30,10 +34,12 @@ public class MultiResultsPresenter implements ResultsPresenter<Settings> {
 
     private List<PresenterDescriptor<Object>> availablePresenters;
     
-    public MultiResultsPresenter(StringMessages stringMessages) {
+    public MultiResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback, StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         availablePresenters = new ArrayList<>();
-        availablePresenters.add(new ColumnChartDescriptor());
+        availablePresenters.add(new ColumnChartDescriptor(drillDownCallback));
+        availablePresenters.add(new ColumnChartDescriptorWithErrorBars(drillDownCallback));
         availablePresenters.add(new PlainDescriptor());
 
         presenterPanel = new DeckLayoutPanel();
@@ -139,7 +145,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Settings> {
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
@@ -171,7 +177,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Settings> {
         private final AbstractResultsPresenter<?> presenter;
         
         public PlainDescriptor() {
-            presenter = new PlainResultsPresenter(stringMessages);
+            presenter = new PlainResultsPresenter(MultiResultsPresenter.this, getComponentContext(), stringMessages);
         }
 
         @Override
@@ -186,28 +192,41 @@ public class MultiResultsPresenter implements ResultsPresenter<Settings> {
         
     }
     
-    private class ColumnChartDescriptor implements PresenterDescriptor<Object> {
-        
+    private abstract class AbstractColumnChartDescriptor implements PresenterDescriptor<Object> {
         private final ResultsChart presenter;
+        private final String name;
 
-        public ColumnChartDescriptor() {
-            presenter = new ResultsChart(stringMessages);
+        public AbstractColumnChartDescriptor(String name, boolean showErrorBars, DrillDownCallback drillDownCallback) {
+            this.name = name;
+            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), stringMessages, showErrorBars, drillDownCallback);
         }
 
         @Override
         public String getName() {
-            return stringMessages.columnChart();
+            return name;
         }
 
         @Override
         public AbstractResultsPresenter<?> getPresenter() {
             return presenter;
         }
-        
+    }
+    
+    private class ColumnChartDescriptor extends AbstractColumnChartDescriptor {
+        public ColumnChartDescriptor(DrillDownCallback drillDownCallback) {
+            super(stringMessages.columnChart(), /* showErrorBars */ false, drillDownCallback);
+        }
+    }
+
+    private class ColumnChartDescriptorWithErrorBars extends AbstractColumnChartDescriptor {
+        public ColumnChartDescriptorWithErrorBars(DrillDownCallback drillDownCallback) {
+            super(stringMessages.columnChartWithErrorBars(), /* showErrorBars */ true, drillDownCallback);
+        }
     }
 
     @Override
     public String getId() {
-        return getLocalizedShortName();
+        return "MultiResultsPresenter";
     }
+
 }

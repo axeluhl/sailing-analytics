@@ -28,13 +28,11 @@ public class TracTracStartTimeResetHandler extends UpdateHandler implements Star
         if (!isActive() || newStartTime != null) {
             return;
         }
-        
         URL startTimeUpdateURL = buildUpdateURL();
-        
         logger.info("Using " + startTimeUpdateURL.toString() + " for the start reset!");
-        HttpURLConnection connection = (HttpURLConnection) startTimeUpdateURL.openConnection();
+        HttpURLConnection connection =  (HttpURLConnection) startTimeUpdateURL.openConnection();
         try {
-            setConnectionProperties(connection);
+            connection = setConnectionProperties(connection);
             try {
                 checkAndLogUpdateResponse(connection);
             } catch (ParseException e) {
@@ -48,5 +46,4 @@ public class TracTracStartTimeResetHandler extends UpdateHandler implements Star
             }
         }
     }
-    
 }

@@ -163,7 +163,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<FleetDTO>> event) {
-                validate();
+                validateAndUpdate();
             }
         });
     }

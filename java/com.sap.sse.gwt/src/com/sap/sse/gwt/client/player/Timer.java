@@ -399,4 +399,9 @@ public class Timer {
         return new MillisecondsTimePoint(getLiveTimePointInMillis());
     }
 
+    public void reset() {
+        timeListeners.clear();
+        playStateListeners.clear();
+    }
+
 }

@@ -17,7 +17,7 @@ class Leaderboard: NSManagedObject {
     }
     
     func nameWithQueryAllowedCharacters() -> String? {
-        return name.stringByAddingPercentEncodingWithAllowedCharacters(.URLQueryAllowedCharacterSet())
+        return name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
     }
     
 }

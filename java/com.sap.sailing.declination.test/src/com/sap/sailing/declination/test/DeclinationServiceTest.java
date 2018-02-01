@@ -12,17 +12,18 @@ import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
+import com.sap.sailing.declination.impl.DeclinationImporter;
 import com.sap.sailing.declination.impl.DeclinationServiceImpl;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class DeclinationServiceTest extends AbstractDeclinationTest {
+public abstract class DeclinationServiceTest<I extends DeclinationImporter> extends AbstractDeclinationTest<I> {
     private DeclinationService service;
     
     @Before
     public void setUp() {
-        service = new DeclinationServiceImpl(new CentralAngleDistance(1./180.*Math.PI));
+        service = new DeclinationServiceImpl(new CentralAngleDistance(1./180.*Math.PI), importer);
     }
     
     @Test
@@ -36,10 +37,10 @@ public class DeclinationServiceTest extends AbstractDeclinationTest {
     @Test
     public void testDeclinationQueryNotMatchedInStore() throws IOException, ClassNotFoundException, ParseException {
         Declination result = service.getDeclination(new MillisecondsTimePoint(simpleDateFormat.parse("2019-02-03").getTime()),
-                new DegreePosition(51, -5), /* timeoutForOnlineFetchInMilliseconds */ 30000);
+                new DegreePosition(51, -5), /* timeoutForOnlineFetchInMilliseconds */ 5000);
         assertNotNull(result);
-        assertEquals(-1.9565, result.getBearing().getDegrees(), 0.0001);
-        assertEquals(0.15244, result.getAnnualChange().getDegrees(), 0.0001);
+        assertEquals(-1.9565, result.getBearing().getDegrees(), 0.001);
+        assertEquals(0.15244, result.getAnnualChange().getDegrees(), 0.001);
     }
 
     @Test

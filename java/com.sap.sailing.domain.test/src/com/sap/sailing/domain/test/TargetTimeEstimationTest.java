@@ -92,7 +92,7 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint,
+        Duration duration = trackedLeg.getEstimatedTimeAndDistanceToComplete(mockedPolars, timepoint,
                 new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint)).getExpectedDuration();
         assertEquals(75494, duration.asMillis(), 100);
     }
@@ -144,7 +144,7 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint,
+        Duration duration = trackedLeg.getEstimatedTimeAndDistanceToComplete(mockedPolars, timepoint,
                 new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint)).getExpectedDuration();
         assertEquals(213513, duration.asMillis(), 100);
     }
@@ -196,7 +196,7 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint,
+        Duration duration = trackedLeg.getEstimatedTimeAndDistanceToComplete(mockedPolars, timepoint,
                 new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint)).getExpectedDuration();
         assertEquals(95090, duration.asMillis(), 100);
         

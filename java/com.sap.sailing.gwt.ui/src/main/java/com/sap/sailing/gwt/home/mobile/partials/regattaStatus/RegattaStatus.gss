@@ -15,27 +15,6 @@
   font-size: 1.066666666666667em;
   font-weight: 700;
 }
-.regattastatus_header_select {
-  position: absolute;
-  top: 50%;
-  right: 1em;
-  -webkit-transform: translateY(-50%);
-     -moz-transform: translateY(-50%);
-      -ms-transform: translateY(-50%);
-          transform: translateY(-50%);
-  font-weight: 600;
-  height: auto;
-  width: 10.666666666666666em;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  color: #008fcc;
-  border: none;
-  border-radius: 0;
-  padding: 0.666666666666667em 2em 0.666666666666667em 1em;
-  background: url("../images/home/filter.svg") 100% no-repeat transparent;
-  background-size: 1.333333333333333em;
-}
 .regattastatus_content {
   visibility: visible;
 }

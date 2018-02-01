@@ -32,7 +32,7 @@ public final class DownsamplerTo1HzProcessor implements DoubleFixProcessor {
         fix.correctTimepointBy(currentOffsetInMs);
         if (fix.getFixSecond() < currentSecond) {
             currentOffsetInMs = (currentSecond - fix.getFixSecond() + 1) * 1000;
-            LOG.warning("Timepoint before last second, using offser of " + currentOffsetInMs + "ms from now on");
+            LOG.warning("Timepoint before last second, using offset of " + currentOffsetInMs + "ms from now on");
         }
         if (currentSecond != fix.getFixSecond()) {
             computeDownsampledFixForCurrentSecond();
@@ -49,20 +49,30 @@ public final class DownsamplerTo1HzProcessor implements DoubleFixProcessor {
     }
 
     private void computeDownsampledFixForCurrentSecond() {
-        final double[] computedAverage = new double[nrOfColumsInTrack];
+        final Double[] computedAverage = new Double[nrOfColumsInTrack];
+        final int[] counts = new int[nrOfColumsInTrack];
         final int numberOfFixesInSecond = fixesInTheCurrentSecond.size();
         if (numberOfFixesInSecond == 0) {
             return;
         }
         for (DoubleVectorFixData d : fixesInTheCurrentSecond) {
-            final double[] fix = d.getFix();
+            final Double[] fix = d.getFix();
             for (int colIdx = 0; colIdx < nrOfColumsInTrack; colIdx++) {
-                computedAverage[colIdx] += fix[colIdx];
+                if (fix[colIdx] != null) {
+                    if (computedAverage[colIdx] == null) {
+                        computedAverage[colIdx] = fix[colIdx];
+                    } else {
+                        computedAverage[colIdx] += fix[colIdx];
+                    }
+                    counts[colIdx]++;
+                }
             }
         }
         fixesInTheCurrentSecond.clear();
         for (int colIdx = 0; colIdx < nrOfColumsInTrack; colIdx++) {
-            computedAverage[colIdx] /= (double) numberOfFixesInSecond;
+            if (computedAverage[colIdx] != null) {
+                computedAverage[colIdx] /= (double) counts[colIdx];
+            }
         }
         delegateProcesssor.accept(new DoubleVectorFixData(currentSecond * 1000 + 500, computedAverage));
         countImportedTtl++;

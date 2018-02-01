@@ -76,7 +76,7 @@ public class ScoreCorrectionProviderImpl extends AbstractManage2SailProvider imp
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
-        Parser parser = resolveParser(eventName, boatClassName);
+        Parser parser = resolveParser(eventName, boatClassName, timePointPublished);
         try {
             RegattaResults regattaResults = parser.parse();
             for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
@@ -107,14 +107,15 @@ public class ScoreCorrectionProviderImpl extends AbstractManage2SailProvider imp
         return null;
     }
     
-    private Parser resolveParser(String eventName, String boatClassName) throws IOException {
+    private Parser resolveParser(String eventName, String boatClassName, TimePoint timePointPublished) throws IOException {
         Parser result = null;
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
             String boatClassAndGenderType = resultDocDescr.getBoatClass();
             if (resultDocDescr.getCompetitorGenderType() != null) {
                 boatClassAndGenderType += ", " + resultDocDescr.getCompetitorGenderType().name();
             }
-            if (eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(boatClassAndGenderType)) {
+            if (eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(boatClassAndGenderType) &&
+                    Util.equalsWithNull(resultDocDescr.getLastModified(), timePointPublished)) {
                 result = getParserFactory().createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 break;
             }

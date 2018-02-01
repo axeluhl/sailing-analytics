@@ -1,162 +1,23 @@
 package com.sap.sailing.server.trackfiles.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
-import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
-import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
-import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor;
-import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleVectorFixData;
-import com.sap.sailing.server.trackfiles.impl.doublefix.DownsamplerTo1HzProcessor;
-import com.sap.sailing.server.trackfiles.impl.doublefix.LearningBatchProcessor;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * TODO: access to columns enum actually by public static enum. Col definition should belong to instance, so we can have
- * different col definitions.
+ * Importer for CSV data files from Bravo units used at the ESS.
  */
-public class BravoDataImporterImpl implements DoubleVectorFixImporter {
-    private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
-    private final BravoSensorDataMetadata metadata = BravoSensorDataMetadata.INSTANCE;
-    private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
+public class BravoDataImporterImpl extends AbstractBravoDataImporterImpl {
+    public static final String BRAVO_TYPE = "BRAVO";
 
-    public void importFixes(InputStream inputStream, Callback callback, final String filename, String sourceName)
-            throws FormatNotSupportedException, IOException {
-        final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
-                UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
-        try {
-            LOG.fine("Import CSV from " + filename);
-            final InputStreamReader isr;
-            if (sourceName.endsWith("gz")) {
-                LOG.fine("Using gzip stream reader " + filename);
-                isr = new InputStreamReader(new GZIPInputStream(inputStream));
-            } else {
-                isr = new InputStreamReader(inputStream);
-            }
-            LOG.fine("Start parsing bravo file");
-            AtomicLong lineNr = new AtomicLong();
-            try (BufferedReader buffer = new BufferedReader(isr)) {
-                String headerLine = null;
-                headerSearch: while (headerLine == null) {
-                    LOG.fine("Searching for header in bravo file");
-                    String headerCandidate = buffer.readLine();
-                    lineNr.incrementAndGet();
-                    if (headerCandidate == null) {
-                        throw new RuntimeException("Missing required header in file " + filename);
-                    }
-                    if (headerCandidate.startsWith(BOF)) {
-                        LOG.fine("Found header");
-                        headerLine = headerCandidate;
-                        break headerSearch;
-                    }
-                }
-                LOG.fine("Validate and parse header columns");
-                final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
-
-                DoubleFixProcessor downsampler = createProcessor(metadata, callback, trackIdentifier);
-
-                buffer.lines().forEach(line -> {
-                    lineNr.incrementAndGet();
-                    downsampler.accept(parseLine(lineNr.get(), filename, line, colIndices));
-                });
-
-                downsampler.finish();
-                buffer.close();
-            }
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Exception parsing bravo CSV file " + filename, e);
-        }
-    }
-
-    /**
-     * This method creates the double fix processor chain used to downsample and batch the stream of fixes parsed by the
-     * importer.
-     * 
-     * This method is protected so it can be overridden by the test case.
-     * 
-     * @param metadata
-     * @param callback
-     * @param trackIdentifier
-     * @return
-     */
-    protected DoubleFixProcessor createProcessor(BravoSensorDataMetadata metadata, Callback callback,
-            final TrackFileImportDeviceIdentifier trackIdentifier) {
-        LearningBatchProcessor batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
-        DoubleFixProcessor downsampler = new DownsamplerTo1HzProcessor(metadata.trackColumnCount, batchProcessor);
-        return downsampler;
-    }
-
-    /**
-     * Parses the CSV line and reads the double data values in the order defined by the col enums.
-     */
-    private DoubleVectorFixData parseLine(long lineNr, String filename, String line, Map<String, Integer> columnsInFile) {
-        try {
-            String[] fileContentTokens = split(line);
-            String epochColValue = fileContentTokens[2];
-            long epoch;
-            if (epochColValue != null && epochColValue.length() > 0) {
-                epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
-                epoch = Long.parseLong(epochColValue);
-            } else {
-                // we don't have epoch, skip the line
-                return null;
-            }
-            double[] trackFixData = new double[metadata.trackColumnCount];
-            for (int trackColumnIdx = 0; trackColumnIdx < metadata.trackColumnCount; trackColumnIdx++) {
-                String columnNameToSearchForInFile = metadata.getTrackColumns().get(trackColumnIdx);
-                Integer columnsInFileIdx = columnsInFile.get(columnNameToSearchForInFile);
-                trackFixData[trackColumnIdx] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
-            }
-            return new DoubleVectorFixData(epoch, trackFixData);
-        } catch (Exception e) {
-            LOG.warning(
-                    "Error parsing line nr " + lineNr + " in file " + filename + "with exception: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private Map<String, Integer> validateAndParseHeader(String headerLine) {
-        final String[] headerTokens = split(headerLine);
-        Map<String, Integer> colIndicesInFile = new HashMap<>();
-        for (int j = metadata.getHeaderColumnOffset(); j < headerTokens.length; j++) {
-            String header = headerTokens[j];
-            colIndicesInFile.put(header, j);
-        }
-        List<String> columnsInFix = metadata.getFileColumns();
-        if (colIndicesInFile.size() != columnsInFix.size() || !colIndicesInFile.keySet().containsAll(columnsInFix)) {
-            LOG.log(Level.SEVERE, "Missing headers");
-            throw new RuntimeException("Missing headers in import files");
-        }
-        return colIndicesInFile;
-    }
-
-    private String[] split(String line) {
-        return line.split("\t");
-    }
-
-    @Override
-    public String getType() {
-        return "BRAVO";
+    public BravoDataImporterImpl() {
+        super(BRAVO_TYPE, BravoSensorDataMetadata.getColumnNamesToIndexInDoubleFix());
     }
 
     @Override

@@ -73,4 +73,9 @@ public abstract class AbstractSpeedImpl implements Speed {
     public double getKnots() {
         return getKilometersPerHour() * 1000. / Mile.METERS_PER_NAUTICAL_MILE;
     }
+    
+    @Override
+    public double divide(Speed speed) {
+        return getKnots() / speed.getKnots();
+    }
 }

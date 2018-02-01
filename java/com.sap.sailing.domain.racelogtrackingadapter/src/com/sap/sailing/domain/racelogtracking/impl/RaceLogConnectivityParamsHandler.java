@@ -49,12 +49,22 @@ public class RaceLogConnectivityParamsHandler extends AbstractRaceTrackingConnec
 
     @Override
     public RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws MalformedURLException, URISyntaxException {
+    	final RaceTrackingConnectivityParameters result;
         final RegattaLeaderboard leaderboard = (RegattaLeaderboard) racingEventService.getLeaderboardByName((String) map.get(LEADERBOARD_NAME));
-        final RaceColumn raceColumn = leaderboard.getRaceColumnByName((String) map.get(RACE_COLUMN_NAME));
-        return new RaceLogConnectivityParams(racingEventService, leaderboard.getRegatta(), raceColumn, 
-                raceColumn.getFleetByName((String) map.get(FLEET_NAME)), leaderboard,
-                ((Number) map.get(DELAY_TO_LIVE_IN_MILLIS)).longValue(), domainFactory, isTrackWind(map),
-                isCorrectWindDirectionByMagneticDeclination(map));
+        if (leaderboard == null) {
+        	result = null;
+        } else {
+	        final RaceColumn raceColumn = leaderboard.getRaceColumnByName((String) map.get(RACE_COLUMN_NAME));
+	        if (raceColumn == null) {
+	        	result = null;
+	        } else {
+		        result = new RaceLogConnectivityParams(racingEventService, leaderboard.getRegatta(), raceColumn, 
+		                raceColumn.getFleetByName((String) map.get(FLEET_NAME)), leaderboard,
+		                ((Number) map.get(DELAY_TO_LIVE_IN_MILLIS)).longValue(), domainFactory, isTrackWind(map),
+		                isCorrectWindDirectionByMagneticDeclination(map));
+	        }
+        }
+        return result;
     }
 
     @Override

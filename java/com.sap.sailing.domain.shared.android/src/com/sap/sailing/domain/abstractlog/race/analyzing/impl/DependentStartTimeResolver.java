@@ -25,7 +25,7 @@ public class DependentStartTimeResolver {
         return internalResolve(event, dependingOnRaces);
     }
 
-    StartTimeFinderResult internalResolve(RaceLogDependentStartTimeEvent event,Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
+    StartTimeFinderResult internalResolve(RaceLogDependentStartTimeEvent event, Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
         SimpleRaceLogIdentifier identifier = event.getDependentOnRaceIdentifier();
         Duration startTimeDifference = event.getStartTimeDifference();
         RaceLog raceLog = raceLogResolver.resolve(identifier);

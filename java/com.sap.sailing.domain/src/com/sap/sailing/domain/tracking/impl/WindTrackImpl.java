@@ -19,7 +19,10 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
-import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
+import com.sap.sailing.domain.common.tracking.impl.PreciseCompactWindImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactWindImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.tracking.WindListener;
@@ -56,11 +59,23 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     private transient Set<WindListener> listeners;
 
+    /**
+     * If {@code true}, {@link Wind} fixes will be compacted in a way that they remain precisely
+     * equal to their original, without rounding or range limitations different from those of the
+     * original {@link Wind} fix. Lossy compaction, in contrast, may use a more compact form that,
+     * however, has stricter limits on ranges and precisions. See {@link CompactPositionHelper} for
+     * details on lossy compaction.
+     */
+    private final boolean losslessCompaction;
+
     public WindTrackImpl(long millisecondsOverWhichToAverage, boolean useSpeed, String nameForReadWriteLock) {
         this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, useSpeed, nameForReadWriteLock);
     }
     
     /**
+     * Uses lossy compaction. See {@link CompactPositionHelper}. Use {@link #WindTrackImpl(long, double, boolean, String, boolean)}
+     * to select lossless compaction.
+     * 
      * @param baseConfidence
      *            the confidence to attribute to the raw wind fixes in this track
      * @param useSpeed
@@ -69,11 +84,29 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      *            value for the speed
      */
     public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed, String nameForReadWriteLock) {
+        this(millisecondsOverWhichToAverage, baseConfidence, useSpeed, nameForReadWriteLock, /* losslessCompaction */ false);
+    }
+    
+    /**
+     * Uses lossy compaction. See {@link CompactPositionHelper}.
+     * 
+     * @param baseConfidence
+     *            the confidence to attribute to the raw wind fixes in this track
+     * @param useSpeed
+     *            whether the wind speed described by the fixes in this track are usable at all; example for an unusable
+     *            wind speed would be that of an estimation that only estimates the wind direction and uses some default
+     *            value for the speed
+     * @param losslessCompaction
+     *            whether or not to use lossless compaction; see {@link CompactPositionHelper} for details on lossy
+     *            compaction
+     */
+    public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed, String nameForReadWriteLock, boolean losslessCompaction) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE), nameForReadWriteLock);
         this.baseConfidence = baseConfidence;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         listeners = new HashSet<WindListener>();
         this.useSpeed = useSpeed;
+        this.losslessCompaction = losslessCompaction;
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -114,10 +147,21 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public boolean add(Wind wind, boolean replace) {
-        final CompactWindImpl compactWind = new CompactWindImpl(wind);
+        final Wind compactWind = compactify(wind);
         final boolean result = super.add(compactWind, replace);
         notifyListenersAboutReceive(compactWind);
         return result;
+    }
+
+    private Wind compactify(Wind wind) {
+        Wind compactWind;
+        try {
+            compactWind = losslessCompaction ? new PreciseCompactWindImpl(wind) : new VeryCompactWindImpl(wind);
+        } catch (CompactionNotPossibleException e) {
+            logger.log(Level.FINE, "Couldn't compact wind fix "+wind+". Using lossless compactification instead.", e);
+            compactWind = new PreciseCompactWindImpl(wind);
+        }
+        return compactWind;
     }
 
     private void notifyListenersAboutReceive(Wind wind) {
@@ -407,6 +451,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         public Distance travel(Duration duration) {
             return null;
         }
+        @Override
+        public double divide(Speed speed) {
+            return 0;
+        }
     }
 
     @Override
@@ -420,7 +468,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     public void remove(Wind wind) {
         lockForWrite();
         try {
-            getInternalRawFixes().remove(wind);
+            // map through "compactify" to account for possible rounding / accuracy differences and still achieve "equals"
+            getInternalRawFixes().remove(compactify(wind));
         } finally {
             unlockAfterWrite();
         }

@@ -13,7 +13,7 @@ import com.sap.sailing.selenium.pages.PageObject;
 public class CheckBoxPO extends AbstractInputPO {
     
     private static final String TAG_NAME = "span";
-    private static final String CSS_CLASS = "gwt-CheckBox";
+    public static final String CSS_CLASS = "gwt-CheckBox";
     
     @FindBy(how = ByTagName.class, using = "input")
     private WebElement input;

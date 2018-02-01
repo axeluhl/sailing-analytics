@@ -87,7 +87,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -100,13 +100,15 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler {
     protected static final int FIX_OVERLAY_Z_ORDER = 230;
     private final RaceMap raceMap;
-    private final LeaderboardPanel leaderboardPanel;
+    private final SingleRaceLeaderboardPanel leaderboardPanel;
     private final MarksPanel marksPanel;
     private Series markSeries;
     private LinePlotOptions markSeriesPlotOptions;
@@ -131,18 +133,20 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
-    public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel,
+    public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
+            final SingleRaceLeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
-        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+                asyncActionsExecutor, errorReporter);
         this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<>();
         this.markDataProvider = new ListDataProvider<>();
-        this.marksPanel = new MarksPanel(this, markDataProvider, stringMessages);
+        this.marksPanel = new MarksPanel(this, context, markDataProvider, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.courseMarkClickHandlers = new ArrayList<>();
@@ -221,10 +225,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         }
         
         private native int getX() /*-{
-            return this.x;
+			return this.x;
         }-*/;
         private native int getY() /*-{
-            return this.y;
+			return this.y;
         }-*/;
     }
     
@@ -528,7 +532,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     public void resetPointColor(int index) {
         Point[] points = markSeries.getPoints();
         if (points.length > index) {
-            points[index].setMarker(new Marker().setFillColor(selectedMark.color));
+            points[index].setMarker(new Marker().setFillColor(selectedMark.color==null?null:selectedMark.color.getAsHtml()));
             setSeriesPoints(markSeries, points);
         }
     }
@@ -548,7 +552,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = marks.get(mark);
         
         for (final GPSFixDTO fix : track) {
-            final FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
+            final FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY,
+                    mark.color==null?null:mark.color.getAsHtml(), raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
             fixOverlayMap.put(fix, overlay);
             overlay.setVisible(false);
             overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
@@ -563,8 +568,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         onResize();
     }
     
-    private void loadData(final Date from, final Date to) {
-        if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
+    private void loadData() {
+        if (selectedRaceIdentifier != null && marks == null) {
             setWidget(chart);
             showLoading(stringMessages.loadingMarkFixes());
             markPositionService.getMarksInTrackedRace(raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier), 
@@ -609,7 +614,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
                     @Override
                     public void onSuccess(Void result) {
-                        FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
+                        FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY,
+                                mark.color==null?null:mark.color.getAsHtml(),
+                                raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
                         overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
                         marks.get(mark).put(fix, overlay);
                         updatePolylinePoints(mark);
@@ -780,7 +787,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 
@@ -814,7 +821,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (isVisible()) {
-            loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
+            loadData();
             updateTimePlotLine(newTime);
         }
     }
@@ -837,7 +844,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             setWidget(chart);
             markSeries.remove();
             markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
-                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00")
+                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color.getAsHtml() : "#efab00")
                     .setLineColor("#fff").setLineWidth(2)));
             chart.addSeries(markSeries);
             setSeriesPoints(selectedMark);
@@ -892,14 +899,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
     
     public void showAllCourseMarkOverlays() {
-        for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
-            overlay.getValue().setVisible(true);
+        for (final CourseMarkOverlay overlay : raceMap.getCourseMarkOverlays().values()) {
+            overlay.setVisible(true);
         }
     }
     
     public void hideAllCourseMarkOverlaysExceptSelected() { 
         for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
-            overlay.getValue().setVisible(overlay.getKey().equals(selectedMark.getName()));
+            overlay.getValue().setVisible(overlay.getKey().equals(selectedMark.getIdAsString()));
         }
     }
     
@@ -1004,5 +1011,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public AbstractSettings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "EditMarkPositionPanel";
     }
 }

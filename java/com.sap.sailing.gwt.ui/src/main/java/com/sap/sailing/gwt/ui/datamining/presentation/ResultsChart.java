@@ -19,10 +19,14 @@ import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -34,13 +38,20 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
+    @FunctionalInterface
+    public static interface DrillDownCallback {
+        void drillDown(GroupKey groupKey);
+    }
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -121,17 +132,34 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
+    private final DrillDownCallback drillDownCallback;
+    
+    /**
+     * The series showing the numerical results
+     */
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
+    
+    /**
+     * The optional series visualizing error bars, if available based on the data type;
+     * see 
+     */
+    private final Map<GroupKey, Series> errorSeriesMappedByGroupKey;
+    
     private final GroupKey simpleResultSeriesKey;
     private final Map<GroupKey, Integer> mainKeyToXValueMap;
+    private final Map<Integer, GroupKey> xValueToMainKeyMap;
     private Map<GroupKey, Number> currentResultValues;
+    private Map<GroupKey, Triple<Number, Number, Long>> currentResultErrorMargins;
 
     private final Map<GroupKey, Double> averagePerMainKey;
     private final Map<GroupKey, Double> medianPerMainKey;
+    private final boolean showErrorBars;
 
-    public ResultsChart(StringMessages stringMessages) {
-        super(stringMessages);
-        
+    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
+            boolean showErrorBars, DrillDownCallback drillDownCallback) {
+        super(parent, context, stringMessages);
+        this.showErrorBars = showErrorBars;
+        this.drillDownCallback = drillDownCallback;
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
         sortByPanel.add(new Label(stringMessages.sortBy() + ":"));
@@ -179,9 +207,11 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         chart = createChart();
         chartPanel.setWidget(chart);
         
-        seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
-        simpleResultSeriesKey = new GenericGroupKey<String>(stringMessages.results());
+        seriesMappedByGroupKey = new HashMap<>();
+        errorSeriesMappedByGroupKey = new HashMap<>();
+        simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
         mainKeyToXValueMap = new HashMap<>();
+        xValueToMainKeyMap = new HashMap<>();
         averagePerMainKey = new HashMap<>();
         medianPerMainKey = new HashMap<>();
     }
@@ -192,8 +222,9 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     }
 
     @Override
-    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResults(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
         this.currentResultValues = resultValues;
+        this.currentResultErrorMargins = errorMargins;
         decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);
         updateKeyComparatorListBox();
         resetChartSeries();
@@ -227,6 +258,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private void resetChartSeries() {
         chart.removeAllSeries(false);
         seriesMappedByGroupKey.clear();
+        errorSeriesMappedByGroupKey.clear();
     }
 
     private void updateChartLabels() {
@@ -242,25 +274,30 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private void showResultData() {
         buildMainKeyMapAndSetXAxisCategories();
         createAndAddSeriesToChart();
-        
         Map<GroupKey, List<Number>> valuesPerMainKey = new HashMap<>();
         for (Entry<GroupKey, ? extends Number> resultEntry : currentResultValues.entrySet()) {
             GroupKey mainKey = GroupKey.Util.getMainKey(resultEntry.getKey());
             Number value = resultEntry.getValue();
-            
             if (!isCurrentResultSimple()) {
                 if (!valuesPerMainKey.containsKey(mainKey)) {
                     valuesPerMainKey.put(mainKey, new ArrayList<Number>());
                 }
                 valuesPerMainKey.get(mainKey).add(value);
             }
-            
             Point point = new Point(mainKeyToXValueMap.get(mainKey), value);
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
+            if (showErrorBars) {
+                final Triple<Number, Number, Long> errorMargins = currentResultErrorMargins==null?null:currentResultErrorMargins.get(mainKey);
+                if (errorMargins != null) {
+                    Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(), errorMargins.getB());
+                    errorMarginsPoint.setName(mainKey.asString()+", "+stringMessages.elements(errorMargins.getC()));
+                    errorSeriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
+                        .addPoint(errorMarginsPoint, false, false, false);
+                }
+            }
         }
-        
         averagePerMainKey.clear();
         medianPerMainKey.clear();
         if (!isCurrentResultSimple()) {
@@ -270,7 +307,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 medianPerMainKey.put(mainKey, getMedianFromValues(values));
             }
         }
-        
         chart.redraw();
     }
 
@@ -303,10 +339,12 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         List<GroupKey> sortedMainKeys = getSortedMainKeys();
         String[] categories = new String[sortedMainKeys.size()];
         mainKeyToXValueMap.clear();
+        xValueToMainKeyMap.clear();
         for (int i = 0; i < sortedMainKeys.size(); i++) {
             GroupKey mainKey = sortedMainKeys.get(i);
             categories[i] = mainKey.asString();
             mainKeyToXValueMap.put(mainKey, i);
+            xValueToMainKeyMap.put(i, mainKey);
         }
         chart.getXAxis().setCategories(false, categories);
     }
@@ -330,12 +368,19 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
                 seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
+                if (showErrorBars) {
+                    errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setType(Type.ERRORBAR).setName(seriesKey.asString()+
+                            " "+getStringMessages().dataMiningErrorMargins()));
+                }
             }
         }
         List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
         Collections.sort(sortedSeriesKeys);
         for (GroupKey seriesKey : sortedSeriesKeys) {
             chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
+            if (showErrorBars) {
+                chart.addSeries(errorSeriesMappedByGroupKey.get(seriesKey), false, false);
+            }
         }
     }
     
@@ -345,6 +390,16 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
         } else {
             return simpleResultSeriesKey;
+        }
+    }
+    
+    private class SeriesClickHandler implements SeriesClickEventHandler {
+        @Override
+        public boolean onClick(SeriesClickEvent seriesClickEvent) {
+            final double xAxisValue = seriesClickEvent.getNearestXAsDouble();
+            final GroupKey groupKey = xValueToMainKeyMap.get((int) Math.round(xAxisValue));
+            drillDown(groupKey);
+            return true;
         }
     }
 
@@ -359,11 +414,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(getStringMessages().dataMiningResult()));
-        
         chart.setExporting(new Exporting().setEnabled(false));
-
         chart.getXAxis().setAllowDecimals(false);
-
         chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
@@ -374,8 +426,20 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 }
             }
         }));
-        
+        chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesClickEventHandler(new SeriesClickHandler()));
         return chart;
+    }
+
+    /**
+     * Attempts a drill-down for the {@code groupKey}. If a drill-down callback has been
+     * provided, it will be invoked; otherwise, this is a no-op.
+     * 
+     * @return whether or not a drill-down was issued
+     */
+    public void drillDown(GroupKey groupKey) {
+        if (drillDownCallback != null) {
+            drillDownCallback.drillDown(groupKey);
+        }
     }
 
     @Override
@@ -389,7 +453,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
@@ -406,5 +470,10 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     @Override
     public Settings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "rc";
     }
 }

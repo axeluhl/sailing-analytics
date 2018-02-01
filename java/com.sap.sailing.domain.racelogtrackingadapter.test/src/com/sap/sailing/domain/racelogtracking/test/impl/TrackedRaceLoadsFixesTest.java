@@ -24,16 +24,18 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -79,9 +81,11 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         // now extend the tracking interval of the tracked race and assert that the additional fixes are loaded
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2500), /* wait for fixes to load */ true);
+        trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getTrack(comp), 2);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(0), /* wait for fixes to load */ true);
+        trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 3);
     }
@@ -113,6 +117,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         new FixLoaderAndTracker(trackedRace, store, null);
         
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(TimePoint.BeginningOfTime, author, 0));
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
@@ -259,6 +264,38 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(450, 10, 20));
         }, /* tests and expectations */ trackedRace -> {
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
+        });
+    }
+    
+    /**
+     * Regression test for bug 4145: when fixes are mapped while startOfTracking is still null, fixes are expected
+     * to not make it into the race. However, when startOfTracking is then set to a value after the fix's time point,
+     * that fix is expected to be loaded if there is no better fix within the tracking interval, just like it already
+     * happens when starting the tracker for the race or adding pings while startOfTracking is already set to a
+     * non-null value.
+     */
+    @Test
+    public void testFixesBeforeStartOfTrackingForMarkAreLoadedWhenSettingStartOfTracking() throws InterruptedException {
+        testFixesInternal(/* start of tracking */ null, /* end of tracking */ null, /* mappings and fixes */ () -> {
+            map(mark, device, 0, 200);
+            store.storeFix(device, createFix(50, 10, 20));
+            store.storeFix(device, createFix(150, 10, 20));
+            store.storeFix(device, createFix(250, 10, 20));
+            map(mark, device, 350, 500);
+            store.storeFix(device, createFix(400, 10, 20));
+            store.storeFix(device, createFix(450, 10, 20));
+        }, /* tests track is initially empty */ trackedRace -> {
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 0); // still no start of tracking set
+        }, /* now set start of tracking */ trackedRace -> trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(600)),
+           /* now check the last fix has arrived */ trackedRace -> {
+               testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1); // one fix
+               trackedRace.getOrCreateTrack(mark).lockForRead();
+               try {
+                   final GPSFix fix = trackedRace.getOrCreateTrack(mark).getRawFixes().iterator().next();
+                   assertEquals(new MillisecondsTimePoint(450), fix.getTimePoint());
+               } finally {
+                   trackedRace.getOrCreateTrack(mark).unlockAfterRead();
+               }
         });
     }
     
@@ -452,13 +489,23 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         });
     }
-    
+
     @SafeVarargs
     private final void testFixes(long startOfTracking, long endOfTracking, Runnable beforeTrackingStarted,
             Consumer<DynamicTrackedRace>... afterTrackingStartedConsumers) throws InterruptedException {
+        testFixesInternal(Long.valueOf(startOfTracking), Long.valueOf(endOfTracking), beforeTrackingStarted, afterTrackingStartedConsumers);
+    }
+    
+    @SafeVarargs
+    private final void testFixesInternal(Long startOfTracking, Long endOfTracking, Runnable beforeTrackingStarted,
+            Consumer<DynamicTrackedRace>... afterTrackingStartedConsumers) throws InterruptedException {
         defineMarksOnRegattaLog(mark, mark2);
-        raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(startOfTracking), author, 0));
-        raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(endOfTracking), author, 0));
+        if (startOfTracking != null) {
+            raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(startOfTracking), author, 0));
+        }
+        if (endOfTracking != null) {
+            raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(endOfTracking), author, 0));
+        }
         beforeTrackingStarted.run();
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);

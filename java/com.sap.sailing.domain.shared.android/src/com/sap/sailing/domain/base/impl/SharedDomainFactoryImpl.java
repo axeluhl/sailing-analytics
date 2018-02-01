@@ -174,7 +174,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
     
     @Override
-    public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+    public Mark getOrCreateMark(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id, name, type, color, shape, pattern);
@@ -185,7 +185,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type,
-            String color, String shape, String pattern) {
+            Color color, String shape, String pattern) {
         Serializable id = toStringRepresentationOfID;
         if (markIdCache.containsKey(toStringRepresentationOfID)) {
             id = markIdCache.get(toStringRepresentationOfID);

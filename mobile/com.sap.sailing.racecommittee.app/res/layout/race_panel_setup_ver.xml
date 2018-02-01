@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/start_procedure"
+            app:buttonCaption="@string/start_procedure"
             app:buttonType="typeValue" />
 
         <com.sap.sailing.racecommittee.app.ui.views.PanelButton
@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/start_mode"
+            app:buttonCaption="@string/start_mode"
             app:buttonType="typeImage" />
 
         <com.sap.sailing.racecommittee.app.ui.views.PanelButton
@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/gate_start_pathfinder"
+            app:buttonCaption="@string/gate_start_pathfinder"
             app:buttonType="typeValue" />
 
         <com.sap.sailing.racecommittee.app.ui.views.PanelButton
@@ -38,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/gate_start_timing"
+            app:buttonCaption="@string/gate_start_timing"
             app:buttonType="typeValue" />
 
         <com.sap.sailing.racecommittee.app.ui.views.PanelButton
@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/race_group"
+            app:buttonCaption="@string/race_group"
             app:buttonSwitch=""
             app:buttonType="typeSwitch" />
 
@@ -55,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/race_factor"
+            app:buttonCaption="@string/race_factor"
             app:buttonType="typeValue" />
 
         <com.sap.sailing.racecommittee.app.ui.views.PanelButton
@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/course"
+            app:buttonCaption="@string/course"
             app:buttonType="typeValue" />
 
         <com.sap.sailing.racecommittee.app.ui.views.PanelButton
@@ -71,7 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:buttonHeader="@string/wind"
+            app:buttonCaption="@string/wind"
             app:buttonType="typeValue" />
     </LinearLayout>
 

@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueProvider;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
@@ -42,12 +43,13 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         setViewContent(uiBinder.createAndBindUi(this));
         if(presenter.getRegatta() != null) {
             RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
-            RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
-            refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
+            RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi,
+                    competitionPresenter, competitionPresenter);
+            refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter),
+                    new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
         } else {
             setViewContent(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
         }
-        competitorFilterUi.removeFromParent();
     }
     
     @Override
@@ -72,18 +74,27 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     }
     
     private class RacesViewImplFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
-        private final List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> valueChangeHandler;
+
+        private final List<FilterValueProvider<SimpleCompetitorDTO>> valueProviders;
+        private final List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> valueChangeHandlers;
 
         public RacesViewImplFilterPresenter(FilterWidget<SimpleRaceMetadataDTO, SimpleCompetitorDTO> filterWidget,
-                FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> valueChangeHandler) {
+                FilterValueProvider<SimpleCompetitorDTO> valueProvider,
+                FilterValueChangeHandler<SimpleRaceMetadataDTO> valueChangeHandler) {
             super(filterWidget);
-            this.valueChangeHandler = Arrays.asList(valueChangeHandler);
+            this.valueProviders = Arrays.asList(valueProvider);
+            this.valueChangeHandlers = Arrays.asList(valueChangeHandler);
             super.addHandler(valueChangeHandler);
         }
 
         @Override
-        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> getCurrentValueChangeHandlers() {
-            return valueChangeHandler;
+        protected List<FilterValueProvider<SimpleCompetitorDTO>> getCurrentValueProviders() {
+            return valueProviders;
+        }
+
+        @Override
+        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> getCurrentValueChangeHandlers() {
+            return valueChangeHandlers;
         }
     }
     

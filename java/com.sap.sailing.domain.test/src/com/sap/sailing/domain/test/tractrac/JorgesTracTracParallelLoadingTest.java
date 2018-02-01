@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import com.sap.sse.common.Duration;
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.data.IControlPassing;
 import com.tractrac.model.lib.api.data.IControlPassings;
@@ -66,7 +67,7 @@ public class JorgesTracTracParallelLoadingTest {
             threads.add(new Thread(()->{
                     try {
                         // Download the parameters file and load the race
-                        IRace race = ModelLocator.getEventFactory().createRace(new URI(paramsURIs.get(index)));
+                        IRace race = ModelLocator.getEventFactory().createRace(new URI(paramsURIs.get(index)), (int) /* timeout in milliseconds */ Duration.ONE_MINUTE.asMillis());
 
                         // Create the subscriptions
                         SubscriptionLogger subscriptionLogger = new SubscriptionLogger(race);

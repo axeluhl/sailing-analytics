@@ -430,4 +430,17 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public void setDelayToLiveInMillisForLatestRace(Long delayToLiveInMillisForLatestRace) {
         this.delayToLiveInMillisForLatestRace = delayToLiveInMillisForLatestRace;
     }
+    
+    public List<String> getNamesOfRaceColumns() {
+        List<String> result = new ArrayList<>(races.size());
+        for(RaceColumnDTO column : races) {
+            result.add(column.getRaceColumnName());
+        }
+        return result;
+    }
+
+    public String getName() {
+        return name;
+    }
+
 }

@@ -16,9 +16,23 @@ import junit.framework.Assert;
 public class AbstractColorTest {
 
     @Test
+    public void testShortRGBColor() {
+        Color color = AbstractColor.getCssColor("#0");
+        Assert.assertEquals("#000000", color.getAsHtml());
+        color = AbstractColor.getCssColor("#00F");
+        Assert.assertEquals("#0000FF", color.getAsHtml());
+        color = AbstractColor.getCssColor("F");
+        Assert.assertEquals("#0F0F0F", color.getAsHtml());
+        color = AbstractColor.getCssColor("0F0");
+        Assert.assertEquals("#00FF00", color.getAsHtml());
+    }
+    
+    @Test
     public void testRGBColor() throws Exception {
         Color color = AbstractColor.getCssColor("rgb(255,255,255)");
         Assert.assertEquals("#FFFFFF", color.getAsHtml());
+        color = AbstractColor.getCssColor("rgb(1, 2, 3)");
+        Assert.assertEquals("#010203", color.getAsHtml());
         color = AbstractColor.getCssColor("rgb(100%,100%,100%)");
         Assert.assertEquals("#FFFFFF", color.getAsHtml());
         color = AbstractColor.getCssColor("rgb(255,255,255,777,354)");

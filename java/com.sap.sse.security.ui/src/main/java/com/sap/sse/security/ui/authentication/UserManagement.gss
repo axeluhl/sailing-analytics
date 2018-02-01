@@ -1,12 +1,30 @@
 .flyover {
     font-size: 1rem;
 }
+
+.flyover_position_grid {
+    visibility: visible;
+    right: 0.25em;
+    top: 55px;
+}
+
+@media ( max-width: 40em) {
+    .flyover_small_hidden {
+        visibility: hidden;
+    }
+}
+
+@media ( min-width: 76em) {
+    .flyover_position_grid {
+        visibility: visible;
+        right: calc(( 100vw - 80.5rem)/2);
+    }
+}
 .flyover_content_wrapper {
     padding: 0 1rem;
 }
 .flyover_content {
     width: 24.8em;
-    float: right;
     padding: 1.333333333333333em;
     background-color: #fff;
     border-radius: .2em;
@@ -166,7 +184,8 @@ a.form_social_button_facebook:hover {
     background-color: #355089;
 }
 a.form_social_button_facebook:before {
-    background-image: url(images/home/facebook.svg);
+    background-image: resourceUrl("facebook");
+    background-size: 12px auto;
 }
 a.form_social_button_google {
     background-color: #de5342;
@@ -175,7 +194,7 @@ a.form_social_button_google:hover {
     background-color: #da3d29;
 }
 a.form_social_button_google:before {
-    background-image: url(images/home/google.svg);
+    background-image: resourceUrl("google");
 }
 .info_user {
     overflow: hidden;

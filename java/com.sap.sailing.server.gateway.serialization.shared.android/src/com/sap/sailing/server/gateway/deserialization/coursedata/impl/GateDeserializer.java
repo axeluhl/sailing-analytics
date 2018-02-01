@@ -26,14 +26,11 @@ public class GateDeserializer implements JsonDeserializer<ControlPointWithTwoMar
 
     @Override
     public ControlPointWithTwoMarks deserialize(JSONObject object) throws JsonDeserializationException {
-        
         JSONObject jsonLeftMark = (JSONObject) object.get(GateJsonSerializer.FIELD_LEFT);
         JSONObject jsonRightMark = (JSONObject) object.get(GateJsonSerializer.FIELD_RIGHT);
         Mark leftMark = markDeserializer.deserialize(jsonLeftMark);
         Mark rightMark = markDeserializer.deserialize(jsonRightMark);
-        
         String gateName = (String) object.get(BaseControlPointJsonSerializer.FIELD_NAME);
-        
         ControlPointWithTwoMarks controlPoint = factory.createControlPointWithTwoMarks(leftMark, rightMark, gateName);
         return controlPoint;
     }

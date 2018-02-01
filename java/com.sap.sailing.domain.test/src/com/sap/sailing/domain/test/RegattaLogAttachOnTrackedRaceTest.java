@@ -43,6 +43,10 @@ public class RegattaLogAttachOnTrackedRaceTest {
         @Override
         public void addImportedRegattaLog(RegattaLog regattaLog, RegattaLikeIdentifier identifier) {
         }
+
+        @Override
+        public void clear() {
+        }
     }
     
     private class MyMockedTrackedRace extends MockedTrackedRace {

@@ -65,6 +65,6 @@ public class ClearStateServlet extends HttpServlet {
     }
 
     private ClearStateTestSupport[] getClearStateTestSupportServices() {
-        return this.racingEventTracker.getServices(new ClearStateTestSupport[2]);
+        return this.racingEventTracker.getServices(new ClearStateTestSupport[3]);
     }
 }

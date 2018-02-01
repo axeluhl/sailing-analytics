@@ -20,6 +20,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.gwt.ui.adminconsole.WaypointCreationDialog.DefaultPassingInstructionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -27,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
@@ -49,6 +51,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     
     protected final Button insertWaypointBefore;
     protected final Button insertWaypointAfter;
+    private PassingInstruction lastSingleMarkPassingInstruction = PassingInstruction.Port; // the usual default
     
     protected final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     
@@ -194,6 +197,14 @@ public abstract class CourseManagementWidget implements IsWidget {
     }
     
     private <T> void insert(TableWrapper<T, ? extends SetSelectionModel<T>> tableWrapper, T toInsert, boolean beforeSelection) {
+        int index = getInsertIndex(tableWrapper, beforeSelection);
+        if (index != -1) {
+            tableWrapper.getDataProvider().getList().add(index, toInsert);
+        }
+    }
+
+    private <T> int getInsertIndex(TableWrapper<T, ? extends SetSelectionModel<T>> tableWrapper,
+            boolean beforeSelection) {
         T selected = getFirstSelected(tableWrapper.getSelectionModel());
         int index = -1;
         if (tableWrapper.getDataProvider().getList().isEmpty()) {
@@ -201,9 +212,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         } else if (selected != null) {
             index = tableWrapper.getDataProvider().getList().indexOf(selected) + (beforeSelection?0:1);
         }
-        if (index != -1) {
-            tableWrapper.getDataProvider().getList().add(index, toInsert);
-        }
+        return index;
     }
 
     private void addMultiMarkControlPoint() {
@@ -223,17 +232,44 @@ public abstract class CourseManagementWidget implements IsWidget {
         List<ControlPointDTO> allControlPoints = new ArrayList<>();
         allControlPoints.addAll(multiMarkControlPoints.getDataProvider().getList());
         allControlPoints.addAll(marks.getDataProvider().getList());
-        new WaypointCreationDialog(sailingService, errorReporter, stringMessages, tableRes,
-                allControlPoints, new DataEntryDialog.DialogCallback<WaypointDTO>() {
-            @Override
-            public void cancel() {}
+        final int insertIndex = getInsertIndex(waypoints, beforeSelection);
+        new WaypointCreationDialog(sailingService, errorReporter, stringMessages, tableRes, allControlPoints,
+                new DefaultPassingInstructionProvider() {
+                    @Override
+                    public PassingInstruction getDefaultPassingInstruction(int numberOfMarksInControlPoint, String controlPointIdAsString) {
+                        final PassingInstruction result;
+                        if (numberOfMarksInControlPoint == 2) {
+                            if (insertIndex == 0 ||
+                                    (!waypoints.getDataProvider().getList().isEmpty() && Util.equalsWithNull(controlPointIdAsString, waypoints.getDataProvider().getList().get(0).controlPoint.getIdAsString())
+                                    && insertIndex == waypoints.getDataProvider().getList().size())) {
+                                // two-mark control point used as first waypoint or
+                                // same control point as for the first waypoint now used as the last one;
+                                // suggest Line:
+                                result = PassingInstruction.Line;
+                            } else {
+                                result = PassingInstruction.Gate;
+                            }
+                        } else if (numberOfMarksInControlPoint == 1) {
+                            result = lastSingleMarkPassingInstruction;
+                        } else {
+                            result = null;
+                        }
+                        return result;
+                    }
+                }, new DataEntryDialog.DialogCallback<WaypointDTO>() {
+                    @Override
+                    public void cancel() {
+                    }
 
-            @Override
-            public void ok(WaypointDTO result) {
-                insert(waypoints, result, beforeSelection);
-                waypoints.getSelectionModel().setSelected(result, true);
-            }
-        }).show();
+                    @Override
+                    public void ok(WaypointDTO result) {
+                        insert(waypoints, result, beforeSelection);
+                        waypoints.getSelectionModel().setSelected(result, true);
+                        if (Util.size(result.controlPoint.getMarks()) == 1) {
+                            lastSingleMarkPassingInstruction = result.passingInstructions;
+                        }
+                    }
+                }).show();
     }
 
     public void refresh(){};

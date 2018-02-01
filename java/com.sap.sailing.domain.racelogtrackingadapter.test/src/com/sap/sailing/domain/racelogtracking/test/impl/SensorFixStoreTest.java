@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,6 +14,7 @@ import org.mockito.Mockito;
 
 import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -29,10 +31,12 @@ import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+
+import junit.framework.Assert;
 
 public class SensorFixStoreTest {
     private static final long FIX_TIMESTAMP = 110;
@@ -88,32 +92,82 @@ public class SensorFixStoreTest {
         newStore();
         assertEquals(1, store.getNumberOfFixes(device));
     }
-    
+
     @Test
     public void testFixDataIsPreservedOnStore() throws Exception {
         DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-        
+
         verifySingleFix(fix, 100, 200, device, true);
     }
     
+    @Test
+    public void testProgressSingle() throws Exception {
+        testProgress(1);
+    }
+    
+    @Test
+    public void testProgressFew() throws Exception {
+        testProgress(80);
+    }
+    
+    @Test
+    public void testProgressLittle() throws Exception {
+        testProgress(109);
+    }
+
+    @Test
+    public void testProgressMany() throws Exception {
+        testProgress(2000);
+    }
+
+    private void testProgress(int fixes) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        for (int i = 0; i < fixes; i++) {
+            addBravoFix(device, FIX_TIMESTAMP + 1, FIX_RIDE_HEIGHT);
+        }
+
+        List<Double> progressData = new ArrayList<>();
+        store.loadFixes((fix) -> {
+        }, device, new MillisecondsTimePoint(FIX_TIMESTAMP - 1), new MillisecondsTimePoint(FIX_TIMESTAMP + fixes + 1),
+                true, () -> false, new Consumer<Double>() {
+
+                    @Override
+                    public void accept(Double progress) {
+                        progressData.add(progress);
+                    }
+                });
+
+        // validate monotone rising
+        // validate between 0 and 1 (inclusive)
+        Double last = 0.0;
+        for (Double progress : progressData) {
+            Assert.assertTrue(progress <= 1);
+            Assert.assertTrue(progress >= 0);
+            Assert.assertTrue(progress >= last);
+            last = progress;
+        }
+        //validate that 0-100 updates do exist
+        Assert.assertFalse(progressData.isEmpty());
+        Assert.assertTrue(progressData.size() <= 100);
+    }
+
     @Test
     public void testFixWithinExclusiveBoundsIsLoaded() throws Exception {
         DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         verifySingleFix(fix, FIX_TIMESTAMP - 1, FIX_TIMESTAMP + 1, device, false);
     }
-    
+
     @Test
     public void testFixOnInclusiveLowerBoundIsLoaded() throws Exception {
         DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         verifySingleFix(fix, FIX_TIMESTAMP, FIX_TIMESTAMP + 1, device, true);
     }
-    
+
     @Test
     public void testFixOnInclusiveUpperBoundIsLoaded() throws Exception {
         DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-        verifySingleFix(fix, FIX_TIMESTAMP-1, FIX_TIMESTAMP, device, true);
+        verifySingleFix(fix, FIX_TIMESTAMP - 1, FIX_TIMESTAMP, device, true);
     }
-    
+
     @Test
     public void testFixesOnExclusiveEndBoundsArentLoaded() throws Exception {
         DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
@@ -136,16 +190,16 @@ public class SensorFixStoreTest {
         addBravoFix(device, FIX_TIMESTAMP + 5, FIX_RIDE_HEIGHT2);
         verifyOldestFix(oldestFix, FIX_TIMESTAMP, FIX_TIMESTAMP2, device);
     }
-    
+
     @Test
     public void testSingleListenerIsNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
         store.addListener(listener, device);
         DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-        
+
         Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix);
     }
-    
+
     @Test
     public void testMultipleListenersForSameDeviceAreNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
@@ -153,20 +207,20 @@ public class SensorFixStoreTest {
         store.addListener(listener1, device);
         store.addListener(listener2, device);
         DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-        
+
         Mockito.verify(listener1, Mockito.times(1)).fixReceived(device, doubleVectorFix);
         Mockito.verify(listener2, Mockito.times(1)).fixReceived(device, doubleVectorFix);
     }
-    
+
     @Test
     public void testListenerForNonMatchingDeviceIsNotNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
         store.addListener(listener, device);
         addBravoFix(device2, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-        
+
         Mockito.verifyZeroInteractions(listener);
     }
-    
+
     @Test
     public void testOnlyListenerForMatchingDeviceIsNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
@@ -174,23 +228,23 @@ public class SensorFixStoreTest {
         store.addListener(listener1, device);
         store.addListener(listener2, device2);
         DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-        
+
         Mockito.verify(listener1, Mockito.times(1)).fixReceived(device, doubleVectorFix);
         Mockito.verifyZeroInteractions(listener2);
     }
-    
+
     @Test
     public void testListenerForMatchingDeviceIsNotifiedMultipleTimes() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
         store.addListener(listener, device);
         DoubleVectorFix doubleVectorFix1 = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         DoubleVectorFix doubleVectorFix2 = addBravoFix(device, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
-        
+
         Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix1);
         Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix2);
         Mockito.verifyNoMoreInteractions(listener);
     }
-    
+
     @Test
     public void testAfterRemoveListenerIsNotNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
@@ -199,7 +253,7 @@ public class SensorFixStoreTest {
         addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         Mockito.verifyZeroInteractions(listener);
     }
-    
+
     @Test
     public void testAfterRemoveForDeviceListenerIsNotNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
@@ -208,7 +262,7 @@ public class SensorFixStoreTest {
         addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         Mockito.verifyZeroInteractions(listener);
     }
-    
+
     @Test
     public void testAfterRemoveForNonMatchingDeviceListenerIsNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
@@ -217,7 +271,7 @@ public class SensorFixStoreTest {
         DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix);
     }
-    
+
     @Test
     public void testListenerForMultipleDevicesIsNotifiedMultipleTimes() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
@@ -229,7 +283,7 @@ public class SensorFixStoreTest {
         Mockito.verify(listener, Mockito.times(1)).fixReceived(device2, doubleVectorFix2);
         Mockito.verifyNoMoreInteractions(listener);
     }
-    
+
     @Test
     public void testAfterRemoveListenerForMultipleDevicesIsNotNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
@@ -240,7 +294,7 @@ public class SensorFixStoreTest {
         addBravoFix(device2, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
         Mockito.verifyZeroInteractions(listener);
     }
-    
+
     @Test
     public void testAfterRemoveListenerForOneDevicesIsNotifiedForOtherDevice() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
@@ -252,7 +306,7 @@ public class SensorFixStoreTest {
         Mockito.verify(listener, Mockito.times(1)).fixReceived(device2, doubleVectorFix2);
         Mockito.verifyNoMoreInteractions(listener);
     }
-    
+
     @Test
     public void testAfterRemoveListenerOtherListenerIsNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
@@ -265,7 +319,7 @@ public class SensorFixStoreTest {
         Mockito.verifyNoMoreInteractions(listener2);
         Mockito.verifyZeroInteractions(listener1);
     }
-    
+
     @Test
     public void testAfterRemoveForDeviceListenerOtherListenerIsNotified() throws Exception {
         FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
@@ -278,7 +332,7 @@ public class SensorFixStoreTest {
         Mockito.verifyNoMoreInteractions(listener2);
         Mockito.verifyZeroInteractions(listener1);
     }
-    
+
     @SuppressWarnings("unchecked")
     private FixReceivedListener<DoubleVectorFix> mockFixReceivedListener() {
         FixReceivedListener<DoubleVectorFix> listener = Mockito.mock(FixReceivedListener.class);
@@ -330,9 +384,9 @@ public class SensorFixStoreTest {
     }
 
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
-        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.trackColumnCount];
-        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn] = rideHeight;
-        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn] = rideHeight;
+        Double[] fixData = new Double[BravoSensorDataMetadata.getTrackColumnCount()];
+        fixData[BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex()] = rideHeight;
+        fixData[BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex()] = rideHeight;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
     }
 }

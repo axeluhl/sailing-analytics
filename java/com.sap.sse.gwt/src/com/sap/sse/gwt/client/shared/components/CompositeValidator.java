@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,7 +10,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogCom
 
 public class CompositeValidator implements Validator<CompositeSettings> {
     
-    private final Map<Serializable, Validator<?>> validatorsMappedByComponent;
+    private final Map<String, Validator<?>> validatorsMappedByComponent;
 
     public CompositeValidator(Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
         validatorsMappedByComponent = new HashMap<>();
@@ -23,7 +22,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
         final StringBuilder result = new StringBuilder();
-        for (Entry<Serializable, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
+        for (Entry<String, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -32,7 +31,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
         return result.toString();
     }
 
-    private <SettingsType extends Settings> String getErrorMessage(Entry<Serializable, SettingsType> componentIdAndSettings) {
+    private <SettingsType extends Settings> String getErrorMessage(Entry<String, SettingsType> componentIdAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
         final Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentIdAndSettings.getKey());

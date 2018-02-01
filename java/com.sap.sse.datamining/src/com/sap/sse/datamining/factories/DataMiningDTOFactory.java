@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.factories;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -102,7 +103,8 @@ public class DataMiningDTOFactory {
                                          localizedRetrievedDataType, retrieverLevel.getDefaultSettings());
     }
     
-    public <ResultType> QueryResultDTO<ResultType> createResultDTO(QueryResult<ResultType> result) {
+    public <ResultType extends Serializable> QueryResultDTO<ResultType> createResultDTO(
+            QueryResult<ResultType> result) {
         return new QueryResultDTO<ResultType>(result.getState(), result.getResultType(), result.getResults(), result.getAdditionalData());
     }
 

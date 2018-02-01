@@ -60,14 +60,14 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventOverviewStageDTO> execute(SailingDispatchContext context) {
-        TimePoint now = MillisecondsTimePoint.now();
-        Event event = context.getRacingEventService().getEvent(eventId);
-        EventState state = HomeServiceUtil.calculateEventState(event);
+        final TimePoint now = MillisecondsTimePoint.now();
+        final Event event = context.getRacingEventService().getEvent(eventId);
+        final EventState state = HomeServiceUtil.calculateEventState(event);
         long ttl = Duration.ONE_MINUTE.times(5).asMillis();
         if(state == EventState.RUNNING) {
             ttl = Duration.ONE_MINUTE.times(2).asMillis();
         }
-        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+        if (isUpcomingOrPlanned(event, state)) {
             ttl = Math.min(ttl, now.until(event.getStartDate()).asMillis());
         }
         
@@ -94,7 +94,7 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
         }
         
         // Show countdown for planned or upcoming events
-        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+        if (isUpcomingOrPlanned(event, state)) {
             return new EventOverviewTickerStageDTO(event.getStartDate().asDate(), event.getName(), imageUrl);
         }
         return new EventOverviewTickerStageDTO(null, null, imageUrl);
@@ -151,6 +151,12 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
 //        }
 //        
 //        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
+    }
+
+    @GwtIncompatible
+    private boolean isUpcomingOrPlanned(Event event, EventState state) {
+        final TimePoint startDate = event.getStartDate();
+        return startDate != null && (state == EventState.UPCOMING || state == EventState.PLANNED);
     }
 
     @Override
