@@ -728,6 +728,20 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
+    public Double getAWA(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getAWAIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
     public Distance getDistanceFoiled(TimePoint at) {
         final Distance result;
         if (hasStartedLeg(at)) {

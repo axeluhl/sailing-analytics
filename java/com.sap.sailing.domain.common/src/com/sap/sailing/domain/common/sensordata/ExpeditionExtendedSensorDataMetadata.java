@@ -34,6 +34,22 @@ public enum ExpeditionExtendedSensorDataMetadata {
     TARGET_HEEL("TG Heell", BravoExtendedSensorDataMetadata.TARGET_HEEL, /* expected in logfile */ true), //
     DEFLECTOR_MILLIMETERS("DflectrMM", BravoExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS, /* expected in logfile */ true), //
     TARGET_BOATSPEED_P("BspTr", BravoExtendedSensorDataMetadata.TARGET_BOATSPEED_P, /* expected in logfile */ true), //
+    EXPEDITION_AWA("Awa", BravoExtendedSensorDataMetadata.EXPEDITION_AWA, /* expected in logfile */ true), //
+    EXPEDITION_AWS("Aws", BravoExtendedSensorDataMetadata.EXPEDITION_AWS, /* expected in logfile */ true), //
+    EXPEDITION_TWA("Twa", BravoExtendedSensorDataMetadata.EXPEDITION_TWA, /* expected in logfile */ true), //
+    EXPEDITION_TWS("Tws", BravoExtendedSensorDataMetadata.EXPEDITION_TWS, /* expected in logfile */ true), //
+    EXPEDITION_TWD("Twd", BravoExtendedSensorDataMetadata.EXPEDITION_TWD, /* expected in logfile */ true), //
+    EXPEDITION_BSP("Bsp", BravoExtendedSensorDataMetadata.EXPEDITION_BSP, /* expected in logfile */ true), //
+    EXPEDITION_BSP_TR("BspTr", BravoExtendedSensorDataMetadata.EXPEDITION_BSP_TR, /* expected in logfile */ true), //
+    EXPEDITION_SOG("Sog", BravoExtendedSensorDataMetadata.EXPEDITION_SOG, /* expected in logfile */ true), //
+    EXPEDITION_COG("Cog", BravoExtendedSensorDataMetadata.EXPEDITION_COG, /* expected in logfile */ true), //
+    EXPEDITION_FORESTAY("Forestay", BravoExtendedSensorDataMetadata.EXPEDITION_FORESTAY, /* expected in logfile */ true), //
+    EXPEDITION_RAKE("Rake", BravoExtendedSensorDataMetadata.EXPEDITION_RAKE, /* expected in logfile */ true), //
+    EXPEDITION_HDG("Hdg", BravoExtendedSensorDataMetadata.EXPEDITION_HDG, /* expected in logfile */ true), //
+    EXPEDITION_HEEL("Heel", BravoExtendedSensorDataMetadata.EXPEDITION_HEEL, /* expected in logfile */ true), //
+    EXPEDITION_TGHEEL("TG Heell", BravoExtendedSensorDataMetadata.EXPEDITION_TGHEEL, /* expected in logfile */ true), //
+    EXPEDITION_TMTOGUN("TmToGun", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN, /* expected in logfile */ true), //
+    EXPEDITION_TMTOBURN("TmToBurn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN, /* expected in logfile */ true), //
     ;
 
     private String columnName;

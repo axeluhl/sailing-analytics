@@ -188,7 +188,6 @@ public class RaceBoardPanel
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel, Collection<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings);
-        GWT.debugger();
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -550,6 +549,7 @@ public class RaceBoardPanel
     
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+        GWT.log("Leaderboard update " + leaderboard);
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
             editMarkPassingPanel.setLeaderboard(leaderboard);

@@ -25,4 +25,20 @@ public interface BravoExtendedFix extends BravoFix {
     Bearing getTargetHeel();
     Distance getDeflector();
     Double getTargetBoatspeedP();
+    Double getExpeditionAWA();
+    Double getExpeditionAWS();
+    Double getExpeditionTWA();
+    Double getExpeditionTWS();
+    Double getExpeditionTWD();
+    Double getExpeditionBSP();
+    Double getExpeditionBSP_TR();
+    Double getExpeditionSOG();
+    Double getExpeditionCOG();
+    Double getExpeditionForestayLoad();
+    Double getExpeditionRake();
+    Double getExpeditionHDG();
+    Double getExpeditionHeel();
+    Double getExpeditionTG_Heell();
+    Double getExpeditionTmToGun();
+    Double getExpeditionTmToBurn();
 }

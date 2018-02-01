@@ -406,6 +406,12 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getTargetBoatspeedP,
                 ScalableDouble::new);
     }
+    
+    @Override
+    public Double getAWAIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getExpeditionAWA,
+                ScalableDouble::new);
+    }
 
     private static class NaivelyScalableBearing implements ScalableValue<Double, Bearing> {
         private final double deg;

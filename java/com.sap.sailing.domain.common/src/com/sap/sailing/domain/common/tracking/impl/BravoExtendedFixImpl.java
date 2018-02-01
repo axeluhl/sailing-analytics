@@ -123,4 +123,82 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     public Double getTargetBoatspeedP() {
         return fix.get(BravoExtendedSensorDataMetadata.TARGET_BOATSPEED_P.getColumnIndex());
     }
+    
+    @Override
+    public Double getExpeditionAWA() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_AWA.getColumnIndex());
+    }
+    
+    @Override
+    public Double getExpeditionAWS() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_AWS.getColumnIndex());
+    }
+    
+    @Override
+    public Double getExpeditionTWA() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TWA.getColumnIndex());
+    }
+    @Override
+    public Double getExpeditionTWS() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TWS.getColumnIndex());
+    }
+    @Override
+    public Double getExpeditionTWD() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TWD.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionBSP() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_BSP.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionBSP_TR() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_BSP_TR.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionSOG() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_SOG.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionCOG() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_COG.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionForestayLoad() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_FORESTAY.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionRake() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_RAKE.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionHDG() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_HDG.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionHeel() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_HEEL.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionTG_Heell() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TGHEEL.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionTmToGun() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionTmToBurn() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex());
+    }
 }

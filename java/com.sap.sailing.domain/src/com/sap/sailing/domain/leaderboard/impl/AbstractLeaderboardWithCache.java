@@ -56,6 +56,7 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.MetaLeaderboardRaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -66,6 +67,7 @@ import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -457,6 +459,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
             row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
             row.netPoints = this.getNetPoints(competitor, timePoint);
+            
             if (addOverallDetails) {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
@@ -600,6 +603,34 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 entryDTO.calculatedTime = raceDetails.getCorrectedTime();
                 entryDTO.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
+                
+                
+                try {
+                    BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
+                            BravoFixTrack.TRACK_NAME);
+                    if(sensorTrack.hasExtendedFixes()){
+                        BravoExtendedFix fix = (BravoExtendedFix) sensorTrack.getFirstFixAtOrAfter(timePoint);
+                        entryDTO.expeditionAWA = fix.getExpeditionAWA();
+                        entryDTO.expeditionAWS = fix.getExpeditionAWS();
+                        entryDTO.expeditionTWA = fix.getExpeditionTWA();
+                        entryDTO.expeditionTWS = fix.getExpeditionTWS();
+                        entryDTO.expeditionTWD = fix.getExpeditionTWD();
+                        entryDTO.expeditionBoatSpeed = fix.getExpeditionBSP();
+                        entryDTO.expeditionTargBoatSpeed = fix.getExpeditionBSP_TR();
+                        entryDTO.expeditionSOG = fix.getExpeditionSOG();
+                        entryDTO.expeditionCOG = fix.getExpeditionCOG();
+                        entryDTO.expeditionForestayLoad = fix.getExpeditionForestayLoad();
+                        entryDTO.expeditionRake = fix.getExpeditionRake();
+                        entryDTO.expeditionHeading = fix.getExpeditionHDG();
+                        entryDTO.expeditionHeel = fix.getExpeditionHeel();
+                        entryDTO.expeditionTargetHeel = fix.getExpeditionTG_Heell();
+                        entryDTO.expeditionTimeToGUN = fix.getExpeditionTmToGun();
+                        entryDTO.expeditionTimeToBurnToLine = fix.getExpeditionTmToBurn();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
                     Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
@@ -811,6 +842,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 // without wind information, use null meaning "unknown"
                 averageSignedCrossTrackError = null;
             }
+            
             final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
             return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),

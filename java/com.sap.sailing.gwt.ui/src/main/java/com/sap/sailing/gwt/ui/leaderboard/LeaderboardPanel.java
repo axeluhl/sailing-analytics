@@ -472,6 +472,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         if (settings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
         }
+        
+        timer.addPlayStateListener(this);
+        timer.addTimeListener(this);
 
         totalRankColumn = new TotalRankColumn();
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
@@ -2871,6 +2874,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     public void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
+            GWT.log("Leaderboard " + leaderboard);
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
                     leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
@@ -3576,6 +3580,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
+        GWT.log("tchange" + newTime) ;
         loadCompleteLeaderboard(/* showProgress */ false);
     }
 

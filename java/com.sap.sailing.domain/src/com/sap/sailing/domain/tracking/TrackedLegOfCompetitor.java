@@ -325,4 +325,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
 
+    Double getAWA(TimePoint at);
+
 }

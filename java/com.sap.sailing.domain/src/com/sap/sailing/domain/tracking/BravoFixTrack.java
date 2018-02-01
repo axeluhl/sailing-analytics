@@ -99,4 +99,5 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Bearing getTargetHeelIfAvailable(TimePoint timePoint);
     Distance getDeflectorIfAvailable(TimePoint timePoint);
     Double getTargetBoatspeedPIfAvailable(TimePoint timePoint);
+    Double getAWAIfAvailable(TimePoint timePoint);
 }
