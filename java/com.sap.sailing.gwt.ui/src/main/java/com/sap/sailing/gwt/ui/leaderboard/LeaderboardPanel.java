@@ -744,7 +744,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private void applyDetailSettings(final LeaderboardSettings newSettings) {
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), reduceToAvailableTypes(getAvailableOverallDetailColumnTypes()),
                     selectedOverallDetailColumns);
         }
 
@@ -758,7 +758,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), LegColumn.getAvailableLegDetailColumnTypes(),
+            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), reduceToAvailableTypes(LegColumn.getAvailableLegDetailColumnTypes()),
                     selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
@@ -766,7 +766,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             allRaceDetailsTypes.addAll(DetailType.getRaceDetailTypes());
             allRaceDetailsTypes.addAll(getAvailableRaceStartAnalysisColumnTypes());
             GWT.log("selected race details " + selectedRaceDetails);
-            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(),allRaceDetailsTypes, selectedRaceDetails);
+            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), reduceToAvailableTypes(allRaceDetailsTypes) , selectedRaceDetails);
         }
     }
 
