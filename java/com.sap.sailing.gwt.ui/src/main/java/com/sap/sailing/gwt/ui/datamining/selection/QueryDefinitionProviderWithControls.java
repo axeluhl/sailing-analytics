@@ -73,7 +73,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final ProviderListener providerListener;
     private final Collection<DataMiningComponentProvider<?>> providers;
     private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
-    private final StatisticProvider statisticProvider;
+    private final StatisticProvider<?> statisticProvider;
     private final GroupingProvider groupingProvider;
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;

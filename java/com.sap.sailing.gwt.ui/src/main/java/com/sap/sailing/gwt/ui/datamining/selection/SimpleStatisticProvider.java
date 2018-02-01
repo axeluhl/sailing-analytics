@@ -34,7 +34,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class SimpleStatisticProvider extends AbstractComponent<SerializableSettings> implements StatisticProvider {
+public class SimpleStatisticProvider extends AbstractComponent<SerializableSettings> implements StatisticProvider<SerializableSettings> {
     
     private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
     
