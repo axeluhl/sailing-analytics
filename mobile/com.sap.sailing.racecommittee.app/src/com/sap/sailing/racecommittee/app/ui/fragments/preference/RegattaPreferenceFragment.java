@@ -56,38 +56,38 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
 
     private void setupRRS26() {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
-        bindPreferenceSummaryToValue(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
 
         setupStartmodeFlagsList(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
-        bindPreferenceSummaryToSet(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
     }
 
     private void setupSWC() {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_swc_classflag_key));
-        bindPreferenceSummaryToSet(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_swc_startmode_flags_key));
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_swc_startmode_flags_key));
 
         setupStartmodeFlagsList(R.string.preference_racing_procedure_swc_startmode_flags_key);
-        bindPreferenceSummaryToValue(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_swc_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_swc_classflag_key));
     }
 
     private void setupGateStart() {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
-        bindPreferenceSummaryToValue(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
     }
 
     private void setupESS() {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_ess_classflag_key));
-        bindPreferenceSummaryToValue(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_ess_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_ess_classflag_key));
     }
 
     private void setupBasic() {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_basic_classflag_key));
-        bindPreferenceSummaryToValue(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_basic_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_basic_classflag_key));
     }
 
     private void setupLeague() {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_league_classflag_key));
-        bindPreferenceSummaryToValue(getPreferenceManager(), findPreference(R.string.preference_racing_procedure_league_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_league_classflag_key));
     }
 
     private void setupRacingProcedureTypePreference() {
@@ -103,7 +103,7 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         startProcedurePreference.setEntries(entries.toArray(new String[entries.size()]));
         startProcedurePreference.setEntryValues(entryValues.toArray(new String[entryValues.size()]));
 
-        bindPreferenceSummaryToValue(getPreferenceManager(), startProcedurePreference);
+        bindPreferenceSummaryToValue(startProcedurePreference);
     }
 
     private void setupCourseDesignerTypePreference() {
@@ -119,17 +119,17 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         preference.setEntries(entries.toArray(new String[entries.size()]));
         preference.setEntryValues(entryValues.toArray(new String[entryValues.size()]));
 
-        bindPreferenceSummaryToValue(getPreferenceManager(), preference);
+        bindPreferenceSummaryToValue(preference);
 
         preference.setSummary(CourseDesignerMode.valueOf(preference.getValue()).toString());
     }
 
     private void setupDependentRacesPreference() {
-        bindPreferenceSummaryToInteger(getPreferenceManager(), findPreference(R.string.preference_dependent_races_offset_key));
+        bindPreferenceSummaryToInteger(findPreference(R.string.preference_dependent_races_offset_key));
     }
 
     private void setupProtestTimePreference() {
-        bindPreferenceSummaryToInteger(getPreferenceManager(), findPreference(R.string.preference_protest_time_duration_key));
+        bindPreferenceSummaryToInteger(findPreference(R.string.preference_protest_time_duration_key));
     }
 
     private void setupStartmodeFlagsList(@StringRes int prefId) {

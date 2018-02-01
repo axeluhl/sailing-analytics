@@ -14,7 +14,7 @@ public class CourseDesignerPreferenceFragment extends BasePreferenceFragment {
         
         setupCourseDesignerByNameCourseNames();
         
-        bindPreferenceSummaryToSet(getPreferenceManager(), findPreference(R.string.preference_course_designer_by_name_course_names_key));
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_course_designer_by_name_course_names_key));
     }
 
     private void setupCourseDesignerByNameCourseNames() {
