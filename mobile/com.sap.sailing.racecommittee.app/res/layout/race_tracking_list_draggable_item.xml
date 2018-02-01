@@ -29,20 +29,35 @@
             android:layout_weight="12"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/item_penalty"
+            <LinearLayout
+                android:id="@+id/penalty_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_gravity="center"
-                android:layout_marginRight="16dp"
-                android:background="@drawable/penalty_text_background"
+                android:orientation="horizontal"
                 android:paddingBottom="4dp"
-                android:paddingLeft="6dp"
-                android:paddingRight="6dp"
-                android:paddingTop="4dp"
-                tools:text="OCS" />
+                android:paddingTop="4dp">
+
+                <ImageView
+                    android:id="@+id/warning_sign"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    tools:src="@drawable/ic_warning_red" />
+
+                <TextView
+                    android:id="@+id/item_penalty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="16dp"
+                    android:background="@drawable/penalty_text_background"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    tools:text="OCS" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/vessel_id"
@@ -58,7 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/item_penalty"
+                android:layout_toLeftOf="@id/penalty_layout"
                 android:layout_toRightOf="@id/vessel_id"
                 android:padding="5dp"
                 android:singleLine="true"

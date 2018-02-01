@@ -51,9 +51,11 @@ public class ManeuverSpeedDetailsRetrievalProcessor
         Wind wind = trackedRace.getWind(maneuver.getPosition(), maneuver.getTimePoint());
         if (wind != null) {
             if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null
-                    && element.getTimePointBeforeForAnalysis().until(element.getTimePointAfterForAnalysis()).asMillis() >= 500) {
+                    && element.getTimePointBeforeForAnalysis().until(element.getTimePointAfterForAnalysis())
+                            .asMillis() >= 500) {
                 SpeedPerTWAExtraction speedPerTWAExtraction = extractSpeedPerTWA(trackedRace,
-                        trackedLegOfCompetitor.getCompetitor(), wind, element.getTimePointBeforeForAnalysis(), element.getTimePointAfterForAnalysis(), element.getDirectionChangeInDegreesForAnalysis());
+                        trackedLegOfCompetitor.getCompetitor(), wind, element.getTimePointBeforeForAnalysis(),
+                        element.getTimePointAfterForAnalysis(), element.getDirectionChangeInDegreesForAnalysis());
                 ManeuverSpeedDetailsWithContext maneuverSpeedDetailsContext = new ManeuverSpeedDetailsWithContext(
                         element, speedPerTWAExtraction.getSpeedPerTWA(), speedPerTWAExtraction.getEnteringTWA(),
                         settings);
@@ -65,14 +67,14 @@ public class ManeuverSpeedDetailsRetrievalProcessor
     }
 
     private SpeedPerTWAExtraction extractSpeedPerTWA(TrackedRace trackedRace, Competitor competitor, Wind wind,
-            TimePoint timePointBeforeForAnalysis, TimePoint timePointAfterForAnalysis, double directionChangeInDegreesForAnalysis) {
-        final SpeedWithBearingStepsIterable maneuverBearingSteps = trackedRace.getTrack(competitor).getSpeedWithBearingSteps(
-                timePointBeforeForAnalysis, timePointAfterForAnalysis);
-
+            TimePoint timePointBeforeForAnalysis, TimePoint timePointAfterForAnalysis,
+            double directionChangeInDegreesForAnalysis) {
+        final SpeedWithBearingStepsIterable maneuverBearingSteps = trackedRace.getTrack(competitor)
+                .getSpeedWithBearingSteps(timePointBeforeForAnalysis, timePointAfterForAnalysis);
         NauticalSide maneuverDirection = directionChangeInDegreesForAnalysis < 0 ? NauticalSide.PORT
                 : NauticalSide.STARBOARD;
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils
-                .getNextTWAFunctionForManeuverDirection(maneuverDirection);
+        Function<Integer, Integer> twaIterationFunction = ManeuverSpeedDetailsUtils
+                .getTWAIterationFunctionForManeuverDirection(maneuverDirection);
 
         double[] speedPerTWA = new double[360];
         int previousRoundedTWA = -1;
@@ -80,7 +82,20 @@ public class ManeuverSpeedDetailsRetrievalProcessor
 
         int enteringTWA = -1;
 
+        double currentDirectionChangeSumInDegrees = 0;
+        double currentMaxDirectionChangeSumInDegrees = 0;
+
+        double directionChangeForAnalysisSignum = Math.signum(directionChangeInDegreesForAnalysis);
         for (SpeedWithBearingStep bearingStep : maneuverBearingSteps) {
+            currentDirectionChangeSumInDegrees += bearingStep.getCourseChangeInDegrees();
+            if (previousRoundedTWA != -1
+                    && Math.signum(currentDirectionChangeSumInDegrees) != directionChangeForAnalysisSignum
+                    || currentDirectionChangeSumInDegrees
+                            * directionChangeForAnalysisSignum < currentMaxDirectionChangeSumInDegrees
+                                    * directionChangeForAnalysisSignum) {
+                continue;
+            }
+            currentMaxDirectionChangeSumInDegrees = currentDirectionChangeSumInDegrees;
             SpeedWithBearing speedWithBearing = bearingStep.getSpeedWithBearing();
             double twa = wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees();
             if (twa < 0) {
@@ -99,15 +114,14 @@ public class ManeuverSpeedDetailsRetrievalProcessor
             // whole twa sequence
             if (speedPerTWA[roundedTWA] == 0) {
                 speedPerTWA[roundedTWA] = speed;
-                // First bearing step supposed to have 0 as course change as
                 // it does not have any previous steps with bearings to compute bearing difference.
-                if (bearingStep.getCourseChangeInDegrees() != 0 && bearingStep.getCourseChangeInDegrees() < 40) {
+                if (previousRoundedTWA != -1 && bearingStep.getCourseChangeInDegrees() < 40) {
                     int diffWithPreviousTWA = Math.abs(previousRoundedTWA - roundedTWA);
                     if (diffWithPreviousTWA > 1) {
                         double diffWithPreviousSpeed = speed - previousSpeed;
                         // fill the TWA gaps with linear approximation
-                        for (int step = 1, fillingTWA = forNextTWA
-                                .apply(previousRoundedTWA); fillingTWA != roundedTWA; fillingTWA = forNextTWA
+                        for (int step = 1, fillingTWA = twaIterationFunction
+                                .apply(previousRoundedTWA); fillingTWA != roundedTWA; fillingTWA = twaIterationFunction
                                         .apply(fillingTWA), ++step) {
                             if (speedPerTWA[fillingTWA] == 0) {
                                 speedPerTWA[fillingTWA] = previousSpeed

@@ -119,6 +119,17 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
         this.mMergeState = mergeState;
     }
 
+    public void setValue(CompetitorResult result) {
+        mCompetitorId = result.getCompetitorId();
+        mCompetitorDisplayName = result.getCompetitorDisplayName();
+        mOneBasedRank = result.getOneBasedRank();
+        mMaxPointsReason = result.getMaxPointsReason();
+        mScore = result.getScore();
+        mFinishingTime = result.getFinishingTime();
+        mComment = result.getComment();
+        mMergeState = result.getMergeState();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)

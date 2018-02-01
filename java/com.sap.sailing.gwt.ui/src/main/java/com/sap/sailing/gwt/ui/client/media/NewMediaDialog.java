@@ -6,6 +6,8 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -14,6 +16,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
+import com.google.gwt.typedarrays.shared.Int8Array;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -31,6 +34,7 @@ import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -138,13 +142,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     native void addLoadMetadataHandler(MediaElement mediaElement) /*-{
-		var that = this;
-		mediaElement
-				.addEventListener(
-						'loadedmetadata',
-						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
-						});
+        var that = this;
+        mediaElement.addEventListener('loadedmetadata',
+            function() {
+                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
+            });
     }-*/;
 
     public void loadedmetadata(MediaElement mediaElement) {
@@ -223,7 +225,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             mediaTrack.url = url;
             loadMediaDuration();
-            String lastPathSegment = mediaTrack.url.substring(mediaTrack.url.lastIndexOf('/') + 1);
+            AnchorElement anchor = Document.get().createAnchorElement();
+            anchor.setHref(url);
+            //remove trailing / as well
+            String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
             int dotPos = lastPathSegment.lastIndexOf('.');
             if (dotPos >= 0) {
                 mediaTrack.title = lastPathSegment.substring(0, dotPos);
@@ -237,6 +242,19 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         remoteMp4WasStarted = false;
         remoteMp4WasFinished = false;
         refreshUI();
+        if (MimeType.mp4.equals(mediaTrack.mimeType)) {
+            processMp4(mediaTrack);
+        } else {
+            loadMediaDuration();
+        }
+    }
+
+    private String sliceBefore(String lastPathSegment, String slicer) {
+        int paramSegment = lastPathSegment.indexOf(slicer);
+        if (paramSegment > 0) {
+            return lastPathSegment.substring(0, paramSegment);
+        }
+        return lastPathSegment;
     }
 
     protected void setUiEnabled(boolean isEnabled) {
@@ -252,13 +270,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     private native void registerNativeMethods() /*-{
-		var that = this;
-		window.youtubeMetadataCallback = function(metadata) {
-			var title = metadata.entry.media$group.media$title.$t;
-			var duration = metadata.entry.media$group.yt$duration.seconds;
-			var description = metadata.entry.media$group.media$description.$t;
-			that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
-		}
+        var that = this;
+        window.youtubeMetadataCallback = function(metadata) {
+            var title = metadata.entry.media$group.media$title.$t;
+            var duration = metadata.entry.media$group.yt$duration.seconds;
+            var description = metadata.entry.media$group.media$description.$t;
+            that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
+        }
     }-*/;
 
     /**
@@ -267,28 +285,24 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
      * @param youtubeId
      */
     public native void loadYoutubeMetadata(String youtubeId) /*-{
-		var that = this;
+        var that = this;
+        //Create temporary script element.
+        window.youtubeMetadataCallbackScript = document.createElement("script");
+        window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
+                + youtubeId
+                + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
+        document.body.appendChild(window.youtubeMetadataCallbackScript);
 
-		//Create temporary script element.
-		window.youtubeMetadataCallbackScript = document.createElement("script");
-		window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
-				+ youtubeId
-				+ "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
-		document.body.appendChild(window.youtubeMetadataCallbackScript);
-
-		// Cancel meta data capturing after has 2-seconds timeout.
-		setTimeout(
-				function() {
-					//Remove temporary script element.
-					if (window != null && window.youtubeMetadataCallbackScript != null) {
-					    document.body
-							.removeChild(window.youtubeMetadataCallbackScript);
-							
-					    delete window.youtubeMetadataCallbackScript;
-					}
-					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
-				}, 2000);
-
+        // Cancel meta data capturing after has 2-seconds timeout.
+        setTimeout(
+            function() {
+                //Remove temporary script element.
+                if (window != null && window.youtubeMetadataCallbackScript != null) {
+                    document.body.removeChild(window.youtubeMetadataCallbackScript);
+                    delete window.youtubeMetadataCallbackScript;
+                }
+                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
+            }, 2000);
     }-*/;
 
     public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
@@ -359,17 +373,84 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 setUiEnabled(true);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack);
+                loadMediaDuration();
+            }
+        });
+    }
+
+    /**
+     * For a given url that points to an mp4 video, attempts are made to parse the header, to determine the actual
+     * starttime of the video and to check for a 360° flag. The video will be analyzed by the backendserver, either via
+     * direct download, or proxied by the client, if a video is only available locally. If the video header cannot be
+     * read, default values are used instead.
+     */
+    private void checkMetadata(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
+        // check on server first
+        mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+
+            @Override
+            public void onSuccess(VideoMetadataDTO result) {
+                remoteMp4WasFinished = true;
+                if (result.isDownloadable()) {
+                    setUiEnabled(true);
+                    mp4MetadataResult(result);
+                } else {
+                    checkMetadataOnClient(url, lbl, asyncCallback);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // try on client instead
+                checkMetadataOnClient(url, lbl, asyncCallback);
+            }
+
+            private void checkMetadataOnClient(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
+                JSDownloadUtils.getData(url, new JSDownloadCallback() {
+
+                    @Override
+                    public void progress(Double current, Double total) {
+                        lbl.setText(stringMessages.transferStarted() + " " + Math.round(current / 1024 / 1024) + "/"
+                                + Math.round(total / 1024 / 1024) + " MB");
+                        infoLabel.setWidget(lbl);
+                    }
+
+                    @Override
+                    public void error(Object msg) {
+                        asyncCallback
+                                .onSuccess(new VideoMetadataDTO(false, null, false, null, msg == null ? "" : msg.toString()));
+                    }
+
+                    @Override
+                    public void complete(Int8Array start, Int8Array end, Double skipped) {
+                        lbl.setText(stringMessages.analyze());
+                        infoLabel.setWidget(lbl);
+                        byte[] jStart = new byte[start.byteLength()];
+                        for (int i = 0; i < start.byteLength(); i++) {
+                            jStart[i] = start.get(i);
+                        }
+                        byte[] jEnd = new byte[end.byteLength()];
+                        for (int i = 0; i < end.byteLength(); i++) {
+                            jEnd[i] = end.get(i);
+                        }
+                        // Due to js represeting everything as 64double, the max safe file is around 4 petabytes
+                        mediaService.checkMetadata(jStart, jEnd, skipped.longValue(), asyncCallback);
+                    }
+                });
             }
         });
     }
 
     protected void mp4MetadataResult(VideoMetadataDTO result) {
         if (!result.isDownloadable()) {
-            Window.alert("Could not download file " + mediaTrack.url);
+            Window.alert(stringMessages.couldNotDownload(mediaTrack.url));
             manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
+            mediaTrack.duration = result.getDuration();
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
-            mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
+            if(result.getRecordStartedTime() != null){
+                mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
+            }
             refreshUI();
         }
     }
@@ -390,7 +471,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
             }
         });
-        mimeTypeListBox.setSelectedIndex(MimeType.mp4.equals(mediaTrack.mimeType)?0:1);
+        mimeTypeListBox.setSelectedIndex(MimeType.mp4.equals(mediaTrack.mimeType) ? 0 : 1);
         fp.add(mimeTypeListBox);
         infoLabel.setWidget(fp);
     }
