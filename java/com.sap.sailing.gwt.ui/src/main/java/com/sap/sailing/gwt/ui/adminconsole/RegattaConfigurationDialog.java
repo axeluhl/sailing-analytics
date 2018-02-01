@@ -30,8 +30,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurationDTO.RegattaConfigurationDTO> {
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    private final Duration DEFAULT_PROTEST_TIME_DURATION = Duration.ONE_MINUTE.times(90); // FIXME where can I find the value?
-    
     private final StringMessages stringMessages;
     private final DeviceConfigurationDTO.RegattaConfigurationDTO originalConfiguration;
 
@@ -161,8 +159,8 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     }
 
     private void setupProtestTimeTextBox(Grid grid, int gridRow) {
-        int protestTimeDurationInMinutes = (int) (originalConfiguration.defaultProtestTimeDuration != null ?
-                originalConfiguration.defaultProtestTimeDuration : DEFAULT_PROTEST_TIME_DURATION).asMinutes();
+        final Integer protestTimeDurationInMinutes = originalConfiguration.defaultProtestTimeDuration == null ? null :
+            (int) originalConfiguration.defaultProtestTimeDuration.asMinutes();
         protestTimeInMinutesTextBox = createIntegerBox(protestTimeDurationInMinutes, 3);
         grid.setWidget(gridRow, 0, new Label(stringMessages.protestTime()));
         grid.setWidget(gridRow, 1, protestTimeInMinutesTextBox);
@@ -514,7 +512,8 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
             CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
             result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
         }
-        result.defaultProtestTimeDuration = Duration.ONE_MINUTE.times(protestTimeInMinutesTextBox.getValue());
+        result.defaultProtestTimeDuration = protestTimeInMinutesTextBox.getValue() == null ? null :
+            Duration.ONE_MINUTE.times(protestTimeInMinutesTextBox.getValue());
         if (rrs26EnabledBox.getValue()) {
             result.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             getRacingProcedureConfigurationResults(result.rrs26Configuration, rrs26ClassFlagListBox, rrs26RecallBox, rrs26ResultEntryBox);

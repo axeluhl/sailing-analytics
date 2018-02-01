@@ -29,7 +29,8 @@ public interface RegattaConfiguration extends Serializable, Cloneable {
     RacingProcedureType getDefaultRacingProcedureType();
 
     /**
-     * Gets the default protest time duration
+     * Gets the default protest time duration. May be {@code null} in case no default is set for the
+     * regatta.
      */
     Duration getDefaultProtestTimeDuration();
     
