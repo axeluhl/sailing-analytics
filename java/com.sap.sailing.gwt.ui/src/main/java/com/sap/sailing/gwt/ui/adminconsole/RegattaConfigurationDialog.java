@@ -213,7 +213,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         rrs26DisclosurePanel = new DisclosurePanel(stringMessages.rrs26Start());
         VerticalPanel panel = new VerticalPanel();
 
-        Grid grid = new Grid(5, 3);
+        Grid grid = new Grid(4, 3);
         rrs26EnabledBox = new CheckBox(stringMessages.setConfiguration());
         rrs26EnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -273,7 +273,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         swcStartDisclosurePanel = new DisclosurePanel(stringMessages.sailingWorldCupStart());
         VerticalPanel panel = new VerticalPanel();
 
-        Grid grid = new Grid(5, 3);
+        Grid grid = new Grid(4, 3);
         swcStartEnabledBox = new CheckBox(stringMessages.setConfiguration());
         swcStartEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -333,7 +333,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         gateStartDisclosurePanel = new DisclosurePanel(stringMessages.gateStart());
         VerticalPanel panel = new VerticalPanel();
 
-        Grid grid = new Grid(6, 3);
+        Grid grid = new Grid(5, 3);
         gateStartEnabledBox = new CheckBox(stringMessages.setConfiguration());
         gateStartEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -385,7 +385,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         essDisclosurePanel = new DisclosurePanel(stringMessages.essStart());
         VerticalPanel panel = new VerticalPanel();
 
-        Grid grid = new Grid(4, 3);
+        Grid grid = new Grid(3, 3);
         essEnabledBox = new CheckBox(stringMessages.setConfiguration());
         essEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -422,7 +422,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         basicDisclosurePanel = new DisclosurePanel(stringMessages.basicStart());
         VerticalPanel panel = new VerticalPanel();
 
-        Grid grid = new Grid(4, 3);
+        Grid grid = new Grid(3, 3);
         basicEnabledBox = new CheckBox(stringMessages.setConfiguration());
         basicEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -459,7 +459,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         leagueDisclosurePanel = new DisclosurePanel(stringMessages.leagueStart());
         VerticalPanel panel = new VerticalPanel();
 
-        Grid grid = new Grid(4, 3);
+        Grid grid = new Grid(3, 3);
         leagueEnabledBox = new CheckBox(stringMessages.setConfiguration());
         leagueEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
