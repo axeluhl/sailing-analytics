@@ -14,8 +14,8 @@ image_id='ami-7719840e'
 
 certificate_arn='arn:aws:acm:eu-west-1:017363970217:certificate/67a1515a-81be-472d-9459-85746d030564'
 elb_security_group_ids=
-mongodb_host=
-mongodb_port=
+mongodb_host='dbserver.internal.sapsailing.com'
+mongodb_port='10202'
 alb_domain='sapsailing.com'
 
 #SL Multi-Instance Sailing Server
