@@ -69,12 +69,12 @@ function wait_instance_exists(){
 
 # -----------------------------------------------------------
 # Wait until ssh connection is established
-# @param $1  instance id
+# @param $1  ssh_user
+# @param $2  public dns name
 # -----------------------------------------------------------
 function wait_for_ssh_connection(){
-	public_dns_name=$(query_public_dns_name $1)
-	local_echo -n "Connecting to $ssh_user@$public_dns_name..."
-	do_until_true ssh_prewrapper -q $ssh_user@$public_dns_name true 1>&2
+	local_echo -n "Connecting to $1@$2..."
+	do_until_true ssh_prewrapper -q $1@$2 true 1>&2
 }
 
 # -----------------------------------------------------------

@@ -78,7 +78,7 @@ function create_new_user(){
 
 # -----------------------------------------------------------
 # Patch 001-events.conf with ssl macros
-# @param $1  dns name
+# @param $1  domain
 # @param $2  event id
 # @param $3  ssh user
 # @param $4  public dns name
@@ -92,6 +92,11 @@ function append_event_ssl_macro_to_001_events_conf(){
 	ssh_wrapper $3@$4 echo "$patched_content >> $events_conf"
 }
 
+# -----------------------------------------------------------
+# Wait until 001_events.conf file appears on instance
+# @param $1  ssh user
+# @param $2  dns name
+# -----------------------------------------------------------
 function wait_for_001_events_patch(){
 	echo "Waiting for 001-events.conf to be created..."
 	wait_for_ssh_connection $1 $2

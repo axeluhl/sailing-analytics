@@ -38,8 +38,9 @@ function instance_execute() {
 	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
 
 	instance_id=$(create_instance "$user_data")
+	public_dns_name=$(query_public_dns_name $instance_id)
 
-	wait_for_ssh_connection $instance_id
+	wait_for_ssh_connection $ssh_user $public_dns_name
 
 	header "Event and user creation"
 
