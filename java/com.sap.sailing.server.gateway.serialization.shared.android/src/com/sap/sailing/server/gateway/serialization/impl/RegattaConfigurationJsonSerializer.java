@@ -16,7 +16,7 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
 
     public static final String FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
     public static final String FIELD_DEFAULT_COURSE_DESIGNER_MODE = "defaultCourseDesignerMode";
-    public static final String FIELD_DEFAULT_PROTEST_TIME_DURATION = "defaultProtestTimeDuration";
+    public static final String FIELD_DEFAULT_PROTEST_TIME_DURATION_MILLIS = "defaultProtestTimeDurationMillis";
     public static final String FIELD_RRS26 = "rrs26";
     public static final String FIELD_SWC_START = "swcStart";
     public static final String FIELD_GATE_START = "gateStart";
@@ -54,7 +54,7 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
         }
 
         if (object.getDefaultProtestTimeDuration() != null) {
-            result.put(FIELD_DEFAULT_PROTEST_TIME_DURATION, object.getDefaultProtestTimeDuration());
+            result.put(FIELD_DEFAULT_PROTEST_TIME_DURATION_MILLIS, object.getDefaultProtestTimeDuration().asMillis());
         }
 
         if (object.getRRS26Configuration() != null) {

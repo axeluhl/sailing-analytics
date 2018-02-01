@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 
 public class RegattaConfigurationImpl implements RegattaConfiguration {
 
@@ -16,7 +17,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     private RacingProcedureType defaultRacingProcedureType;
     private CourseDesignerMode defaultCourseDesignerMode;
-    private Integer defaultProtestTimeDuration;
+    private Duration defaultProtestTimeDuration;
     
     private RRS26Configuration rrs26Configuration;
     private SWCStartConfiguration swcStartConfiguration;
@@ -44,11 +45,11 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
     }
 
     @Override
-    public Integer getDefaultProtestTimeDuration() {
+    public Duration getDefaultProtestTimeDuration() {
         return defaultProtestTimeDuration;
     }
 
-    public void setDefaultProtestTimeDuration(Integer defaultProtestTimeDuration) {
+    public void setDefaultProtestTimeDuration(Duration defaultProtestTimeDuration) {
         this.defaultProtestTimeDuration = defaultProtestTimeDuration;
     }
 

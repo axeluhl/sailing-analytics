@@ -497,13 +497,13 @@ public class AppPreferences {
             .getInteger(R.integer.preference_dependent_races_offset_default));
     }
 
-    public int getProtestTimeDuration() {
+    public int getProtestTimeDurationInMinutes() {
         return helper.getInt(context.getString(R.string.preference_protest_time_duration_key), context.getResources()
             .getInteger(R.integer.preference_protest_time_duration_default));
     }
 
-    public void setDefaultProtestTimeDuration(int value) {
-        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_key), value).commit();
+    public void setDefaultProtestTimeDurationInMinutes(int protestTimeInMinutes) {
+        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_key), protestTimeInMinutes).commit();
     }
 
     public String getTheme() {

@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<RegattaConfiguration> {
 
@@ -58,10 +59,11 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
             configuration.setDefaultCourseDesignerMode(mode);
         }
 
-        if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_DEFAULT_PROTEST_TIME_DURATION)) {
-            Integer protestTimeDuration = Integer.parseInt(object.get(
-                    RegattaConfigurationJsonSerializer.FIELD_DEFAULT_PROTEST_TIME_DURATION).toString());
-            configuration.setDefaultProtestTimeDuration(protestTimeDuration);
+        if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_DEFAULT_PROTEST_TIME_DURATION_MILLIS)) {
+            final Number defaultProtestTimeDurationInMillis = (Number) object.get(
+                    RegattaConfigurationJsonSerializer.FIELD_DEFAULT_PROTEST_TIME_DURATION_MILLIS);
+            configuration.setDefaultProtestTimeDuration(defaultProtestTimeDurationInMillis == null ? null :
+                new MillisecondsDurationImpl(defaultProtestTimeDurationInMillis.longValue()));
         }
 
         if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_RRS26)) {

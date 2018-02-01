@@ -309,7 +309,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint startTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
-            Duration duration = Duration.ONE_MINUTE.times(AppPreferences.on(getActivity()).getProtestTimeDuration());
+            Duration duration = Duration.ONE_MINUTE.times(AppPreferences.on(getActivity()).getProtestTimeDurationInMinutes());
             TimeRange protestTime = new TimeRangeImpl(startTime, startTime.plus(duration));
             race.getState().setProtestTime(now, protestTime);
         }
@@ -391,7 +391,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     }
 
     private void updateProtestRange() {
-        int duration = mPreferences.getProtestTimeDuration();
+        int duration = mPreferences.getProtestTimeDurationInMinutes();
         if (mProtestDuration != null) {
             mProtestDuration.setText(getString(R.string.protest_duration, duration));
         }
@@ -440,7 +440,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         public void onClick(View v) {
             FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration, null);
             final EditText duration = (EditText) layout.findViewById(R.id.protest_duration);
-            duration.setText(String.valueOf(mPreferences.getProtestTimeDuration()));
+            duration.setText(String.valueOf(mPreferences.getProtestTimeDurationInMinutes()));
             duration.setSelection(duration.length());
             AlertDialog.Builder builder = new AlertDialog.Builder(new ContextWrapper(v.getContext()), R.style.AppTheme_AlertDialog);
             builder.setTitle(v.getContext().getString(R.string.protest_duration_dialog_title));
@@ -449,7 +449,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     int value = Integer.parseInt(duration.getText().toString());
-                    mPreferences.setDefaultProtestTimeDuration(value);
+                    mPreferences.setDefaultProtestTimeDurationInMinutes(value);
                     updateProtestRange();
                 }
             });

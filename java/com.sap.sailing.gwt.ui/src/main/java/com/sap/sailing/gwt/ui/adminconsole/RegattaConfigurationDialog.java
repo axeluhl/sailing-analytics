@@ -23,13 +23,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurationDTO.RegattaConfigurationDTO> {
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    private final Integer DEFAULT_PROTEST_TIME_DURATION = 90; // FIXME where can I find the value?
+    private final Duration DEFAULT_PROTEST_TIME_DURATION = Duration.ONE_MINUTE.times(90); // FIXME where can I find the value?
     
     private final StringMessages stringMessages;
     private final DeviceConfigurationDTO.RegattaConfigurationDTO originalConfiguration;
@@ -38,7 +39,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
 
     private ListBox racingProcedureListBox;
     private ListBox designerModeEntryListBox;
-    private IntegerBox protestTimeTextBox;
+    private IntegerBox protestTimeInMinutesTextBox;
 
     private DisclosurePanel rrs26DisclosurePanel;
     private CheckBox rrs26EnabledBox;
@@ -160,11 +161,11 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     }
 
     private void setupProtestTimeTextBox(Grid grid, int gridRow) {
-        Integer protestTimeDuration = originalConfiguration.defaultProtestTimeDuration != null ?
-                originalConfiguration.defaultProtestTimeDuration : DEFAULT_PROTEST_TIME_DURATION;
-        protestTimeTextBox = createIntegerBox(protestTimeDuration, 3);
+        int protestTimeDurationInMinutes = (int) (originalConfiguration.defaultProtestTimeDuration != null ?
+                originalConfiguration.defaultProtestTimeDuration : DEFAULT_PROTEST_TIME_DURATION).asMinutes();
+        protestTimeInMinutesTextBox = createIntegerBox(protestTimeDurationInMinutes, 3);
         grid.setWidget(gridRow, 0, new Label(stringMessages.protestTime()));
-        grid.setWidget(gridRow, 1, protestTimeTextBox);
+        grid.setWidget(gridRow, 1, protestTimeInMinutesTextBox);
     }
 
     private ListBox setupClassFlagListBox(RacingProcedureConfigurationDTO config) {
@@ -513,7 +514,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
             CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
             result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
         }
-        result.defaultProtestTimeDuration = protestTimeTextBox.getValue();
+        result.defaultProtestTimeDuration = Duration.ONE_MINUTE.times(protestTimeInMinutesTextBox.getValue());
         if (rrs26EnabledBox.getValue()) {
             result.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             getRacingProcedureConfigurationResults(result.rrs26Configuration, rrs26ClassFlagListBox, rrs26RecallBox, rrs26ResultEntryBox);
