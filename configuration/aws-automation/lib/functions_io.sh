@@ -101,11 +101,11 @@ function require_public_dns_name(){
 }
 
 function require_ssh_user(){
-	require_variable "$ssh_user_param" ssh_user "" "$ssh_user_ask_message"
+	require_variable "$ssh_user_param" ssh_user "$default_ssh_user" "$ssh_user_ask_message"
 }
 
-function require_super_instance(){
-	require_variable "$super_instance_param" super_instance "$default_super_instance" "$super_instance_message"
+function require_super_instance_dns_name(){
+	require_variable "$super_instance_dns_name_param" super_instance_dns_name "$default_super_instance_dns_name" "$super_instance_dns_name_message"
 }
 
 function require_description(){
@@ -137,7 +137,7 @@ user_username_ask_message="Please enter the username of your new user: "
 user_password_ask_message="Please enter the password of your new user: "
 public_dns_name_ask_message="Please enter the public dns name: "
 ssh_user_ask_message="Please enter the ssh user: "
-super_instance_message="Please enter the dns name of the superior instance: "
+super_instance_dns_name_message="Please enter the dns name of the superior instance: "
 description_message="Please enter a description for the server: "
 contact_person_message="Please enter the name of a contact person: "
 contact_email_message="Please enter the email of the contact person: "

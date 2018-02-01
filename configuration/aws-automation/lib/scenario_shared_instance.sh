@@ -15,7 +15,8 @@ function shared_instance_start(){
 # the user will be prompted to enter a value
 # -----------------------------------------------------------
 function shared_instance_require(){
-	require_super_instance
+	require_super_instance_dns_name
+	require_ssh_user
 
 	require_key_name
 	require_key_file
@@ -41,7 +42,7 @@ function shared_instance_check_preconditions(){
 	echo "Checking if directory $server_dir exists already..."
 	execute_remote "[ ! -d $server_dir ]"
 
-	echo "Checking if ssh connection $ssh_user@$super_instance is working..."
+	echo "Checking if ssh connection $ssh_user@$super_instance_dns_name is working..."
 	execute_remote ls
 }
 
@@ -103,29 +104,29 @@ function shared_instance_execute() {
 	header "Event and user creation"
 
 	# get access token
-	access_token=$(get_access_token $admin_username $admin_password $super_instance $server_port)
+	access_token=$(get_access_token $admin_username $admin_password $super_instance_dns_name $server_port)
 
 	# create event
-	event_id=$(create_event $access_token $super_instance $server_port $instance_name)
+	event_id=$(create_event $access_token $super_instance_dns_name $server_port $instance_name)
 
 	# change admin password
-	change_admin_password $access_token $super_instance $server_port $admin_username $new_admin_password
+	change_admin_password $access_token $super_instance_dns_name $server_port $admin_username $new_admin_password
 
 	# create new user
-	user=$(create_new_user $access_token $super_instance $server_port $user_username $user_password)
+	user=$(create_new_user $access_token $super_instance_dns_name $server_port $user_username $user_password)
 
 	header "Configuring ALB"
 
 	local target_group_arn=$(create_target_group "S-shared-$instance_short_name")
 	set_target_group_health_check "$target_group_arn" "HTTP" "/index.html" "$server_port" "5" "4" "2" "2"
 
-	register_targets $target_group_arn $(get_instance_id $super_instance)
+	register_targets $target_group_arn $(get_instance_id $super_instance_dns_name)
 
 	local domain=$(create_rule $listener_arn $instance_short_name $target_group_arn)
 
 	header "Configuring Apache"
 
-	append_event_ssl_macro_to_001_events_conf $domain $event_id $ssh_user $super_instance $server_port
+	append_event_ssl_macro_to_001_events_conf $domain $event_id $ssh_user $super_instance_dns_name $server_port
 
 	local_echo "Reloading httpd..."
 	out=$(execute_remote "/etc/init.d/httpd reload")
@@ -153,9 +154,9 @@ function find_first_unused_port(){
 }
 
 function execute_remote(){
-	ssh_wrapper $ssh_user@$super_instance "$@"
+	ssh_wrapper $ssh_user@$super_instance_dns_name "$@"
 }
 
 function get_last_used_port(){
-	ssh_prewrapper $ssh_user@$super_instance "set -o pipefail; for i in /home/sailing/servers/*/env.sh; do cat \$i | grep '^ *$1=' | tr -d '$1='; done | sort -n | tail -1"
+	ssh_prewrapper $ssh_user@$super_instance_dns_name "set -o pipefail; for i in /home/sailing/servers/*/env.sh; do cat \$i | grep '^ *$1=' | tr -d '$1='; done | sort -n | tail -1"
 }

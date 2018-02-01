@@ -35,6 +35,8 @@ function master_instance_require(){
 function master_instance_execute() {
 	header "Master Instance Initialization"
 
+	ssh_user=$image_ssh_user
+
 	local user_data_master=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
 	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-master-server" \
 	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")

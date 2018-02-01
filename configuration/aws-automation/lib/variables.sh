@@ -2,8 +2,6 @@
 
 # START EDIT
 default_region=eu-west-2
-default_key_name=leonradeck-keypair
-default_key_file='/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem'
 default_instance_type=t2.medium
 default_server_startup_notify=leon.radeck@sap.com
 default_new_admin_password=admin
@@ -35,7 +33,6 @@ tag_specifications="\'ResourceType=instance,Tags=[{Key=Name,Value=%s}]\'"
 admin_username=admin
 admin_password=admin
 instance_count=1
-ssh_user=root
 default_instance_name="$script_start_time"
 default_instance_short_name="$timestamp"
 sailing_0='/home/sailing/servers/server/logs/sailing0.log.0'
