@@ -14,6 +14,7 @@ public class TrackFileImportWidget extends AbstractFileImportWidget implements I
     public TrackFileImportWidget(TrackFileImportDeviceIdentifierTableWrapper table, StringMessages stringMessages,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         super("/sailingserver/trackfiles/import", stringMessages, table, sailingService, errorReporter);
+        setDownsampleOptionVisible(false);
     }
     
     @Override

@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
 /**
@@ -28,8 +29,8 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
     private static final String IS_AUTOPLAYING_STYLE = SailingFullscreenViewerResources.INSTANCE.css().is_autoplaying();
     
     private final EventNavigationHandler eventNavigationHandler;
-    private final Button eventLinkControl = new Button();
-    private final Image autoRefreshControl = new Image("images/home/reload.svg");
+    private final Anchor eventLinkControl = new Anchor();
+    private final Image autoRefreshControl = new Image(SharedHomeResources.INSTANCE.reload().getSafeUri());
     private SailingGalleryPlayer player = null;
 
     /**
@@ -52,17 +53,12 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
         SailingFullscreenViewerResources.INSTANCE.css().ensureInjected();
         eventNavigationHandler = new EventNavigationHandler(navigator);
         if (eventNavigationHandler.isNavigationConfigured()) {
-            eventLinkControl.addClickHandler(eventNavigationHandler);
             eventLinkControl.addStyleName(SharedResources.INSTANCE.mainCss().buttonarrowrightwhite());
             eventLinkControl.setTabIndex(-1);
+            eventLinkControl.setTarget("_blank");
             addToolbarAction(eventLinkControl);
         }
-        autoRefreshControl.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SailingFullscreenViewer.this.toggleAutoplay();
-            }
-        });
+        autoRefreshControl.addClickHandler(event -> SailingFullscreenViewer.this.toggleAutoplay());
         addToolbarAction(autoRefreshControl);
     }
 
@@ -94,10 +90,11 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
 
         @Override
         public void onSelectionChange(SelectionChangeEvent event) {
-            EventLinkDTO eventLink = player.getSelectedImage().getEventLink();
-            eventLinkControl.setText(eventLink.getDisplayName());
-            String evnetId = String.valueOf(eventLink.getId()), baseURL = eventLink.getBaseURL();
+            final EventLinkDTO eventLink = player.getSelectedImage().getEventLink();
+            final String evnetId = String.valueOf(eventLink.getId()), baseURL = eventLink.getBaseURL();
             eventNavigation = navigator.getEventNavigation(evnetId, baseURL, eventLink.isOnRemoteServer());
+            eventLinkControl.setText(eventLink.getDisplayName());
+            eventLinkControl.setHref(eventNavigation.getSafeTargetUrl());
         }
 
         @Override

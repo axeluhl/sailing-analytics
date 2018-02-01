@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -380,6 +381,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     refreshRaceLog(raceColumnDTOAndFleetDTO.getA(), raceColumnDTOAndFleetDTO.getB(), true);
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
                     setStartTime(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME.equals(value)) {
+                    setEndTime(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(raceColumnDTOAndFleetDTO.getA(), raceColumnDTOAndFleetDTO.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_TRACKING_TIMES.equals(value)) {
@@ -570,19 +573,33 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     private void denoteForRaceLogTracking(final StrippedLeaderboardDTO leaderboard) {
-        sailingService.denoteForRaceLogTracking(leaderboard.name, new AsyncCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                loadAndRefreshLeaderboard(leaderboard.name);
-                updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
-                raceColumnTableSelectionModel.clear();
-            }
+        final ChooseNameDenoteEventDialog dialog = new ChooseNameDenoteEventDialog(stringMessages,leaderboard,
+                new DialogCallback<String>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
-            }
-        });
+                    @Override
+                    public void ok(String prefix) {
+                        sailingService.denoteForRaceLogTracking(leaderboard.name, prefix, new AsyncCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                loadAndRefreshLeaderboard(leaderboard.name);
+                                updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
+                                raceColumnTableSelectionModel.clear();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter
+                                        .reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
+        dialog.show();
     }
 
     private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {
@@ -754,6 +771,34 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void cancel() { }
         }).show();
+    }
+    
+    private void setEndTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
+        new SetFinishingAndFinishedTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(),
+                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetFinishingAndFinishTimeDTO>() {
+                    @Override
+                    public void ok(RaceLogSetFinishingAndFinishTimeDTO editedObject) {
+                        sailingService.setFinishingAndEndTime(editedObject, new AsyncCallback<Pair<Boolean, Boolean>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Pair<Boolean, Boolean> result) {
+                                if (!result.getA() || !result.getB()) {
+                                    Window.alert(stringMessages.failedToSetNewFinishingAndFinishTime());
+                                } else {
+                                    trackedRacesListComposite.regattaRefresher.fillRegattas();
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
     }
     
     private void refreshTrackingActionButtons(){

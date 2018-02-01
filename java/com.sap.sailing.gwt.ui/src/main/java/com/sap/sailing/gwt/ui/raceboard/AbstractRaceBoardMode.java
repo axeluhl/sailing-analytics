@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -19,7 +20,11 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.Competitor
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * Abstract base class for implementing a {@link RaceBoardMode}. The {@link #applyTo(RaceBoardPanel)} method registers
@@ -190,5 +195,26 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
 
     protected RaceColumnDTO getRaceColumn() {
         return raceColumn;
+    }
+    
+    protected void setTimerOrUseCustomStart(final TimePoint startPlayingAt) {
+        final PlayModes playMode = getTimer().getPlayMode();
+        TimePoint startPlayingAtOverride = null;
+        if (playMode != PlayModes.Live && getRaceTimesInfoForRace() != null
+                && getRaceTimesInfoForRace().getStartOfRace() != null) {
+            final Date startOfRace = getRaceTimesInfoForRace().getStartOfRace();
+            final RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings()
+                    .getPerspectiveOwnSettings();
+            if (perspectiveOwnSettings != null) {
+                final Duration initialDurationAfterRaceStartInReplay = perspectiveOwnSettings
+                        .getInitialDurationAfterRaceStartInReplay();
+                if (initialDurationAfterRaceStartInReplay != null) {
+                    startPlayingAtOverride = new MillisecondsTimePoint(
+                            startOfRace.getTime() + initialDurationAfterRaceStartInReplay.asMillis());
+                }
+            }
+        }
+        getTimer().setTime(
+                startPlayingAtOverride != null ? startPlayingAtOverride.asMillis() : startPlayingAt.asMillis());
     }
 }

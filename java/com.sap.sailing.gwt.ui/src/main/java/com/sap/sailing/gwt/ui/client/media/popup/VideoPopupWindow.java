@@ -1,18 +1,18 @@
 package com.sap.sailing.gwt.ui.client.media.popup;
 
-import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
+import com.sap.sse.common.media.MimeType;
 
 public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenuHandler {
 
-    private Video video;
     private boolean isDebug;
+    private VideoJSPlayer videoJSDelegate;
 
     @Override
     protected void initializePlayer() {
@@ -23,44 +23,28 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
         Window.setTitle(title);
 
         String videoUrl = Window.Location.getParameter("url");
-        
+        String mimeType = Window.Location.getParameter("mimetype");
         isDebug = Window.Location.getParameter("gwt.codesvr") != null;
         
         if (videoUrl != null) {
-            video = Video.createIfSupported();
-            if (video != null) {
-
-                addNativeEventHandlers(video.getVideoElement());
-                video.addDomHandler(this, ContextMenuEvent.getType());
-
-                video.setPreload(MediaElement.PRELOAD_AUTO);
-                video.setMuted(true);
-                video.setAutoplay(false);
-                video.setControls(false);
-                video.setLoop(false);
-                video.setSrc(videoUrl);
-                mainPanel.add(video);
-
-            } else {
-                mainPanel.add(new Label("Video not supported"));
-            }
+            videoJSDelegate = new VideoJSPlayer(true, false);
+            videoJSDelegate.setVideo(MimeType.valueOf(mimeType), videoUrl);
+            mainPanel.add(videoJSDelegate);
+            initPlay(videoJSDelegate.getVideoElement());
         } else {
             mainPanel.add(new Label("Parameter 'url' not assigned."));
         }
 
     }
+    
+    
 
-    native void addNativeEventHandlers(VideoElement videoElement) /*-{
+    native void initPlay(VideoElement videoElement) /*-{
 		var that = this;
-		videoElement.addEventListener('loadedmetadata', function() {
-			that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::loadedmetadata()();
-		});
-                videoElement.addEventListener('canplay', function() { //see http://www.w3schools.com/tags/av_event_canplay.asp
-                        var deferredPlayState = $wnd.deferredPlayState
-                        if (deferredPlayState && !$wnd.videoPlayer) {
-                            that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
-                        }
-                });
+                var deferredPlayState = $wnd.deferredPlayState
+                if (deferredPlayState && !$wnd.videoPlayer) {
+                     that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
+                }
     }-*/;
 
     public void loadedmetadata() {
@@ -69,42 +53,42 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
     
     @Override
     public void play() {
-        video.play();
+        videoJSDelegate.play();
     }
 
     @Override
     public void pause() {
-        video.pause();
+        videoJSDelegate.pause();
     }
 
     @Override
     public void setTime(double time) {
-        video.setCurrentTime(Math.min(time, video.getDuration()));
+        videoJSDelegate.setCurrentTime((int) Math.min(time, videoJSDelegate.getDuration()));
     }
 
     @Override
     public void setMuted(boolean muted) {
-        video.setMuted(muted);
+        videoJSDelegate.setMuted(muted);
     }
 
     @Override
     public boolean isPaused() {
-        return video.isPaused();
+        return videoJSDelegate.paused();
     }
 
     @Override
     public double getDuration() {
-        return video.getDuration();
+        return videoJSDelegate.getDuration();
     }
 
     @Override
     public double getTime() {
-        return video.getCurrentTime();
+        return videoJSDelegate.getCurrentTime();
     }
 
     @Override
     public void setPlaybackSpeed(double newPlaySpeedFactor) {
-        video.setPlaybackRate(newPlaySpeedFactor);
+        videoJSDelegate.setPlaybackRate(newPlaySpeedFactor);
     }
 
     /**
@@ -120,22 +104,22 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
 
     @Override
     protected boolean hasVideoSizes() {
-        return video != null;
+        return videoJSDelegate != null;
     }
-    
+
     @Override
     protected int getVideoWidth() {
-        return video.getVideoWidth();
+        return videoJSDelegate.getVideoWidth();
     }
 
     @Override
     protected int getVideoHeight() {
-        return video.getVideoHeight();
+        return videoJSDelegate.getVideoHeight();
     }
 
     @Override
     protected void setVideoSize(int width, int height) {
-        video.setPixelSize(width, height);
+        videoJSDelegate.setPixelSize(width, height);
     }
 
 }

@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RegattaOverviewImpl extends AbstractEventOverview {
@@ -28,8 +29,11 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private EventSteps eventStepsUi;
     private RegattaLiveRaces liveRacesUi;
 
-    public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
+    private final FlagImageResolver flagImageResolver;
+
+    public RegattaOverviewImpl(EventViewBase.Presenter presenter, FlagImageResolver flagImageResolver) {
         super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
+        this.flagImageResolver = flagImageResolver;
         FlowPanel container = new FlowPanel();
         if (presenter.getRegatta() != null) {
             this.setupProgress(container);
@@ -37,6 +41,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
         }
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
+            this.setupEventDescription(container);
         }
         this.setupMiniLeaderboard(container);
         initRacesNavigation(container);
@@ -61,7 +66,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupMiniLeaderboard(Panel container) {
-        MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
+        MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false, flagImageResolver);
         miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
         if (currentPresenter.getRegatta() != null) {
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));

@@ -37,7 +37,6 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 RaceColumnSelectionStrategies.LAST_N,
                 defaultSettings.isShowAddedScores(),
-                defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultSettings.isShowCompetitorSailIdColumn(),
                 defaultSettings.isShowCompetitorFullNameColumn(),
                 defaultSettings.isShowCompetitorNationality());
@@ -51,7 +50,6 @@ public class LeaderboardSettingsFactory {
                 raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 defaultSettings.isShowAddedScores(),
-                defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultSettings.isShowCompetitorSailIdColumn(),
                 defaultSettings.isShowCompetitorFullNameColumn(),
                 defaultSettings.isShowRaceRankColumn(),
@@ -79,7 +77,7 @@ public class LeaderboardSettingsFactory {
         return new MultiRaceLeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, numberOfLastRacesToShow, refreshIntervalInMs,
                 strategy, /*showAddedScores*/ false,
-                /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
+                showCompetitorSailIdColumn, showCompetitorFullNameColumns,
                 settingsWithRaceSelection.isShowCompetitorNationality());
     }
     

@@ -44,6 +44,8 @@ public class LegEntryDTO implements Serializable {
 
     public Double currentHeelInDegrees;
     public Double currentPitchInDegrees;
+    public Double currentDistanceFoiledInMeters;
+    public Double currentDurationFoiledInSeconds;
     
     /**
      * If the competitor has already finished the leg at the time point for which this entry was created, contains the
@@ -81,6 +83,8 @@ public class LegEntryDTO implements Serializable {
         result = prime * result + ((currentHeelInDegrees == null) ? 0 : currentHeelInDegrees.hashCode());
         result = prime * result + ((currentPitchInDegrees == null) ? 0 : currentPitchInDegrees.hashCode());
         result = prime * result + ((currentRideHeightInMeters == null) ? 0 : currentRideHeightInMeters.hashCode());
+        result = prime * result + ((currentDurationFoiledInSeconds == null) ? 0 : currentDurationFoiledInSeconds.hashCode());
+        result = prime * result + ((currentDistanceFoiledInMeters == null) ? 0 : currentDistanceFoiledInMeters.hashCode());
         result = prime * result
                 + ((currentSpeedOverGroundInKnots == null) ? 0 : currentSpeedOverGroundInKnots.hashCode());
         result = prime * result + ((distanceTraveledInMeters == null) ? 0 : distanceTraveledInMeters.hashCode());
@@ -149,6 +153,16 @@ public class LegEntryDTO implements Serializable {
             if (other.currentRideHeightInMeters != null)
                 return false;
         } else if (!currentRideHeightInMeters.equals(other.currentRideHeightInMeters))
+            return false;
+        if (currentDurationFoiledInSeconds == null) {
+            if (other.currentDurationFoiledInSeconds != null)
+                return false;
+        } else if (!currentDurationFoiledInSeconds.equals(other.currentDurationFoiledInSeconds))
+            return false;
+        if (currentDistanceFoiledInMeters == null) {
+            if (other.currentDistanceFoiledInMeters != null)
+                return false;
+        } else if (!currentDistanceFoiledInMeters.equals(other.currentDistanceFoiledInMeters))
             return false;
         if (currentSpeedOverGroundInKnots == null) {
             if (other.currentSpeedOverGroundInKnots != null)

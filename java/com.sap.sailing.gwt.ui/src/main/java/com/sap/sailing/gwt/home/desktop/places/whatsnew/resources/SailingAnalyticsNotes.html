@@ -4,6 +4,28 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
     <div class="innerContent">
+        <h5 class="articleSubheadline">November 2017</h5>
+        <ul class="bulletList">
+           <li>The language preference set in the user profile (if any), now also affects the website's language. Formerly,
+               this preference affected the language of notification mails only.
+               Be aware of the fact, that signing in will not force the page to be shown in the user's preferred language.
+               It will only take effect when refreshing the page manually or opening a new one, in order to prevent the
+               state of the currently opened page to get lost.
+               After a sign out (and another page reload) the language preference will stop to take effect.
+           </li>
+           <li>There are additional column types in the leaderboard that show per leg, per race and overall statistics
+               for distance foiled and duration foiled. This allows for quick competitor comparisons regarding these
+               figures which are so important for any foiling boat class. Note, that this feature is also available
+               on overall leaderboards, providing foiling stats across an entire season or event series.
+           </li>
+           <li>When a leaderboard belongs to a leaderboard group with an overall (series) leaderboard and the
+               leaderboard has no scores at all yet for a competitor, that competitor won't be assigned a score
+               in the overall (series) leaderboard either. This way, when an act or event has its leaderboard already
+               linked to the series leaderboard group, no scores will show in the series leaderboard before the
+               act/event starts producing scores for the competitors.
+           </li>
+        </ul>
+        
         <h5 class="articleSubheadline">October 2017</h5>
         <ul class="bulletList">
            <li>The <tt>DataMining.html</tt> module now offers an additional chart type with error bars. This currently
@@ -14,6 +36,8 @@
                a corresponding drill-down operation, adding the first grouping key value as a new filter and removing
                the grouping dimension. If that was the last dimension removed, the user is asked to provide a new
                grouping dimension.
+           </li>
+           <li>If available, an event description is now shown on event overview pages.
            </li>
         </ul>
         

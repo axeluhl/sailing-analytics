@@ -17,6 +17,45 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.8.0 ****************
+********************************************
+This is a final version. It change the signature of a method, breaking the
+backward compatibility:
+
+- com.tractrac.model.lib.api.event.RaceStatusType enum. UNKNOWN value of this enum type has been renamed to PENDING.
+
+This version provides a new JavaDoc version.
+
+Release date: 22/11/2017
+Build number: 14453
+
+ 1) Features
+
+ - com.tractrac.model.lib.api.event.RaceStatusType enum. UNKNOWN value of this enum type has been renamed to PENDING.
+ (Requested by Chris Terkelsen 24/10/2017)
+ - Support for sensor data. IRaceSubscriber has been updated adding methods to retrieve sensor data (Requested by SAP)
+ - When the tracking of a race is initialized, TracAPI also sends the positions of the controls using the tracking start time
+ as timestamp (Requested by Axel Uhl, 14/11/2017)
+
+
+********************************************
+************* TracAPI 3.7.7 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 29/10/2017
+Build number: 14453
+
+ 1) Bugs
+
+ - Selector.wakeup() throws an IOException in Android 5. It seems a bug on this platform
+ (Reported by André Borud, 30/08/2017)
+ - There is a synchronization bug on the implementation of the IAttachable interface
+ (Reported by Axel Uhl, 29/10/2017)
+
+
+********************************************
 ************* TracAPI 3.7.6 ****************
 ********************************************
  This is a final version.It fixes bugs in the implementation and it adds a some features.

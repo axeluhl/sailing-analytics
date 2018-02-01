@@ -104,6 +104,7 @@
         <module>com.sap.sailing.datamining.shared</module>
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.deckmanadapter</module>
+        <module>com.sap.sailing.domain.bravoadapter</module>
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
         <module>com.sap.sailing.domain.tractracadapter.persistence</module>
@@ -117,7 +118,9 @@
         <module>com.sap.sailing.news</module>
         <module>com.sap.sailing.declination</module>
         <module>com.sap.sailing.udpconnector</module>
+        <module>com.sap.sailing.expeditionconnector.common</module>
         <module>com.sap.sailing.expeditionconnector</module>
+        <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
@@ -206,6 +209,7 @@
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
+		<module>org.mp4parser.isoparser</module>
         <!--
         com.sap.sailing.targetplatform.base
         left out on purpose: only invoke maven manually to build target platform
@@ -497,6 +501,7 @@
         <execution>
           <configuration>
             <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+             <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>
           -->

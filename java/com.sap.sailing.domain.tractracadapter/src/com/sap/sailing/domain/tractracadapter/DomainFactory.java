@@ -132,21 +132,19 @@ public interface DomainFactory {
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param timeoutInMilliseconds TODO
      */
     TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException, IOException, InterruptedException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)},
      * only that a predefined {@link Regatta} is used to hold the resulting races.
-     * @param timeoutInMilliseconds TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
-            SubscriberInitializationException;
+            SubscriberInitializationException, IOException, InterruptedException;
 
     BoatClass getOrCreateBoatClass(String competitorClassName);
 
@@ -161,7 +159,6 @@ public interface DomainFactory {
      *            must have been created before through
      *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
      *            the {@link IEvent} can't be established
-     * @param timeoutInMilliseconds TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
      *            this call
@@ -173,47 +170,39 @@ public interface DomainFactory {
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds);
 
     /**
-	 * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a
-	 * domain {@link Course} definition. The resulting {@link RaceDefinition} is
-	 * added to the {@link com.sap.sailing.domain.base.Regatta} to which
-	 * <code>trackedRegatta</code> belongs (see
-	 * {@link TrackedRegatta#getRegatta()}). It is added to the internal race
-	 * cache. The corresponding {@link TrackedRace} object is also created, and
-	 * the notification of threads waiting on the race cache such as a blocking
-	 * {@link #getAndWaitForRaceDefinition(UUID)} happens only <em>after</em>
-	 * the tracked race has been created and the {@link RaceDefinition} was
-	 * {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) added}
-	 * to the domain event. This ensures that waiters for the
-	 * {@link RaceDefinition} are guaranteed to obtain a valid,
-	 * non-<code>null</code> tracked race already immediately after the
-	 * notification was sent, and that the {@link RaceDefinition} is already
-	 * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its
-	 * containing {@link com.sap.sailing.domain.base.Regatta}.
+     * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a domain {@link Course} definition. The
+     * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Regatta} to which
+     * <code>trackedRegatta</code> belongs (see {@link TrackedRegatta#getRegatta()}). It is added to the internal race
+     * cache. The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on
+     * the race cache such as a blocking {@link #getAndWaitForRaceDefinition(UUID)} happens only <em>after</em> the
+     * tracked race has been created and the {@link RaceDefinition} was
+     * {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) added} to the domain event. This ensures that
+     * waiters for the {@link RaceDefinition} are guaranteed to obtain a valid, non-<code>null</code> tracked race
+     * already immediately after the notification was sent, and that the {@link RaceDefinition} is already
+     * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its containing
+     * {@link com.sap.sailing.domain.base.Regatta}.
+     * 
      * @param raceDefinitionSetToUpdate
-	 *            if not <code>null</code>, after creating the
-	 *            {@link TrackedRace}, the {@link RaceDefinition} is
-	 *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace)
-	 *            added} to that object.
+     *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
+     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that
+     *            object.
      * @param runBeforeExposingRace
-	 *            if not {@code null} then this consumer will be passed the
-	 *            {@link DynamicTrackedRace} if it was actually created by this
-	 *            call. This happens while still in the
-	 *            {@code synchronized(raceCache)} block, therefore before calls
-	 *            waiting for the race (e.g.,
-	 *            {@link #getAndWaitForRaceDefinition(UUID)}) return the race.
-     * @param tractracRace TODO
-	 */
-	DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-			String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass,
-			Map<Competitor, Boat> competitorBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
-			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid,
-			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace);
+     *            if not {@code null} then this consumer will be passed the {@link DynamicTrackedRace} if it was
+     *            actually created by this call. This happens while still in the {@code synchronized(raceCache)} block,
+     *            therefore before calls waiting for the race (e.g., {@link #getAndWaitForRaceDefinition(UUID)}) return
+     *            the race.
+     */
+    DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
+            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass,
+            Map<Competitor, Boat> competitorBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid,
+            String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings,
+            RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace);
 
     /**
-     * The record may be for a single mark or a gate. If for a gate, the
-     * {@link ControlPointPositionData#getIndex() index} is used to determine
-     * which of its marks is affected.
+     * The record may be for a single mark or a gate. If for a gate, the {@link ControlPointPositionData#getIndex()
+     * index} is used to determine which of its marks is affected.
      */
     Mark getMark(TracTracControlPoint controlPoint, int zeroBasedMarkIndex);
 
@@ -223,8 +212,6 @@ public interface DomainFactory {
 
     /**
      * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
-     * @param raceLogResolver TODO
-     * @param timeoutInMilliseconds TODO
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
             long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
@@ -274,23 +261,17 @@ public interface DomainFactory {
      *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
      *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
      *            races if since the last connection the race was migrated to a replay file format.
-     * @param timeoutInMillis TODO
      */
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
             boolean preferReplayIfAvailable, int timeoutInMillis) throws Exception;
+    
     /**
-     * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
-     * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding
-     * {@link RaceDefinition} exists, from the {@link TrackedRegatta}. If removing the race from the event, the event is
-     * removed from the event cache such that {@link #getOrCreateDefaultRegatta(IEvent, TrackedRegattaRegistry)} will have to create a new one. Similarly,
-     * if the {@link TrackedRace} that was removed from the {@link TrackedRegatta} was the last one, the
-     * {@link TrackedRegatta} is removed such that {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)}
-     * will have to create a new one.
+     * Removes all knowledge about <code>tractracRace</code> from the race cache.
      */
-    void removeRace(IEvent tractracEvent, IRace tractracRace, TrackedRegattaRegistry trackedRegattaRegistry);
+    RaceDefinition removeRace(IEvent tractracEvent, IRace tractracRace, Regatta regattaToLoadRaceInto, TrackedRegattaRegistry trackedRegattaRegistry);
 
     /**
      * Computes an ID to use for a {@link RaceDefinition} based on the TracTrac race.

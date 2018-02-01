@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +40,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -84,6 +87,9 @@ import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     private static final long serialVersionUID = -5651389357061229100L;
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardWithCache.class.getName());
+    
+    private final MaxPointsReason[] MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES = new MaxPointsReason[] {
+            MaxPointsReason.DNS, MaxPointsReason.DNF, MaxPointsReason.DNC };
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
     protected static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     private transient LeaderboardDTOCache leaderboardDTOCache;
@@ -487,6 +493,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     + ". Leaving empty.", e);
                 }
             }
+            
+            if (addOverallDetails) {
+                //this reuses several prior calculated fields, so must be evaluated after them
+                row.totalScoredRaces = this.getTotalRaces(competitor, row, timePoint);
+            }
             result.rows.put(competitorDTO, row);
             String displayName = this.getDisplayName(competitor);
             if (displayName != null) {
@@ -498,7 +509,39 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         return result;
     }
-    
+ 
+    private Integer getTotalRaces(Competitor competitor, LeaderboardRowDTO row, TimePoint timePoint) {
+        int amount = 0;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            // reuse calculations already done earlier
+            LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(raceColumn.getName());
+            if (entry.netPoints != null) {
+                if (entry.reasonForMaxPoints.equals(MaxPointsReason.NONE)
+                        || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
+                                entry.reasonForMaxPoints)) {
+                    if (raceColumn instanceof MetaLeaderboardColumn) {
+                        Leaderboard leaderBoardForMeta = ((MetaLeaderboardColumn) raceColumn).getLeaderboard();
+                        for (RaceColumn subRace : leaderBoardForMeta.getRaceColumns()) {
+                            Double netPointsForSubRace = leaderBoardForMeta.getNetPoints(competitor, subRace, timePoint);
+                            MaxPointsReason subMaxPointsReason = leaderBoardForMeta.getMaxPointsReason(competitor, subRace, timePoint);
+                            if(netPointsForSubRace != null){
+                                if (subMaxPointsReason.equals(MaxPointsReason.NONE) || !Util.contains(
+                                        Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
+                                        subMaxPointsReason)) {
+                                    amount++;
+                                }
+                            }
+                        }
+                    } else {
+                        amount++;
+                    }
+
+                }
+            }
+        }
+        return amount;
+    }
+
     /**
      * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
@@ -642,8 +685,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         row.totalTimeSailedReachingInSeconds = totalTimeSailedReaching==null?null:totalTimeSailedReaching.asSeconds();
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         row.totalTimeSailedInSeconds = totalTimeSailed==null?null:totalTimeSailed.asSeconds();
-        final Distance totalDistanceTraveledInMeters = this.getTotalDistanceTraveled(competitor, timePoint);
-        row.totalDistanceTraveledInMeters = totalDistanceTraveledInMeters==null?null:totalDistanceTraveledInMeters.getMeters();
+        final Distance totalDistanceTraveled = this.getTotalDistanceTraveled(competitor, timePoint);
+        row.totalDistanceTraveledInMeters = totalDistanceTraveled==null?null:totalDistanceTraveled.getMeters();
+        final Distance totalDistanceFoiled = this.getTotalDistanceFoiled(competitor, timePoint);
+        row.totalDistanceFoiledInMeters = totalDistanceFoiled==null?null:totalDistanceFoiled.getMeters();
+        final Duration totalDurationFoiled = this.getTotalDurationFoiled(competitor, timePoint);
+        row.totalDurationFoiledInSeconds = totalDurationFoiled==null?null:totalDurationFoiled.asSeconds();
     }
 
     private LeaderboardDTOCache getLeaderboardDTOCache() {
@@ -821,6 +868,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.currentHeelInDegrees = heel == null ? null : heel.getDegrees();
             Bearing pitch = trackedLeg.getPitch(timePoint);
             result.currentPitchInDegrees = pitch == null ? null : pitch.getDegrees();
+            
+            Distance distanceFoiled = trackedLeg.getDistanceFoiled(timePoint);
+            result.currentDistanceFoiledInMeters = distanceFoiled == null ? null : distanceFoiled.getMeters();
+            Duration durationFoiled = trackedLeg.getDurationFoiled(timePoint);
+            result.currentDurationFoiledInSeconds = durationFoiled == null ? null : durationFoiled.asSeconds();
+
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
@@ -858,7 +911,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             if (trackedLeg.hasFinishedLeg(timePoint)) {
                 velocityMadeGood = trackedLeg.getAverageVelocityMadeGood(timePoint);
             } else {
-                velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
+                velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
             }
             result.velocityMadeGoodInKnots = velocityMadeGood == null ? null : velocityMadeGood.getKnots();
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE);
@@ -1012,12 +1065,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     legTypeCache.put(trackedLeg, trackedLegType);
                                 }
                                 if (legType == trackedLegType) {
-                                    Duration timeSpentOnDownwind = trackedLegOfCompetitor.getTime(timePoint);
-                                    if (timeSpentOnDownwind != null) {
+                                    Duration timeSpentInLegOfType = trackedLegOfCompetitor.getTime(timePoint);
+                                    if (timeSpentInLegOfType != null) {
                                         if (result == null) {
-                                            result = timeSpentOnDownwind;
+                                            result = timeSpentInLegOfType;
                                         } else {
-                                            result = result.plus(timeSpentOnDownwind);
+                                            result = result.plus(timeSpentInLegOfType);
                                         }
                                     } else {
                                         // Although the competitor has started the leg, no value was produced. This
@@ -1082,18 +1135,37 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     @Override
     public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
-        Distance result = null;
+        return getTotals(competitor, timePoint, Distance::add, TrackedRace::getDistanceTraveled);
+    }
+    
+    @Override
+    public Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return getTotals(competitor, timePoint, Distance::add, TrackedRace::getDistanceFoiled);
+    }
+    
+    @Override
+    public Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return getTotals(competitor, timePoint, Duration::plus, TrackedRace::getDurationFoiled);
+    }
+    
+    @FunctionalInterface
+    private static interface ValueFromRaceGetter<T> {
+        T get(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint);
+    }
+    
+    private <T> T getTotals(Competitor competitor, TimePoint timePoint, BiFunction<T, T, T> adder, ValueFromRaceGetter<T> valueGetter) {
+        T result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             TimePoint startOfRace;
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor) &&
                     (startOfRace=trackedRace.getStartOfRace()) != null &&
                     !startOfRace.after(timePoint)) {
-                Distance distanceSailedInRace = trackedRace.getDistanceTraveled(competitor, timePoint);
+                T distanceSailedInRace = valueGetter.get(trackedRace, competitor, timePoint);
                 if (distanceSailedInRace != null) {
                     if (result == null) {
                         result = distanceSailedInRace;
                     } else {
-                        result = result.add(distanceSailedInRace);
+                        result = adder.apply(result, distanceSailedInRace);
                     }
                 } else {
                     // if competitor has not finished one single race in the whole
@@ -1118,4 +1190,13 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
     }
 
+    @Override
+    public boolean hasScores(Competitor competitor, TimePoint timePoint) {
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            if (getTotalPoints(competitor, raceColumn, timePoint) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

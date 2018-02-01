@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -46,6 +47,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -528,6 +530,16 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the
+     * <code>boatBearing</code> to the wind's bearing at that time and place and determined the tack.
+     * 
+     * @throws NoWindException
+     *             in case the wind cannot be determined because without a wind direction, the tack cannot be determined
+     *             either
+     */
+    Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException;
 
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
@@ -570,6 +582,14 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *         for the <code>key</code> is still ongoing, the result of that ongoing re-calculation is returned.
      */
     Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest);
+    
+    /**
+     * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
+     *         this race. Depending on <code>waitForLatest</code> the result is taken from the cache straight away
+     *         (<code>waitForLatest==false</code>) or, if a re-calculation for the <code>key</code> is still ongoing,
+     *         the result of that ongoing re-calculation is returned.
+     */
+    Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest);
 
     /**
      * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg. If this is
@@ -611,7 +631,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
             boolean notifyAboutGPSFixesAlreadyLoaded);
 
     void removeListener(RaceChangeListener listener);
-
+    
     /**
      * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
      * or if the competitor has not finished one of the legs in the race.
@@ -622,6 +642,18 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * See {@link TrackedLegOfCompetitor#getDistanceTraveledConsideringGateStart(TimePoint)}
      */
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
+     */
+    Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
+     */
+    Duration getDurationFoiled(Competitor competitor, TimePoint timePoint);
 
     /**
      * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
@@ -1021,4 +1053,43 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *            time point up and until to compute the speed
      */
     Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
+
+    
+    /**
+     * Computes the competitor's speed projected onto the wind (if wind data is available and the competitor is not
+     * between start and finish (not racing) or not on a {@link LegType#REACHING reaching} leg; if outside a race and no
+     * wind information is available, {@code null} is returned. Otherwise, the speed at {@code timePoint} is projected
+     * onto the course. The wind direction at the {@link WindPositionMode#EXACT exact} competitor position at
+     * {@code timePoint} is used for the calculation.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint) {
+        return getVelocityMadeGood(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a {@link WindPositionMode}
+     * other than the default {@link WindPositionMode#EXACT}. If {@link WindPositionMode#LEG_MIDDLE} is used and the
+     * competitor is not currently sailing on a leg (hasn't started or has already finished), {@code null} is returned.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
+        return getVelocityMadeGood(competitor, timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
+     * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
+     */
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getVelocityMadeGood(competitor, timePoint, WindPositionMode.EXACT, cache);
+    }
+
+    /**
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a
+     * {@link WindPositionMode} other than the default {@link WindPositionMode#EXACT} as well as a cache that can
+     * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing. If
+     * {@link WindPositionMode#LEG_MIDDLE} is used and the competitor is not currently sailing on a leg (hasn't started
+     * or has already finished), {@code null} is returned.
+     */
+    SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache);
 }

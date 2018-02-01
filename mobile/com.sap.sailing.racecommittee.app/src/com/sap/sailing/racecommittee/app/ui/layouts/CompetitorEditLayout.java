@@ -10,6 +10,7 @@ import java.util.Locale;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
@@ -215,7 +216,8 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
             comment = mComment.getText().toString();
         }
         CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor
-            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment);
+            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment,
+            MergeState.OK); // TODO handle merge state
         return new CompetitorResultWithIdImpl(mCompetitor.getId(), result);
     }
 

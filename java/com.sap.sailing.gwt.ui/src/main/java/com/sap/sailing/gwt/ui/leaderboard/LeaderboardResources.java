@@ -48,5 +48,8 @@ public interface LeaderboardResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/jump_forward_button_disabled.png")
     ImageResource jumpForwardButtonDisabled();
+    
+    @Source("medal_small.png")
+    ImageResource medalSmall();
 
 }

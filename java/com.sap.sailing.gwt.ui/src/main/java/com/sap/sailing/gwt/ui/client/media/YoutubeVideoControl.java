@@ -16,12 +16,12 @@ public class YoutubeVideoControl  {
 
     private double deferredPlaybackSpeed;
 
-    YoutubeVideoControl(String videoUrl, String videoContainerId, boolean showControls) {
+    YoutubeVideoControl(String videoUrl, String videoContainerId) {
         
         if (!isYoutubeApiInitialized()) {
-            loadInitialYoutubePlayer(videoUrl, videoContainerId, showControls);
+            loadInitialYoutubePlayer(videoUrl, videoContainerId);
         } else {
-            loadYoutubePlayer(videoUrl, videoContainerId, showControls);
+            loadYoutubePlayer(videoUrl, videoContainerId);
         }
     }
 
@@ -37,7 +37,7 @@ public class YoutubeVideoControl  {
     // See also: https://developers.google.com/youtube/js_api_reference
     // Code Playground: https://code.google.com/apis/ajax/playground/?exp=youtube#chromeless_player
     // Extended with API-initialization control to support multiple players on the same page. 
-    private native void loadInitialYoutubePlayer(String videoUrl, String videoContainerId, boolean showControls) /*-{
+    private native void loadInitialYoutubePlayer(String videoUrl, String videoContainerId) /*-{
         
                 var that = this;
                 
@@ -45,7 +45,7 @@ public class YoutubeVideoControl  {
                 var player;
                 $wnd.onYouTubeIframeAPIReady = function() {
                         that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::setYoutubeApiInitialized()();
-                        that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::loadYoutubePlayer(Ljava/lang/String;Ljava/lang/String;Z)(videoUrl, videoContainerId, showControls);
+                        that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::loadYoutubePlayer(Ljava/lang/String;Ljava/lang/String;)(videoUrl, videoContainerId);
                 }
 
                 // Use script tag trick to cope with browser's cross domain restrictions
@@ -56,12 +56,10 @@ public class YoutubeVideoControl  {
 
     }-*/;
 
-    private native void loadYoutubePlayer(String videoUrl, String videoContainerId, boolean showControls) /*-{
+    private native void loadYoutubePlayer(String videoUrl, String videoContainerId) /*-{
     
         var that = this;
         
-        var playerSetting_Controls = showControls ? 1 : 0;
-
         var player = new $wnd.YT.Player(videoContainerId, {
                 videoId : videoUrl,
                 //height: '480', //see https://developers.google.com/youtube/iframe_api_reference?hl=en#Playback_quality
@@ -73,9 +71,7 @@ public class YoutubeVideoControl  {
                 },
                 playerVars : {
                         'autoplay' : 0,
-                        'disablekb': 1, 
-                        'autohide': 0,
-                        'controls' : playerSetting_Controls
+                        'disablekb': 1
                 }
         });
 

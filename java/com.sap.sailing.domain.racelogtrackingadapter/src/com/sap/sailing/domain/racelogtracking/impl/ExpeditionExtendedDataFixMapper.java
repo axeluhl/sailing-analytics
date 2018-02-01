@@ -11,7 +11,7 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.impl.BravoFixTrackImpl;
+import com.sap.sailing.domain.tracking.impl.CompetitorBravoFixTrackImpl;
 
 /**
  * {@link SensorFixMapper} implementation to product {@link BravoExtendedFix}es from {@link DoubleVectorFix}es
@@ -25,7 +25,8 @@ public class ExpeditionExtendedDataFixMapper implements SensorFixMapper<BravoFix
     @Override
     public DynamicSensorFixTrack<Competitor, BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
         return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, 
-                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ true));
+                () -> new CompetitorBravoFixTrackImpl(key, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ true,
+                        race.getTrack(key)));
     }
     
     @Override

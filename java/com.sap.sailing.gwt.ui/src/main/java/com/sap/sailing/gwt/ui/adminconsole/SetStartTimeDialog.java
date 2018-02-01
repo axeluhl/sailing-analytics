@@ -20,15 +20,16 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetStartTimeAndProcedureDTO> {
+public class SetStartTimeDialog extends DataEntryDialogWithDateTimeBox<RaceLogSetStartTimeAndProcedureDTO> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
@@ -42,7 +43,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
     private int currentPassId = -1;
     private Label currentStartTimeLabel;
     private Label currentPassIdBox;
-    private BetterDateTimeBox timeBox;
+    private DateAndTimeInput timeBox;
     private TextBox authorNameBox;
     private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
     private ListBox racingProcedureSelection;
@@ -100,8 +101,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
     
     private Widget createInputPanel() {
         Grid content = new Grid(5, 2);
-        timeBox = createDateTimeBox(new Date());
-        timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
+        timeBox = createDateTimeBox(new Date(), Accuracy.SECONDS);
         timeBox.ensureDebugId("StartTimeTimeBox");
         content.setWidget(0, 0, createLabel(stringMessages.startTime()));
         content.setWidget(0, 1, timeBox);
