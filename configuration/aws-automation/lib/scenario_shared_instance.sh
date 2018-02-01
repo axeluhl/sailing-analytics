@@ -18,7 +18,6 @@ function shared_instance_require(){
 	require_super_instance_dns_name
 	require_ssh_user
 
-	require_key_name
 	require_key_file
 	require_instance_name
 	require_instance_short_name
