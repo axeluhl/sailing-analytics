@@ -429,7 +429,7 @@
     <string name="use_previous_course_dialog_message">Use previously published course design?</string>
     <string name="please_enter_valid_number">Please enter a valid number</string>
     <string name="please_enter_valid_pathfinder">Please enter a valid pathfinder</string>
-    <string name="error_scanning_qr">Error scanning QR code (%i)</string>
+    <string name="error_scanning_qr">Error scanning QR code (%d)</string>
     <string name="error_scanning_qr_malformed">Malformed url</string>
     <string name="marks_w_placeholder">Marks: %s</string>
     <string name="error_no_course_to_copy">No course available to copy</string>
