@@ -5,6 +5,28 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.ScreenHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -26,27 +48,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
-
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.ScreenHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sailing.racecommittee.app.utils.TimeUtils;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
@@ -100,7 +101,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mPreferences = AppPreferences.on(getActivity());
         View layout = super.onCreateView(inflater, container, savedInstanceState);
         if (customView == null) {
             layout = inflater.inflate(R.layout.protest_time_fragment, container, false);
@@ -210,7 +210,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     }
 
     private View setupView() {
-        mPreferences = AppPreferences.on(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.protest_time_dialog, null);
         mRacesList = (ListView) view.findViewById(R.id.protest_time_races_list);
@@ -296,10 +295,20 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         }
         ReadonlyDataManager manager = DataManager.create(getActivity());
         ArrayList<String> raceIds = args.getStringArrayList(ARGS_RACE_IDS);
+        String raceGroup = null;
         if (raceIds != null) {
             for (String id : raceIds) {
-                races.add(manager.getDataStore().getRace(id));
+                ManagedRace managedRace = manager.getDataStore().getRace(id);
+                if (raceGroup == null) {
+                    raceGroup = managedRace.getRaceGroup().getName();
+                }
+                races.add(managedRace);
             }
+        }
+        if (raceGroup != null) {
+            mPreferences = AppPreferences.on(getActivity(), PreferenceHelper.getRegattaPrefFileName(raceGroup));
+        } else {
+            mPreferences = AppPreferences.on(getActivity());
         }
     }
 
