@@ -108,6 +108,9 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
 
         if (configuration.getDefaultProtestTimeDuration() != null) {
             preferences.setDefaultProtestTimeDurationInMinutes((int) configuration.getDefaultProtestTimeDuration().asMinutes());
+            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(false);
+        } else {
+            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
         }
 
         if (configuration.getRRS26Configuration() != null) {

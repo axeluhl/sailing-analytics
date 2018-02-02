@@ -502,8 +502,27 @@ public class AppPreferences {
             .getInteger(R.integer.preference_protest_time_duration_default));
     }
 
+    public int getProtestTimeDurationInMinutesCustom() {
+        return helper.getInt(context.getString(R.string.preference_protest_time_duration_custom_key), -1);
+    }
+
+    public boolean isDefaultProtestTimeCustomEditable() {
+        return helper.getBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key),
+                context.getResources().getBoolean(R.bool.preference_protest_time_duration_custom_editable_default));
+    }
+
     public void setDefaultProtestTimeDurationInMinutes(int protestTimeInMinutes) {
         helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_key), protestTimeInMinutes).commit();
+    }
+
+    public void setDefaultProtestTimeDurationInMinutesCustom(int protestTimeInMinutest) {
+        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_custom_key), protestTimeInMinutest).commit();
+    }
+
+    public void setDefaultProtestTimeDurationInMinutesCustomEditable(boolean editable) {
+        helper.getEditor()
+            .putBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key), editable)
+            .commit();
     }
 
     public String getTheme() {

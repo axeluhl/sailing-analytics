@@ -407,6 +407,7 @@ public class LoginActivity extends BaseActivity
             public void onLoadFailed(Exception reason) {
                 dismissProgressSpinner();
 
+                preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
                 if (reason instanceof FileNotFoundException) {
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
                     ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));

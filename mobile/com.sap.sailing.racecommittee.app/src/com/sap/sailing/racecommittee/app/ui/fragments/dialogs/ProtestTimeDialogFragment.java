@@ -67,6 +67,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     private View mHome;
     private Button mChoose;
     private AppPreferences mPreferences;
+    private Integer mDuration = null;
 
     public ProtestTimeDialogFragment() {
         races = new ArrayList<>();
@@ -400,13 +401,21 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     }
 
     private void updateProtestRange() {
-        int duration = mPreferences.getProtestTimeDurationInMinutes();
+        if (mDuration == null) {
+            mDuration = mPreferences.getProtestTimeDurationInMinutes();
+            if (mPreferences.isDefaultProtestTimeCustomEditable()) {
+                int custom = mPreferences.getProtestTimeDurationInMinutesCustom();
+                if (custom >= 0) {
+                    mDuration = custom;
+                }
+            }
+        }
         if (mProtestDuration != null) {
-            mProtestDuration.setText(getString(R.string.protest_duration, duration));
+            mProtestDuration.setText(getString(R.string.protest_duration, mDuration));
         }
         if (mProtestEndTime != null) {
             TimePoint startTime = TimeUtils.getTime(mTimePicker);
-            TimePoint endTime = startTime.plus(Duration.ONE_MINUTE.times(duration));
+            TimePoint endTime = startTime.plus(Duration.ONE_MINUTE.times(mDuration));
             mProtestEndTime.setText(getString(R.string.protest_end_time, TimeUtils.formatTime(endTime)));
         }
     }
@@ -449,7 +458,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         public void onClick(View v) {
             FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration, null);
             final EditText duration = (EditText) layout.findViewById(R.id.protest_duration);
-            duration.setText(String.valueOf(mPreferences.getProtestTimeDurationInMinutes()));
+            duration.setText(String.valueOf(mDuration));
             duration.setSelection(duration.length());
             AlertDialog.Builder builder = new AlertDialog.Builder(new ContextWrapper(v.getContext()), R.style.AppTheme_AlertDialog);
             builder.setTitle(v.getContext().getString(R.string.protest_duration_dialog_title));
@@ -457,8 +466,10 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    int value = Integer.parseInt(duration.getText().toString());
-                    mPreferences.setDefaultProtestTimeDurationInMinutes(value);
+                    mDuration = Integer.parseInt(duration.getText().toString());
+                    if (mPreferences.isDefaultProtestTimeCustomEditable()) {
+                        mPreferences.setDefaultProtestTimeDurationInMinutesCustom(mDuration);
+                    }
                     updateProtestRange();
                 }
             });
