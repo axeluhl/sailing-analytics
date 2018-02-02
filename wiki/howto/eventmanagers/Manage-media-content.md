@@ -15,10 +15,10 @@ There are four image types which can be added to an event carrying different rol
 ## Scale guidelines for several purposes
 For performance reasons, images should be scaled before uploading them. The following image resolutions showed up as good manner:
 
-* **logo:** about 150 x 150 pixel (file size < 100 kB); take a .png file with transparent background!
-* **teaser:** about 640 x 480 pixel (file size < 100 kB)
-* **stage:** about 1800 x 500 pixel (file size < 500 kB)
-* **gallery:** about 1400 x 1000 pixel (file size < 350 kB)
+* **logo.png:** about 150 x 150 pixel (file size < 100 kB); take a .png file with transparent background!
+* **teaser.jpeg:** about 640 x 480 pixel (file size < 100 kB)
+* **stage.jpeg:** about 1800 x 500 pixel (file size < 500 kB)
+* **gallery.jpeg:** about 1400 x 1000 pixel (file size < 350 kB)
 
 ## S3 folder structure
 Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following naming conventions:     
