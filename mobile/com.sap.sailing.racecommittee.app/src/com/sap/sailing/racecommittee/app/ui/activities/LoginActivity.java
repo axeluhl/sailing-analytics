@@ -6,28 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
-import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -65,6 +43,28 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
+import android.widget.Toast;
 
 public class LoginActivity extends BaseActivity
         implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -514,11 +514,11 @@ public class LoginActivity extends BaseActivity
         animatorSet.start();
     }
 
-    private ObjectAnimator getAlphaAnimator(@NonNull Object target) {
+    private ObjectAnimator getAlphaAnimator(@NonNull View target) {
         return ObjectAnimator.ofFloat(target, "alpha", 0f, 1f);
     }
 
-    private ObjectAnimator getAlphaRevAnimator(@NonNull Object target) {
+    private ObjectAnimator getAlphaRevAnimator(@NonNull View target) {
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
