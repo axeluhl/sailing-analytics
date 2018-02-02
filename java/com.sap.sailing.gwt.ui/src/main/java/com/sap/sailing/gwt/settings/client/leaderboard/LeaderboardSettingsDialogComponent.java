@@ -22,7 +22,6 @@ import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LegColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -117,7 +116,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
         GWT.debugger();
-        for (DetailType type : reduceToAvailableTypes(DetailType.getRaceDetailTypes())) {
+        for (DetailType type : reduceToAvailableTypes(DetailType.getAllRaceDetailTypes())) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
@@ -169,7 +168,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         Collection<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
-        for (DetailType type : reduceToAvailableTypes(LeaderboardPanel.getAvailableOverallDetailColumnTypes())) {
+        for (DetailType type : reduceToAvailableTypes(DetailType.getAvailableOverallDetailColumnTypes())) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
@@ -202,7 +201,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel legDetailsContent = null;
         Collection<DetailType> currentLegDetailSelection = initialSettings.getLegDetailsToShow();
         int detailCountInCurrentFlowPanel = 0;
-        for (DetailType type : reduceToAvailableTypes(LegColumn.getAvailableLegDetailColumnTypes())) {
+        for (DetailType type : reduceToAvailableTypes(DetailType.getAllLegDetailColumnTypes())) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 legDetailsContent = new FlowPanel();
                 legDetailsContent.addStyleName("dialogInnerContent");

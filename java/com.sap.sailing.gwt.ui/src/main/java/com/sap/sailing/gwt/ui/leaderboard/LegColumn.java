@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -266,8 +265,24 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             }
             return result;
         }
+        
+
     }
         
+    private class LegAWA implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            if (legEntry == null || getLegIndex() == 0) {
+                // no gain/loss for first leg
+                return null;
+            } else {
+                LegEntryDTO previousEntry = getLegEntry(row, getLegIndex()-1);
+                return previousEntry == null ? null : legEntry.expeditionAWA - previousEntry.expeditionAWA;
+            }
+        }
+    }
+    
     public LegColumn(LeaderboardPanel<?> leaderboardPanel, String raceColumnName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
@@ -279,19 +294,6 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         this.stringMessages = stringMessages;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
-    }
-    
-    public static List<DetailType> getAvailableLegDetailColumnTypes() {
-        return Arrays.asList(new DetailType[] { DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.DISTANCE_TRAVELED,
-                DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START, DetailType.GAP_TO_LEADER_IN_SECONDS,
-                DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS, DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, 
-                DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.CURRENT_HEEL_IN_DEGREES,
-                DetailType.CURRENT_PITCH_IN_DEGREES, DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
-                DetailType.CURRENT_DISTANCE_FOILED_IN_METERS, DetailType.CURRENT_DURATION_FOILED_IN_SECONDS,
-                DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
-                DetailType.TIME_TRAVELED, DetailType.CORRECTED_TIME_TRAVELED, DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, DetailType.RANK_GAIN });
     }
 
     @Override
@@ -343,6 +345,12 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new AverageAbsoluteCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, 
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new AverageSignedCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        
+        result.put(DetailType.LEG_AWA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_AWA, new LegAWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+
+     
+        
         return result;
     }
 

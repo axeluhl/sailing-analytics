@@ -176,7 +176,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         dialogPanel.ensureDebugId("LeaderboardSettingsPanel");
         dialogPanel.add(createSelectedRacesPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
-        DetailType.getRaceDetailTypes().retainAll(availableDetailTypes);
+        DetailType.getAllRaceDetailTypes().retainAll(availableDetailTypes);
         dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createRaceStartAnalysisPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));

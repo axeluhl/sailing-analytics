@@ -686,7 +686,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
 
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), DetailType.getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
         }
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
@@ -747,7 +747,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private void applyDetailSettings(final LeaderboardSettings newSettings) {
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), reduceToAvailableTypes(getAvailableOverallDetailColumnTypes()),
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), reduceToAvailableTypes(selectedOverallDetailColumns),
                     selectedOverallDetailColumns);
         }
 
@@ -761,12 +761,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), reduceToAvailableTypes(LegColumn.getAvailableLegDetailColumnTypes()),
+            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), reduceToAvailableTypes(selectedLegDetails),
                     selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
             List<DetailType> allRaceDetailsTypes = new ArrayList<>();
-            allRaceDetailsTypes.addAll(DetailType.getRaceDetailTypes());
+            allRaceDetailsTypes.addAll(DetailType.getAllRaceDetailTypes());
             allRaceDetailsTypes.addAll(getAvailableRaceStartAnalysisColumnTypes());
             GWT.log("selected race details " + selectedRaceDetails);
             setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), reduceToAvailableTypes(allRaceDetailsTypes) , selectedRaceDetails);
@@ -1122,15 +1122,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, DetailType.START_TACK });
     }
 
-    public static List<DetailType> getAvailableOverallDetailColumnTypes() {
-        return Arrays.asList(new DetailType[] { DetailType.REGATTA_RANK, DetailType.TOTAL_DISTANCE_TRAVELED,
-                DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
-                DetailType.TOTAL_DURATION_FOILED_IN_SECONDS, DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
-                DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, DetailType.TIME_ON_TIME_FACTOR,
-                DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
-                DetailType.TOTAL_SCORED_RACE_COUNT });
-    }
-
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
         /**
          * Remembers the leg columns; <code>null</code>-padded, if {@link #getLegColumn(int)} asks for a column index
@@ -1281,8 +1272,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_TARG_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.RACE_TARG_BOAT_SPEED, new TargBoatSpeedDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.RACE_BS_SOG, new FormattedDoubleDetailTypeColumn(DetailType.RACE_BS_SOG, new BSSOGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_SOG, new FormattedDoubleDetailTypeColumn(DetailType.RACE_SOG, new SOGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_COG, new FormattedDoubleDetailTypeColumn(DetailType.RACE_COG, new COGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
@@ -1377,21 +1366,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class BSSOGDetailTypeExtractor implements LegDetailField<Double> {
-
-            @Override
-            public Double get(LeaderboardRowDTO row) {
-                Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.expeditionBSSOG != null) {
-                    result = fieldsForRace.expeditionBSSOG;
-                }
-                return result;
-            }
-        }
-
         private class COGDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1404,7 +1379,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class CourseDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1417,7 +1391,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class DistanceBelowLineDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1430,7 +1403,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class DistanceToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1443,7 +1415,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class DistanceToPinDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1456,7 +1427,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class DistToPortLaylineDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1469,7 +1439,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class VMGTargVMGDeltaDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1482,7 +1451,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class DistToStbLaylineDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1495,7 +1463,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class VMGDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1508,7 +1475,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class TWSDetailTypeExtractor implements LegDetailField<Double> {
-
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1592,7 +1558,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.expeditionTimeToGUN != null) {
-                    result = fieldsForRace.expeditionTimeToGUN;
+                    result = fieldsForRace.expeditionTimeToGUN.asSeconds();
                 }
                 return result;
             }
@@ -1631,7 +1597,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.expeditionTimeToBurnToLine != null) {
-                    result = fieldsForRace.expeditionTimeToBurnToLine;
+                    result = fieldsForRace.expeditionTimeToBurnToLine.asSeconds();
                 }
                 return result;
             }
@@ -3157,7 +3123,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>>();
         // ensure the ordering in overallDetailColumnsToShow conforms to the ordering of
         // getAvailableOverallDetailColumnTypes()
-        for (DetailType overallDetailType : getAvailableOverallDetailColumnTypes()) {
+        for (DetailType overallDetailType : DetailType.getAvailableOverallDetailColumnTypes()) {
             if (selectedOverallDetailColumns.contains(overallDetailType)
                     && overallDetailColumnMap.containsKey(overallDetailType)) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));

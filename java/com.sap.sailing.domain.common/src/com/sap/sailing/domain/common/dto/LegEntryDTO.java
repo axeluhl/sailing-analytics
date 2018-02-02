@@ -63,47 +63,46 @@ public class LegEntryDTO implements Serializable {
     public Double averageAbsoluteCrossTrackErrorInMeters;
     public Double averageSignedCrossTrackErrorInMeters;
     
-    /**
-     * The corrected time spent since the start of the race up to the current time point or the finishing of
-     * the leg, whichever comes first
-     */
-    public Duration correctedTotalTime;
-    
     public Double expeditionAWA;
     public Double expeditionAWS;
     public Double expeditionBoatSpeed;
-    public Double expeditionBSSOG;
     public Double expeditionCOG;
-    public Double expeditionCourse;
-    public Double expeditionDistance;
+    public Double expeditionDistanceBelowLine;
     public Double expeditionDistanceToCommitteeBoat;
-    public Double expeditionDistanceToPin;
-    public Double expeditionDistanceToPortLayline;
-    public Double expeditionVMGTargetVMGDelta;
-    public Double expeditionDistanceToStarboardLayline;
+    public Double expeditionDistToPortLayline;
+    public Double expeditionDistToStbLayline;
     public Double expeditionVMG;
     public Double expeditionTWS;
     public Double expeditionTWD;
     public Double expeditionTWA;
-    public Double expeditionTimeToStarboardLayline;
+    public Double expeditionTimeToStbLayline;
     public Double expeditionTimeToPortLayline;
     public Double expeditionTimeToPin;
-    public Double expeditiontimeToGUN;
-    public Double expeditionTimeToCommiteeBoat;
+    public Duration expeditionTimeToGUN;
+    public Double expeditionTimeToCommitteeBoat;
     public Double expeditionTimeToBurnToPin;
-    public Double expeditionTimeToBurnToLine;
+    public Double expeditionTargTWA;
     public Double expeditionTimeToBurnToCommitteeBoat;
-    public Double expeditionTargetTWA;
+    public Duration expeditionTimeToBurnToLine;
     public Double expeditionTargetHeel;
-    public Double expeditionTargetBoatSpeed;
+    public Double expeditionTargBoatSpeed;
     public Double expeditionSOG;
     public Double expeditionRudderAngle;
     public Double expeditionRateOfTurn;
     public Double expeditionRake;
     public Double expeditionLineSquareForWindDirection;
-    public Double expeditionHeel;
     public Double expeditionHeading;
     public Double expeditionForestayLoad;
+    public Double expeditionHeel;
+    public Double expeditionCourseDetail;
+    public Double expeditionDistanceToPinDetail;
+    public Double expeditionVMGTargVMGDelta;
+    
+    /**
+     * The corrected time spent since the start of the race up to the current time point or the finishing of
+     * the leg, whichever comes first
+     */
+    public Duration correctedTotalTime;
     
     @Override
     public int hashCode() {

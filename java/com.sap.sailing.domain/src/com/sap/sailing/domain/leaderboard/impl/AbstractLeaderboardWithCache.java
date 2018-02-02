@@ -626,6 +626,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         entryDTO.expeditionTargetHeel = fix.getExpeditionTG_Heell();
                         entryDTO.expeditionTimeToGUN = fix.getExpeditionTmToGun();
                         entryDTO.expeditionTimeToBurnToLine = fix.getExpeditionTmToBurn();
+                        entryDTO.expeditionDistanceBelowLine = fix.getExpeditionBelowLn();
+                        entryDTO.expeditionCourseDetail = fix.getExpeditionCourse();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -1009,6 +1011,9 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
+        
+        result.expeditionAWA = trackedLeg.getAWA(timePoint);
+        
         return result;
     }
 

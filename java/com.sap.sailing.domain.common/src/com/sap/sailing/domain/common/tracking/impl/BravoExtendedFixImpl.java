@@ -9,6 +9,8 @@ import com.sap.sailing.domain.common.sensordata.ColumnMetadata;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * Implementation of {@link BravoExtendedFix}. {@link BravoExtendedFix} adds more measures compared to {@link BravoFix}.
@@ -193,12 +195,24 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
-    public Double getExpeditionTmToGun() {
-        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex());
+    public Duration getExpeditionTmToGun() {
+        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex()); 
+        return duration==null?null:new MillisecondsDurationImpl(Math.round(duration*1000));
     }
 
     @Override
-    public Double getExpeditionTmToBurn() {
-        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex());
+    public Duration getExpeditionTmToBurn() {
+        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex()); 
+        return duration==null?null:new MillisecondsDurationImpl(Math.round(duration*1000));
+    }
+    
+    @Override
+    public Double getExpeditionBelowLn() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_BELOWLN.getColumnIndex());
+    }
+
+    @Override
+    public Double getExpeditionCourse() {
+        return getExpeditionHDG()+getLeeway().getDegrees();
     }
 }

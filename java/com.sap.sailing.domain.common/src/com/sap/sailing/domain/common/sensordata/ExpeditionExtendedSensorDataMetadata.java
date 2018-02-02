@@ -50,6 +50,8 @@ public enum ExpeditionExtendedSensorDataMetadata {
     EXPEDITION_TGHEEL("TG Heell", BravoExtendedSensorDataMetadata.EXPEDITION_TGHEEL, /* expected in logfile */ true), //
     EXPEDITION_TMTOGUN("TmToGun", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN, /* expected in logfile */ true), //
     EXPEDITION_TMTOBURN("TmToBurn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN, /* expected in logfile */ true), //
+    EXPEDITION_BELOWLN("BelowLn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN, /* expected in logfile */ true), //
+    EXPEDITION_RATE_OF_TURN("ROT", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN, /* expected in logfile */ true), //
     ;
 
     private String columnName;

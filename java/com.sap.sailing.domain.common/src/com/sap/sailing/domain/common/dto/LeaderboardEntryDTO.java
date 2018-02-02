@@ -138,8 +138,6 @@ public class LeaderboardEntryDTO implements Serializable {
 
     public Double expeditionBoatSpeed;
 
-    public Double expeditionBSSOG;
-
     public Double expeditionCOG;
 
     public Double expeditionDistanceBelowLine;
@@ -164,7 +162,7 @@ public class LeaderboardEntryDTO implements Serializable {
 
     public Double expeditionTimeToPin;
 
-    public Double expeditionTimeToGUN;
+    public Duration expeditionTimeToGUN;
 
     public Double expeditionTimeToCommitteeBoat;
 
@@ -174,7 +172,7 @@ public class LeaderboardEntryDTO implements Serializable {
 
     public Double expeditionTimeToBurnToCommitteeBoat;
 
-    public Double expeditionTimeToBurnToLine;
+    public Duration expeditionTimeToBurnToLine;
 
     public Double expeditionTargetHeel;
 
@@ -323,7 +321,6 @@ public class LeaderboardEntryDTO implements Serializable {
                 : distanceToStartLineFiveSecondsBeforeStartInMeters.hashCode());
         result = prime * result + ((expeditionAWA == null) ? 0 : expeditionAWA.hashCode());
         result = prime * result + ((expeditionAWS == null) ? 0 : expeditionAWS.hashCode());
-        result = prime * result + ((expeditionBSSOG == null) ? 0 : expeditionBSSOG.hashCode());
         result = prime * result + ((expeditionBoatSpeed == null) ? 0 : expeditionBoatSpeed.hashCode());
         result = prime * result + ((expeditionCOG == null) ? 0 : expeditionCOG.hashCode());
         result = prime * result + ((expeditionCourseDetail == null) ? 0 : expeditionCourseDetail.hashCode());
@@ -453,11 +450,6 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.expeditionAWS != null)
                 return false;
         } else if (!expeditionAWS.equals(other.expeditionAWS))
-            return false;
-        if (expeditionBSSOG == null) {
-            if (other.expeditionBSSOG != null)
-                return false;
-        } else if (!expeditionBSSOG.equals(other.expeditionBSSOG))
             return false;
         if (expeditionBoatSpeed == null) {
             if (other.expeditionBoatSpeed != null)

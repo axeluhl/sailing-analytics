@@ -6936,7 +6936,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName) {
         List<DetailType> allowed = new ArrayList<>();
-        allowed.addAll(DetailType.getBaseDetailTypes());
+        allowed.addAll(DetailType.getAllNonRestrictedDetailTypes());
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             boolean hasBravoTrack = false;
@@ -6964,6 +6964,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             if(hasExtendedBravoFixes){
                 allowed.addAll(DetailType.getRaceExpeditionDetailTypes());
+                allowed.addAll(DetailType.getLegExpeditionDetailColumnTypes());
             }
         } else {
             System.out.println("Returning fallback detailtypes");
