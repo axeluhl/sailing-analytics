@@ -9,7 +9,7 @@ public class ChartZoomChangedEvent extends GwtEvent<ChartZoomChangedEvent.Handle
     public static final Type<Handler> TYPE = new Type<>();
     private final Date rangeStart;
     private final Date rangeEnd;
-    interface Handler extends EventHandler {        
+    public interface Handler extends EventHandler {        
         void handleZoomChanged(ChartZoomChangedEvent cze);
     }
     

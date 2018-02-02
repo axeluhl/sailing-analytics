@@ -1,27 +1,15 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog;
-import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
-import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -44,10 +32,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
     private final MultiCompetitorRaceChartLifecycle lifecycle;
-    private final Button splitButtonUi = new Button(StringMessages.INSTANCE.sliceRace());
-
-    private TimeRange visibleRange;
-    private final UUID eventId;
     
     /**
      * Creates a Chart used for example in the Raceboard to display various additional data.
@@ -66,78 +50,13 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
         this.lifecycle = lifecycle;
-        this.eventId = eventId;
-        
-        splitButtonUi.setVisible(false);
-        addChartZoomChangedHandler((e)->checkIfMaySliceSelectedRegattaAndRace(e));
-        addChartZoomResetHandler((e)->splitButtonUi.setVisible(false));
-        splitButtonUi.addClickHandler((e)->doSlice());
     }
-    
-    private void doSlice() {
-        if (visibleRange != null) {
-            sailingService.prepareForSlicingOfRace(selectedRaceIdentifier, new AsyncCallback<SliceRacePreperationDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(StringMessages.INSTANCE.errorWhilePreparingToSliceARace());
-                }
-
-                @Override
-                public void onSuccess(SliceRacePreperationDTO sliceRacePreperatioData) {
-                    new SlicedRaceNameDialog(sliceRacePreperatioData, slicedRaceName -> {
-                        sailingService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(), visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
-                            
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(StringMessages.INSTANCE.errorWhileSlicingARace());
-                            }
-                            
-                            @Override
-                            public void onSuccess(RegattaAndRaceIdentifier result) {
-                                new TrackedRaceCreationResultDialog(StringMessages.INSTANCE.sliceRace(),
-                                        StringMessages.INSTANCE.slicingARaceWasSuccessful(),
-                                        eventId, result.getRegattaName(), result.getRaceName(),
-                                        leaderboardName, leaderboardGroupName).show();
-                            }
-                        });
-                    }).show();
-                }
-            });
-        }
-    }
-    
-    private void checkIfMaySliceSelectedRegattaAndRace(final ChartZoomChangedEvent e) {
-        // TODO: we could cache result 
-        visibleRange = null;
-        sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                boolean yesWeCan = Boolean.TRUE.equals(result);
-                splitButtonUi.setVisible(yesWeCan);
-                if (yesWeCan) {
-                    visibleRange = new TimeRangeImpl(new MillisecondsTimePoint(e.getRangeStart()), new MillisecondsTimePoint(e.getRangeEnd()));
-                }
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                splitButtonUi.setVisible(false);
-            }
-        });
-    }
-    
     
     @Override
     protected Button createSettingsButton() {
         Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
         return settingsButton;
     }
-
-    @Override
-    protected void createExtraToolbarElements(FlowPanel panel) {
-        panel.add(splitButtonUi);
-    }
-   
     
     @Override
     public MultiCompetitorRaceChartSettings getSettings() {
@@ -196,50 +115,5 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     @Override
     public String getId() {
         return lifecycle.getComponentId();
-    }
-    
-    private static class SlicedRaceNameDialog extends DataEntryDialog<String> {
-        
-        private final TextBox raceNameInput;
-        
-        public SlicedRaceNameDialog(final SliceRacePreperationDTO sliceRacePreperatioData, final Consumer<String> okCallback) {
-            super(StringMessages.INSTANCE.sliceRace(), StringMessages.INSTANCE.enterNameForSlicedRace(), StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), new Validator<String>() {
-                @Override
-                public String getErrorMessage(String valueToValidate) {
-                    if (valueToValidate == null || valueToValidate.isEmpty()) {
-                        return StringMessages.INSTANCE.raceNameIsRequired();
-                    }
-                    if (sliceRacePreperatioData.getAlreadyUsedNames().contains(valueToValidate)) {
-                        return StringMessages.INSTANCE.raceNameIsAlreadyUsed();
-                    }
-                    return null;
-                }
-            }, new DialogCallback<String>() {
-                @Override
-                public void ok(String editedObject) {
-                    okCallback.accept(editedObject);
-                }
-
-                @Override
-                public void cancel() {
-                }
-            });
-            raceNameInput = createTextBox(sliceRacePreperatioData.getProposedRaceName());
-            raceNameInput.addAttachHandler(e -> {
-                if (e.isAttached()) {
-                    Scheduler.get().scheduleDeferred(() -> raceNameInput.setFocus(true));
-                }
-            });
-        }
-        
-        @Override
-        protected Widget getAdditionalWidget() {
-            return raceNameInput;
-        }
-        
-        @Override
-        protected String getResult() {
-            return raceNameInput.getValue().trim();
-        }
     }
 }

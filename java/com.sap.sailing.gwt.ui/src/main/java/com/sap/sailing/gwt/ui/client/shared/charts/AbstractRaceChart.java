@@ -113,12 +113,11 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         busyIndicator = new SimpleBusyIndicator(/* busy */ true, 2.0f);
         busyIndicator.setPanelStyleClass(chartsCss.busyIndicatorStyle());
         busyIndicator.setImageStyleClass(chartsCss.busyIndicatorImageStyle());
-        settingsButton = createSettingsButton();
-        settingsButton.setStyleName(chartsCss.settingsButtonStyle());
-        settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
-        add(settingsButton);
         toolbar.addStyleName(chartsCss.toolbar());
-            add(toolbar);
+        add(toolbar);
+        settingsButton = createSettingsButton();
+        settingsButton.setStyleName(chartsCss.settingsButtonBackgroundImage());
+        addToolbarButton(settingsButton);
         initWidget(rootPanel);
         getElement().getStyle().setMarginRight(12, Unit.PX);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
@@ -130,13 +129,8 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
      */
     protected abstract Button createSettingsButton();
     
-    protected void createExtraToolbarElements(FlowPanel panel) {
-    }
-    
-    @Override
-    protected final void onLoad() {
-        createExtraToolbarElements(toolbar);
-        super.onLoad();
+    public void addToolbarButton(Button button) {
+        toolbar.insert(button, 0);
     }
     
     /**

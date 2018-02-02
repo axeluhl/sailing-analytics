@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.GwtEvent;
 public class ChartZoomResetEvent extends GwtEvent<ChartZoomResetEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<>();
 
-    interface Handler extends EventHandler {
+    public interface Handler extends EventHandler {
         void handleZoomReset(ChartZoomResetEvent czre);
     }
 
