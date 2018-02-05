@@ -94,6 +94,22 @@ Note: Always define the most populare video to be _featured_ e.g. the current li
 ![Add a featured video](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/add-featured-video.JPG)  
 **Figure 8: add a featured video**
 
+# Competitor logos
+The competitors of the sailing events can be equipped with their club flags. The following steps provide an exemplary guidance about how to add a club flag to its corresponding competitor. All available clubflags are located at the S3 storage under the folder `~`/`clubflags`/.
 
+## Required file format 
+* **File format:** .png with transparent background
+* **File resolution:** about 100 x 50 pixel (file size < 25 kB)
+* **Storage location:** `~`/`clubflags`/`country`/  
+e.g. `~`/`clubflags`/`germany`/`clubflag1.png`
+
+## Exemplary instructions
+1. Access the administration console _eventname(-master?)_.sapsailing.com/gwt/AdminConsle.html and login with your user credentials.
+
+2. Select _Tracked races_ and click on the _Competitors_ tab (see **figure 9**).  
+![Select the competitors tab within the admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/linking%20race%20videos/clubflag-selection.JPG)  
+**Figure 9: competitors tab of the admin console.
+
+3. Select the competitor, click on the _Edit_ button and insert the Flag image URL of the corresponding club flag.
 
 
