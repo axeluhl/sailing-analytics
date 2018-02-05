@@ -7165,7 +7165,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
 
-            // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
+            // This call waits until the RaceDefinition exists so that we can be sure that the TrackedRace also exists
+            // after the call returns
             raceHandle.getRace();
 
             final DynamicTrackedRace trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
