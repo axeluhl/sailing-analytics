@@ -8,14 +8,15 @@ import com.google.gwt.event.shared.GwtEvent;
 /**
  * Event to be fired by {@link AbstractRaceChart} when a user zooms into the chart.
  */
-public class ChartZoomChangedEvent extends GwtEvent<ChartZoomChangedEvent.Handler>{    
+public class ChartZoomChangedEvent extends GwtEvent<ChartZoomChangedEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<>();
     private final Date rangeStart;
     private final Date rangeEnd;
-    public interface Handler extends EventHandler {        
+
+    public interface Handler extends EventHandler {
         void handleZoomChanged(ChartZoomChangedEvent cze);
     }
-    
+
     public ChartZoomChangedEvent(Date rangeStart, Date rangeEnd) {
         this.rangeStart = rangeStart;
         this.rangeEnd = rangeEnd;
@@ -24,17 +25,17 @@ public class ChartZoomChangedEvent extends GwtEvent<ChartZoomChangedEvent.Handle
     public Date getRangeStart() {
         return rangeStart;
     }
-    
+
     public Date getRangeEnd() {
         return rangeEnd;
     }
-    
+
     @Override
-    public Type<Handler> getAssociatedType() {        
+    public Type<Handler> getAssociatedType() {
         return TYPE;
     }
-    
+
     protected void dispatch(Handler handler) {
         handler.handleZoomChanged(this);
-    };
+    }
 }

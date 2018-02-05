@@ -20,5 +20,5 @@ public class ChartZoomResetEvent extends GwtEvent<ChartZoomResetEvent.Handler> {
 
     protected void dispatch(Handler handler) {
         handler.handleZoomReset(this);
-    };
+    }
 }
