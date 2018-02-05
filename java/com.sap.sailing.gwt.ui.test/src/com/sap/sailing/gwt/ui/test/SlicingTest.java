@@ -83,8 +83,8 @@ public class SlicingTest {
     @Test
     @Ignore
     /**
-     * Currently non functional test case for race slicing. Should be finished when SailingServiceImplMock ist fixed to
-     * work properly for test cases.
+     * Currently non functional test case for race slicing. Should be finished when SailingServiceImplMock is fixed to
+     * work properly for test cases. See bug 4418 for details.
      */
     public void testSliceRace() throws Exception {
         final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
