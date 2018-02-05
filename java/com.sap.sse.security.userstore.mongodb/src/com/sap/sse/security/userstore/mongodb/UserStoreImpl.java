@@ -206,6 +206,9 @@ public class UserStoreImpl implements UserStore {
             // replace them based on the username key:
             for (final UserGroup group : userGroups.values()) {
                 migrateProxyUsersInGroupToRealUsersByUsername(group);
+                for (final SecurityUser userInGroup : group.getUsers()) {
+                    Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+                }
             }
             for (final Tenant tenant : tenants.values()) {
                 migrateProxyUsersInGroupToRealUsersByUsername(tenant);

@@ -55,4 +55,12 @@ public interface SecurityUser extends NamedWithID {
     boolean hasRole(Role role);
 
     Iterable<Role> getRoles();
+
+    /**
+     * @return the groups this user is a member of; an implementation may not be able to reliably determine this, e.g.,
+     *         if it represents a "stripped" copy of a user from which the group information has been removed. Other
+     *         implementations may provide a "static" view on this data as it was when the object was created. Yet
+     *         others may be able to dynamically query the user store for this information.
+     */
+    Iterable<UserGroup> getUserGroups();
 }

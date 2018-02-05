@@ -3,6 +3,7 @@ package com.sap.sse.security.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import org.junit.Test;
 
 import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.UserImpl;
@@ -139,15 +141,20 @@ public class UserStoreWithPersistenceTest {
     }
     
     @Test
-    public void testCreateUserGroup() throws UserGroupManagementException {
+    public void testCreateUserGroup() throws UserGroupManagementException, UserManagementException {
         store.deleteTenant(defaultTenant);
-        store.createUserGroup(userGroupId, userGroupName);
+        final User user = store.createUser(username, email, defaultTenant);
+        final UserGroup group = store.createUserGroup(userGroupId, userGroupName);
+        group.add(user);
+        store.updateUserGroup(group);
         assertNotNull(store.getUserGroup(userGroupId));
         assertNotNull(store.getUserGroupByName(userGroupName));
 
         newStore();
         assertNotNull(store.getUserGroup(userGroupId));
         assertNotNull(store.getUserGroupByName(userGroupName));
+        final User loadedUser = store.getUserByName(username);
+        assertTrue(Util.contains(Util.map(loadedUser.getUserGroups(), g->g.getName()), userGroupName));
     }
     
     @Test

@@ -124,6 +124,7 @@ public class SecurityUserImpl implements SecurityUser {
      * This default implementation does not know where to obtain this user's groups from. It
      * therefore returns an empty collection.
      */
+    @Override
     public Iterable<UserGroup> getUserGroups() {
         return Collections.emptyList();
     }
