@@ -728,20 +728,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Double getAWA(TimePoint at) {
-        final Double result;
-        if (hasStartedLeg(at)) {
-            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-            result = track == null ? null : track.getAWAIfAvailable(timePoint);
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
-    @Override
     public Distance getDistanceFoiled(TimePoint at) {
         final Distance result;
         if (hasStartedLeg(at)) {
@@ -854,5 +840,481 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public String toString() {
         return "TrackedLegOfCompetitor for "+getCompetitor()+" in leg "+getLeg();
+    }
+
+    @Override
+    public Double getExpeditionAWA(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionAWAIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionAWS(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionAWSIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTWA(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTWAIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTWS(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTWSIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTWD(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTWDIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTargTWA(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTargTWAIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionBoatSpeed(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionBoatSpeedIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTargBoatSpeed(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTargBoatSpeedIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionSOG(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionSOGIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionCOG(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionCOGIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionForestayLoad(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionForestayLoadIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionRake(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionRakeIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionCourseDetail(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionCourseDetailIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionHeading(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionHeadingIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionVMG(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionVMGIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionVMGTargVMGDelta(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionVMGTargVMGDeltaIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionRateOfTurn(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionRateOfTurnIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionRudderAngle(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionRudderAngleIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionHeel(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionHeelIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTargetHeel(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTargetHeelIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTimeToPortLayline(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToPortLaylineIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTimeToStbLayline(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToStbLaylineIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionDistToPortLayline(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionDistToPortLaylineIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionDistToStbLayline(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionDistToStbLaylineIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration getExpeditionTimeToGUN(TimePoint at) {
+        final Duration result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToGUNIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTimeToCommitteeBoat(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToCommitteeBoatIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTimeToPin(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToPinIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration getExpeditionTimeToBurnToLine(TimePoint at) {
+        final Duration result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToBurnToLineIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTimeToBurnToCommitteeBoat(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToBurnToCommitteeBoatIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionTimeToBurnToPin(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionTimeToBurnToPinIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionDistanceToCommitteeBoat(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getExpeditionDistanceTocommitteeBoatIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionDistanceToPinDetail(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getDistanceToPinDetailIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionDistanceBelowLine(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getDistanceBelowLineIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getExpeditionLineSquareForWindDirection(TimePoint at) {
+        final Double result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>>getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getLineSquareForWindIfAvailable(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

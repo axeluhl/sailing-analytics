@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -53,7 +52,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        GWT.debugger();
         this.availableDetailTypes = Collections.unmodifiableCollection(availableDetailTypes);
     }
     
@@ -115,7 +113,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         int detailCountInCurrentFlowPanel = 0;
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
-        GWT.debugger();
         for (DetailType type : reduceToAvailableTypes(DetailType.getAllRaceDetailTypes())) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();

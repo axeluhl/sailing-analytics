@@ -325,6 +325,39 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
 
-    Double getAWA(TimePoint at);
+    Double getExpeditionAWA(TimePoint at);
+    Double getExpeditionAWS(TimePoint at);
+    Double getExpeditionTWA(TimePoint at);
+    Double getExpeditionTWS(TimePoint at);
+    Double getExpeditionTWD(TimePoint at);
+    Double getExpeditionTargTWA(TimePoint at);
+    Double getExpeditionBoatSpeed(TimePoint at);
+    Double getExpeditionTargBoatSpeed(TimePoint at);
+    Double getExpeditionSOG(TimePoint at);
+    Double getExpeditionCOG(TimePoint at);
+    Double getExpeditionForestayLoad(TimePoint at);
+    Double getExpeditionRake(TimePoint at);
+    Double getExpeditionCourseDetail(TimePoint at);
+    Double getExpeditionHeading(TimePoint at);
+    Double getExpeditionVMG(TimePoint at);
+    Double getExpeditionVMGTargVMGDelta(TimePoint at);
+    Double getExpeditionRateOfTurn(TimePoint at);
+    Double getExpeditionRudderAngle(TimePoint at);
+    Double getExpeditionHeel(TimePoint at);
+    Double getExpeditionTargetHeel(TimePoint at);
+    Double getExpeditionTimeToPortLayline(TimePoint at);
+    Double getExpeditionTimeToStbLayline(TimePoint at);
+    Double getExpeditionDistToPortLayline(TimePoint at);
+    Double getExpeditionDistToStbLayline(TimePoint at);
+    Duration getExpeditionTimeToGUN(TimePoint at);
+    Double getExpeditionTimeToCommitteeBoat(TimePoint at);
+    Double getExpeditionTimeToPin(TimePoint at);
+    Duration getExpeditionTimeToBurnToLine(TimePoint at);
+    Double getExpeditionTimeToBurnToCommitteeBoat(TimePoint at);
+    Double getExpeditionTimeToBurnToPin(TimePoint at);
+    Double getExpeditionDistanceToCommitteeBoat(TimePoint at);
+    Double getExpeditionDistanceToPinDetail(TimePoint at);
+    Double getExpeditionDistanceBelowLine(TimePoint at);
+    Double getExpeditionLineSquareForWindDirection(TimePoint at);
 
 }

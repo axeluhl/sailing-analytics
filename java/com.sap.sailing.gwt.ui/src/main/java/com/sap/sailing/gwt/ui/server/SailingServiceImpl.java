@@ -3061,10 +3061,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 result = getBravoDoubleValue(BravoFixTrack::getTargetBoatspeedPIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case RACE_AWA: {
-                result = getBravoDoubleValue(BravoFixTrack::getAWAIfAvailable, trackedRace, competitor, timePoint);
-                break;
-            }
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
                         + "' in this method.");

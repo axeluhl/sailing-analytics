@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -25,7 +24,6 @@ public class SingleRaceLeaderboardSettingsDialogComponent
 
     @Override
     public SingleRaceLeaderboardSettings getResult() {
-        GWT.debugger();
         List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes, initialSettings.getManeuverDetailsToShow());
         List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, initialSettings.getOverallDetailsToShow());
         List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes, initialSettings.getRaceDetailsToShow());

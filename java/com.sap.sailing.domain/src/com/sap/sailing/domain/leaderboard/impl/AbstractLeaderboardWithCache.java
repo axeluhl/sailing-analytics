@@ -1011,9 +1011,40 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
-        
-        result.expeditionAWA = trackedLeg.getAWA(timePoint);
-        
+        result.expeditionAWA = trackedLeg.getExpeditionAWA(timePoint);
+        result.expeditionAWS = trackedLeg.getExpeditionAWS(timePoint);
+        result.expeditionTWA = trackedLeg.getExpeditionTWA(timePoint);
+        result.expeditionTWS = trackedLeg.getExpeditionTWS(timePoint);
+        result.expeditionTWD = trackedLeg.getExpeditionTWD(timePoint);
+        result.expeditionTargTWA = trackedLeg.getExpeditionTargTWA(timePoint);
+        result.expeditionBoatSpeed = trackedLeg.getExpeditionBoatSpeed(timePoint);
+        result.expeditionTargBoatSpeed = trackedLeg.getExpeditionTargBoatSpeed(timePoint);
+        result.expeditionSOG = trackedLeg.getExpeditionSOG(timePoint);
+        result.expeditionCOG = trackedLeg.getExpeditionCOG(timePoint);
+        result.expeditionForestayLoad = trackedLeg.getExpeditionForestayLoad(timePoint);
+        result.expeditionRake = trackedLeg.getExpeditionRake(timePoint);
+        result.expeditionCourseDetail = trackedLeg.getExpeditionCourseDetail(timePoint);
+        result.expeditionHeading = trackedLeg.getExpeditionHeading(timePoint);
+        result.expeditionVMG = trackedLeg.getExpeditionVMG(timePoint);
+        result.expeditionVMGTargVMGDelta = trackedLeg.getExpeditionVMGTargVMGDelta(timePoint);
+        result.expeditionRateOfTurn = trackedLeg.getExpeditionRateOfTurn(timePoint);
+        result.expeditionRudderAngle = trackedLeg.getExpeditionRudderAngle(timePoint);
+        result.expeditionHeel = trackedLeg.getExpeditionHeel(timePoint);
+        result.expeditionTargetHeel = trackedLeg.getExpeditionTargetHeel(timePoint);
+        result.expeditionTimeToPortLayline = trackedLeg.getExpeditionTimeToPortLayline(timePoint);
+        result.expeditionTimeToStbLayline = trackedLeg.getExpeditionTimeToStbLayline(timePoint);
+        result.expeditionDistToPortLayline = trackedLeg.getExpeditionDistToPortLayline(timePoint);
+        result.expeditionDistToStbLayline = trackedLeg.getExpeditionDistToStbLayline(timePoint);
+        result.expeditionTimeToGUN = trackedLeg.getExpeditionTimeToGUN(timePoint);
+        result.expeditionTimeToCommitteeBoat = trackedLeg.getExpeditionTimeToCommitteeBoat(timePoint);
+        result.expeditionTimeToPin = trackedLeg.getExpeditionTimeToPin(timePoint);
+        result.expeditionTimeToBurnToLine = trackedLeg.getExpeditionTimeToBurnToLine(timePoint);
+        result.expeditionTimeToBurnToCommitteeBoat = trackedLeg.getExpeditionTimeToBurnToCommitteeBoat(timePoint);
+        result.expeditionTimeToBurnToPin = trackedLeg.getExpeditionTimeToBurnToPin(timePoint);
+        result.expeditionDistanceToCommitteeBoat = trackedLeg.getExpeditionDistanceToCommitteeBoat(timePoint);
+        result.expeditionDistanceToPinDetail = trackedLeg.getExpeditionDistanceToPinDetail(timePoint);
+        result.expeditionDistanceBelowLine = trackedLeg.getExpeditionDistanceBelowLine(timePoint);
+        result.expeditionLineSquareForWindDirection = trackedLeg.getExpeditionLineSquareForWindDirection(timePoint);
         return result;
     }
 

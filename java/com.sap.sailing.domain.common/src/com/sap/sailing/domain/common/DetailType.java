@@ -86,7 +86,6 @@ public enum DetailType implements Serializable {
     RACE_TARG_TWA(0, ASCENDING),
     RACE_BOAT_SPEED(0, ASCENDING),
     RACE_TARG_BOAT_SPEED(0, ASCENDING),
-    RACE_BS_SOG(0, ASCENDING),
     RACE_SOG(0, ASCENDING),
     RACE_COG(0, ASCENDING),
     RACE_FORESTAY_LOAD(0, ASCENDING),
@@ -121,7 +120,6 @@ public enum DetailType implements Serializable {
     LEG_TARG_TWA(0, ASCENDING),
     LEG_BOAT_SPEED(0, ASCENDING),
     LEG_TARG_BOAT_SPEED(0, ASCENDING),
-    LEG_BS_SOG(0, ASCENDING),
     LEG_SOG(0, ASCENDING),
     LEG_COG(0, ASCENDING),
     LEG_FORESTAY_LOAD(0, ASCENDING),
@@ -207,7 +205,6 @@ public enum DetailType implements Serializable {
         allowed.add(RACE_TARG_TWA);
         allowed.add(RACE_BOAT_SPEED);
         allowed.add(RACE_TARG_BOAT_SPEED);
-        allowed.add(RACE_BS_SOG);
         allowed.add(RACE_SOG);
         allowed.add(RACE_COG);
         allowed.add(RACE_FORESTAY_LOAD);
@@ -332,7 +329,7 @@ public enum DetailType implements Serializable {
 
     public static List<DetailType> getLegExpeditionDetailColumnTypes() {
         return Arrays.asList(new DetailType[] { LEG_AWA, LEG_AWS, LEG_TWA, LEG_TWS, LEG_TWD, LEG_TARG_TWA,
-                LEG_BOAT_SPEED, LEG_TARG_BOAT_SPEED, LEG_BS_SOG, LEG_SOG, LEG_COG, LEG_FORESTAY_LOAD, LEG_RAKE,
+                LEG_BOAT_SPEED, LEG_TARG_BOAT_SPEED, LEG_SOG, LEG_COG, LEG_FORESTAY_LOAD, LEG_RAKE,
                 LEG_COURSE, LEG_HEADING, LEG_VMG, LEG_VMG_TARG_VMG_DELTA, LEG_RATE_OF_TURN, LEG_RUDDER_ANGLE, LEG_HEEL,
                 LEG_TARGET_HEEL, LEG_TIME_TO_PORT_LAYLINE, LEG_TIME_TO_STB_LAYLINE, LEG_DIST_TO_PORT_LAYLINE,
                 LEG_DIST_TO_STB_LAYLINE, LEG_TIME_TO_GUN, LEG_TIME_TO_COMMITTEE_BOAT, LEG_TIME_TO_PIN,
@@ -341,7 +338,7 @@ public enum DetailType implements Serializable {
                 LEG_LINE_SQUARE_FOR_WIND_DIRECTION });
     }
 
-    public static Collection<DetailType> getAllLegDetailColumnTypes() {
+    public static List<DetailType> getAllLegDetailColumnTypes() {
         ArrayList<DetailType> all = new ArrayList<>();
         all.addAll(getLegDetailColumnTypes());
         all.addAll(getLegExpeditionDetailColumnTypes());

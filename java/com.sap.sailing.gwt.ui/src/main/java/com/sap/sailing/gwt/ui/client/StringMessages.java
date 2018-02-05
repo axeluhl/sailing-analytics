@@ -2058,7 +2058,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionTargTwa();
     String expeditionBoatSpeed();
     String expeditionTargBoatSpeed();
-    String expeditionBsSog();
     String expeditionSOG();
     String expeditionCOG();
     String expeditionForestayLoad();

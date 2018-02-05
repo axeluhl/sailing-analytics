@@ -273,13 +273,271 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             LegEntryDTO legEntry = getLegEntry(row);
-            if (legEntry == null || getLegIndex() == 0) {
-                // no gain/loss for first leg
-                return null;
-            } else {
-                LegEntryDTO previousEntry = getLegEntry(row, getLegIndex()-1);
-                return previousEntry == null ? null : legEntry.expeditionAWA - previousEntry.expeditionAWA;
-            }
+            return legEntry == null ? null : legEntry.expeditionAWA;
+        }
+    }
+    
+    private class LegAWS implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionAWS;
+        }
+    }
+
+    private class LegTWA implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTWA;
+        }
+    }
+
+    private class LegTWS implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTWS;
+        }
+    }
+
+    private class LegTWD implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTWD;
+        }
+    }
+
+    private class LegTargetTWA implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTargTWA;
+        }
+    }
+
+    private class LegBoatSpeed implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionBoatSpeed;
+        }
+    }
+
+    private class LegTargetBoatSpeed implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTargBoatSpeed;
+        }
+    }
+
+    private class LegSOG implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionSOG;
+        }
+    }
+
+    private class LegCOG implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionCOG;
+        }
+    }
+
+    private class LegForestayLoad implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionForestayLoad;
+        }
+    }
+
+    private class LegRake implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionRake;
+        }
+    }
+
+    private class LegCourse implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionCourseDetail;
+        }
+    }
+
+    private class LegHeading implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionHeading;
+        }
+    }
+
+    private class LegVMG implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionVMG;
+        }
+    }
+
+    private class LegVMGDelta implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionVMGTargVMGDelta;
+        }
+    }
+
+    private class LegRateOfTurn implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionRateOfTurn;
+        }
+    }
+
+    private class LegRudderAngle implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionRudderAngle;
+        }
+    }
+
+    private class LegHeel implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionHeel;
+        }
+    }
+
+    private class LegTargetHeel implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTargetHeel;
+        }
+    }
+
+    private class LegTimeToPortLayline implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToPortLayline;
+        }
+    }
+
+    private class LegTimeToStarboardLayline implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToStbLayline;
+        }
+    }
+
+    private class LegDistanceToPortLayline implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionDistToPortLayline;
+        }
+    }
+
+    private class LegDistanceToStarboardLayline implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionDistToStbLayline;
+        }
+    }
+
+    private class LegTimeToGun implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToGUN.asSeconds();
+        }
+    }
+
+    private class LegTimeToCommitteeBoat implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToCommitteeBoat;
+        }
+    }
+
+    private class LegTimeToPin implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToPin;
+        }
+    }
+
+    private class LegTimeToBurnToLine implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToBurnToLine.asSeconds();
+        }
+    }
+
+    private class LegTimeToBurnToCommitteeBoat implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToBurnToCommitteeBoat;
+        }
+    }
+
+    private class LegTimeToBurnToPin implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionTimeToBurnToPin;
+        }
+    }
+
+    private class LegDistanceToCommitteeBoat implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionDistanceToCommitteeBoat;
+        }
+    }
+
+    private class LegDistanceToPin implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionDistanceToPinDetail;
+        }
+    }
+
+    private class LegDistanceBelowLine implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionDistanceBelowLine;
+        }
+    }
+
+    private class LegLineSquareForWindDirection implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
+            return legEntry == null ? null : legEntry.expeditionLineSquareForWindDirection;
         }
     }
     
@@ -345,12 +603,74 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new AverageAbsoluteCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, 
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new AverageSignedCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        
         result.put(DetailType.LEG_AWA, 
                 new FormattedDoubleDetailTypeColumn(DetailType.LEG_AWA, new LegAWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-
-     
-        
+        result.put(DetailType.LEG_AWS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_AWS, new LegAWS(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TWA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TWA, new LegTWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TWS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TWS, new LegTWS(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TWD, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TWD, new LegTWD(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TARG_TWA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TARG_TWA, new LegTargetTWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_BOAT_SPEED, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_BOAT_SPEED, new LegBoatSpeed(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TARG_BOAT_SPEED, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TARG_BOAT_SPEED, new LegTargetBoatSpeed(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_SOG, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_SOG, new LegSOG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_COG, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_COG, new LegCOG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_FORESTAY_LOAD, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_FORESTAY_LOAD, new LegForestayLoad(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_RAKE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_RAKE, new LegRake(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_COURSE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_COURSE, new LegCourse(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_HEADING, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_HEADING, new LegHeading(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_VMG, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_VMG, new LegVMG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_VMG_TARG_VMG_DELTA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_VMG_TARG_VMG_DELTA, new LegVMGDelta(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_RATE_OF_TURN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_RATE_OF_TURN, new LegRateOfTurn(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_RUDDER_ANGLE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_RUDDER_ANGLE, new LegRudderAngle(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_HEEL, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_HEEL, new LegHeel(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TARGET_HEEL, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TARGET_HEEL, new LegTargetHeel(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_PORT_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_PORT_LAYLINE, new LegTimeToPortLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_STB_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_STB_LAYLINE, new LegTimeToStarboardLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_DIST_TO_PORT_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DIST_TO_PORT_LAYLINE, new LegDistanceToPortLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_DIST_TO_STB_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DIST_TO_STB_LAYLINE, new LegDistanceToStarboardLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_GUN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_GUN, new LegTimeToGun(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_COMMITTEE_BOAT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_COMMITTEE_BOAT, new LegTimeToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_PIN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_PIN, new LegTimeToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_BURN_TO_LINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_BURN_TO_LINE, new LegTimeToBurnToLine(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT, new LegTimeToBurnToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TO_BURN_TO_PIN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_BURN_TO_PIN, new LegTimeToBurnToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_DISTANCE_TO_COMMITTEE_BOAT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_TO_COMMITTEE_BOAT, new LegDistanceToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_DISTANCE_TO_PIN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_TO_PIN, new LegDistanceToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_DISTANCE_BELOW_LINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_BELOW_LINE, new LegDistanceBelowLine(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_LINE_SQUARE_FOR_WIND_DIRECTION, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_LINE_SQUARE_FOR_WIND_DIRECTION, new LegLineSquareForWindDirection(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         return result;
     }
 
