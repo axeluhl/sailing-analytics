@@ -23,7 +23,7 @@ For performance reasons, images should be scaled before uploading them. The foll
 ## S3 folder structure
 Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following conventions:     
 
-Access the S3 folder of the corresponding event year. Create an event root folder and set its name to the name of the league or series of events (see **ficture 1**).  
+Access the S3 folder of the corresponding event year. Create an event root folder and set its name to the name of the league or series of events (see **figure 1**).  
 ![An exemplary event overview for 2017](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/year-and-event.jpeg)  
 **Figure 1: An exemplary event overview for 2017**   
 
