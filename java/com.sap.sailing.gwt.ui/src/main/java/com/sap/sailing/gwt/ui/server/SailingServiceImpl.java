@@ -7032,7 +7032,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (!canSliceRace(raceIdentifier)) {
             throw new RuntimeException("Can not slice race");
         }
-        // TODO check if the race column name is already used
         final String trackedRaceName = newRaceColumnName;
         final RegattaIdentifier regattaIdentifier = new RegattaName(raceIdentifier.getRegattaName());
         final Regatta regatta = getService().getRegatta(regattaIdentifier);
