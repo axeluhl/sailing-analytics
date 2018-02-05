@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.UserGroupProvider;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -44,17 +45,20 @@ public interface DomainObjectFactory {
      *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
      *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
      *            parameter is {@code null}, role migration will throw an exception.
+     * @param userGroupProvider
+     *            a way for the user object that will be created to dynamically obtain the user groups to which it belongs
      * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
      *         tenant} and for their {@link SecurityUser#getRoles() roles} attribute which need to be replaced by the
      *         caller once the {@link Tenant} objects and all user objects have been loaded from the DB. The only field
-     *         that is set correctly in those dummy {@link Tenant} objects is their {@link Tenant#getId() ID} field.
-     *         The {@link Role} objects returned from the {@link SecurityUser#getRoles()} method can be expected to have
-     *         valid {@link Role#getRoleDefinition() role definitions} attached; for the {@link Role#getQualifiedForTenant()}
-     *         and {@link Role#getQualifiedForUser()} fields callers can only expect valid IDs to be set; those objects need
-     *         to be resolved against the full set of tenants and users loaded at a later point in time.
+     *         that is set correctly in those dummy {@link Tenant} objects is their {@link Tenant#getId() ID} field. The
+     *         {@link Role} objects returned from the {@link SecurityUser#getRoles()} method can be expected to have
+     *         valid {@link Role#getRoleDefinition() role definitions} attached; for the
+     *         {@link Role#getQualifiedForTenant()} and {@link Role#getQualifiedForUser()} fields callers can only
+     *         expect valid IDs to be set; those objects need to be resolved against the full set of tenants and users
+     *         loaded at a later point in time.
      */
     Iterable<User> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration,
-            Map<UUID, Tenant> tenants) throws UserManagementException;
+            Map<UUID, Tenant> tenants, UserGroupProvider userGroupProvider) throws UserManagementException;
     
     Map<String, Object> loadSettings();
     

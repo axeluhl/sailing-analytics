@@ -19,6 +19,7 @@ import com.mongodb.DBObject;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.Social;
+import com.sap.sse.security.UserGroupProvider;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -204,13 +205,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<User> loadAllUsers(
             Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration,
-            Map<UUID, Tenant> tenants) throws UserManagementException {
+            Map<UUID, Tenant> tenants, UserGroupProvider userGroupProvider) throws UserManagementException {
         Map<String, User> result = new HashMap<>();
         DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
             for (DBObject o : userCollection.find()) {
                 User userWithProxyRoleUserQualifier = loadUserWithProxyRoleUserQualifiers(o, roleDefinitionsById,
-                        defaultTenantForRoleMigration, tenants);
+                        defaultTenantForRoleMigration, tenants, userGroupProvider);
                 result.put(userWithProxyRoleUserQualifier.getName(), userWithProxyRoleUserQualifier);
             }
         } catch (Exception e) {
@@ -250,12 +251,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *            parameter is {@code null}, role migration will throw an exception.
      * @param tenants
      *            the tenants to resolve tenant IDs against for users' default tenants as well as role tenant qualifiers
+     * @param userGroupProvider TODO
      * @return the user objects returned have dummy objects for their {@link UserImpl#getRoles() roles'}
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
      */
     private UserImpl loadUserWithProxyRoleUserQualifiers(DBObject userDBObject,
-            Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration, Map<UUID, Tenant> tenants) {
+            Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration, Map<UUID, Tenant> tenants, UserGroupProvider userGroupProvider) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
@@ -317,7 +319,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
         UserImpl result = new UserImpl(name, email, fullName, company, locale,
                 emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenant,
-                accounts.values());
+                accounts.values(), userGroupProvider);
         for (final Role role : roles) {
             result.addRole(role);
         }

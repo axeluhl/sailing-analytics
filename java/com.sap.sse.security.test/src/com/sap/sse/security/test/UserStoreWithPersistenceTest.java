@@ -80,7 +80,8 @@ public class UserStoreWithPersistenceTest {
     @Test
     public void testMasterdataIsSaved() throws UserManagementException {
         store.createUser(username, email, defaultTenant);
-        store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null, defaultTenant, Collections.emptySet()));
+        store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null,
+                defaultTenant, Collections.emptySet(), /* userGroupProvider */ null));
         newStore();
         User savedUser = store.getUserByName(username);
         assertEquals(username, savedUser.getName());

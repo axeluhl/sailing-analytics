@@ -54,7 +54,7 @@ public class PermissionCheckerTest {
     @Before
     public void setUp() {
         adminUser = new SecurityUserImpl("admin", adminTenant);
-        user = new UserImpl("jonas", "jonas@dann.io", userTenant);
+        user = new UserImpl("jonas", "jonas@dann.io", userTenant, /* userGroupProvider */ null);
         userTenant = new TenantImpl(userTenantId, "jonas-tenant");
         userTenant.add(user);
         ownership = new OwnershipImpl(user, userTenant);

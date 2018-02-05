@@ -16,6 +16,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
 public class UserImpl extends SecurityUserImpl implements User {
@@ -61,17 +62,19 @@ public class UserImpl extends SecurityUserImpl implements User {
 
     private final Map<AccountType, Account> accounts;
 
-    public UserImpl(String name, String email, Tenant defaultTenant, Account... accounts) {
-        this(name, email, defaultTenant, Arrays.asList(accounts));
+    private transient final UserGroupProvider userGroupProvider;
+
+    public UserImpl(String name, String email, Tenant defaultTenant, UserGroupProvider userGroupProvider, Account... accounts) {
+        this(name, email, defaultTenant, Arrays.asList(accounts), userGroupProvider);
     }
 
-    public UserImpl(String name, String email, Tenant defaultTenant, Collection<Account> accounts) {
+    public UserImpl(String name, String email, Tenant defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
         this(name, email, /* fullName */ null, /* company */ null, /* locale */ null, /* is email validated */ false,
-             /* password reset secret */ null, /* validation secret */ null, defaultTenant, accounts);
+             /* password reset secret */ null, /* validation secret */ null, defaultTenant, accounts, userGroupProvider);
     }
 
     public UserImpl(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
-            String passwordResetSecret, String validationSecret, Tenant defaultTenant, Collection<Account> accounts) {
+            String passwordResetSecret, String validationSecret, Tenant defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
         super(name, defaultTenant);
         this.fullName = fullName;
         this.company = company;
@@ -81,6 +84,7 @@ public class UserImpl extends SecurityUserImpl implements User {
         this.validationSecret = validationSecret;
         this.emailValidated = emailValidated;
         this.accounts = new HashMap<>();
+        this.userGroupProvider = userGroupProvider;
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
         }
@@ -227,6 +231,15 @@ public class UserImpl extends SecurityUserImpl implements User {
     @Override
     public boolean isEmailValidated() {
         return emailValidated;
+    }
+
+    /**
+     * Uses the {@link #userGroupProvider} passed to this object's constructor to dynamically
+     * query the groups that this user is member of.
+     */
+    @Override
+    public Iterable<UserGroup> getUserGroups() {
+        return userGroupProvider.getUserGroupsOfUser(this);
     }
 
     @Override

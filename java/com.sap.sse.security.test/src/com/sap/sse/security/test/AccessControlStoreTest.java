@@ -38,7 +38,8 @@ public class AccessControlStoreTest {
     private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
     private final String testIdAsString = "test";
     private final String testDisplayName = "testDN";
-    private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new TenantImpl(UUID.randomUUID(), "admin-tenant"));
+    private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new TenantImpl(UUID.randomUUID(), "admin-tenant"),
+            /* userGroupProvider */ null);
     private final Tenant testTenantOwner = new TenantImpl(UUID.randomUUID(), "test-tenant");
     private final UUID testRoleId = UUID.randomUUID();
 

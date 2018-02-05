@@ -191,7 +191,7 @@ public class UserStoreImpl implements UserStore {
             final boolean defaultTenantWasCreated = (defaultTenantName != null && getTenantByName(defaultTenantName) == null);
             // identify, create and/or set default tenant
             defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
-            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, tenants)) {
+            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, tenants, this)) {
                 users.put(u.getName(), u);
                 if (defaultTenantWasCreated) {
                     // if the default tenant was just created, add all users to it
@@ -676,7 +676,7 @@ public class UserStoreImpl implements UserStore {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        UserImpl user = new UserImpl(name, email, defaultTenant, accounts);
+        UserImpl user = new UserImpl(name, email, defaultTenant, /* user group provider */ this, accounts);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);

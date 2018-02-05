@@ -1,6 +1,7 @@
 package com.sap.sse.security.shared.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -89,8 +90,7 @@ public class SecurityUserImpl implements SecurityUser {
     
     @Override
     public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
-        // TODO determine user groups and ACLs
-        return hasPermission(permission, ownership, /* user groups */ null, /* ACL */ null);
+        return hasPermission(permission, ownership, getUserGroups(), /* ACL */ null);
     }
 
     @Override
@@ -118,5 +118,13 @@ public class SecurityUserImpl implements SecurityUser {
     @Override
     public String toString() {
         return name+" (roles: "+getRoles()+")";
+    }
+
+    /**
+     * This default implementation does not know where to obtain this user's groups from. It
+     * therefore returns an empty collection.
+     */
+    public Iterable<UserGroup> getUserGroups() {
+        return Collections.emptyList();
     }
 }

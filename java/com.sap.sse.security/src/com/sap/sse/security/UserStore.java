@@ -29,7 +29,7 @@ import com.sap.sse.security.shared.WildcardPermission;
  * @author Axel Uhl (d043530)
  *
  */
-public interface UserStore extends Named {
+public interface UserStore extends UserGroupProvider, Named {
     /**
      * An instance of the bundle hosting this service may have a default tenant. If so, the default tenant's name is
      * read from a system property whose name is provided by this constant.
@@ -43,8 +43,6 @@ public interface UserStore extends Named {
     
     UserGroup getUserGroupByName(String name);
     
-    Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user);
-
     UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup userGroup);

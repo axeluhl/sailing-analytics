@@ -101,12 +101,28 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         return result;
     }
     
-    public List<UserGroup> getUserGroups() {
+    /**
+     * Objects of this type have a copy of their user groups embedded and can respond to this
+     * call with the data embedded. Note, however, that the response is not "live," so there is
+     * no round-trip to the server involved.
+     */
+    @Override
+    public Iterable<UserGroup> getUserGroups() {
         return groups;
     }
     
     public boolean hasPermission(String permission) {
         return hasPermission(new WildcardPermission(permission));
+    }
+
+    @Override
+    public boolean hasPermission(WildcardPermission permission) {
+        return hasPermission(permission, /* ownership */ null, getUserGroups(), /* acl */ null);
+    }
+
+    @Override
+    public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
+        return hasPermission(permission, ownership, /* acl */ null);
     }
 
     public boolean hasPermission(WildcardPermission permission, Ownership ownership, AccessControlList acl) {

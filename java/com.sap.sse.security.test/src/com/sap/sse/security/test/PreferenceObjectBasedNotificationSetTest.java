@@ -269,7 +269,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException, TenantManagementException, UserGroupManagementException {
         Tenant defaultTenant = store.createTenant(UUID.randomUUID(), username+"-tenant");
         store.createUser(username, email, defaultTenant);
-        store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet()));
+        store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet(), /* userGroupProvider */ null));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {
