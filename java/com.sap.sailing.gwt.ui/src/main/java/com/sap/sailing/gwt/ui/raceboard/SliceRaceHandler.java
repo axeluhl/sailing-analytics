@@ -30,6 +30,10 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
 
+/**
+ * Encapsulates the UI to slice a race from an existing race.
+ * The slice functionality is added as an extra action to a given {@link MultiCompetitorRaceChart}.
+ */
 public class SliceRaceHandler {
     interface Resources extends ClientBundle {
         @Source("com/sap/sailing/gwt/ui/client/images/close_time_range.png")
