@@ -45,7 +45,7 @@ public class SliceRaceHandler {
     
     private final Styles styles = GWT.<Resources>create(Resources.class).style();
     
-    private final Button splitButtonUi;
+    private final Button sliceButtonUi;
 
     private TimeRange visibleRange;
 
@@ -78,17 +78,17 @@ public class SliceRaceHandler {
         
         styles.ensureInjected();
         
-        splitButtonUi = new Button();
-        splitButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
-        splitButtonUi.setTitle(StringMessages.INSTANCE.sliceRace());
-        competitorRaceChart.addToolbarButton(splitButtonUi);
-        splitButtonUi.setVisible(false);
+        sliceButtonUi = new Button();
+        sliceButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
+        sliceButtonUi.setTitle(StringMessages.INSTANCE.sliceRace());
+        competitorRaceChart.addToolbarButton(sliceButtonUi);
+        sliceButtonUi.setVisible(false);
         competitorRaceChart.addChartZoomChangedHandler(this::checkIfMaySliceSelectedRegattaAndRace);
         competitorRaceChart.addChartZoomResetHandler(e -> {
             visibleRange = null;
             updateVisibility();
         });
-        splitButtonUi.addClickHandler((e) -> doSlice());
+        sliceButtonUi.addClickHandler((e) -> doSlice());
         
         sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
             @Override
@@ -107,7 +107,7 @@ public class SliceRaceHandler {
         final UserStatusEventHandler userStatusEventHandler = (user, preAuthenticated) -> {
             updateVisibility();
         };
-        splitButtonUi.addAttachHandler(e -> {
+        sliceButtonUi.addAttachHandler(e -> {
             if (e.isAttached()) {
                 userService.addUserStatusEventHandler(userStatusEventHandler);
             } else {
@@ -117,7 +117,7 @@ public class SliceRaceHandler {
     }
     
     private void updateVisibility() {
-        splitButtonUi.setVisible(canSlice && visibleRange != null && allowsEditing());
+        sliceButtonUi.setVisible(canSlice && visibleRange != null && allowsEditing());
     }
     
     private boolean allowsEditing() {
