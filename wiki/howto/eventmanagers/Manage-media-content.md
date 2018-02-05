@@ -5,7 +5,7 @@ This page descrips how to manage the media content like images for the events at
 # Images
 
 ## Image types and their impact
-There are four image types which can be added to an event carrying different roles:
+There are four image types which can be added to an event where they carry different roles:
 
 * **logo:** the sailing event or league logo which gets displayed e.g. in the upper left corner next to the name of the sailing event.
 * **stage:** used as a banner for the sailing event and gets displayed e.g. on the landing page.
