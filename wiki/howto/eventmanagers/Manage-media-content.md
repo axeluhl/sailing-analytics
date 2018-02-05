@@ -64,6 +64,7 @@ The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [
 4. Click on the desired _add `image type` button_ and insert the _Image URL_ according to the memory location of the image. Usually, no further settings are required. 
 
 # Videos
+A guidance about how to synchronize races with livestream videos can be found [here].(https://wiki.sapsailing.com/wiki/howto/eventmanagers/linking-race-videos)
 
 ## Video types and their impact
 We distinguish between _highlight_, _livestream_ and _gallery_ videos and a special _featured_ option.
