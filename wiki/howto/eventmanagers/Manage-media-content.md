@@ -23,26 +23,24 @@ For performance reasons, images should be scaled before uploading them. The foll
 ## S3 folder structure
 Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following conventions:     
 
-Access the S3 folder of the corresponding event year. Create an event root folder and set its name to the name of the league or series of events (see ficture 1).  
+Access the S3 folder of the corresponding event year. Create an event root folder and set its name to the name of the league or series of events (see **ficture 1**).  
 ![An exemplary event overview for 2017](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/year-and-event.jpeg)  
 **Figure 1: An exemplary event overview for 2017**   
 
-Within this folder add a new subfolder, set its name to the event's name and add a preceding number which indicates the order of it (see figure 2).  
+Within this folder add a new subfolder, set its name to the event's name and add a preceding number which indicates the order of it (see **figure 2**).  
 ![folder structure](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/folder-structure.jpeg)  
 **Figure 2: folder structure with preceding event numbers within an event series**  
 
-Access the corresponding event folder and create two subfolders: _Images\_Homepage_ and _Images\_Photos_. The first one is for the _stage_, _teaser_ and _logo_ images. The second one will carry _gallery_ images.  
-According to this description result in following folder structure:
-
+According to this description result in following folder structure:  
 **pattern:** `~`/`event year`/`series name`/`event name with preceding number`/    
 e.g. `~`/`2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/  
 
-Add a folder for the _logo_, _stage_ and _teaser_ images  
-**pattern:** `{event root folder}`/`Images_Homepage`/  
+Access the corresponding event folder and create two subfolders: _Images\_Homepage_ and _Images\_Photos_. The first one is for the _stage_, _teaser_ and _logo_ images. The second one will carry _gallery_ images.    
+   
+**pattern:** `~`/`event year`/`series name`/`event name with preceding number`/`Images_Homepage`/  
 e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Homepage`/  
 
-Add a folder for the _galery_ images  
-**pattern:** `{event root folder}`/`Images_Photos`/    
+**pattern:** `~`/`event year`/`series name`/`event name with preceding number`/`Images_Photos`/    
 e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Photos`/
 
 ## Image manipulation with GIMP
