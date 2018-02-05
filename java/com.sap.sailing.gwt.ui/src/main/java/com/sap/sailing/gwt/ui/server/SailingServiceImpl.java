@@ -7028,6 +7028,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
             TimePoint sliceFrom, TimePoint sliceTo) {
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermissionForObjects(Mode.UPDATE));
         if (!canSliceRace(raceIdentifier)) {
             throw new RuntimeException("Can not slice race");
         }
