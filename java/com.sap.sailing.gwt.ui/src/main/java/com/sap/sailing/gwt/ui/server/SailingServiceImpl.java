@@ -6991,10 +6991,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private boolean isSmartphoneTrackingEnabled(DynamicTrackedRace trackedRace) {
-        // TODO not sure if this check is sufficient
         for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-            if (raceLogTrackingState.isForTracking()) {
+            if (raceLogTrackingState.isTracking()) {
                 return true;
             }
         }
