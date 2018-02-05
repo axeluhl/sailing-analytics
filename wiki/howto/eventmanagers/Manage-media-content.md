@@ -53,7 +53,7 @@ The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [
 3. Add -> Add a watermark -> leave defaults -> insert copyright information -> Ok
 4. Add images -> ... -> Apply
 
-## Exemplary guidance
+## Exemplary instructions
 1. Access the administration console _eventname(-master?)_.sapsailing.com/gwt/AdminConsle.html and login with your user credentials.
 2. Select the corresponding event and click at the _edit_ button (see **figure 3**)  
 ![Events overview on admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/events-overview-admin-console.JPG)  
@@ -73,6 +73,11 @@ We distinguish between _highlight_, _livestream_ and _gallery_ videos and a spec
 * **Gallery:** Some times interviews with sailors or other insights of the sailing event are provided by the organizers. These videos belong to the _gallery_ category.
 * **Featured:** is a special option for an event video. It can be additionally added to one of the three categories _highlight_, _livestream_ and _gallery_. A video with the _featured_ tag is presented at the event's page instead of the _stage image_.  
 Note: Always define the most populare video to be _featured_ e.g. the current livestream during the event. Never define more than _one_ featured video.
+
+## Exemplary instructions
+1. Access the administration console _eventname(-master?)_.sapsailing.com/gwt/AdminConsle.html and login with your user credentials.
+2. Select the corresponding event and click at the _edit_ button (see **figure 3**)  
+![Events overview on admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/events-overview-admin-console.JPG)
 
 
 
