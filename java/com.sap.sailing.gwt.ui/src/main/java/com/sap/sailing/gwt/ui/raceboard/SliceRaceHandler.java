@@ -32,8 +32,8 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class SliceRaceHandler {
     interface Resources extends ClientBundle {
-        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
-        ImageResource settingsButton();
+        @Source("com/sap/sailing/gwt/ui/client/images/close_time_range.png")
+        ImageResource sliceButton();
         
         @Source("SliceRaceHandler.gss")
         Styles style();
