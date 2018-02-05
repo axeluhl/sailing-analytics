@@ -13,9 +13,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.charts.ChartCssResources;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog;
@@ -25,6 +26,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class SliceRaceHandler {
     interface Resources extends ClientBundle {
@@ -53,14 +57,19 @@ public class SliceRaceHandler {
 
     private final SailingServiceAsync sailingService;
 
+    private final UserService userService;
+
     private final ErrorReporter errorReporter;
 
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
+    
+    private boolean canSlice = false;
 
-    public SliceRaceHandler(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public SliceRaceHandler(SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, String leaderboardName, UUID eventId) {
         this.sailingService = sailingService;
+        this.userService = userService;
         this.errorReporter = errorReporter;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.leaderboardGroupName = leaderboardGroupName;
@@ -75,8 +84,47 @@ public class SliceRaceHandler {
         competitorRaceChart.addToolbarButton(splitButtonUi);
         splitButtonUi.setVisible(false);
         competitorRaceChart.addChartZoomChangedHandler(this::checkIfMaySliceSelectedRegattaAndRace);
-        competitorRaceChart.addChartZoomResetHandler(e -> splitButtonUi.setVisible(false));
+        competitorRaceChart.addChartZoomResetHandler(e -> {
+            visibleRange = null;
+            updateVisibility();
+        });
         splitButtonUi.addClickHandler((e) -> doSlice());
+        
+        sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                canSlice = Boolean.TRUE.equals(result);
+                updateVisibility();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                canSlice = false;
+                updateVisibility();
+            }
+        });
+        
+        final UserStatusEventHandler userStatusEventHandler = (user, preAuthenticated) -> {
+            updateVisibility();
+        };
+        splitButtonUi.addAttachHandler(e -> {
+            if (e.isAttached()) {
+                userService.addUserStatusEventHandler(userStatusEventHandler);
+            } else {
+                userService.removeUserStatusEventHandler(userStatusEventHandler);
+            }
+        });
+    }
+    
+    private void updateVisibility() {
+        splitButtonUi.setVisible(canSlice && visibleRange != null && allowsEditing());
+    }
+    
+    private boolean allowsEditing() {
+        final UserDTO currentUser = userService.getCurrentUser();
+        return currentUser != null
+                && currentUser.hasPermission(Permission.MANAGE_TRACKED_RACES.getStringPermission(),
+                        SailingPermissionsForRoleProvider.INSTANCE);
     }
 
     private void doSlice() {
@@ -115,24 +163,9 @@ public class SliceRaceHandler {
     }
 
     private void checkIfMaySliceSelectedRegattaAndRace(final ChartZoomChangedEvent e) {
-        // TODO: we could cache result
-        visibleRange = null;
-        sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                boolean yesWeCan = Boolean.TRUE.equals(result);
-                splitButtonUi.setVisible(yesWeCan);
-                if (yesWeCan) {
-                    visibleRange = new TimeRangeImpl(new MillisecondsTimePoint(e.getRangeStart()),
-                            new MillisecondsTimePoint(e.getRangeEnd()));
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                splitButtonUi.setVisible(false);
-            }
-        });
+        visibleRange = new TimeRangeImpl(new MillisecondsTimePoint(e.getRangeStart()),
+                new MillisecondsTimePoint(e.getRangeEnd()));
+        updateVisibility();
     }
 
     private static class SlicedRaceNameDialog extends DataEntryDialog<String> {

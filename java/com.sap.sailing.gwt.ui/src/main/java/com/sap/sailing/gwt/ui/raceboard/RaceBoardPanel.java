@@ -366,7 +366,7 @@ public class RaceBoardPanel
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
             
-            new SliceRaceHandler(sailingService, errorReporter, competitorChart, selectedRaceIdentifier,
+            new SliceRaceHandler(sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
                     leaderboardGroupName, leaderboardName, event);
             
             componentsForSideBySideViewer.add(competitorChart);
