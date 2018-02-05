@@ -38,6 +38,7 @@ import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
@@ -119,11 +120,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Collection<AccessControlList> getAccessControlLists() throws UnauthorizedException {
+    public Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("access_control:manage")) {
-            List<AccessControlList> acls = new ArrayList<>();
-            for (AccessControlList acl : getSecurityService().getAccessControlLists()) {
-                acls.add(securityDTOFactory.createAccessControlListDTO(acl));
+            List<AccessControlListAnnotation> acls = new ArrayList<>();
+            for (AccessControlListAnnotation acl : getSecurityService().getAccessControlLists()) {
+                acls.add(securityDTOFactory.createAccessControlListAnnotationDTO(acl));
             }
             return acls;
         } else {
@@ -132,8 +133,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString) {
-        return securityDTOFactory.createAccessControlListDTO(getSecurityService().getAccessControlList(idOfAccessControlledObjectAsString));
+    public AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString) {
+        return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObjectAsString));
     }
 
     @Override

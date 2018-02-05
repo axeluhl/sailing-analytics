@@ -6,8 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
@@ -24,9 +25,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
     /**
      * maps from object ID string representations to the access control lists for the respective key object
      */
-    private final ConcurrentHashMap<String, AccessControlList> accessControlLists;
+    private final ConcurrentHashMap<String, AccessControlListAnnotation> accessControlLists;
     
-    private final ConcurrentHashMap<String, Ownership> ownerships;
+    /**
+     * maps from object ID string representations to the ownership information for the respective key object
+     */
+    private final ConcurrentHashMap<String, OwnershipAnnotation> ownerships;
     
     private final Tenant defaultTenant;
     
@@ -45,28 +49,28 @@ public class AccessControlStoreImpl implements AccessControlStore {
         ownerships = new ConcurrentHashMap<>();
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
-            for (AccessControlList acl : domainObjectFactory.loadAllAccessControlLists(userStore)) {
-                accessControlLists.put(acl.getIdOfAccessControlledObjectAsString(), acl);
+            for (AccessControlListAnnotation acl : domainObjectFactory.loadAllAccessControlLists(userStore)) {
+                accessControlLists.put(acl.getIdOfAnnotatedObjectAsString(), acl);
             }
-            for (Ownership ownership : domainObjectFactory.loadAllOwnerships(userStore)) {
-                ownerships.put(ownership.getIdOfOwnedObjectAsString(), ownership);
+            for (OwnershipAnnotation ownership : domainObjectFactory.loadAllOwnerships(userStore)) {
+                ownerships.put(ownership.getIdOfAnnotatedObjectAsString(), ownership);
             }
         }
     }
     
     @Override
-    public Iterable<AccessControlList> getAccessControlLists() {
+    public Iterable<AccessControlListAnnotation> getAccessControlLists() {
         return new ArrayList<>(accessControlLists.values());
     }
     
     @Override
-    public AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString) {
+    public AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString) {
         return accessControlLists.get(idOfAccessControlledObjectAsString);
     }
 
     @Override
-    public AccessControlList createAccessControlList(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
-        AccessControlList acl = new AccessControlListImpl(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject);
+    public AccessControlListAnnotation createAccessControlList(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+        AccessControlListAnnotation acl = new AccessControlListAnnotation(new AccessControlListImpl(), idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject);
         accessControlLists.put(idOfAccessControlledObjectAsString, acl);
         mongoObjectFactory.storeAccessControlList(acl);
         return acl;
@@ -74,54 +78,54 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public void setAclPermissions(String idOfAccessControlledObjectAsString, UserGroup userGroup, Set<String> actions) {
-        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
-        acl.setPermissions(userGroup, actions);
+        AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        acl.getAnnotation().setPermissions(userGroup, actions);
         mongoObjectFactory.storeAccessControlList(acl);
     }
 
-    private AccessControlList getOrCreateAcl(String idOfAccessControlledObjectAsString) {
-        AccessControlList acl = accessControlLists.get(idOfAccessControlledObjectAsString);
+    private AccessControlListAnnotation getOrCreateAcl(String idOfAccessControlledObjectAsString) {
+        AccessControlListAnnotation acl = accessControlLists.get(idOfAccessControlledObjectAsString);
         if (acl == null) {
-            acl = new AccessControlListImpl(idOfAccessControlledObjectAsString, /* displayNameOfAccessControlledObject */ null);
+            acl = new AccessControlListAnnotation(new AccessControlListImpl(), idOfAccessControlledObjectAsString, /* display name */ null);
         }
         return acl;
     }
 
     @Override
     public void addAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
-        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
-        acl.addPermission(userGroup, action);
+        AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        acl.getAnnotation().addPermission(userGroup, action);
         mongoObjectFactory.storeAccessControlList(acl);
     }
 
     @Override
     public void removeAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
-        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
-        if (acl.removePermission(userGroup, action)) {
+        AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        if (acl.getAnnotation().removePermission(userGroup, action)) {
             mongoObjectFactory.storeAccessControlList(acl);
         }
     }
 
     @Override
     public void denyAclPermission(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
-        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
-        if (acl.denyPermission(userGroup, action)) {
+        AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        if (acl.getAnnotation().denyPermission(userGroup, action)) {
             mongoObjectFactory.storeAccessControlList(acl);
         }
     }
 
     @Override
     public void removeAclDenial(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
-        AccessControlList acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
-        if (acl.removeDenial(userGroup, action)) {
+        AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+        if (acl.getAnnotation().removeDenial(userGroup, action)) {
             mongoObjectFactory.storeAccessControlList(acl);
         }
     }
 
     @Override
     public void removeAccessControlList(String idOfAccessControlledObjectAsString) {
-        AccessControlList acl = accessControlLists.remove(idOfAccessControlledObjectAsString);
-        mongoObjectFactory.deleteAccessControlList(acl);
+        AccessControlListAnnotation acl = accessControlLists.remove(idOfAccessControlledObjectAsString);
+        mongoObjectFactory.deleteAccessControlList(idOfAccessControlledObjectAsString, acl.getAnnotation());
     }
 
     @Override
@@ -130,23 +134,23 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     @Override
-    public Ownership createOwnership(String idAsString, SecurityUser userOwnerName, Tenant tenantOwner, String displayNameOfOwnedObject) {
-        Ownership ownership = new OwnershipImpl(idAsString, userOwnerName, tenantOwner, displayNameOfOwnedObject);
+    public OwnershipAnnotation createOwnership(String idAsString, SecurityUser userOwnerName, Tenant tenantOwner, String displayNameOfOwnedObject) {
+        OwnershipAnnotation ownership = new OwnershipAnnotation(new OwnershipImpl(userOwnerName, tenantOwner), idAsString, displayNameOfOwnedObject);
         ownerships.put(idAsString, ownership);
         mongoObjectFactory.storeOwnership(ownership);
-        return ownerships.get(idAsString);
+        return ownership;
     }
 
     @Override
     public void removeOwnership(String idAsString) {
-        Ownership ownership = ownerships.remove(idAsString);
-        mongoObjectFactory.deleteOwnership(ownership);
+        OwnershipAnnotation ownership = ownerships.remove(idAsString);
+        mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
     }
 
     @Override
-    public Ownership getOwnership(String idOfOwnedObjectAsString) {
-        final Ownership storedOwnership = ownerships.get(idOfOwnedObjectAsString);
-        final Ownership result;
+    public OwnershipAnnotation getOwnership(String idOfOwnedObjectAsString) {
+        final OwnershipAnnotation storedOwnership = ownerships.get(idOfOwnedObjectAsString);
+        final OwnershipAnnotation result;
         if (storedOwnership != null) {
             result = storedOwnership;
         } else {
@@ -156,23 +160,23 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     /**
-     * If there is no ownership information for an object and there is a non-{@link #defaultTenant} available,
+     * If there is no ownership information for an object and there is a {@link #defaultTenant} available,
      * create a default {@link Ownership} information that lists the {@link #defaultTenant} as the tenant owner
      * for the object in question; no user owner is specified. If no {@link #defaultTenant} is available,
      * {@code null} is returned.
      */
-    private Ownership createDefaultOwnership(String idOfOwnedObjectAsString) {
+    private OwnershipAnnotation createDefaultOwnership(String idOfOwnedObjectAsString) {
         final Ownership result;
         if (defaultTenant != null) {
-            result = new OwnershipImpl(idOfOwnedObjectAsString, /* userOwner */ null, /* tenantOwner */ defaultTenant, /* displayNameOfOwnedObject */ null);
+            result = new OwnershipImpl(/* userOwner */ null, /* tenantOwner */ defaultTenant);
         } else {
             result = null;
         }
-        return result;
+        return result == null ? null : new OwnershipAnnotation(result, idOfOwnedObjectAsString, /* display name */ null);
     }
 
     @Override 
-    public Iterable<Ownership> getOwnerships() {
+    public Iterable<OwnershipAnnotation> getOwnerships() {
         return new ArrayList<>(ownerships.values());
     }
     
@@ -185,11 +189,11 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void replaceContentsFrom(AccessControlStore newAccessControlStore) {
         clear();
-        for (AccessControlList acl : newAccessControlStore.getAccessControlLists()) {
-            accessControlLists.put(acl.getIdOfAccessControlledObjectAsString(), acl);
+        for (AccessControlListAnnotation acl : newAccessControlStore.getAccessControlLists()) {
+            accessControlLists.put(acl.getIdOfAnnotatedObjectAsString(), acl);
         }
-        for (Ownership ownership : newAccessControlStore.getOwnerships()) {
-            ownerships.put(ownership.getIdOfOwnedObjectAsString(), ownership);
+        for (OwnershipAnnotation ownership : newAccessControlStore.getOwnerships()) {
+            ownerships.put(ownership.getIdOfAnnotatedObjectAsString(), ownership);
         }
     }
 }

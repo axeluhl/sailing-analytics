@@ -4,7 +4,9 @@ import java.util.Map;
 
 import com.mongodb.DB;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
@@ -12,13 +14,13 @@ import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 
 public interface MongoObjectFactory {
-    public void storeAccessControlList(AccessControlList acl);
+    public void storeAccessControlList(AccessControlListAnnotation acl);
     
-    public void deleteAccessControlList(AccessControlList acl);
+    public void deleteAccessControlList(String idOfAccessControlledObjectAsString, AccessControlList acl);
     
-    public void storeOwnership(Ownership owner);
+    public void storeOwnership(OwnershipAnnotation owner);
     
-    public void deleteOwnership(Ownership owner);
+    public void deleteOwnership(String ownedObjectIdAsString, Ownership owner);
     
     public void storeRoleDefinition(RoleDefinition role);
     

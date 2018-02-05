@@ -27,7 +27,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.ui.client.SecurityTableResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
@@ -43,7 +43,7 @@ public class UserManagementPanel extends DockPanel {
     
     private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
     
-    private final SingleSelectionModel<AccessControlList> aclSingleSelectionModel;
+    private final SingleSelectionModel<AccessControlListAnnotation> aclSingleSelectionModel;
     private final AccessControlListListDataProvider aclListDataProvider;
     
     private final SingleSelectionModel<UserDTO> singleSelectionModel;
@@ -112,17 +112,17 @@ public class UserManagementPanel extends DockPanel {
         });
         buttonPanel.add(editACLButton);
         aclSingleSelectionModel = new SingleSelectionModel<>();
-        final CellTable<AccessControlList> aclTable = new CellTable<>();
-        TextColumn<AccessControlList> idColumn = new TextColumn<AccessControlList>() {
+        final CellTable<AccessControlListAnnotation> aclTable = new CellTable<>();
+        TextColumn<AccessControlListAnnotation> idColumn = new TextColumn<AccessControlListAnnotation>() {
             @Override
-            public String getValue(AccessControlList acl) {
-                return acl.getIdOfAccessControlledObjectAsString();
+            public String getValue(AccessControlListAnnotation acl) {
+                return acl.getIdOfAnnotatedObjectAsString();
             }
         };
-        TextColumn<AccessControlList> displayNameColumn = new TextColumn<AccessControlList>() {
+        TextColumn<AccessControlListAnnotation> displayNameColumn = new TextColumn<AccessControlListAnnotation>() {
             @Override
-            public String getValue(AccessControlList acl) {
-                return acl.getDisplayNameOfAccessControlledObject()==null?"":acl.getDisplayNameOfAccessControlledObject();
+            public String getValue(AccessControlListAnnotation acl) {
+                return acl.getDisplayNameOfAnnotatedObject()==null?"":acl.getDisplayNameOfAnnotatedObject();
             }
         };
         aclTable.addColumn(idColumn, stringMessages.id());

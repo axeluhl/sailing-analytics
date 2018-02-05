@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
@@ -16,9 +16,9 @@ import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserManagementException;
 
 public interface DomainObjectFactory {
-    Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore);
+    Iterable<AccessControlListAnnotation> loadAllAccessControlLists(UserStore userStore);
     
-    Iterable<Ownership> loadAllOwnerships(UserStore userStore);
+    Iterable<OwnershipAnnotation> loadAllOwnerships(UserStore userStore);
     
     Iterable<RoleDefinition> loadAllRoleDefinitions();
     

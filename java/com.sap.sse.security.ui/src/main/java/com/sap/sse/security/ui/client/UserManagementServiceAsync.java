@@ -10,6 +10,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
@@ -17,9 +18,9 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
-    void getAccessControlLists(AsyncCallback<Collection<AccessControlList>> callback);
+    void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotation>> callback);
 
-    void getAccessControlList(String id, AsyncCallback<AccessControlList> callback);
+    void getAccessControlList(String id, AsyncCallback<AccessControlListAnnotation> callback);
 
     void updateACL(String id, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlList> callback);
 

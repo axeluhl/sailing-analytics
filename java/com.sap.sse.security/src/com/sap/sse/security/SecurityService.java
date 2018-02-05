@@ -17,7 +17,9 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
@@ -41,15 +43,22 @@ import com.sap.sse.security.shared.WildcardPermission;
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
     SecurityManager getSecurityManager();
 
-    Ownership getOwnership(String idOfOwnedObjectAsString);
+    /**
+     * Return the ownership information for the object identified by {@code idOfOwnedObjectAsString}. If there is no
+     * ownership information for that object and there is a default tenant available, create a default {@link Ownership}
+     * information that lists the default tenant as the tenant owner for the object in question; no user owner is
+     * specified. If no default tenant is available and no ownership information for the object with the ID specified
+     * is found, {@code null} is returned.
+     */
+    OwnershipAnnotation getOwnership(String idOfOwnedObjectAsString);
     
-    Ownership createDefaultOwnershipForNewObject(WithID newObject);
+    OwnershipAnnotation createDefaultOwnershipForNewObject(WithID newObject);
 
     void deleteAllDataForRemovedObject(WithID removedObject);
 
-    Iterable<AccessControlList> getAccessControlLists();
+    Iterable<AccessControlListAnnotation> getAccessControlLists();
 
-    AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString);
+    AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString);
 
     /**
      * @param idOfAccessControlledObjectAsString Has to be globally unique

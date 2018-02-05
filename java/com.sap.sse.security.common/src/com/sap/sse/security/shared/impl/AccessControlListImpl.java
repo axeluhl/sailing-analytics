@@ -15,9 +15,7 @@ import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
 public class AccessControlListImpl implements AccessControlList {
     private static final long serialVersionUID = -8587238587604749862L;
-    private String idOfAccessControlledObjectAsString;
-    private String displayNameOfAccessControlledObject;
-    
+
     /**
      * Maps from {@link UserGroup} to the actions allowed for this group on the
      * {@link #idOfAccessControlledObjectAsString object to which this ACL belongs}.
@@ -44,16 +42,11 @@ public class AccessControlListImpl implements AccessControlList {
      */
     private Map<UserGroup, Set<WildcardPermission>> deniedActionsByUserGroup;
 
-    @Deprecated
-    protected AccessControlListImpl() {} // for GWT serialization only
-
-    public AccessControlListImpl(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
-        this(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject, new HashMap<UserGroup, Set<String>>());
+    public AccessControlListImpl() {
+        this(new HashMap<UserGroup, Set<String>>());
     }
     
-    public AccessControlListImpl(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap) {
-        this.idOfAccessControlledObjectAsString = idOfAccessControlledObjectAsString;
-        this.displayNameOfAccessControlledObject = displayNameOfAccessControlledObject;
+    public AccessControlListImpl(Map<UserGroup, Set<String>> permissionMap) {
         this.allowedActionsByUserGroup = new HashMap<>();
         this.deniedActionsByUserGroup = new HashMap<>();
         for (final Entry<UserGroup, Set<String>> permissionMapEntry : permissionMap.entrySet()) {
@@ -85,16 +78,6 @@ public class AccessControlListImpl implements AccessControlList {
         return PermissionState.NONE;
     }
     
-    @Override
-    public String getIdOfAccessControlledObjectAsString() {
-        return idOfAccessControlledObjectAsString;
-    }
-
-    @Override
-    public String getDisplayNameOfAccessControlledObject() {
-        return displayNameOfAccessControlledObject;
-    }
-
     @Override
     public Map<UserGroup, Set<String>> getActionsByUserGroup() {
         final Map<UserGroup, Set<String>> result = new HashMap<>();
@@ -170,9 +153,7 @@ public class AccessControlListImpl implements AccessControlList {
 
     @Override
     public String toString() {
-        return "AccessControlList for Object ID " + idOfAccessControlledObjectAsString
-                + " (" + displayNameOfAccessControlledObject
-                + "), actionsByUserGroup=" + getActionsByUserGroup() + "]";
+        return "AccessControlList [actionsByUserGroup=" + getActionsByUserGroup() + "]";
     }
 
 }

@@ -57,14 +57,14 @@ public class PermissionCheckerTest {
         user = new UserImpl("jonas", "jonas@dann.io", userTenant);
         userTenant = new TenantImpl(userTenantId, "jonas-tenant");
         userTenant.add(user);
-        ownership = new OwnershipImpl(eventId.toString(), user, userTenant, "event");
+        ownership = new OwnershipImpl(user, userTenant);
         adminTenant = new TenantImpl(adminTenantId, "admin-tenant");
         adminTenant.add(adminUser);
-        adminOwnership = new OwnershipImpl(eventId.toString(), adminUser, adminTenant, "event");
+        adminOwnership = new OwnershipImpl(adminUser, adminTenant);
         tenants = new ArrayList<>();
         tenants.add(userTenant);
         tenants.add(adminTenant);
-        acl = new AccessControlListImpl(eventId.toString(), "event");
+        acl = new AccessControlListImpl();
         Set<WildcardPermission> permissionSet = new HashSet<>();
         permissionSet.add(permission);
         globalRoleDefinition = new RoleDefinitionImpl(globalRoleId, "event", permissionSet);
@@ -85,7 +85,7 @@ public class PermissionCheckerTest {
         Set<String> permissionSet = new HashSet<>();
         permissionSet.add(DefaultActions.EDIT.name());
         permissionMap.put(userTenant, permissionSet);
-        acl = new AccessControlListImpl(eventId.toString(), "event", permissionMap);
+        acl = new AccessControlListImpl(permissionMap);
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
         user.addPermission(permission);
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
@@ -93,7 +93,7 @@ public class PermissionCheckerTest {
         permissionSet = new HashSet<>();
         permissionSet.add("!" + DefaultActions.EDIT.name());
         permissionMap.put(userTenant, permissionSet);
-        acl = new AccessControlListImpl(eventId.toString(), "event", permissionMap);
+        acl = new AccessControlListImpl(permissionMap);
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, ownership, acl));
     }
@@ -114,7 +114,7 @@ public class PermissionCheckerTest {
         user.removeRole(globalRole);
         user.addRole(new RoleImpl(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
-        Ownership testOwnership = new OwnershipImpl(eventId.toString(), adminUser, userTenant, "event");
+        Ownership testOwnership = new OwnershipImpl(adminUser, userTenant);
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, testOwnership, acl));
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, null, acl));
     }

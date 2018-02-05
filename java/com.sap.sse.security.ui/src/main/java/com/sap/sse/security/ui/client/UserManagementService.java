@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -23,9 +24,9 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
-    Collection<AccessControlList> getAccessControlLists() throws UnauthorizedException;
+    Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException;
 
-    AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString);
+    AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString);
 
     AccessControlList updateACL(String idOfAccessControlledObjectAsString, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
 

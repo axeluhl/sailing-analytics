@@ -13,9 +13,11 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
@@ -41,15 +43,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void storeAccessControlList(AccessControlList acl) {
+    public void storeAccessControlList(AccessControlListAnnotation acl) {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), 1));
         DBObject dbACL = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString());
-        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString());
-        dbACL.put(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name(), acl.getDisplayNameOfAccessControlledObject());
+        DBObject query = new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAnnotatedObjectAsString());
+        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAnnotatedObjectAsString());
+        dbACL.put(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name(), acl.getDisplayNameOfAnnotatedObject());
         BasicDBList permissionMap = new BasicDBList();
-        for (Entry<UserGroup, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+        for (Entry<UserGroup, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
             DBObject permissionMapEntry = new BasicDBObject();
             permissionMapEntry.put(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name(), entry.getKey().getId());
             final BasicDBList dbActions = new BasicDBList();
@@ -62,31 +64,31 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void deleteAccessControlList(AccessControlList acl) {
+    public void deleteAccessControlList(String idOfAccessControlledObjectAsString, AccessControlList acl) {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         DBObject dbACL = new BasicDBObject();
-        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAccessControlledObjectAsString());
+        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), idOfAccessControlledObjectAsString);
         aclCollection.remove(dbACL);
     }
     
     @Override
-    public void storeOwnership(Ownership owner) {
+    public void storeOwnership(OwnershipAnnotation owner) {
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         ownershipCollection.createIndex(new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), 1));
         DBObject dbOwnership = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfOwnedObjectAsString());
-        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfOwnedObjectAsString());
-        dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getUserOwner()==null?null:owner.getUserOwner().getName());
-        dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getTenantOwner()==null?null:owner.getTenantOwner().getId());
-        dbOwnership.put(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name(), owner.getDisplayNameOfOwnedObject());
+        DBObject query = new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfAnnotatedObjectAsString());
+        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfAnnotatedObjectAsString());
+        dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getAnnotation().getUserOwner()==null?null:owner.getAnnotation().getUserOwner().getName());
+        dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getAnnotation().getTenantOwner()==null?null:owner.getAnnotation().getTenantOwner().getId());
+        dbOwnership.put(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name(), owner.getDisplayNameOfAnnotatedObject());
         ownershipCollection.update(query, dbOwnership, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 
     @Override
-    public void deleteOwnership(Ownership owner) {
+    public void deleteOwnership(String ownedObjectIdAsString, Ownership ownership) {
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         DBObject dbOwnership = new BasicDBObject();
-        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfOwnedObjectAsString());
+        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), ownedObjectIdAsString);
         ownershipCollection.remove(dbOwnership);
     }
 

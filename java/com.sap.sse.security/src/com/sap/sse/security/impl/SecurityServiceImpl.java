@@ -91,9 +91,10 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AbstractRoles;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
-import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
@@ -328,13 +329,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Ownership getOwnership(String idOfOwnedObjectAsString) {
+    public OwnershipAnnotation getOwnership(String idOfOwnedObjectAsString) {
         return accessControlStore.getOwnership(idOfOwnedObjectAsString);
     }
 
     @Override
-    public Ownership createDefaultOwnershipForNewObject(WithID newObject) {
-        return new OwnershipImpl(newObject.getId().toString(), getCurrentUser(), getCurrentUser().getDefaultTenant(), newObject.toString());
+    public OwnershipAnnotation createDefaultOwnershipForNewObject(WithID newObject) {
+        return new OwnershipAnnotation(new OwnershipImpl(getCurrentUser(), getCurrentUser().getDefaultTenant()),
+                newObject.getId().toString(), /* display name */ newObject.toString());
     }
     
     @Override
@@ -349,17 +351,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return userStore.getRoleDefinition(idOfRoleDefinition);
     }
 
-    @Override
     /**
      * Returns a list of all existing access control lists. This is possibly not complete in the sense
      * that there is a access control list for every access controlled data object.
      */
-    public Iterable<AccessControlList> getAccessControlLists() {
+    @Override
+    public Iterable<AccessControlListAnnotation> getAccessControlLists() {
         return accessControlStore.getAccessControlLists();
     }
 
     @Override
-    public AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString) {
+    public AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString) {
         return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
     }
 
@@ -391,7 +393,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             // avoid the UserGroup object having to be serialized with the operation by using the ID
             apply(s->s.internalAclPutPermissions(idOfAccessControlledObjectAsString, userGroupId, actions));
         }
-        return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
+        return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
     }
 
     @Override
@@ -410,7 +412,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         final UUID groupId = group.getId();
         apply(s->s.internalAclAddPermission(idOfAccessControlledObjectAsString, groupId, action));
-        return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
+        return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
     }
 
     @Override
@@ -424,12 +426,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     @Override
     public AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, UserGroup group, String permission) {
+        final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
             final UUID groupId = group.getId();
             apply(s->s.internalAclRemovePermission(idOfAccessControlledObjectAsString, groupId, permission));
-            return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
+            result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     @Override
@@ -568,9 +573,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException {
-        for (Ownership ownership : accessControlStore.getOwnerships()) {
-            if (!Util.equalsWithNull(ownership.getIdOfOwnedObjectAsString(), tenant.getId().toString()) &&
-                    Util.equalsWithNull(ownership.getTenantOwner(), tenant)) {
+        for (OwnershipAnnotation ownership : accessControlStore.getOwnerships()) {
+            if (!Util.equalsWithNull(ownership.getIdOfAnnotatedObjectAsString(), tenant.getId().toString()) &&
+                    Util.equalsWithNull(ownership.getAnnotation().getTenantOwner(), tenant)) {
                 throw new TenantManagementException("The tenant "+tenant.getName()+
                         " is still used as tenant owner and therefore cannot be removed");
             }

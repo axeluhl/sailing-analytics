@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog.AccessControlListData;
@@ -53,8 +54,8 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
     }
     
     public EditAccessControlListDialog(final StringMessages stringMessages, final UserManagementServiceAsync userManagementService, 
-            final AccessControlListListDataProvider aclListDataProvider, AccessControlList acl) {
-        this(stringMessages, stringMessages.editAnACL(), acl.getIdOfAccessControlledObjectAsString(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
+            final AccessControlListListDataProvider aclListDataProvider, AccessControlListAnnotation acl) {
+        this(stringMessages, stringMessages.editAnACL(), acl.getIdOfAnnotatedObjectAsString(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
             @Override
             public void ok(AccessControlListData aclData) {
                 userManagementService.updateACL(aclData.getAccessControlledObjectIdAsString(), aclData.getActionStrings(), new AsyncCallback<AccessControlList>() {
@@ -75,7 +76,7 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
     }
     
     private EditAccessControlListDialog(final StringMessages stringMessages, final String title, final String message,
-            final UserManagementServiceAsync userManagementService, final AccessControlList acl,
+            final UserManagementServiceAsync userManagementService, final AccessControlListAnnotation acl,
             final DialogCallback<AccessControlListData> callback) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 new DataEntryDialog.Validator<AccessControlListData>() {
@@ -98,8 +99,8 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
                 updateGrid();                
             }
         });
-        accessControlledObjectIdAsString = acl.getIdOfAccessControlledObjectAsString();
-        for (Map.Entry<UserGroup, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+        accessControlledObjectIdAsString = acl.getIdOfAnnotatedObjectAsString();
+        for (Map.Entry<UserGroup, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
             Label label = new Label(entry.getKey().getName());
             labels.add(label);
             String concatenated = "";

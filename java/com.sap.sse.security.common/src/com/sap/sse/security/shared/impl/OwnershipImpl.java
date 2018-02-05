@@ -6,26 +6,17 @@ import com.sap.sse.security.shared.SecurityUser;
 
 public class OwnershipImpl implements Ownership {    
     private static final long serialVersionUID = -6379054499434958440L;
-    private String idOfOwnedObjectAsString;
     private SecurityUser userOwner;
     private Tenant tenantOwner;
-    private String displayNameOfOwnedObject;
     
     @Deprecated
     OwnershipImpl() {} // for GWT serialization only
     
-    public OwnershipImpl(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject) {
-        this.idOfOwnedObjectAsString = idOfOwnedObjectAsString;
+    public OwnershipImpl(SecurityUser userOwner, Tenant tenantOwner) {
         this.userOwner = userOwner;
         this.tenantOwner = tenantOwner;
-        this.displayNameOfOwnedObject = displayNameOfOwnedObject;
     }
     
-    @Override
-    public String getIdOfOwnedObjectAsString() {
-        return idOfOwnedObjectAsString;
-    }
-
     @Override
     public SecurityUser getUserOwner() {
         return userOwner;
@@ -37,13 +28,7 @@ public class OwnershipImpl implements Ownership {
     }
     
     @Override
-    public String getDisplayNameOfOwnedObject() {
-        return displayNameOfOwnedObject;
-    }
-
-    @Override
     public String toString() {
-        return "OwnershipImpl [idOfOwnedObjectAsString=" + idOfOwnedObjectAsString + ", userOwner=" + userOwner
-                + ", tenantOwner=" + tenantOwner + ", displayNameOfOwnedObject=" + displayNameOfOwnedObject + "]";
+        return "OwnershipImpl [userOwner=" + userOwner + ", tenantOwner=" + tenantOwner + "]";
     }
 }

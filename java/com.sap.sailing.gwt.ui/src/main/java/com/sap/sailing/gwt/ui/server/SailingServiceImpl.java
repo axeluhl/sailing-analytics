@@ -3963,9 +3963,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Map<Tenant, Tenant> fromOriginalToStrippedDownTenant = new HashMap<>();
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-        eventDTO.setAcl(securityDTOFactory.createAccessControlListDTO(getSecurityService().getAccessControlList(event.getId().toString()),
+        eventDTO.setAcl(securityDTOFactory.createAccessControlListDTO(getSecurityService().getAccessControlList(event.getId().toString()).getAnnotation(),
                 fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(getSecurityService().getOwnership(event.getId().toString()),
+        eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(getSecurityService().getOwnership(event.getId().toString()).getAnnotation(),
                 fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         return eventDTO;
     }

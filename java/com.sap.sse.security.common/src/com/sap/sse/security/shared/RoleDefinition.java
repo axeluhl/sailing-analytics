@@ -17,14 +17,15 @@ import com.sap.sse.common.Renamable;
  * During instantiating, a {@link Role} may optionally declare a {@link Tenant} and/or {@link SecurityUser} parameter to
  * qualify the range of objects for which it implies its permissions. With no such qualifications, the role grants its
  * permissions to the user to which the role is assigned for <em>all</em> objects. If a {@link Tenant} and/or
- * {@link SecurityUser} parameter is declared, the object's {@link Ownership owning} {@link Ownership#getTenantOwner()
- * tenant} and/or {@link Ownership#getUserOwner() user} owner must match the actual {@link Tenant}/{@link SecurityUser}
- * object(s) used when instantiating the {@link Role} from this {@link RoleDefinition}. As different parameterizations
- * are possible for the same group of permissions, multiple {@link Role}s may be instantiated from a single
- * {@link RoleDefinition}.
+ * {@link SecurityUser} parameter is {@link RoleImpl#RoleImpl(RoleDefinition, Tenant, SecurityUser) declared}, the
+ * object's {@link Ownership owning} {@link Ownership#getTenantOwner() tenant} and/or {@link Ownership#getUserOwner()
+ * user} owner must match the actual {@link Tenant}/{@link SecurityUser} object(s) used when instantiating the
+ * {@link Role} from this {@link RoleDefinition} for the user to obtain the permissions from this role definition. As
+ * different parameterizations are possible for the same group of permissions, multiple {@link Role}s may be
+ * instantiated from a single {@link RoleDefinition}.
  * <p>
  * 
- * Equality ({@link #equals(Object)} and {@link #hashCode()} are expected to be based solely on the {@link #getId() ID}.
+ * Equality ({@link #equals(Object)}) and {@link #hashCode()} are expected to be based solely on the {@link #getId() ID}.
  * 
  * @author Axel Uhl (d043530)
  *

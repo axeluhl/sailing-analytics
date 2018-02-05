@@ -18,7 +18,7 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.TenantManagementException;
@@ -95,17 +95,17 @@ public class AccessControlStoreTest {
         accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
         accessControlStore.removeOwnership(testIdAsString);
         // expecting to fall back to default tenant ownership
-        final Ownership defaultOwnership = accessControlStore.getOwnership(testIdAsString);
+        final OwnershipAnnotation defaultOwnership = accessControlStore.getOwnership(testIdAsString);
         assertDefaultOwnership(defaultOwnership);
         newStores();
         assertDefaultOwnership(accessControlStore.getOwnership(testIdAsString));
     }
 
-    private void assertDefaultOwnership(final Ownership defaultOwnershipToCheck) {
-        assertNull(defaultOwnershipToCheck.getUserOwner());
-        assertNotNull(defaultOwnershipToCheck.getTenantOwner());
-        assertEquals(DEFAULT_TENANT_NAME, defaultOwnershipToCheck.getTenantOwner().getName());
-        assertNull(defaultOwnershipToCheck.getDisplayNameOfOwnedObject());
+    private void assertDefaultOwnership(final OwnershipAnnotation defaultOwnershipToCheck) {
+        assertNull(defaultOwnershipToCheck.getAnnotation().getUserOwner());
+        assertNotNull(defaultOwnershipToCheck.getAnnotation().getTenantOwner());
+        assertEquals(DEFAULT_TENANT_NAME, defaultOwnershipToCheck.getAnnotation().getTenantOwner().getName());
+        assertNull(defaultOwnershipToCheck.getDisplayNameOfAnnotatedObject());
     }
     
     @Test

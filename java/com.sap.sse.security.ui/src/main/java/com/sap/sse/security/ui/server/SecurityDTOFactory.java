@@ -11,9 +11,11 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
@@ -171,6 +173,22 @@ public class SecurityDTOFactory {
     public Tenant createTenantDTOFromTenant(Tenant tenant) {
         return createTenantDTOFromTenant(tenant, new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
+
+    public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation) {
+        return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation()),
+                ownershipAnnotation.getIdOfAnnotatedObjectAsString(),
+                ownershipAnnotation.getDisplayNameOfAnnotatedObject());
+    }
+    
+    public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation,
+            Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
+            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+        return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation(), fromOriginalToStrippedDownTenant,
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                ownershipAnnotation.getIdOfAnnotatedObjectAsString(),
+                ownershipAnnotation.getDisplayNameOfAnnotatedObject());
+    }
     
     public Ownership createOwnershipDTO(Ownership ownership) {
         return createOwnershipDTO(ownership, new HashMap<>(), new HashMap<>(), new HashMap<>());
@@ -183,14 +201,29 @@ public class SecurityDTOFactory {
         if (ownership == null) {
             result = null;
         } else {
-            result = new OwnershipImpl(ownership.getIdOfOwnedObjectAsString(),
-                    createUserDTOFromUser(ownership.getUserOwner(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
-                    createTenantDTOFromTenant(ownership.getTenantOwner(), fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
-                    ownership.getDisplayNameOfOwnedObject());
+            result = new OwnershipImpl(
+                    createUserDTOFromUser(ownership.getUserOwner(), fromOriginalToStrippedDownTenant,
+                            fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                    createTenantDTOFromTenant(ownership.getTenantOwner(), fromOriginalToStrippedDownTenant,
+                            fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         }
         return result;
     }
     
+    public AccessControlListAnnotation createAccessControlListAnnotationDTO(AccessControlListAnnotation aclAnnotation) {
+        return new AccessControlListAnnotation(createAccessControlListDTO(aclAnnotation.getAnnotation()),
+                aclAnnotation.getIdOfAnnotatedObjectAsString(), aclAnnotation.getDisplayNameOfAnnotatedObject());
+    }
+    
+    public AccessControlListAnnotation createAccessControlListAnnotationDTO(AccessControlListAnnotation aclAnnotation,
+            Map<Tenant, Tenant> fromOriginalToStrippedDownTenant,
+            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+        return new AccessControlListAnnotation(createAccessControlListDTO(aclAnnotation.getAnnotation(),
+                fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                aclAnnotation.getIdOfAnnotatedObjectAsString(), aclAnnotation.getDisplayNameOfAnnotatedObject());
+    }
+        
     public AccessControlList createAccessControlListDTO(AccessControlList acl) {
         return createAccessControlListDTO(acl, new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
@@ -210,8 +243,7 @@ public class SecurityDTOFactory {
                                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
                         actionForGroup.getValue());
             }
-            result = new AccessControlListImpl(acl.getIdOfAccessControlledObjectAsString(),
-                    acl.getDisplayNameOfAccessControlledObject(), permissionMapDTO);
+            result = new AccessControlListImpl(permissionMapDTO);
         }
         return result;
     }

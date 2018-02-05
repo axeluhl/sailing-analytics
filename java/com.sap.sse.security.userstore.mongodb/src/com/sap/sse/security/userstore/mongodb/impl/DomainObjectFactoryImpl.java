@@ -21,11 +21,11 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
-import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -55,8 +55,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore) {
-        ArrayList<AccessControlList> result = new ArrayList<>();
+    public Iterable<AccessControlListAnnotation> loadAllAccessControlLists(UserStore userStore) {
+        ArrayList<AccessControlListAnnotation> result = new ArrayList<>();
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         try {
             for (DBObject o : aclCollection.find()) {
@@ -69,7 +69,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore) {
+    private AccessControlListAnnotation loadAccessControlList(DBObject aclDBObject, UserStore userStore) {
         final String id = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name());
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
         Iterable<?> dbPermissionMap = ((BasicDBList) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
@@ -84,13 +84,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             permissionMap.put(userGroup, actions);
         }
-        AccessControlList result = new AccessControlListImpl(id, displayName, permissionMap);
+        AccessControlListAnnotation result = new AccessControlListAnnotation(new AccessControlListImpl(permissionMap), id, displayName);
         return result;
     }
     
     @Override
-    public Iterable<Ownership> loadAllOwnerships(UserStore userStore) {
-        ArrayList<Ownership> result = new ArrayList<>();
+    public Iterable<OwnershipAnnotation> loadAllOwnerships(UserStore userStore) {
+        ArrayList<OwnershipAnnotation> result = new ArrayList<>();
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         try {
             for (DBObject o : ownershipCollection.find()) {
@@ -103,14 +103,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private Ownership loadOwnership(DBObject ownershipDBObject, UserStore userStore) {
+    private OwnershipAnnotation loadOwnership(DBObject ownershipDBObject, UserStore userStore) {
         final String idOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
         final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
         final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
         final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());
         final SecurityUser userOwner = userStore.getUserByName(userOwnerName);
         final Tenant tenantOwner = userStore.getTenant(tenantOwnerId);
-        return new OwnershipImpl(idOfOwnedObject, userOwner, tenantOwner, displayNameOfOwnedObject);
+        return new OwnershipAnnotation(new OwnershipImpl(userOwner, tenantOwner), idOfOwnedObject, displayNameOfOwnedObject);
     }
     
     @Override

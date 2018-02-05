@@ -20,8 +20,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.impl.Activator;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.User;
@@ -170,16 +170,16 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             for (WildcardPermission directPermission : getUserStore().getPermissionsFromUser(username)) {
                 directPermissions.add(directPermission);
             }
-            Ownership ownership = null;
-            AccessControlList acl = null;
+            OwnershipAnnotation ownership = null;
+            AccessControlListAnnotation acl = null;
             if (parts.length > 2) {
                 ownership = getAccessControlStore().getOwnership(parts[2]);
                 acl = getAccessControlStore().getAccessControlList(parts[2]);
             }
             final User user = getUserStore().getUserByName(username);
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
-                    user, getUserStore().getUserGroupsOfUser(user), ownership, 
-                    acl);
+                    user, getUserStore().getUserGroupsOfUser(user), ownership==null?null:ownership.getAnnotation(), 
+                    acl==null?null:acl.getAnnotation());
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "User " + username + " does not exist.", e);
             return false;
