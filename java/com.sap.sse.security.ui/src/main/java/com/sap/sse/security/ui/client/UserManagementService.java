@@ -23,7 +23,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
-    Collection<AccessControlList> getAccessControlListList() throws UnauthorizedException;
+    Collection<AccessControlList> getAccessControlLists() throws UnauthorizedException;
 
     AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString);
 

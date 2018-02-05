@@ -119,10 +119,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Collection<AccessControlList> getAccessControlListList() throws UnauthorizedException {
+    public Collection<AccessControlList> getAccessControlLists() throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("access_control:manage")) {
             List<AccessControlList> acls = new ArrayList<>();
-            for (AccessControlList acl : getSecurityService().getAccessControlListList()) {
+            for (AccessControlList acl : getSecurityService().getAccessControlLists()) {
                 acls.add(securityDTOFactory.createAccessControlListDTO(acl));
             }
             return acls;

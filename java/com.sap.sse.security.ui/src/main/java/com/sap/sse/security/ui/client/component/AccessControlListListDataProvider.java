@@ -22,7 +22,7 @@ public class AccessControlListListDataProvider extends AbstractDataProvider<Acce
     @Override
     protected void onRangeChanged(final HasData<AccessControlList> display) {
         final Range range = display.getVisibleRange();
-        userManagementService.getAccessControlListList(new AsyncCallback<Collection<AccessControlList>>() {
+        userManagementService.getAccessControlLists(new AsyncCallback<Collection<AccessControlList>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());

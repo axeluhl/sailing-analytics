@@ -37,8 +37,7 @@ public class PermissionChecker {
      *            may be {@code null} in which case no ACL-specific checks are performed
      */
     public static boolean isPermitted(WildcardPermission permission, SecurityUser user, Iterable<UserGroup> groupsOfWhichUserIsMember,
-            Iterable<Role> roles, Ownership ownership,
-            AccessControlList acl) {
+            Ownership ownership, AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
@@ -68,7 +67,7 @@ public class PermissionChecker {
         }
         // 4. check role permissions
         if (result == PermissionState.NONE) {
-            for (Role role : roles) {
+            for (Role role : user.getRoles()) {
                 if (implies(role, permission, ownership)) {
                     result = PermissionState.GRANTED;
                     break;

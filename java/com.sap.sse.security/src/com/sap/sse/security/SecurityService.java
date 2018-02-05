@@ -47,7 +47,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void deleteAllDataForRemovedObject(WithID removedObject);
 
-    Iterable<AccessControlList> getAccessControlListList();
+    Iterable<AccessControlList> getAccessControlLists();
 
     AccessControlList getAccessControlList(String idOfAccessControlledObjectAsString);
 

@@ -96,7 +96,7 @@ public class SecurityUserImpl implements SecurityUser {
     @Override
     public boolean hasPermission(WildcardPermission permission, Ownership ownership,
             Iterable<UserGroup> groupsThisUserIsPartOf, AccessControlList acl) {
-        return PermissionChecker.isPermitted(permission, this, groupsThisUserIsPartOf, getRoles(), ownership, acl);
+        return PermissionChecker.isPermitted(permission, this, groupsThisUserIsPartOf, ownership, acl);
     }
 
     public void addRole(Role role) {

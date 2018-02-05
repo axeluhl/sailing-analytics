@@ -253,7 +253,7 @@ public class MediaSynchControl implements EditFlag {
     }
 
     private boolean hasRightToEdit() {
-        UserDTO currentUser = userservice.getCurrentUser();
+        UserDTO currentUser = userservice.getCurrentUser(); // TODO should there be userservice.getGroups(SecurityUser)?
         return currentUser != null
                 && currentUser.hasPermission(Permission.MANAGE_MEDIA.getPermission(),
                         /* TODO ownership */ null);

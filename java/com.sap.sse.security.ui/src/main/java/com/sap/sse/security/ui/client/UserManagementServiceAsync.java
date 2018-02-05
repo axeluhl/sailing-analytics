@@ -17,7 +17,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
-    void getAccessControlListList(AsyncCallback<Collection<AccessControlList>> callback);
+    void getAccessControlLists(AsyncCallback<Collection<AccessControlList>> callback);
 
     void getAccessControlList(String id, AsyncCallback<AccessControlList> callback);
 

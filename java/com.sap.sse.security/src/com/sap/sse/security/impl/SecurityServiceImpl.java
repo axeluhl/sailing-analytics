@@ -354,7 +354,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * Returns a list of all existing access control lists. This is possibly not complete in the sense
      * that there is a access control list for every access controlled data object.
      */
-    public Iterable<AccessControlList> getAccessControlListList() {
+    public Iterable<AccessControlList> getAccessControlLists() {
         return accessControlStore.getAccessControlLists();
     }
 

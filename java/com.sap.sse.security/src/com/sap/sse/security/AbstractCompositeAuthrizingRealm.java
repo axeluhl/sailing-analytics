@@ -178,8 +178,8 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             }
             final User user = getUserStore().getUserByName(username);
             return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
-                    user, getUserStore().getUserGroupsOfUser(user), getUserStore().getRolesFromUser(username), 
-                    ownership, acl);
+                    user, getUserStore().getUserGroupsOfUser(user), ownership, 
+                    acl);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "User " + username + " does not exist.", e);
             return false;
