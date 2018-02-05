@@ -14,9 +14,9 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
 public class UserImpl extends SecurityUserImpl implements User {
     private static final long serialVersionUID = 1788215575606546042L;
@@ -242,5 +242,4 @@ public class UserImpl extends SecurityUserImpl implements User {
     public String getValidationSecret() {
         return validationSecret;
     }
-
 }

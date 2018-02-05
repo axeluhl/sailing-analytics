@@ -13,6 +13,7 @@ import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatistic;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
@@ -24,7 +25,7 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
     private final Competitor competitor;
     private final PolarDataMiningSettings settings;
     private final HasCompetitorPolarContext competitorPolarContext;
-    private WindWithConfidence<Pair<Position, TimePoint>> wind;
+    private final WindWithConfidence<Pair<Position, TimePoint>> wind;
 
     public GPSFixWithPolarContext(GPSFixMoving fix, TrackedRace trackedRace, ClusterGroup<Speed> windSpeedRangeGroup, Competitor competitor,
             PolarDataMiningSettings settings, WindWithConfidence<Pair<Position, TimePoint>> wind, HasCompetitorPolarContext competitorPolarContext) {
@@ -39,7 +40,14 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
 
     @Override
     public ClusterDTO getWindSpeedRange() {
-        return new ClusterDTO(wind == null || wind.getObject() == null ? "null" : windSpeedRangeGroup.getClusterFor(wind.getObject()).toString());
+        String signifier;
+        if (wind == null || wind.getObject() == null) {
+            signifier = "null";
+        } else {
+            Cluster<Speed> cluster = windSpeedRangeGroup.getClusterFor(wind.getObject());
+            signifier = cluster == null ? "null" : cluster.toString();
+        }
+        return new ClusterDTO(signifier);
     }
 
     @Override

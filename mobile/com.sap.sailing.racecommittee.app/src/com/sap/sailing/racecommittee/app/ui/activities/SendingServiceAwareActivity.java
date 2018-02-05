@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
 import java.util.Date;
 
 import android.content.ComponentName;
@@ -156,8 +157,12 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
             if (AppPreferences.on(this).getAccessToken() == null) {
                 onException(null);
             } else {
-                AuthCheckTask task = new AuthCheckTask(this, AppPreferences.on(this).getServerBaseURL(), this);
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                try {
+                    AuthCheckTask task = new AuthCheckTask(this, AppPreferences.on(this).getServerBaseURL(), this);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                } catch (MalformedURLException e) {
+                    ExLog.e(this, TAG, "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
+                }
             }
             return true;
         } else {
@@ -177,7 +182,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
     }
 
     @Override
-    public void onRequestReceived(Boolean authenticated) {
+    public void onResultReceived(Boolean authenticated) {
         Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
     }
 
@@ -202,7 +207,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
             builder.setNegativeButton(android.R.string.no, null);
             builder.show();
         } else {
-            onRequestReceived(true);
+            onResultReceived(true);
         }
     }
 }

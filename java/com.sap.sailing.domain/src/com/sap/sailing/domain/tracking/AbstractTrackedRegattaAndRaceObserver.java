@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,9 +72,21 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
         }
     }
 
+    /**
+     * The method is called when a {@link TrackedRace} has been added to a {@link TrackedRegatta} that was
+     * {@link #regattaAdded(TrackedRegatta) added} to this listener.<p>
+     * 
+     * The method is called {@code synchronized} under the {@link RegattaListener}'s monitor.
+     */
     protected abstract void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
             DynamicTrackedRace trackedRace);
 
+    /**
+     * The method is called when a {@link TrackedRace} has been removed from a {@link TrackedRegatta} that was
+     * {@link #regattaRemoved(TrackedRegatta) removed} from this listener.<p>
+     * 
+     * The method is called {@code synchronized} under the {@link RegattaListener}'s monitor.
+     */
     protected abstract void onRaceRemoved(DynamicTrackedRace trackedRace);
 
     private class RegattaListener {
@@ -120,12 +133,26 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
 
         /**
          * Called by {@link AbstractTrackedRegattaAndRaceObserver} when the {@link TrackedRegatta} was removed or the
-         * {@link TrackedRegatta} shouldn't be tracked anymore (this is e.g. the case in replication state.
+         * {@link TrackedRegatta} shouldn't be tracked anymore (this is e.g. the case in replication state).
          */
-        public synchronized void stop() {
-            trackedRegatta.removeRaceListener(raceListener);
-            knownTrackedRaces.keySet().forEach(this::remove);
-            knownTrackedRaces.clear();
+        public void stop() {
+            try {
+                // It's necessary that we wait for the returned future to be completed
+                // to ensure that all regular removals are correctly processed before
+                // manually removing the left over ones (see below).
+                // This is now necessary due to the fact that TrackedRegattaImpl fires events concurrently,
+                // which makes it possible to receive the removal of the TrackedRegatta before the removals
+                // for the contained TrackedRaces are received.
+                trackedRegatta.removeRaceListener(raceListener).get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.log(Level.SEVERE, "Error while waiting for the raceListener to be removed", e);
+            }
+            // Depending on the code path (e.g. replication) it's possible that we still track some TrackedRace at this point.
+            // We need to ensure that all listeners are correctly stopped to not leak any instances.
+            synchronized (this) {
+                knownTrackedRaces.keySet().forEach(this::remove);
+                knownTrackedRaces.clear();
+            }
         }
 
         @Override

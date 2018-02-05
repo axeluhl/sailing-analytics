@@ -1205,7 +1205,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showSimulationOverlay();
     String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
-    String showNumberOfRacesScored();
     String racesScored();
     String racesScoredTooltip();
     String averageNumberOfOperationsPerMessage();
@@ -1513,6 +1512,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resultsChart();
     String tabbedResultsPresenter();
     String polarResultsPresenter();
+    String maneuverSpeedDetailsResultsPresenter();
     String dataMiningRetrieval();
     String actionWatch();
     String actionAnalyze();
@@ -1875,6 +1875,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noUpcomingRaceDataAvailable();
     String trackedRaceAlreadyLinked();
     String reallyRemoveSeries(String seriesName);
+    String maneuverSpeedDetails();
+    String maneuverDirectionNormalization();
     String settingsId();
     String documentSettingsId();
     String settingsForId(String id);
@@ -1927,6 +1929,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String estimatedDuration();
     String countDown(long value,String unit);
     String countDownEnd();
+    String maneuver();
+    String minManeuverDuration();
+    String maxManeuverDuration();
+    String minManeuverEnteringSpeedInKnots();
+    String maxManeuverEnteringSpeedInKnots();
+    String minManeuverExitingSpeedInKnots();
+    String maxManeuverExitingSpeedInKnots();
+    String maneuverDirectionEqualWeightingEnabled();
+    String minValue();
+    String maxValue();
+    String zeroTo360AxisLabeling();
+    String exportStatisticsCurveToCsv();
+    String csvCopiedToClipboard();
+    String minDataCount();
     String moreLoginInformationHeadline();
     String moreLoginInformationIntroduction();
     String moreLoginInformationSectionUserSettingsHeading();
@@ -1963,12 +1979,17 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentPortDaggerboardRakeTooltip();
     String currentStbdDaggerboardRake();
     String currentStbdDaggerboardRakeTooltip();
+    String minManeuverEnteringAbsTWA();
+    String maxManeuverEnteringAbsTWA();
+    String minManeuverExitingAbsTWA();
+    String maxManeuverExitingAbsTWA();
     String currentPortRudderRake();
     String currentPortRudderRakeTooltip();
     String currentStbdRudderRake();
     String currentStbdRudderRakeTooltip();
     String currentMastRotationInDegree();
     String currentMastRotationInDegreeTooltip();
+    String mainCurveAnalysis();
     String finishingTime();
     String boatNameMustNotBeEmpty();
     String errorUpdatingExpeditionDeviceConfiguration(String name, String message);
@@ -2028,4 +2049,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String importFinishedGotoRaceboard();
     String importFinishedGotoEvent();
     String chooseAName();
+    String unexpectedErrorDuringFileImport();
+    String couldNotDownload(String url);
 }

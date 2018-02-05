@@ -17,7 +17,7 @@ import com.sap.sse.datamining.shared.data.AverageWithStats;
 @SuppressWarnings("unused")
 public final class SailingDataMiningSerializationDummy implements SerializationDummy {
     private static final long serialVersionUID = 345L;
-    
+
     private LegType legType;
     private Distance distance;
     private Speed speed;
@@ -31,7 +31,13 @@ public final class SailingDataMiningSerializationDummy implements SerializationD
     private NauticalSide nauticalSide;
     private FoilingSegmentsDataMiningSettings foilingSegmentsSettings;
     private AverageWithStats<Number> averageWithStats;
-    
+    private ManeuverSpeedDetailsAggregation maneuverSpeedDetailsAggregation;
+    private ManeuverSpeedDetailsAggregationImpl maneuverSpeedDetailsAggregationImpl;
+    private ManeuverSpeedDetailsSettings maneuverSpeedDetailsSettings;
+    private ManeuverSpeedDetailsSettingsImpl maneuverSpeedDetailsSettingsImpl;
+    private ManeuverSettings maneuverSettings;
+    private ManeuverSettingsImpl maneuverSettingsImpl;
+
     private SailingDataMiningSerializationDummy() { }
-    
+
 }

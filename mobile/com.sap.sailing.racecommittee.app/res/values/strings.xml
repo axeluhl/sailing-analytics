@@ -558,4 +558,14 @@
     <string name="publish_clicked">Results published</string>
     <string name="competitor_count">%d</string>
 
+    <string name="refresh_title">Data changed</string>
+    <string name="refresh_message">The data of following competitors has changed. Please review:\n\n%s</string>
+    <string name="refresh_positive">@android:string/ok</string>
+    <string name="hello_call_error_title">Can\'t connect to SAP</string>
+    <string name="hello_call_error_message">The App couldn\'t establish a connection to SAP Sailing.\nPlease check if you have a stable mobile connection.\nDo you want to retry?</string>
+    <string name="hello_call_error_positive">Retry</string>
+    <string name="hello_call_error_negative">Exit</string>
+
+    <string name="competitor_merge_error_message">This competitor was changed from another device and you have changed the same data. Please be sure, that this data is correct now.</string>
+
 </resources>
