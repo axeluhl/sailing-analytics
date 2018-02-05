@@ -5,6 +5,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -12,9 +14,14 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter.EditFlag;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class MediaSynchControl implements EditFlag {
 
@@ -38,6 +45,7 @@ public class MediaSynchControl implements EditFlag {
     private final Button discardButton;
 
     private boolean isEditing = false;
+    private UserService userservice;
 
     /**
      * We dont want to force the caller to use a specific button or anchor class for future flexibility
@@ -51,13 +59,14 @@ public class MediaSynchControl implements EditFlag {
     }
 
     public MediaSynchControl(MediaSynchAdapter mediaSynchAdapter, MediaServiceAsync mediaService,
-            ErrorReporter errorReporter, EditButtonProxy editButtonProxy) {
+            ErrorReporter errorReporter, EditButtonProxy editButtonProxy, UserService userservice) {
         this.mediaService = mediaService;
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack();
         backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration,
                 videoTrack.mimeType, videoTrack.assignedRaces);
+        this.userservice = userservice;
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("main-panel");
         editPanel = new FlowPanel();
@@ -65,14 +74,11 @@ public class MediaSynchControl implements EditFlag {
         fineTuningPanel.addStyleName("finetuning-panel");
         commitPanel = new FlowPanel();
         commitPanel.addStyleName("button-panel");
-
         this.editButton = editButtonProxy;
-
         titleEdit = new TextBox();
         titleEdit.setText(videoTrack.title);
         titleEdit.addStyleName("title-edit");
         titleEdit.addKeyUpHandler(new KeyUpHandler() {
-
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 String text = titleEdit.getText();
@@ -80,7 +86,6 @@ public class MediaSynchControl implements EditFlag {
                 updateUiState();
             }
         });
-
         Button fastRewindButton = new Button("-1s &#171;", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -114,7 +119,6 @@ public class MediaSynchControl implements EditFlag {
         });
         editButton.setTitle(
                 "Pauses race and decouples race from video playback. Use video controls, race time slider or fine tuning buttons for time alignment, then press Preview to re-couple race and video playback.");
-
         previewButton = new Button("Preview", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -123,7 +127,6 @@ public class MediaSynchControl implements EditFlag {
         });
         previewButton.setTitle(
                 "Re-couples race and video playback. If ok, press Save to write changes back to database. Press Cancel to reset the changes.");
-
         saveButton = new Button("Save", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -137,24 +140,39 @@ public class MediaSynchControl implements EditFlag {
                 discard();
             }
         });
-
         fineTuningPanel.add(fastRewindButton);
         fineTuningPanel.add(slowRewindButton);
         fineTuningPanel.add(slowForwardButton);
         fineTuningPanel.add(fastForwardButton);
-
         mainPanel.add(titleEdit);
         editPanel.add(previewButton);
         mainPanel.add(editPanel);
         mainPanel.add(fineTuningPanel);
-
         commitPanel.add(saveButton);
         commitPanel.add(discardButton);
-
         mainPanel.add(commitPanel);
-
+        UserStatusEventHandler userHandler = new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                if (user == null) {
+                    //discard already updates ui state!
+                    discard();
+                } else {
+                    updateUiState();
+                }
+            }
+        };
+        mainPanel.addAttachHandler(new Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                if (event.isAttached()) {
+                    userservice.addUserStatusEventHandler(userHandler);
+                } else {
+                    userservice.removeUserStatusEventHandler(userHandler);
+                }
+            }
+        });
         updateUiState();
-
     }
 
     protected void preview() {
@@ -183,17 +201,11 @@ public class MediaSynchControl implements EditFlag {
         pausePlayback();
         mediaSynchAdapter.forceAlign();
         updateUiState();
-        // For now, only start time can be changed.
-        // getMediaTrack().title = backupVideoTrack.title;
-        // getMediaTrack().url = backupVideoTrack.url;
-        // getMediaTrack().duration = backupVideoTrack.duration;
     }
 
     private void save() {
-
         if (!backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime)) {
             mediaService.updateStartTime(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
-
                 @Override
                 public void onSuccess(Void result) {
                     backupVideoTrack.startTime = mediaSynchAdapter.getMediaTrack().startTime;
@@ -209,7 +221,6 @@ public class MediaSynchControl implements EditFlag {
         }
         if (!backupVideoTrack.title.equals(mediaSynchAdapter.getMediaTrack().title)) {
             mediaService.updateTitle(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
-
                 @Override
                 public void onSuccess(Void result) {
                     backupVideoTrack.title = mediaSynchAdapter.getMediaTrack().title;
@@ -233,14 +244,20 @@ public class MediaSynchControl implements EditFlag {
             }
         }
         mediaSynchAdapter.setControlsVisible(isEditing);
-
-        editButton.setEnabled(!isEditing);
         previewButton.setEnabled(isEditing);
-
-        mainPanel.getElement().getStyle().setDisplay(this.isEditing() ? Display.BLOCK : Display.NONE);
+        boolean hasRightToEdit = hasRightToEdit();
+        editButton.setEnabled(hasRightToEdit && !isEditing);
+        mainPanel.getElement().getStyle().setDisplay(isEditing && hasRightToEdit ? Display.BLOCK : Display.NONE);
         boolean isDirty = isDirty();
         saveButton.setEnabled(isEditing || isDirty);
         discardButton.setEnabled(isEditing || isDirty);
+    }
+
+    private boolean hasRightToEdit() {
+        UserDTO currentUser = userservice.getCurrentUser();
+        return currentUser != null
+                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
+                        SailingPermissionsForRoleProvider.INSTANCE);
     }
 
     private boolean isDirty() {
@@ -276,5 +293,4 @@ public class MediaSynchControl implements EditFlag {
     public boolean isEditing() {
         return isEditing;
     }
-
 }

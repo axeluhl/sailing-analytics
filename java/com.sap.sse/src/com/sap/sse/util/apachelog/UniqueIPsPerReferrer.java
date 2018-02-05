@@ -52,6 +52,7 @@ public class UniqueIPsPerReferrer {
     private static final Logger logger = Logger.getLogger(UniqueIPsPerReferrer.class.getName());
     private static final String HOSTNAME_FILE_EXTENSION = ".ips";
     private static final String UNIQUE_SUFFIX = ".unique";
+    private static final String MONTH_AND_YEAR_TOTALS_SUFFIX = "_totals";
     private static final char YEAR_MONTH_SEPARATOR = '_';
     private final File CACHE;
     private final File VISITED_FILES;
@@ -150,7 +151,7 @@ public class UniqueIPsPerReferrer {
      * files for totals and per-event totals.
      */
     private void cleanUpOldResults() throws IOException {
-        logger.info("Cleanign up old results");
+        logger.info("Cleaning up old results");
         deleteDirectoryContentsRecursively(MONTHS.toPath(), "...."+YEAR_MONTH_SEPARATOR+"..\\.gz");
         deleteDirectoryContentsRecursively(YEARS.toPath(), "....\\.gz");
         EVENTTOTALS.delete();
@@ -160,6 +161,8 @@ public class UniqueIPsPerReferrer {
     private void computePerMonthPerYearPerEventAndTotals() throws IOException, ParseException {
         final Map<String, Writer> monthFileWritersPerFileBaseName = new HashMap<>();
         final Map<String, Writer> yearFileWritersPerFileBaseName = new HashMap<>();
+        final Map<String, Writer> monthTotalsFileWritersPerFileBaseName = new HashMap<>();
+        final Map<String, Writer> yearTotalsFileWritersPerFileBaseName = new HashMap<>();
         final Writer eventTotalsWriter = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(EVENTTOTALS)));
         final Writer totalsWriter = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(TOTALS)));
         for (final File perHostnameFile : getAllHostnameFiles()) {
@@ -170,16 +173,22 @@ public class UniqueIPsPerReferrer {
                 String line;
                 while ((line=r.readLine()) != null) {
                     final PerHostnameEntry entry = new PerHostnameEntry(line);
+                    final String combinedLine = hostname+" "+line+"\n";
                     if (entry.getYear() != 0) {
                         final String monthFileBasename = String.format("%04d"+YEAR_MONTH_SEPARATOR+"%02d", entry.getYear(), entry.getZeroBasedMonth()+1);
                         final Writer monthFileWriter = getFileWriter(monthFileBasename, monthFileWritersPerFileBaseName, this::getMonthFileCompressed, /* gzipCompressed */ true, /* append */ false);
-                        final String combinedLine = hostname+" "+line+"\n";
                         monthFileWriter.write(combinedLine);
+                        final String monthTotalsFileBasename = monthFileBasename+MONTH_AND_YEAR_TOTALS_SUFFIX;
+                        final Writer monthTotalsFileWriter = getFileWriter(monthTotalsFileBasename, monthTotalsFileWritersPerFileBaseName, this::getMonthFileCompressed, /* gzipCompressed */ true, /* append */ false);
+                        monthTotalsFileWriter.write(line+"\n");
                         final String yearFileBasename = String.format("%04d", entry.getYear());
                         final Writer yearFileWriter = getFileWriter(yearFileBasename, yearFileWritersPerFileBaseName, this::getYearFileCompressed, /* gzipCompressed */ true, /* append */ false);
                         yearFileWriter.write(combinedLine);
+                        final String yearTotalsFileBasename = yearFileBasename+MONTH_AND_YEAR_TOTALS_SUFFIX;
+                        final Writer yearTotalsFileWriter = getFileWriter(yearTotalsFileBasename, yearTotalsFileWritersPerFileBaseName, this::getYearFileCompressed, /* gzipCompressed */ true, /* append */ false);
+                        yearTotalsFileWriter.write(line+"\n");
                     }
-                    eventTotalsWriter.write(hostname+" "+line+"\n");
+                    eventTotalsWriter.write(combinedLine);
                     totalsWriter.write(line+"\n");
                 }
             } finally {
@@ -191,6 +200,12 @@ public class UniqueIPsPerReferrer {
         }
         for (final Writer yearFileWriter : yearFileWritersPerFileBaseName.values()) {
             yearFileWriter.close();
+        }
+        for (final Writer monthTotalsFileWriter : monthTotalsFileWritersPerFileBaseName.values()) {
+            monthTotalsFileWriter.close();
+        }
+        for (final Writer yearTotalsFileWriter : yearTotalsFileWritersPerFileBaseName.values()) {
+            yearTotalsFileWriter.close();
         }
         eventTotalsWriter.close();
         totalsWriter.close();
@@ -249,9 +264,21 @@ public class UniqueIPsPerReferrer {
     }
 
     private void countTotalHits() throws IOException {
-        logger.info("Counting total number of unique visitors");
-        final FileWriter totalsCountWriter = new FileWriter(TOTALS_UNIQUE);
-        final Set<String> uniqueTotalLines = readDistinctLinesFromGzippedFile(TOTALS);
+        logger.info("Counting total numbers of unique visitors for all, months, and years");
+        countUniqueTotals(TOTALS, TOTALS_UNIQUE);
+        for (final File monthGzippedTotals : MONTHS.listFiles((dir, filename)->filename.endsWith(MONTH_AND_YEAR_TOTALS_SUFFIX+GZIP_EXTENSION))) {
+            countUniqueTotals(monthGzippedTotals, new File(monthGzippedTotals.getParentFile(),
+                    monthGzippedTotals.getName().substring(0, monthGzippedTotals.getName().length()-GZIP_EXTENSION.length())+UNIQUE_SUFFIX));
+        }
+        for (final File yearGzippedTotals : YEARS.listFiles((dir, filename)->filename.endsWith(MONTH_AND_YEAR_TOTALS_SUFFIX+GZIP_EXTENSION))) {
+            countUniqueTotals(yearGzippedTotals, new File(yearGzippedTotals.getParentFile(),
+                    yearGzippedTotals.getName().substring(0, yearGzippedTotals.getName().length()-GZIP_EXTENSION.length())+UNIQUE_SUFFIX));
+        }
+    }
+
+    private void countUniqueTotals(File gzippedEntriesWithoutHostname, File uniqueCount) throws IOException {
+        final FileWriter totalsCountWriter = new FileWriter(uniqueCount);
+        final Set<String> uniqueTotalLines = readDistinctLinesFromGzippedFile(gzippedEntriesWithoutHostname);
         totalsCountWriter.write(uniqueTotalLines.size()+"\n");
         totalsCountWriter.close();
     }

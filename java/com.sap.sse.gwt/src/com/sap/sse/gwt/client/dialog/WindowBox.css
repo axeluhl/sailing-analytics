@@ -2,6 +2,10 @@
 	clip: rect(auto auto auto auto);
 }
 
+.dialogTopCenterInner {
+  height: 18px;
+}
+
 .gwt-extras-WindowBox .dialogTopCenterInner {
   background-color: transparent;
 }

@@ -6,10 +6,15 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +54,24 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     
     private transient ConcurrentMap<RaceListener, RaceListener> raceListeners;
+    
+    /**
+     * This {@link WorkQueue} is used to do all event related work. This ensures that e.g. events are fired in order.
+     * The following cases need to be handles through this queue:
+     * <ul>
+     * <li>Firing events when adding/removing {@link TrackedRace} instances (see {@link #enqueEvent}). The list of
+     * listeners to fire the event to need to be the list of listeners existing when enqueuing the event. This ensures
+     * that newly added listeners only receive events after the initial {@link TrackedRace} instances are delivered to
+     * this listener.</li>
+     * <li>Firing events for the already existing {@link TrackedRace} instances when adding a new listener (see
+     * {@link #addRaceListener(RaceListener)}). This ensures that all events are correctly fired to this listener that
+     * are triggered after the listener was added while suppressing inconsistent events before/while the initial
+     * {@link TrackedRace} instances are delivered to this listener.</li>
+     * <li>Completing the future returned by {@link #removeRaceListener(RaceListener)} to ensure that the receiver gets
+     * to know when it is guaranteed that no more event will be fired to the listener.
+     * </ul>
+     */
+    private transient WorkQueue eventQueue;
 
     public TrackedRegattaImpl(Regatta regatta) {
         super();
@@ -56,11 +79,13 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         this.regatta = regatta;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         raceListeners = new ConcurrentHashMap<RaceListener, RaceListener>();
+        eventQueue = new WorkQueue();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         this.raceListeners = new ConcurrentHashMap<RaceListener, RaceListener>();
+        eventQueue = new WorkQueue();
     }
     
     @Override
@@ -110,28 +135,25 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             logger.info("adding tracked race for "+trackedRace.getRace()+" to tracked regatta "+getRegatta().getName()+
                     " with regatta hash code "+getRegatta().hashCode());
             oldTrackedRace = trackedRaces.put(trackedRace.getRace(), trackedRace);
+            if (oldTrackedRace != trackedRace) {
+                notifyListenersAboutTrackedRaceAdded(trackedRace);
+            }
         } finally {
             unlockTrackedRacesAfterWrite();
-        }
-        if (oldTrackedRace != trackedRace) {
-            notifyListenersAboutTrackedRaceAdded(trackedRace);
         }
     }
 
     protected void notifyListenersAboutTrackedRaceAdded(TrackedRace trackedRace) {
-        for (RaceListener listener : raceListeners.keySet()) {
-            listener.raceAdded(trackedRace);
-        }
+        enqueEvent(listener -> listener.raceAdded(trackedRace));
     }
     
-    @Override
-    public void removeTrackedRace(RaceDefinition raceDefinition) {
-        lockTrackedRacesForWrite();
-        try {
-            trackedRaces.remove(raceDefinition);
-        } finally {
-            unlockTrackedRacesAfterWrite();
-        }
+    protected void enqueEvent(Consumer<RaceListener> fireEventCallback) {
+        final Set<RaceListener> listenersToInform = new HashSet<>(raceListeners.keySet());
+        eventQueue.addWork(() -> {
+            for (RaceListener listener : listenersToInform) {
+                fireEventCallback.accept(listener);
+            }
+        });
     }
     
     @Override
@@ -139,19 +161,14 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         lockTrackedRacesForWrite();
         try {
             trackedRaces.remove(trackedRace.getRace());
+            notifyListenersAboutTrackedRaceRemoved(trackedRace);
         } finally {
             unlockTrackedRacesAfterWrite();
         }
-        // Fix for bug4414: put this into a separate thread to avoid deadlock caused by
-        // a synchronized RegattaListener.raceRemoved while holding the TrackedRegattaImpl.trackedRacesLock's write lock
-        // acquired in RacingEventServiceImpl.removeRace
-        new Thread(()->notifyListenersAboutTrackedRaceRemoved(trackedRace)).start();
     }
 
     protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace) {
-        for (RaceListener listener : raceListeners.keySet()) {
-            listener.raceRemoved(trackedRace);
-        }
+        enqueEvent(listener -> listener.raceRemoved(trackedRace));
     }
 
     @Override
@@ -216,27 +233,37 @@ public class TrackedRegattaImpl implements TrackedRegatta {
 
     @Override
     public void addRaceListener(RaceListener listener) {
-        final List<TrackedRace> trackedRacesCopy = new ArrayList<>();
         lockTrackedRacesForRead();
         try {
             raceListeners.put(listener, listener);
+            final List<TrackedRace> trackedRacesCopy = new ArrayList<>();
             Util.addAll(getTrackedRaces(), trackedRacesCopy);
+            eventQueue.addWork(() -> {
+                for (TrackedRace trackedRace : trackedRacesCopy) {
+                    listener.raceAdded(trackedRace);
+                }
+            });
         } finally {
             unlockTrackedRacesAfterRead();
-        }
-        for (TrackedRace trackedRace : trackedRacesCopy) {
-            listener.raceAdded(trackedRace);
         }
     }
 
     @Override
-    public void removeRaceListener(RaceListener listener) {
+    public Future<Boolean> removeRaceListener(RaceListener listener) {
+        final CompletableFuture<Boolean> result = new CompletableFuture<Boolean>();
         lockTrackedRacesForRead();
         try {
-            raceListeners.remove(listener);
+            if (raceListeners.remove(listener) != null) {
+                eventQueue.addWork(() -> {
+                    result.complete(Boolean.TRUE);
+                });
+            } else {
+                result.complete(Boolean.TRUE);
+            }
         } finally {
             unlockTrackedRacesAfterRead();
         }
+        return result;
     }
 
     @Override
