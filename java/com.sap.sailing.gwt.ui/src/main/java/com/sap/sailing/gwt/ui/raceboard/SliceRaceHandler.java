@@ -3,7 +3,11 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
@@ -23,6 +27,20 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SliceRaceHandler {
+    interface Resources extends ClientBundle {
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
+        ImageResource settingsButton();
+        
+        @Source("SliceRaceHandler.gss")
+        Styles style();
+    }
+    
+    interface Styles extends CssResource {
+        String sliceButtonBackgroundImage();
+    }
+    
+    private final Styles styles = GWT.<Resources>create(Resources.class).style();
+    
     private final Button splitButtonUi;
 
     private TimeRange visibleRange;
@@ -48,8 +66,11 @@ public class SliceRaceHandler {
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardName = leaderboardName;
         this.eventId = eventId;
+        
+        styles.ensureInjected();
+        
         splitButtonUi = new Button();
-        splitButtonUi.setStyleName(ChartCssResources.INSTANCE.css().sliceButtonBackgroundImage());
+        splitButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
         splitButtonUi.setTitle(StringMessages.INSTANCE.sliceRace());
         competitorRaceChart.addToolbarButton(splitButtonUi);
         splitButtonUi.setVisible(false);

@@ -26,6 +26,7 @@
     margin-top: 8px;
     width: 2em;
     height: 2em;
+    background-color: transparent;
     background-size: contain;
     border: none;
     display: block;
@@ -40,9 +41,5 @@
 }
 
 @sprite .settingsButtonBackgroundImage {
-    gwt-image: "settingsButton";
-}
-
-@sprite .sliceButtonBackgroundImage {
     gwt-image: "settingsButton";
 }
