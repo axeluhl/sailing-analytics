@@ -10,7 +10,7 @@ There are four image types which can be added to an event carrying different rol
 * **logo:** the sailing event or league logo which gets displayed e.g. in the upper left corner next to the name of the sailing event.
 * **stage:** used as a banner for the sailing event and gets displayed e.g. on the landing page.
 * **teaser:** used to give a preview about the sailing event and gets displayed e.g. in the event overview where all events are grouped by years.    
-* **galery:** representing the images which are displayed under the _media_ tab of each event.
+* **gallery:** representing the images which are displayed under the _media_ tab of each event.
 
 ## Scale guidelines for several purposes
 For performance reasons, images should be scaled before uploading them. The following image resolutions showed up as good manner:
@@ -21,12 +21,21 @@ For performance reasons, images should be scaled before uploading them. The foll
 * **gallery.jpeg:** about 1400 x 1000 pixel (file size < 350 kB)
 
 ## S3 folder structure
-Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following naming conventions:     
+Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following conventions:     
 
-Build a event root folder for the event. Please add preceding number for providing a well grouped events order.  
-**pattern:** `event year`/`league name`/`event name with preceding number`/  
-e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/    
-e.g. `2017`/`1. Segel-Bundesliga`/`02 Berlin`/   
+Access the S3 folder of the corresponding event year. Create an event root folder and set its name to the name of the league or series of events (see ficture 1).  
+![An exemplary event overview for 2017](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/year-and-event.jpeg)  
+**Figure 1: An exemplary event overview for 2017**   
+
+Within this folder add a new subfolder, set its name to the event's name and add a preceding number which indicates the order of it (see figure 2).  
+![folder structure](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/folder-structure.jpeg)  
+**Figure 2: folder structure with preceding event numbers within an event series**  
+
+Access the corresponding event folder and create two subfolders: _Images\_Homepage_ and _Images\_Photos_. The first one is for the _stage_, _teaser_ and _logo_ images. The second one will carry _gallery_ images.  
+According to this description result in following folder structure:
+
+**pattern:** `~`/`event year`/`series name`/`event name with preceding number`/    
+e.g. `~`/`2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/  
 
 Add a folder for the _logo_, _stage_ and _teaser_ images  
 **pattern:** `{event root folder}`/`Images_Homepage`/  
