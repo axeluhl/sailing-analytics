@@ -1,4 +1,4 @@
-This page descrips how to manage the media content like images for the events at www.sapsailing.com, providing a guidance based on user's best experiences. For information about where to get media content itself, please refer to the [[media|wiki/events/Sailing-events-media-content]] page.
+This page descrips how to manage the media content like images and videos for the events on www.sapsailing.com, providing a guidance based on user's best experiences. For information about where to get media content itself, please refer to the [[media|wiki/events/Sailing-events-media-content]] page.
 
 [[_TOC_]]
 
@@ -7,10 +7,10 @@ This page descrips how to manage the media content like images for the events at
 ## Image types and their impact
 There are four image types which can be added to an event where they carry different roles:
 
-* **logo:** the sailing event or league logo which gets displayed e.g. in the upper left corner next to the name of the sailing event.
-* **stage:** used as a banner for the sailing event and gets displayed e.g. on the landing page.
-* **teaser:** used to give a preview about the sailing event and gets displayed e.g. in the event overview where all events are grouped by years.    
-* **gallery:** representing the images which are displayed under the _media_ tab of each event.
+* **Logo:** the sailing event or league logo which gets displayed e.g. in the upper left corner next to the name of the sailing event.
+* **Stage:** used as a banner for the sailing event and gets displayed e.g. on the landing page.
+* **Teaser:** used to give a preview about the sailing event and gets displayed e.g. in the event overview where all events are grouped by years.    
+* **Gallery:** representing the images which are displayed under the _media_ tab of each event.
 
 ## Scale guidelines for several purposes
 For performance reasons, images should be scaled before uploading them. The following image resolutions showed up as good manner:
@@ -63,7 +63,16 @@ The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [
 **Figure 4: the four image types**
 4. Click on the desired _add `image type` button_ and insert the _Image URL_ according to the memory location of the image. Usually, no further settings are required. 
 
+# Videos
 
+## Video types and their impact
+We distinguish between _highlight_, _livestream_ and _gallery_ videos and a special _featured_ option.
+
+* **Highlight:** most event organizers provide highlight videos of their sailing events which summarize the best moments of the event. Such videos belong to the _highlight_ category.  
+* **Livestream:** some event organizers record livestreams of the races during the event. This videos belong to the _livestream_ category and can be linked to the _Race Analytics_ solution.
+* **Gallery:** Some times interviews with sailors or other insights of the sailing event are provided by the organizers. These videos belong to the _gallery_ category.
+* **Featured:** is a special option for an event video. It can be additionally added to one of the three categories _highlight_, _livestream_ and _gallery_. A video with the _featured_ tag is presented at the event's page instead of the _stage image_.  
+Note: Always define the most populare video to be _featured_ e.g. the current livestream during the event. Never define more than _one_ featured video.
 
 
 
