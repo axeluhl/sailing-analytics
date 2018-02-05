@@ -11,6 +11,11 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
+/**
+ * Summary dialog to be shown after actions that generate a new TrackedRace.
+ * the dialog shows a link to the RaceBoard for the generated TrackedRace.
+ * In addition, if available a link to the associated event is shown.
+ */
 public class TrackedRaceCreationResultDialog extends DataEntryDialog<Void> {
 
     private final VerticalPanel verticalPanel;
