@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.util.UUID;
-
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -43,7 +41,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
-            final String leaderboardGroupName, String leaderboardName, UUID eventId) {
+            final String leaderboardGroupName, String leaderboardName) {
         super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
                 selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter,
