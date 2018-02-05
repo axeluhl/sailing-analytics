@@ -89,7 +89,7 @@ Note: Always define the most populare video to be _featured_ e.g. the current li
 ![insert a video](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/add-video.JPG)  
 **Figure 7: link a video with _Video URL_, _Mime Type_, _Title_ and _Language_**
 
-5. For the case when you are willing to set a _featured_ video select the _Enter tags for the video_ input field and enter _Featured_ (a small popup will support your insertion). When you are done its necessary to click the _Add_ button next to the text field which attaches this tag to the video (see **figure 8**).
+5. In the case you want to set a _featured_ video, select the _Enter tags for the video_ input field and enter _Featured_ (a small popup supports your input). When you're done, you'll need to click the _Add button_ next to the text box that attaches this tag to the video (see **figure 8**).  
 ![Add a featured video](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/add-featured-video.JPG)  
 **Figure 8: add a featured video**
 
