@@ -15,21 +15,22 @@ There are four image types which can be added to an event carrying different rol
 ## Scale guidelines for several purposes
 For performance reasons, images should be scaled before uploading them. The following image resolutions showed up as good manner:
 
-* **logo:** about 150 x 150 pixel (file size < 100 kB); take a .png file with transparent background!
-* **teaser:** about 640 x 480 pixel (file size < 100 kB)
-* **stage:** about 1800 x 500 pixel (file size < 500 kB)
-* **gallery:** about 1400 x 1000 pixel (file size < 350 kB)
+* **logo.png:** about 150 x 150 pixel (file size < 100 kB); take a .png file with transparent background!
+* **teaser.jpeg:** about 640 x 480 pixel (file size < 100 kB)
+* **stage.jpeg:** about 1800 x 500 pixel (file size < 500 kB)
+* **gallery.jpeg:** about 1400 x 1000 pixel (file size < 350 kB)
 
 ## S3 folder structure
 Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following naming conventions:     
 
 Build a event root folder for the event. Please add preceding number for providing a well grouped events order.  
 **pattern:** `event year`/`league name`/`event name with preceding number`/  
-e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/  
+e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/    
+e.g. `2017`/`1. Segel-Bundesliga`/`02 Berlin`/   
 
 Add a folder for the _logo_, _stage_ and _teaser_ images  
 **pattern:** `{event root folder}`/`Images_Homepage`/  
-e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Homepage`/
+e.g. `2017`/`1. Segel-Bundesliga`/`01 Prien am Chiemsee`/`Images_Homepage`/  
 
 Add a folder for the _galery_ images  
 **pattern:** `{event root folder}`/`Images_Photos`/    
