@@ -18,7 +18,9 @@ For performance reasons, images should be scaled before uploading them. The foll
 * **logo.png:** about 150 x 150 pixel (file size < 100 kB); take a .png file with transparent background!
 * **teaser.jpeg:** about 640 x 480 pixel (file size < 100 kB)
 * **stage.jpeg:** about 1800 x 500 pixel (file size < 500 kB)
-* **gallery.jpeg:** about 1400 x 1000 pixel (file size < 350 kB)
+* **gallery.jpeg:** about 1400 x 1000 pixel (file size < 350 kB)  
+
+Note: the _logo_ requires the .png file format with transparent background. _Teaser_, _stage_ and _gallery_ images require the .jpg (.jpeg) file format.
 
 ## S3 folder structure
 Before uploading the images an appropirate folder needs to be created at the S3 storage. For a good contribution please stick to the following conventions:     
