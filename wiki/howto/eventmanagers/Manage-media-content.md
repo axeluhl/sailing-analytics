@@ -58,7 +58,7 @@ The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [
 2. Select the corresponding event and click at the _edit_ button (see **figure 3**)  
 ![Events overview on admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/events-overview-admin-console.JPG)  
 **Figure 3: the edit button on the admin console**
-3. By selecting the _Images_ tab the possibilies to add the four image types like described [above](https://wiki.sapsailing.com/preview#images_image-types-and-their-impact) show up (see **figure 4**).
+3. By selecting the _Images_ tab the possibilities to add the four image types like described [above](https://wiki.sapsailing.com/preview#images_image-types-and-their-impact) show up (see **figure 4**).
 ![The four image types](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/edit-media-content.JPG)  
 **Figure 4: the four image types**
 4. Click on the desired _add `image type` button_ and insert the _Image URL_ according to the memory location of the image. Usually, no further settings are required. 
@@ -76,8 +76,12 @@ Note: Always define the most populare video to be _featured_ e.g. the current li
 
 ## Exemplary instructions
 1. Access the administration console _eventname(-master?)_.sapsailing.com/gwt/AdminConsle.html and login with your user credentials.
-2. Select the corresponding event and click at the _edit_ button (see **figure 3**)  
-![Events overview on admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/events-overview-admin-console.JPG)
+2. Select the corresponding event and click at the _edit_ button (see **figure 5**)  
+![Events overview on admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/events-overview-admin-console.JPG)  
+**Figure 5: the edit button on the admin console**
+3. By selecting the _Videos_ tab the possibilities to add the three video types like described [above](https://wiki.sapsailing.com/wiki/howto/eventmanagers/Manage-media-content#videos_video-types-and-their-impact) show up (see **figure 6**).  
+![Figure 6: the three video types](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/edit-media-content-video.JPG)    
+
 
 
 
