@@ -107,9 +107,9 @@ e.g. `~`/`clubflags`/`germany`/`clubflag1.png`
 1. Access the administration console _eventname(-master?)_.sapsailing.com/gwt/AdminConsle.html and login with your user credentials.
 
 2. Select _Tracked races_ and click on the _Competitors_ tab (see **figure 9**).  
+
+3. Select the competitor, click on the _Edit_ button (see **figure 9**) and insert the Flag image URL of the corresponding club flag.   
 ![Select the competitors tab within the admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/clubflag-selection.JPG)  
 **Figure 9: competitors tab of the admin console**
-
-3. Select the competitor, click on the _Edit_ button and insert the Flag image URL of the corresponding club flag.
 
 
