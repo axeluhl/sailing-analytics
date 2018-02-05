@@ -72,7 +72,7 @@ We distinguish between _highlight_, _livestream_ and _gallery_ videos and a spec
 * **Highlight:** most event organizers provide highlight videos of their sailing events which summarize the best moments of the event. Such videos belong to the _highlight_ category.  
 * **Livestream:** some event organizers record livestreams of the races during the event. This videos belong to the _livestream_ category and can be linked to the _Race Analytics_ solution.
 * **Gallery:** Some times interviews with sailors or other insights of the sailing event are provided by the organizers. These videos belong to the _gallery_ category.
-* **Featured:** is a special option for an event video. It can be additionally added to one of the three categories _highlight_, _livestream_ and _gallery_. A video with the _featured_ tag is presented at the event's page instead of the _stage image_.  
+* **Featured:** is a special option for an event video. This tag can be additionally added to one of the three categories _highlight_, _livestream_ and _gallery_. A video with the _featured_ tag is presented at the event's page instead of the _stage image_.  
 Note: Always define the most populare video to be _featured_ e.g. the current livestream during the event. Never define more than _one_ featured video.
 
 ## Exemplary instructions
