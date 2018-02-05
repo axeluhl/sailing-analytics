@@ -1,4 +1,4 @@
-This page descrips how to manage the media content like images for the events at www.sapsailing.com, providing a guidance based on user's best experience. For information about where to get media content itself, please refer to the [[media|wiki/events/Sailing-events-media-content]] page.
+This page descrips how to manage the media content like images for the events at www.sapsailing.com, providing a guidance based on user's best experiences. For information about where to get media content itself, please refer to the [[media|wiki/events/Sailing-events-media-content]] page.
 
 [[_TOC_]]
 
