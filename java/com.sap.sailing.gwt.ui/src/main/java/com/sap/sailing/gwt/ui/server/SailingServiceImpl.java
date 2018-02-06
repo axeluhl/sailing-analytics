@@ -510,6 +510,8 @@ import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.ShiroPermissionBuilderImpl;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
@@ -3963,9 +3965,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Map<Tenant, Tenant> fromOriginalToStrippedDownTenant = new HashMap<>();
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-        eventDTO.setAcl(securityDTOFactory.createAccessControlListDTO(getSecurityService().getAccessControlList(event.getId().toString()).getAnnotation(),
+        final AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(event.getId().toString());
+        eventDTO.setAcl(securityDTOFactory.createAccessControlListDTO(accessControlList==null?null:accessControlList.getAnnotation(),
                 fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(getSecurityService().getOwnership(event.getId().toString()).getAnnotation(),
+        final OwnershipAnnotation ownership = getSecurityService().getOwnership(event.getId().toString());
+        eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(ownership==null?null:ownership.getAnnotation(),
                 fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         return eventDTO;
     }
