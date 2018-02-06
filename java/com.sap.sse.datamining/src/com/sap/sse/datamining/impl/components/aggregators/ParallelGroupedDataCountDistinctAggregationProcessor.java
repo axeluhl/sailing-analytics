@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
-import org.eclipse.jetty.util.ConcurrentHashSet;
-
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
@@ -55,7 +53,7 @@ public class ParallelGroupedDataCountDistinctAggregationProcessor
         Util.addToValueSet(countMap, key, element.getDataEntry(), new Util.ValueSetConstructor<Object>() {
             @Override
             public Set<Object> createSet() {
-                return new ConcurrentHashSet<Object>();
+                return ConcurrentHashMap.newKeySet();
             }
         });
     }
