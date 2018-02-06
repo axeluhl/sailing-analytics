@@ -1,0 +1,59 @@
+.windfindercontrol {
+  background-color: #d0021b;
+  text-transform: uppercase;
+  text-decoration: none;
+  vertical-align: bottom;
+  padding-left: 1em;
+  padding-right: 0.5em
+}
+.windfindercontrol_text, .windfindercontrol_icon {
+  display: inline-block;
+}
+.windfindercontrol_icon {
+  margin: -0.5em 0.25em;
+}
+.windfindercontrol:hover {
+  cursor: pointer;
+  background-color: #ba011a;
+}
+.windfinderlaunchpad_content {
+  display: block;
+  bottom: 0;
+  right: 0;
+  box-shadow: 0px 0px 0.666666666666667em 0px rgba(0,0,0,0.2);
+}
+.windfinderlaunchpad_content_item {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 3em;
+  padding: 0 1.333333333333333em 0 0.666666666666667em;
+  background: #fff;
+  color: #d0021b;
+  font-weight: normal;
+}
+.windfinderlaunchpad_content_item:hover {
+  background-color: #d0021b;
+  color: #ffffff;
+  text-decoration: underline;
+}
+.windfinderlaunchpad_content_item_icon {
+  margin-right: 1em;
+}
+.windfinderlaunchpad_content_item_title {
+  white-space: nowrap;
+}
+.windfindercontrol_icon, .windfinderlaunchpad_content_item_icon {
+  width: 1.666666666666667em;
+  height: 1.666666666666667em;
+  background-image: resourceUrl("windfinderLogo");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
