@@ -17,8 +17,6 @@ import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
-import com.sap.sse.security.shared.WildcardPermission;
 
 public class User implements NamedWithID {
     private static final long serialVersionUID = 1788215575606546042L;
@@ -269,23 +267,6 @@ public class User implements NamedWithID {
 
     public String getValidationSecret() {
         return validationSecret;
-    }
-
-    public boolean hasPermission(String stringPermission, PermissionsForRoleProvider provider) {
-        WildcardPermission requested = new WildcardPermission(stringPermission);
-        for (String permission : getPermissions()) {
-            if (new WildcardPermission(permission).implies(requested)) {
-                return true;
-            }
-        }
-        for (String role : getRoles()) {
-            for (String permission : provider.getPermissions(role)) {
-                if (new WildcardPermission(permission).implies(requested)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
 }
