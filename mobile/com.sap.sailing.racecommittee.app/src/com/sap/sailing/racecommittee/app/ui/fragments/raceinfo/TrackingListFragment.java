@@ -39,7 +39,6 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorResultsList;
@@ -521,19 +520,15 @@ public class TrackingListFragment extends BaseFragment
 
     protected void onLoadLeaderboardSucceeded(LeaderboardResult data) {
         final String raceName = getRace().getName();
-        List<CompetitorWithRaceRankImpl> sortByRank = data.getCompetitors();
-        Collections.sort(sortByRank, new Comparator<CompetitorWithRaceRankImpl>() {
-            @Override
-            public int compare(CompetitorWithRaceRankImpl left, CompetitorWithRaceRankImpl right) {
-                return (int) left.getRaceRank(raceName) - (int) right.getRaceRank(raceName);
-            }
-        });
+        List<Util.Pair<Long, String>> sortByRank = data.getResult(raceName);
         List<Competitor> sortedList = new ArrayList<>();
-        for (CompetitorWithRaceRankImpl item : sortByRank) {
-            for (Competitor competitor : mCompetitorData) {
-                if (competitor.getId().toString().equals(item.getId())) {
-                    sortedList.add(competitor);
-                    break;
+        if (sortByRank != null) {
+            for (Util.Pair<Long, String> item : sortByRank) {
+                for (Competitor competitor : mCompetitorData) {
+                    if (competitor.getId().toString().equals(item.getB())) {
+                        sortedList.add(competitor);
+                        break;
+                    }
                 }
             }
         }

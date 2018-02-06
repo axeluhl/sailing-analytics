@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +35,6 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorResultsList;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
@@ -445,19 +442,15 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     private void onLoadLeaderboardResultSucceeded(LeaderboardResult data) {
         final String raceName = getRace().getName();
-        List<CompetitorWithRaceRankImpl> sortByRank = data.getCompetitors();
-        Collections.sort(sortByRank, new Comparator<CompetitorWithRaceRankImpl>() {
-            @Override
-            public int compare(CompetitorWithRaceRankImpl left, CompetitorWithRaceRankImpl right) {
-                return (int) left.getRaceRank(raceName) - (int) right.getRaceRank(raceName);
-            }
-        });
+        List<Util.Pair<Long, String>> sortByRank = data.getResult(raceName);
         List<CompetitorResultEditableImpl> sortedList = new ArrayList<>();
-        for (CompetitorWithRaceRankImpl item : sortByRank) {
-            for (CompetitorResultEditableImpl competitor : mCompetitorResults) {
-                if (competitor.getCompetitorId().toString().equals(item.getId())) {
-                    sortedList.add(competitor);
-                    break;
+        if (sortByRank != null) {
+            for (Util.Pair<Long, String> item : sortByRank) {
+                for (CompetitorResultEditableImpl competitor : mCompetitorResults) {
+                    if (competitor.getCompetitorId().toString().equals(item.getB())) {
+                        sortedList.add(competitor);
+                        break;
+                    }
                 }
             }
         }

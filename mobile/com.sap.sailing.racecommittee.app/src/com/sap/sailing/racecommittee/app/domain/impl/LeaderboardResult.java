@@ -1,17 +1,24 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.util.List;
+import java.util.Map;
+
+import com.sap.sse.common.Util;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 public class LeaderboardResult {
 
-    private List<CompetitorWithRaceRankImpl> mCompetitors;
+    private Map<String, List<Util.Pair<Long, String>>> mResult;
 
-    public LeaderboardResult(List<CompetitorWithRaceRankImpl> competitors) {
-        mCompetitors = competitors;
+    public LeaderboardResult(@NonNull Map<String, List<Util.Pair<Long, String>>> result) {
+        mResult = result;
     }
 
-    public List<CompetitorWithRaceRankImpl> getCompetitors() {
-        return mCompetitors;
+    @Nullable
+    public List<Util.Pair<Long, String>> getResult(@NonNull String raceName) {
+        return mResult.get(raceName);
     }
 
 }
