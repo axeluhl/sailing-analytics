@@ -7,7 +7,7 @@
 <unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
-<repository location="http://p2.sapsailing.com/p2/sailing/"/>
+<repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.2.2.201407241931"/>
