@@ -19,6 +19,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.shiro.SecurityUtils;
 import org.mp4parser.IsoFile;
 import org.mp4parser.boxes.UserBox;
 import org.mp4parser.boxes.iso14496.part12.MovieBox;
@@ -36,13 +37,11 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.User;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
 
@@ -51,10 +50,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private static final int METADATA_CONNECTION_TIMEOUT = 10000;
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-
-    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
     private static final int REQUIRED_SIZE = 1000000;
     private static final long serialVersionUID = -8917349579281305977L;
@@ -62,8 +58,6 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public MediaServiceImpl() {
         super();
         BundleContext context = Activator.getDefault();
-        securityServiceTracker = new ServiceTracker<>(context, SecurityService.class, /* customizer */ null);
-        securityServiceTracker.open();
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context,
                 RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
@@ -89,19 +83,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
     
     private void ensureUserCanManageMedia() {
-        SecurityService service = securityServiceTracker.getService();
-        if (service == null) {
-            throw new IllegalStateException("SecurityService not initialized");
-        }
-        User user = service.getCurrentUser();
-        if (user == null) {
-            throw new IllegalStateException("User is missing permission to MANAGER_MEDIA");
-        }
-        boolean hasPermission = user.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
-                SailingPermissionsForRoleProvider.INSTANCE);
-        if (!hasPermission) {
-            throw new IllegalStateException("User is missing permission to MANAGER_MEDIA");
-        }
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(Mode.UPDATE));
     }
 
     @Override
