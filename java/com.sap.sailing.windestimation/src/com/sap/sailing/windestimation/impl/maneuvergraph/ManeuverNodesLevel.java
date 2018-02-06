@@ -18,9 +18,7 @@ public class ManeuverNodesLevel {
     private final SingleManeuverClassificationResult maneuverClassificationResult;
 
     private final double[] bestDistancesFromStart = new double[FineGrainedPointOfSail.values().length];
-    private final double[] bestDistancesFromEnd = new double[bestDistancesFromStart.length];
     private final FineGrainedPointOfSail[] bestPrecedingNodesForThisNodes = new FineGrainedPointOfSail[bestDistancesFromStart.length];
-    private final FineGrainedPointOfSail[] bestFollowingNodesForThisNodes = new FineGrainedPointOfSail[bestDistancesFromStart.length];
 
     public ManeuverNodesLevel(Maneuver maneuver, SingleManeuverClassifier singleManeuverClassifier,
             ManeuverNodesLevel previousLevel) {
@@ -60,45 +58,18 @@ public class ManeuverNodesLevel {
         return bestDistancesFromStart[node.ordinal()];
     }
 
-    public double getDistanceToNodeFromEnd(FineGrainedPointOfSail node) {
-        return bestDistancesFromEnd[node.ordinal()];
-    }
-
-    public void computeDistancesFromStart() {
-        computeDistances(false);
-    }
-
-    public void computeDistancesFromEnd() {
-        computeDistances(true);
-    }
-
-    private void computeDistances(boolean fromEnd) {
-        final double[] bestDistances;
-        final double[] previousLevelBestDistances;
-        final ManeuverNodesLevel previousLevel;
-        final FineGrainedPointOfSail[] bestPrecidingNodes;
-        if (fromEnd) {
-            bestDistances = this.bestDistancesFromEnd;
-            previousLevelBestDistances = this.nextLevel.bestDistancesFromEnd;
-            previousLevel = this.nextLevel;
-            bestPrecidingNodes = this.bestFollowingNodesForThisNodes;
-        } else {
-            bestDistances = this.bestDistancesFromStart;
-            previousLevelBestDistances = this.previousLevel.bestDistancesFromStart;
-            previousLevel = this.previousLevel;
-            bestPrecidingNodes = this.bestPrecedingNodesForThisNodes;
-        }
+    public void computeDistances() {
         boolean markPassingIsNeighbour = isMarkPassingNeighbour();
         for (FineGrainedPointOfSail pointOfSailBeforeManeuver : FineGrainedPointOfSail.values()) {
             double likelihoodForPointOfSailBeforeManeuver = markPassingIsNeighbour
                     ? 1 / CoarseGrainedPointOfSail.values().length
                     : maneuverClassificationResult.getLikelihoodForPointOfSailBeforeManeuver(
                             pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail());
-            if (previousLevel == null) {
-                bestDistances[pointOfSailBeforeManeuver.ordinal()] = convertLikelihoodToDistance(
+            if (this.previousLevel == null) {
+                this.bestDistancesFromStart[pointOfSailBeforeManeuver.ordinal()] = convertLikelihoodToDistance(
                         likelihoodForPointOfSailBeforeManeuver);
             } else {
-                double courseChangeDegFromPreviousPointOfSailBefore = previousLevel.getManeuver()
+                double courseChangeDegFromPreviousPointOfSailBefore = this.previousLevel.getManeuver()
                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore().getBearing()
                         .getDifferenceTo(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
                                 .getSpeedWithBearingBefore().getBearing())
@@ -109,15 +80,16 @@ public class ManeuverNodesLevel {
                     double likelihoodForPointOfSailTransition = getLikelihoodForPointOfSailTransition(
                             previousLevelPointOfSailBeforeManeuver, pointOfSailBeforeManeuver,
                             courseChangeDegFromPreviousPointOfSailBefore, likelihoodForPointOfSailBeforeManeuver);
-                    double distanceThroughPreviousLevelPointOfSailBeforeManeuver = previousLevelBestDistances[previousLevelPointOfSailBeforeManeuver
+                    double distanceThroughPreviousLevelPointOfSailBeforeManeuver = this.previousLevel.bestDistancesFromStart[previousLevelPointOfSailBeforeManeuver
                             .ordinal()] + convertLikelihoodToDistance(likelihoodForPointOfSailTransition);
                     if (bestDistanceThroughPreviousLevel > distanceThroughPreviousLevelPointOfSailBeforeManeuver) {
                         bestDistanceThroughPreviousLevel = distanceThroughPreviousLevelPointOfSailBeforeManeuver;
                         bestPreviousLevelPointOfSailBeforeManeuver = previousLevelPointOfSailBeforeManeuver;
                     }
                 }
-                bestDistances[pointOfSailBeforeManeuver.ordinal()] = bestDistanceThroughPreviousLevel;
-                bestPrecidingNodes[pointOfSailBeforeManeuver.ordinal()] = bestPreviousLevelPointOfSailBeforeManeuver;
+                this.bestDistancesFromStart[pointOfSailBeforeManeuver.ordinal()] = bestDistanceThroughPreviousLevel;
+                this.bestPrecedingNodesForThisNodes[pointOfSailBeforeManeuver
+                        .ordinal()] = bestPreviousLevelPointOfSailBeforeManeuver;
             }
         }
     }

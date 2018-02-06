@@ -34,13 +34,8 @@ public class ManeuverSequenceGraph {
     public void computePossiblePathsWithDistances() {
         ManeuverNodesLevel currentLevel = firstGraphLevel;
         while (currentLevel != null) {
-            currentLevel.computeDistancesFromStart();
+            currentLevel.computeDistances();
             currentLevel = currentLevel.getNextLevel();
-        }
-        currentLevel = lastGraphLevel;
-        while (currentLevel != null) {
-            currentLevel.computeDistancesFromEnd();
-            currentLevel = currentLevel.getPreviousLevel();
         }
     }
 
