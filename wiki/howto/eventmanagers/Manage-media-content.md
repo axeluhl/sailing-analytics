@@ -64,6 +64,7 @@ The following guide is based on the tool [GIMP](https://www.gimp.org/) and its [
 4. Click on the desired _add `image type` button_ and insert the _Image URL_ according to the memory location of the image. Usually, no further settings are required. 
 
 # Videos
+A guidance about how to synchronize races with livestream videos can be found [here](https://wiki.sapsailing.com/wiki/howto/eventmanagers/linking-race-videos).
 
 ## Video types and their impact
 We distinguish between _highlight_, _livestream_ and _gallery_ videos and a special _featured_ option.
@@ -71,7 +72,7 @@ We distinguish between _highlight_, _livestream_ and _gallery_ videos and a spec
 * **Highlight:** most event organizers provide highlight videos of their sailing events which summarize the best moments of the event. Such videos belong to the _highlight_ category.  
 * **Livestream:** some event organizers record livestreams of the races during the event. This videos belong to the _livestream_ category and can be linked to the _Race Analytics_ solution.
 * **Gallery:** Some times interviews with sailors or other insights of the sailing event are provided by the organizers. These videos belong to the _gallery_ category.
-* **Featured:** is a special option for an event video. It can be additionally added to one of the three categories _highlight_, _livestream_ and _gallery_. A video with the _featured_ tag is presented at the event's page instead of the _stage image_.  
+* **Featured:** is a special option for an event video. This tag can be additionally added to one of the three categories _highlight_, _livestream_ and _gallery_. A video with the _featured_ tag is presented at the event's page instead of the _stage image_.  
 Note: Always define the most populare video to be _featured_ e.g. the current livestream during the event. Never define more than _one_ featured video.
 
 ## Exemplary instructions
@@ -93,6 +94,22 @@ Note: Always define the most populare video to be _featured_ e.g. the current li
 ![Add a featured video](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/add-featured-video.JPG)  
 **Figure 8: add a featured video**
 
+# Competitor logos
+The competitors of the sailing events can be equipped with their club flags. The following steps provide an exemplary guidance about how to add a club flag to its corresponding competitor. All available clubflags are located at the S3 storage under the folder `~`/`clubflags`/.
 
+## Required file format 
+* **File format:** .png with transparent background
+* **File resolution:** about 100 x 50 pixel (file size < 25 kB)
+* **Storage location:** `~`/`clubflags`/`country`/  
+e.g. `~`/`clubflags`/`germany`/`clubflag1.png`
+
+## Exemplary instructions
+1. Access the administration console _eventname(-master?)_.sapsailing.com/gwt/AdminConsle.html and login with your user credentials.
+
+2. Select _Tracked races_ and click on the _Competitors_ tab (see **figure 9**).  
+
+3. Select the competitor, click on the _Edit_ button (see **figure 9**) and insert the Flag image URL of the corresponding club flag.   
+![Select the competitors tab within the admin console](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/media%20content/clubflag-selection.JPG)  
+**Figure 9: competitors tab of the admin console**
 
 
