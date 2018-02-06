@@ -426,14 +426,26 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("user:grant_permission,revoke_permission:" + username)) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
-                return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
+                return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
             }
             Set<Role> rolesToSet = new HashSet<>();
             for (final Triple<UUID, String, String> roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierNameAndUsernames) {
-                final Tenant tenant = getSecurityService().getTenantByName(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB());
-                rolesToSet.add(createRoleFromIDs(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getA(),
-                        tenant == null ? null : tenant.getId(),
-                        roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getC()));
+                final Tenant tenant;
+                if (roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB() == null || roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB().trim().isEmpty()) {
+                    tenant = null;
+                } else {
+                    tenant = getSecurityService().getTenantByName(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB());
+                    if (tenant == null) {
+                        return new SuccessInfo(false, "Tenant "+roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB()+
+                                " does not exist.", /* redirectURL */ null, /* userDTO */ null);
+                    }
+                }
+                try {
+                    rolesToSet.add(createRoleFromIDs(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getA(),
+                            tenant==null?null:tenant.getId(), roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getC()));
+                } catch (UserManagementException e) {
+                    return new SuccessInfo(false, e.getMessage(), /* redirectURL */ null, /* userDTO */ null);
+                }
             }
             Set<Role> roleDefinitionsToRemove = new HashSet<>();
             Util.addAll(u.getRoles(), roleDefinitionsToRemove);
@@ -455,11 +467,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
     
-    private Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername) {
+    private Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername) throws UserManagementException {
+        final User user;
+        if (qualifyingUsername == null || qualifyingUsername.trim().isEmpty()) {
+            user = null;
+        } else {
+            user = getSecurityService().getUserByName(qualifyingUsername);
+            if (user == null) {
+                throw new UserManagementException("User "+qualifyingUsername+" not found for role qualification");
+            }
+        }
         return new RoleImpl(
                 getSecurityService().getRoleDefinition(roleDefinitionId),
-                qualifyingTenantId == null ? null : getSecurityService().getTenant(qualifyingTenantId),
-                        qualifyingUsername == null ? null : getSecurityService().getUserByName(qualifyingUsername));
+                qualifyingTenantId == null ? null : getSecurityService().getTenant(qualifyingTenantId), user);
     }
 
     @Override
