@@ -19,6 +19,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.shiro.SecurityUtils;
 import org.mp4parser.IsoFile;
 import org.mp4parser.boxes.UserBox;
 import org.mp4parser.boxes.iso14496.part12.MovieBox;
@@ -35,6 +36,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
@@ -47,8 +50,8 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private static final int METADATA_CONNECTION_TIMEOUT = 10000;
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+
     private static final int REQUIRED_SIZE = 1000000;
     private static final long serialVersionUID = -8917349579281305977L;
 
@@ -78,9 +81,14 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public Iterable<MediaTrack> getAllMediaTracks() {
         return racingEventService().getAllMediaTracks();
     }
+    
+    private void ensureUserCanManageMedia() {
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(Mode.UPDATE));
+    }
 
     @Override
     public String addMediaTrack(MediaTrack mediaTrack) {
+        ensureUserCanManageMedia();
         if (mediaTrack.dbId != null) {
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
         }
@@ -90,36 +98,43 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     @Override
     public void deleteMediaTrack(MediaTrack mediaTrack) {
+        ensureUserCanManageMedia();
         racingEventService().mediaTrackDeleted(mediaTrack);
     }
 
     @Override
     public void updateTitle(MediaTrack mediaTrack) {
+        ensureUserCanManageMedia();
         racingEventService().mediaTrackTitleChanged(mediaTrack);
     }
 
     @Override
     public void updateUrl(MediaTrack mediaTrack) {
+        ensureUserCanManageMedia();
         racingEventService().mediaTrackUrlChanged(mediaTrack);
     }
 
     @Override
     public void updateStartTime(MediaTrack mediaTrack) {
+        ensureUserCanManageMedia();
         racingEventService().mediaTrackStartTimeChanged(mediaTrack);
     }
 
     @Override
     public void updateDuration(MediaTrack mediaTrack) {
+        ensureUserCanManageMedia();
         racingEventService().mediaTrackDurationChanged(mediaTrack);
     }
 
     @Override
     public void updateRace(MediaTrack mediaTrack) {
+        ensureUserCanManageMedia();
         racingEventService().mediaTrackAssignedRacesChanged(mediaTrack);
     }
 
     @Override
     public VideoMetadataDTO checkMetadata(String url) {
+        ensureUserCanManageMedia();
         VideoMetadataDTO response = null;
         try {
             URL input = new URL(url);
@@ -199,6 +214,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     @Override
     public VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped) {
+        ensureUserCanManageMedia();
         File tmp = null;
         boolean spherical = false;
         Duration duration = null;
