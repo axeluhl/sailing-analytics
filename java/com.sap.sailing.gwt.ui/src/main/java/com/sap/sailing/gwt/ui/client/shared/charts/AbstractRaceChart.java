@@ -259,12 +259,14 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     
     protected void resetMinMaxAndExtremesInterval(boolean redraw) {
         changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), redraw);
+        fireEvent(new ChartZoomResetEvent());
     }
 
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
         chart.showResetZoom(); // Patched method
+        fireEvent(new ChartZoomChangedEvent(zoomStartTimepoint, zoomEndTimepoint));
     }
 
     @Override
