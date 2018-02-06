@@ -185,7 +185,7 @@ public class ManeuverNodesLevel {
     }
 
     private double convertLikelihoodToDistance(double likelihoodForPointOfSailBeforeManeuver) {
-        return 1 - likelihoodForPointOfSailBeforeManeuver;
+        return 1 / (likelihoodForPointOfSailBeforeManeuver * likelihoodForPointOfSailBeforeManeuver);
     }
 
 }
