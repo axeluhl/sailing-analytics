@@ -603,74 +603,74 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new AverageAbsoluteCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, 
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new AverageSignedCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_AWA, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_AWA, new LegAWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_AWS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_AWS, new LegAWS(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TWA, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TWA, new LegTWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TWS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TWS, new LegTWS(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TWD, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TWD, new LegTWD(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TARG_TWA, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TARG_TWA, new LegTargetTWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_BOAT_SPEED, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_BOAT_SPEED, new LegBoatSpeed(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TARG_BOAT_SPEED, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TARG_BOAT_SPEED, new LegTargetBoatSpeed(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_SOG, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_SOG, new LegSOG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_COG, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_COG, new LegCOG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_FORESTAY_LOAD, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_FORESTAY_LOAD, new LegForestayLoad(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_RAKE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_RAKE, new LegRake(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_COURSE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_COURSE, new LegCourse(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_HEADING, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_HEADING, new LegHeading(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_VMG, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_VMG, new LegVMG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_VMG_TARG_VMG_DELTA, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_VMG_TARG_VMG_DELTA, new LegVMGDelta(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_RATE_OF_TURN, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_RATE_OF_TURN, new LegRateOfTurn(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_RUDDER_ANGLE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_RUDDER_ANGLE, new LegRudderAngle(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_HEEL, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_HEEL, new LegHeel(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TARGET_HEEL, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TARGET_HEEL, new LegTargetHeel(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_PORT_LAYLINE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_PORT_LAYLINE, new LegTimeToPortLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_STB_LAYLINE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_STB_LAYLINE, new LegTimeToStarboardLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_DIST_TO_PORT_LAYLINE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DIST_TO_PORT_LAYLINE, new LegDistanceToPortLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_DIST_TO_STB_LAYLINE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DIST_TO_STB_LAYLINE, new LegDistanceToStarboardLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_GUN, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_GUN, new LegTimeToGun(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_COMMITTEE_BOAT, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_COMMITTEE_BOAT, new LegTimeToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_PIN, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_PIN, new LegTimeToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_BURN_TO_LINE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_BURN_TO_LINE, new LegTimeToBurnToLine(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT, new LegTimeToBurnToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_TIME_TO_BURN_TO_PIN, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_TIME_TO_BURN_TO_PIN, new LegTimeToBurnToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_DISTANCE_TO_COMMITTEE_BOAT, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_TO_COMMITTEE_BOAT, new LegDistanceToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_DISTANCE_TO_PIN, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_TO_PIN, new LegDistanceToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_DISTANCE_BELOW_LINE, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_BELOW_LINE, new LegDistanceBelowLine(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.LEG_LINE_SQUARE_FOR_WIND_DIRECTION, 
-                new FormattedDoubleDetailTypeColumn(DetailType.LEG_LINE_SQUARE_FOR_WIND_DIRECTION, new LegLineSquareForWindDirection(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_AWA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_AWA, new LegAWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_AWS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_AWS, new LegAWS(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TWA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TWA, new LegTWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TWS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TWS, new LegTWS(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TWD, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TWD, new LegTWD(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TARG_TWA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TARG_TWA, new LegTargetTWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_BOAT_SPEED, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_BOAT_SPEED, new LegBoatSpeed(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TARG_BOAT_SPEED, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TARG_BOAT_SPEED, new LegTargetBoatSpeed(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_SOG, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_SOG, new LegSOG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_COG, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_COG, new LegCOG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_FORESTAY_LOAD, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_FORESTAY_LOAD, new LegForestayLoad(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_RAKE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_RAKE, new LegRake(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_COURSE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_COURSE, new LegCourse(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_HEADING, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_HEADING, new LegHeading(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_VMG, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_VMG, new LegVMG(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_VMG_TARG_VMG_DELTA, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_VMG_TARG_VMG_DELTA, new LegVMGDelta(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_RATE_OF_TURN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_RATE_OF_TURN, new LegRateOfTurn(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_RUDDER_ANGLE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_RUDDER_ANGLE, new LegRudderAngle(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_HEEL, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_HEEL, new LegHeel(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TARGET_HEEL, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TARGET_HEEL, new LegTargetHeel(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_PORT_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_PORT_LAYLINE, new LegTimeToPortLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_STB_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_STB_LAYLINE, new LegTimeToStarboardLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_DIST_TO_PORT_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_DIST_TO_PORT_LAYLINE, new LegDistanceToPortLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_DIST_TO_STB_LAYLINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_DIST_TO_STB_LAYLINE, new LegDistanceToStarboardLayline(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_GUN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_GUN, new LegTimeToGun(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT, new LegTimeToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_PIN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_PIN, new LegTimeToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_LINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_LINE, new LegTimeToBurnToLine(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT, new LegTimeToBurnToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_PIN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_PIN, new LegTimeToBurnToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT, new LegDistanceToCommitteeBoat(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_DISTANCE_TO_PIN, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_DISTANCE_TO_PIN, new LegDistanceToPin(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_DISTANCE_BELOW_LINE, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_DISTANCE_BELOW_LINE, new LegDistanceBelowLine(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION, new LegLineSquareForWindDirection(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         return result;
     }
 
