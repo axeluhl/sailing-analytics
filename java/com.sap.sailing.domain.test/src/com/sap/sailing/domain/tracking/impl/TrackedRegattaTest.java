@@ -47,7 +47,7 @@ public class TrackedRegattaTest {
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ false, /* startDate */ null, /* endDate */null, null, null, "a", null));
     }
     
     @Test(expected = TimeoutException.class)
@@ -114,7 +114,7 @@ public class TrackedRegattaTest {
     }
     
     private DynamicTrackedRace createRace(String name) {
-        RaceDefinition race1 = new RaceDefinitionImpl(name, course, boatClass, Collections.emptyList());
+        RaceDefinition race1 = new RaceDefinitionImpl(name, course, boatClass, Collections.emptyMap());
         return new DynamicTrackedRaceImpl(regatta, race1, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class));
