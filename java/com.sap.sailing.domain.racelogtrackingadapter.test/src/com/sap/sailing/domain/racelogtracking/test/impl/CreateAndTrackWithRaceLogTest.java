@@ -60,6 +60,8 @@ import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RaceLogFixTrackerM
 import com.sap.sailing.domain.racelogtracking.test.RaceLogTrackingTestHelper;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -126,7 +128,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
             Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         exception.expect(NotDenotedForRaceLogTrackingException.class);
-        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        trackRace(column);
     }
 
     private void testSize(Track<?> track, int expected) {
@@ -198,7 +200,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         raceLog.add(new RaceLogRegisterCompetitorEventImpl(t(), author, 0, comp1, boat1));
         raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
         // start tracking
-        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        trackRace(column);
         
 
         // now there is a tracked race
@@ -220,6 +222,23 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
     }
+
+    private void trackRace(RaceColumn column) throws NotDenotedForRaceLogTrackingException, Exception {
+        final RaceHandle raceHandle = adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        
+        // The following lines ensure that we received all necessary events from the TrackedRegatta
+        // When removing a listener we get a Future whose get method will block until all previously triggered events are processed.
+        final RaceListener raceListener = new RaceListener() {
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
+            }
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+            }
+        };
+        raceHandle.getTrackedRegatta().addRaceListener(raceListener);
+        raceHandle.getTrackedRegatta().removeRaceListener(raceListener).get();
+    }
     
     /**
      * See bug 4114: when the regatta is set to control the tracking times from start / finish times,
@@ -235,6 +254,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
         // start tracking
         adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        
         // now there is a trackedrace
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
@@ -254,7 +274,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         
         // now remove the tracked race and track again; again, the explicit tracking times in the race log must prevail
         service.removeRace(regatta, race.getRace());
-        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        trackRace(column);
         TrackedRace race2 = column.getTrackedRace(fleet);
         assertEquals(explicitStartOfTracking, race2.getStartOfTracking());
         assertEquals(explicitEndOfTracking, race2.getEndOfTracking());
@@ -278,8 +298,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(t(), t(), author, UUID.randomUUID(), comp1));
         raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
 
-        // start tracking
-        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        trackRace(column);
 
         // now there is a trackedrace
         TrackedRace race = column.getTrackedRace(fleet);

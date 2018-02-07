@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Future;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -623,10 +624,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removeTrackedRace(RaceDefinition raceDefinition) {
-            }
-
-            @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
                     WindStore windStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -652,7 +649,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removeRaceListener(RaceListener listener) {
+            public Future<Boolean> removeRaceListener(RaceListener listener) {
+                return null;
             }
         };
     }

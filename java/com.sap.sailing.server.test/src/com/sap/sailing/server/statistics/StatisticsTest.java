@@ -41,6 +41,8 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -88,14 +90,28 @@ public class StatisticsTest {
         regatta.addTrackedRace(trackedRace);
     }
 
-    private TrackedRaceStatisticsCacheImpl getStatisticsCacheWithRegattaAdded() {
+    private TrackedRaceStatisticsCacheImpl getStatisticsCacheWithRegattaAdded() throws Exception {
         TrackedRaceStatisticsCacheImpl trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         trackedRaceStatisticsCache.regattaAdded(regatta);
+        
+        // The following lines ensure that we received all necessary events from the TrackedRegatta
+        // When removing a listener we get a Future whose get method will block until all previously triggered events are processed.
+        RaceListener raceListener = new RaceListener() {
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
+            }
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+            }
+        };
+        regatta.addRaceListener(raceListener);
+        regatta.removeRaceListener(raceListener).get();
+        
         return trackedRaceStatisticsCache;
     }
 
     @Test
-    public void testTrackedRaceStatisticsCacheWithoutFixes() {
+    public void testTrackedRaceStatisticsCacheWithoutFixes() throws Exception {
         TrackedRaceStatisticsCacheImpl trackedRaceStatisticsCache = getStatisticsCacheWithRegattaAdded();
 
         TrackedRaceStatistics statisticsForRace = trackedRaceStatisticsCache.getStatisticsWaitingForLatest(trackedRace);
@@ -105,7 +121,7 @@ public class StatisticsTest {
     }
 
     @Test
-    public void testTrackedRaceStatisticsCacheWithFixes() {
+    public void testTrackedRaceStatisticsCacheWithFixes() throws Exception {
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295970, 8.638958), new MillisecondsTimePoint(START_OF_RACE),
                         new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
@@ -165,5 +181,4 @@ public class StatisticsTest {
         double distanceInMeters = statisticsForRace.getDistanceTraveled().getMeters();
         assertTrue(distanceInMeters > 53 && distanceInMeters < 57);
     }
-
 }
