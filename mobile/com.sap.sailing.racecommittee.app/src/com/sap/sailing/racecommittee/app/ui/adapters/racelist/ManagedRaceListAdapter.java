@@ -93,7 +93,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         for (final ManagedRace race : mAllRaces) {
             viewItemsRaces.put(race, new RaceListDataTypeRace(race, mInflater));
             final SeriesBase series = race.getSeries();
-            boolean hasConflict = race.getState().getConfirmedFinishPositioningList() != null && race.getState().getConfirmedFinishPositioningList().hasConflicts();
+            RaceState state = race.getState();
+            boolean draft = state.getFinishPositioningList() != null && state.getFinishPositioningList().hasConflicts();
+            boolean confirmed  = state.getConfirmedFinishPositioningList() != null && state.getConfirmedFinishPositioningList().hasConflicts();
+            boolean hasConflict = draft || confirmed;
             if (!viewItemsSeriesHeaders.containsKey(series)) {
                 viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater, hasConflict));
             } else {
@@ -200,10 +203,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             holder.race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
             RaceState state = race.getRace().getState();
             if (state != null) {
-                CompetitorResults results = state.getConfirmedFinishPositioningList();
-                if (results != null) {
-                    holder.warning_sign.setVisibility(results.hasConflicts() ? View.VISIBLE : View.GONE);
-                }
+                CompetitorResults draft = state.getFinishPositioningList();
+                CompetitorResults confirmed = state.getConfirmedFinishPositioningList();
+                holder.warning_sign.setVisibility(((draft != null && draft.hasConflicts()) || confirmed != null && confirmed.hasConflicts()) ? View.VISIBLE : View.GONE);
                 if (state.getStartTime() != null) {
                     int startRes = R.string.race_started;
                     if (state.getFinishedTime() == null) {

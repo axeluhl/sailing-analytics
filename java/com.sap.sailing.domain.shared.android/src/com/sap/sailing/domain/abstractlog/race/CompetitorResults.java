@@ -7,6 +7,8 @@ package com.sap.sailing.domain.abstractlog.race;
  */
 public interface CompetitorResults extends Iterable<CompetitorResult> {
     boolean add(CompetitorResult result);
+    void clear();
+    int size();
 
     /**
      * @return {@code true} if there are more than one {@link CompetitorResult} contained with equal

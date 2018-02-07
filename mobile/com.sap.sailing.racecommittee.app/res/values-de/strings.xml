@@ -529,9 +529,14 @@
     <string name="publish_clicked">Ergebnisliste veröffentlicht</string>
     <string name="competitor_count">%d</string>
 
+    <string name="refresh_title">Datenänderung</string>
+    <string name="refresh_message">Die Daten der folgenden Teilnehmer haben sich geändert. Bitte überprüfen:\n\n%s</string>
+    <string name="refresh_positive">@android:string/ok</string>
     <string name="hello_call_error_title">Keine Verbindung zu SAP</string>
     <string name="hello_call_error_message">Die App konnte keine Verbindung zu SAP Sailing hergestellt.\nPrüfen Sie bitte, ob Sie eine stabile Mobilfunkverbindung haben.\nWollen Sie es erneut versuchen?</string>
     <string name="hello_call_error_positive">Wiederholen</string>
     <string name="hello_call_error_negative">Beenden</string>
+
+    <string name="competitor_merge_error_message">Dieser Teilnehmer wurde an einem anderen Gerät verändert und hat überschneidende Änderungen. Bitte stellen Sie sicher, dass die Daten korrekt sind.</string>
 
 </resources>
