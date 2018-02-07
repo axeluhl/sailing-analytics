@@ -414,7 +414,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     protected String getTimeLabelText(Date time) {
         final String timeLabelText;
         DateTimeFormat formatter = timeFormatter;
-        if(timer.getRefreshInterval()<1000){
+        if (timer.getRefreshInterval() < 1000) {
             formatter = timeFormatterDetailed;
         }
         if (lastReceivedDataTimepoint == null) {
