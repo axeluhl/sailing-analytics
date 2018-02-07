@@ -9,10 +9,10 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/regattas/{regattaname}/races/{racename}/startorder</h2>
+<h2>URL: /api/v1/leaderboards/{name}/startorder?race_column={name}&amp;fleet={name}</h2>
 
 <b>Description:</b>
-<p>Gets the order in which competitors have started or are expected to start. The output
+<p>Gets the order in which competitors have started or are expected to start for a race. The output
    is a JSON array that contains the race competitors in the order in which they have passed
    the start waypoint or are expected to do so. Those competitors for which a start mark
    passing is already known are sorted by those start mark passings. All other
@@ -31,7 +31,8 @@
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
-		<td>None</td>
+        <td>race_column
+            <br/>fleet</td>
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
@@ -43,7 +44,7 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="https://dev.sapsailing.com/sailingserver/api/v1/regattas/ESS%202016%20Cardiff/races/Race%2016/startorder">https://dev.sapsailing.com/sailingserver/api/v1/regattas/ESS%202016%20Cardiff/races/Race%2016/startorder</a></td>
+		<td><a href="https://dev.sapsailing.com/sailingserver/api/v1/leaderboards/ESS%202016%20Cardiff/startorder?race_column=R1&fleet=Default">https://dev.sapsailing.com/sailingserver/api/v1/leaderboards/ESS%202016%20Cardiff/startorder?race_column=R1&fleet=Default</a></td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
