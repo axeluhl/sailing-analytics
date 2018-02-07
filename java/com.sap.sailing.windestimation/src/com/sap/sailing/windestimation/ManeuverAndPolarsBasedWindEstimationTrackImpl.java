@@ -9,15 +9,20 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.maneuverdetection.ManeuverWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.ManeuverWithEstimationDataCalculator;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverWithEstimationDataCalculatorImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
-import com.sap.sailing.windestimation.impl.CompetitorManeuverBasedWindDirectionEstimator;
+import com.sap.sailing.windestimation.impl.CompetitorManeuverGraphBasedWindDirectionEstimator;
+import com.sap.sailing.windestimation.impl.IManeuverSpeedRetriever;
 import com.sap.sailing.windestimation.impl.WindDirectionCandidatesForManeuver;
 import com.sap.sailing.windestimation.impl.WindDirectionCandidatesForTimePointIterationHelper;
 import com.sap.sailing.windestimation.impl.maneuvergraph.CoarseGrainedPointOfSail;
@@ -45,14 +50,30 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
 
     public void analyzeRace() {
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
-        CompetitorManeuverBasedWindDirectionEstimator competitorManeuverBasedWindEstimator = new CompetitorManeuverBasedWindDirectionEstimator();
+        CompetitorManeuverGraphBasedWindDirectionEstimator competitorManeuverBasedWindEstimator = new CompetitorManeuverGraphBasedWindDirectionEstimator(
+                polarService, new IManeuverSpeedRetriever() {
+
+                    @Override
+                    public SpeedWithBearing getLowestSpeedWithinManeuverMainCurve(Maneuver maneuver) {
+                        return ((ManeuverWithEstimationData) maneuver).getLowestSpeedWithinMainCurve();
+                    }
+
+                    @Override
+                    public SpeedWithBearing getHighestSpeedWithinManeuverMainCurve(Maneuver maneuver) {
+                        return ((ManeuverWithEstimationData) maneuver).getHighestSpeedWithinMainCurve();
+                    }
+                });
         Map<Competitor, WindDirectionCandidatesForTimePointIterationHelper> windDirectionCandidatesPerCompetitorTrack = new HashMap<>();
+        ManeuverWithEstimationDataCalculator maneuverWithEstimationDataCalculator = new ManeuverWithEstimationDataCalculatorImpl();
         for (Competitor competitor : competitors) {
             Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
-            Iterable<WindDirectionCandidatesForManeuver> windDirectionCandidates = competitorManeuverBasedWindEstimator
-                    .computeWindDirectionCandidates(maneuvers);
-            windDirectionCandidatesPerCompetitorTrack.put(competitor,
-                    new WindDirectionCandidatesForTimePointIterationHelper(windDirectionCandidates));
+            Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = maneuverWithEstimationDataCalculator
+                    .computeEstimationDataForManeuvers(trackedRace, competitor, maneuvers, false);
+            //TODO next
+//            competitorManeuverBasedWindEstimator
+//                    .computeWindDirectionCandidates(competitor.getBoat().getBoatClass(), maneuversWithEstimationData);
+//            windDirectionCandidatesPerCompetitorTrack.put(competitor,
+//                    new WindDirectionCandidatesForTimePointIterationHelper(windDirectionCandidates));
         }
 
         for (WindDirectionCandidatesForTimePointIterationHelper currentCandidates : windDirectionCandidatesPerCompetitorTrack
@@ -121,7 +142,8 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
         private final Speed speed;
         private final CoarseGrainedPointOfSail pointOfSail;
 
-        public BoatClassWithSpeedAndPointOfSail(BoatClass boatClass, Speed speed, CoarseGrainedPointOfSail pointOfSail) {
+        public BoatClassWithSpeedAndPointOfSail(BoatClass boatClass, Speed speed,
+                CoarseGrainedPointOfSail pointOfSail) {
             this.boatClass = boatClass;
             this.speed = speed;
             this.pointOfSail = pointOfSail;

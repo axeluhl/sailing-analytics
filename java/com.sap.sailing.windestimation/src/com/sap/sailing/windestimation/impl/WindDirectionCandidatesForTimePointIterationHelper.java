@@ -5,6 +5,11 @@ import java.util.Iterator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindDirectionCandidatesForTimePointIterationHelper {
 
     private final Iterable<WindDirectionCandidatesForManeuver> windDirectionCandidatesForTimePoints;

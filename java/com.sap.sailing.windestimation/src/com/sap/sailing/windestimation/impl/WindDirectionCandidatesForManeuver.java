@@ -4,6 +4,11 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindDirectionCandidatesForManeuver {
 
     private final Maneuver maneuver;

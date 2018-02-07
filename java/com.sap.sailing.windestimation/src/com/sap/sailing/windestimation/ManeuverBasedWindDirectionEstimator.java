@@ -1,10 +1,12 @@
 package com.sap.sailing.windestimation;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.windestimation.impl.WindDirectionCandidatesForManeuver;
+import com.sap.sailing.windestimation.impl.WindTrackCandidate;
 
 public interface ManeuverBasedWindDirectionEstimator {
 
-    Iterable<WindDirectionCandidatesForManeuver> computeWindDirectionCandidates(Iterable<Maneuver> competitorManeuvers);
+    Iterable<WindTrackCandidate> computeWindDirectionCandidates(BoatClass boatClass,
+            Iterable<Maneuver> competitorManeuvers);
 
 }

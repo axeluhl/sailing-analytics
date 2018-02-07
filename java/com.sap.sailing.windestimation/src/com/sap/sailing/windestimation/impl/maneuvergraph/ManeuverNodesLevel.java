@@ -57,6 +57,10 @@ public class ManeuverNodesLevel {
     public double getDistanceToNodeFromStart(FineGrainedPointOfSail node) {
         return bestDistancesFromStart[node.ordinal()];
     }
+    
+    public FineGrainedPointOfSail getBestPrecedingNode(FineGrainedPointOfSail node) {
+        return bestPrecedingNodesForThisNodes[node.ordinal()];
+    }
 
     public void computeDistances() {
         boolean markPassingIsNeighbour = isMarkPassingNeighbour();
@@ -158,6 +162,14 @@ public class ManeuverNodesLevel {
 
     private double convertLikelihoodToDistance(double likelihoodForPointOfSailBeforeManeuver) {
         return 1 / (likelihoodForPointOfSailBeforeManeuver * likelihoodForPointOfSailBeforeManeuver);
+    }
+
+    public FineGrainedPointOfSail[] getBestPrecedingNodesForThisNodes() {
+        return bestPrecedingNodesForThisNodes;
+    }
+
+    public double[] getBestDistancesFromStart() {
+        return bestDistancesFromStart;
     }
 
 }

@@ -2,10 +2,13 @@ package com.sap.sailing.windestimation.impl.maneuvergraph;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.windestimation.impl.IManeuverSpeedRetriever;
 import com.sap.sse.common.Util.Pair;
 
 public class SingleManeuverClassifier {
@@ -43,8 +46,8 @@ public class SingleManeuverClassifier {
                 .getDirectionChangeInDegrees();
         double[] presumedManeuverTypeLikelihoodsByAngleAnalysis = new double[PresumedManeuverType.values().length];
         double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis = new double[presumedManeuverTypeLikelihoodsByAngleAnalysis.length];
-        double presumedTwsInKnotsIfTack = -1;
-        double presumedTwsInKnotsIfJibe = -1;
+        SpeedWithBearingWithConfidence<Void> speedWithTwaIfTack = null;
+        SpeedWithBearingWithConfidence<Void> speedWithTwaIfJibe = null;
         double absCourseChangeDeg = Math.abs(courseChangeDeg);
         if (Math.abs(maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees()) <= 45) {
             // jibe, bear away, head up
@@ -53,7 +56,8 @@ public class SingleManeuverClassifier {
                             maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore(),
                             courseChangeDeg, ManeuverType.JIBE);
             if (jibeLikelihoodWithTwaTws.getA() == 0) {
-                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = 1.0;
+                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = 0.8;
+                presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.JIBE.ordinal()] = 0.2;
             } else {
                 double jibeLikelihoodBonus = jibeLikelihoodWithTwaTws.getA() - 0.5;
                 if (jibeLikelihoodBonus < -0.2) {
@@ -65,7 +69,8 @@ public class SingleManeuverClassifier {
                         - jibeLikelihoodBonus;
                 presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.JIBE.ordinal()] = 0.5
                         + jibeLikelihoodBonus;
-                presumedTwsInKnotsIfJibe = jibeLikelihoodWithTwaTws.getB().getObject().getKnots();
+                speedWithTwaIfJibe = new SpeedWithBearingWithConfidenceImpl<Void>(
+                        jibeLikelihoodWithTwaTws.getB().getObject(), jibeLikelihoodWithTwaTws.getA(), null);
             }
         } else if (absCourseChangeDeg <= 110) {
             // tack, jibe, mark passings, head up, bear away
@@ -89,10 +94,18 @@ public class SingleManeuverClassifier {
             double markPassingLikelihood = 0.5 + markPassingLikelihoodBonus;
             double headUpBearAwayLikelihood = 1 - markPassingLikelihood;
 
-            double tackLikelihood = tackLikelihoodWithTwaTws.getA();
-            double jibeLikelihood = jibeLikelihoodWithTwaTws.getA();
+            double tackLikelihood = tackLikelihoodWithTwaTws.getA() + 0.1;
+            double jibeLikelihood = jibeLikelihoodWithTwaTws.getA() + 0.1;
             double likelihoodSum = markPassingLikelihood * 2 + headUpBearAwayLikelihood + tackLikelihood
                     + jibeLikelihood;
+
+            if (tackLikelihoodWithTwaTws.getA() != 0) {
+                speedWithTwaIfTack = new SpeedWithBearingWithConfidenceImpl<Void>(
+                        tackLikelihoodWithTwaTws.getB().getObject(), tackLikelihoodWithTwaTws.getA(), null);
+            } else if (jibeLikelihoodWithTwaTws.getA() != 0) {
+                speedWithTwaIfJibe = new SpeedWithBearingWithConfidenceImpl<Void>(
+                        jibeLikelihoodWithTwaTws.getB().getObject(), jibeLikelihoodWithTwaTws.getA(), null);
+            }
 
             presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY
                     .ordinal()] = headUpBearAwayLikelihood / likelihoodSum;
@@ -121,15 +134,16 @@ public class SingleManeuverClassifier {
                 markPassingLuvLikelihoodBonus = 0.3;
             }
 
-            tackLikelihood = 0.5 + -markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
+            tackLikelihood = 0.5 - markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
             jibeLikelihood = tackLikelihood;
             double markPassingLeeLikelihood = 0.5 + markPassingLeeLikelihoodBonus - markPassingLuvLikelihoodBonus;
             double markPassingLuvLikelihood = 0.5 + markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
             headUpBearAwayLikelihood = 0.1 + Math.max(markPassingLuvLikelihood, markPassingLeeLikelihood);
-            likelihoodSum = tackLikelihood + jibeLikelihood + markPassingLeeLikelihood + markPassingLeeLikelihood + headUpBearAwayLikelihood;
+            likelihoodSum = tackLikelihood + jibeLikelihood + markPassingLeeLikelihood + markPassingLeeLikelihood
+                    + headUpBearAwayLikelihood;
 
-            presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = headUpBearAwayLikelihood
-                    / likelihoodSum;
+            presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY
+                    .ordinal()] = headUpBearAwayLikelihood / likelihoodSum;
             presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.TACK.ordinal()] = tackLikelihood
                     / likelihoodSum;
             presumedManeuverTypeLikelihoodsBySpeedAnalysis[PresumedManeuverType.JIBE.ordinal()] = jibeLikelihood
@@ -178,10 +192,12 @@ public class SingleManeuverClassifier {
             // => course at lowest speed refers upwind
             presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType._360.ordinal()] = 1.0;
         }
-        return new SingleManeuverClassificationResult(lowestSpeedWithBeginningSpeedRatio,
+        Bearing middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing()
+                .middle(maneuver.getSpeedWithBearingAfter().getBearing());
+        return new SingleManeuverClassificationResult(middleManeuverCourse, lowestSpeedWithBeginningSpeedRatio,
                 courseChangeDegUntilLowestSpeed, highestSpeedWithBeginningSpeedRatio, enteringExitingSpeedRatio,
                 courseChangeDeg, presumedManeuverTypeLikelihoodsByAngleAnalysis,
-                presumedManeuverTypeLikelihoodsBySpeedAnalysis, presumedTwsInKnotsIfTack, presumedTwsInKnotsIfJibe);
+                presumedManeuverTypeLikelihoodsBySpeedAnalysis, speedWithTwaIfTack, speedWithTwaIfJibe);
     }
 
 }

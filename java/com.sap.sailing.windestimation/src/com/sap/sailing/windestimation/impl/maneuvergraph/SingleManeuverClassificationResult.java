@@ -1,9 +1,12 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 
 public class SingleManeuverClassificationResult {
 
+    private final Bearing middleManeuverCourse;
     private final double lowestSpeedWithBeginningSpeedRatio;
     private final double courseChangeUntilLowestSpeed;
     private final double highestSpeedWithBeginningSpeedRatio;
@@ -11,16 +14,18 @@ public class SingleManeuverClassificationResult {
     private final double courseChangeDeg;
     private final double[] presumedManeuverTypeLikelihoodsByAngleAnalysis;
     private final double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis;
-    private final double presumedTwsInKnotsIfTack;
-    private final double presumedTwsInKnotsIfJibe;
     private double[] likelihoodsForPointOfSailBeforeManeuvers;
+    private final SpeedWithBearingWithConfidence<Void> speedWithTwaIfTack;
+    private final SpeedWithBearingWithConfidence<Void> speedWithTwaIfJibe;
 
-    public SingleManeuverClassificationResult(double lowestSpeedWithBeginningSpeedRatio,
+    public SingleManeuverClassificationResult(Bearing middleManeuverCourse, double lowestSpeedWithBeginningSpeedRatio,
             double courseChangeUntilLowestSpeed, double highestSpeedWithBeginningSpeedRatio,
             double enteringExitingSpeedRatio, double courseChangeDeg,
             double[] presumedManeuverTypeLikelihoodsByAngleAnalysis,
-            double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis, double presumedTwsInKnotsIfTack,
-            double presumedTwsInKnotsIfJibe) {
+            double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis,
+            SpeedWithBearingWithConfidence<Void> speedWithTwaIfTack,
+            SpeedWithBearingWithConfidence<Void> speedWithTwaIfJibe) {
+        this.middleManeuverCourse = middleManeuverCourse;
         this.lowestSpeedWithBeginningSpeedRatio = lowestSpeedWithBeginningSpeedRatio;
         this.courseChangeUntilLowestSpeed = lowestSpeedWithBeginningSpeedRatio;
         this.highestSpeedWithBeginningSpeedRatio = highestSpeedWithBeginningSpeedRatio;
@@ -28,8 +33,8 @@ public class SingleManeuverClassificationResult {
         this.courseChangeDeg = courseChangeDeg;
         this.presumedManeuverTypeLikelihoodsByAngleAnalysis = presumedManeuverTypeLikelihoodsByAngleAnalysis;
         this.presumedManeuverTypeLikelihoodsBySpeedAnalysis = presumedManeuverTypeLikelihoodsBySpeedAnalysis;
-        this.presumedTwsInKnotsIfTack = presumedTwsInKnotsIfTack;
-        this.presumedTwsInKnotsIfJibe = presumedTwsInKnotsIfJibe;
+        this.speedWithTwaIfTack = speedWithTwaIfTack;
+        this.speedWithTwaIfJibe = speedWithTwaIfJibe;
         computeLikelihoodsForPointOfSailBeforeManeuver();
     }
 
@@ -57,12 +62,12 @@ public class SingleManeuverClassificationResult {
         return presumedManeuverTypeLikelihoodsBySpeedAnalysis[maneuverType.ordinal()];
     }
 
-    public double getPresumedTwsInKnotsIfTack() {
-        return presumedTwsInKnotsIfTack;
+    public SpeedWithBearingWithConfidence<Void> getSpeedWithTwaIfTack() {
+        return speedWithTwaIfTack;
     }
 
-    public double getPresumedTwsInKnotsIfJibe() {
-        return presumedTwsInKnotsIfJibe;
+    public SpeedWithBearingWithConfidence<Void> getSpeedWithTwaIfJibe() {
+        return speedWithTwaIfJibe;
     }
 
     private void computeLikelihoodsForPointOfSailBeforeManeuver() {
@@ -196,6 +201,10 @@ public class SingleManeuverClassificationResult {
 
     public double getLikelihoodForPointOfSailBeforeManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver) {
         return likelihoodsForPointOfSailBeforeManeuvers[pointOfSailBeforeManeuver.ordinal()];
+    }
+    
+    public Bearing getMiddleManeuverCourse() {
+        return middleManeuverCourse;
     }
 
 }
