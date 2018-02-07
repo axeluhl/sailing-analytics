@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -442,11 +443,8 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
         for (Permission requiredStringPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
             WildcardPermission requiredPermission = requiredStringPermission.getPermission();
-            // TODO use PermissionChecker instead of enumerating all permissions
-            for (WildcardPermission userPermission : user.getAllPermissions()) {
-                if (requiredPermission.implies(userPermission) || userPermission.implies(requiredPermission)) {
-                    return true;
-                }
+            if (PermissionChecker.isPermitted(requiredPermission, user, user.getUserGroups(), /* ownership */ null, /* acl */ null)) {
+                return true;
             }
         }
         return false;

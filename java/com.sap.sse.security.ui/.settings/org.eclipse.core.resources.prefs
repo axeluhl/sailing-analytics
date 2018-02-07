@@ -4,6 +4,7 @@ encoding//src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.prope
 encoding//src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages_de.properties=UTF-8
 encoding//src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages_fr.properties=UTF-8
 encoding//src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages_ja.properties=UTF-8
+encoding//src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages_pt.properties=UTF-8
 encoding//src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages_ru.properties=UTF-8
 encoding//src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages_zh.properties=UTF-8
 encoding//src/main/java/com/sap/sse/security/ui/login/LoginView.java=utf-8

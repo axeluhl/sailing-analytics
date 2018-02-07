@@ -1,8 +1,6 @@
-package com.sap.sailing.gwt.home.desktop.partials.racelist;
+package com.sap.sse.common.impl;
 
 import java.util.Comparator;
-
-import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 
 public abstract class InvertibleComparatorWrapper<T, C> extends InvertibleComparatorAdapter<T> {
 

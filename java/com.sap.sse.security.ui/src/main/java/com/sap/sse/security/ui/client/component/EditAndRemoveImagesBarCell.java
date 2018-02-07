@@ -7,17 +7,17 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class RoleImagesBarCell extends ImagesBarCell {
-    static final String ACTION_REMOVE = "ACTION_REMOVE";
+public class EditAndRemoveImagesBarCell extends ImagesBarCell {
+    public static final String ACTION_REMOVE = "ACTION_REMOVE";
     public static final String ACTION_EDIT = "ACTION_EDIT";
     private final StringMessages stringMessages;
 
-    public RoleImagesBarCell(StringMessages stringMessages) {
+    public EditAndRemoveImagesBarCell(StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
     }
 
-    public RoleImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringMessages) {
+    public EditAndRemoveImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringMessages) {
         this(stringMessages);
     }
 

@@ -1649,7 +1649,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String info();
     String windFixes();
     String twoXMark();
-    String pagerStateInfo(int start , int end, int size, @Select boolean exact);
     String currentHeelInDegree();
     String currentHeelInDegreeTooltip();
     String currentPitchInDegree();
@@ -2051,4 +2050,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chooseAName();
     String unexpectedErrorDuringFileImport();
     String couldNotDownload(String url);
+    String roles();
 }

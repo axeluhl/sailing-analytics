@@ -1,11 +1,11 @@
 package com.sap.sse.gwt.adminconsole;
 
 import com.google.gwt.user.cellview.client.CellTable;
-import com.sap.sse.security.ui.client.SecurityTableResources;
-import com.sap.sse.security.ui.client.SecurityTableStyle;
+import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
+import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxStyle;
 
-public interface AdminConsoleTableResources extends SecurityTableResources, CellTable.Resources {
-    interface AdminConsoleTableStyle extends SecurityTableStyle, CellTable.Style {
+public interface AdminConsoleTableResources extends CellTableWithCheckboxResources, CellTable.Resources {
+    interface AdminConsoleTableStyle extends CellTableWithCheckboxStyle, CellTable.Style {
         /**
          * Applied to header cells of race columns
          */

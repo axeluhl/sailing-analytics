@@ -225,7 +225,7 @@ public abstract class CourseManagementWidget implements IsWidget {
 
             @Override
             public void ok(GateDTO result) {
-                multiMarkControlPoints.dataProvider.getList().add(result);
+                multiMarkControlPoints.getDataProvider().getList().add(result);
             }
         }).show();
     }

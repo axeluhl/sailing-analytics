@@ -25,8 +25,9 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.FlushableSortedCellTableWithStylableHeaders;
+import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
@@ -35,7 +36,6 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.ui.client.SecurityTableResources;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -53,7 +53,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     private final Button addButton;
     private final Button removeButton;
     private final Button refreshButton;
-    private final FlushableSortedCellTableWithStylableHeaders<RoleDefinition> roleDefinitionsTable;
+    private final FlushableCellTable<RoleDefinition> roleDefinitionsTable;
     private final ErrorReporter errorReporter;
     private final UserManagementServiceAsync userManagementService;
     private final ListDataProvider<RoleDefinition> rolesListDataProvider;
@@ -61,7 +61,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     private final LabeledAbstractFilterablePanel<RoleDefinition> filterablePanelRoleDefinitions;
     private RefreshableMultiSelectionModel<? super RoleDefinition> refreshableRoleDefinitionMultiSelectionModel;
     
-    public RoleDefinitionsPanel(StringMessages stringMessages, UserManagementServiceAsync userManagementService, SecurityTableResources tableResources,
+    public RoleDefinitionsPanel(StringMessages stringMessages, UserManagementServiceAsync userManagementService, CellTableWithCheckboxResources tableResources,
             ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -130,8 +130,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         return result;
     }
     
-    private FlushableSortedCellTableWithStylableHeaders<RoleDefinition> createRoleDefinitionsTable(SecurityTableResources tableResources) {
-        final FlushableSortedCellTableWithStylableHeaders<RoleDefinition> table = new FlushableSortedCellTableWithStylableHeaders<>(/* pageSize */ 50, tableResources);
+    private FlushableCellTable<RoleDefinition> createRoleDefinitionsTable(CellTableWithCheckboxResources tableResources) {
+        final FlushableCellTable<RoleDefinition> table = new FlushableCellTable<>(/* pageSize */ 50, tableResources);
         rolesListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
         SelectionCheckboxColumn<RoleDefinition> roleSelectionCheckboxColumn = new SelectionCheckboxColumn<RoleDefinition>(
@@ -186,14 +186,14 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 return new NaturalComparator().compare(r1.getPermissions().toString(), r2.getPermissions().toString());
             }
         });
-        ImagesBarColumn<RoleDefinition, RoleImagesBarCell> regattaActionColumn = new ImagesBarColumn<RoleDefinition, RoleImagesBarCell>(
-                new RoleImagesBarCell(stringMessages));
+        ImagesBarColumn<RoleDefinition, EditAndRemoveImagesBarCell> regattaActionColumn = new ImagesBarColumn<RoleDefinition, EditAndRemoveImagesBarCell>(
+                new EditAndRemoveImagesBarCell(stringMessages));
         regattaActionColumn.setFieldUpdater(new FieldUpdater<RoleDefinition, String>() {
             @Override
             public void update(int index, RoleDefinition roleDefinition, String value) {
-                if (RoleImagesBarCell.ACTION_EDIT.equals(value)) {
+                if (EditAndRemoveImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRole(roleDefinition);
-                } else if (RoleImagesBarCell.ACTION_REMOVE.equals(value)) {
+                } else if (EditAndRemoveImagesBarCell.ACTION_REMOVE.equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roleDefinition.getName()))) {
                         removeRole(roleDefinition);
                     }

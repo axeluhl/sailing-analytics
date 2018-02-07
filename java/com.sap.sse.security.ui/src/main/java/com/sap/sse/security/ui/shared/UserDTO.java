@@ -1,9 +1,7 @@
 package com.sap.sse.security.ui.shared;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
@@ -77,26 +75,6 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         List<String> result = new ArrayList<>();
         for (WildcardPermission wp : getPermissions()) {
             result.add(wp.toString());
-        }
-        return result;
-    }
-    
-    /**
-     * Returns all permissions this user has, including those inferred from the user's {@link #getRoles() roles} by the
-     * <code>permissionForRoleProvider</code> and including the {@link #getStringPermissions()} that are set explicitly
-     * for this user.
-     * 
-     * @param permissionsForRoleProvider
-     *            may be <code>null</code> in which case only the {@link #getStringPermissions() explicit permissions}
-     *            set for this user will be returned.
-     * @return a set of permissions with no duplicates, all in the format parsable by
-     *         {@link WildcardPermission#WildcardPermission(String)}
-     */
-    public Iterable<WildcardPermission> getAllPermissions() {
-        Set<WildcardPermission> result = new LinkedHashSet<>();
-        Util.addAll(getPermissions(), result);
-        for (Role role : getRoles()) {
-            Util.addAll(role.getPermissions(), result);
         }
         return result;
     }

@@ -1,8 +1,8 @@
-package com.sap.sse.security.ui.client;
+package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.user.cellview.client.CellTable;
 
-public interface SecurityTableStyle extends CellTable.Style {
+public interface CellTableWithCheckboxStyle extends CellTable.Style {
     /**
      * Applied to checkbox column
      */

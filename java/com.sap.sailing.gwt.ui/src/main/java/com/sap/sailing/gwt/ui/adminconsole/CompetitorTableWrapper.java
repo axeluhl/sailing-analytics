@@ -232,7 +232,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         });
 
         
-        filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
+        filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(getStringMessages().filterCompetitors()),
                 new ArrayList<CompetitorDTO>(), table, dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
@@ -249,7 +249,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         
         //CompetitorTableEditFeatures
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
-                new CompetitorConfigImagesBarCell(stringMessages));
+                new CompetitorConfigImagesBarCell(getStringMessages()));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
             public void update(int index, final CompetitorDTO competitor, String value) {
@@ -263,17 +263,17 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
-        table.addColumn(sailIdColumn, stringMessages.sailNumber());
-        table.addColumn(competitorNameColumn, stringMessages.name());
-        table.addColumn(boatClassColumn, stringMessages.boatClass());
-        table.addColumn(timeOnTimeFactorColumn, stringMessages.timeOnTimeFactor());
-        table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile());
-        table.addColumn(displayColorColumn, stringMessages.color());
-        table.addColumn(imageColumn, stringMessages.image());
-        table.addColumn(competitorEMailColumn, stringMessages.email());
-        table.addColumn(competitorSearchTagColumn, stringMessages.searchTag());
-        table.addColumn(competitorIdColumn, stringMessages.id());
-        table.addColumn(competitorActionColumn, stringMessages.actions());
+        table.addColumn(sailIdColumn, getStringMessages().sailNumber());
+        table.addColumn(competitorNameColumn, getStringMessages().name());
+        table.addColumn(boatClassColumn, getStringMessages().boatClass());
+        table.addColumn(timeOnTimeFactorColumn, getStringMessages().timeOnTimeFactor());
+        table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, getStringMessages().timeOnDistanceAllowanceInSecondsPerNauticalMile());
+        table.addColumn(displayColorColumn, getStringMessages().color());
+        table.addColumn(imageColumn, getStringMessages().image());
+        table.addColumn(competitorEMailColumn, getStringMessages().email());
+        table.addColumn(competitorSearchTagColumn, getStringMessages().searchTag());
+        table.addColumn(competitorIdColumn, getStringMessages().id());
+        table.addColumn(competitorActionColumn, getStringMessages().actions());
         table.ensureDebugId("CompetitorsTable");
     }
     
@@ -328,7 +328,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     }
     
     void openEditCompetitorDialog(final CompetitorDTO originalCompetitor, String boatClass) {
-        final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
+        final CompetitorEditDialog dialog = new CompetitorEditDialog(getStringMessages(), originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
                 final List<CompetitorDTO> competitors = new ArrayList<>();
@@ -377,7 +377,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
             @Override
             public void onSuccess(Void result) {
-                Window.alert(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()));
+                Window.alert(getStringMessages().successfullyAllowedCompetitorReset(competitors.toString()));
             }
         });
     }
@@ -396,7 +396,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.setRowStyles((CompetitorDTO row, int rowIndex) -> {
             for (CompetitorWithToolTipDTO competitor : competitors) {
                 if (competitor.getCompetitor().equals(row)) {
-                    return tableRes.cellTableStyle().cellTableDisabledRow();
+                    return getTableRes().cellTableStyle().cellTableDisabledRow();
                 }
             }
             return "";

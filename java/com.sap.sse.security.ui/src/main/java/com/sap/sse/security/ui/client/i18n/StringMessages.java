@@ -41,7 +41,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String deleteUser();
     String deleteUserQuestion();
     String doYouReallyWantToDeleteUser(String username);
-    String errorDeletingUser();
     String account(String accountType);
     String save();
     String remove();
@@ -133,4 +132,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String couldNotRemoveUserFromTenant(String username, String tenantname, String errorMessage);
     String enterTenantName();
     String defaultTenant();
+    String editUser();
+    String validated();
+    String groups();
+    String errorDeletingUser(String username, String message);
+    String doYouReallyWantToRemoveUser(String name);
+    String errorTryingToUpdateUser(String username, String message);
 }

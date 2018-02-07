@@ -44,9 +44,10 @@ import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorat
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
+import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 import com.sap.sse.security.ui.client.component.TenantManagementPanel;
-import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.usermanagement.UserManagementPanel;
 
 public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
@@ -284,15 +285,25 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
                 getStringMessages().localServer(), Permission.MANAGE_LOCAL_SERVER_INSTANCE);
 
-        final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
+        final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
                 Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()), this, tableResources);
         panel.addToTabPanel(advancedTabPanel,
-                new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel) {
+                new DefaultRefreshableAdminConsolePanel<UserManagementPanel<AdminConsoleTableResources>>(userManagementPanel) {
                     @Override
                     public void refreshAfterBecomingVisible() {
                         userManagementPanel.updateUsersAndACLs();
                     }
                 }, getStringMessages().userManagement(), Permission.MANAGE_USERS);
+
+        final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanel(StringMessages.INSTANCE, getUserService().getUserManagementService(), 
+                tableResources, this);
+        panel.addToTabPanel(advancedTabPanel,
+                new DefaultRefreshableAdminConsolePanel<RoleDefinitionsPanel>(roleManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        roleManagementPanel.updateRoleDefinitions();
+                    }
+                }, getStringMessages().roles(), Permission.MANAGE_ROLES);
 
         final TenantManagementPanel tenantManagementPanel = new TenantManagementPanel(getUserService(), StringMessages.INSTANCE);
         panel.addToTabPanel(advancedTabPanel,

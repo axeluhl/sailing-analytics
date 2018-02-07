@@ -33,4 +33,7 @@ public interface StringMessages extends Messages {
     String resetToDefaultInProgress();
     String settingsRemoved();
     String settingsRemovedError();
+    String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String yes();
+    String no();
 }

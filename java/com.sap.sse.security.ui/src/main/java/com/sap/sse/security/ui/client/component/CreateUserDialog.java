@@ -6,9 +6,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.component.UserManagementPanel.UserCreatedEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.usermanagement.UserManagementPanel.UserCreatedEventHandler;
 
 /**
  * Produces username, e-mail and password as the dialog's result.
@@ -28,7 +28,8 @@ public class CreateUserDialog extends AbstractUserDialog {
                                 .createSimpleUser(usernameEmailPassword.getUsername(),
                                         usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
                                         /* TOOD fullName */ null, /* TODO company */ null, /* TODO locale */ null,
-                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), "tenant", new AsyncCallback<UserDTO>() {
+                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
+                                        /* TODO name of tenant owner of the new user object */ "tenant", new AsyncCallback<UserDTO>() {
                                             @Override
                                             public void onSuccess(UserDTO result) {
                                                 for (UserCreatedEventHandler handler : handlers) {

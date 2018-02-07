@@ -25,7 +25,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -345,20 +344,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
-    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
-        final Subject subject = SecurityUtils.getSubject();
-        // the signed-in subject has all permissions or is changing own user
-        if (SecurityUtils.getSubject().isPermitted("*") &&
-                (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
-            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
-        }
-    }
-    
     @Override
     public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
         SecurityUtils.getSubject().checkPermission("user:edit:" + username);
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         getSecurityService().updateUserProperties(username, fullName, company,
                 getLocaleFromLocaleName(localeName));
     }
@@ -375,7 +363,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
         SecurityUtils.getSubject().checkPermission("user:edit:" + username);
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
     }
     
