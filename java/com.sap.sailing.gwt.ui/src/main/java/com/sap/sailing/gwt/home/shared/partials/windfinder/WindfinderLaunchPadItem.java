@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.partials.windfinder;
+package com.sap.sailing.gwt.home.shared.partials.windfinder;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;

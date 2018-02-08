@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.windfinder.WindfinderResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderResources" />
     <div class="{res.mainCss.button} {local_res.css.windfindercontrol}">
         <div class="{local_res.css.windfindercontrol_text}" ui:field="labelUi">Weather Data</div>
         <div class="{local_res.css.windfindercontrol_icon}"></div>

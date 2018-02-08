@@ -22,11 +22,11 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionE
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
-import com.sap.sailing.gwt.home.desktop.partials.windfinder.WindfinderControl;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesTabView;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderControl;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
