@@ -11,8 +11,6 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -200,20 +198,14 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
      * retrieving a fresh roles copy from the server
      */
     private void setRolesEditor(UserDTO user) {
-        final StringListEditorComposite result = new StringListEditorComposite(
+        rolesEditor = new StringListEditorComposite(
                 user == null ? Collections.<String> emptySet() : user.getStringRoles(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), serverRoleDefinitionsByName.keySet(),
                 stringMessages.enterRoleName());
-        result.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
-            @Override
-            public void onValueChange(final ValueChangeEvent<Iterable<String>> event) {
-                validateAndUpdate();
-            }
-        });
         while (rolesEditorWrapper.getWidgetCount() > 0) {
             rolesEditorWrapper.remove(0);
         }
-        rolesEditorWrapper.add(result);
+        rolesEditorWrapper.add(rolesEditor);
     }
 
     @Override

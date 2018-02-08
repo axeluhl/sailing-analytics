@@ -13,6 +13,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -70,7 +71,7 @@ public interface UserManagementServiceAsync {
 
     void setRolesForUser(String username, Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantNameAndUsernames, AsyncCallback<SuccessInfo> callback);
 
-    void setPermissionsForUser(String username, Iterable<String> permissions, AsyncCallback<SuccessInfo> callback);
+    void setPermissionsForUser(String username, Iterable<WildcardPermission> permissions, AsyncCallback<SuccessInfo> callback);
 
     void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
 

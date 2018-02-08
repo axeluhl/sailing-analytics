@@ -333,7 +333,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                     }  
                 });
                 if (!Util.equalsWithNull(originalUser.getPermissions(), user.getPermissions())) {
-                    getUserManagementService().setPermissionsForUser(user.getName(), user.getStringPermissions(), new MarkedAsyncCallback<SuccessInfo>(
+                    getUserManagementService().setPermissionsForUser(user.getName(), user.getPermissions(), new MarkedAsyncCallback<SuccessInfo>(
                             new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
