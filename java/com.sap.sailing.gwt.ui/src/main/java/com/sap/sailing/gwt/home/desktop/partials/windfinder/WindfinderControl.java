@@ -23,14 +23,24 @@ public class WindfinderControl extends Widget {
     @UiField
     DivElement labelUi;
     private final WindfinderLaunchPadController launchPadController;
-    private Iterable<SpotDTO> spots;
+    private Iterable<SpotDTO> spotData;
 
-    public WindfinderControl(Iterable<SpotDTO> spots, BiFunction<SpotDTO, TimePoint, String> windfinderUrlFactory) {
+    public WindfinderControl(Iterable<SpotDTO> spotData, BiFunction<SpotDTO, TimePoint, String> windfinderUrlFactory) {
+        this(windfinderUrlFactory);
+        this.setSpotData(spotData);
+    }
+
+    public WindfinderControl(BiFunction<SpotDTO, TimePoint, String> windfinderUrlFactory) {
         WindfinderResources.INSTANCE.css().ensureInjected();
         this.launchPadController = new WindfinderLaunchPadController(windfinderUrlFactory);
-        this.spots = spots;
         setElement(uiBinder.createAndBindUi(this));
         sinkEvents(Event.ONCLICK);
+        this.setVisible(false);
+    }
+    
+    public void setSpotData(Iterable<SpotDTO> spotData) {
+        this.spotData = spotData;
+        this.setVisible(true);
     }
 
     @Override
@@ -41,11 +51,11 @@ public class WindfinderControl extends Widget {
         }
 
         // If rendered as direct link button, open link in new tab directly instead of showing the menu popup
-        if (launchPadController.renderAsDirectLink(spots)) {
-            Window.open(launchPadController.getDirectLinkUrl(spots), "_blank", "");
+        if (launchPadController.renderAsDirectLink(spotData)) {
+            Window.open(launchPadController.getDirectLinkUrl(spotData), "_blank", "");
             return;
         }
 
-        launchPadController.showWindfinderLaunchPad(spots, this.getElement());
+        launchPadController.showWindfinderLaunchPad(spotData, this.getElement());
     }
 }

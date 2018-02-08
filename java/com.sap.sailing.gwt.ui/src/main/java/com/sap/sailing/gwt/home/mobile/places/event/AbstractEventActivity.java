@@ -95,7 +95,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected final void initWindfinderNavigations(EventViewBase view) {
         final Iterable<SpotDTO> spots = eventDTO.getAllWindFinderSpotIdsUsedByEvent();
         if (spots != null && !Util.isEmpty(spots)) {
-            view.setWindfinderNavigations(spots, SpotDTO::getCurrentlyMostAppropriateUrl);
+            view.setWindfinderNavigations(spots);
         }
     }
 

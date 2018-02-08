@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiFunction;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -29,7 +28,6 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.TimePoint;
 
 public abstract class AbstractEventView<P extends EventViewBase.Presenter> extends Composite implements EventViewBase {
     
@@ -42,10 +40,12 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         @UiField(provided = true) EventHeader eventHeaderUi;
         @UiField Quickfinder quickFinderUi;
         @UiField SimpleInfoBlock simpleInfoUi;
-        @UiField SimplePanel viewContentUi, windfinderContainerUi;
+        @UiField(provided = true) WindfinderControl windfinderUi;
+        @UiField SimplePanel viewContentUi;;
         
         private AbstractEventViewLayout(EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
             this.eventHeaderUi = new EventHeader(event, regattaName, logoNavigation);
+            this.windfinderUi = new WindfinderControl(SpotDTO::getCurrentlyMostAppropriateUrl);
         }
     }
 
@@ -130,8 +130,8 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     }
     
     @Override
-    public void setWindfinderNavigations(Iterable<SpotDTO> spots, BiFunction<SpotDTO, TimePoint, String> urlFactory) {
-        layout.windfinderContainerUi.setWidget(new WindfinderControl(spots, urlFactory));
+    public void setWindfinderNavigations(Iterable<SpotDTO> spotData) {
+        layout.windfinderUi.setSpotData(spotData);
     }
 
     @Override
