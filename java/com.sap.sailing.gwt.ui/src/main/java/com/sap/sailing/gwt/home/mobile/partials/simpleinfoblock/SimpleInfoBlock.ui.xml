@@ -7,7 +7,7 @@
 		.description {
 			display: none;
 			font-size: .866666666666667em;
-    			margin-bottom: .769230769230769em;
+    		margin-bottom: .384615384615385em;
 		}
 		.action {
 			display: none;
@@ -17,7 +17,7 @@
 		}
 		.holder {
 			box-sizing: border-box;
-			padding: 0px 10px 0px 10px;
+			padding: 0px 10px 10px;
 		}
 	</ui:style>
 	<g:HTMLPanel styleName="{style.holder}">

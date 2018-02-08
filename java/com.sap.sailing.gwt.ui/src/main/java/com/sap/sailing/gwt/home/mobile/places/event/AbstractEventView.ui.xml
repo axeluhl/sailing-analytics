@@ -7,16 +7,12 @@
 	<ui:style>
 		.headerWrapper {
 			background-color: #f2f2f2;
-			padding-bottom: 10px;
 		}
 		.windfinder {
-			padding: 0 10px;
-		}
-		.windfinder > div {
-            border-radius: .3846154em;
-            width: 100%;
+            display: block;
+            margin: 0 10px 10px;
+            border-radius: .384615384615385em;
             text-align: center;
-            margin-top: 10px;
 		}
 	</ui:style>		
 	<g:HTMLPanel>
