@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,6 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -113,6 +116,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSe
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.InvalidDateException;
@@ -1084,6 +1088,116 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         JSONObject result = new JSONObject();
         result.put("marks", array);
         return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+
+    /**
+     * @return the actual or anticipated start order for the race identified by {@code raceColumnName}, {@code fleetName}.
+     * Those competitors for which a start mark passing is already known are sorted by those start mark passings. All other
+     * boats are ordered by their geometric distance from the start line or the windward distance from the start mark
+     * if the start for some reason is defined by a single mark. See {@link #compareDistanceFromStartLine(Competitor, Competitor)}.
+     */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{leaderboardName}/startorder")
+    public Response getStartOrder(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            return Response
+                    .status(Status.NOT_FOUND)
+                    .entity("Could not find a race column '" + StringEscapeUtils.escapeHtml(raceColumnName) + "' in leaderboard '"
+                            + StringEscapeUtils.escapeHtml(leaderboardName) + "'.").type(MediaType.TEXT_PLAIN).build();
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            return Response
+                    .status(Status.NOT_FOUND)
+                    .entity("Could not find a fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "' in raceColumn '"
+                            + StringEscapeUtils.escapeHtml(raceColumnName) + "'.").type(MediaType.TEXT_PLAIN).build();
+        }
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+        if (trackedRace == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a tracked race for raceColumn '" + StringEscapeUtils.escapeHtml(raceColumnName) 
+                     + " and fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "'.").type(MediaType.TEXT_PLAIN)
+                    .build();
+        };
+            
+        Course course = trackedRace.getRace().getCourse();
+        final List<Competitor> competitors = new ArrayList<>();
+        final Waypoint firstWaypoint = course.getFirstWaypoint();
+        final TimePoint timeToUseForStart;
+        if (trackedRace.getStartOfRace() != null) {
+            timeToUseForStart = trackedRace.getStartOfRace();
+        } else {
+            timeToUseForStart = MillisecondsTimePoint.now();
+        }
+        if (firstWaypoint != null) {
+            final List<Position> startWaypointMarkPositions =
+                StreamSupport.stream(firstWaypoint.getMarks().spliterator(), /* parallel */ false).
+                map(mark->trackedRace.getTrack(mark)).filter(markTrack->markTrack!=null).
+                map(markTrack->markTrack.getEstimatedPosition(timeToUseForStart, /* extrapolate */ false)).
+                collect(Collectors.toList());
+            Util.addAll(trackedRace.getRace().getCompetitors(), competitors);
+            competitors.sort((a, b)->{
+                final MarkPassing aStartMarkPassing = trackedRace.getMarkPassing(a, firstWaypoint);
+                final MarkPassing bStartMarkPassing = trackedRace.getMarkPassing(b, firstWaypoint);
+                final int result;
+                if (aStartMarkPassing == null) {
+                    if (bStartMarkPassing == null) {
+                        result = compareDistanceFromStartLine(trackedRace, startWaypointMarkPositions, timeToUseForStart, a, b);
+                    } else {
+                        result = 1; // b consider less than a because it has a start mark passing and therefore is assumed to have started before a
+                    }
+                } else if (bStartMarkPassing == null) {
+                    result = -1; // a consider less than b because it has a start mark passing and therefore is assumed to have started before b
+                } else {
+                    // both have a start mark passing; compare time points
+                    result = aStartMarkPassing.getTimePoint().compareTo(bStartMarkPassing.getTimePoint());
+                }
+                return result;
+            });
+        }
+        CompetitorJsonSerializer serializer = new CompetitorJsonSerializer();
+        JSONArray result = new JSONArray();
+        for (final Competitor c : competitors) {
+            JSONObject jsonCompetitor = serializer.serialize(c);
+            result.add(jsonCompetitor);
+        }
+        String json = result.toJSONString();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+
+    private int compareDistanceFromStartLine(TrackedRace trackedRace, Iterable<Position> startWaypointMarkPositions,
+            TimePoint timeToUseForStart, Competitor a, Competitor b) {
+        final Position aPos = trackedRace.getTrack(a).getEstimatedPosition(timeToUseForStart, /* extrapolate */ true);
+        final Position bPos = trackedRace.getTrack(b).getEstimatedPosition(timeToUseForStart, /* extrapolate */ true);
+        final Distance aDist = aPos==null?null:getDistanceFromStartWaypoint(aPos, startWaypointMarkPositions);
+        final Distance bDist = bPos==null?null:getDistanceFromStartWaypoint(bPos, startWaypointMarkPositions);
+        return Comparator.<Distance>nullsLast(Comparator.naturalOrder()).compare(aDist, bDist);
+    }
+
+    private Distance getDistanceFromStartWaypoint(Position pos, Iterable<Position> startWaypointMarkPositions) {
+        final Distance result;
+        if (Util.isEmpty(startWaypointMarkPositions)) {
+            result = null;
+        } else if (Util.size(startWaypointMarkPositions) == 1) {
+            // single mark start; strange, but possible:
+            result = startWaypointMarkPositions.iterator().next().getDistance(pos);
+        } else {
+            final Position first = Util.get(startWaypointMarkPositions, 0);
+            final Position second = Util.get(startWaypointMarkPositions, 1);
+            result = pos.getDistanceToLine(first, second).abs();
+        }
+        return result;
     }
 
     @GET

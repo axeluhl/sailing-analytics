@@ -38,6 +38,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.UserService;
 
 public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
@@ -64,7 +65,8 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     private final Button backToLivePlayButton;
     protected final StringMessages stringMessages;
     protected final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
-    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
+    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    protected final DateTimeFormat timeFormatterDetailed = DateTimeFormat.getFormat("HH:mm:ss:SS"); 
     private final ImageResource playSpeedImg;
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
@@ -92,6 +94,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
     private final boolean forcePaddingRightToAlignToCharts;
+    private UserService userService;
 
     /**
      * @param forcePaddingRightToAlignToCharts
@@ -102,8 +105,9 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
             TimeRangeWithZoomProvider timeRangeProvider,
             StringMessages stringMessages,
-            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService) {
         super(parent, context);
+        this.userService = userService;
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
@@ -409,10 +413,14 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
 
     protected String getTimeLabelText(Date time) {
         final String timeLabelText;
+        DateTimeFormat formatter = timeFormatter;
+        if (timer.getRefreshInterval() < 1000) {
+            formatter = timeFormatterDetailed;
+        }
         if (lastReceivedDataTimepoint == null) {
-            timeLabelText = timeFormatter.format(time);
+            timeLabelText = formatter.format(time);
         } else {
-            timeLabelText = timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")";
+            timeLabelText = formatter.format(time) + " (" + formatter.format(lastReceivedDataTimepoint) + ")";
         }
         return timeLabelText;
     }
@@ -597,7 +605,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
 
     @Override
     public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
-        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages);
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages, userService);
     }
 
     @Override
