@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.home.mobile.places.event;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -20,6 +22,7 @@ import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvide
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sse.common.TimePoint;
 
 public interface EventViewBase extends IsWidget {
 
@@ -31,6 +34,8 @@ public interface EventViewBase extends IsWidget {
     
     void setSailorInfos(String description, String buttonLabel, String url);
     
+    void setWindfinderNavigations(Iterable<SpotDTO> spots, BiFunction<SpotDTO, TimePoint, String> urlFactory);
+
     void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
 
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider,

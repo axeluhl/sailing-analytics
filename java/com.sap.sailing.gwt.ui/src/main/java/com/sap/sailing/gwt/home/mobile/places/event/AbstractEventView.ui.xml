@@ -7,13 +7,23 @@
 			background-color: #f2f2f2;
 			padding-bottom: 10px;
 		}
+		.windfinder {
+			padding: 0 10px;
+		}
+		.windfinder > div {
+            border-radius: .3846154em;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+		}
 	</ui:style>		
 	<g:HTMLPanel>
 		<div class="{style.headerWrapper}">
 			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
 			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
-			<mp:simpleinfoblock.SimpleInfoBlock ui:field="simpleInfoUi" /> 
+			<mp:simpleinfoblock.SimpleInfoBlock ui:field="simpleInfoUi" />
+			<g:SimplePanel addStyleNames="{style.windfinder}" ui:field="windfinderContainerUi"/>
 		</div>
 		<g:SimplePanel ui:field="viewContentUi"></g:SimplePanel>
 	</g:HTMLPanel>
-</ui:UiBinder>    
+</ui:UiBinder>
