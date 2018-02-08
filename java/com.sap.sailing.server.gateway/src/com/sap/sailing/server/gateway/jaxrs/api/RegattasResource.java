@@ -1013,7 +1013,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorWithBoatJsonSerializer(),
+                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(CompetitorWithBoatJsonSerializer.create(),
                         new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();

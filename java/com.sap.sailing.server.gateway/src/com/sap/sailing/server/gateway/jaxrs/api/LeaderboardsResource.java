@@ -1169,7 +1169,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 return result;
             });
         }
-        CompetitorWithBoatJsonSerializer serializer = new CompetitorWithBoatJsonSerializer();
+        CompetitorWithBoatJsonSerializer serializer = CompetitorWithBoatJsonSerializer.create();
         JSONArray result = new JSONArray();
         for (final Competitor c : competitors) {
             Boat boat = trackedRace.getBoatOfCompetitor(c);

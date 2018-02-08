@@ -16,10 +16,6 @@ public class CompetitorWithBoatJsonSerializer implements JsonSerializer<Competit
         return new CompetitorWithBoatJsonSerializer(CompetitorJsonSerializer.create(), BoatJsonSerializer.create());
     }
 
-    public CompetitorWithBoatJsonSerializer() {
-        this(null, null);
-    }
-
     public CompetitorWithBoatJsonSerializer(JsonSerializer<Competitor> competitorJsonSerializer, JsonSerializer<Boat> boatJsonSerializer) {
         this.competitorJsonSerializer = competitorJsonSerializer;
         this.boatJsonSerializer = boatJsonSerializer;
