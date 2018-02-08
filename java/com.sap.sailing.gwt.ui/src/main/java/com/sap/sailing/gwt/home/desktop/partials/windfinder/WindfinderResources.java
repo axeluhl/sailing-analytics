@@ -11,8 +11,11 @@ public interface WindfinderResources extends ClientBundle {
     @Source("Windfinder.gss")
     LocalCss css();
 
-    @Source("windfinder-logo.png")
-    ImageResource windfinderLogo();
+    @Source("windfinder-logo-white.png")
+    ImageResource windfinderLogoWhite();
+
+    @Source("windfinder-logo-red.png")
+    ImageResource windfinderLogoRed();
 
     public interface LocalCss extends CssResource {
 

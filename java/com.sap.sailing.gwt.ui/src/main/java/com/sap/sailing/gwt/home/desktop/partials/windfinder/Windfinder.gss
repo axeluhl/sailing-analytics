@@ -11,6 +11,7 @@
 }
 .windfindercontrol_icon {
   margin: -0.5em 0.25em;
+  background-image: resourceUrl("windfinderLogoWhite");
 }
 .windfindercontrol:hover {
   cursor: pointer;
@@ -44,16 +45,19 @@
   color: #ffffff;
   text-decoration: underline;
 }
-.windfinderlaunchpad_content_item_icon {
+.windfinderlaunchpad_content_item .windfinderlaunchpad_content_item_icon {
   margin-right: 1em;
+  background-image: resourceUrl("windfinderLogoRed");
 }
-.windfinderlaunchpad_content_item_title {
+.windfinderlaunchpad_content_item:hover .windfinderlaunchpad_content_item_icon {
+  background-image: resourceUrl("windfinderLogoWhite");
+}
+.windfinderlaunchpad_content_item .windfinderlaunchpad_content_item_title {
   white-space: nowrap;
 }
-.windfindercontrol_icon, .windfinderlaunchpad_content_item_icon {
+.windfindercontrol_icon, .windfinderlaunchpad_content_item .windfinderlaunchpad_content_item_icon {
   width: 1.666666666666667em;
   height: 1.666666666666667em;
-  background-image: resourceUrl("windfinderLogo");
   background-size: contain;
   background-repeat: no-repeat;
 }
