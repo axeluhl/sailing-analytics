@@ -28,6 +28,14 @@
                         <li>In the raceboard the floating video box was improved, leading to a more solid resizing and moving behavior.</li>
                         <li>In the raceboard, the adding of videos has now an additional fallback startDate, if no startOfRace could be determined, and the file did not contain a proper creationtime tag, startOfTracking is used.</li>
                         <li>In the raceboard, the floating video box will now only display an edit button in the header, next to close and minimize. Upon clicking it, the box will expand and show the prior always shown editing buttons. This saves a lot of screenspace for logged in admin enabled users.
+                        <li>For smartphone tracked races it's now possible to slice a new race from an existing one in the RaceBoard.
+                            As a user having sufficient permissions you need to select a specific time range in the competitor chart of a race.
+                            This will make a new Button appear near to the settings button of the chart.
+                            When you click this button you are being asked for a name of the new race.
+                            A new race column is created in the same series the current race is associated to.
+                            A new tracked race is then associated to the new column for the fleet of the current race.
+                            This new race is being filled with the data from the current race for the selected time range.
+                            After the slicing process is finished, a dialog will open providing a link to the RaceBoard.
                     </ul>
                     
                     <h2 class="articleSubheadline">December 2017</h2>
