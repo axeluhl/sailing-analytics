@@ -20,8 +20,7 @@ public class WindfinderControl extends Widget {
 
     private static WindfinderLaunchPadItemUiBinder uiBinder = GWT.create(WindfinderLaunchPadItemUiBinder.class);
 
-    @UiField
-    DivElement labelUi;
+    @UiField DivElement labelUi;
     private final WindfinderLaunchPadController launchPadController;
     private Iterable<SpotDTO> spotData;
 
@@ -56,6 +55,6 @@ public class WindfinderControl extends Widget {
             return;
         }
 
-        launchPadController.showWindfinderLaunchPad(spotData, this.getElement());
+        launchPadController.showLaunchPad(spotData, this.getElement());
     }
 }
