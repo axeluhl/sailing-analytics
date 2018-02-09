@@ -24,6 +24,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
@@ -75,73 +76,11 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         ListHandler<UserDTO> userColumnListHandler = getColumnSortHandler();
         
         // users table
-        TextColumn<UserDTO> usernameColumn = new TextColumn<UserDTO>() {
-            @Override
-            public String getValue(UserDTO user) {
-                return user.getName();
-            }
-        };
-        usernameColumn.setSortable(true);
-        userColumnListHandler.setComparator(usernameColumn, new Comparator<UserDTO>() {
-            @Override
-            public int compare(UserDTO o1, UserDTO o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        TextColumn<UserDTO> fullNameColumn = new TextColumn<UserDTO>() {
-            @Override
-            public String getValue(UserDTO user) {
-                return user.getFullName();
-            }
-        };
-        fullNameColumn.setSortable(true);
-        userColumnListHandler.setComparator(fullNameColumn, new Comparator<UserDTO>() {
-            @Override
-            public int compare(UserDTO o1, UserDTO o2) {
-                return o1.getFullName().compareTo(o2.getFullName());
-            }
-        });
-        TextColumn<UserDTO> emailColumn = new TextColumn<UserDTO>() {
-            @Override
-            public String getValue(UserDTO user) {
-                return user.getEmail() != null ? user.getEmail() : "";
-            }
-        };
-        emailColumn.setSortable(true);
-        userColumnListHandler.setComparator(emailColumn, new Comparator<UserDTO>() {
-            private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
-            @Override
-            public int compare(UserDTO o1, UserDTO o2) {
-                return comparator.compare(o1.getEmail(), o2.getEmail());
-            }
-        });
-        TextColumn<UserDTO> emailValidatedColumn = new TextColumn<UserDTO>() {
-            @Override
-            public String getValue(UserDTO user) {
-                return user.isEmailValidated() ? stringMessages.yes() : stringMessages.no();
-            }
-        };
-        emailValidatedColumn.setSortable(true);
-        userColumnListHandler.setComparator(emailValidatedColumn, new Comparator<UserDTO>() {
-            @Override
-            public int compare(UserDTO o1, UserDTO o2) {
-                return Boolean.compare(o1.isEmailValidated(), o2.isEmailValidated());
-            }
-        });
-        TextColumn<UserDTO> companyColumn = new TextColumn<UserDTO>() {
-            @Override
-            public String getValue(UserDTO user) {
-                return user.getCompany() != null ? user.getCompany() : "";
-            }
-        };
-        companyColumn.setSortable(true);
-        userColumnListHandler.setComparator(companyColumn, new Comparator<UserDTO>() {
-            private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
-            @Override
-            public int compare(UserDTO o1, UserDTO o2) {
-                return comparator.compare(o1.getCompany(), o2.getCompany());
-            }
-        });
+        TextColumn<UserDTO> usernameColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getName(), userColumnListHandler);
+        TextColumn<UserDTO> fullNameColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getFullName(), userColumnListHandler);
+        TextColumn<UserDTO> emailColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getEmail(), userColumnListHandler);
+        TextColumn<UserDTO> emailValidatedColumn = new AbstractSortableTextColumn<UserDTO>(user->user.isEmailValidated() ? stringMessages.yes() : stringMessages.no(), userColumnListHandler);
+        TextColumn<UserDTO> companyColumn = new AbstractSortableTextColumn<UserDTO>(user->user.getCompany(), userColumnListHandler);
         Column<UserDTO, SafeHtml> groupsColumn = new Column<UserDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(UserDTO user) {
@@ -255,6 +194,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         table.addColumn(fullNameColumn, stringMessages.name());
         table.addColumn(emailColumn, stringMessages.email());
         table.addColumn(emailValidatedColumn, stringMessages.validated());
+        table.addColumn(companyColumn, stringMessages.company());
         table.addColumn(groupsColumn, stringMessages.groups());
         table.addColumn(rolesColumn, stringMessages.roles());
         table.addColumn(permissionsColumn, stringMessages.permissions());
