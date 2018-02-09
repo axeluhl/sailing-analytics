@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
+import com.sap.sse.security.ui.client.UserService;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> {
@@ -29,18 +30,18 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     //constructor used by Standalone RaceBoard
-    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes, Collection<DetailType> availableDetailTypes) {
-        this(null, stringMessages, competitorChartAllowedDetailTypes, availableDetailTypes);
+    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes, UserService userService, Collection<DetailType> availableDetailTypes) {
+        this(null, stringMessages, competitorChartAllowedDetailTypes, userService, availableDetailTypes);
     }
 
-    public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes, Collection<DetailType> availableDetailTypes) {
+    public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes, UserService userService, Collection<DetailType> availableDetailTypes) {
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
-        raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);
+        raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages, userService);
         
         addLifeCycle(raceMapLifecycle);
         addLifeCycle(windChartLifecycle);

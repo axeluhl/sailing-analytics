@@ -131,7 +131,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                             public void onSuccess(List<DetailType> availableDetailTypes) {
                                                 // TODO Auto-generated method stub
                                                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
-                                                        StringMessages.INSTANCE, result, availableDetailTypes);
+                                                        StringMessages.INSTANCE, result, getUserService(), availableDetailTypes);
                                                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(
                                                         lifeCycle, getUserService(), storageDefinition);
 
@@ -201,7 +201,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
-                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo,true, availableDetailTypes);
+                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         return raceBoardPerspective;
     }  
