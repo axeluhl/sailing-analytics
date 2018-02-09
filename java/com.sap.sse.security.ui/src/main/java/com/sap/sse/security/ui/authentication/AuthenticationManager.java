@@ -61,7 +61,7 @@ public interface AuthenticationManager {
      */
     void logout();
     
-    void updateUserProperties(String fullName, String company, String localeName, AsyncCallback<Void> callback);
+    void updateUserProperties(String fullName, String company, String localeName, AsyncCallback<UserDTO> callback);
     
     /**
      * Provide the {@link AuthenticationContext} for the current user 

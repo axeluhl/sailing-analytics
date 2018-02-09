@@ -10,7 +10,6 @@ import java.util.UUID;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -311,73 +310,69 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 final List<UserDTO> users = new ArrayList<>();
                 final UserDTO user = userAndRoles.getA();
                 users.add(user);
-                getUserManagementService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(), user.getLocale(), new AsyncCallback<Void>() {
+                getUserManagementService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(), user.getLocale(), new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(getStringMessages().errorTryingToUpdateUser(user.getName(), caught.getMessage()));
                     }
 
                     @Override
-                    public void onSuccess(Void nothing) {
+                    public void onSuccess(final UserDTO updatedUser) {
                         int editedUserIndex = getFilterField().indexOf(originalUser);
                         getFilterField().remove(originalUser);
-                        Scheduler.get().scheduleFinally(()->{
-                            if (editedUserIndex >= 0) {
-                                getFilterField().add(editedUserIndex, user);
-                            } else {
-                                //in case competitor was not present --> not edit, but create
-                                getFilterField().add(user);
-                            }
-                            getDataProvider().refresh();
-                        });
-                    }  
-                });
-                if (!Util.equalsWithNull(originalUser.getPermissions(), user.getPermissions())) {
-                    getUserManagementService().setPermissionsForUser(user.getName(), user.getPermissions(), new MarkedAsyncCallback<SuccessInfo>(
-                            new AsyncCallback<SuccessInfo>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    Window.alert(getStringMessages().errorUpdatingPermissions(user.getName(), caught.getMessage()));
-                                }
+                        if (editedUserIndex >= 0) {
+                            getFilterField().add(editedUserIndex, updatedUser);
+                        } else {
+                            //in case competitor was not present --> not edit, but create
+                            getFilterField().add(updatedUser);
+                        }
+                        getUserManagementService().setRolesForUser(user.getName(), userAndRoles.getB(), new MarkedAsyncCallback<SuccessInfo>(
+                                new AsyncCallback<SuccessInfo>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(getStringMessages().errorUpdatingRoles(user.getName(), caught.getMessage()));
+                                    }
 
-                                @Override
-                                public void onSuccess(SuccessInfo result) {
-                                    if (!result.isSuccessful()) {
-                                        Window.alert(getStringMessages().errorUpdatingPermissions(user.getName(), result.getMessage()));
-                                    } else {
-                                        getFilterField().remove(user);
-                                        Scheduler.get().scheduleFinally(()->{
-                                            getFilterField().add(user);
-                                            if (userService.getCurrentUser().getName().equals(user.getName())) {
-                                                // if the current user's permissions changed, update the user object in the user service and notify others
+                                    @Override
+                                    public void onSuccess(final SuccessInfo result) {
+                                        if (!result.isSuccessful()) {
+                                            Window.alert(getStringMessages().errorUpdatingRoles(user.getName(), result.getMessage()));
+                                        } else {
+                                            getFilterField().remove(updatedUser);
+                                            final UserDTO userWithUpdatedRoles = result.getUserDTO();
+                                            getFilterField().add(userWithUpdatedRoles);
+                                            if (userService.getCurrentUser().getName().equals(userWithUpdatedRoles.getName())) {
+                                                // if the current user's roles changed, update the user object in the user service and notify others
                                                 userService.updateUser(/* notify other instances */ true);
                                             }
-                                        });
-                                    }
-                                }
-                            }));
-                }
-                getUserManagementService().setRolesForUser(user.getName(), userAndRoles.getB(), new MarkedAsyncCallback<SuccessInfo>(
-                        new AsyncCallback<SuccessInfo>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(getStringMessages().errorUpdatingRoles(user.getName(), caught.getMessage()));
-                            }
+                                            if (!Util.equalsWithNull(originalUser.getPermissions(), user.getPermissions())) {
+                                                getUserManagementService().setPermissionsForUser(user.getName(), user.getPermissions(), new MarkedAsyncCallback<SuccessInfo>(
+                                                        new AsyncCallback<SuccessInfo>() {
+                                                            @Override
+                                                            public void onFailure(Throwable caught) {
+                                                                errorReporter.reportError(getStringMessages().errorUpdatingPermissions(user.getName(), caught.getMessage()));
+                                                            }
 
-                            @Override
-                            public void onSuccess(SuccessInfo result) {
-                                if (!result.isSuccessful()) {
-                                    Window.alert(getStringMessages().errorUpdatingRoles(user.getName(), result.getMessage()));
-                                } else {
-                                    getFilterField().remove(user);
-                                    getFilterField().add(user);
-                                    if (userService.getCurrentUser().getName().equals(user.getName())) {
-                                        // if the current user's roles changed, update the user object in the user service and notify others
-                                        userService.updateUser(/* notify other instances */ true);
+                                                            @Override
+                                                            public void onSuccess(final SuccessInfo result) {
+                                                                if (!result.isSuccessful()) {
+                                                                    errorReporter.reportError(getStringMessages().errorUpdatingPermissions(user.getName(), result.getMessage()));
+                                                                } else {
+                                                                    getFilterField().remove(userWithUpdatedRoles);
+                                                                    getFilterField().add(result.getUserDTO());
+                                                                    if (userService.getCurrentUser().getName().equals(result.getUserDTO())) {
+                                                                        // if the current user's permissions changed, update the user object in the user service and notify others
+                                                                        userService.updateUser(/* notify other instances */ true);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }));
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                        }));
+                                }));
+                    }  
+                });
             }
 
             @Override

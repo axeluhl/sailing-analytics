@@ -133,10 +133,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 userService, additionalPermissions, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, tableResources);
         userSelectionModel = userList.getSelectionModel();
         buttonPanel.add(deleteButton);
-        deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() == 1);
+        deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
         userSelectionModel.addSelectionChangeHandler(e->{
             deleteButton.setText(stringMessages.remove()+" ("+userSelectionModel.getSelectedSet().size()+")");
-            deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() == 1);
+            deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
         });
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
@@ -149,6 +149,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             public void onUserCreated(UserDTO user) {
                 if (user != null) {
                     userList.getFilterField().add(user);
+                    userSelectionModel.clear();
                     userSelectionModel.setSelected(user, true);
                 }
             }
@@ -159,6 +160,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 userList.getFilterField().remove(user);
             }
         });
+        updateUsersAndACLs();
     }
     
     public void updateUsersAndACLs() {

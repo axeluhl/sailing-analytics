@@ -14,6 +14,7 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Default Presenter implementation for {@link UserDetailsView}.
@@ -47,10 +48,9 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
 
     @Override
     public void handleSaveChangesRequest(String fullName, String company, String locale, String defaultTenantIdAsString) {
-        authenticationManager.updateUserProperties(fullName, company, locale,
-                new AsyncCallback<Void>() {
+        authenticationManager.updateUserProperties(fullName, company, locale, new AsyncCallback<UserDTO>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(UserDTO result) {
                 Window.alert(i18n_sec.successfullyUpdatedUserProperties(
                         authenticationManager.getAuthenticationContext().getCurrentUser().getName()));
             }

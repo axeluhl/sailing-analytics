@@ -345,10 +345,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+    public UserDTO updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
         SecurityUtils.getSubject().checkPermission("user:edit:" + username);
         getSecurityService().updateUserProperties(username, fullName, company,
                 getLocaleFromLocaleName(localeName));
+        return securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username), getSecurityService());
     }
 
     private Locale getLocaleFromLocaleName(String localeName) {

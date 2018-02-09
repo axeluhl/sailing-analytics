@@ -187,22 +187,20 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
     
     @Override
-    public void updateUserProperties(String fullName, String company, String localeName, final AsyncCallback<Void> callback) {
+    public void updateUserProperties(String fullName, String company, String localeName, final AsyncCallback<UserDTO> callback) {
         final UserDTO currentUser = getAuthenticationContext().getCurrentUser();
         final String username = currentUser.getName();
         final String locale = currentUser.getLocale();
-        userManagementService.updateUserProperties(username, fullName, company, localeName, new AsyncCallback<Void>() {
-
+        userManagementService.updateUserProperties(username, fullName, company, localeName, new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(UserDTO result) {
                 refreshUserInfo();
                 callback.onSuccess(result);
-
                 if(!Util.equalsWithNull(locale, localeName)) {
                     redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(localeName);
                 }
