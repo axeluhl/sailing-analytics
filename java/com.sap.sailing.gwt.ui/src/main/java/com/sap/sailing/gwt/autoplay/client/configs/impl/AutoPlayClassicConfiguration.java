@@ -21,11 +21,12 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
+    private AutoPlayClientFactory cf;
 
     @Override
     public void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
             PerspectiveCompositeSettings<?> settings) {
-
+        this.cf = cf;
         final UUID eventUUID = context.getEventId();
         AsyncCallback<EventDTO> getEventByIdAsyncCallback = new AsyncCallback<EventDTO>() {
             @SuppressWarnings("unchecked")
@@ -33,7 +34,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             public void onSuccess(final EventDTO event) {
                 StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(event,
                         context.getLeaderboardName());
-                AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO);
+                AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO, cf.getUserService());
                 cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
                         (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
                         AutoPlayClassicConfiguration.this, context));
@@ -63,7 +64,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             public void cancel() {
             }
         };
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, cf.getUserService());
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = autoplayLifecycle
                 .createDefaultSettings();
         LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
@@ -74,7 +75,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     @Override
     public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
             OnSettingsCallback settingsCallback) {
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, cf.getUserService());
         settingsCallback.newSettings(autoplayLifecycle.createDefaultSettings());
     }
 

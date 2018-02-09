@@ -32,6 +32,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_MARK_PASSINGS,
     MANAGE_MARK_POSITIONS,
     CAN_REPLAY_DURING_LIVE_RACES,
+    DETAIL_TIMER,
     
     // back-end permissions
     EVENT,
