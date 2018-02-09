@@ -25,6 +25,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
@@ -150,21 +151,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         ListHandler<RoleDefinition> columnSortHandler = new ListHandler<>(rolesListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getComparator());
-
-        TextColumn<RoleDefinition> roleDefinitionNameColumn = new TextColumn<RoleDefinition>() {
-            @Override
-            public String getValue(RoleDefinition role) {
-                return role.getName();
-            }
-        };
-        roleDefinitionNameColumn.setSortable(true);
-        columnSortHandler.setComparator(roleDefinitionNameColumn, new Comparator<RoleDefinition>() {
-            @Override
-            public int compare(RoleDefinition r1, RoleDefinition r2) {
-                return new NaturalComparator().compare(r1.getName(), r2.getName());
-            }
-        });
-
+        TextColumn<RoleDefinition> roleDefinitionNameColumn = new AbstractSortableTextColumn<RoleDefinition>(role->role.getName(), columnSortHandler);
         Column<RoleDefinition, SafeHtml> permissionsColumn = new Column<RoleDefinition, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(RoleDefinition role) {
@@ -200,7 +187,6 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 }
             }
         });
-
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
         table.addColumn(permissionsColumn, stringMessages.permissions());
