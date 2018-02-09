@@ -146,8 +146,8 @@ public enum DetailType implements Serializable {
     EXPEDITION_LEG_DISTANCE_TO_PIN(0, ASCENDING),
     EXPEDITION_LEG_DISTANCE_BELOW_LINE(0, ASCENDING),
     EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION(0, ASCENDING),
-    EXPEDITION_RACE__HEEL_IN_DEGREES(2,DESCENDING),
-    EXPEDITION_RACE_CURRENT_PITCH_IN_DEGREES(2,DESCENDING),
+    RACE_HEEL_IN_DEGREES(2,DESCENDING),
+    RACE_PITCH_IN_DEGREES(2,DESCENDING),
     ;
     private int precision;
     
@@ -269,6 +269,8 @@ public enum DetailType implements Serializable {
 
     public static List<DetailType> getAllRaceDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
+        allowed.add(RACE_HEEL_IN_DEGREES);
+        allowed.add(RACE_PITCH_IN_DEGREES);
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);

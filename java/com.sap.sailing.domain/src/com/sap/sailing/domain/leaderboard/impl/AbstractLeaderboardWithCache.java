@@ -628,6 +628,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         entryDTO.expeditionTimeToBurnToLine = fix.getExpeditionTmToBurn();
                         entryDTO.expeditionDistanceBelowLine = fix.getExpeditionBelowLn();
                         entryDTO.expeditionCourseDetail = fix.getExpeditionCourse();
+                        entryDTO.heel = fix.getHeel();
+                        entryDTO.pitch = fix.getPitch();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

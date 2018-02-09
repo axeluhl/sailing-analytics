@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -199,6 +200,10 @@ public class LeaderboardEntryDTO implements Serializable {
     public Double expeditionDistanceToPinDetail;
 
     public Double expeditionVMGTargVMGDelta;
+
+    public Bearing heel;
+
+    public Bearing pitch;
 
     public LeaderboardEntryDTO() { }
     

@@ -1256,78 +1256,108 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                             new RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_AWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWA, new AWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_AWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWA, new ExpeditionAWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                         LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_AWS, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWS, new AWSDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_AWS, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWS, new ExpeditionAWSDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWA, new TWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWA, new ExpeditionTWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TWS, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWS, new TWSDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TWS, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWS, new ExpeditionTWSDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TWD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWD, new TWDDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TWD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWD, new ExpeditionTWDDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TARG_TWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_TWA, new TargTWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TARG_TWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_TWA, new ExpeditionTargTWADetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_BOAT_SPEED, new BoatSpeedDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_BOAT_SPEED, new ExpeditionBoatSpeedDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED, new TargBoatSpeedDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED, new ExpeditionTargBoatSpeedDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_SOG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_SOG, new SOGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_SOG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_SOG, new ExpeditionSOGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_COG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COG, new COGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_COG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COG, new ExpeditionCOGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_FORESTAY_LOAD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_FORESTAY_LOAD, new ForestayLoadDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_FORESTAY_LOAD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_FORESTAY_LOAD, new ExpeditionForestayLoadDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_RAKE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RAKE, new RakeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_RAKE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RAKE, new ExpeditionRakeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_COURSE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COURSE, new CourseDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_COURSE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COURSE, new ExpeditionCourseDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_HEADING, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEADING, new HeadingDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_HEADING, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEADING, new ExpeditionHeadingDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_VMG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG, new VMGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_VMG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG, new ExpeditionVMGDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA, new VMGTargVMGDeltaDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA, new ExpeditionVMGTargVMGDeltaDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_RATE_OF_TURN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RATE_OF_TURN, new RateOfTurnDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_RATE_OF_TURN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RATE_OF_TURN, new ExpeditionRateOfTurnDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_RUDDER_ANGLE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RUDDER_ANGLE, new RudderAngleDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_RUDDER_ANGLE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RUDDER_ANGLE, new ExpeditionRudderAngleDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_HEEL, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEEL, new HeelDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_HEEL, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEEL, new ExpeditionHeelDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TARGET_HEEL, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARGET_HEEL, new TargetHeelDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TARGET_HEEL, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARGET_HEEL, new ExpeditionTargetHeelDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE, new TimeToPortLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE, new ExpeditionTimeToPortLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE, new TimeToStbLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE, new ExpeditionTimeToStbLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE, new DistToPortLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE, new ExpeditionDistToPortLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new DistToStbLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new ExpeditionDistToStbLaylineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new TimeToGUNDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new ExpeditionTimeToGUNDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new TimeToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new ExpeditionTimeToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PIN, new TimeToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PIN, new ExpeditionTimeToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE, new TimeToBurnToLineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE, new ExpeditionTimeToBurnToLineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT, new TimeToBurnToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT, new ExpeditionTimeToBurnToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN, new TimeToBurnToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN, new ExpeditionTimeToBurnToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, new DistanceToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, new ExpeditionDistanceToCommitteeBoatDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN, new DistanceToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN, new ExpeditionDistanceToPinDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE, new DistanceBelowLineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE, new ExpeditionDistanceBelowLineDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new LineSquareForWindDirectionDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new ExpeditionLineSquareForWindDirectionDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RACE_HEEL_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.RACE_HEEL_IN_DEGREES, new HeelInDegreeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RACE_PITCH_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.RACE_PITCH_IN_DEGREES, new PitchInDegreeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
         }
     
-        private class AWADetailTypeExtractor implements LegDetailField<Double> {
+        private class HeelInDegreeDetailTypeExtractor implements LegDetailField<Double> {
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null && fieldsForRace.heel != null) {
+                    result = fieldsForRace.heel.getDegrees();
+                }
+                return result;
+            }
+        }
+        
+        private class PitchInDegreeDetailTypeExtractor implements LegDetailField<Double> {
+
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null && fieldsForRace.pitch != null) {
+                    result = fieldsForRace.pitch.getDegrees();
+                }
+                return result;
+            }
+        }
+        
+        private class ExpeditionAWADetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1340,7 +1370,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class AWSDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionAWSDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1353,7 +1383,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class BoatSpeedDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionBoatSpeedDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1366,7 +1396,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class COGDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionCOGDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1378,7 +1408,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class CourseDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionCourseDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1390,7 +1420,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class DistanceBelowLineDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionDistanceBelowLineDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1402,7 +1432,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class DistanceToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionDistanceToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1414,7 +1444,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class DistanceToPinDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionDistanceToPinDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1426,7 +1456,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class DistToPortLaylineDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionDistToPortLaylineDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1438,7 +1468,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class VMGTargVMGDeltaDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionVMGTargVMGDeltaDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1450,7 +1480,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class DistToStbLaylineDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionDistToStbLaylineDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1462,7 +1492,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class VMGDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionVMGDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1474,7 +1504,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TWSDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTWSDetailTypeExtractor implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1486,7 +1516,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TWDDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTWDDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1499,7 +1529,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TWADetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTWADetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1512,7 +1542,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToStbLaylineDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToStbLaylineDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1525,7 +1555,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToPortLaylineDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToPortLaylineDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1538,7 +1568,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToPinDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToPinDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1551,7 +1581,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToGUNDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToGUNDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1564,7 +1594,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1577,7 +1607,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToBurnToPinDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToBurnToPinDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1590,7 +1620,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToBurnToLineDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToBurnToLineDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1603,7 +1633,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TimeToBurnToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTimeToBurnToCommitteeBoatDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1616,7 +1646,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TargTWADetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTargTWADetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1629,7 +1659,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TargetHeelDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTargetHeelDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1642,7 +1672,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class TargBoatSpeedDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionTargBoatSpeedDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1655,7 +1685,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class SOGDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionSOGDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1668,7 +1698,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class RudderAngleDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionRudderAngleDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1681,7 +1711,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class RateOfTurnDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionRateOfTurnDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1694,7 +1724,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class RakeDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionRakeDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1707,7 +1737,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class LineSquareForWindDirectionDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionLineSquareForWindDirectionDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1720,7 +1750,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class HeelDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionHeelDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1733,7 +1763,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class HeadingDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionHeadingDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1746,7 +1776,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class ForestayLoadDetailTypeExtractor implements LegDetailField<Double> {
+        private class ExpeditionForestayLoadDetailTypeExtractor implements LegDetailField<Double> {
 
             @Override
             public Double get(LeaderboardRowDTO row) {

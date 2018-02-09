@@ -338,6 +338,10 @@ public class DetailTypeFormatter {
             return "\u2205 " + stringMessages.expeditionVmg();
         case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
             return "\u2205 " + stringMessages.expeditionVmgTargVmgDelta();
+        case RACE_HEEL_IN_DEGREES:
+            return stringMessages.currentHeelInDegree();
+        case RACE_PITCH_IN_DEGREES:
+            return stringMessages.currentPitchInDegree();
         default:
             break;
         }
@@ -410,6 +414,8 @@ public class DetailTypeFormatter {
         case CURRENT_RUDDER_IN_DEGREES:
         case CURRENT_TACK_ANGLE_IN_DEGREES:
         case CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES:
+        case RACE_HEEL_IN_DEGREES:
+        case RACE_PITCH_IN_DEGREES:
             return stringMessages.degreesShort();
         
         case CURRENT_PORT_DAGGERBOARD_RAKE:
