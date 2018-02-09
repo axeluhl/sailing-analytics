@@ -365,22 +365,18 @@ public class RaceBoardPanel
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
-            
             new SliceRaceHandler(sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
                     leaderboardGroupName, leaderboardName, event);
-            
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,
                     selectedRaceIdentifier, timer,
                     timeRangeWithZoomModel,
                     windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
                     true);
-
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             componentsForSideBySideViewer.add(windChart);
         }
-        
         editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,
                 selectedRaceIdentifier,
                 stringMessages,
