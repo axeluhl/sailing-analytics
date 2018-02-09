@@ -22,9 +22,9 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<CompetitorWithBoat> {
-    protected final CompetitorFactory competitorWithBoatFactory;
-    protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
-    protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
+    private final CompetitorFactory competitorWithBoatFactory;
+    private final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
+    private final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
     private static final Logger logger = Logger.getLogger(CompetitorWithBoatJsonDeserializer.class.getName());
 
     public static CompetitorWithBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {

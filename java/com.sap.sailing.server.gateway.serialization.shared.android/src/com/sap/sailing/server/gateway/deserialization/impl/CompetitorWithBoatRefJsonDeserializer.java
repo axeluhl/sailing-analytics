@@ -24,9 +24,9 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<Competitor> {
-    protected final CompetitorFactory competitorFactory;
-    protected final BoatFactory boatFactory;
-    protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
+    private final CompetitorFactory competitorFactory;
+    private final BoatFactory boatFactory;
+    private final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     private static final Logger logger = Logger.getLogger(CompetitorWithBoatRefJsonDeserializer.class.getName());
 
     public static CompetitorWithBoatRefJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
