@@ -47,7 +47,7 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 import com.sap.sse.security.ui.client.component.TenantManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.usermanagement.UserManagementPanel;
+import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
 public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);

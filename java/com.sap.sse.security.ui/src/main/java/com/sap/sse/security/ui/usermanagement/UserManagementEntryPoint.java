@@ -12,6 +12,7 @@ import com.sap.sse.security.ui.client.AbstractSecurityEntryPoint;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.SettingsPanel;
+import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.UserDTO;
 

@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.usermanagement;
+package com.sap.sse.security.ui.client.usermanagement;
 
 import java.util.ArrayList;
 import java.util.Collection;

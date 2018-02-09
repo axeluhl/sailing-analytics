@@ -26,7 +26,7 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
-	<inherits name="com.sap.sse.security.ui.UserManagement" />
+	<inherits name="com.sap.sse.security.ui.SecurityCommon" />
 	<inherits name="com.sap.sse.Security" />
     
 	<super-source path="jre" />

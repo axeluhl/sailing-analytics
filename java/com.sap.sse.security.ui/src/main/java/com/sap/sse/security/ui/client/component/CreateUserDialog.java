@@ -7,8 +7,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel.UserCreatedEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.usermanagement.UserManagementPanel.UserCreatedEventHandler;
 
 /**
  * Produces username, e-mail and password as the dialog's result.
