@@ -271,73 +271,73 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
             return stringMessages.expeditionLineSquareForWindDirection();
         case EXPEDITION_LEG_AWA:
-            return stringMessages.expeditionAwa();
+            return "\u2205 " + stringMessages.expeditionAwa();
         case EXPEDITION_LEG_AWS:
-            return stringMessages.expeditionAws();
+            return "\u2205 " + stringMessages.expeditionAws();
         case EXPEDITION_LEG_BOAT_SPEED:
-            return stringMessages.expeditionBoatSpeed();
+            return "\u2205 " + stringMessages.expeditionBoatSpeed();
         case EXPEDITION_LEG_COG:
-            return stringMessages.expeditionCOG();
+            return "\u2205 " + stringMessages.expeditionCOG();
         case EXPEDITION_LEG_COURSE:
-            return stringMessages.expeditionCourse();
+            return "\u2205 " + stringMessages.expeditionCourse();
         case EXPEDITION_LEG_DISTANCE_BELOW_LINE:
-            return stringMessages.expeditionDistanceBelowLine();
+            return "\u2205 " + stringMessages.expeditionDistanceBelowLine();
         case EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT:
-            return stringMessages.expeditionDistanceToCommitteeBoat();
+            return "\u2205 " + stringMessages.expeditionDistanceToCommitteeBoat();
         case EXPEDITION_LEG_DISTANCE_TO_PIN:
-            return stringMessages.expeditionDistanceToPin();
+            return "\u2205 " + stringMessages.expeditionDistanceToPin();
         case EXPEDITION_LEG_DIST_TO_PORT_LAYLINE:
-            return stringMessages.expeditionDistToPortLayline();
+            return "\u2205 " + stringMessages.expeditionDistToPortLayline();
         case EXPEDITION_LEG_DIST_TO_STB_LAYLINE:
-            return stringMessages.expeditionDistToStbLayline();
+            return "\u2205 " + stringMessages.expeditionDistToStbLayline();
         case EXPEDITION_LEG_FORESTAY_LOAD:
-            return stringMessages.expeditionForestayLoad();
+            return "\u2205 " + stringMessages.expeditionForestayLoad();
         case EXPEDITION_LEG_HEADING:
-            return stringMessages.expeditionHeading();
+            return "\u2205 " + stringMessages.expeditionHeading();
         case EXPEDITION_LEG_HEEL:
-            return stringMessages.expeditionTargetHeel();
+            return "\u2205 " + stringMessages.expeditionTargetHeel();
         case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
-            return stringMessages.expeditionLineSquareForWindDirection();
+            return "\u2205 " + stringMessages.expeditionLineSquareForWindDirection();
         case EXPEDITION_LEG_RAKE:
-            return stringMessages.expeditionRake();
+            return "\u2205 " + stringMessages.expeditionRake();
         case EXPEDITION_LEG_RATE_OF_TURN:
-            return stringMessages.expeditionRateOfTurn();
+            return "\u2205 " + stringMessages.expeditionRateOfTurn();
         case EXPEDITION_LEG_RUDDER_ANGLE:
-            return stringMessages.expeditionRudderAngle();
+            return "\u2205 " + stringMessages.expeditionRudderAngle();
         case EXPEDITION_LEG_SOG:
-            return stringMessages.expeditionSOG();
+            return "\u2205 " + stringMessages.expeditionSOG();
         case EXPEDITION_LEG_TARGET_HEEL:
-            return stringMessages.expeditionTargetHeel();
+            return "\u2205 " + stringMessages.expeditionTargetHeel();
         case EXPEDITION_LEG_TARG_BOAT_SPEED:
-            return stringMessages.expeditionTargBoatSpeed();
+            return "\u2205 " + stringMessages.expeditionTargBoatSpeed();
         case EXPEDITION_LEG_TARG_TWA:
-            return stringMessages.expeditionTargTwa();
+            return "\u2205 " + stringMessages.expeditionTargTwa();
         case EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT:
-            return stringMessages.expeditionTimeToBurnToCommitteeBoat();
+            return "\u2205 " + stringMessages.expeditionTimeToBurnToCommitteeBoat();
         case EXPEDITION_LEG_TIME_TO_BURN_TO_LINE:
-            return stringMessages.expeditionTimeToBurnToLine();
+            return "\u2205 " + stringMessages.expeditionTimeToBurnToLine();
         case EXPEDITION_LEG_TIME_TO_BURN_TO_PIN:
-            return stringMessages.expeditionTimeToBurnToPin();
+            return "\u2205 " + stringMessages.expeditionTimeToBurnToPin();
         case EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT:
-            return stringMessages.expeditionTimeToCommitteeBoat();
+            return "\u2205 " + stringMessages.expeditionTimeToCommitteeBoat();
         case EXPEDITION_LEG_TIME_TO_GUN:
-            return stringMessages.expeditionTimeToGun();
+            return "\u2205 " + stringMessages.expeditionTimeToGun();
         case EXPEDITION_LEG_TIME_TO_PIN:
-            return stringMessages.expeditionTimeToPin();
+            return "\u2205 " + stringMessages.expeditionTimeToPin();
         case EXPEDITION_LEG_TIME_TO_PORT_LAYLINE:
-            return stringMessages.expeditionDistToPortLayline();
+            return "\u2205 " + stringMessages.expeditionDistToPortLayline();
         case EXPEDITION_LEG_TIME_TO_STB_LAYLINE:
-            return stringMessages.expeditionDistToStbLayline();
+            return "\u2205 " + stringMessages.expeditionDistToStbLayline();
         case EXPEDITION_LEG_TWA:
-            return stringMessages.expeditionTwa();
+            return "\u2205 " + stringMessages.expeditionTwa();
         case EXPEDITION_LEG_TWD:
-            return stringMessages.expeditionTwd();
+            return "\u2205 " + stringMessages.expeditionTwd();
         case EXPEDITION_LEG_TWS:
-            return stringMessages.expeditionTws();
+            return "\u2205 " + stringMessages.expeditionTws();
         case EXPEDITION_LEG_VMG:
-            return stringMessages.expeditionVmg();
+            return "\u2205 " + stringMessages.expeditionVmg();
         case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
-            return stringMessages.expeditionVmgTargVmgDelta();
+            return "\u2205 " + stringMessages.expeditionVmgTargVmgDelta();
         default:
             break;
         }
