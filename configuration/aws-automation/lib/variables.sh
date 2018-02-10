@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# START EDIT
 default_region=eu-west-2
 default_instance_type=t2.medium
 default_server_startup_notify=leon.radeck@sap.com
@@ -8,9 +7,10 @@ default_new_admin_password=admin
 default_user_username=newuser
 default_user_password=newpassword
 latest_release=$(get_latest_release)
-# END EDIT
 
 # Other Variables (DONT EDIT)
+
+autoDiscoverResourceTagName='AutoDiscover'
 scriptName=`basename $0` #Set Script Name variable
 scriptBasename="$(basename ${scriptName} .sh)" # Strips '.sh' from scriptName
 declare -r script_start_time=$(LC_ALL=C date +"%Y-%m-%d %H:%M:%S")        # Returns: 2015-06-15 22:34:40
@@ -44,3 +44,4 @@ default_telnet_port='14900'
 default_expedition_port='2000'
 default_contact_person='Unknown'
 default_contact_email='Unkown'
+resources_file=./lib/resources-$region.sh

@@ -17,12 +17,6 @@ else
   exit 1
 fi
 
-function source_region_config_file(){
-  require_region
-  local region_config_fle=$(echo lib/config_$region.sh | tr '-' '_')
-  source $region_config_fle
-}
-
 # delete temp files when trapped
 function trapCleanup() {
   echo ""
@@ -52,10 +46,10 @@ args=()
 
 # Create temp directory with three random numbers and the process ID
 # in the name.  This directory is removed automatically at exit.
-# tmpDir="./tmp.$RANDOM.$RANDOM.$RANDOM.$$/"
-# (umask 000 && mkdir "${tmpDir}") || {
-  # die "Could not create temporary directory! Exiting."
-# }
+#tmpDir="/tmp/$RANDOM.$RANDOM.$RANDOM.$$/"
+#(umask 000 && mkdir "${tmpDir}") || {
+#  die "Could not create temporary directory! Exiting."
+#}
 
 # Logging (not used)
 # To never save a logfile change variable to '/dev/null'
@@ -65,9 +59,19 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
 function mainScript() {
 echo -n
+#require_region
+region=eu-west-2
 
-source_region_config_file
+local resource_file=./lib/resources-$region.sh
+if is_exists ${resource_file}; then
+  source "${resource_file}"
+fi
 
+init_resources
+
+require_super_instance_dns_name
+echo "SUPER INSTANCE: $super_instance_dns_name"
+safeExit
 if $instance; then
 	instance_start
   if $associate_alb; then

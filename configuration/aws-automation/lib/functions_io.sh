@@ -1,17 +1,40 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------------
-# As long as variable is empty, prompt again.
+# Prompt user for input and save value to variable
 # @param $1  prompt message
 # @param $2  default value
 # @param $3  variable that is receiving the value
+# @param $4  array of resource names
+# @param $5  array of resource arns
 # -----------------------------------------------------------
-function ask(){
-	while [[ -z "${!3}" ]]
-	do
-	  require_input "$1" "$2" $3
-	done
+function require_input(){
+	declare -a _optionNames=()
+	declare -a _optionValues=()
+	if [ ! -z "$4" ] && [ ! -z "$5" ]; then
+		_optionNames=("${!4}")
+		_optionValues=("${!5}")
+	fi
+
+  if [ ${#_optionValues[@]} -gt 1 ]; then
+			local_echo "--- Names ---"
+			o=0
+			for name in ${optionNames[@]}; do
+				local_echo "$((++o))) $name"
+			done
+			local_echo "--- Resource IDs ---"
+			select option in ${_optionValues[@]};
+			do
+				read -r $3 <<< $option
+				break
+			done
+  elif [ ${#_optionValues[@]} -eq 1 ]; then
+			read -r $3 <<< ${_optionValues[0]}
+	else
+		read -e -p "$1" -i "$2" $3
+	fi
 }
+
 
 # -----------------------------------------------------------
 # If the needed variable was not passed as a parameter and is not
@@ -22,8 +45,17 @@ function ask(){
 # @param $2  variable
 # @param $3  default value
 # @param $4  prompt message
+# @param $5  array of resource names
+# @param $6  array of resource arns
 # -----------------------------------------------------------
 function require_variable(){
+	declare -a optionNames=()
+	declare -a optionValues=()
+	if [ ! -z "$5" ] && [ ! -z "$6" ]; then
+		optionNames=("${!5}")
+		optionValues=("${!6}")
+	fi
+
 	# if parameter is empty
 	if [ -z "$1" ]; then
 		# if required variable is empty
@@ -33,8 +65,11 @@ function require_variable(){
 				# read default value into required variable
 				read -r "$2" <<< "$3"
 			fi
-			# if force not enabled, ask user for input
-			ask "$4" "$3" $2
+			# if force not enabled, ask user for input and repeat until value is set for variable
+			while [[ -z "${!2}" ]]
+			do
+			  require_input "$4" "$3" $2 optionNames[@] optionValues[@]
+			done
 		fi
 	else
 		# if parameter is not empty, read its value into required variable
@@ -50,15 +85,108 @@ function local_echo(){
 	echo "$@" >&2
 }
 
-# -----------------------------------------------------------
-# Prompt user for input and save value to variable
-# @param $1  prompt message
-# @param $2  default value
-# @param $3  variable that is receiving the value
-# -----------------------------------------------------------
-function require_input(){
-	 read -e -p "$1" -i "$2" $3
+function update_configuration(){
+	require_region
+
+	mkdir -p ~/.aws-automation
+	if is_exists ~/.aws-automation/config-$region; then
+		seek_confirmation "Do you want to update your configuration?"
+		if is_confirmed; then
+			rm -rf ~/.aws-automation
+			write_configuration_to_file
+		fi
+	else
+		local_echo "Creating configuration for region $region in folder ~/.aws-automation..."
+		write_configuration_to_file
+	fi
 }
+
+function select_resource_names(){
+	jq -c ".ResourceTagMappingList[] | select(.ResourceARN | contains(\"$1\")) | .Tags[] | select(.Key==\"Name\") | .Value" -r | sanitize
+}
+
+function select_resource_arns(){
+	jq -c ".ResourceTagMappingList[] | select(.ResourceARN | contains(\"$1\")) | .ResourceARN" -r | sanitize
+}
+
+function get_names_for_resources(){
+	declare -a resources=("${!1}")
+	declare -a names=()
+
+	for arn in ${resources[@]}; do
+		name=$(echo "$RESOURCES" | select_resource_names $arn)
+		if [ -z "$name" ]; then
+			names+=("[Unnamed]")
+		else
+			names+=("$name")
+		fi
+	done
+	echo ${names[@]}
+}
+
+function update_resources(){
+	local resources_file=./lib/resources-$region.sh
+	> $resources_file
+
+	OLD_RESOURCES=$RESOURCES
+	typeset -p OLD_RESOURCES >> $resources_file
+
+	local filter="security-group"
+	TAGGED_SECURITY_GROUP_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
+	IFS=' ' read -ra TAGGED_SECURITY_GROUP_NAMES <<< "$(get_names_for_resources TAGGED_SECURITY_GROUP_ARNS[@])"
+	typeset -p TAGGED_SECURITY_GROUP_NAMES TAGGED_SECURITY_GROUP_ARNS >> $resources_file
+
+	local filter="image"
+	TAGGED_IMAGE_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
+	IFS=' ' read -ra TAGGED_IMAGE_NAMES <<< "$(get_names_for_resources TAGGED_IMAGE_ARNS[@])"
+	typeset -p TAGGED_IMAGE_NAMES TAGGED_IMAGE_ARNS >> $resources_file
+
+	local filter="instance"
+	TAGGED_INSTANCE_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
+	IFS=' ' read -ra TAGGED_INSTANCE_NAMES <<< "$(get_names_for_resources TAGGED_INSTANCE_ARNS[@])"
+	typeset -p TAGGED_INSTANCE_NAMES TAGGED_INSTANCE_ARNS >> $resources_file
+
+	local filter="certificate"
+  TAGGED_CERTIFICATE_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
+	IFS=' ' read -ra TAGGED_CERTIFICATE_NAMES <<< "$(get_names_for_resources TAGGED_CERTIFICATE_ARNS[@])"
+	typeset -p TAGGED_CERTIFICATE_NAMES TAGGED_CERTIFICATE_ARNS >> $resources_file
+
+	local filter="loadbalancer"
+	TAGGED_LOADBALANCER_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
+	IFS=' ' read -ra TAGGED_LOADBALANCER_NAMES <<< "$(get_names_for_resources TAGGED_LOADBALANCER_ARNS[@])"
+	typeset -p TAGGED_LOADBALANCER_NAMES TAGGED_LOADBALANCER_ARNS >> $resources_file
+
+}
+function init_resources(){
+	RESOURCES=$(get_auto_discover_resources)
+
+	if [ "$RESOURCES" != "$OLD_RESOURCES" ]; then
+			update_resources $resources_file
+	fi
+
+	# for resource in $resources; do
+  #
+	# 	default_key_name='Leon'
+	# 	default_key_file='/cygdrive/c/Users/d069485/.ssh/Leon.pem'
+  #
+	# 	# through environemnt
+	# 	# mongodb_host='dbserver.internal.sapsailing.com'
+	# 	# mongodb_port='10202'
+	# 	alb_domain='sapsailing.com'
+  #
+	# 	#SL Multi-Instance Sailing Server
+	# 	# default_super_instance_dns_name='ec2-34-250-136-229.eu-west-1.compute.amazonaws.com'
+	# 	# always ask ssh user
+	# 	# default_ssh_user='root'
+  #
+	# mkdir ~/.aws-automation
+	# lib/configurator.sh --bash ~/.aws-automation/config-$region default_key_name $instance_security_group_id
+	# lib/configurator.sh --bash ~/.aws-automation/config-$region default_key_file $load_balancer
+	# lib/configurator.sh --bash ~/.aws-automation/config-$region listener_arn $listener_arn
+	# lib/configurator.sh --bash ~/.aws-automation/config-$region image_id $image_id
+	# lib/configurator.sh --bash ~/.aws-automation/config-$region certificate_arn $certificate_arn
+}
+
 
 function require_region(){
 	require_variable "$region_param" region "$default_region" "$region_ask_message"
@@ -105,7 +233,7 @@ function require_ssh_user(){
 }
 
 function require_super_instance_dns_name(){
-	require_variable "$super_instance_dns_name_param" super_instance_dns_name "$default_super_instance_dns_name" "$super_instance_dns_name_message"
+	require_variable "$super_instance_dns_name_param" super_instance_dns_name "$default_super_instance_dns_name" "$super_instance_dns_name_message" TAGGED_INSTANCE_NAMES[@] TAGGED_INSTANCE_ARNS[@]
 }
 
 function require_description(){

@@ -63,7 +63,7 @@ function master_instance_execute() {
 
 	local base64_user_data=$(echo "$user_data_replica" | base64 -w 0)
 	local launch_template_for_replica=$(printf '{"UserData":"%s","ImageId":"%s","InstanceType":"%s","TagSpecifications":[{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"%s"}]}], "SecurityGroupIds": ["%s"], "KeyName": "%s"}'\
-	"${base64_user_data}" "$image_id" "$instance_type" "$instance_name (Replica)" "$instance_security_group_ids" "$key_name")
+	"${base64_user_data}" "$image_id" "$instance_type" "$instance_name (Replica)" "$instance_security_group_id" "$key_name")
 
 	aws_wrapper ec2 create-launch-template --launch-template-name "Replica_$instance_short_name" --version-description "Replica for $instance_name." --launch-template-data $launch_template_for_replica
 
