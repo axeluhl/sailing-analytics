@@ -148,33 +148,19 @@ function init_resources(){
 			update_resources $resources_file
 	fi
 
-	update_configuration
+	if ! is_exists ~/.aws-automation/config-$region; then
+		create_configuration
+	fi
 }
 
-function update_configuration(){
+function create_configuration(){
 	mkdir -p ~/.aws-automation
 	touch  ~/.aws-automation/config-$region
 
-	init_config_variable default_key_name
-	init_config_variable default_key_file
-	init_config_variable default_mongodb_host
-	init_config_variable default_mongodb_port
-	init_config_variable default_region
-	init_config_variable default_instance_type
-	init_config_variable default_server_startup_notify
-	init_config_variable default_new_admin_password
-	init_config_variable default_user_username
-	init_config_variable default_user_password
+	config=$(build_configuration "default_key_name=" "default_key_file=" "default_mongodb_host=" "default_mongodb_port=" "default_region="\
+	"default_instance_type=" "default_server_startup_notify=" "default_new_admin_password=" "default_user_username="  "default_user_password=")
 
-}
-
-function init_config_variable(){
-	local tmp=$(get_config_variable "$1")
-	if [ -z $tmp ]; then
-		set_config_variable "$1" ""
-	else
-		read -r "$1" <<< $tmp
-	fi
+	echo $config >  ~/.aws-automation/config-$region
 }
 
 function set_config_variable(){

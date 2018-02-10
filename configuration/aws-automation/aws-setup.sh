@@ -59,14 +59,20 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
 function mainScript() {
 echo -n
+
 require_region
 
 local resource_file=./lib/resources-$region.sh
+local config_file=~/.aws-automation/config-$region
 if is_exists ${resource_file}; then
   source "${resource_file}"
 fi
+if is_exists ${config_file}; then
+  source "${config_file}"
+fi
 
 init_resources
+
 safeExit
 if $instance; then
 	instance_start
