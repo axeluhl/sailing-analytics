@@ -157,6 +157,8 @@ function update_configuration(){
 
 	init_config_variable default_key_name
 	init_config_variable default_key_file
+	init_config_variable default_mongodb_host
+	init_config_variable default_mongodb_port
 }
 
 function init_config_variable(){
