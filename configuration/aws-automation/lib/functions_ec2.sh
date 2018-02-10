@@ -99,7 +99,7 @@ function wait_for_ssh_connection(){
 }
 
 function run_instance(){
-	aws_wrapper ec2 run-instances --image-id $(get_resource_id $image_id) --count $instance_count --instance-type $instance_type --key-name $key_name \
+	aws_wrapper ec2 run-instances --image-id $(get_resource_id $image_id) --count 1 --instance-type $instance_type --key-name $key_name \
 	--security-group-ids $(get_resource_id $instance_security_group_id) --user-data "$1" \
 	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]" || { safeExit; }
 }

@@ -159,6 +159,13 @@ function update_configuration(){
 	init_config_variable default_key_file
 	init_config_variable default_mongodb_host
 	init_config_variable default_mongodb_port
+	init_config_variable default_region
+	init_config_variable default_instance_type
+	init_config_variable default_server_startup_notify
+	init_config_variable default_new_admin_password
+	init_config_variable default_user_username
+	init_config_variable default_user_password
+
 }
 
 function init_config_variable(){
