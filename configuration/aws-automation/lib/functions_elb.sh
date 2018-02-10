@@ -51,6 +51,14 @@ function register_targets(){
 }
 
 # -----------------------------------------------------------
+# Returns first https listener of load balancer
+# @param $1  load balancer arn
+# @return  https listener arn
+# -----------------------------------------------------------
+function get_first_https_listener(){
+	aws_wrapper elbv2 describe-listeners --load-balancer-arn $1 --query "Listeners[?Protocol==`HTTPS`].ListenerArn" --output text
+}
+# -----------------------------------------------------------
 # Create rule for listener
 # @param $1  listener arn
 # @param $2  sub domain

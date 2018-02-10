@@ -69,8 +69,11 @@ function ssh_wrapper(){
 # Executes curl command until status code is 200
 # -----------------------------------------------------------
 function curl_until_http_200(){
+  start_time="$(date -u +%s)"
 	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "200" ]];
 	do
+    fail_on_timeout $start_time
+
 		local_echo -n "."
 		sleep $http_retry_interval;
 	done
@@ -82,18 +85,32 @@ function curl_until_http_200(){
 # TODO: Fix code duplication (curl_until_http_200, curl_until_http_401)
 # -----------------------------------------------------------
 function curl_until_http_401(){
+  start_time="$(date -u +%s)"
 	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "401" ]];
 	do
-		local_echo -n "."
+    fail_on_timeout $start_time
+
+    local_echo -n "."
 		sleep $http_retry_interval;
 	done
 	local_echo ""
 }
 
 function do_until_true(){
+  start_time="$(date -u +%s)"
   until "$@"
 	do
+    fail_on_timeout $start_time
+
 		echo -n .
 		sleep $http_retry_interval
 	done
+}
+
+function fail_on_timeout(){
+  end_time="$(date -u +%s)"
+  if [ "$(($end_time-$1))" -gt 180 ]; then
+    error "TIMEOUT"
+    safeExit
+  fi
 }

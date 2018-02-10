@@ -187,6 +187,16 @@ function init_resources(){
 	# lib/configurator.sh --bash ~/.aws-automation/config-$region certificate_arn $certificate_arn
 }
 
+function require_image_id(){
+	require_variable "" image_id "" "$image_id_ask_message" TAGGED_IMAGE_NAMES[@] TAGGED_IMAGE_ARNS[@]
+}
+
+function require_instance_security_group_id(){
+	require_variable "" instance_security_group_id "" "$instance_security_group_id_ask_message" TAGGED_SECURITY_GROUP_NAMES[@] TAGGED_SECURITY_GROUP_ARNS[@]
+}
+function require_load_balancer(){
+	require_variable "" load_balancer "" "$load_balancer_ask_message" TAGGED_LOADBALANCER_NAMES[@] TAGGED_LOADBALANCER_ARNS[@]
+}
 
 function require_region(){
 	require_variable "$region_param" region "$default_region" "$region_ask_message"
@@ -252,6 +262,8 @@ function require_build_version(){
 	require_variable "$build_version_param" build_version "$latest_release" "$build_version_message"
 }
 
+instance_security_group_id_ask_message="Please select the security group for the instance: "
+load_balancer_ask_message="Please select the load balancer: "
 region_ask_message="Please enter the region for the instance: "
 instance_type_ask_message="Please enter the instance type: "
 key_name_ask_message="Please enter the name of your keypair to connect to the instance: "

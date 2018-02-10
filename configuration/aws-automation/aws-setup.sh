@@ -59,8 +59,7 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 
 function mainScript() {
 echo -n
-#require_region
-region=eu-west-2
+require_region
 
 local resource_file=./lib/resources-$region.sh
 if is_exists ${resource_file}; then
@@ -69,8 +68,6 @@ fi
 
 init_resources
 
-require_super_instance_dns_name
-echo "SUPER INSTANCE: $super_instance_dns_name"
 safeExit
 if $instance; then
 	instance_start
