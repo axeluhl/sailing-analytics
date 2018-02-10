@@ -14,7 +14,6 @@ default_key_file='/cygdrive/c/Users/d069485/.ssh/leonradeck-keypair.pem'
 
 mongodb_host=35.176.143.232
 mongodb_port=27017
-alb_domain='dummy2.sapsailing.com'
 
 #default_super_instance_dns_name=''
 default_ssh_user="root"

@@ -17,6 +17,7 @@ function instance_require(){
 	require_region
 	require_instance_type
 	require_instance_security_group_id
+	require_image_id
 	require_instance_name
 	require_instance_short_name
 	require_ssh_user

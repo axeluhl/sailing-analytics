@@ -69,7 +69,7 @@ function create_rule(){
 	local_echo "Creating rule for listener..."
 	local subdomain=$(alphanumeric "$2")
 	local priority=$(($(get_rule_with_highest_priority $1) + 1))
-	local domain="$subdomain.$alb_domain"
+	local domain="$subdomain.sapsailing.com
 	rule=$(aws_wrapper elbv2 create-rule --listener-arn $1 --priority $priority \
 	--conditions Field=host-header,Values=$domain --actions Type=forward,TargetGroupArn=$3)
 	echo $domain
