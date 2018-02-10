@@ -121,7 +121,7 @@ function shared_instance_execute() {
 	local target_group_arn=$(create_target_group "S-shared-$instance_short_name")
 	set_target_group_health_check "$target_group_arn" "HTTP" "/index.html" "$server_port" "5" "4" "2" "2"
 
-	register_targets $target_group_arn $(get_instance_id_of_resource_arn $super_instance)
+	register_targets $target_group_arn $(get_instance_id $super_instance)
 
 	local domain=$(create_rule $listener_arn $instance_short_name $target_group_arn)
 

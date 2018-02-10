@@ -56,7 +56,7 @@ function register_targets(){
 # @return  https listener arn
 # -----------------------------------------------------------
 function get_first_https_listener(){
-	aws_wrapper elbv2 describe-listeners --load-balancer-arn $1 --query "Listeners[?Protocol==`HTTPS`].ListenerArn" --output text
+	aws_wrapper elbv2 describe-listeners --load-balancer-arn $1 --query "Listeners[?Protocol=='HTTPS'].ListenerArn" --output text
 }
 # -----------------------------------------------------------
 # Create rule for listener
@@ -69,7 +69,7 @@ function create_rule(){
 	local_echo "Creating rule for listener..."
 	local subdomain=$(alphanumeric "$2")
 	local priority=$(($(get_rule_with_highest_priority $1) + 1))
-	local domain="$subdomain.sapsailing.com
+	local domain="$subdomain.sapsailing.com"
 	rule=$(aws_wrapper elbv2 create-rule --listener-arn $1 --priority $priority \
 	--conditions Field=host-header,Values=$domain --actions Type=forward,TargetGroupArn=$3)
 	echo $domain

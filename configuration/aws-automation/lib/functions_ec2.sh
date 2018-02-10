@@ -40,8 +40,12 @@ function get_instance_id(){
 # param $1 resource arn
 # @return  instance id
 # -----------------------------------------------------------
-function get_instance_id_of_resource_arn(){
+function get_resource_id(){
 	cut -d/ -f2 <<< $1
+}
+
+function is_resource_arn(){
+	[[ $a == "arn:*" ]]
 }
 
 function get_public_ip(){
@@ -95,9 +99,9 @@ function wait_for_ssh_connection(){
 }
 
 function run_instance(){
-	aws_wrapper ec2 run-instances --image-id $image_id --count $instance_count --instance-type $instance_type --key-name $key_name \
-	--security-group-ids $instance_security_group_id --user-data "$1" \
-	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]") || { safeExit; }
+	aws_wrapper ec2 run-instances --image-id $(get_resource_id $image_id) --count $instance_count --instance-type $instance_type --key-name $key_name \
+	--security-group-ids $(get_resource_id $instance_security_group_id) --user-data "$1" \
+	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]" || { safeExit; }
 }
 
 
@@ -116,7 +120,7 @@ function get_user_data_from_instance() {
 # -----------------------------------------------------------
 function create_instance(){
 	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n${1}\n"
-	json_instance=$(run_instance)
+	json_instance=$(run_instance "$1")
 	instance_id=$(echo "$json_instance" | get_attribute '.Instances[0].InstanceId')
 	wait_instance_exists $instance_id
 	description=$(aws --region $region ec2 describe-instances --instance-ids $instance_id \

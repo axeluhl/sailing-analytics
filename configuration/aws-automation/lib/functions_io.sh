@@ -85,22 +85,6 @@ function local_echo(){
 	echo "$@" >&2
 }
 
-function update_configuration(){
-	require_region
-
-	mkdir -p ~/.aws-automation
-	if is_exists ~/.aws-automation/config-$region; then
-		seek_confirmation "Do you want to update your configuration?"
-		if is_confirmed; then
-			rm -rf ~/.aws-automation
-			write_configuration_to_file
-		fi
-	else
-		local_echo "Creating configuration for region $region in folder ~/.aws-automation..."
-		write_configuration_to_file
-	fi
-}
-
 function select_resource_names(){
 	jq -c ".ResourceTagMappingList[] | select(.ResourceARN | contains(\"$1\")) | .Tags[] | select(.Key==\"Name\") | .Value" -r | sanitize
 }
@@ -164,27 +148,32 @@ function init_resources(){
 			update_resources $resources_file
 	fi
 
-	# for resource in $resources; do
-  #
-	# 	default_key_name='Leon'
-	# 	default_key_file='/cygdrive/c/Users/d069485/.ssh/Leon.pem'
-  #
-	# 	# through environemnt
-	# 	# mongodb_host='dbserver.internal.sapsailing.com'
-	# 	# mongodb_port='10202'
-	# 	alb_domain='sapsailing.com'
-  #
-	# 	#SL Multi-Instance Sailing Server
-	# 	# default_super_instance_dns_name='ec2-34-250-136-229.eu-west-1.compute.amazonaws.com'
-	# 	# always ask ssh user
-	# 	# default_ssh_user='root'
-  #
-	# mkdir ~/.aws-automation
-	# lib/configurator.sh --bash ~/.aws-automation/config-$region default_key_name $instance_security_group_id
-	# lib/configurator.sh --bash ~/.aws-automation/config-$region default_key_file $load_balancer
-	# lib/configurator.sh --bash ~/.aws-automation/config-$region listener_arn $listener_arn
-	# lib/configurator.sh --bash ~/.aws-automation/config-$region image_id $image_id
-	# lib/configurator.sh --bash ~/.aws-automation/config-$region certificate_arn $certificate_arn
+	update_configuration
+}
+
+function update_configuration(){
+	mkdir -p ~/.aws-automation
+	touch  ~/.aws-automation/config-$region
+
+	init_config_variable default_key_name
+	init_config_variable default_key_file
+}
+
+function init_config_variable(){
+	local tmp=$(get_config_variable "$1")
+	if [ -z $tmp ]; then
+		set_config_variable "$1" ""
+	else
+		read -r "$1" <<< $tmp
+	fi
+}
+
+function set_config_variable(){
+	./lib/build-config.sh --bash ~/.aws-automation/config-$region "$1" "$2"
+}
+
+function get_config_variable(){
+	./lib/build-config.sh --bash ~/.aws-automation/config-$region "$1"
 }
 
 function require_image_id(){
@@ -242,8 +231,12 @@ function require_ssh_user(){
 	require_variable "$ssh_user_param" ssh_user "$default_ssh_user" "$ssh_user_ask_message"
 }
 
-function require_super_instance_dns_name(){
-	require_variable "$super_instance_dns_name_param" super_instance_dns_name "$default_super_instance_dns_name" "$super_instance_dns_name_message" TAGGED_INSTANCE_NAMES[@] TAGGED_INSTANCE_ARNS[@]
+function require_super_instance(){
+	require_variable "$super_instance_param" super_instance "$default_super_instance" "$super_instance_message" TAGGED_INSTANCE_NAMES[@] TAGGED_INSTANCE_ARNS[@]
+	if is_resource_arn $super_instance; then
+		local instance_id=$(get_resource_id $super_instance)
+		super_instance=$(query_public_dns_name $instance_id)
+	fi
 }
 
 function require_description(){
@@ -277,7 +270,7 @@ user_username_ask_message="Please enter the username of your new user: "
 user_password_ask_message="Please enter the password of your new user: "
 public_dns_name_ask_message="Please enter the public dns name: "
 ssh_user_ask_message="Please enter the ssh user: "
-super_instance_dns_name_message="Please enter the dns name of the superior instance: "
+super_instance_message="Please enter the dns name of the superior instance: "
 description_message="Please enter a description for the server: "
 contact_person_message="Please enter the name of a contact person: "
 contact_email_message="Please enter the email of the contact person: "

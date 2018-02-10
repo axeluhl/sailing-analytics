@@ -67,7 +67,6 @@ if is_exists ${resource_file}; then
 fi
 
 init_resources
-
 safeExit
 if $instance; then
 	instance_start
