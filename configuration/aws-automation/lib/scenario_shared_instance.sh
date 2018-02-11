@@ -137,10 +137,13 @@ function shared_instance_execute() {
 
 	header "Configuring Apache"
 
-	append_macro_to_001_events_conf "$domain" "$event_id" "$ssh_user" "$super_instance" "$server_port"
+	execute_remote_root "echo -e \"\n# $instance_short_name (${description:-"Unknown"}, ${contact_person:-"Unknown"},${contact_email:-"Unknown"})\" >> $events_conf"
+	append_macro_to_001_events_conf "$domain" "$event_id" "root" "$super_instance" "$server_port"
 
 	local_echo "Reloading httpd..."
-	out=$(execute_remote "/etc/init.d/httpd reload")
+	if [ $(execute_remote_root "apachectl configtest") ]; then
+		out=$(execute_remote_root "/etc/init.d/httpd reload")
+	fi
 
 	header "Conclusion"
 
@@ -165,6 +168,10 @@ function find_first_unused_port(){
 }
 
 function execute_remote(){
+	ssh_wrapper $ssh_user@$super_instance "$@"
+}
+
+function execute_remote_root(){
 	ssh_wrapper $ssh_user@$super_instance "$@"
 }
 
