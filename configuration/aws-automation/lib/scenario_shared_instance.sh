@@ -141,9 +141,8 @@ function shared_instance_execute() {
 	append_macro_to_001_events_conf "$domain" "$event_id" "root" "$super_instance" "$server_port"
 
 	local_echo "Reloading httpd..."
-	if [ $(execute_remote_root "apachectl configtest >/dev/null 2>&1") ]; then
-		out=$(execute_remote_root "/etc/init.d/httpd reload")
-	fi
+	execute_remote_root "apachectl configtest >/dev/null 2>&1"
+	out=$(execute_remote_root "/etc/init.d/httpd reload")
 
 	header "Conclusion"
 
