@@ -88,7 +88,7 @@ function create_rule(){
 # @return    highest priority
 # -----------------------------------------------------------
 function get_rule_with_highest_priority(){
-	local max_priority=$(aws elbv2 describe-rules --listener-arn $1 --query "Rules[*].{P:Priority}" --output text | sanitize | sort -n | tail -1)
+	local max_priority=$(aws --region=$region elbv2 describe-rules --listener-arn $1 --query "Rules[*].{P:Priority}" --output text | sanitize | sort -n | tail -1)
 	if is_number $max_priority; then
 		echo $max_priority
 	else
