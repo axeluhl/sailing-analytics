@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+declare -g DISPLAY_SUCCESS_FOR_THIS_COMMAND="true"
 # -----------------------------------------------------------
 # Does the error checking for curl commands.
 # Captures response and http code of curl command into variable $out.
@@ -35,12 +36,22 @@ function aws_wrapper(){
   local out;
   out=$(aws --region $region "$@")
   if command_was_successful $?; then
-    success ${out:-"[ OK ]"}
+    if [ "$DISPLAY_SUCCESS_FOR_THIS_COMMAND" != "false" ]; then
+      success ${out:-"[ OK ]"}
+    fi
     echo $out | sanitize
   else
     error "[ ERROR ] $out"
     return 1
   fi
+}
+
+function disable_aws_success_output(){
+  DISPLAY_SUCCESS_FOR_THIS_COMMAND="false"
+}
+
+function enable_aws_success_output(){
+  DISPLAY_SUCCESS_FOR_THIS_COMMAND="true"
 }
 
 function ssh_prewrapper(){
@@ -113,4 +124,8 @@ function fail_on_timeout(){
     error "TIMEOUT"
     safeExit
   fi
+}
+
+function exit_on_fail(){
+  "$@" || { safeExit; }
 }

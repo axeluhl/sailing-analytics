@@ -18,6 +18,15 @@ function get_auto_discover_resources(){
 }
 
 # -----------------------------------------------------------
+# @param1   instance id
+# @param2   tag key
+# @return  tag value
+# -----------------------------------------------------------
+function get_tag_value_for_key(){
+	aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[*].Tags[?Key=='$2'].Value" --instance-ids $1 --output text
+}
+
+# -----------------------------------------------------------
 # Query for default vpc id
 # @return    default vpc id
 # -----------------------------------------------------------
@@ -45,7 +54,7 @@ function get_resource_id(){
 }
 
 function is_resource_arn(){
-	[[ $a == "arn:*" ]]
+	[[ $1 == arn:* ]]
 }
 
 function get_public_ip(){
@@ -99,9 +108,9 @@ function wait_for_ssh_connection(){
 }
 
 function run_instance(){
-	aws_wrapper ec2 run-instances --image-id $(get_resource_id $image_id) --count 1 --instance-type $instance_type --key-name $key_name \
+	exit_on_fail aws_wrapper ec2 run-instances --image-id $(get_resource_id $image_id) --count 1 --instance-type $instance_type --key-name $key_name \
 	--security-group-ids $(get_resource_id $instance_security_group_id) --user-data "$1" \
-	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]" || { safeExit; }
+	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]"
 }
 
 
@@ -111,7 +120,7 @@ function run_instance(){
 # @return    user data of instance
 # -----------------------------------------------------------
 function get_user_data_from_instance() {
-	aws_wrapper ec2 describe-instance-attribute --instance-id $1 --attribute userData --output text --query "UserData.Value" | sanitize | base64 --decode
+	aws_wrapper ec2 describe-instance-attribute --instance-id $1 --attribute userData --output text --query "UserData.Value" | sanitize 
 }
 
 # -----------------------------------------------------------
@@ -123,13 +132,9 @@ function create_instance(){
 	json_instance=$(run_instance "$1")
 	instance_id=$(echo "$json_instance" | get_attribute '.Instances[0].InstanceId')
 	wait_instance_exists $instance_id
-	description=$(aws --region $region ec2 describe-instances --instance-ids $instance_id \
+	aws_wrapper --region $region ec2 describe-instances --instance-ids $instance_id \
 	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\
-	--output table)
-
-	if command_was_successful $?; then
-		success $description
-	fi
+	--output table
 
 	echo $instance_id
 }

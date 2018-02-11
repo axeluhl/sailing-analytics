@@ -42,18 +42,15 @@ function master_instance_execute() {
 	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-master-server" \
 	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
 
-	instance_id=$(create_instance "$user_data_master")
-	public_dns_name=$(query_public_dns_name $instance_id)
+	instance_id=$(exit_on_fail create_instance "$user_data_master")
+	public_dns_name=$(exit_on_fail query_public_dns_name $instance_id)
 
 	wait_for_ssh_connection $ssh_user $public_dns_name
 
 	header "Event and user creation"
 
 	port="8888"
-	access_token=$(get_access_token $admin_username $admin_password $public_dns_name $port)
-	event_id=$(create_event $access_token $public_dns_name $port $instance_name)
-	response=$(change_admin_password $access_token $public_dns_name $port $admin_username $new_admin_password)
-	user=$(create_new_user $access_token $public_dns_name $port $user_username $user_password)
+	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_password
 
 	public_ip=$(get_public_ip $public_dns_name)
 

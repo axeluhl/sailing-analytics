@@ -77,6 +77,38 @@ function create_new_user(){
 }
 
 # -----------------------------------------------------------
+# Creates event, changes admin password, creates user
+# @param $1  public dns name
+# @param $2  port of application instance
+# @param $3  event name
+# @param $4  new admin password
+# @param $5  user username
+# @param $6  user password
+# @return event id if event was created
+# -----------------------------------------------------------
+function configure_application(){
+	if [ -z "$3" ] && [ -z "$4" ] && [ -z "$5" ] && [ -z "$6" ]; then
+		return 0
+	fi
+
+	access_token=$(get_access_token "admin" "admin" $1 $2)
+
+	if [ ! -z "$3" ]; then
+		event_id=$(create_event $access_token $1 $2 $3)
+	fi
+
+  if [ ! -z "$4" ]; then
+		response=$(change_admin_password $access_token $1 $2 "admin" $4)
+	fi
+
+	if [ ! -z "$5" ] && [ ! -z "$6" ]; then
+		user=$(create_new_user $access_token $1 $2 $5 $6)
+	fi
+
+	echo ${$event_id:-""}
+}
+
+# -----------------------------------------------------------
 # Patch 001-events.conf with ssl macros
 # @param $1  domain
 # @param $2  event id
@@ -84,10 +116,15 @@ function create_new_user(){
 # @param $4  public dns name
 # @param $5  server port
 # -----------------------------------------------------------
-function append_event_ssl_macro_to_001_events_conf(){
+function append_macro_to_001_events_conf(){
 	wait_for_001_events_patch $3 $4
 
-	local patched_content="Use Event-SSL $1 \\\"$2\\\" 127.0.0.1 $5"
+	if [ -z "$2" ]; then
+		patched_content="Use Home-SSL $1 127.0.0.1 $5"
+	else
+		patched_content="Use Event-SSL $1 \\\"$2\\\" 127.0.0.1 $5"
+	fi
+
 	local_echo "Appending´\"$patched_content\" to $events_conf..."
 	ssh_wrapper $3@$4 echo "$patched_content >> $events_conf"
 }

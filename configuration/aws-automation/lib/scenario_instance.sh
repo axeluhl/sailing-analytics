@@ -36,7 +36,7 @@ function instance_require(){
 function instance_execute() {
 	header "Instance Initialization"
 
-	local user_data=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
+	local user_data=$(build_configuration "MONGODB_HOST=$default_mongodb_host" "MONGODB_PORT=$default_mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
 	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
 	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
 
@@ -46,10 +46,7 @@ function instance_execute() {
 	wait_for_ssh_connection $ssh_user $public_dns_name
 
 	header "Event and user creation"
+	local port="8888"
+	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_pass
 
-	port="8888"
-	access_token=$(get_access_token $admin_username $admin_password $public_dns_name $port)
-	event_id=$(create_event $access_token $public_dns_name $port $instance_name)
-	response=$(change_admin_password $access_token $public_dns_name $port $admin_username $new_admin_password)
-	user=$(create_new_user $access_token $public_dns_name $port $user_username $user_password)
 }

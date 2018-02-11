@@ -16,7 +16,6 @@ function shared_instance_start(){
 # -----------------------------------------------------------
 function shared_instance_require(){
 	require_super_instance
-	require_ssh_user
 	require_load_balancer
 
 	require_key_file
@@ -39,11 +38,21 @@ function shared_instance_check_preconditions(){
 
 	header "Checking preconditions"
 
+	local instance_id=$(get_instance_id $super_instance)
+
+	echo "Checking if instance has tag: 'ssh_user'."
+	ssh_user=$(exit_on_fail get_tag_value_for_key $instance_id "ssh_user")
+
 	echo "Checking if directory $server_dir exists already..."
-	execute_remote "[ ! -d $server_dir ]"
+	exit_on_fail execute_remote "[ ! -d $server_dir ]"
 
 	echo "Checking if ssh connection $ssh_user@$super_instance is working..."
-	execute_remote ls
+	exit_on_fail execute_remote ls
+
+	echo "Checking if super instance has user data.\
+	The instance should not have any user data set, otherwise the refreshInstance script will not work properly."
+
+	exit_on_fail [ $(get_user_data_from_instance $instance_id) == "None" ]
 }
 
 function shared_instance_execute() {
@@ -57,7 +66,7 @@ function shared_instance_execute() {
 
 	# create sub instance server directory
 	local_echo "Creating directory $server_dir ..."
-	execute_remote mkdir $server_dir
+	exit_on_fail execute_remote mkdir $server_dir
 
 	local_echo "Getting next unused SERVER_PORT..."
 	local server_port=$(find_first_unused_port "SERVER_PORT" $default_server_port)
@@ -70,11 +79,11 @@ function shared_instance_execute() {
 
 	# copy refreshInstance.sh from /servers/server to sub instance directory
 	local_echo "Copying $refreshInstance_file to $server_dir..."
-	execute_remote cp $refreshInstance_file $server_dir
+	exit_on_fail execute_remote cp $refreshInstance_file $server_dir
 
 	# Execute refreshInstance.sh
 	local_echo "Executing refreshInstance.sh with build version $build_version ..."
-	execute_remote "set -o pipefail;export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version > /dev/null 2>&1;"
+	exit_on_fail execute_remote "set -o pipefail;export DEPLOY_TO=$instance_short_name;cd $server_dir;./refreshInstance.sh install-release $build_version > /dev/null 2>&1;"
 
 	# uncommenting lines containing pattern
 	local_echo "Commenting in $comment_in_line_in_env_with_pattern inside $server_env_file..."
@@ -84,41 +93,42 @@ function shared_instance_execute() {
 	local_echo "Commenting out $comment_out_line_in_env_with_pattern inside $server_env_file..."
 	execute_remote "sed -i '/$comment_out_line_in_env_with_pattern/s/^/#/g' $server_env_file"
 
-	local env_patch=$(build_configuration "# PATCH $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
-	"SERVER_PORT=$server_port" "EXPEDITION_PORT=$expedition_port" "MONGODB_NAME=$(alphanumeric $instance_name)" "MONGODB_HOST=$mongodb_host" \
-	"MONGODB_PORT=$mongodb_port" "DEPLOY_TO=$instance_short_name")
-
 	local_echo "Configuring $server_env_file..."
-	execute_remote "echo -e \"$env_patch\" >> $server_env_file"
+	environment="live-server"
+	env_content=$(wget -qO- http://releases.sapsailing.com/environments/$environment)
+
+	exit_on_fail execute_remote "echo -e \"# START Environment: $environment \" >> $server_env_file"
+	exit_on_fail execute_remote "echo -e \"$env_content\" >> $server_env_file"
+	exit_on_fail execute_remote "echo -e \"# END Environment: $environment \" >> $server_env_file"
+
+	local env_patch=$(build_configuration "# START Script $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
+	"SERVER_PORT=$server_port" "EXPEDITION_PORT=$expedition_port" "MONGODB_NAME=$(alphanumeric $instance_name)" "MONGODB_HOST=$default_mongodb_host" \
+	"MONGODB_PORT=$default_mongodb_port" "DEPLOY_TO=$instance_short_name" "SERVER_STARTUP_NOTIFY=${default_server_startup_notify:-" "}" \
+	"BUILD_COMPLETE_NOTIFY=${default_build_complete_notifiy:-" "}" "# END Script $script_start_time")
+
+	exit_on_fail execute_remote "echo -e \"$env_patch\" >> $server_env_file"
+
+	local memory="10000m"
+	exit_on_fail execute_remote "echo -e \"MEMORY=$memory\" >> $server_env_file"
 
 	local_echo "Creating README file if it does not exist already..."
 	execute_remote touch $readme_file
 
 	local_echo "Appending patch to README file..."
-	execute_remote "echo -e \"\n# $instance_short_name ($description, $contact_person, $contact_email)\n$env_patch\" >> $readme_file"
+	execute_remote "echo -e \"\n# $instance_short_name (${description:-"Unknown"}, ${contact_person:-"Unknown"},${contact_email:-"Unknown"})\n$env_patch\" >> $readme_file"
 
 	# start server and redirect both stderr and stdout to /dev/null (&>/dev/null). Send command to background by &. Do this to avoid blocking.
 	local_echo "Starting server..."
-	execute_remote -f "set -o pipefail;sh -c \"cd $server_dir; nohup ./start > /dev/null 2>&1 &\""
+	exit_on_fail execute_remote -f "set -o pipefail;sh -c \"cd $server_dir; nohup ./start > /dev/null 2>&1 &\""
 
 	header "Event and user creation"
 
-	# get access token
-	access_token=$(get_access_token $admin_username $admin_password $super_instance $server_port)
-
-	# create event
-	event_id=$(create_event $access_token $super_instance $server_port $instance_name)
-
-	# change admin password
-	change_admin_password $access_token $super_instance $server_port $admin_username $new_admin_password
-
-	# create new user
-	user=$(create_new_user $access_token $super_instance $server_port $user_username $user_password)
+	event_id=$(configure_application $super_instance $port $event_name $new_admin_password $user_username $user_password)
 
 	header "Configuring ALB"
 
 	listener_arn=$(get_first_https_listener $load_balancer)
-	local target_group_arn=$(create_target_group "S-shared-$instance_short_name")
+	local target_group_arn=$(exit_on_fail create_target_group "S-shared-$instance_short_name")
 	set_target_group_health_check "$target_group_arn" "HTTP" "/index.html" "$server_port" "5" "4" "2" "2"
 
 	register_targets $target_group_arn $(get_instance_id $super_instance)
@@ -127,7 +137,7 @@ function shared_instance_execute() {
 
 	header "Configuring Apache"
 
-	append_event_ssl_macro_to_001_events_conf $domain $event_id $ssh_user $super_instance $server_port
+	append_macro_to_001_events_conf "$domain" "$event_id" "$ssh_user" "$super_instance" "$server_port"
 
 	local_echo "Reloading httpd..."
 	out=$(execute_remote "/etc/init.d/httpd reload")

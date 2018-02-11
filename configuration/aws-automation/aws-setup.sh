@@ -60,20 +60,27 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 function mainScript() {
 echo -n
 
-require_region
+local config_file=~/.aws-automation/config
 
-local resource_file=./lib/resources-$region.sh
-local config_file=~/.aws-automation/config-$region
-if is_exists ${resource_file}; then
-  source "${resource_file}"
-fi
 if is_exists ${config_file}; then
   source "${config_file}"
 fi
 
+require_region
+
+local resource_file=./lib/resources-$region.sh
+local region_config_file=~/.aws-automation/config-$region
+
+if is_exists ${resource_file}; then
+  source "${resource_file}"
+fi
+
+if is_exists ${region_config_file}; then
+  source "${region_config_file}"
+fi
+
 init_resources
 
-safeExit
 if $instance; then
 	instance_start
   if $associate_alb; then
@@ -113,6 +120,7 @@ usage() {
   -a, --new-admin-password      New password for the admin user
   -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
   -z, --super-instance          Dns name of superior instance (e.g. base instance for sub instances)
+  -m, --event-name              Name of event
   -b, --build                   Build version to use (leave empty for latest)
   -w, --description             Description of sub instance
   -c, --contact-person          Contact person
@@ -216,6 +224,7 @@ while [[ $1 = -?* ]]; do
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
   -b|--super-instance) shift; super_instance_param=${1} ;;
+  -m|--event-name) shift; event_name_param=${1} ;;
   -z|--build) shift; build_version_param=${1} ;;
   -w|--description) shift; description_param=${1} ;;
   -c|--contact-person) shift; contact_person_param=${1} ;;
