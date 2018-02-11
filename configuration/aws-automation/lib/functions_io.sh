@@ -164,18 +164,24 @@ function update_resources(){
 function init_resources(){
 
 	disable_aws_success_output
+	local_echo "Checking if aws resources with tag key 'AutoDiscover' and value 'true' were added or removed in region $region..."
 	RESOURCES=$(get_auto_discover_resources)
 	enable_aws_success_output
 
 	if [ "$RESOURCES" != "$OLD_RESOURCES" ]; then
+		  local_echo "Updating tagged aws resources..."
 			update_resources $resources_file
+	else
+		local_echo "Stored aws resources are up to date."
 	fi
 
 	if ! is_exists ~/.aws-automation/config-$region; then
+		local_echo "Creating ~/.aws-automation/config-$region..."
 		create_region_configuration
 	fi
 
 	if ! is_exists ~/.aws-automation/config; then
+		local_echo "Creating ~/.aws-automation/config..."
 		create_configuration
 	fi
 }
@@ -186,7 +192,7 @@ function create_region_configuration(){
 
 	local config=""
 	config+="default_instance_type=\n"
-	config+="default_ssh_user\n"
+	config+="default_ssh_user=\n"
 	config+="default_key_name=\n"
 	config+="default_key_file=\n"
 	config+="default_mongodb_host=\n"
@@ -263,7 +269,9 @@ function require_user_username(){
 }
 
 function require_user_password(){
-	require_variable "$user_password_param" user_password "$default_user_password" "$user_password_ask_message" "true" "true"
+	if [ ! -z "$user_name" ]; then
+	  require_variable "$user_password_param" user_password "$default_user_password" "$user_password_ask_message" "true" "true"
+  fi
 }
 
 function require_public_dns_name(){
@@ -303,22 +311,22 @@ function require_build_version(){
 
 event_name_ask_message="Please enter an event name if you want to create an event, leave blank otherwise:"
 instance_security_group_id_ask_message="Please select the security group for the instance: "
-load_balancer_ask_message="Please select the load balancer: "
-region_ask_message="Please enter the region for the instance: "
-instance_type_ask_message="Please enter the instance type: "
-key_name_ask_message="Please enter the name of your keypair to connect to the instance: "
+load_balancer_ask_message="Please select/enter the load balancer: "
+region_ask_message="Please enter the region you want to use (e.g. eu-west-2): "
+instance_type_ask_message="Please enter the instance type (e.g. t2.medium): "
+key_name_ask_message="Please enter the name of your keypair to connect to the instance (e.g. leon-keypair): "
 instance_name_ask_message="Please enter a name for the instance: (e.g \"WC Santander 2017\"): "
 instance_short_name_ask_message="Please enter a short name for the instance (e.g. \"wcs17\"): "
-key_file_ask_message="Please enter the file path of the keypair or leave empty to use default ssh key: "
-new_admin_password_ask_message="Please enter a new password for the admin user: "
+key_file_ask_message="Please enter the file path of the keypair or leave empty to use ~/.ssh key: "
+new_admin_password_ask_message="Please enter a new password for the admin user (leave blank to skip password change): "
 mongo_db_host_ask_message="Please enter the ip adress of the mongo db server: "
 mongo_db_port_ask_message="Please enter the port of the mongo db server: "
-user_username_ask_message="Please enter the username of your new user: "
-user_password_ask_message="Please enter the password of your new user: "
+user_username_ask_message="Please enter the username of your new user (leave blank to skip user creation): "
+user_password_ask_message="Please enter the password of your new user (leave blank to skip user creation): "
 public_dns_name_ask_message="Please enter the public dns name: "
 ssh_user_ask_message="Please enter the ssh user: "
-super_instance_message="Please enter the dns name of the superior instance: "
-description_message="Please enter a description for the server: "
-contact_person_message="Please enter the name of a contact person: "
-contact_email_message="Please enter the email of the contact person: "
+super_instance_message="Please select/enter the dns name of the superior instance: "
+description_message="Please enter a description for the server (leave blank to skip): "
+contact_person_message="Please enter the name of a contact person (leave blank to skip): "
+contact_email_message="Please enter the email of the contact person (leave blank to skip): "
 build_version_message="Please enter a build version to use (releases.sapsailing.com): "
