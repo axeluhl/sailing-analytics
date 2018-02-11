@@ -32,6 +32,7 @@ import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
@@ -202,7 +203,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                     Window.alert(stringMessages.youHaveToSelectATenant());
                     return;
                 }
-                for (UserDTO user : users) {
+                for (final UserDTO user : users) {
                     userManagementService.addUserToTenant(tenant.getId().toString(), user.getName(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -210,6 +211,8 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                         }
                         @Override
                         public void onSuccess(Void result) {
+                            tenant.add(user);
+                            allUsersListDataProvider.updateDisplays();
                             tenantListDataProvider.updateDisplays();
                         }
                     });
@@ -233,6 +236,17 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                         }
                         @Override
                         public void onSuccess(Void result) {
+                            SecurityUser userToRemoveFromTenant = null;
+                            for (final SecurityUser userInTenant : tenant.getUsers()) {
+                                if (Util.equalsWithNull(userInTenant.getName(), username)) {
+                                    userToRemoveFromTenant = userInTenant;
+                                    break;
+                                }
+                            }
+                            if (userToRemoveFromTenant != null) {
+                                tenant.remove(userToRemoveFromTenant);
+                            }
+                            allUsersListDataProvider.updateDisplays();
                             tenantListDataProvider.updateDisplays();
                         }
                     });
