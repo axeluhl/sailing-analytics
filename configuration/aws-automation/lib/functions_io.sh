@@ -247,11 +247,11 @@ function require_instance_short_name(){
 }
 
 function require_key_name(){
-	require_variable "$key_name_param" key_name "$default_key_name" "$key_name_ask_message" "false" "false"
+	require_variable "$key_name_param" key_name "$default_key_name" "$key_name_ask_message" "true" "false"
 }
 
 function require_key_file(){
-	require_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message" "false" "false"
+	require_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message" "true" "false"
 }
 
 function require_new_admin_password(){
