@@ -17,7 +17,7 @@
     <!-- NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the local 
       settings.xml, because of the differences between the CI-Build and the local setup. -->
     <tycho.tests.argLine>
-      ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx1536m
+      ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx4096m
     </tycho.tests.argLine>
   </properties>
 
