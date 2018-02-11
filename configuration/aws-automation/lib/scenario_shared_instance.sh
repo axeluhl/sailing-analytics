@@ -141,7 +141,7 @@ function shared_instance_execute() {
 	append_macro_to_001_events_conf "$domain" "$event_id" "root" "$super_instance" "$server_port"
 
 	local_echo "Reloading httpd..."
-	if [ $(execute_remote_root "apachectl configtest") ]; then
+	if [ $(execute_remote_root "apachectl configtest >/dev/null 2>&1") ]; then
 		out=$(execute_remote_root "/etc/init.d/httpd reload")
 	fi
 
@@ -172,7 +172,7 @@ function execute_remote(){
 }
 
 function execute_remote_root(){
-	ssh_wrapper $ssh_user@$super_instance "$@"
+	ssh_wrapper "root"@$super_instance "$@"
 }
 
 function get_last_used_port(){
