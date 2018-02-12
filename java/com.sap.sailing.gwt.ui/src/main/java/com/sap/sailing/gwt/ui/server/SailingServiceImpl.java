@@ -2899,14 +2899,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = (speedOverGround == null) ? null : speedOverGround.getKnots();
                 }
                 break;
-            case COURSE_OVER_GROUND_TRUE_DEGREES:
+            case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:
                 final GPSFixTrack<Competitor, GPSFixMoving> cogTrack = trackedRace.getTrack(competitor);
                 if (cogTrack != null) {
                     SpeedWithBearing speedOverGround = cogTrack.getEstimatedSpeed(timePoint);
                     result = (speedOverGround == null) ? null : speedOverGround.getBearing().getDegrees();
                 }
                 break;
-            case VELOCITY_MADE_GOOD_IN_KNOTS:
+            case LEG_VELOCITY_MADE_GOOD_IN_KNOTS:
                 final Speed velocityMadeGood;
                 if (trackedLeg != null) {
                     velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
@@ -2916,26 +2916,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
                 break;
-            case DISTANCE_TRAVELED:
+            case LEG_DISTANCE_TRAVELED:
                 if (trackedLeg != null) {
                     Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
                     result = distanceTraveled == null ? null : distanceTraveled.getMeters();
                 }
                 break;
-            case DISTANCE_TRAVELED_INCLUDING_GATE_START:
+            case LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START:
                 if (trackedLeg != null) {
                     Distance distanceTraveledConsideringGateStart = trackedRace.getDistanceTraveledIncludingGateStart(competitor, timePoint);
                     result = distanceTraveledConsideringGateStart == null ? null : distanceTraveledConsideringGateStart.getMeters();
                 }
                 break;
-            case GAP_TO_LEADER_IN_SECONDS:
+            case LEG_GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
                     final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                     final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                     result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
                 break;
-            case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
+            case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
                 if (trackedLeg != null) {
                     final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                     Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
@@ -2963,24 +2963,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 Leaderboard overall = group.getOverallLeaderboard();
                 result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
                 break;
-            case DISTANCE_TO_START_LINE:
+            case CHART_DISTANCE_TO_START_LINE:
                 TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace == null || timePoint.before(startOfRace) || timePoint.equals(startOfRace)) {
                     Distance distanceToStartLine = trackedRace.getDistanceToStartLine(competitor, timePoint);
                     result = distanceToStartLine == null ? null : distanceToStartLine.getMeters();
                 }
                 break;
-            case BEAT_ANGLE:
+            case CHART_BEAT_ANGLE:
                 if (trackedLeg != null) {
                     Bearing beatAngle = trackedLeg.getBeatAngle(timePoint, cache);
                     result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
                 }
                 break;
-            case CURRENT_HEEL_IN_DEGREES: {
+            case BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getHeel, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_PITCH_IN_DEGREES: {
+            case BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getPitch, trackedRace, competitor, timePoint);
                 break;
             }
@@ -2988,76 +2988,76 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 result = getBravoDistanceInMeters(BravoFixTrack::getRideHeight, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_PORT_DAGGERBOARD_RAKE: {
+            case BRAVOEXTENDED_RACE_CURRENT_PORT_DAGGERBOARD_RAKE: {
                 result = getBravoDoubleValue(BravoFixTrack::getPortDaggerboardRakeIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_STBD_DAGGERBOARD_RAKE: {
+            case BRAVOEXTENDED_RACE_CURRENT_STBD_DAGGERBOARD_RAKE: {
                 result = getBravoDoubleValue(BravoFixTrack::getStbdDaggerboardRakeStbdIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_PORT_RUDDER_RAKE: {
+            case BRAVOEXTENDED_RACE_CURRENT_PORT_RUDDER_RAKE: {
                 result = getBravoDoubleValue(BravoFixTrack::getPortRudderRakeIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_STBD_RUDDER_RAKE: {
+            case BRAVOEXTENDED_RACE_CURRENT_STBD_RUDDER_RAKE: {
                 result = getBravoDoubleValue(BravoFixTrack::getStbdRudderRakeIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_MAST_ROTATION_IN_DEGREES: {
+            case BRAVOEXTENDED_RACE_CURRENT_MAST_ROTATION_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getMastRotationIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_LEEWAY_IN_DEGREES: {
+            case BRAVOEXTENDED_RACE_CURRENT_LEEWAY_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getLeewayIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_SET: {
+            case BRAVOEXTENDED_RACE_CURRENT_SET: {
                 result = getBravoDoubleValue(BravoFixTrack::getSetIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_DRIFT_IN_DEGREES: {
+            case BRAVOEXTENDED_RACE_CURRENT_DRIFT_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getDriftIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_DEPTH_IN_METERS: {
+            case BRAVOEXTENDED_RACE_CURRENT_DEPTH_IN_METERS: {
                 result = getBravoDistanceInMeters(BravoFixTrack::getDepthIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_RUDDER_IN_DEGREES: {
+            case BRAVOEXTENDED_RACE_CURRENT_RUDDER_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getRudderIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_TACK_ANGLE_IN_DEGREES: {
+            case BRAVOEXTENDED_RACE_CURRENT_TACK_ANGLE_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getTackAngleIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_DEFLECTOR_PERCENTAGE: {
+            case BRAVOEXTENDED_RACE_CURRENT_DEFLECTOR_PERCENTAGE: {
                 result = getBravoDoubleValue(BravoFixTrack::getDeflectorPercentageIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_DEFLECTOR_IN_MILLIMETERS: {
+            case BRAVOEXTENDED_RACE_CURRENT_DEFLECTOR_IN_MILLIMETERS: {
                 Double deflectorInMeters = getBravoDistanceInMeters(BravoFixTrack::getDeflectorIfAvailable, trackedRace, competitor, timePoint);
                 result = deflectorInMeters == null ? null : (deflectorInMeters * 1000.);
                 break;
             }
-            case CURRENT_RAKE_IN_DEGREES: {
+            case BRAVOEXTENDED_RACE_CURRENT_RAKE_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getRakeIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES: {
+            case BRAVOEXTENDED_RACE_CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getTargetHeelIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_FORESTAY_LOAD: {
+            case BRAVOEXTENDED_RACE_CURRENT_FORESTAY_LOAD: {
                 result = getBravoDoubleValue(BravoFixTrack::getForestayLoadIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_FORESTAY_PRESSURE: {
+            case BRAVOEXTENDED_RACE_CURRENT_FORESTAY_PRESSURE: {
                 result = getBravoDoubleValue(BravoFixTrack::getForestayPressureIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case CURRENT_TARGET_BOATSPEED_PERCENTAGE: {
+            case BRAVOEXTENDED_RACE_CURRENT_TARGET_BOATSPEED_PERCENTAGE: {
                 result = getBravoDoubleValue(BravoFixTrack::getTargetBoatspeedPIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
@@ -6702,7 +6702,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
-        List<DetailType> availableDetailsTypes = DetailType.getDefaultDetailTypesForChart();
+        List<DetailType> availableDetailsTypes1 = new ArrayList<>();
+        availableDetailsTypes1.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
+        availableDetailsTypes1.add(DetailType.LEG_DISTANCE_TRAVELED);
+        availableDetailsTypes1.add(DetailType.LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START);
+        availableDetailsTypes1.add(DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS);
+        availableDetailsTypes1.add(DetailType.LEG_GAP_TO_LEADER_IN_SECONDS);
+        availableDetailsTypes1.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+        availableDetailsTypes1.add(DetailType.RACE_RANK);
+        availableDetailsTypes1.add(DetailType.REGATTA_RANK);
+        availableDetailsTypes1.add(DetailType.CHART_DISTANCE_TO_START_LINE);
+        availableDetailsTypes1.add(DetailType.CHART_BEAT_ANGLE);
+        availableDetailsTypes1.add(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
+        List<DetailType> availableDetailsTypes = availableDetailsTypes1;
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
         if (trackedRace != null) {
             boolean hasBravoTrack = false;
@@ -6957,6 +6969,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             System.out.println("Getting available types for " + leaderboardName + " " + hasBravoTrack + " " + hasExtendedBravoFixes);
             if(hasBravoTrack){
                 allowed.addAll(DetailType.getRaceBravoDetailTypes());
+                allowed.addAll(DetailType.getAvailableBravoOverallDetailColumnTypes());
             }
             if(hasExtendedBravoFixes){
                 allowed.addAll(DetailType.getRaceExpeditionDetailTypes());

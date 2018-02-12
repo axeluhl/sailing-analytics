@@ -559,50 +559,50 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
-        result.put(DetailType.DISTANCE_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TRAVELED, new DistanceTraveledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START,
-                new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START, new DistanceTraveledIncludingGateStartInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new AverageSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_DISTANCE_TRAVELED,
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_TRAVELED, new DistanceTraveledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START,
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START, new DistanceTraveledIncludingGateStartInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new AverageSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
 
-        result.put(DetailType.CURRENT_HEEL_IN_DEGREES, new HeelColumn(DetailType.CURRENT_HEEL_IN_DEGREES,
+        result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES, new HeelColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES,
                 new CurrentHeelInDegrees(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.CURRENT_PITCH_IN_DEGREES, new PitchColumn(DetailType.CURRENT_PITCH_IN_DEGREES,
+        result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES, new PitchColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES,
                 new CurrentPitchInDegrees(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS, new RideHeightColumn(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
+        result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS, new RideHeightColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS,
                 new CurrentRideHeightInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS, new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS,
+        result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS, new FormattedDoubleDetailTypeColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS,
                 new CurrentDistanceFoiledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.CURRENT_DURATION_FOILED_IN_SECONDS, new TotalTimeColumn(DetailType.CURRENT_DURATION_FOILED_IN_SECONDS,
+        result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS, new TotalTimeColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS,
                 new CurrentDurationFoiled(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
-                new FormattedDoubleDetailTypeColumn(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, new EstimatedTimeToNextWaypointInSeconds(),
+        result.put(DetailType.LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, new EstimatedTimeToNextWaypointInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.GAP_TO_LEADER_IN_SECONDS,
-                new FormattedDoubleDetailTypeColumn(DetailType.GAP_TO_LEADER_IN_SECONDS, new GapToLeaderInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS,
-                new FormattedDoubleDetailTypeColumn(DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS, new GapChangeSinceLegStartInSeconds(),
+        result.put(DetailType.LEG_GAP_TO_LEADER_IN_SECONDS,
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_GAP_TO_LEADER_IN_SECONDS, new GapToLeaderInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS,
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS, new GapChangeSinceLegStartInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED,
+        result.put(DetailType.LEG_SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED,
                 new SideToWhichMarkAtLegStartWasRoundedColumn(stringMessages.sideToWhichMarkAtLegStartWasRounded(),
                         new SideToWhichMarkAtLegStartWasRounded(), detailHeaderStyle, detailColumnStyle, stringMessages, leaderboardPanel));
-        result.put(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
-                new FormattedDoubleDetailTypeColumn(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, new VelocityMadeGoodInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new WindwardDistanceToGoInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS,
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS, new VelocityMadeGoodInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS, new WindwardDistanceToGoInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.TIME_TRAVELED, new TotalTimeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.CORRECTED_TIME_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.CORRECTED_TIME_TRAVELED, new CorrectedTimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new AverageAbsoluteCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new AverageSignedCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_TIME_TRAVELED, new TotalTimeColumn(DetailType.LEG_TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_CORRECTED_TIME_TRAVELED,
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_CORRECTED_TIME_TRAVELED, new CorrectedTimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new AverageAbsoluteCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, 
+                new FormattedDoubleDetailTypeColumn(DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new AverageSignedCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_AWA, 
                 new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_AWA, new LegAWA(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_AWS, 

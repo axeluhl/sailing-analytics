@@ -45,7 +45,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
                 selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
+                /* show initially */DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
         this.lifecycle = lifecycle;
     }
@@ -81,7 +81,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         DetailType secondType = newSettings.getSecondDetailType();
         if(!lifecycle.getAllowedDetailTypes().contains(firstType)){
             //if the first type is not allowed here, choose a different valid value
-            firstType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
+            firstType = DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
         }
         if(!lifecycle.getAllowedDetailTypes().contains(firstType)){
             //if the second type is not allowed here, do not set it.

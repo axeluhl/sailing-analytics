@@ -48,12 +48,12 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
         maneuverDetailsToShow = new EnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOf);
         List<DetailType> legDetails = new ArrayList<>();
-        legDetails.add(DetailType.DISTANCE_TRAVELED);
-        legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
-        legDetails.add(DetailType.RANK_GAIN);
+        legDetails.add(DetailType.LEG_DISTANCE_TRAVELED);
+        legDetails.add(DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        legDetails.add(DetailType.LEG_RANK_GAIN);
         legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOf);
         List<DetailType> raceDetails = new ArrayList<>();
-        raceDetails.add(DetailType.DISPLAY_LEGS);
+        raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOf);
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);

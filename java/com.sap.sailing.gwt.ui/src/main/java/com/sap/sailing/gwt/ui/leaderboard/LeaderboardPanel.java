@@ -1242,7 +1242,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringMessages,
                             LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.CURRENT_LEG, new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG,
+            result.put(DetailType.RACE_CURRENT_LEG, new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_LEG,
                     new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_TIME_TRAVELED,
                     new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE,
@@ -1795,7 +1795,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
-            if (isExpanded() && selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
+            if (isExpanded() && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
@@ -2579,28 +2579,28 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
-        result.put(DetailType.TOTAL_DISTANCE_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_TRAVELED,
+        result.put(DetailType.OVERALL_TOTAL_DISTANCE_TRAVELED,
+                new FormattedDoubleDetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_TRAVELED,
                         new TotalDistanceTraveledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+        result.put(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                new FormattedDoubleDetailTypeColumn(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
                         new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+        result.put(DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
                 new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
-        result.put(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
-                new TotalTimeColumn(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
+        result.put(DetailType.OVERALL_TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
+        result.put(DetailType.OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS,
+                new TotalTimeColumn(DetailType.OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS,
                         new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
+        result.put(DetailType.OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS,
+                new FormattedDoubleDetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS,
                         new TotalDistanceFoiledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TIME_ON_TIME_FACTOR, new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
+        result.put(DetailType.OVERALL_TIME_ON_TIME_FACTOR, new FormattedDoubleDetailTypeColumn(DetailType.OVERALL_TIME_ON_TIME_FACTOR,
                 new TimeOnTimeFactorColumn(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
-                new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+        result.put(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                new FormattedDoubleDetailTypeColumn(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                         new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE,
                         RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_SCORED_RACE_COUNT, new IntegerDetailTypeColumn(DetailType.TOTAL_SCORED_RACE_COUNT,
+        result.put(DetailType.OVERALL_TOTAL_SCORED_RACE_COUNT, new IntegerDetailTypeColumn(DetailType.OVERALL_TOTAL_SCORED_RACE_COUNT,
                 new TotalScoredRacesCountField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         return result;
     }
@@ -3015,7 +3015,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private Collection<RaceColumn<?>> getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
             LeaderboardDTO newLeaderboard) {
         Set<RaceColumn<?>> result = new HashSet<RaceColumn<?>>();
-        if (selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
+        if (selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
             for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
                 if (c instanceof LeaderboardPanel.RaceColumn) {
