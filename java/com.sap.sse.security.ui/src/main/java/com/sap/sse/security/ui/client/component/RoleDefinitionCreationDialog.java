@@ -20,4 +20,9 @@ public class RoleDefinitionCreationDialog extends AbstractRoleDefinitionDialog {
         return newRoleDefinitionId;
     }
 
+    @Override
+    public void show() {
+        super.show();
+        roleDefinitionNameField.setFocus(true);
+    }
 }
