@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -95,6 +96,17 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * allows the panel to find the refresh target when a widget has been selected in a tab panel.
      */
     private final Map<Widget, RefreshableAdminConsolePanel> panelsByWidget;
+
+    /**
+     * If {@code null}, any permission will be accepted by
+     * {@link #remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel, Widget, String, Permission...)}
+     * which is used by all methods that add a panel and optionally specify permissions required to see that panel.
+     * If this field holds a valid permission collection, only permissions from this collection will be accepted.
+     * This can be used to keep a central repository of all such permissions which in turn may be used to
+     * automatically create a role that implies all those permissions for users to have full access to the
+     * admin console and its panels.
+     */
+    private final Iterable<? extends Permission> acceptablePermissionsRequiredToSeeWidgets;
     
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
@@ -147,10 +159,18 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         }
         return target;
     }
-
     public AdminConsolePanel(UserService userService,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages) {
+        this(userService, buildVersionRetriever, releaseNotesAnchorLabel, releaseNotesURL, errorReporter, loginPanelCss,
+                stringMessages, /* acceptablePermissionsRequiredToSeeWidgets==null means accept any permission */ null);
+    }
+
+    public AdminConsolePanel(UserService userService,
+            ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
+            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages,
+            Iterable<? extends Permission> acceptablePermissionsRequiredToSeeWidgets) {
+        this.acceptablePermissionsRequiredToSeeWidgets = acceptablePermissionsRequiredToSeeWidgets;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
         this.userService = userService;
         roleSpecificTabs = new LinkedHashSet<>();
@@ -338,6 +358,14 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      */
     private void remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
             String tabTitle, Permission... requiresAnyOfThesePermissions) {
+        if (acceptablePermissionsRequiredToSeeWidgets != null) {
+            for (final Permission requiredPermission : requiresAnyOfThesePermissions) {
+                if (!Util.contains(acceptablePermissionsRequiredToSeeWidgets, requiredPermission)) {
+                    throw new RuntimeException("Internal error: permission "+requiredPermission+
+                            " missing from the set of acceptable admin console permissions "+acceptablePermissionsRequiredToSeeWidgets);
+                }
+            }
+        }
         roleSpecificTabs.add(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, widgetToAdd, tabTitle));
         final HashSet<Permission> permissionsAsSet = new HashSet<>(Arrays.asList(requiresAnyOfThesePermissions));
         permissionsAnyOfWhichIsRequiredToSeeWidget.put(widgetToAdd, permissionsAsSet);

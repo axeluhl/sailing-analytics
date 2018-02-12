@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.common.security;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sse.security.shared.WildcardPermission;
 
 public enum Permission implements com.sap.sse.security.shared.Permission {
@@ -42,6 +47,25 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     TRACKED_RACE,
     DATA_MINING,
     ;
+    
+    private static Set<Permission> adminConsolePermissions = new HashSet<>(Arrays.asList(
+            MANAGE_EVENTS, MANAGE_ALL_COMPETITORS, MANAGE_REGATTAS, MANAGE_LEADERBOARDS, MANAGE_LEADERBOARD_GROUPS,
+            MANAGE_COURSE_LAYOUT, MANAGE_WIND, MANAGE_MEDIA, MANAGE_DEVICE_CONFIGURATION, MANAGE_TRACKED_RACES,
+            SHOW_TRACKED_RACES, MANAGE_IGTIMI_ACCOUNTS, MANAGE_EXPEDITION_DEVICE_CONFIGURATIONS, MANAGE_RESULT_IMPORT_URLS,
+            MANAGE_STRUCTURE_IMPORT_URLS, MANAGE_REPLICATION, MANAGE_MASTERDATA_IMPORT, MANAGE_SAILING_SERVER_INSTANCES,
+            MANAGE_LOCAL_SERVER_INSTANCE, MANAGE_USERS, MANAGE_ROLES, MANAGE_FILE_STORAGE));
+    
+    /**
+     * Tells whether {@code permission} is one that describes the permission necessary to view
+     * an AdminConsole permission.
+     */
+    public static boolean isAdminConsolePermission(Permission permission) {
+        return adminConsolePermissions.contains(permission);
+    }
+    
+    public static Iterable<Permission> getAdminConsolePermissions() {
+        return Collections.unmodifiableSet(adminConsolePermissions);
+    }
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
