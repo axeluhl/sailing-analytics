@@ -568,9 +568,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         result.put(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, 
                 new FormattedDoubleDetailTypeColumn(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
 
-        result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES, new HeelColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES,
+        result.put(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES, new HeelColumn(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES,
                 new CurrentHeelInDegrees(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES, new PitchColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES,
+        result.put(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES, new PitchColumn(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES,
                 new CurrentPitchInDegrees(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS, new RideHeightColumn(DetailType.BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS,

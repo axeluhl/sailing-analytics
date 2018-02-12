@@ -1182,8 +1182,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceCurrentSpeedOverGroundInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
-            result.put(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
-                    new RideHeightColumn(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
+            result.put(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
+                    new RideHeightColumn(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                             new RaceCurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
@@ -1324,9 +1324,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new ExpeditionLineSquareForWindDirectionDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.RACE_HEEL_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.RACE_HEEL_IN_DEGREES, new HeelInDegreeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.BRAVO_RACE_HEEL_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_HEEL_IN_DEGREES, new HeelInDegreeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.RACE_PITCH_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.RACE_PITCH_IN_DEGREES, new PitchInDegreeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.BRAVO_RACE_PITCH_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_PITCH_IN_DEGREES, new PitchInDegreeDetailTypeExtractor(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
         }

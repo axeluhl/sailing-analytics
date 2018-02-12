@@ -44,11 +44,11 @@ public class DetailTypeFormatter {
             return stringMessages.currentDistanceFoiledInMeters();
         case BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiled();
-        case BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES:
+        case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
-        case BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES:
+        case BRAVO_LEG_CURRENT_PITCH_IN_DEGREES:
             return stringMessages.currentPitchInDegree();
-        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMeters();
         case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiled();
@@ -338,9 +338,9 @@ public class DetailTypeFormatter {
             return "\u2205 " + stringMessages.expeditionVmg();
         case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
             return "\u2205 " + stringMessages.expeditionVmgTargVmgDelta();
-        case RACE_HEEL_IN_DEGREES:
+        case BRAVO_RACE_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
-        case RACE_PITCH_IN_DEGREES:
+        case BRAVO_RACE_PITCH_IN_DEGREES:
             return stringMessages.currentPitchInDegree();
         default:
             break;
@@ -394,7 +394,7 @@ public class DetailTypeFormatter {
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
         case CHART_DISTANCE_TO_START_LINE:
         case BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
-        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
         case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
         case BRAVOEXTENDED_RACE_CURRENT_DEPTH_IN_METERS:
         case BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS:
@@ -405,8 +405,8 @@ public class DetailTypeFormatter {
             return stringMessages.millimetersUnit();
             
         case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:
-        case BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES:
-        case BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES:
+        case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES:
+        case BRAVO_LEG_CURRENT_PITCH_IN_DEGREES:
         case BRAVOEXTENDED_RACE_CURRENT_MAST_ROTATION_IN_DEGREES:
         case BRAVOEXTENDED_RACE_CURRENT_DRIFT_IN_DEGREES:
         case BRAVOEXTENDED_RACE_CURRENT_LEEWAY_IN_DEGREES:
@@ -414,8 +414,8 @@ public class DetailTypeFormatter {
         case BRAVOEXTENDED_RACE_CURRENT_RUDDER_IN_DEGREES:
         case BRAVOEXTENDED_RACE_CURRENT_TACK_ANGLE_IN_DEGREES:
         case BRAVOEXTENDED_RACE_CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES:
-        case RACE_HEEL_IN_DEGREES:
-        case RACE_PITCH_IN_DEGREES:
+        case BRAVO_RACE_HEEL_IN_DEGREES:
+        case BRAVO_RACE_PITCH_IN_DEGREES:
             return stringMessages.degreesShort();
         
         case BRAVOEXTENDED_RACE_CURRENT_PORT_DAGGERBOARD_RAKE:
@@ -620,7 +620,7 @@ public class DetailTypeFormatter {
             return stringMessages.currentDistanceFoiledInMetersTooltip();
         case BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiledTooltip();
-        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentRideHeightInMetersTooltip();
         case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
             return stringMessages.currentDurationFoiledTooltip();
@@ -662,9 +662,9 @@ public class DetailTypeFormatter {
             return stringMessages.currentTargetBoatspeedPercentageTooltip();
         case BRAVOEXTENDED_RACE_CURRENT_TARGET_HEEL_ANGLE_IN_DEGREES:
             return stringMessages.currentTargetHeelAngleInDegreesTooltip();
-        case BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES:
+        case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegreeTooltip();
-        case BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES:
+        case BRAVO_LEG_CURRENT_PITCH_IN_DEGREES:
             return stringMessages.currentPitchDegreeTooltip();
         case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
             return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();

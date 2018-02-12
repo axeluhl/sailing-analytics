@@ -28,8 +28,8 @@ public enum DetailType implements Serializable {
     LEG_RANK_GAIN(0, ASCENDING, "RANK_GAIN"),
     NUMBER_OF_MANEUVERS(0, ASCENDING),
     LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING, "CURRENT_SPEED_OVER_GROUND_IN_KNOTS"),
-    BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES(2, DESCENDING, "CURRENT_HEEL_IN_DEGREES"),
-    BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES(2, DESCENDING, "CURRENT_PITCH_IN_DEGREES"),
+    BRAVO_LEG_CURRENT_HEEL_IN_DEGREES(2, DESCENDING, "CURRENT_HEEL_IN_DEGREES"),
+    BRAVO_LEG_CURRENT_PITCH_IN_DEGREES(2, DESCENDING, "CURRENT_PITCH_IN_DEGREES"),
     BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS(2, DESCENDING, "CURRENT_RIDE_HEIGHT_IN_METERS"),
     BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS(0, DESCENDING, "CURRENT_DISTANCE_FOILED_IN_METERS"),
     BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS(0, DESCENDING, "CURRENT_DURATION_FOILED_IN_SECONDS"),
@@ -98,7 +98,7 @@ public enum DetailType implements Serializable {
     OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS(0, DESCENDING, "TOTAL_DURATION_FOILED_IN_SECONDS"),
     OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS(0, DESCENDING, "TOTAL_DISTANCE_FOILED_IN_METERS"),
     RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING),
-    RACE_CURRENT_RIDE_HEIGHT_IN_METERS(2, DESCENDING),
+    BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS(2, DESCENDING),
     RACE_CURRENT_DISTANCE_FOILED_IN_METERS(0, DESCENDING),
     RACE_CURRENT_DURATION_FOILED_IN_SECONDS(0, DESCENDING),
     RACE_NET_POINTS(2, ASCENDING),
@@ -185,8 +185,8 @@ public enum DetailType implements Serializable {
     EXPEDITION_LEG_DISTANCE_TO_PIN(0, ASCENDING),
     EXPEDITION_LEG_DISTANCE_BELOW_LINE(0, ASCENDING),
     EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION(0, ASCENDING),
-    RACE_HEEL_IN_DEGREES(2, DESCENDING),
-    RACE_PITCH_IN_DEGREES(2, DESCENDING),;
+    BRAVO_RACE_HEEL_IN_DEGREES(2, DESCENDING),
+    BRAVO_RACE_PITCH_IN_DEGREES(2, DESCENDING),;
     private int precision;
 
     private SortingOrder defaultSortingOrder;
@@ -198,7 +198,7 @@ public enum DetailType implements Serializable {
         this.precision = precision;
         this.defaultSortingOrder = defaultSortingOrder;
     }
-    
+
     public String[] getOldNames() {
         return oldNames;
     }
@@ -228,9 +228,9 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.CHART_DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.CHART_BEAT_ANGLE);
         availableDetailsTypes.add(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
-        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
-        availableDetailsTypes.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES);
+        availableDetailsTypes.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        availableDetailsTypes.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
+        availableDetailsTypes.add(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES);
         return availableDetailsTypes;
     }
 
@@ -273,12 +273,10 @@ public enum DetailType implements Serializable {
         return allowed;
     }
 
-    public static List<DetailType> getLEGExtendedBravoDetailTypes() {
+    public static List<DetailType> getLegExtendedBravoDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
         allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
         allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES);
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS);
 
         return allowed;
@@ -309,16 +307,22 @@ public enum DetailType implements Serializable {
 
     public static List<DetailType> getRaceBravoDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
-        allowed.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES);
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES);
+        allowed.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);
+        allowed.add(DetailType.BRAVO_RACE_PITCH_IN_DEGREES);
+        allowed.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         return allowed;
     }
+    
+    public static List<DetailType> getLegBravoDetailTypes() {
+        ArrayList<DetailType> allowed = new ArrayList<>();
+        allowed.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
+        allowed.add(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES);
+        return allowed;
+    }
+    
 
     public static List<DetailType> getAllRaceDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
-        allowed.add(RACE_HEEL_IN_DEGREES);
-        allowed.add(RACE_PITCH_IN_DEGREES);
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);
@@ -327,7 +331,7 @@ public enum DetailType implements Serializable {
         allowed.add(RACE_CALCULATED_TIME_TRAVELED);
         allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
         allowed.add(RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
-        allowed.add(RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         allowed.add(RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
         allowed.add(RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
         allowed.add(RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
@@ -351,8 +355,9 @@ public enum DetailType implements Serializable {
     public static Collection<DetailType> getAllNonRestrictedDetailTypes() {
         List<DetailType> all = new ArrayList<>(Arrays.asList(values()));
         all.removeAll(getRaceBravoDetailTypes());
-        all.removeAll(getRaceExpeditionDetailTypes());
+        all.removeAll(getLegBravoDetailTypes());
         all.removeAll(getRaceExtendedBravoDetailTypes());
+        all.removeAll(getRaceExpeditionDetailTypes());
         all.removeAll(getLegExpeditionDetailColumnTypes());
         all.removeAll(getAvailableBravoOverallDetailColumnTypes());
         return all;
@@ -402,6 +407,8 @@ public enum DetailType implements Serializable {
     public static List<DetailType> getAllLegDetailColumnTypes() {
         ArrayList<DetailType> all = new ArrayList<>();
         all.addAll(getLegDetailColumnTypes());
+        all.addAll(getLegBravoDetailTypes());
+        all.addAll(getLegExtendedBravoDetailTypes());
         all.addAll(getLegExpeditionDetailColumnTypes());
         return all;
     }

@@ -2976,15 +2976,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
                 }
                 break;
-            case BRAVOEXTENDED_LEG_CURRENT_HEEL_IN_DEGREES: {
+            case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getHeel, trackedRace, competitor, timePoint);
                 break;
             }
-            case BRAVOEXTENDED_LEG_CURRENT_PITCH_IN_DEGREES: {
+            case BRAVO_LEG_CURRENT_PITCH_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getPitch, trackedRace, competitor, timePoint);
                 break;
             }
-            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS: {
+            case BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS: {
                 result = getBravoDistanceInMeters(BravoFixTrack::getRideHeight, trackedRace, competitor, timePoint);
                 break;
             }
@@ -6969,6 +6969,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             System.out.println("Getting available types for " + leaderboardName + " " + hasBravoTrack + " " + hasExtendedBravoFixes);
             if(hasBravoTrack){
                 allowed.addAll(DetailType.getRaceBravoDetailTypes());
+                allowed.addAll(DetailType.getLegBravoDetailTypes());
                 allowed.addAll(DetailType.getAvailableBravoOverallDetailColumnTypes());
             }
             if(hasExtendedBravoFixes){
