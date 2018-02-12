@@ -14,6 +14,9 @@ public class CompetitorAndBoatJsonSerializer implements JsonSerializer<Pair<Comp
     private final JsonSerializer<Competitor> competitorJsonSerializer;
     private final JsonSerializer<Boat> boatJsonSerializer;
 
+    public static final String FIELD_BOAT = "boat";
+    public static final String FIELD_COMPETITOR = "competitor";
+
     public static CompetitorAndBoatJsonSerializer create() {
         return new CompetitorAndBoatJsonSerializer(CompetitorJsonSerializer.create(), BoatJsonSerializer.create());
     }
@@ -30,8 +33,8 @@ public class CompetitorAndBoatJsonSerializer implements JsonSerializer<Pair<Comp
         JSONObject serializedCompetitor = competitorJsonSerializer.serialize(competitorAndBoat.getA());
         JSONObject serializedBoat = boatJsonSerializer.serialize(competitorAndBoat.getB());
 
-        serializedCompetitorAndBoat.put("competitor", serializedCompetitor);
-        serializedCompetitorAndBoat.put("boat", serializedBoat);
+        serializedCompetitorAndBoat.put(FIELD_COMPETITOR, serializedCompetitor);
+        serializedCompetitorAndBoat.put(FIELD_BOAT, serializedBoat);
 
         return serializedCompetitorAndBoat;
     }

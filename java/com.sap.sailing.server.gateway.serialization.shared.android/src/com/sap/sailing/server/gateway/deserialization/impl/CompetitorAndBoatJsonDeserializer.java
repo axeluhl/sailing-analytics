@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sse.common.Util.Pair;
 
 public class CompetitorAndBoatJsonDeserializer implements JsonDeserializer<Pair<Competitor, Boat>> {
@@ -25,8 +26,8 @@ public class CompetitorAndBoatJsonDeserializer implements JsonDeserializer<Pair<
 
     @Override
     public Pair<Competitor, Boat> deserialize(JSONObject competitorAndBoatJsonObject) throws JsonDeserializationException {
-        Competitor competitor = competitorDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, "competitor"));
-        Boat boat = boatDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, "boat"));
+        Competitor competitor = competitorDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, CompetitorAndBoatJsonSerializer.FIELD_COMPETITOR));
+        Boat boat = boatDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, CompetitorAndBoatJsonSerializer.FIELD_BOAT));
         return new Pair<Competitor, Boat>(competitor, boat);
     }
 }
