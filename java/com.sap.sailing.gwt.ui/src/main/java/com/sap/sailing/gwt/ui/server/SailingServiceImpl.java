@@ -602,9 +602,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
-        if (context != null) {
-            activator.setSailingService(this); // register so this service is informed when the bundle shuts down
-        }
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
@@ -653,6 +650,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
         executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
+        if (context != null) {
+            activator.setSailingService(this); // register so this service is informed when the bundle shuts down
+        }
     }
     
     /**
