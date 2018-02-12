@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -223,25 +225,25 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(
-            final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(context, callback,
-                new Callable<Collection<Competitor>>() {
+    public LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createCompetitorsLoader(
+            final ManagedRace managedRace, LoadClient<Map<Competitor, Boat>> callback) {
+        return new ImmediateDataLoaderCallbacks<Map<Competitor, Boat>>(context, callback,
+                new Callable<Map<Competitor, Boat>>() {
                     @Override
-                    public Collection<Competitor> call() throws Exception {
-                        return managedRace.getCompetitors();
+                    public Map<Competitor, Boat> call() throws Exception {
+                        return managedRace.getCompetitorsAndBoats();
                     }
                 });
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createStartOrderLoader(final ManagedRace managedRace,
-        LoadClient<Collection<Competitor>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(context, callback,
-            new Callable<Collection<Competitor>>() {
+    public LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createStartOrderLoader(final ManagedRace managedRace,
+        LoadClient<Map<Competitor, Boat>> callback) {
+        return new ImmediateDataLoaderCallbacks<Map<Competitor, Boat>>(context, callback,
+            new Callable<Map<Competitor, Boat>>() {
                 @Override
-                public Collection<Competitor> call() throws Exception {
-                    return managedRace.getCompetitors();
+                public Map<Competitor, Boat> call() throws Exception {
+                    return managedRace.getCompetitorsAndBoats();
                 }
             });
     }

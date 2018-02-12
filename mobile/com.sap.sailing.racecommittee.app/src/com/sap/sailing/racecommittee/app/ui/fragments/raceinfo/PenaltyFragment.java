@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -377,14 +377,14 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             domainFactory.getCompetitorStore().allowCompetitorResetToDefaults(competitor);
         }
         final Loader<?> competitorLoader = getLoaderManager()
-            .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
+            .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
                 @Override
                 public void onLoadFailed(Exception reason) {
                     Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()), Toast.LENGTH_LONG).show();
                 }
 
                 @Override
-                public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
+                public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
                     if (isAdded() && !isCached) {
                         onLoadCompetitorsSucceeded(data);
                     }
@@ -411,9 +411,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         leaderboardResultLoader.forceLoad();
     }
 
-    private void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
+    private void onLoadCompetitorsSucceeded(Map<Competitor, Boat> data) {
         mCompetitorResults.clear();
-        for (Competitor item : data) { // add loaded competitors
+        for (Competitor item : data.keySet()) { // add loaded competitors
             String name = "";
             if (item.getShortInfo() != null) {
                 name += item.getShortInfo() + " - ";

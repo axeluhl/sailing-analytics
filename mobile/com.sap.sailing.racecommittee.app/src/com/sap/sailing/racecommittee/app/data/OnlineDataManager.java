@@ -6,12 +6,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -64,19 +66,17 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBase
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorAndBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceColumnFactorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
@@ -246,16 +246,15 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(
-            final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
-        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<Competitor>>() {
+    public LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createCompetitorsLoader(
+            final ManagedRace managedRace, LoadClient<Map<Competitor, Boat>> callback) {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Map<Competitor, Boat>>() {
             @Override
-            public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<Map<Competitor, Boat>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating Competitor-OnlineDataLoader " + id);
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), 
-                        new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))));
-                DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
-                DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
+                JsonDeserializer<Pair<Competitor, Boat>> competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
+                DataParser<Map<Competitor, Boat>> parser = new CompetitorsDataParser(competitorAndBoatDeserializer);
+                DataHandler<Map<Competitor, Boat>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
@@ -274,15 +273,15 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createStartOrderLoader(
-        final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
-        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<Competitor>>() {
+    public LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createStartOrderLoader(
+        final ManagedRace managedRace, LoadClient<Map<Competitor, Boat>> callback) {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Map<Competitor, Boat>>() {
             @Override
-            public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<Map<Competitor, Boat>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating StartOrder-Competitor-OnlineDataLoader " + id);
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))));
-                DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
-                DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
+                JsonDeserializer<Pair<Competitor, Boat>> competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
+                DataParser<Map<Competitor, Boat>> parser = new CompetitorsDataParser(competitorAndBoatDeserializer);
+                DataHandler<Map<Competitor, Boat>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
 
                 // https://dev.sapsailing.com/sailingserver/api/v1/regattas/ESS%202016%20Cardiff/races/Race%2016/startorder
                 Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();

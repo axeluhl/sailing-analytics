@@ -28,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -55,6 +56,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -130,6 +132,7 @@ public class TrackingListFragment extends BaseFragment
         return fragment;
     }
 
+    @TargetApi(19)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_tracking_list, container, false);
@@ -467,7 +470,7 @@ public class TrackingListFragment extends BaseFragment
         }
 
         final Loader<?> competitorLoader = getLoaderManager()
-            .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
+            .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
 
                 @Override
                 public void onLoadFailed(Exception reason) {
@@ -475,7 +478,7 @@ public class TrackingListFragment extends BaseFragment
                 }
 
                 @Override
-                public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
+                public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
                     if (isAdded() && !isCached) {
                         onLoadCompetitorsSucceeded(data);
                     }
@@ -507,13 +510,14 @@ public class TrackingListFragment extends BaseFragment
         leaderboardResultLoader.forceLoad();
     }
 
-    protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
+    protected void onLoadCompetitorsSucceeded(Map<Competitor, Boat> data) {
+        Collection<Competitor> competitors = data.keySet(); 
         mCompetitorData.clear();
-        mCompetitorData.addAll(data);
+        mCompetitorData.addAll(competitors);
         mFilteredCompetitorData.clear();
-        mFilteredCompetitorData.addAll(data);
+        mFilteredCompetitorData.addAll(competitors);
         sortCompetitors();
-        deleteCompetitorsFromFinishedList(data);
+        deleteCompetitorsFromFinishedList(competitors);
         deleteCompetitorsFromCompetitorList();
         mCompetitorAdapter.notifyDataSetChanged();
     }
