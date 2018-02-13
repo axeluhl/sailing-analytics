@@ -7069,7 +7069,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final TimeRange timeRange = new TimeRangeImpl(sliceFrom, sliceTo);
         final StartTimeFinderResult startTimeFinderResult = new StartTimeFinder(getService(), raceLogOfRaceToSlice).analyze();
         final TimePoint startTime = startTimeFinderResult.getStartTime();
-        if (startTime != null && timeRange.includes(startTime)) {
+        final boolean hasStartTime = startTime != null && timeRange.includes(startTime);
+        if (hasStartTime) {
             // we do not support depdendent start times here
             raceLog.add(new RaceLogStartTimeEventImpl(startTimeFinderResult.getStartTime(), author,
                     raceLog.getCurrentPassId(), startTimeFinderResult.getStartTime()));
@@ -7083,6 +7084,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         
+        
+        // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
+        final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
+                timeRange);
         for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
             raceLogEvent.accept(new BaseRaceLogEventVisitor() {
                 @Override
@@ -7093,11 +7098,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                 @Override
                 public void visit(RaceLogWindFixEvent event) {
-                    final Wind windFix = event.getWindFix();
-                    if (timeRange.includes(windFix.getTimePoint())) {
-                        raceLog.add(new RaceLogWindFixEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
-                                raceLog.getCurrentPassId(), windFix, event.isMagnetic()));
-                    }
+                    windFixEvents.addEvent(event);
                 }
                 
                 @Override
@@ -7108,16 +7109,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 
                 @Override
                 public void visit(RaceLogCourseDesignChangedEvent event) {
-                    if (!event.getLogicalTimePoint().after(endOfTracking)) {
-                        raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getLogicalTimePoint(),
-                                event.getAuthor(), raceLog.getCurrentPassId(), event.getCourseDesign(),
-                                event.getCourseDesignerMode()));
-                    }
+                    raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getLogicalTimePoint(),
+                            event.getAuthor(), raceLog.getCurrentPassId(), event.getCourseDesign(),
+                            event.getCourseDesignerMode()));
                 }
                 
                 @Override
                 public void visit(RaceLogFlagEvent event) {
-                    if (isLatestPassAndInSlicedTrackingInterval(event)) {
+                    // If we do not have a start time in the new race, flag events won't be useful
+                    if (hasStartTime && isLatestPass(event) && !event.getLogicalTimePoint().after(sliceTo)) {
                         raceLog.add(new RaceLogFlagEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
                                 raceLog.getCurrentPassId(), event.getUpperFlag(), event.getLowerFlag(),
                                 event.isDisplayed()));
@@ -7126,29 +7126,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 
                 @Override
                 public void visit(RaceLogCourseAreaChangedEvent event) {
-                    if (isLatestPassAndInSlicedTrackingInterval(event)) {
-                        raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
-                                raceLog.getCurrentPassId(), event.getCourseAreaId()));
-                    }
+                    raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                            raceLog.getCurrentPassId(), event.getCourseAreaId()));
                 }
                 
                 @Override
                 public void visit(RaceLogStartProcedureChangedEvent event) {
-                    if (isLatestPassAndInSlicedTrackingInterval(event)) {
+                    if (hasStartTime && isLatestPass(event)) {
                         raceLog.add(new RaceLogStartProcedureChangedEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
                                 raceLog.getCurrentPassId(), event.getStartProcedureType()));
                     }
                 }
                 
-                private boolean isLatestPassAndInSlicedTrackingInterval(RaceLogEvent event) {
-                    if (event.getPassId() != raceLogOfRaceToSlice.getCurrentPassId()) {
-                        return false;
-                    }
-                    return timeRange.includes(event.getLogicalTimePoint());
+                private boolean isLatestPass(RaceLogEvent event) {
+                    return event.getPassId() == raceLogOfRaceToSlice.getCurrentPassId();
                 }
                 // TODO do we need to copy more events?
             });
         }
+        
+        windFixEvents.getFilteredEvents()
+                .forEach(event -> raceLog.add(new RaceLogWindFixEventImpl(event.getLogicalTimePoint(),
+                        event.getAuthor(), raceLog.getCurrentPassId(), event.getWindFix(), event.isMagnetic())));
         
         final TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
         // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
