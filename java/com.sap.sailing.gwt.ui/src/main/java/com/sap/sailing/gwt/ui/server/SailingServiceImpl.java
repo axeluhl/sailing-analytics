@@ -7183,7 +7183,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             return trackedRace.getRaceIdentifier();
         } catch (Exception e) {
-            throw new RuntimeException("Error while slicing race");
+            throw new RuntimeException("Error while slicing race", e);
         }
     }
 }
