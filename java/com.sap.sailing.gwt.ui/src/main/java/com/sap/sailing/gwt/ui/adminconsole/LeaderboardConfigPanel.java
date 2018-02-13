@@ -323,7 +323,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     editCompetitorsDialog.show();
 
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<List<DetailType>>() {
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<Collection<DetailType>>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -331,7 +331,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         }
 
                         @Override
-                        public void onSuccess(List<DetailType> result) {
+                        public void onSuccess(Collection<DetailType> result) {
                             openLeaderboardUrlConfigDialog(leaderboardDTO, result);
                         }
                     });

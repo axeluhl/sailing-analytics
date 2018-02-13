@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -767,9 +766,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         if (newSettings.getRaceDetailsToShow() != null) {
             List<DetailType> allRaceDetailsTypes = new ArrayList<>();
             allRaceDetailsTypes.addAll(DetailType.getAllRaceDetailTypes());
-            allRaceDetailsTypes.addAll(getAvailableRaceStartAnalysisColumnTypes());
+            allRaceDetailsTypes.addAll(DetailType.getRaceStartAnalysisColumnTypes());
             GWT.log("selected race details " + selectedRaceDetails);
-            setValuesWithReferenceOrder(reduceToAvailableTypes(newSettings.getRaceDetailsToShow()), DetailType.getAllRaceDetailTypes() , selectedRaceDetails);
+            setValuesWithReferenceOrder(reduceToAvailableTypes(newSettings.getRaceDetailsToShow()), allRaceDetailsTypes, selectedRaceDetails);
         }
     }
 
@@ -1113,14 +1112,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     public abstract boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb);
-
-    public static List<DetailType> getAvailableRaceStartAnalysisColumnTypes() {
-        return Arrays.asList(new DetailType[] { DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
-                DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, DetailType.DISTANCE_TO_START_AT_RACE_START,
-                DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
-                DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, DetailType.START_TACK });
-    }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
         /**

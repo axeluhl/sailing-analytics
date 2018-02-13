@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -120,7 +120,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
 
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                 .createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
-        sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+        sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Collection<DetailType>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -129,7 +129,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             }
 
             @Override
-            public void onSuccess(List<DetailType> result) {
+            public void onSuccess(Collection<DetailType> result) {
 
                 if (leaderboardDTO.type.isMetaLeaderboard()) {
                     // overall
@@ -172,7 +172,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                 public void onSuccess(
                                         PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
                                     sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName,
-                                            new AsyncCallback<List<DetailType>>() {
+                                            new AsyncCallback<Collection<DetailType>>() {
 
                                                 @Override
                                                 public void onFailure(Throwable caught) {
@@ -180,7 +180,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                                 }
 
                                                 @Override
-                                                public void onSuccess(List<DetailType> result) {
+                                                public void onSuccess(Collection<DetailType> result) {
                                                     configureWithSettings(defaultSettings, timer);
                                                     final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(
                                                             null, context, rootComponentLifeCycle, defaultSettings,

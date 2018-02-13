@@ -119,7 +119,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                             public void onSuccess(List<DetailType> result) {
                                 sailingService.getAvailableDetailTypesForLeaderboard(
                                         raceboardContextDefinition.getLeaderboardName(),
-                                        new AsyncCallback<List<DetailType>>() {
+                                        new AsyncCallback<Collection<DetailType>>() {
 
                                             @Override
                                             public void onFailure(Throwable caught) {
@@ -128,7 +128,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                             }
 
                                             @Override
-                                            public void onSuccess(List<DetailType> availableDetailTypes) {
+                                            public void onSuccess(Collection<DetailType> availableDetailTypes) {
                                                 // TODO Auto-generated method stub
                                                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
                                                         StringMessages.INSTANCE, result, getUserService(), availableDetailTypes);

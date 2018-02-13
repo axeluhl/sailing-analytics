@@ -20,13 +20,13 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
+    public static final String CHECK_BOX_DEBUGID_CONSTANT = "CheckBox";
     protected final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
     protected final Map<DetailType, CheckBox> legDetailCheckboxes;
     protected final Map<DetailType, CheckBox> raceDetailCheckboxes;
@@ -143,7 +143,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         int detailCountInCurrentFlowPanel = 0;
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceStartAnalysisDialogContent = null;
-        for (DetailType type : reduceToAvailableTypes(LeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes())) {
+        for (DetailType type : reduceToAvailableTypes(DetailType.getRaceStartAnalysisColumnTypes())) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceStartAnalysisDialogContent = new FlowPanel();
                 raceStartAnalysisDialogContent.addStyleName("dialogInnerContent");
@@ -224,13 +224,13 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     private CheckBox createCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected) {
         CheckBox checkbox = createCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
                 DetailTypeFormatter.getTooltip(detailType));
-        checkbox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + "CheckBox");
+        checkbox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + CHECK_BOX_DEBUGID_CONSTANT);
         return checkbox;
     }
     
     protected CheckBox createCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip) {
         CheckBox checkbox = dialog.createCheckbox(label);
-        checkbox.ensureDebugId(DebugIdHelper.createDebugId(label) + "CheckBox");
+        checkbox.ensureDebugId(DebugIdHelper.createDebugId(label) + CHECK_BOX_DEBUGID_CONSTANT);
         checkbox.setValue(selected);
         dialog.addTooltip(checkbox, tooltip);
         return checkbox;
@@ -260,16 +260,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     }
     
     protected List<DetailType> getSelected(Map<DetailType, CheckBox> checkBoxes, Collection<DetailType> initialValues) {
-        List<DetailType> selectedDetails = new ArrayList<DetailType>();
-        ArrayList<DetailType> safeInitialValues = new ArrayList<>(initialValues);
+        List<DetailType> selectedDetails = new ArrayList<DetailType>(initialValues);
         for (Map.Entry<DetailType, CheckBox> entry : checkBoxes.entrySet()) {
-            safeInitialValues.remove(entry.getKey());
             if (entry.getValue().getValue()) {
                 selectedDetails.add(entry.getKey());
+            } else {
+                selectedDetails.remove(entry.getKey());
             }
         }
-        //all values that are not currently settable (eg hidden checkboxes) but might be set via defaults ect. Keep them.
-        selectedDetails.addAll(safeInitialValues);
         return selectedDetails;
     }
 }

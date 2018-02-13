@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
@@ -64,7 +65,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                             String overallLeaderboardName = result.get(0);
                             CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
                             
-                            cf.getSailingService().getAvailableDetailTypesForLeaderboard(overallLeaderboardName, new AsyncCallback<List<DetailType>>() {
+                            cf.getSailingService().getAvailableDetailTypesForLeaderboard(overallLeaderboardName, new AsyncCallback<Collection<DetailType>>() {
 
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -72,7 +73,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                                 }
 
                                 @Override
-                                public void onSuccess(List<DetailType> result) {
+                                public void onSuccess(Collection<DetailType> result) {
                                     MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
                                             cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
                                             provider, timer, null, overallLeaderboardName, cf.getErrorReporter(),

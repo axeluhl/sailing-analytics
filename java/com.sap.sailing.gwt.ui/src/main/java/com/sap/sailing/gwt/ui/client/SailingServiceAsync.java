@@ -930,5 +930,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
 
     void getAvailableDetailTypesForLeaderboard(String leaderboardName,
-            AsyncCallback<List<DetailType>> asyncCallback);
+            AsyncCallback<Collection<DetailType>> asyncCallback);
 }

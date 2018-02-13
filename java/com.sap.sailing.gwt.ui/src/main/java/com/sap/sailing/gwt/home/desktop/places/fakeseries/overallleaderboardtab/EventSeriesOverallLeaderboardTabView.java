@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -65,10 +65,10 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
         contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
-            currentPresenter.getCtx().getAnalyticsManager().getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+            currentPresenter.getCtx().getAnalyticsManager().getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Collection<DetailType>>() {
                 
                 @Override
-                public void onSuccess(List<DetailType> result) {
+                public void onSuccess(Collection<DetailType> result) {
                     EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
                     final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
                         @Override

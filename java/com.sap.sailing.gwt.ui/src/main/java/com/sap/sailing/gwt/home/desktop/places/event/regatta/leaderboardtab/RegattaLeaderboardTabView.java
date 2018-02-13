@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -93,10 +93,10 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
             String leaderboardName = regattaId;
             currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
-                    new AsyncCallback<List<DetailType>>() {
+                    new AsyncCallback<Collection<DetailType>>() {
 
                         @Override
-                        public void onSuccess(List<DetailType> result) {
+                        public void onSuccess(Collection<DetailType> result) {
                             MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
                             final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
                                 @Override

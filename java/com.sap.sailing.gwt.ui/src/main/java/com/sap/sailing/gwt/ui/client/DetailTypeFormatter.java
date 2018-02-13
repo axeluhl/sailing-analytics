@@ -38,7 +38,7 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnots();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnots();
-        case BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMeters();
         case BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS:
             return stringMessages.currentDistanceFoiledInMeters();
@@ -393,7 +393,7 @@ public class DetailTypeFormatter {
         case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
         case CHART_DISTANCE_TO_START_LINE:
-        case BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
         case BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
         case RACE_CURRENT_DISTANCE_FOILED_IN_METERS:
         case BRAVOEXTENDED_RACE_CURRENT_DEPTH_IN_METERS:
@@ -614,7 +614,7 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnotsTooltip();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
-        case BRAVOEXTENDED_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
+        case BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMetersTooltip();
         case BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS:
             return stringMessages.currentDistanceFoiledInMetersTooltip();

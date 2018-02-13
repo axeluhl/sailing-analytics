@@ -6942,14 +6942,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName) {
-        List<DetailType> allowed = new ArrayList<>();
+    public Collection<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName) {
+        Set<DetailType> allowed = new HashSet<>();
         allowed.addAll(DetailType.getAllNonRestrictedDetailTypes());
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             boolean hasBravoTrack = false;
             boolean hasExtendedBravoFixes = false;
-            for (RaceColumn race : leaderboard.getRaceColumns()) {
+            abort: for (RaceColumn race : leaderboard.getRaceColumns()) {
                 for (Fleet fleet : race.getFleets()) {
                     TrackedRace trace = race.getTrackedRace(fleet);
                     if(trace != null){
@@ -6960,24 +6960,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 hasBravoTrack = true;
                                 if (track.hasExtendedFixes()) {
                                     hasExtendedBravoFixes = true;
+                                    break abort;
                                 }
                             }
                         }
                     }
                 }
             }
-            System.out.println("Getting available types for " + leaderboardName + " " + hasBravoTrack + " " + hasExtendedBravoFixes);
             if(hasBravoTrack){
                 allowed.addAll(DetailType.getRaceBravoDetailTypes());
                 allowed.addAll(DetailType.getLegBravoDetailTypes());
-                allowed.addAll(DetailType.getAvailableBravoOverallDetailColumnTypes());
+                allowed.addAll(DetailType.getOverallBravoDetailTypes());
             }
             if(hasExtendedBravoFixes){
                 allowed.addAll(DetailType.getRaceExpeditionDetailTypes());
                 allowed.addAll(DetailType.getLegExpeditionDetailColumnTypes());
             }
-        } else {
-            System.out.println("Returning fallback detailtypes");
         }
         return allowed;
     }

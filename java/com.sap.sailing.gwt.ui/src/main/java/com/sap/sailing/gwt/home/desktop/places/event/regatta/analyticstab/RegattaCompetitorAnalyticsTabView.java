@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,10 +79,10 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+            currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Collection<DetailType>>() {
                 
                 @Override
-                public void onSuccess(List<DetailType> result) {
+                public void onSuccess(Collection<DetailType> result) {
                     final Runnable callback = new Runnable() {
                         @Override
                         public void run() {

@@ -710,5 +710,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
     
-    List<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName);
+    Collection<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName);
 }

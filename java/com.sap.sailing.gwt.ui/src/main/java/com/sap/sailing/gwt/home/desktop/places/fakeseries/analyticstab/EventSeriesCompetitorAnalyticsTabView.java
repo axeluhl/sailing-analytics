@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,10 +66,10 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
-            eventSeriesAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<List<DetailType>>() {
+            eventSeriesAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Collection<DetailType>>() {
                 
                 @Override
-                public void onSuccess(List<DetailType> result) {
+                public void onSuccess(Collection<DetailType> result) {
                     final Runnable callback = new Runnable() {
                         @Override
                         public void run() {

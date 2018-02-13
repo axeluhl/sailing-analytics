@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -80,10 +79,10 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                     .getAnalyticsManager();
 
             regattaAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
-                    new AsyncCallback<List<DetailType>>() {
+                    new AsyncCallback<Collection<DetailType>>() {
 
                         @Override
-                        public void onSuccess(List<DetailType> result) {
+                        public void onSuccess(Collection<DetailType> result) {
 
                             final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);

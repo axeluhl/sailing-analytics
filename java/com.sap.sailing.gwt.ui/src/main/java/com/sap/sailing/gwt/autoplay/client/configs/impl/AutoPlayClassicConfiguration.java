@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.configs.impl;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.user.client.Window;
@@ -37,7 +36,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             @SuppressWarnings("unchecked")
             @Override
             public void onSuccess(final EventDTO event) {
-                cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<List<DetailType>>() {
+                cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<Collection<DetailType>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -45,7 +44,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
                     }
 
                     @Override
-                    public void onSuccess(List<DetailType> result) {
+                    public void onSuccess(Collection<DetailType> result) {
                         StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(event,
                                 context.getLeaderboardName());
                         AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO, cf.getUserService(), result);
