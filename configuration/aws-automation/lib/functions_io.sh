@@ -18,22 +18,25 @@ function require_input(){
 	fi
 
   if [ ${#_optionValues[@]} -gt 1 ]; then
-			local_echo "--- Names ---"
+			local_echo "$1"
+			local_echo "--- Select by Name ---"
 			o=0
 			for name in ${optionNames[@]}; do
 				local_echo "$((++o))) $name"
 			done
-			local_echo "--- Resource IDs ---"
+			local_echo "--- Select by Resource ID ---"
 			select option in ${_optionValues[@]};
 			do
 				read -r $3 <<< $option
-				break
+				return 0
 			done
   elif [ ${#_optionValues[@]} -eq 1 ]; then
 			read -r $3 <<< ${_optionValues[0]}
 	else
 		if [ "$4" == "true" ]; then
 			read -e -s -p "$1" -i "$2" $3
+			# print new line after read -s 
+			echo
 		else
 			read -e -p "$1" -i "$2" $3
 		fi
@@ -77,6 +80,7 @@ function require_variable(){
 				else
 					# read default value into required variable
 					read -r "$2" <<< "$3"
+					return 0
 				fi
 			fi
 			# if force not enabled
