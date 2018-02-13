@@ -53,6 +53,7 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
         String name = object.get(RaceGroupJsonSerializer.FIELD_NAME).toString();
         BoatClass boatClass = null;
         String displayName = null;
+        Boolean canBoatsOfCompetitorsChangePerRace = false;
         CourseArea courseArea = null;
         RegattaConfiguration configuration = null;
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
@@ -76,6 +77,10 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
             final Object displayNameJson = object.get(RaceGroupJsonSerializer.FIELD_DISPLAY_NAME);
             displayName = displayNameJson == null ? null : displayNameJson.toString();
         }
-        return new RaceGroupImpl(name, displayName, boatClass, courseArea, series, configuration);
+        if (object.containsKey(RaceGroupJsonSerializer.FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE)) {
+            final Object canBoatsOfCompetitorsChangePerRaceJson = object.get(RaceGroupJsonSerializer.FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE);
+            canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceJson == null ? null : (Boolean) canBoatsOfCompetitorsChangePerRaceJson; 
+        }
+        return new RaceGroupImpl(name, displayName, boatClass, canBoatsOfCompetitorsChangePerRace, courseArea, series, configuration);
     }
 }
