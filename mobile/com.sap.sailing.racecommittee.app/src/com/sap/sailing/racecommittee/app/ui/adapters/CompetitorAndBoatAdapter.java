@@ -1,28 +1,30 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.racecommittee.app.R;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.ViewHolder> {
+public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAndBoatAdapter.ViewHolder> {
 
-    private static final String TAG = CompetitorAdapter.class.getName();
+    private static final String TAG = CompetitorAndBoatAdapter.class.getName();
 
     private Context mContext;
-    private List<Competitor> mData;
+    private List<Map.Entry<Competitor, Boat>> mData;
     private CompetitorClick mListener;
 
-    public CompetitorAdapter(Context context, List<Competitor> data) {
+    public CompetitorAndBoatAdapter(Context context, List<Map.Entry<Competitor, Boat>> data) {
         mContext = context;
         mData = data;
     }
@@ -35,13 +37,17 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Competitor competitor = mData.get(position);
+        Competitor competitor = mData.get(position).getKey();
+        Boat boat = mData.get(position).getValue();
         if (competitor != null) {
             String name = "";
-            if (competitor.hasBoat()) {
-                CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) competitor;
-                if (competitorWithBoat.getBoat() != null) {
-                    name = competitorWithBoat.getBoat().getSailID() + " - ";
+            if (competitor.getShortInfo() != null) {
+                name += competitor.getShortInfo() + " - ";
+                if (boat != null) {
+                    holder.vesselId.setText(boat.getSailID());
+                    float color = (1 - boat.getColor().getAsHSV().getC()) * 255f;
+                    holder.vesselId.setTextColor(Color.argb(255, (int) color, (int) color, (int) color));
+                    holder.vesselId.setBackgroundColor(Color.parseColor(boat.getColor().getAsHtml()));
                 }
             }
             name += competitor.getName();
@@ -65,11 +71,15 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
         mListener = listener;
     }
 
+    public interface CompetitorClick {
+        void onCompetitorClick(Competitor competitor);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public View container;
-        public TextView vesselId;
-        public TextView competitor;
+        View container;
+        TextView vesselId;
+        TextView competitor;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -83,15 +93,11 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
         @Override
         public void onClick(View v) {
             if (mListener != null) {
-                Competitor competitor = mData.get(getAdapterPosition());
+                Competitor competitor = mData.get(getAdapterPosition()).getKey();
                 if (competitor != null) {
                     mListener.onCompetitorClick(competitor);
                 }
             }
         }
-    }
-
-    public interface CompetitorClick {
-        void onCompetitorClick(Competitor competitor);
     }
 }

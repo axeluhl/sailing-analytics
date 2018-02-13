@@ -665,7 +665,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
         }
         competitor.setMergeState(MergeState.OK);
-        CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, competitor.getCompetitorId(), competitor
+        CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, getBoat(competitor.getCompetitorId()), competitor.getCompetitorId(), competitor
             .getCompetitorDisplayName(), competitor.getOneBasedRank(), competitor.getMaxPointsReason(), competitor.getScore(), competitor
             .getFinishingTime(), competitor.getComment(), competitor.getMergeState());
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
@@ -716,6 +716,18 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 window.setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
             }
         }
+    }
+
+    @Nullable
+    private Boat getBoat(Serializable competitorId) {
+        Boat boat = null;
+        for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
+            if (entry.getKey().getId().equals(competitorId)) {
+                boat = entry.getValue();
+                break;
+            }
+        }
+        return boat;
     }
 
     private CompetitorResultsImpl getCompetitorResultsDiff(CompetitorResults results) {
