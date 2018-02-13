@@ -27,7 +27,7 @@ function trapCleanup() {
 function safeExit() {
   deleteTemp
   trap - INT TERM EXIT
-  exit
+  exit 77
 }
 
 function deleteTemp () {
@@ -264,6 +264,9 @@ if ${strict}; then set -o nounset ; fi
 # Bash will remember & return the highest exitcode in a chain of pipes.
 # This way you can catch the error in case mysqldump fails in `mysqldump |gzip`, for example.
 set -o pipefail
+
+set -E
+trap '[ "$?" -ne 77 ] || exit 77' ERR
 
 # Invoke the checkDependenices function to test for Bash packages.  Uncomment if needed.
 # checkDependencies

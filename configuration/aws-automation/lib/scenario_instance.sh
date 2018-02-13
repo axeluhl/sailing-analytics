@@ -34,19 +34,22 @@ function instance_require(){
 # @param $1  user data
 # -----------------------------------------------------------
 function instance_execute() {
+
 	header "Instance Initialization"
 
-	local user_data=$(build_configuration "MONGODB_HOST=$default_mongodb_host" "MONGODB_PORT=$default_mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
-	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
-	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
-
-	instance_id=$(exit_on_fail create_instance "$user_data")
-	public_dns_name=$(exit_on_fail query_public_dns_name $instance_id)
-
+	local user_data=$(build_user_data)
+	instance_id=$(create_instance "$user_data")
+	public_dns_name=$(get_public_dns_name $instance_id)
 	wait_for_ssh_connection $ssh_user $public_dns_name
 
 	header "Event and user creation"
+
 	local port="8888"
 	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_pass
+}
 
+function build_user_data(){
+	build_configuration "MONGODB_HOST=$default_mongodb_host" "MONGODB_PORT=$default_mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
+	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
+	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify"
 }

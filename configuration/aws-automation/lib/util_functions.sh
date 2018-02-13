@@ -37,6 +37,7 @@ function uncomment_line_starting_with(){
 	sed -i '/$1/s/^#//g' $2
 }
 
+
 # -----------------------------------------------------------
 # Checks if variable is a number
 # @param $1  returnvariablevalue
@@ -46,21 +47,6 @@ function is_number(){
 	[[ $1 =~ ^-?[0-9]+$ ]]
 }
 
-# -----------------------------------------------------------
-# Finds first missing number in array of sorted numbers
-# @param $1  array of numbers
-# @return first missing number
-# -----------------------------------------------------------
-function find_first_missing_number_in_array(){
-	arr=("$@")
-	for (( i = 0 ; i < $((${#arr[@]})) ; i++ )); do
-		if [ "$((${arr[$i]}+1))" != "${arr[$(($i + 1))]}" ] ;then
-			missing_number="$((${arr[$i]}+1))"
-		break
-	fi
-	done
-	echo $missing_number
-}
 
 
 # -----------------------------------------------------------

@@ -35,7 +35,7 @@ function require_input(){
 	else
 		if [ "$4" == "true" ]; then
 			read -e -s -p "$1" -i "$2" $3
-			# print new line after read -s 
+			# print new line after read -s
 			echo
 		else
 			read -e -p "$1" -i "$2" $3
@@ -131,6 +131,7 @@ function get_names_for_resources(){
 	done
 	echo ${names[@]}
 }
+
 
 function update_resources(){
 	local resources_file=./lib/resources-$region.sh
@@ -257,11 +258,15 @@ function require_instance_short_name(){
 }
 
 function require_key_name(){
-	require_variable "$key_name_param" key_name "$default_key_name" "$key_name_ask_message" "true" "false"
+	if [ -z ${key_file+x} ] || [ ! -z "$key_file" ]; then
+		require_variable "$key_name_param" key_name "$default_key_name" "$key_name_ask_message" "true" "false"
+	fi
 }
 
 function require_key_file(){
-	require_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message" "true" "false"
+	if [ -z ${key_name+x} ] || [ ! -z "$key_name" ]; then
+		require_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message" "true" "false"
+	fi
 }
 
 function require_new_admin_password(){
@@ -269,11 +274,13 @@ function require_new_admin_password(){
 }
 
 function require_user_username(){
-	require_variable "$user_username_param" user_username "$default_user_username" "$user_username_ask_message" "true" "false"
+	if [ ! -z ${user_password+x} ] || [ ! -z "$user_password" ]; then
+		require_variable "$user_username_param" user_username "$default_user_username" "$user_username_ask_message" "true" "false"
+	fi
 }
 
 function require_user_password(){
-	if [ ! -z "$user_name" ]; then
+	if [ ! -z ${user_name+x} ] || [ ! -z "$user_name" ]; then
 	  require_variable "$user_password_param" user_password "$default_user_password" "$user_password_ask_message" "true" "true"
   fi
 }
@@ -292,7 +299,7 @@ function require_super_instance(){
 	disable_aws_success_output
 	if is_resource_arn $super_instance; then
 		local instance_id=$(get_resource_id $super_instance)
-		super_instance=$(query_public_dns_name $instance_id)
+		super_instance=$(get_public_dns_name $instance_id)
 	fi
 	enable_aws_success_output
 }
@@ -313,12 +320,12 @@ function require_build_version(){
 	require_variable "$build_version_param" build_version "$latest_release" "$build_version_message" "false"
 }
 
-event_name_ask_message="Please enter an event name if you want to create an event, leave blank otherwise:"
+event_name_ask_message="Please enter an event name  (leave blank to skip event creation):"
 instance_security_group_id_ask_message="Please select the security group for the instance: "
-load_balancer_ask_message="Please select/enter the load balancer: "
+load_balancer_ask_message="Please select/enter the load balancer dns name: "
 region_ask_message="Please enter the region you want to use (e.g. eu-west-2): "
 instance_type_ask_message="Please enter the instance type (e.g. t2.medium): "
-key_name_ask_message="Please enter the name of your keypair to connect to the instance (e.g. leon-keypair): "
+key_name_ask_message="Please enter the name of your keypair to connect to the instance (e.g. leon-keypair). Leave blank to use ~/.ssh key: "
 instance_name_ask_message="Please enter a name for the instance: (e.g \"WC Santander 2017\"): "
 instance_short_name_ask_message="Please enter a short name for the instance (e.g. \"wcs17\"): "
 key_file_ask_message="Please enter the file path of the keypair or leave empty to use ~/.ssh key: "
@@ -327,8 +334,7 @@ mongo_db_host_ask_message="Please enter the ip adress of the mongo db server: "
 mongo_db_port_ask_message="Please enter the port of the mongo db server: "
 user_username_ask_message="Please enter the username of your new user (leave blank to skip user creation): "
 user_password_ask_message="Please enter the password of your new user (leave blank to skip user creation): "
-public_dns_name_ask_message="Please enter the public dns name: "
-ssh_user_ask_message="Please enter the ssh user: "
+ssh_user_ask_message="Please enter the ssh user to connect to the instance: "
 super_instance_message="Please select/enter the dns name of the superior instance: "
 description_message="Please enter a description for the server (leave blank to skip): "
 contact_person_message="Please enter the name of a contact person (leave blank to skip): "

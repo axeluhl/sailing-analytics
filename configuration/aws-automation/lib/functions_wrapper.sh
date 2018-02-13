@@ -34,7 +34,7 @@ function curl_wrapper(){
 # -----------------------------------------------------------
 function aws_wrapper(){
   local out;
-  out=$(aws --region $region "$@")
+  out=$(aws --region $region "$@" 2>&1)
   if command_was_successful $?; then
     if [ "$DISPLAY_SUCCESS_FOR_THIS_COMMAND" != "false" ]; then
       success ${out:-"[ OK ]"}
@@ -42,7 +42,7 @@ function aws_wrapper(){
     echo $out | sanitize
   else
     error "[ ERROR ] $out"
-    return 1
+    safeExit
   fi
 }
 
