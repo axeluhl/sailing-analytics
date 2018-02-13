@@ -266,7 +266,7 @@ public class OnlineDataManager extends DataManager {
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitors", params);
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitorsAndBoats", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
             }
         }, getContext());
