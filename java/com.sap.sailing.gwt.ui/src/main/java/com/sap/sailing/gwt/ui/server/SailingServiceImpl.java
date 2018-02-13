@@ -319,7 +319,6 @@ import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
-import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -7161,14 +7160,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
             
         try {
-            final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
+            getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
-
-            // This call waits until the RaceDefinition exists so that we can be sure that the TrackedRace also exists
-            // after the call returns
-            raceHandle.getRace();
-
-            final DynamicTrackedRace trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
+            
+            DynamicTrackedRace trackedRace = null;
+            for (int i = 0; i < 100 ; i++) {
+                trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    break;
+                } else {
+                    Thread.sleep(100);
+                }
+            }
+            
+            if (trackedRace == null) {
+                throw new IllegalStateException("Could not obtain sliced race after 10s");
+            }
             
             for (WindSource windSourceToCopy : trackedRaceToSlice.getWindSources(WindSourceType.EXPEDITION)) {
                 final WindTrack windTrackToCopyFrom = trackedRaceToSlice.getOrCreateWindTrack(windSourceToCopy);
