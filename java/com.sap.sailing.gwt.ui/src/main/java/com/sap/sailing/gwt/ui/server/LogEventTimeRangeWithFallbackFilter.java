@@ -29,13 +29,17 @@ public class LogEventTimeRangeWithFallbackFilter<E extends AbstractLogEvent<?>> 
         } else if (logicalTimePoint.before(this.timeRangeToInclude.from())) {
             final TimePoint currentFallbackBefore = this.filteredEvents.lowerKey(this.timeRangeToInclude.from());
             if (currentFallbackBefore == null || logicalTimePoint.after(currentFallbackBefore)) {
-                this.filteredEvents.remove(currentFallbackBefore);
+                if (currentFallbackBefore != null) {
+                    this.filteredEvents.remove(currentFallbackBefore);
+                }
                 filteredEvents.put(logicalTimePoint, event);
             }
         } else if (logicalTimePoint.after(this.timeRangeToInclude.to())) {
             final TimePoint currentFallbackAfter = this.filteredEvents.higherKey(this.timeRangeToInclude.to());
             if (currentFallbackAfter == null || logicalTimePoint.before(currentFallbackAfter)) {
-                this.filteredEvents.remove(currentFallbackAfter);
+                if (currentFallbackAfter != null) {
+                    this.filteredEvents.remove(currentFallbackAfter);
+                }
                 filteredEvents.put(logicalTimePoint, event);
             }
         }
