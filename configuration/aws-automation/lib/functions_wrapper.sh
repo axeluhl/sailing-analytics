@@ -34,7 +34,7 @@ function curl_wrapper(){
 # -----------------------------------------------------------
 function aws_wrapper(){
   local out;
-  out=$(aws --region $region "$@" 2>&1)
+  out=$(aws --region $region "$@")
   if command_was_successful $?; then
     if [ "$DISPLAY_SUCCESS_FOR_THIS_COMMAND" != "false" ]; then
       success ${out:-"[ OK ]"}
