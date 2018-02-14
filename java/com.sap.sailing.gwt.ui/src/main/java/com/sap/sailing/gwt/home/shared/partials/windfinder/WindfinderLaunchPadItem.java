@@ -14,13 +14,15 @@ class WindfinderLaunchPadItem extends UIObject {
     interface WindfinderLaunchPadItemUiBinder extends UiBinder<AnchorElement, WindfinderLaunchPadItem> {
     }
 
-    @UiField DivElement itemLabelUi;
+    @UiField WindfinderResources local_res;
+    @UiField DivElement itemLabelUi, itemIconUi;
     private final AnchorElement anchorUi;
     
     WindfinderLaunchPadItem(String label, String raceViewerUrl) {
         setElement(anchorUi = uiBinder.createAndBindUi(this));
         anchorUi.setHref(raceViewerUrl);
         itemLabelUi.setInnerText(label);
+        itemIconUi.setInnerHTML(local_res.windfinderLogo().getText());
     }
 
 }

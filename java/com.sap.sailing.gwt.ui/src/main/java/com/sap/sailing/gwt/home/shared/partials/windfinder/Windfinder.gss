@@ -1,5 +1,8 @@
+@def WINFINDER_COLOR_PRIMARY #ffffff;
+@def WINFINDER_COLOR_SECONDARY #d0021b;
+
 .windfindercontrol {
-  background-color: #d0021b;
+  background-color: WINFINDER_COLOR_SECONDARY;
   text-transform: uppercase;
   text-decoration: none;
   vertical-align: bottom;
@@ -11,7 +14,10 @@
 }
 .windfindercontrol_icon {
   margin: -0.5em 0.25em;
-  background-image: resourceUrl("windfinderLogoWhite");
+}
+.windfindercontrol_icon svg {
+  display: block;
+  fill: WINFINDER_COLOR_PRIMARY;
 }
 .windfindercontrol:hover {
   cursor: pointer;
@@ -36,21 +42,23 @@
           align-items: center;
   height: 3em;
   padding: 0 1.333333333333333em 0 0.666666666666667em;
-  background: #fff;
-  color: #d0021b;
+  background: WINFINDER_COLOR_PRIMARY;
+  color: WINFINDER_COLOR_SECONDARY;
   font-weight: normal;
 }
 .windfinderlaunchpad_content_item:hover {
-  background-color: #d0021b;
-  color: #ffffff;
+  background-color: WINFINDER_COLOR_SECONDARY;
+  color: WINFINDER_COLOR_PRIMARY;
   text-decoration: underline;
 }
 .windfinderlaunchpad_content_item .windfinderlaunchpad_content_item_icon {
   margin-right: 1em;
-  background-image: resourceUrl("windfinderLogoRed");
 }
-.windfinderlaunchpad_content_item:hover .windfinderlaunchpad_content_item_icon {
-  background-image: resourceUrl("windfinderLogoWhite");
+.windfinderlaunchpad_content_item .windfinderlaunchpad_content_item_icon svg {
+  fill: WINFINDER_COLOR_SECONDARY;
+}
+.windfinderlaunchpad_content_item:hover .windfinderlaunchpad_content_item_icon svg {
+  fill: WINFINDER_COLOR_PRIMARY;
 }
 .windfinderlaunchpad_content_item .windfinderlaunchpad_content_item_title {
   white-space: nowrap;
@@ -58,6 +66,4 @@
 .windfindercontrol_icon, .windfinderlaunchpad_content_item .windfinderlaunchpad_content_item_icon {
   width: 1.666666666666667em;
   height: 1.666666666666667em;
-  background-size: contain;
-  background-repeat: no-repeat;
 }

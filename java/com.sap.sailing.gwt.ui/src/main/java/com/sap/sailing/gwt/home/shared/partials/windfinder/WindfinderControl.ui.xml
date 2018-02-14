@@ -5,6 +5,6 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderResources" />
     <div class="{res.mainCss.button} {local_res.css.windfindercontrol}">
         <div class="{local_res.css.windfindercontrol_text}" ui:field="labelUi">Weather Data</div>
-        <div class="{local_res.css.windfindercontrol_icon}"></div>
+        <div class="{local_res.css.windfindercontrol_icon}" ui:field="iconUi"></div>
     </div>
 </ui:UiBinder>
