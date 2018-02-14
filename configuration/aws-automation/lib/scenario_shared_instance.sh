@@ -18,10 +18,11 @@ function shared_instance_require(){
 	require_super_instance
 	require_load_balancer
 
-	require_key_file
 	require_instance_name
 	require_instance_short_name
 	require_build_version
+	require_key_file
+	require_event_name
 	require_new_admin_password
 	require_user_username
 	require_user_password
@@ -29,6 +30,11 @@ function shared_instance_require(){
 	require_contact_person
 	require_contact_email
 	require_description
+
+	disable_aws_success_output
+	local instance_id=$(get_resource_id $super_instance)
+	super_instance=$(get_public_dns_name $instance_id)
+	enable_aws_success_output
 }
 
 function shared_instance_check_preconditions(){
@@ -137,7 +143,7 @@ function shared_instance_execute() {
 
 	header "Configuring Apache"
 
-	execute_remote_root "echo -e \"\n# $instance_short_name (${description:-"Unknown"}, ${contact_person:-"Unknown"},${contact_email:-"Unknown"})\" >> $events_conf"
+	execute_remote_root "echo -e \"\n# $instance_short_name (${description:-"Unknown"}, ${contact_person:-"Unknown"}, ${contact_email:-"Unknown"})\" >> $events_conf"
 	append_macro_to_001_events_conf "$domain" "$event_id" "root" "$super_instance" "$server_port"
 
 	local_echo "Reloading httpd..."

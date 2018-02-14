@@ -15,7 +15,15 @@ function associate_alb_start(){
 # -----------------------------------------------------------
 function associate_alb_require(){
 	# will only be executed after instance creation
-	:
+	require_instance
+  require_instance_short_name
+	require_load_balancer
+	require_ssh_user
+
+	disable_aws_success_output
+	instance_id=$(get_resource_id $instance)
+	public_dns_name=$(get_public_dns_name $instance_id)
+	enable_aws_success_output
 }
 
 function associate_alb_execute() {
@@ -23,7 +31,7 @@ function associate_alb_execute() {
 	local target_group_arn=$(exit_on_fail create_target_group "S-dedicated-$instance_short_name")
 	set_target_group_health_check "$target_group_arn" "HTTP" "/index.html" "80" "5" "4" "2" "2"
 
-	# add instance to target group
+	listener_arn=$(get_first_https_listener )# add instance to target group
 	register_targets $target_group_arn $instance_id
 
 	# create rule for host-based forwarding within alb

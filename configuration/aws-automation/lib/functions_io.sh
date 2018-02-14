@@ -109,73 +109,41 @@ function local_echo(){
 	echo "$@" >&2
 }
 
-function select_resource_names(){
-	jq -c ".ResourceTagMappingList[] | select(.ResourceARN | contains(\"$1\")) | .Tags[] | select(.Key==\"Name\") | .Value" -r | sanitize
-}
-
-function select_resource_arns(){
-	jq -c ".ResourceTagMappingList[] | select(.ResourceARN | contains(\"$1\")) | .ResourceARN" -r | sanitize
-}
-
-function get_names_for_resources(){
-	declare -a resources=("${!1}")
-	declare -a names=()
-
-	for arn in ${resources[@]}; do
-		name=$(echo "$RESOURCES" | select_resource_names $arn)
-		if [ -z "$name" ]; then
-			names+=("[Unnamed]")
-		else
-			names+=("$name")
-		fi
-	done
-	echo ${names[@]}
-}
-
-
 function update_resources(){
 	local resources_file=./lib/resources-$region.sh
 	> $resources_file
 
-	OLD_RESOURCES=$RESOURCES
-	typeset -p OLD_RESOURCES >> $resources_file
+	OLD_RESOURCE_JSON=$RESOURCE_JSON
+	typeset -p OLD_RESOURCE_JSON >> $resources_file
 
-	local filter="security-group"
-	TAGGED_SECURITY_GROUP_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
-	IFS=' ' read -ra TAGGED_SECURITY_GROUP_NAMES <<< "$(get_names_for_resources TAGGED_SECURITY_GROUP_ARNS[@])"
-	typeset -p TAGGED_SECURITY_GROUP_NAMES TAGGED_SECURITY_GROUP_ARNS >> $resources_file
+	RESOURCES_ARRAY=($(get_resources))
 
-	local filter="image"
-	TAGGED_IMAGE_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
-	IFS=' ' read -ra TAGGED_IMAGE_NAMES <<< "$(get_names_for_resources TAGGED_IMAGE_ARNS[@])"
-	typeset -p TAGGED_IMAGE_NAMES TAGGED_IMAGE_ARNS >> $resources_file
+	declare -A RESOURCE_MAP
 
-	local filter="instance"
-	TAGGED_INSTANCE_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
-	IFS=' ' read -ra TAGGED_INSTANCE_NAMES <<< "$(get_names_for_resources TAGGED_INSTANCE_ARNS[@])"
-	typeset -p TAGGED_INSTANCE_NAMES TAGGED_INSTANCE_ARNS >> $resources_file
+	for resource in ${RESOURCES_ARRAY[@]}; do
+		local arn=$(echo $resource | jq -c ".ResourceARN" -r | sanitize)
+		local name=$(echo $resource | jq -c ".Tags[] | select(.Key==\"Name\") | .Value" -r | sanitize)
+		local tagged=$(echo $resource | jq -c ".Tags[] | select(.Key==\"AutoDiscover\") | .Value" -r | sanitize)
 
-	local filter="certificate"
-  TAGGED_CERTIFICATE_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
-	IFS=' ' read -ra TAGGED_CERTIFICATE_NAMES <<< "$(get_names_for_resources TAGGED_CERTIFICATE_ARNS[@])"
-	typeset -p TAGGED_CERTIFICATE_NAMES TAGGED_CERTIFICATE_ARNS >> $resources_file
+		if [ ! -z "$tagged" ] && [ "$tagged" == "true" ] || [ "$tagged" == "True" ]; then
+			tagged="true"
+		else
+			tagged="false"
+		fi
 
-	local filter="loadbalancer"
-	TAGGED_LOADBALANCER_ARNS=($(echo "$RESOURCES" | select_resource_arns $filter ))
-	IFS=' ' read -ra TAGGED_LOADBALANCER_NAMES <<< "$(get_names_for_resources TAGGED_LOADBALANCER_ARNS[@])"
-	typeset -p TAGGED_LOADBALANCER_NAMES TAGGED_LOADBALANCER_ARNS >> $resources_file
+		RESOURCE_MAP[$arn]="${name:-"Unnamed"}, $tagged"
+	done
 
+	typeset -p RESOURCE_MAP >> $resources_file
 }
+
 function init_resources(){
-
-	disable_aws_success_output
 	local_echo "Checking if aws resources with tag key 'AutoDiscover' and value 'true' were added or removed in region $region..."
-	RESOURCES=$(get_auto_discover_resources)
-	enable_aws_success_output
+	RESOURCE_JSON=$(get_resources)
 
-	if [ "$RESOURCES" != "$OLD_RESOURCES" ]; then
+	if [ "$RESOURCE_JSON" != "$OLD_RESOURCE_JSON" ]; then
 		  local_echo "Updating tagged aws resources..."
-			update_resources $resources_file
+			update_resources
 	else
 		local_echo "Stored aws resources are up to date."
 	fi
@@ -237,8 +205,13 @@ function require_event_name(){
 function require_instance_security_group_id(){
 	require_variable "" instance_security_group_id "" "$instance_security_group_id_ask_message" "false" "false" TAGGED_SECURITY_GROUP_NAMES[@] TAGGED_SECURITY_GROUP_ARNS[@]
 }
+
 function require_load_balancer(){
 	require_variable "" load_balancer "" "$load_balancer_ask_message" "false" "false" TAGGED_LOADBALANCER_NAMES[@] TAGGED_LOADBALANCER_ARNS[@]
+}
+
+function require_instance(){
+	require_variable "" instance "" "$instance_ask_message" "false" "false" TAGGED_INSTANCE_NAMES[@] TAGGED_INSTANCE_ARNS[@]
 }
 
 function require_region(){
@@ -295,13 +268,6 @@ function require_ssh_user(){
 
 function require_super_instance(){
 	require_variable "$super_instance_param" super_instance "$default_super_instance" "$super_instance_message"  "false" "false" TAGGED_INSTANCE_NAMES[@] TAGGED_INSTANCE_ARNS[@]
-
-	disable_aws_success_output
-	if is_resource_arn $super_instance; then
-		local instance_id=$(get_resource_id $super_instance)
-		super_instance=$(get_public_dns_name $instance_id)
-	fi
-	enable_aws_success_output
 }
 
 function require_description(){
@@ -320,6 +286,7 @@ function require_build_version(){
 	require_variable "$build_version_param" build_version "$latest_release" "$build_version_message" "false"
 }
 
+instance_ask_message="Please enter an instance to use: "
 event_name_ask_message="Please enter an event name  (leave blank to skip event creation):"
 instance_security_group_id_ask_message="Please select the security group for the instance: "
 load_balancer_ask_message="Please select/enter the load balancer dns name: "

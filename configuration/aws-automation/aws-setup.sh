@@ -81,11 +81,9 @@ fi
 
 init_resources
 
+safeExit
 if $instance; then
 	instance_start
-  if $associate_alb; then
-  	associate_alb_start
-  fi
 	safeExit
 fi
 
@@ -96,6 +94,11 @@ fi
 
 if $master_instance; then
   master_instance_start
+	safeExit
+fi
+
+if $associate_alb; then
+  associate_alb_start
 	safeExit
 fi
 

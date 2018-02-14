@@ -10,12 +10,13 @@ function get_public_dns_name(){
 	exit_on_fail validate_hostname $public_dns_name
 }
 
+
 # -----------------------------------------------------------
 # Get resources that should be automatically discovered
 # @return   array of resource ids
 # -----------------------------------------------------------
-function get_auto_discover_resources(){
-	aws_wrapper resourcegroupstaggingapi get-resources --tag-filters "Key=$autoDiscoverResourceTagName,Values=true,True,1,Yes,yes"
+function get_resources(){
+	aws resourcegroupstaggingapi get-resources | jq -c ".ResourceTagMappingList[] | select(.ResourceARN)" -r | sanitize
 }
 
 # -----------------------------------------------------------

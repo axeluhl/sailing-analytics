@@ -24,6 +24,7 @@ function instance_require(){
 	require_build_version
 	require_key_name
 	require_key_file
+	require_event_name
 	require_new_admin_password
 	require_user_username
 	require_user_password
