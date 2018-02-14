@@ -9,37 +9,103 @@
 # @param $5  array of resource names
 # @param $6  array of resource arns
 # -----------------------------------------------------------
-function require_input(){
-	declare -a _optionNames=()
-	declare -a _optionValues=()
-	if [ ! -z "$5" ] && [ ! -z "$6" ]; then
-		_optionNames=("${!5}")
-		_optionValues=("${!6}")
-	fi
+# function require_input(){
+# 	declare -a _optionNames=()
+# 	declare -a _optionValues=()
+# 	if [ ! -z "$5" ] && [ ! -z "$6" ]; then
+# 		_optionNames=("${!5}")
+# 		_optionValues=("${!6}")
+# 	fi
+#
+#   if [ ${#_optionValues[@]} -gt 1 ]; then
+# 			local_echo "$1"
+# 			local_echo "--- Select by Name ---"
+# 			o=0
+# 			for name in ${optionNames[@]}; do
+# 				local_echo "$((++o))) $name"
+# 			done
+# 			local_echo "--- Select by Resource ID ---"
+# 			select option in ${_optionValues[@]};
+# 			do
+# 				read -r $3 <<< $option
+# 				return 0
+# 			done
+#   elif [ ${#_optionValues[@]} -eq 1 ]; then
+# 			read -r $3 <<< ${_optionValues[0]}
+# 	else
+# 		if [ "$4" == "true" ]; then
+# 			read -e -s -p "$1" -i "$2" $3
+# 			# print new line after read -s
+# 			echo
+# 		else
+# 			read -e -p "$1" -i "$2" $3
+# 		fi
+# 	fi
+# }
 
-  if [ ${#_optionValues[@]} -gt 1 ]; then
-			local_echo "$1"
-			local_echo "--- Select by Name ---"
-			o=0
-			for name in ${optionNames[@]}; do
-				local_echo "$((++o))) $name"
+# -----------------------------------------------------------
+# Prompt user for input and save value to variable
+# @param $1  prompt message
+# @param $2  default value
+# @param $3  variable that is receiving the value
+# @param $4  hide text
+# @param $5  filter
+# -----------------------------------------------------------
+function require_input(){
+
+  if [ ! -z "$5" ]; then
+		declare -a option_keys=()
+		declare -a option_values=()
+		number_of_tagged_resources=0
+		default_tagged_resource=""
+		o=0
+		for key in "${!RESOURCE_MAP[@]}"; do
+			if [[ $key = *"$5"* ]]; then
+				# if resource is tagged
+				option_keys[o]=$key
+				local tagged=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f2)
+				local name=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f1)
+				if [ $tagged == "true" ]; then
+					option_values[o]="$(tput setaf 3)$name ($key)$(tput sgr0)"
+					default_tagged_resource=$key
+					((number_of_tagged_resources++))
+				else
+					option_values[o]="$name ($key)"
+				fi
+			fi
+			((o++))
+		done
+
+		if [ $number_of_tagged_resources -eq 1 ] && [ "$force" == "true" ]; then
+			read -r $3 <<< $default_tagged_resource
+			return 0
+		elif [ $number_of_tagged_resources -gt 0 ]; then
+			selectedValue=""
+			select option in ${option_values[@]}; do
+				selectedValue=$option
+				break
 			done
-			local_echo "--- Select by Resource ID ---"
-			select option in ${_optionValues[@]};
-			do
-				read -r $3 <<< $option
-				return 0
-			done
-  elif [ ${#_optionValues[@]} -eq 1 ]; then
-			read -r $3 <<< ${_optionValues[0]}
-	else
-		if [ "$4" == "true" ]; then
-			read -e -s -p "$1" -i "$2" $3
-			# print new line after read -s
-			echo
+			# workaround cant access option_keys from within select
+			read -r $3 <<< $(echo $selectedValue  | sed  's/.*(\(.*\)).*/\1/')
+			return 0
 		else
-			read -e -p "$1" -i "$2" $3
+			read_input_normal "$1" "$2" $3 $4
+			return 0
 		fi
+
+	else
+		read_input_normal "$1" "$2" $3 $4
+	fi
+}
+
+function read_input_normal(){
+	# if hide input
+	if [ "$4" == "true" ]; then
+		read -e -s -p "$1" -i "$2" $3
+		# print new line after read -s
+		echo
+	else
+		read -e -p "$1" -i "$2" $3
 	fi
 }
 
@@ -55,23 +121,15 @@ function require_input(){
 # @param $4  prompt message
 # @param $5  true if optional
 # @param $6  true if text input be hidden
-# @param $7  array of resource names
-# @param $8  array of resource arns
+# @param $7  filter
 # -----------------------------------------------------------
 function require_variable(){
-	declare -a optionNames=()
-	declare -a optionValues=()
-	if [ ! -z "$7" ] && [ ! -z "$8" ]; then
-		optionNames=("${!7}")
-		optionValues=("${!8}")
-	fi
-
 	# if parameter is empty
 	if [ -z "$1" ]; then
 		# if required variable value is empty
 		if [ -z "${!2}" ]; then
 			# if force is enabled
-			if [ "$force" = true ]; then
+			if [ "$force" = true ] && [ -z "$7" ]; then
 				# if variable is optional
 				if [ "$5" == "true" ]; then
 					# variable should be empty
@@ -83,15 +141,15 @@ function require_variable(){
 					return 0
 				fi
 			fi
-			# if force not enabled
+			# if force not enabled or filter is set
 			# if variable value is optional, then value of "" is possible
 			if [ "$5" == "true" ]; then
-				require_input "$4" "$3" $2 $6 optionNames[@] optionValues[@]
+				require_input "$4" "$3" $2 $6 $7
 			else
 				# if variable value is not optional, repeat until value is set for variable
 				while [[ -z "${!2}" ]]
 				do
-				  require_input "$4" "$3" $2 $6 optionNames[@] optionValues[@]
+				  require_input "$4" "$3" $2 $6 $7
 				done
 			fi
 		fi
@@ -131,7 +189,7 @@ function update_resources(){
 			tagged="false"
 		fi
 
-		RESOURCE_MAP[$arn]="${name:-"Unnamed"}, $tagged"
+		RESOURCE_MAP[$arn]="${name:-"Unnamed"},$tagged"
 	done
 
 	typeset -p RESOURCE_MAP >> $resources_file
@@ -210,8 +268,8 @@ function require_load_balancer(){
 	require_variable "" load_balancer "" "$load_balancer_ask_message" "false" "false" TAGGED_LOADBALANCER_NAMES[@] TAGGED_LOADBALANCER_ARNS[@]
 }
 
-function require_instance(){
-	require_variable "" instance "" "$instance_ask_message" "false" "false" TAGGED_INSTANCE_NAMES[@] TAGGED_INSTANCE_ARNS[@]
+function require_instance_arn(){
+	require_variable "" instance_arn "" "$instance_ask_message" "false" "false" "instance"
 }
 
 function require_region(){

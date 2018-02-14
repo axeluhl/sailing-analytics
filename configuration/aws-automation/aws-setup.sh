@@ -80,7 +80,7 @@ if is_exists ${region_config_file}; then
 fi
 
 init_resources
-
+require_instance_arn
 safeExit
 if $instance; then
 	instance_start
