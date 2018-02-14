@@ -650,7 +650,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             updateStatusAndProgressWithErrorHandling();
             try {
                 load(this::updateProgress, preemptiveStopRequested::get);
-            } finally {
+            } catch (Throwable e) {
+                logger.log(Level.SEVERE, "Error while loading fixes, this is most likely a critical error! ", e);
+            }
+            finally {
                 isFinished = true;
                 updateProgress(1d);
             }
