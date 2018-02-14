@@ -129,6 +129,14 @@ function append_macro_to_001_events_conf(){
 	ssh_wrapper $3@$4 echo "$patched_content >> $events_conf"
 }
 
+function reload_httpd(){
+	local_echo "Reloading httpd..."
+	ssh_wrapper $1@$2 "apachectl configtest >/dev/null 2>&1"
+	out=$(ssh_wrapper $1@$2 "/etc/init.d/httpd reload")
+}
+
+
+
 # -----------------------------------------------------------
 # Wait until 001_events.conf file appears on instance
 # @param $1  ssh user

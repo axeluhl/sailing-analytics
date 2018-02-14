@@ -80,24 +80,23 @@ if is_exists ${region_config_file}; then
 fi
 
 init_resources
-require_instance_arn
-safeExit
-if $instance; then
+
+if $instance_scenario; then
 	instance_start
 	safeExit
 fi
 
-if $shared_instance; then
+if $shared_instance_scenario; then
   shared_instance_start
 	safeExit
 fi
 
-if $master_instance; then
+if $master_instance_scenario; then
   master_instance_start
 	safeExit
 fi
 
-if $associate_alb; then
+if $associate_alb_scenario; then
   associate_alb_start
 	safeExit
 fi
@@ -205,10 +204,10 @@ unset options
 [[ $# -eq 0 ]] && set -- "--help"
 
 # Set default value of variable without parameter value to false
-associate_alb=false
-instance=false
-shared_instance=false
-master_instance=false
+associate_alb_scenario=false
+instance_scenario=false
+shared_instance_scenario=false
+master_instance_scenario=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -234,10 +233,10 @@ while [[ $1 = -?* ]]; do
   -e|--contact-email) shift; contact_email_param=${1} ;;
   -f|--force) force=true ;;
 	-d|--debug) debug=true ;;
-  --instance) instance=true ;;
-  --shared-instance) shared_instance=true ;;
-  --master-instance) master_instance=true ;;
-  --associate-alb) associate_alb=true ;;
+  --instance) instance_scenario=true ;;
+  --shared-instance) shared_instance_scenario=true ;;
+  --master-instance) master_instance_scenario=true ;;
+  --associate-alb) associate_alb_scenario=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac

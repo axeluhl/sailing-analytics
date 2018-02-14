@@ -1,47 +1,10 @@
 #!/usr/bin/env bash
 
-# -----------------------------------------------------------
-# Prompt user for input and save value to variable
-# @param $1  prompt message
-# @param $2  default value
-# @param $3  variable that is receiving the value
-# @param $4  hide text
-# @param $5  array of resource names
-# @param $6  array of resource arns
-# -----------------------------------------------------------
-# function require_input(){
-# 	declare -a _optionNames=()
-# 	declare -a _optionValues=()
-# 	if [ ! -z "$5" ] && [ ! -z "$6" ]; then
-# 		_optionNames=("${!5}")
-# 		_optionValues=("${!6}")
-# 	fi
-#
-#   if [ ${#_optionValues[@]} -gt 1 ]; then
-# 			local_echo "$1"
-# 			local_echo "--- Select by Name ---"
-# 			o=0
-# 			for name in ${optionNames[@]}; do
-# 				local_echo "$((++o))) $name"
-# 			done
-# 			local_echo "--- Select by Resource ID ---"
-# 			select option in ${_optionValues[@]};
-# 			do
-# 				read -r $3 <<< $option
-# 				return 0
-# 			done
-#   elif [ ${#_optionValues[@]} -eq 1 ]; then
-# 			read -r $3 <<< ${_optionValues[0]}
-# 	else
-# 		if [ "$4" == "true" ]; then
-# 			read -e -s -p "$1" -i "$2" $3
-# 			# print new line after read -s
-# 			echo
-# 		else
-# 			read -e -p "$1" -i "$2" $3
-# 		fi
-# 	fi
-# }
+CHOOSE_FROM_INSTANCES=":instance"
+CHOOSE_FROM_SECURITY_GROUPS=":security-group"
+CHOOSE_FROM_IMAGES=":image"
+CHOOSE_FROM_CERTIFICATES=":certificate"
+CHOOSE_FROM_LOAD_BALANCERS=":loadbalancer"
 
 # -----------------------------------------------------------
 # Prompt user for input and save value to variable
@@ -76,7 +39,7 @@ function require_input(){
 			((o++))
 		done
 
-		if [ $number_of_tagged_resources -eq 1 ] && [ "$force" == "true" ]; then
+		if [ $number_of_tagged_resources -eq 1 ] && [ "$force" == "true" ] || [ ${#option_keys[@]} -eq 1 ]; then
 			read -r $3 <<< $default_tagged_resource
 			return 0
 		elif [ $number_of_tagged_resources -gt 0 ]; then
@@ -156,6 +119,7 @@ function require_variable(){
 	else
 		# if parameter is not empty, read its value into required variable
 		read -r "$2" <<< "$1"
+		return 0
 	fi
 }
 
@@ -253,7 +217,7 @@ function get_config_variable(){
 }
 
 function require_image_id(){
-	require_variable "" image_id "" "$image_id_ask_message" "false" "false" TAGGED_IMAGE_NAMES[@] TAGGED_IMAGE_ARNS[@] ""
+	require_variable "" image_id "" "$image_id_ask_message" "false" "false" $CHOOSE_FROM_IMAGES
 }
 
 function require_event_name(){
@@ -261,15 +225,15 @@ function require_event_name(){
 }
 
 function require_instance_security_group_id(){
-	require_variable "" instance_security_group_id "" "$instance_security_group_id_ask_message" "false" "false" TAGGED_SECURITY_GROUP_NAMES[@] TAGGED_SECURITY_GROUP_ARNS[@]
+	require_variable "" instance_security_group_id "" "$instance_security_group_id_ask_message" "false" "false" $CHOOSE_FROM_SECURITY_GROUPS
 }
 
 function require_load_balancer(){
-	require_variable "" load_balancer "" "$load_balancer_ask_message" "false" "false" TAGGED_LOADBALANCER_NAMES[@] TAGGED_LOADBALANCER_ARNS[@]
+	require_variable "" load_balancer "" "$load_balancer_ask_message" "false" "false" $CHOOSE_FROM_LOAD_BALANCERS
 }
 
-function require_instance_arn(){
-	require_variable "" instance_arn "" "$instance_ask_message" "false" "false" "instance"
+function require_instance(){
+	require_variable "" instance "" "$instance_ask_message" "false" "false" $CHOOSE_FROM_INSTANCES
 }
 
 function require_region(){
@@ -316,16 +280,12 @@ function require_user_password(){
   fi
 }
 
-function require_public_dns_name(){
-	require_variable "$public_dns_name_param" public_dns_name "" "$public_dns_name_ask_message" "false" "false"
-}
-
 function require_ssh_user(){
 	require_variable "$ssh_user_param" ssh_user "$default_ssh_user" "$ssh_user_ask_message" "false" "false"
 }
 
 function require_super_instance(){
-	require_variable "$super_instance_param" super_instance "$default_super_instance" "$super_instance_message"  "false" "false" TAGGED_INSTANCE_NAMES[@] TAGGED_INSTANCE_ARNS[@]
+	require_variable "$super_instance_param" super_instance "$default_super_instance" "$super_instance_message"  "false" "false" $CHOOSE_FROM_INSTANCES
 }
 
 function require_description(){
@@ -341,7 +301,7 @@ function require_contact_email(){
 }
 
 function require_build_version(){
-	require_variable "$build_version_param" build_version "$latest_release" "$build_version_message" "false"
+	require_variable "$build_version_param" build_version "$latest_release" "$build_version_message" "false" "false"
 }
 
 instance_ask_message="Please enter an instance to use: "
