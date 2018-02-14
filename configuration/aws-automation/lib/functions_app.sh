@@ -32,7 +32,7 @@ function get_latest_release(){
 # -----------------------------------------------------------
 function get_access_token(){
 	local_echo -n "Getting access token..."
-	curl_until_http_200 http://$1:$2@$3:$4/security/api/restsecurity/access_token
+	curl_until_response "200" http://$1:$2@$3:$4/security/api/restsecurity/access_token
 	curl_wrapper -X GET "http://$1:$2@$3:$4/security/api/restsecurity/access_token" | get_attribute '.access_token'
 }
 
@@ -46,7 +46,7 @@ function get_access_token(){
 # -----------------------------------------------------------
 function create_event(){
 	local_echo -n "Creating event with name $4..."
-	curl_until_http_401 http://$2:$3/sailingserver/api/v1/events/createEvent
+	curl_until_response "401" http://$2:$3/sailingserver/api/v1/events/createEvent
   curl_wrapper -X POST -H "Authorization: Bearer $1" "http://$2:$3/sailingserver/api/v1/events/createEvent" --data "eventName=$4" --data "venuename=Default" --data "createregatta=false" | get_attribute '.eventid'
 }
 

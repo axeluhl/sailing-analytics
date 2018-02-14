@@ -9,8 +9,8 @@ function create_target_group(){
 	local_echo "Creating target group $1..."
 	local target_group_name=$(only_letters_numbers_dash $1)
 	local vpc_id=$(get_default_vpc_id)
-	aws_wrapper elbv2 create-target-group --name $target_group_name --protocol "$target_group_protocol" \
-	--port $target_group_port --vpc-id $vpc_id | get_attribute '.TargetGroups[0].TargetGroupArn'
+	aws_wrapper elbv2 create-target-group --name $target_group_name --protocol "HTTPS" \
+	--port "443" --vpc-id $vpc_id | get_attribute '.TargetGroups[0].TargetGroupArn'
 }
 
 # -----------------------------------------------------------

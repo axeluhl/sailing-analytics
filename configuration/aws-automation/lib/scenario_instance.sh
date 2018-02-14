@@ -5,6 +5,7 @@
 
 function instance_start(){
 	instance_require
+	instance_preview
 	instance_execute
 }
 
@@ -30,6 +31,19 @@ function instance_require(){
 	require_user_password
 }
 
+function instance_preview(){
+	header "Preview"
+	user_data=$(build_user_data)
+	local_echo "An instance will be created with the following specifications: "
+	local_echo "To be implemented..."
+	seek_confirmation "Do you want to continue?"
+  if is_confirmed; then
+		break
+  else
+		break
+	fi
+}
+
 # -----------------------------------------------------------
 # Execute instance scenario
 # @param $1  user data
@@ -38,7 +52,6 @@ function instance_execute() {
 
 	header "Instance Initialization"
 
-	local user_data=$(build_user_data)
 	instance_id=$(create_instance "$user_data")
 	public_dns_name=$(get_public_dns_name $instance_id)
 	wait_for_ssh_connection $ssh_user $public_dns_name
@@ -47,6 +60,10 @@ function instance_execute() {
 
 	local port="8888"
 	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_pass
+
+	header "Conclusion"
+
+	success "Instance should be reachable through $public_dns_name."
 }
 
 function build_user_data(){

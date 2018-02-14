@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 declare -g DISPLAY_SUCCESS_FOR_THIS_COMMAND="true"
+HTTP_RETRY_INTERVAL=5
+TIMEOUT=300
+
 # -----------------------------------------------------------
 # Does the error checking for curl commands.
 # Captures response and http code of curl command into variable $out.
@@ -79,30 +82,16 @@ function ssh_wrapper(){
 # -----------------------------------------------------------
 # Executes curl command until status code is 200
 # -----------------------------------------------------------
-function curl_until_http_200(){
+function curl_until_response(){
+  response_code=$1
+  shift
   start_time="$(date -u +%s)"
-	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "200" ]];
+	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $HTTP_RETRY_INTERVAL "$@") != "$response_code" ]];
 	do
     fail_on_timeout $start_time
 
 		local_echo -n "."
-		sleep $http_retry_interval;
-	done
-	local_echo ""
-}
-
-# -----------------------------------------------------------
-# Executes curl command until status code is 401.
-# TODO: Fix code duplication (curl_until_http_200, curl_until_http_401)
-# -----------------------------------------------------------
-function curl_until_http_401(){
-  start_time="$(date -u +%s)"
-	while [[ $(curl -s -o /dev/null -w ''%{http_code}'' --connect-timeout $http_retry_interval "$@") != "401" ]];
-	do
-    fail_on_timeout $start_time
-
-    local_echo -n "."
-		sleep $http_retry_interval;
+		sleep $HTTP_RETRY_INTERVAL;
 	done
 	local_echo ""
 }
@@ -114,13 +103,13 @@ function do_until_true(){
     fail_on_timeout $start_time
 
 		echo -n .
-		sleep $http_retry_interval
+		sleep $HTTP_RETRY_INTERVAL
 	done
 }
 
 function fail_on_timeout(){
   end_time="$(date -u +%s)"
-  if [ "$(($end_time-$1))" -gt 180 ]; then
+  if [ "$(($end_time-$1))" -gt $TIMEOUT ]; then
     error "TIMEOUT"
     safeExit
   fi

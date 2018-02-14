@@ -26,7 +26,7 @@ function shared_instance_require(){
 	require_new_admin_password
 	require_user_username
 	require_user_password
-
+	require_ssh_user
 	require_contact_person
 	require_contact_email
 	require_description
@@ -46,8 +46,8 @@ function shared_instance_check_preconditions(){
 
 	local instance_id=$(get_instance_id $super_instance)
 
-	echo "Checking if instance has tag: 'ssh_user'."
-	ssh_user=$(exit_on_fail get_tag_value_for_key $instance_id "ssh_user")
+	# echo "Checking if instance has tag: 'ssh_user'."
+	# ssh_user=$(exit_on_fail get_tag_value_for_key $instance_id "ssh_user")
 
 	echo "Checking if directory $server_dir exists already..."
 	exit_on_fail execute_remote "[ ! -d $server_dir ]"
@@ -55,10 +55,9 @@ function shared_instance_check_preconditions(){
 	echo "Checking if ssh connection $ssh_user@$super_instance is working..."
 	exit_on_fail execute_remote ls
 
-	echo "Checking if super instance has user data.\
-	The instance should not have any user data set, otherwise the refreshInstance script will not work properly."
-
-	exit_on_fail [ $(get_user_data_from_instance $instance_id) == "None" ]
+	# echo "Checking if super instance has user data.\
+	# The instance should not have any user data set, otherwise the refreshInstance script will not work properly."
+	# exit_on_fail [ $(get_user_data_from_instance $instance_id) == "None" ]
 }
 
 function shared_instance_execute() {
@@ -75,13 +74,13 @@ function shared_instance_execute() {
 	exit_on_fail execute_remote mkdir $server_dir
 
 	local_echo "Getting next unused SERVER_PORT..."
-	local server_port=$(find_first_unused_port "SERVER_PORT" $default_server_port)
+	local server_port=$(find_first_unused_port "SERVER_PORT" "8888")
 
 	local_echo "Getting next unused TELNET_PORT..."
-	local telnet_port=$(find_first_unused_port "TELNET_PORT" $default_telnet_port)
+	local telnet_port=$(find_first_unused_port "TELNET_PORT" "14900")
 
 	local_echo "Getting next unused EXPEDITION_PORT..."
-	local expedition_port=$(find_first_unused_port "EXPEDITION_PORT" $default_expedition_port)
+	local expedition_port=$(find_first_unused_port "EXPEDITION_PORT" "2000")
 
 	# copy refreshInstance.sh from /servers/server to sub instance directory
 	local_echo "Copying $refreshInstance_file to $server_dir..."
@@ -129,7 +128,7 @@ function shared_instance_execute() {
 
 	header "Event and user creation"
 
-	event_id=$(configure_application $super_instance $port $event_name $new_admin_password $user_username $user_password)
+	event_id=$(configure_application $super_instance $server_port $event_name $new_admin_password $user_username $user_password)
 
 	header "Configuring ALB"
 
@@ -145,10 +144,6 @@ function shared_instance_execute() {
 
 	execute_remote_root "echo -e \"\n# $instance_short_name (${description:-"Unknown"}, ${contact_person:-"Unknown"}, ${contact_email:-"Unknown"})\" >> $events_conf"
 	append_macro_to_001_events_conf "$domain" "$event_id" "root" "$super_instance" "$server_port"
-
-	local_echo "Reloading httpd..."
-	execute_remote_root "apachectl configtest >/dev/null 2>&1"
-	out=$(execute_remote_root "/etc/init.d/httpd reload")
 
 	header "Conclusion"
 
