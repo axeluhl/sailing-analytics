@@ -2157,8 +2157,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Widget createInfoWindowLabelAndValue(String labelName, String value) {
         Label valueLabel = new Label(value);
         valueLabel.setWordWrap(false);
-        valueLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        valueLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
         return createInfoWindowLabelWithWidget(labelName, valueLabel);
     }
 
@@ -2169,6 +2167,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
         label.getElement().getStyle().setPadding(3, Style.Unit.PX);
         label.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
+        value.getElement().getStyle().setFloat(Style.Float.LEFT);
+        value.getElement().getStyle().setPadding(3, Style.Unit.PX);
         flowPanel.add(label);
         flowPanel.add(value);
         return flowPanel;
@@ -2225,20 +2225,33 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         positionInDecimalDegreesLabel.getElement().getStyle().setFontSize(0.7, Unit.EM);
         vPanel.add(positionInDecimalDegreesLabel);
         if (windSource.getType() == WindSourceType.WINDFINDER) {
+            HorizontalPanel container = new HorizontalPanel();
+            container.setSpacing(2);
+            Image windfinderImage = new Image(raceMapImageManager.getWindFinderIconSmall());
+            windfinderImage.getElement().getStyle().setMarginRight(1, Unit.EM);
+            container.add(windfinderImage);
+            container.add(vPanel);
             sailingService.getWindFinderSpot(windSource.getId().toString(), new AsyncCallback<SpotDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    errorReporter.reportError(stringMessages.unableToResolveWindFinderSpotId(windSource.getId().toString(), caught.getMessage()), /* silentMode */ true);
+                    errorReporter.reportError(stringMessages.unableToResolveWindFinderSpotId(
+                            windSource.getId().toString(), caught.getMessage()), /* silentMode */ true);
                 }
 
                 @Override
                 public void onSuccess(SpotDTO result) {
-                    // TODO bug1301 place WindFinder button icon on anchor and format nicely; this or similar could be the image icon to use: RaceMap.this.raceMapImageManager.getWindFinderIconSmall();
-                    windSourceNameAnchor.setHref(result.getCurrentlyMostAppropriateUrl(timePoint));
-                    windSourceNameAnchor.setName(stringMessages.windFinder()+": "+result.getName()+" ("+result.getId()+")");
-                    windSourceNameAnchor.setTarget("_blank");
+                    // TODO bug1301 place WindFinder button icon on anchor and format nicely; this or similar could be
+                    // the image icon to use: RaceMap.this.raceMapImageManager.getWindFinderIconSmall();
+                    // windSourceNameAnchor.setHref(result.getCurrentlyMostAppropriateUrl(timePoint));
+                    // windSourceNameAnchor.setTarget("_blank");
+                    windSourceNameAnchor.setText(result.getName() + " (" + result.getId() + ")");
+                    final String url = result.getCurrentlyMostAppropriateUrl(timePoint);
+                    final ClickHandler clickHandler = event -> Window.open(url, "_blank", "");
+                    windSourceNameAnchor.addClickHandler(clickHandler);
+                    windfinderImage.addClickHandler(clickHandler);
                 }
             });
+            return container;
         } // TODO bug1301 else, or in any case, register an event listener on the Anchor that opens the wind chart
         return vPanel;
     }
