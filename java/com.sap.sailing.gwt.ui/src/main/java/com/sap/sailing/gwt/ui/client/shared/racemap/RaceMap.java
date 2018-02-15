@@ -53,8 +53,6 @@ import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
 import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.mvc.MVCArray;
-import com.google.gwt.maps.client.overlays.InfoWindow;
-import com.google.gwt.maps.client.overlays.InfoWindowOptions;
 import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
 import com.google.gwt.maps.client.overlays.Polygon;
@@ -331,8 +329,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    private InfoWindow lastInfoWindow = null;
-    
     /**
      * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
      * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
@@ -435,6 +431,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     /** Callback to set the visibility of the wind chart. */
     private final Consumer<Boolean> setWindChartVisibleCallback;
+    private ManagedInfoWindow managedInfoWindow;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -464,8 +461,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.errorReporter = errorReporter;
         this.timer = timer;
         this.isSimulationEnabled = true;
-        this.setWindChartVisibleCallback = parent == null ? visibile -> {
-        } : parent::setWindChartVisible;
+        this.setWindChartVisibleCallback = parent == null ? visibile -> {} : parent::setWindChartVisible;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -709,6 +705,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               RaceMap.this.redraw();
               trueNorthIndicatorPanel.redraw();
               showAdditionalControls(map);
+              RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
           }
         };
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
@@ -2073,21 +2070,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, DisplayMode displayMode) {
         final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
         boatCanvas.setDisplayMode(displayMode);
-        boatCanvas.addClickHandler(new ClickMapHandler() {
-            @Override
-            public void onEvent(ClickMapEvent event) {
-                if (lastInfoWindow != null) {
-                    lastInfoWindow.close();
-                }
-                GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
-                LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
-                InfoWindowOptions options = InfoWindowOptions.newInstance();
-                InfoWindow infoWindow = InfoWindow.newInstance(options);
-                infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
-                infoWindow.setPosition(where);
-                lastInfoWindow = infoWindow;
-                infoWindow.open(map);
-            }
+        boatCanvas.addClickHandler(event -> {
+            GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
+            Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
+            LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
+            managedInfoWindow.openAtPosition(content, where);
         });
 
         boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
@@ -2119,29 +2106,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void showMarkInfoWindow(MarkDTO markDTO, LatLng position) {
-        if(lastInfoWindow != null) {
-            lastInfoWindow.close();
-        }
-        InfoWindowOptions options = InfoWindowOptions.newInstance();
-        InfoWindow infoWindow = InfoWindow.newInstance(options);
-        infoWindow.setContent(getInfoWindowContent(markDTO));
-        infoWindow.setPosition(position);
-        lastInfoWindow = infoWindow;
-        infoWindow.open(map);
+        managedInfoWindow.openAtPosition(getInfoWindowContent(markDTO), position);
     }
 
     private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
-        if(lastInfoWindow != null) {
-            lastInfoWindow.close();
-        }
-        GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime()); 
-        // TODO find close fix where the mouse was; see BUG 470
-        InfoWindowOptions options = InfoWindowOptions.newInstance();
-        InfoWindow infoWindow = InfoWindow.newInstance(options);
-        infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
-        infoWindow.setPosition(where);
-        lastInfoWindow = infoWindow;
-        infoWindow.open(map);
+        final GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
+        final Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
+        managedInfoWindow.openAtPosition(content, where);
     }
 
     private void showWindSensorInfoWindow(final WindSensorOverlay windSensorOverlay) {
@@ -2149,17 +2120,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         WindTrackInfoDTO windTrackInfoDTO = windSensorOverlay.getWindTrackInfoDTO();
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
         if (windDTO != null && windDTO.position != null) {
-            if (lastInfoWindow != null) {
-                lastInfoWindow.close();
-            }
-            LatLng where = coordinateSystem.toLatLng(windDTO.position);
-            final InfoWindowOptions options = InfoWindowOptions.newInstance();
-            final InfoWindow infoWindow = InfoWindow.newInstance(options);
-            final InfoWindowContentPanel contentPanel = new InfoWindowContentPanel(infoWindow);
-            contentPanel.setWidget(getInfoWindowContent(windSource, windTrackInfoDTO));
-            infoWindow.setPosition(where);
-            lastInfoWindow = infoWindow;
-            infoWindow.open(map);
+            final LatLng where = coordinateSystem.toLatLng(windDTO.position);
+            final Widget content = getInfoWindowContent(windSource, windTrackInfoDTO);
+            managedInfoWindow.openAtPosition(content, where);
         }
     }
 
@@ -2191,7 +2154,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return vPanel;
     }
 
-    public Widget getInfoWindowContent(ManeuverDTO maneuver) {
+    private Widget getInfoWindowContent(ManeuverDTO maneuver) {
         SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
         SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
         VerticalPanel vPanel = new VerticalPanel();
@@ -2418,18 +2381,22 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
-                        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
+        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
         Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
                 .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
-                        MarkerOptions options = MarkerOptions.newInstance();
-                        options.setIcon(maneuverMarker.getIcon_MarkerImage());
-                        Marker marker = Marker.newInstance(options);
-                        marker.setPosition(latLng);
+        MarkerOptions options = MarkerOptions.newInstance();
+        options.setIcon(maneuverMarker.getIcon_MarkerImage());
+        Marker marker = Marker.newInstance(options);
+        marker.setPosition(latLng);
         marker.setTitle(ManeuverTypeFormatter.format(maneuver.type, stringMessages));
-        marker.addClickHandler(new ManeuverMarkerClickedListener(this, maneuver));
-                        maneuverMarkers.add(marker);
-                        marker.setMap(map);
-                    }
+        marker.addClickHandler(event -> {
+            LatLng where = getCoordinateSystem().toLatLng(maneuver.position);
+            Widget content = getInfoWindowContent(maneuver);
+            managedInfoWindow.openAtPosition(content, where);
+        });
+        maneuverMarkers.add(marker);
+        marker.setMap(map);
+    }
 
     /**
      * @param date
@@ -3055,14 +3022,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
     
-    void setLastInfoWindow(InfoWindow infoWindow) {
-        lastInfoWindow = infoWindow;
-    }
-
-    InfoWindow getLastInfoWindow() {
-        return lastInfoWindow;
-    }
-
     public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
         raceCompetitorSet.addCompetitorsForRaceDefinedListener(listener);
     }
