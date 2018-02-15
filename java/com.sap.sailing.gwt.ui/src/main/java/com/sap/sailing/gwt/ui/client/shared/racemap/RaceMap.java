@@ -886,15 +886,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                         case EXPEDITION:
                                         case WINDFINDER:
                                             // we filter out measured wind sources with very low confidence
-                                                GWT.log("Wind source " + windSource.getId());
                                             if (windTrackInfoDTO.minWindConfidence > 0.0001) {
                                                 windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
-                                                    GWT.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                                                } else {
-                                                    GWT.log("????????????????????????????????????????????????????????");
                                             }
-                                                if ("de15".equals(windSource.getId()))
-                                                    GWT.debugger();
                                             break;
                                         case COMBINED:
                                             showCombinedWindOnMap(windSource, windTrackInfoDTO);

@@ -2,20 +2,19 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
     <ui:style>
         .container {
-            display: block;
-            margin: .15em .5em 0 0;
-        }
-        .content {
-            background-color:#d0021b;
-            border-radius:.5em;
+            display: inline-block;
             width: 8em;
             height: 8em;
+            margin: .15em .5em 0 0;
             text-align: center;
+            text-decoration: none;
             color: #fff;
-            display: inline-block;
+            background-color:#d0021b;
+            border-radius:.5em;
         }
         .icon {
             width: 4em;
+            height: auto;
             margin: .75em auto 0;
         }
         .icon svg {
@@ -29,9 +28,7 @@
         }
     </ui:style>
     <a target="_blank" class="{style.container}" ui:field="anchorUi">
-        <div class="{style.content}">
-            <div class="{style.icon}" ui:field="iconContainerUi"></div>
-            <div class="{style.text}" ui:field="textContainerUi"></div>
-        </div>
+        <div class="{style.icon}" ui:field="iconContainerUi"></div>
+        <div class="{style.text}" ui:field="textContainerUi"></div>
     </a>
 </ui:UiBinder>
