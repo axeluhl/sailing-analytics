@@ -2152,9 +2152,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 lastInfoWindow.close();
             }
             LatLng where = coordinateSystem.toLatLng(windDTO.position);
-            InfoWindowOptions options = InfoWindowOptions.newInstance();
-            InfoWindow infoWindow = InfoWindow.newInstance(options);
-            infoWindow.setContent(getInfoWindowContent(windSource, windTrackInfoDTO));
+            final InfoWindowOptions options = InfoWindowOptions.newInstance();
+            final InfoWindow infoWindow = InfoWindow.newInstance(options);
+            final InfoWindowContentPanel contentPanel = new InfoWindowContentPanel(infoWindow);
+            contentPanel.setWidget(getInfoWindowContent(windSource, windTrackInfoDTO));
             infoWindow.setPosition(where);
             lastInfoWindow = infoWindow;
             infoWindow.open(map);
