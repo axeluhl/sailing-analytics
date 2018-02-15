@@ -67,6 +67,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -885,9 +886,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                         case EXPEDITION:
                                         case WINDFINDER:
                                             // we filter out measured wind sources with very low confidence
+                                                GWT.log("Wind source " + windSource.getId());
                                             if (windTrackInfoDTO.minWindConfidence > 0.0001) {
                                                 windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
+                                                    GWT.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                                                } else {
+                                                    GWT.log("????????????????????????????????????????????????????????");
                                             }
+                                                if ("de15".equals(windSource.getId()))
+                                                    GWT.debugger();
                                             break;
                                         case COMBINED:
                                             showCombinedWindOnMap(windSource, windTrackInfoDTO);
@@ -2217,7 +2224,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(windDTO.measureTimepoint);
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(), timePoint.asDate().toString()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
-        Label positionInDecimalDegreesLabel = new Label("  "+windDTO.position.getAsSignedDecimalDegrees());
+        final Label positionInDecimalDegreesLabel = new Label(windDTO.position.getAsSignedDecimalDegrees());
         positionInDecimalDegreesLabel.setWordWrap(false);
         positionInDecimalDegreesLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         positionInDecimalDegreesLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
@@ -2225,11 +2232,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         positionInDecimalDegreesLabel.getElement().getStyle().setFontSize(0.7, Unit.EM);
         vPanel.add(positionInDecimalDegreesLabel);
         if (windSource.getType() == WindSourceType.WINDFINDER) {
-            HorizontalPanel container = new HorizontalPanel();
-            container.setSpacing(2);
-            Image windfinderImage = new Image(raceMapImageManager.getWindFinderIconSmall());
-            windfinderImage.getElement().getStyle().setMarginRight(1, Unit.EM);
-            container.add(windfinderImage);
+            final HorizontalPanel container = new HorizontalPanel();
+            container.setSpacing(1);
+            final WindfinderIcon windfinderIcon = new WindfinderIcon(raceMapImageManager, stringMessages);
+            container.add(windfinderIcon);
             container.add(vPanel);
             sailingService.getWindFinderSpot(windSource.getId().toString(), new AsyncCallback<SpotDTO>() {
                 @Override
@@ -2240,15 +2246,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
                 @Override
                 public void onSuccess(SpotDTO result) {
-                    // TODO bug1301 place WindFinder button icon on anchor and format nicely; this or similar could be
-                    // the image icon to use: RaceMap.this.raceMapImageManager.getWindFinderIconSmall();
-                    // windSourceNameAnchor.setHref(result.getCurrentlyMostAppropriateUrl(timePoint));
-                    // windSourceNameAnchor.setTarget("_blank");
-                    windSourceNameAnchor.setText(result.getName() + " (" + result.getId() + ")");
                     final String url = result.getCurrentlyMostAppropriateUrl(timePoint);
-                    final ClickHandler clickHandler = event -> Window.open(url, "_blank", "");
-                    windSourceNameAnchor.addClickHandler(clickHandler);
-                    windfinderImage.addClickHandler(clickHandler);
+                    windSourceNameAnchor.setTarget("_blank");
+                    windSourceNameAnchor.setText(result.getName());
+                    windSourceNameAnchor.setHref(url);
+                    windfinderIcon.setHref(url);
                 }
             });
             return container;

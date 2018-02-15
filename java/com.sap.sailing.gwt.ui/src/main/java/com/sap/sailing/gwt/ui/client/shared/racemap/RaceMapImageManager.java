@@ -12,6 +12,7 @@ import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerImage;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.TextResource;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sse.common.Util;
 
@@ -92,7 +93,7 @@ public class RaceMapImageManager {
         return windSensorIconTransformer;
     }
     
-    public ImageResource getWindFinderIconSmall() {
-        return resources.getWindFinderIconSmall();
+    public TextResource getWindFinderLogo() {
+        return resources.getWindFinderLogo();
     }
 }

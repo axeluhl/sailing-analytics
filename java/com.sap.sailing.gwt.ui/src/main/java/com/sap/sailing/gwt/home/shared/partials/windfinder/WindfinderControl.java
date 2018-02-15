@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 
 public class WindfinderControl extends Widget {
@@ -34,6 +35,7 @@ public class WindfinderControl extends Widget {
         WindfinderResources.INSTANCE.css().ensureInjected();
         this.launchPadController = new WindfinderLaunchPadController(windfinderUrlFactory);
         setElement(uiBinder.createAndBindUi(this));
+        this.labelUi.setInnerHTML(StringMessages.INSTANCE.windFinderWeatherData());
         this.iconUi.setInnerHTML(local_res.windfinderLogo().getText());
         sinkEvents(Event.ONCLICK);
         this.setVisible(false);
