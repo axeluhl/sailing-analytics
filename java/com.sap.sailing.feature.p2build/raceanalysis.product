@@ -76,12 +76,10 @@
       <plugin id="org.apache.felix.shell.remote" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.jetty.continuation" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.deploy" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.http" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.io" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.jmx" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.nested" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.jetty.security" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.server" autoStart="true" startLevel="4" />
@@ -89,7 +87,6 @@
       <plugin id="org.eclipse.jetty.util" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.webapp" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.xml" autoStart="true" startLevel="4" />
-      <plugin id="org.mortbay.jetty.util" autoStart="true" startLevel="4" />
       <property name="eclipse.ignoreApp" value="true" />
       <property name="osgi.noShutdown" value="true" />
    </configurations>
