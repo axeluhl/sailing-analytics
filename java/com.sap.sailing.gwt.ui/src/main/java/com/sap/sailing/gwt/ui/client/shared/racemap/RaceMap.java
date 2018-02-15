@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -110,6 +111,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.Competitor
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -430,6 +432,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     protected Label estimatedDurationOverlay;
     private RaceMapStyle raceMapStyle;
     private final boolean showHeaderPanel;
+    
+    /** Callback to set the visibility of the wind chart. */
+    private final Consumer<Boolean> setWindChartVisibleCallback;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -442,7 +447,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
     
-    public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
+    public RaceMap(RaceBoardPanel parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
@@ -459,6 +464,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.errorReporter = errorReporter;
         this.timer = timer;
         this.isSimulationEnabled = true;
+        this.setWindChartVisibleCallback = parent == null ? visibile -> {
+        } : parent::setWindChartVisible;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -2249,7 +2256,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
             });
             return container;
-        } // TODO bug1301 else, or in any case, register an event listener on the Anchor that opens the wind chart
+        } else {
+            windSourceNameAnchor.addClickHandler(event -> setWindChartVisibleCallback.accept(true));
+        }
         return vPanel;
     }
 
