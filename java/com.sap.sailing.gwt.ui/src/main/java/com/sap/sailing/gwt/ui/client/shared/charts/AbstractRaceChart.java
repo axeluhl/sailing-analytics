@@ -245,6 +245,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     
     protected void resetMinMaxAndExtremesInterval(boolean redraw) {
         changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), redraw);
+        chart.hideResetZoom();
     }
 
     @Override
