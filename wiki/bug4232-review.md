@@ -12,13 +12,13 @@
 
 The edit dialog (open with the pencil) should always be closed if a warning (yellow or red) will be displayed. In case of a red warning, the publish button is always disabled.
 
-One device will be called **A** and the other **B**, so they are have unique names while testing.
+One device will be called **A** and the other **B**, so they have unique names while testing.
 
 ## While starting
 
 ### Test 1
 * devices open the penalty fragment
-* device A give Omar Air OSC, device B set DNS for Omar Air
+* device A give Omar Air OCS, device B set DNS for Omar Air
 * device A closes the penalty view (without publishing)
 * device B should see a red warning sign (without active publish button) after the automatic refresh
 
@@ -32,7 +32,7 @@ One device will be called **A** and the other **B**, so they are have unique nam
 
 ### Test 4
 * both devices open the penalty fragment
-* device A give Omar Air OSC, device B set for Alinghi the value DNS
+* device A gives Omar Air OCS, device B sets DNS for Alinghi
 * device A closes the penalty view (without publishing)
 * device B should see both entries in the list after refresh
 
@@ -42,20 +42,20 @@ One device will be called **A** and the other **B**, so they are have unique nam
 
 ### Test 6
 * same as [test 4](#test-scenarios_while-starting_test-4), but after refresh device B should publish the merged result
-* after the refresh device A also see both entries
+* after the refresh device A also sees both entries
 
 ## While finishing
 
 ### Test 7
 * both devices open result list
-* device A add Omar Air, Alinghi and LR BAR into the list
+* device A adds Omar Air, Alinghi and LR BAR into the list
 * device A closes the result list
 * after refresh device B see the three competitors in the result list
 
 ### Test 8
 * both devices open result list
 * both devices add Omar Air to the result list
-* device A set the penalty to OSC and closes the result list
+* device A sets the penalty to OCS and closes the result list
 * device B should see after the refresh a yellow warning sign
 
 ### Test 9
@@ -68,7 +68,7 @@ One device will be called **A** and the other **B**, so they are have unique nam
 ### Test 10
 * both devices open result list
 * both devices add Omar Air to the result list
-* device A changes to penalty view and set the value to DNF and changes back to result list
+* device A changes to penalty view and sets the value to DNF and changes back to result list
 * device B should see a yellow warning sign after refresh
 
 ### Test 11
