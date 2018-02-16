@@ -17,8 +17,8 @@ function instance_start(){
 function instance_require(){
 	require_region
 	require_instance_type
-	require_instance_security_group_id
-	require_image_id
+	require_instance_security_group
+	require_image
 	require_instance_name
 	require_instance_short_name
 	require_ssh_user
@@ -33,6 +33,8 @@ function instance_require(){
 
 function instance_preview(){
 	header "Preview"
+	image_id=$(get_resource_id $image)
+	instance_security_group_id=$(get_resource_id $instance_security_group)
 	user_data=$(build_user_data)
 	local_echo "An instance will be created with the following specifications: "
 	local_echo "To be implemented..."
@@ -60,7 +62,7 @@ function instance_execute() {
 
 	local port="8888"
 	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_pass
-
+	append_environment_to_env_sh "live-server" $ssh_user $public_dns_name 
 	header "Conclusion"
 
 	success "Instance should be reachable through $public_dns_name."

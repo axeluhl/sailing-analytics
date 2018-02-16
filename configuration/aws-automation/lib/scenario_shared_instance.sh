@@ -98,13 +98,7 @@ function shared_instance_execute() {
 	local_echo "Commenting out $comment_out_line_in_env_with_pattern inside $server_env_file..."
 	execute_remote "sed -i '/$comment_out_line_in_env_with_pattern/s/^/#/g' $server_env_file"
 
-	local_echo "Configuring $server_env_file..."
-	environment="live-server"
-	env_content=$(wget -qO- http://releases.sapsailing.com/environments/$environment)
-
-	exit_on_fail execute_remote "echo -e \"# START Environment: $environment \" >> $server_env_file"
-	exit_on_fail execute_remote "echo -e \"$env_content\" >> $server_env_file"
-	exit_on_fail execute_remote "echo -e \"# END Environment: $environment \" >> $server_env_file"
+	append_environment_to_env_sh "live-server" $ssh_user $super_instance $server_env_file $env_file
 
 	local env_patch=$(build_configuration "# START Script $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
 	"SERVER_PORT=$server_port" "EXPEDITION_PORT=$expedition_port" "MONGODB_NAME=$(alphanumeric $instance_name)" "MONGODB_HOST=$default_mongodb_host" \

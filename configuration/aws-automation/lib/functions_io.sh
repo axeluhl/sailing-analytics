@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-CHOOSE_FROM_INSTANCES=":instance"
-CHOOSE_FROM_SECURITY_GROUPS=":security-group"
-CHOOSE_FROM_IMAGES=":image"
-CHOOSE_FROM_CERTIFICATES=":certificate"
-CHOOSE_FROM_LOAD_BALANCERS=":loadbalancer"
-
 # -----------------------------------------------------------
 # Prompt user for input and save value to variable
 # @param $1  prompt message
@@ -21,28 +15,35 @@ function require_input(){
 		declare -a option_values=()
 		number_of_tagged_resources=0
 		default_tagged_resource=""
-		o=0
+    o=0
 		for key in "${!RESOURCE_MAP[@]}"; do
-			if [[ $key = *"$5"* ]]; then
+			if [[ $key =~ $5 ]]; then
 				# if resource is tagged
-				option_keys[o]=$key
+				option_keys[$o]=$key
 				local tagged=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f2)
 				local name=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f1)
 				if [ $tagged == "true" ]; then
-					option_values[o]="$(tput setaf 3)$name ($key)$(tput sgr0)"
+					option_values[$o]="$(tput setaf 3)$name ($key)$(tput sgr0)"
 					default_tagged_resource=$key
 					((number_of_tagged_resources++))
 				else
-					option_values[o]="$name ($key)"
+					option_values[$o]="$name ($key)"
 				fi
+        ((o++))
 			fi
-			((o++))
 		done
 
-		if [ $number_of_tagged_resources -eq 1 ] && [ "$force" == "true" ] || [ ${#option_keys[@]} -eq 1 ]; then
-			read -r $3 <<< $default_tagged_resource
-			return 0
-		elif [ $number_of_tagged_resources -gt 0 ]; then
+		if [[ ( $number_of_tagged_resources -eq 1 || ${#option_keys[@]} -eq 1 ) && "$force" == "true" ]]; then
+      local_echo "$1"
+      if [ ! -z "$default_tagged_resource" ]; then
+        read -r $3 <<< $default_tagged_resource
+      else
+        echo ${option_keys[0]}
+        read -r $3 <<< ${option_keys[0]}
+      fi
+      return 0
+		elif [ ${#option_keys[@]} -gt 0 ]; then
+      local_echo "$1"
 			selectedValue=""
 			select option in ${option_values[@]}; do
 				selectedValue=$option
@@ -136,9 +137,13 @@ function update_resources(){
 	> $resources_file
 
 	OLD_RESOURCE_JSON=$RESOURCE_JSON
-	typeset -p OLD_RESOURCE_JSON >> $resources_file
+  typeset -p OLD_RESOURCE_JSON >> $resources_file
+
+  OLD_LAUNCH_TEMPLATE_JSON=$LAUNCH_TEMPLATE_JSON
+	typeset -p OLD_LAUNCH_TEMPLATE_JSON >> $resources_file
 
 	RESOURCES_ARRAY=($(get_resources))
+  LAUNCH_TEMPLATES_ARRAY=($(get_launch_templates))
 
 	declare -A RESOURCE_MAP
 
@@ -156,15 +161,22 @@ function update_resources(){
 		RESOURCE_MAP[$arn]="${name:-"Unnamed"},$tagged"
 	done
 
+  for lt in ${LAUNCH_TEMPLATES_ARRAY[@]}; do
+    local id=$(echo $lt | jq -c ".LaunchTemplateId" -r | sanitize)
+    local name=$(echo $lt | jq -c ".LaunchTemplateName" -r | sanitize)
+    RESOURCE_MAP[$id]="${name:-"Unnamed"},false"
+  done
+
 	typeset -p RESOURCE_MAP >> $resources_file
 }
 
 function init_resources(){
-	local_echo "Checking if aws resources with tag key 'AutoDiscover' and value 'true' were added or removed in region $region..."
+	local_echo "Checking if aws resources were added or removed in region $region since the last time..."
 	RESOURCE_JSON=$(get_resources)
+  LAUNCH_TEMPLATE_JSON=$(get_launch_templates)
 
-	if [ "$RESOURCE_JSON" != "$OLD_RESOURCE_JSON" ]; then
-		  local_echo "Updating tagged aws resources..."
+	if [ "$RESOURCE_JSON" != "$OLD_RESOURCE_JSON" ] || [ "$LAUNCH_TEMPLATE_JSON" != "$OLD_LAUNCH_TEMPLATE_JSON" ] ; then
+		  local_echo "Updating aws resources..."
 			update_resources
 	else
 		local_echo "Stored aws resources are up to date."

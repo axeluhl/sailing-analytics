@@ -96,6 +96,11 @@ if $master_instance_scenario; then
 	safeExit
 fi
 
+if $replica_instance_scenario; then
+  replica_instance_start
+	safeExit
+fi
+
 if $associate_alb_scenario; then
   associate_alb_start
 	safeExit
@@ -123,6 +128,8 @@ usage() {
   -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
   -z, --super-instance          Dns name of superior instance (e.g. base instance for sub instances)
   -m, --event-name              Name of event
+  -x, --mongodb-host            Ip adress or dns of mongodb host
+  -y  --mongodb-port            Port of mongodb
   -b, --build                   Build version to use (leave empty for latest)
   -w, --description             Description of sub instance
   -c, --contact-person          Contact person
@@ -208,6 +215,7 @@ associate_alb_scenario=false
 instance_scenario=false
 shared_instance_scenario=false
 master_instance_scenario=false
+replica_instance_scenario=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -227,6 +235,8 @@ while [[ $1 = -?* ]]; do
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
   -b|--super-instance) shift; super_instance_param=${1} ;;
   -m|--event-name) shift; event_name_param=${1} ;;
+  -x|--mongodb-host) shift; mongodb_host_param=${1} ;;
+  -y|--mongodb-port) shift; mongodb_name_param=${1} ;;
   -z|--build) shift; build_version_param=${1} ;;
   -w|--description) shift; description_param=${1} ;;
   -c|--contact-person) shift; contact_person_param=${1} ;;
@@ -236,6 +246,7 @@ while [[ $1 = -?* ]]; do
   --instance) instance_scenario=true ;;
   --shared-instance) shared_instance_scenario=true ;;
   --master-instance) master_instance_scenario=true ;;
+  --replica-instance) replica_instance_scenario=true ;;
   --associate-alb) associate_alb_scenario=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;

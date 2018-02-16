@@ -47,6 +47,9 @@ function get_instance_id(){
 	exit_on_fail validate_instance_id $instance_id
 }
 
+function get_launch_templates(){
+	aws ec2 describe-launch-templates | jq -c ".LaunchTemplates[]" -r | sanitize
+}
 # -----------------------------------------------------------
 # Returns the instance id part of e.g. arn:aws:ec2:eu-west-2:017363970217:instance/i-096a32ca8c28bedbb
 # param $1 resource arn
@@ -114,6 +117,12 @@ function run_instance(){
 	exit_on_fail validate_instance_id $instance_id
 }
 
+function run_instance_from_launch_template(){
+	local instance_id=$(aws_wrapper ec2 run-instances --launch-template LaunchTemplateId="$1" | get_attribute '.Instances[0].InstanceId')
+	exit_on_fail validate_instance_id $instance_id
+	wait_instance_exists $instance_id
+}
+
 # -----------------------------------------------------------
 # Get user data of instance with specific instance id
 # @param $1  instance id
@@ -131,12 +140,12 @@ function create_instance(){
 	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n${1}\n"
 	instance_id=$(run_instance "$1")
 	wait_instance_exists $instance_id
-	print_instance_description $instance_id
+	$(print_instance_description $instance_id)
 	echo $instance_id
 }
 
 function print_instance_description(){
 	aws_wrapper ec2 describe-instances --instance-ids $1 \
 	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\
-	--output table 1>&2
+	--output table
 }

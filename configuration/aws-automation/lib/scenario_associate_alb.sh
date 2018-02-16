@@ -20,14 +20,15 @@ function associate_alb_require(){
 	require_load_balancer
 	require_key_file
 	require_ssh_user
+}
+
+function associate_alb_execute() {
 
 	disable_aws_success_output
 	instance_id=$(get_resource_id $instance)
 	public_dns_name=$(get_public_dns_name $instance_id)
 	enable_aws_success_output
-}
 
-function associate_alb_execute() {
 	# create target group for instance
 	local target_group_arn=$(exit_on_fail create_target_group "S-dedicated-$instance_short_name")
 	exit_on_fail set_target_group_health_check "$target_group_arn" "HTTP" "/index.html" "80" "5" "4" "2" "2"
