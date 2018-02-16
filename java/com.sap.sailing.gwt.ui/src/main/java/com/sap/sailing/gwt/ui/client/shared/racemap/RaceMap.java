@@ -109,7 +109,6 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.Competitor
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -444,12 +443,23 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
     
-    public RaceMap(RaceBoardPanel parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
+    public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
+        this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
+                timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
+                showHeaderPanel, quickRanksDTOProvider, visible -> {});
+    }
+    
+    public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
+            RaceMapSettings raceMapSettings,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider, Consumer<Boolean> setWindChartVisibleCallback) {
         super(parent, context);
         this.showHeaderPanel = showHeaderPanel;
         this.quickRanksDTOProvider = quickRanksDTOProvider;
@@ -461,7 +471,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.errorReporter = errorReporter;
         this.timer = timer;
         this.isSimulationEnabled = true;
-        this.setWindChartVisibleCallback = parent == null ? visibile -> {} : parent::setWindChartVisible;
+        this.setWindChartVisibleCallback = setWindChartVisibleCallback;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
