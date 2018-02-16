@@ -31,10 +31,7 @@ Require-Bundle:
  javax.servlet;bundle-version="2.6.0",
  org.apache.shiro.core;bundle-version="1.2.2",
  org.apache.shiro.web;bundle-version="1.2.2",
- org.apache.shiro.ehcache;bundle-version="1.2.3",
- org.eclipse.jetty.websocket.api;bundle-version="9.4.8",
- org.eclipse.jetty.websocket.client;bundle-version="9.4.8",
- org.eclipse.jetty.websocket.common;bundle-version="9.4.8"
+ org.apache.shiro.ehcache;bundle-version="1.2.3"
 Import-Package: 
  com.sap.sailing.util,
  javax.ws.rs;version="1.1.1",
