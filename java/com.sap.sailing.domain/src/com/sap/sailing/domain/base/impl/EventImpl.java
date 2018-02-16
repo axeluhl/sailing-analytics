@@ -25,7 +25,7 @@ public class EventImpl extends EventBaseImpl implements Event {
 
     private ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
     
-    private final ConcurrentMap<String, Boolean> windFinderReviewedSpotsCollectionIds;
+    private ConcurrentMap<String, Boolean> windFinderReviewedSpotsCollectionIds;
     
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -44,6 +44,9 @@ public class EventImpl extends EventBaseImpl implements Event {
         ois.defaultReadObject();
         if (leaderboardGroups == null) {
             leaderboardGroups = new ConcurrentLinkedQueue<>();
+        }
+        if (windFinderReviewedSpotsCollectionIds == null) {
+            windFinderReviewedSpotsCollectionIds = new ConcurrentHashMap<>();
         }
     }
     
