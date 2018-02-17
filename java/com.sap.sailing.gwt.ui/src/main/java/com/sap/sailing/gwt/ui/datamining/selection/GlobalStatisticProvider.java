@@ -106,6 +106,8 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
         aggregatorListBox = createAggregatorListBox();
         aggregatorListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(aggregatorListBox);
+        
+        updateContent();
     }
     
     private ValueListBox<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> createExtractionFunctionListBox() {
@@ -124,7 +126,7 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
                 notifyStatisticListeners();
             }
         });
-        return null;
+        return extractionFunctionListBox;
     }
 
     private ValueListBox<AggregationProcessorDefinitionDTO> createAggregatorListBox() {
