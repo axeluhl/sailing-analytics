@@ -69,8 +69,14 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
@@ -88,14 +94,21 @@ import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPathfinderEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -7070,6 +7083,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final StartTimeFinderResult startTimeFinderResult = new StartTimeFinder(getService(), raceLogOfRaceToSlice).analyze();
         final TimePoint startTime = startTimeFinderResult.getStartTime();
         final boolean hasStartTime = startTime != null && timeRange.includes(startTime);
+        boolean hasFinishedTime = false;
         if (hasStartTime) {
             // we do not support depdendent start times here
             raceLog.add(new RaceLogStartTimeEventImpl(startTimeFinderResult.getStartTime(), author,
@@ -7080,10 +7094,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
                 if (finishedTime != null && timeRange.includes(finishedTime)) {
                     raceLog.add(new RaceLogRaceStatusEventImpl(finishedTime, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED));
+                    hasFinishedTime = true;
                 }
             }
         }
-        
+        final boolean hasFinishedTimeFinal = hasFinishedTime;
         
         // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
         final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
@@ -7138,10 +7153,91 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }
                 
+                @Override
+                public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+                    if (hasFinishedTimeFinal && isLatestPass(event)) {
+                        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogFinishPositioningListChangedEvent event) {
+                    if (hasFinishedTimeFinal && isLatestPass(event)) {
+                        raceLog.add(new RaceLogFinishPositioningListChangedEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogFixedMarkPassingEvent event) {
+                    if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getTimePointOfFixedPassing())) {
+                        raceLog.add(new RaceLogFixedMarkPassingEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                event.getInvolvedBoats(), raceLog.getCurrentPassId(),
+                                event.getTimePointOfFixedPassing(), event.getZeroBasedIndexOfPassedWaypoint()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogSuppressedMarkPassingsEvent event) {
+                    if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getLogicalTimePoint())) {
+                        raceLog.add(new RaceLogSuppressedMarkPassingsEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                event.getInvolvedBoats(), raceLog.getCurrentPassId(),
+                                event.getZeroBasedIndexOfFirstSuppressedWaypoint()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogProtestStartTimeEvent event) {
+                    if (hasFinishedTimeFinal && isLatestPass(event)) {
+                        raceLog.add(new RaceLogProtestStartTimeEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), event.getProtestTime()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogAdditionalScoringInformationEvent event) {
+                    if (hasFinishedTimeFinal && isLatestPass(event)) {
+                        raceLog.add(new RaceLogAdditionalScoringInformationEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                                raceLog.getCurrentPassId(), event.getType()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogPathfinderEvent event) {
+                    if (hasStartTime && isLatestPass(event)) {
+                        raceLog.add(new RaceLogPathfinderEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
+                                event.getPathfinderId()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogGateLineOpeningTimeEvent event) {
+                    if (hasStartTime && isLatestPass(event)) {
+                        raceLog.add(new RaceLogGateLineOpeningTimeEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getGateLineOpeningTimes().getGateLaunchStopTime(),
+                                event.getGateLineOpeningTimes().getGolfDownTime()));
+                    }
+                }
+                
+                @Override
+                public void visit(RaceLogRaceStatusEvent event) {
+                    if (isLatestPass(event)) {
+                        if ((hasStartTime && event.getNextStatus().getOrderNumber() <= RaceLogRaceStatus.RUNNING.getOrderNumber())) {
+                            new RaceLogRaceStatusEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
+                                    event.getNextStatus());
+                        }
+                    }
+                }
+                
                 private boolean isLatestPass(RaceLogEvent event) {
                     return event.getPassId() == raceLogOfRaceToSlice.getCurrentPassId();
                 }
-                // TODO do we need to copy more events?
             });
         }
         
