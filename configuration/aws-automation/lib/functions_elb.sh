@@ -75,8 +75,8 @@ function create_rule(){
 	local priority=$(($(get_rule_with_highest_priority $1) + 1))
 
 	# For testing purpose
-	if [ $region == "eu-west-2" ]; then
-		local domain="$subdomain.dummy2.sapsailing.com"
+	if [ $region == "eu-west-1" ]; then
+		local domain="$subdomain.training.sapsailing.com"
 	else
 		local domain="$subdomain.sapsailing.com"
 	fi

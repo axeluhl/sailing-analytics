@@ -14,56 +14,56 @@
 # -----------------------------------------------------------
 function require_input(){
 
-  if [ ! -z "$5" ]; then
-		declare -a option_keys=()
-		declare -a option_values=()
-		number_of_tagged_resources=0
-		default_tagged_resource=""
-    o=0
-		for key in "${!RESOURCE_MAP[@]}"; do
-			if [[ $key =~ $5 ]]; then
-				# if resource is tagged
-				option_keys[$o]=$key
-				local tagged=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f2)
-				local name=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f1)
-				if [ $tagged == "true" ]; then
-					option_values[$o]="$(tput setaf 3)$name ($key)$(tput sgr0)"
-					default_tagged_resource=$key
-					((number_of_tagged_resources++))
-				else
-					option_values[$o]="$name ($key)"
-				fi
-        ((o++))
-			fi
-		done
+  # if [ ! -z "$5" ]; then
+	# 	declare -a option_keys=()
+	# 	declare -a option_values=()
+		# number_of_tagged_resources=0
+		# default_tagged_resource=""
+    # o=0
+		# for key in "${!RESOURCE_MAP[@]}"; do
+		# 	if [[ $key =~ $5 ]]; then
+		# 		# if resource is tagged
+		# 		option_keys[$o]=$key
+		# 		local tagged=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f2)
+		# 		local name=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f1)
+		# 		if [ $tagged == "true" ]; then
+		# 			option_values[$o]="$(tput setaf 3)$name ($key)$(tput sgr0)"
+		# 			default_tagged_resource=$key
+		# 			((number_of_tagged_resources++))
+		# 		else
+		# 			option_values[$o]="$name ($key)"
+		# 		fi
+    #     ((o++))
+		# 	fi
+		# done
+    #
+		# if [[ ( $number_of_tagged_resources -eq 1 || ${#option_keys[@]} -eq 1 ) && "$force" == "true" ]]; then
+    #   local_echo "$1"
+    #   if [ ! -z "$default_tagged_resource" ]; then
+    #     read -r $3 <<< $default_tagged_resource
+    #   else
+    #     echo ${option_keys[0]}
+    #     read -r $3 <<< ${option_keys[0]}
+    #   fi
+    #   return 0
+		# elif [ ${#option_keys[@]} -gt 0 ]; then
+    #   local_echo "$1"
+		# 	selectedValue=""
+		# 	select option in ${option_values[@]}; do
+		# 		selectedValue=$option
+		# 		break
+		# 	done
+		# 	# workaround cant access option_keys from within select
+		# 	read -r $3 <<< $(echo $selectedValue  | sed  's/.*(\(.*\)).*/\1/')
+		# 	return 0
+		# else
+		# 	read_input_normal "$1" "$2" $3 $4
+		# 	return 0
+		# fi
 
-		if [[ ( $number_of_tagged_resources -eq 1 || ${#option_keys[@]} -eq 1 ) && "$force" == "true" ]]; then
-      local_echo "$1"
-      if [ ! -z "$default_tagged_resource" ]; then
-        read -r $3 <<< $default_tagged_resource
-      else
-        echo ${option_keys[0]}
-        read -r $3 <<< ${option_keys[0]}
-      fi
-      return 0
-		elif [ ${#option_keys[@]} -gt 0 ]; then
-      local_echo "$1"
-			selectedValue=""
-			select option in ${option_values[@]}; do
-				selectedValue=$option
-				break
-			done
-			# workaround cant access option_keys from within select
-			read -r $3 <<< $(echo $selectedValue  | sed  's/.*(\(.*\)).*/\1/')
-			return 0
-		else
-			read_input_normal "$1" "$2" $3 $4
-			return 0
-		fi
-
-	else
+	# else
 		read_input_normal "$1" "$2" $3 $4
-	fi
+	# fi
 }
 
 function read_input_normal(){

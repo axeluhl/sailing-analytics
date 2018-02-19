@@ -53,7 +53,7 @@ function require_launch_template(){
 }
 
 function require_image(){
-	require_variable "$image_param" image "$NO_DEFAULT_VALUE" "$image_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidImageARNRegex
+	require_variable "$image_param" image 'ami-d47711ad' "$image_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidImageARNRegex
 }
 
 function require_event_name(){
@@ -61,19 +61,19 @@ function require_event_name(){
 }
 
 function require_instance_security_group(){
-	require_variable "$security_group_param" instance_security_group "$NO_DEFAULT_VALUE" "$instance_security_group_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidSecurityGroupARNRegex
+	require_variable "$security_group_param" instance_security_group 'sg-eaf31e85' "$instance_security_group_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidSecurityGroupARNRegex
 }
 
 function require_load_balancer(){
-	require_variable "$load_balancer_param" load_balancer "$NO_DEFAULT_VALUE" "$load_balancer_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidLoadBalancerARNRegex
+	require_variable "$load_balancer_param" load_balancer 'arn:aws:elasticloadbalancing:eu-west-1:017363970217:loadbalancer/app/Sailing-eu-west-1/32b89dbfe7f75097' "$load_balancer_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidLoadBalancerARNRegex
 }
 
 function require_instance(){
-	require_variable "$instance_param" instance "$NO_DEFAULT_VALUE" "$instance_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
+	require_variable "$instance_param" instance 'arn:aws:ec2:eu-west-1:017363970217:instance/i-07c1a5d90e5b16524' "$instance_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
 }
 
 function require_region(){
-	require_variable "$region_param" region "$default_region" "$region_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
+	require_variable "$region_param" region "eu-west-1" "$region_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_instance_type(){
@@ -93,7 +93,7 @@ function require_key_name(){
 }
 
 function require_key_file(){
-		require_variable "$key_file_param" key_file "$default_key_file" "$key_file_ask_message" "$IS_OPTIONAL" "$SHOW_INPUT"
+		require_variable "$key_file_param" key_file '/cygdrive/c/Users/d069485/.ssh/Leon.pem' "$key_file_ask_message" "$IS_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_new_admin_password(){
@@ -126,7 +126,7 @@ function require_ssh_user(){
 }
 
 function require_super_instance(){
-	require_variable "$super_instance_param" super_instance "$NO_DEFAULT_VALUE" "$super_instance_message"  "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
+	require_variable "$super_instance_param" super_instance 'arn:aws:ec2:eu-west-1:017363970217:instance/i-07c1a5d90e5b16524' "$super_instance_message"  "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
 }
 
 function require_description(){
