@@ -102,8 +102,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 new EditAccessControlListDialog(stringMessages, userManagementService, aclListDataProvider, aclSingleSelectionModel.getSelectedObject()).show();
             }
         });
+        editACLButton.setEnabled(false);
         buttonPanel.add(editACLButton);
         aclSingleSelectionModel = new SingleSelectionModel<>();
+        aclSingleSelectionModel.addSelectionChangeHandler(e->editACLButton.setEnabled(aclSingleSelectionModel.getSelectedObject() != null));
         final CellTable<AccessControlListAnnotation> aclTable = new CellTable<>();
         TextColumn<AccessControlListAnnotation> idColumn = new TextColumn<AccessControlListAnnotation>() {
             @Override
