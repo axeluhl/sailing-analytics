@@ -66,12 +66,12 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
         raceDataGrid = new Grid(6,2);
         this.selectedRaceContentPanel.add(raceDataGrid);
         
-        raceDataGrid.setText(0, 0, "StartTime:");
-        raceDataGrid.setText(1, 0, "EndTime:");
-        raceDataGrid.setText(2, 0, "Duration:");
-        raceDataGrid.setText(3, 0, "Start of tracking:");
-        raceDataGrid.setText(4, 0, "End of tracking:");
-        raceDataGrid.setText(5, 0, "Delay to live (ms):");
+        raceDataGrid.setText(0, 0, stringMessages.startTime()+":");
+        raceDataGrid.setText(1, 0, stringMessages.endTime()+":");
+        raceDataGrid.setText(2, 0, stringMessages.duration()+":");
+        raceDataGrid.setText(3, 0, stringMessages.startOfTracking()+":");
+        raceDataGrid.setText(4, 0, stringMessages.endOfTracking()+":");
+        raceDataGrid.setText(5, 0, stringMessages.delayForLiveMode()+" (ms):");
     }
 
     @Override
