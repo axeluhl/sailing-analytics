@@ -110,6 +110,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventName();
     String event();
     String startTime();
+    String endTime();
     String startOfTracking();
     String endOfTracking();
     String regatta();
