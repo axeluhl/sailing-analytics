@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
@@ -34,7 +35,7 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
             if (getTimer().getPlayMode() == PlayModes.Live) {
                 getTimer().setPlayMode(PlayModes.Replay);
             }
-            getTimer().setTime(getRaceTimesInfoForRace().endOfRace.getTime());
+            setTimerOrUseCustomStart(new MillisecondsTimePoint(getRaceTimesInfoForRace().endOfRace));
         }
         if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
             leaderboardSettingsAdjusted = true;

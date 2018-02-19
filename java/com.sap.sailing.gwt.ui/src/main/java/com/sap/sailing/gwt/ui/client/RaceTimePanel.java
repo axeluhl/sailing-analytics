@@ -80,7 +80,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
         super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
-                forcePaddingRightToAlignToCharts);
+                forcePaddingRightToAlignToCharts, userService);
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -333,6 +333,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             if (newRaceTimesInfo.startOfRace != null) {
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
                         (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
+            } else if (newRaceTimesInfo.startOfTracking != null) {
+                timer.setTime(newRaceTimesInfo.startOfTracking.getTime());
             }
             break;
         }

@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.test;
 
-
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
@@ -84,7 +83,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
             }
         }
     }
-    
+
     @Override
     protected String getExpectedEventName() {
         return "Internationale Deutche Meisterschaft";
@@ -98,9 +97,9 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         Competitor competitor = getCompetitorByName("Polgar\\+Koy\\+Seelig");
         assertNotNull(competitor);
         Date toDate = new Date(1317650038784l); // that's shortly after their penalty circle
-        Date fromDate = new Date(toDate.getTime()-450000l);
+        Date fromDate = new Date(toDate.getTime() - 450000l);
         final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:30.000+0200"));
+        TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:31.000+0200"));
         Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>();
@@ -110,5 +109,5 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         maneuverTypesFound.add(ManeuverType.PENALTY_CIRCLE);
         assertAllManeuversOfTypesDetected(maneuverTypesFound, maneuversInvalid);
     }
-    
+
 }

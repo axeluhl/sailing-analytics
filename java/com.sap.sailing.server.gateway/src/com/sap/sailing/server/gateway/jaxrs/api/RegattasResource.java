@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,8 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -48,7 +45,6 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -64,7 +60,6 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -86,8 +81,12 @@ import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSer
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveBoundariesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverWindJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuversJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuversWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPassingsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -1024,101 +1023,50 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
-
-    /**
-     * @return the actual or anticipated start order for the race identified by {@coode regattaName} and {@code raceName}.
-     * Those competitors for which a start mark passing is already known are sorted by those start mark passings. All other
-     * boats are ordered by their geometric distance from the start line or the windward distance from the start mark
-     * if the start for some reason is defined by a single mark. See {@link #compareDistanceFromStartLine(Competitor, Competitor)}.
-     */
+    
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/startorder")
-    public Response getStartOrder(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    @Path("{regattaname}/races/{racename}/maneuversWithFullEstimationData")
+    public Response getManeuversWithFullEstimationData(@PathParam("regattaname") String regattaName,
+            @PathParam("racename") String raceName) {
+        return getManeuversWithEstimationData(regattaName, raceName, true);
+    }
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/maneuversWithEstimationData")
+    public Response getManeuversWithEstimationData(@PathParam("regattaname") String regattaName,
+            @PathParam("racename") String raceName) {
+        return getManeuversWithEstimationData(regattaName, raceName, false);
+    }
+    
+    private Response getManeuversWithEstimationData(String regattaName,
+            String raceName, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
-                    .build();
+                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
         } else {
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
-                        .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
-                        .build();
+                        .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
             } else {
-                final TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                Course course = trackedRace.getRace().getCourse();
-                final List<Competitor> competitors = new ArrayList<>();
-                final Waypoint firstWaypoint = course.getFirstWaypoint();
-                final TimePoint timeToUseForStart;
-                if (trackedRace.getStartOfRace() != null) {
-                    timeToUseForStart = trackedRace.getStartOfRace();
-                } else {
-                    timeToUseForStart = MillisecondsTimePoint.now();
-                }
-                if (firstWaypoint != null) {
-                    final List<Position> startWaypointMarkPositions =
-                        StreamSupport.stream(firstWaypoint.getMarks().spliterator(), /* parallel */ false).
-                        map(mark->trackedRace.getTrack(mark)).filter(markTrack->markTrack!=null).
-                        map(markTrack->markTrack.getEstimatedPosition(timeToUseForStart, /* extrapolate */ false)).
-                        collect(Collectors.toList());
-                    Util.addAll(trackedRace.getRace().getCompetitors(), competitors);
-                    competitors.sort((a, b)->{
-                        final MarkPassing aStartMarkPassing = trackedRace.getMarkPassing(a, firstWaypoint);
-                        final MarkPassing bStartMarkPassing = trackedRace.getMarkPassing(b, firstWaypoint);
-                        final int result;
-                        if (aStartMarkPassing == null) {
-                            if (bStartMarkPassing == null) {
-                                result = compareDistanceFromStartLine(trackedRace, startWaypointMarkPositions, timeToUseForStart, a, b);
-                            } else {
-                                result = 1; // b consider less than a because it has a start mark passing and therefore is assumed to have started before a
-                            }
-                        } else if (bStartMarkPassing == null) {
-                            result = -1; // a consider less than b because it has a start mark passing and therefore is assumed to have started before b
-                        } else {
-                            // both have a start mark passing; compare time points
-                            result = aStartMarkPassing.getTimePoint().compareTo(bStartMarkPassing.getTimePoint());
-                        }
-                        return result;
-                    });
-                }
-                CompetitorJsonSerializer serializer = new CompetitorJsonSerializer();
-                JSONArray result = new JSONArray();
-                for (final Competitor c : competitors) {
-                    JSONObject jsonCompetitor = serializer.serialize(c);
-                    result.add(jsonCompetitor);
-                }
-                String json = result.toJSONString();
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                ManeuversWithEstimationDataJsonSerializer serializer = new ManeuversWithEstimationDataJsonSerializer(
+                        new BoatClassJsonSerializer(),
+                        new ManeuverWithEstimationDataJsonSerializer(new GPSFixJsonSerializer(),
+                                new ManeuverCurveBoundariesJsonSerializer(),
+                                new ManeuverWindJsonSerializer(), avgSpeedAndCogCalculationBeforeAndAfterManeuver), avgSpeedAndCogCalculationBeforeAndAfterManeuver);
+                JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
+                String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
-    }
-
-    private int compareDistanceFromStartLine(TrackedRace trackedRace, Iterable<Position> startWaypointMarkPositions,
-            TimePoint timeToUseForStart, Competitor a, Competitor b) {
-        final Position aPos = trackedRace.getTrack(a).getEstimatedPosition(timeToUseForStart, /* extrapolate */ true);
-        final Position bPos = trackedRace.getTrack(b).getEstimatedPosition(timeToUseForStart, /* extrapolate */ true);
-        final Distance aDist = aPos==null?null:getDistanceFromStartWaypoint(aPos, startWaypointMarkPositions);
-        final Distance bDist = bPos==null?null:getDistanceFromStartWaypoint(bPos, startWaypointMarkPositions);
-        return Comparator.<Distance>nullsLast(Comparator.naturalOrder()).compare(aDist, bDist);
-    }
-
-    private Distance getDistanceFromStartWaypoint(Position pos, Iterable<Position> startWaypointMarkPositions) {
-        final Distance result;
-        if (Util.isEmpty(startWaypointMarkPositions)) {
-            result = null;
-        } else if (Util.size(startWaypointMarkPositions) == 1) {
-            // single mark start; strange, but possible:
-            result = startWaypointMarkPositions.iterator().next().getDistance(pos);
-        } else {
-            final Position first = Util.get(startWaypointMarkPositions, 0);
-            final Position second = Util.get(startWaypointMarkPositions, 1);
-            result = pos.getDistanceToLine(first, second).abs();
-        }
-        return result;
     }
 
     @GET

@@ -33,6 +33,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
+  * [[Creating a webserver EC2 image from scratch|wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch]]
   * [[EC2 mail relaying|wiki/info/landscape/mail-relaying]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
@@ -87,7 +88,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ## HowTo
 
 * [[Onboarding|wiki/howto/onboarding]]
-
+* [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 
 ### Development
 
@@ -116,7 +117,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Setup
 
 * [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
-* [[Setup local webserver to serve 360° videos|wiki/howto/setup/webserver/chrome-webserver]]
+* [[Setup local webserver to serve 360° videos|wiki/howto/setup/webserver/nginx-webserver]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
 ### Miscellaneous

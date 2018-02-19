@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -320,10 +322,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removeTrackedRace(RaceDefinition raceDefinition) {
-            }
-
-            @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
                     long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
                     long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
@@ -348,7 +346,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removeRaceListener(RaceListener listener) {
+            public Future<Boolean> removeRaceListener(RaceListener listener) {
+                return null;
             }
         };
     }
@@ -380,6 +379,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
+        return null;
+    }
+    
+    @Override
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
     }
 
@@ -894,6 +898,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException {
         return null;
     }
 

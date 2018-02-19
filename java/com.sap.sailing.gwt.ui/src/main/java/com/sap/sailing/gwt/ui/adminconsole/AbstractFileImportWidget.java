@@ -93,7 +93,7 @@ public abstract class AbstractFileImportWidget extends Composite {
         }
         SensorDataImportResponse importResponse = SensorDataImportResponse.parse(event.getResults());
         if (importResponse == null) {
-            Window.alert("Empty response from server");
+            Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
         } else {
             SensorDataImportResultsDialog.showResults(importResponse);
             if (importResponse.didSucceedImportingAnyFile()) {
