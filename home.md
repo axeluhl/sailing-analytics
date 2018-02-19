@@ -117,7 +117,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Setup
 
 * [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
-* [[Setup local webserver to serve 360° videos|wiki/howto/setup/webserver/chrome-webserver]]
+* [[Setup local webserver to serve 360° videos|wiki/howto/setup/webserver/nginx-webserver]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
 ### Miscellaneous

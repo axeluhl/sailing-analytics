@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
+import com.sap.sse.security.ui.client.UserService;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> {
@@ -28,18 +29,18 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     //constructor used by Standalone RaceBoard
-    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes) {
-        this(null, stringMessages, competitorChartAllowedDetailTypes);
+    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes, UserService userService) {
+        this(null, stringMessages, competitorChartAllowedDetailTypes, userService);
     }
 
-    public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes) {
+    public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, List<DetailType> competitorChartAllowedDetailTypes, UserService userService) {
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
-        raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);
+        raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages, userService);
         
         addLifeCycle(raceMapLifecycle);
         addLifeCycle(windChartLifecycle);
