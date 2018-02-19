@@ -89,6 +89,9 @@ public class UserStoreImpl implements UserStore {
      */
     private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock("User Groups Cache", /* fair */ false);
     private final ConcurrentHashMap<SecurityUser, Set<UserGroup>> userGroupsContainingUser;
+    /**
+     * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroup)} is called.
+     */
     private final ConcurrentHashMap<UserGroup, Set<SecurityUser>> usersInUserGroups;
     
     private final ConcurrentHashMap<String, User> users;
@@ -207,11 +210,16 @@ public class UserStoreImpl implements UserStore {
             for (final UserGroup group : userGroups.values()) {
                 migrateProxyUsersInGroupToRealUsersByUsername(group);
                 for (final SecurityUser userInGroup : group.getUsers()) {
+                    Util.addToValueSet(usersInUserGroups, group, userInGroup);
                     Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
                 }
             }
             for (final Tenant tenant : tenants.values()) {
                 migrateProxyUsersInGroupToRealUsersByUsername(tenant);
+                for (final SecurityUser userInTenant : tenant.getUsers()) {
+                    Util.addToValueSet(usersInUserGroups, tenant, userInTenant);
+                    Util.addToValueSet(userGroupsContainingUser, userInTenant, tenant);
+                }
             }
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
                 if (e.getValue() != null) {
