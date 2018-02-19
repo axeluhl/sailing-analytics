@@ -429,7 +429,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final boolean showHeaderPanel;
     
     /** Callback to set the visibility of the wind chart. */
-    private final Consumer<Boolean> setWindChartVisibleCallback;
+    private final Consumer<WindSource> showWindChartForProvider;
     private ManagedInfoWindow managedInfoWindow;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
@@ -459,7 +459,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider, Consumer<Boolean> setWindChartVisibleCallback) {
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider) {
         super(parent, context);
         this.showHeaderPanel = showHeaderPanel;
         this.quickRanksDTOProvider = quickRanksDTOProvider;
@@ -471,7 +471,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.errorReporter = errorReporter;
         this.timer = timer;
         this.isSimulationEnabled = true;
-        this.setWindChartVisibleCallback = setWindChartVisibleCallback;
+        this.showWindChartForProvider = showWindChartForProvider;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -2230,7 +2230,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             });
             return container;
         } else {
-            windSourceNameAnchor.addClickHandler(event -> setWindChartVisibleCallback.accept(true));
+            windSourceNameAnchor.addClickHandler(event -> showWindChartForProvider.accept(windSource));
         }
         return vPanel;
     }
