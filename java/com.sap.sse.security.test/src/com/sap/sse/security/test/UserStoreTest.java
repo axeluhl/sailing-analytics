@@ -21,6 +21,7 @@ public class UserStoreTest {
     private final String accessToken = "ak";
     private final String prefKey = "pk";
     private final String prefValue = "pv";
+    private final String defaulttenantname = username+"-tenant";
     
     public UserStoreTest() throws TenantManagementException, UserGroupManagementException, UserManagementException {
         userStore = new UserStoreImpl(null, null, "TestDefaultTenant");
@@ -28,7 +29,7 @@ public class UserStoreTest {
     
     @Before
     public void setUp() throws UserManagementException, TenantManagementException, UserGroupManagementException {
-        userStore.createUser(username, email, userStore.createTenant(UUID.randomUUID(), username+"-tenant"));
+        userStore.createUser(username, email, userStore.createTenant(UUID.randomUUID(), defaulttenantname));
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
     }

@@ -3,6 +3,7 @@ package com.sap.sse.security.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
@@ -192,5 +193,16 @@ public class UserStoreWithPersistenceTest {
         assertNull(store.getTenantByName(userGroupName));
         assertNull(store.getUserGroup(userGroupId));
         assertNull(store.getUserGroupByName(userGroupName));
+    }
+
+    @Test
+    public void testGroups() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        store.createUser(username, email, defaultTenant);
+        newStore();
+        final Tenant loadedDefaultTenant = store.getTenantByName(defaultTenant.getName());
+        final User loadedUser = store.getUserByName(username);
+        assertSame(loadedDefaultTenant, loadedUser.getDefaultTenant());
+        assertEquals(1, Util.size(loadedDefaultTenant.getUsers()));
+        assertSame(loadedUser, loadedDefaultTenant.getUsers().iterator().next());
     }
 }
