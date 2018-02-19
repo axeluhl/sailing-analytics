@@ -29,6 +29,11 @@
                             tenant for a login session. Zero or more users can belong to a tenant. Objects have
                             a tenant owner and a user owner, similar to group and user ownerships of files in a
                             file system.<p>
+                            By default, each user receives a default tenant that is named like the user, with "-tenant"
+                            appended. This applies during user migration to this new version, as well as during
+                            creation of new users. While a "default tenant" only specifies the tenant that objects
+                            created by the user will have as their tenant owner, by default the user also "belongs"
+                            to its default tenant (is part of that tenant's user group).<p>
                             Roles are now defined explicitly, in the "Roles" tab in the "Advanced" category.
                             A new server that is not sharing the security service with any other server will
                             start out with a few default role definitions, such as "admin" and "user". Roles imply permissions,

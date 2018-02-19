@@ -752,7 +752,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final String emailValidationSecret = result.startEmailValidation();
         // don't replicate exception handling; replicate only the effect on the user store
         apply(s->s.internalStoreUser(result));
-        if (validationBaseURL != null) {
+        if (validationBaseURL != null && email != null && !email.trim().isEmpty()) {
             new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
                 @Override
                 public void run() {
