@@ -79,7 +79,7 @@ if is_exists ${region_config_file}; then
   source "${region_config_file}"
 fi
 
-# init_resources
+init_resources
 
 if $instance_scenario; then
 	instance_start
