@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------------
-# Query for public dns name of instance
+# Functions that are relevant for the configuration of the ec2 instance.
+# -----------------------------------------------------------
+
+# -----------------------------------------------------------
+# Get public dns name of instance
 # @param $1  instance id
 # @return    public dns name
 # -----------------------------------------------------------
@@ -12,14 +16,15 @@ function get_public_dns_name(){
 
 
 # -----------------------------------------------------------
-# Get resources that should be automatically discovered
-# @return   array of resource ids
+# Get resources all resources from aws
+# @return  json array of resourceARNs
 # -----------------------------------------------------------
 function get_resources(){
-	aws resourcegroupstaggingapi get-resources | jq -c ".ResourceTagMappingList[] | select(.ResourceARN)" -r | sanitize
+	aws_wrapper resourcegroupstaggingapi get-resources --resource-type-filters elasticloadbalancing:loadbalancer ec2:instance ec2:image ec2:security-group acm:certificate | jq -c ".ResourceTagMappingList[] | select(.ResourceARN)" -r | sanitize
 }
 
 # -----------------------------------------------------------
+# Get tag value of specified key of instance
 # @param1   instance id
 # @param2   tag key
 # @return  tag value
@@ -29,7 +34,7 @@ function get_tag_value_for_key(){
 }
 
 # -----------------------------------------------------------
-# Query for default vpc id
+# Get default vpc id
 # @return    default vpc id
 # -----------------------------------------------------------
 function get_default_vpc_id(){
@@ -47,8 +52,13 @@ function get_instance_id(){
 	exit_on_fail validate_instance_id $instance_id
 }
 
+# -----------------------------------------------------------
+# Get launch templates as json
+# param $1 public dns name
+# @return  json array of launch templates
+# -----------------------------------------------------------
 function get_launch_templates(){
-	aws ec2 describe-launch-templates | jq -c ".LaunchTemplates[]" -r | sanitize
+	aws_wrapper ec2 describe-launch-templates | jq -c ".LaunchTemplates[]" -r | sanitize
 }
 # -----------------------------------------------------------
 # Returns the instance id part of e.g. arn:aws:ec2:eu-west-2:017363970217:instance/i-096a32ca8c28bedbb
@@ -56,13 +66,7 @@ function get_launch_templates(){
 # @return  id part of arn
 # -----------------------------------------------------------
 function get_resource_id(){
-	cut -d/ -f2 <<< $1
-}
-
-function get_public_ip(){
-	local_echo "Querying for the public ip of $1..."
-	local ip_address=$(aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[?PublicIpAddress=='$1'].InstanceId" --output text)
-	exit_on_fail validate_ipaddress $ip_address
+	echo "${1##*/}"
 }
 
 # -----------------------------------------------------------
@@ -110,6 +114,11 @@ function wait_for_ssh_connection(){
 	do_until_true ssh_prewrapper -q $1@$2 true 1>&2
 }
 
+# -----------------------------------------------------------
+# Runs instance with specified user data. All other variables user inside function have to be initialized already.
+# @param $1  user data
+# @return  instance id
+# -----------------------------------------------------------
 function run_instance(){
 	local instance_id=$(aws_wrapper ec2 run-instances --image-id $(get_resource_id $image_id) --count 1 --instance-type $instance_type --key-name $key_name \
 	--security-group-ids $(get_resource_id $instance_security_group_id) --user-data "$1" \
@@ -117,10 +126,14 @@ function run_instance(){
 	exit_on_fail validate_instance_id $instance_id
 }
 
+# -----------------------------------------------------------
+# Runs instance from specified launch template.
+# @param $1  launch template id
+# @return  instance id
+# -----------------------------------------------------------
 function run_instance_from_launch_template(){
 	local instance_id=$(aws_wrapper ec2 run-instances --launch-template LaunchTemplateId="$1" | get_attribute '.Instances[0].InstanceId')
 	exit_on_fail validate_instance_id $instance_id
-	wait_instance_exists $instance_id
 }
 
 # -----------------------------------------------------------
@@ -144,6 +157,10 @@ function create_instance(){
 	echo $instance_id
 }
 
+# -----------------------------------------------------------
+# Prints instance description to screen.
+# @param $1  instance id
+# -----------------------------------------------------------
 function print_instance_description(){
 	aws_wrapper ec2 describe-instances --instance-ids $1 \
 	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\

@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+
+# -----------------------------------------------------------
+# Functions that are relevant for the configuration of the sap instance.
+# -----------------------------------------------------------
+
+
 # -----------------------------------------------------------
 # Get latest release build from releases.sapsailing.com
 # @return  latest build
@@ -38,11 +44,11 @@ function get_access_token(){
 
 # -----------------------------------------------------------
 # Creates a new event with event name = instance name, no regatta and venuename="Default"
-# @param $1  access token of privileged user
+# @param $1  access token
 # @param $2  dns name of instance
 # @param $3  port
 # @param $4  event name
-# @return    event_id of created event
+# @return    event id of event
 # -----------------------------------------------------------
 function create_event(){
 	local_echo -n "Creating event with name $4..."
@@ -52,7 +58,7 @@ function create_event(){
 
 # -----------------------------------------------------------
 # Changes password of user
-# @param $1  access token of privileged user
+# @param $1  access token
 # @param $2  dns name of instance
 # @param $3  port
 # @param $4  admin username
@@ -65,7 +71,7 @@ function change_admin_password(){
 
 # -----------------------------------------------------------
 # Creates new user
-# @param $1  access token of privileged user
+# @param $1  access token
 # @param $2  dns name of instance
 # @param $3  port
 # @param $4  user username
@@ -77,7 +83,7 @@ function create_new_user(){
 }
 
 # -----------------------------------------------------------
-# Creates event, changes admin password, creates user
+# Creates event, changes admin password, creates user if parameters are not empty.
 # @param $1  public dns name
 # @param $2  port of application instance
 # @param $3  event name
@@ -105,11 +111,11 @@ function configure_application(){
 		user=$(create_new_user $access_token $1 $2 $5 $6)
 	fi
 
-	echo ${$event_id:-""}
+	echo ${event_id:-""}
 }
 
 # -----------------------------------------------------------
-# Patch 001-events.conf with ssl macros
+# Patch 001-events.conf with Even-SSL macro if event id is not empty. Else use Home-SSL macro.
 # @param $1  domain
 # @param $2  event id
 # @param $3  ssh user
@@ -129,6 +135,13 @@ function append_macro_to_001_events_conf(){
 	ssh_wrapper $3@$4 echo "$patched_content >> $events_conf"
 }
 
+# -----------------------------------------------------------
+# Append specified environment to env.sh.
+# @param $1  environment
+# @param $2  ssh user
+# @param $3  dns name of instance
+# @param $4  path to env.sh file
+# -----------------------------------------------------------
 function append_environment_to_env_sh(){
 	local env_file=${4:-'/home/sailing/servers/server'}
 	local_echo "Appending environment '$environment' to env.sh..."
@@ -139,6 +152,11 @@ function append_environment_to_env_sh(){
 	exit_on_fail ssh_wrapper $2@$3 "echo -e \"# END Environment: $environment \" >> $env_file"
 }
 
+# -----------------------------------------------------------
+# Reloads httpd service after executing apachectl configtest.
+# @param $1  ssh user
+# @param $2  dns name of instance
+# -----------------------------------------------------------
 function reload_httpd(){
 	local_echo "Reloading httpd..."
 	ssh_wrapper $1@$2 "apachectl configtest >/dev/null 2>&1"

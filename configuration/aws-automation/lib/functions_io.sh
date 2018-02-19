@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------------
+# Functions that are relevant for the treatment of user input and user configuration.
+# -----------------------------------------------------------
+
+# -----------------------------------------------------------
 # Prompt user for input and save value to variable
 # @param $1  prompt message
 # @param $2  default value

@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
-# Add instance to application load balancer
-# ------------------------------------------------------
+# -----------------------------------------------------------
+# Associates a chosen instance with a chosen application load balancer.
+#
+# Steps:
+# Creates target group for instance.
+# Configures health check of target group.
+# Creates rule inside https listener of application load balancer.
+# Registers target within target group.
+# Configures apache of ec2 instance to revere proxy.
+# -----------------------------------------------------------
+
 
 function associate_alb_start(){
 	associate_alb_require
@@ -14,7 +23,6 @@ function associate_alb_start(){
 # the user will be prompted to enter a value
 # -----------------------------------------------------------
 function associate_alb_require(){
-	# will only be executed after instance creation
 	require_instance
   require_instance_short_name
 	require_load_balancer

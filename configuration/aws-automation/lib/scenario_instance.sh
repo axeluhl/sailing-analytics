@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-# Scenario for creating an instance
+# Scenario for creating an ec2 instance
+#
+# Steps:
+# Creates ec2 instance
 # ------------------------------------------------------
 
 function instance_start(){
@@ -62,7 +65,7 @@ function instance_execute() {
 
 	local port="8888"
 	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_pass
-	append_environment_to_env_sh "live-server" $ssh_user $public_dns_name 
+	append_environment_to_env_sh "live-server" $ssh_user $public_dns_name
 	header "Conclusion"
 
 	success "Instance should be reachable through $public_dns_name."

@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 
+# -----------------------------------------------------------
+# Define variable properties and user messages here.
+# -----------------------------------------------------------
+
+
+# -----------------------------------------------------------
+# Messages for user input.
+# -----------------------------------------------------------
+
 image_ask_message="Please select an image to use: "
 instance_ask_message="Please enter an instance to use: "
 event_name_ask_message="Please enter an event name  (leave blank to skip event creation):"
 instance_security_group_ask_message="Please select the security group for the instance: "
-load_balancer_ask_message="Please select/enter the load balancer dns name: "
+load_balancer_ask_message="Please select or enter the load balancer dns name: "
 region_ask_message="Please enter the region you want to use (e.g. eu-west-2): "
 instance_type_ask_message="Please enter the instance type (e.g. t2.medium): "
 key_name_ask_message="Please enter the name of your keypair to user for the instance (e.g. leon-keypair). "
@@ -23,6 +32,7 @@ contact_person_message="Please enter the name of a contact person (leave blank t
 contact_email_message="Please enter the email of the contact person (leave blank to skip): "
 build_version_message="Please enter a build version to use (releases.sapsailing.com): "
 launch_tempate_ask_message="Please select the launch template for the replica: "
+
 IS_OPTIONAL="true"
 IS_NOT_OPTIONAL="false"
 SHOW_INPUT="false"
@@ -30,6 +40,13 @@ HIDE_INPUT="true"
 NO_DEFAULT_VALUE=""
 NOT_A_PARAMETER=""
 
+
+# -----------------------------------------------------------
+# Functions that are responsible for: Connection of variable to respective use rmessage. Setting if variable is required or can be left empty.
+# Set the variables default value. Choose if user input will be shown or hidden (e.g. passwords). Choose whether the variable is a aws resources
+# and can be selected. If yes then append a regex as last parameter (e.g. ValidImageARNRegex). Then the selection will be limited to resources
+# of the associative array RESOURCE_MAP (functions_io.sh) that have a key matching the regex.
+# -----------------------------------------------------------
 
 function require_launch_template(){
 	require_variable "$launch_template_param" launch_template "$NO_DEFAULT_VALUE" "$launch_tempate_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidLaunchTemplateIdRegex
@@ -48,11 +65,11 @@ function require_instance_security_group(){
 }
 
 function require_load_balancer(){
-	require_variable "$load_balancer_param" load_balancer $NO_DEFAULT_VALUE "$load_balancer_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidLoadBalancerARNRegex
+	require_variable "$load_balancer_param" load_balancer "$NO_DEFAULT_VALUE" "$load_balancer_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidLoadBalancerARNRegex
 }
 
 function require_instance(){
-	require_variable "$instance_param" instance $NO_DEFAULT_VALUE "$instance_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
+	require_variable "$instance_param" instance "$NO_DEFAULT_VALUE" "$instance_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
 }
 
 function require_region(){
@@ -105,11 +122,11 @@ function require_user_password(){
 }
 
 function require_ssh_user(){
-	require_variable "$ssh_user_param" ssh_user "$default_ssh_user" "$ssh_user_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
+	require_variable "$ssh_user_param" ssh_user "root" "$ssh_user_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_super_instance(){
-	require_variable "$super_instance_param" super_instance "$default_super_instance" "$super_instance_message"  "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
+	require_variable "$super_instance_param" super_instance "$NO_DEFAULT_VALUE" "$super_instance_message"  "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
 }
 
 function require_description(){

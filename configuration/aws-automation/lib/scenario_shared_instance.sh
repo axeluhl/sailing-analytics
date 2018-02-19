@@ -138,7 +138,7 @@ function shared_instance_execute() {
 
 	execute_remote_root "echo -e \"\n# $instance_short_name (${description:-"Unknown"}, ${contact_person:-"Unknown"}, ${contact_email:-"Unknown"})\" >> $events_conf"
 	append_macro_to_001_events_conf "$domain" "$event_id" "root" "$super_instance" "$server_port"
-
+	reload_httpd "root" $super_instance
 	header "Conclusion"
 
 	success "Sub instance should be reachable through https://$domain."

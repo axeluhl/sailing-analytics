@@ -31,6 +31,7 @@ function replica_instance_execute() {
 	header "Replica Instance Initialization"
 
 	instance_id=$(run_instance_from_launch_template $launch_template)
+	wait_instance_exists $instance_id
 	public_dns_name=$(get_public_dns_name $instance_id)
 	user_data=$(get_user_data_from_instance $instance_id | base64 --decode)
 	echo "$user_data"
