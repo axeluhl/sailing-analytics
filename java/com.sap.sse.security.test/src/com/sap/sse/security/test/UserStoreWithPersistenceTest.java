@@ -196,13 +196,45 @@ public class UserStoreWithPersistenceTest {
     }
 
     @Test
-    public void testGroups() throws UserManagementException, TenantManagementException, UserGroupManagementException {
-        store.createUser(username, email, defaultTenant);
+    public void testTenantUsers() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        final User user = store.createUser(username, email, defaultTenant);
+        defaultTenant.add(user);
+        store.updateTenant(defaultTenant);
+        assertSame(defaultTenant, user.getDefaultTenant());
+        assertEquals(1, Util.size(defaultTenant.getUsers()));
+        assertSame(user, defaultTenant.getUsers().iterator().next());
+        assertEquals(1, Util.size(store.getUserGroupsOfUser(user)));
+        assertSame(defaultTenant, store.getUserGroupsOfUser(user).iterator().next());
         newStore();
         final Tenant loadedDefaultTenant = store.getTenantByName(defaultTenant.getName());
         final User loadedUser = store.getUserByName(username);
         assertSame(loadedDefaultTenant, loadedUser.getDefaultTenant());
         assertEquals(1, Util.size(loadedDefaultTenant.getUsers()));
         assertSame(loadedUser, loadedDefaultTenant.getUsers().iterator().next());
+        assertEquals(1, Util.size(store.getUserGroupsOfUser(loadedUser)));
+        assertSame(loadedDefaultTenant, store.getUserGroupsOfUser(loadedUser).iterator().next());
+    }
+
+    @Test
+    public void testUserGroups() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+        final User user = store.createUser(username, email, defaultTenant);
+        final String GROUP_NAME = "group";
+        final UserGroup group = store.createUserGroup(UUID.randomUUID(), GROUP_NAME);
+        group.add(user);
+        store.updateUserGroup(group);
+        assertEquals(1, Util.size(group.getUsers()));
+        assertEquals(1, Util.size(user.getUserGroups()));
+        assertSame(group, user.getUserGroups().iterator().next());
+        assertEquals(1, Util.size(store.getUserGroupsOfUser(user)));
+        assertSame(group, store.getUserGroupsOfUser(user).iterator().next());
+        newStore();
+        final UserGroup loadedGroup = store.getUserGroupByName(GROUP_NAME);
+        final User loadedUser = store.getUserByName(username);
+        assertEquals(1, Util.size(loadedUser.getUserGroups()));
+        assertSame(loadedGroup, loadedUser.getUserGroups().iterator().next());
+        assertEquals(1, Util.size(loadedGroup.getUsers()));
+        assertSame(loadedUser, loadedGroup.getUsers().iterator().next());
+        assertEquals(1, Util.size(store.getUserGroupsOfUser(loadedUser)));
+        assertSame(loadedGroup, store.getUserGroupsOfUser(loadedUser).iterator().next());
     }
 }
