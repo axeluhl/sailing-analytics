@@ -7039,7 +7039,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new SliceRacePreperationDTO(prefix + currentCount, alreadyUsedRaceNames);
     }
     
-    
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
             TimePoint sliceFrom, TimePoint sliceTo) {
@@ -7129,7 +7128,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 
                 @Override
                 public void visit(RaceLogRegisterCompetitorEvent event) {
-                    raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                    raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getCreatedAt(),
+                            event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                             raceLog.getCurrentPassId(), event.getCompetitor()));
                 }
 
@@ -7146,30 +7146,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 
                 @Override
                 public void visit(RaceLogCourseDesignChangedEvent event) {
-                    raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getLogicalTimePoint(),
-                            event.getAuthor(), raceLog.getCurrentPassId(), event.getCourseDesign(),
-                            event.getCourseDesignerMode()));
+                    raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
+                            event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                            raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
                 }
                 
                 @Override
                 public void visit(RaceLogFlagEvent event) {
                     if (hasStartTime && isLatestPass(event) && !event.getLogicalTimePoint().after(sliceTo)) {
-                        raceLog.add(new RaceLogFlagEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
-                                raceLog.getCurrentPassId(), event.getUpperFlag(), event.getLowerFlag(),
-                                event.isDisplayed()));
+                        raceLog.add(new RaceLogFlagEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getUpperFlag(),
+                                event.getLowerFlag(), event.isDisplayed()));
                     }
                 }
                 
                 @Override
                 public void visit(RaceLogCourseAreaChangedEvent event) {
-                    raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
-                            raceLog.getCurrentPassId(), event.getCourseAreaId()));
+                    raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                            event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getCourseAreaId()));
                 }
                 
                 @Override
                 public void visit(RaceLogStartProcedureChangedEvent event) {
                     if (hasStartTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogStartProcedureChangedEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                        raceLog.add(new RaceLogStartProcedureChangedEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getStartProcedureType()));
                     }
                 }
@@ -7177,7 +7178,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 @Override
                 public void visit(RaceLogFinishPositioningConfirmedEvent event) {
                     if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
                     }
                 }
@@ -7185,7 +7187,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 @Override
                 public void visit(RaceLogFinishPositioningListChangedEvent event) {
                     if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogFinishPositioningListChangedEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                        raceLog.add(new RaceLogFinishPositioningListChangedEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
                     }
                 }
@@ -7213,7 +7216,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 @Override
                 public void visit(RaceLogProtestStartTimeEvent event) {
                     if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogProtestStartTimeEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                        raceLog.add(new RaceLogProtestStartTimeEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getProtestTime()));
                     }
                 }
@@ -7221,7 +7225,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 @Override
                 public void visit(RaceLogAdditionalScoringInformationEvent event) {
                     if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogAdditionalScoringInformationEventImpl(event.getLogicalTimePoint(), event.getAuthor(),
+                        raceLog.add(new RaceLogAdditionalScoringInformationEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getType()));
                     }
                 }
@@ -7267,8 +7272,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         windFixEvents.getFilteredEvents()
-                .forEach(event -> raceLog.add(new RaceLogWindFixEventImpl(event.getLogicalTimePoint(),
-                        event.getAuthor(), raceLog.getCurrentPassId(), event.getWindFix(), event.isMagnetic())));
+                .forEach(event -> raceLog.add(new RaceLogWindFixEventImpl(event.getCreatedAt(),
+                        event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
+                        event.getWindFix(), event.isMagnetic())));
         
         final TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
         // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
