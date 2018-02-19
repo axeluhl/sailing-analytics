@@ -226,7 +226,8 @@ input.magnifier {
 }
 
 .statisticProviderElement {
-	margin: 2px;
+	margin: 10px 2px 2px 2px;
+	display: inline-block;
 }
 
 .definitionProviderControls {

@@ -20,12 +20,13 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
+import com.sap.sailing.gwt.ui.datamining.AggregatorDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsControl;
 import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsInfo;
 import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsInfoManager;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
-import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.ExtractionFunctionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.Util;
@@ -53,8 +54,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * 
  * @author Lennart Hensler
  */
-public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings>
-        implements DataRetrieverChainDefinitionProvider, StatisticProvider<CompositeSettings> {
+public class ListBoxStatisticProvider extends AbstractComponent<CompositeSettings> implements StatisticProvider {
     
     private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
 
@@ -62,7 +62,8 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<DataRetrieverChainDefinitionChangedListener> retrieverChainListeners;
-    private final Set<StatisticChangedListener> statisticListeners;
+    private final Set<ExtractionFunctionChangedListener> extractionFunctionListeners;
+    private final Set<AggregatorDefinitionChangedListener> aggregatorDefinitionListeners;
     private boolean isAwaitingReload;
     private int awaitingRetrieverChainStatistics;
     
@@ -76,7 +77,7 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
     private final ValueListBox<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> extractionFunctionListBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
-    public GlobalStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
+    public ListBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
             StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {
         super(parent, componentContext);
@@ -84,7 +85,8 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         retrieverChainListeners = new HashSet<>();
-        statisticListeners = new HashSet<>();
+        extractionFunctionListeners = new HashSet<>();
+        aggregatorDefinitionListeners = new HashSet<>();
         isAwaitingReload = false;
         
         settingsManager = new DataMiningSettingsInfoManager();
@@ -121,9 +123,9 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
         extractionFunctionListBox.addValueChangeHandler(new ValueChangeHandler<Pair<DataRetrieverChainDefinitionDTO,FunctionDTO>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> event) {
-                updateAggregators();
                 notifyRetrieverChainListeners();
-                notifyStatisticListeners();
+                notifyExtractionFunctionListeners();
+                updateAggregators();
             }
         });
         return extractionFunctionListBox;
@@ -139,7 +141,7 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
         aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregationProcessorDefinitionDTO>() {
             @Override
             public void onValueChange(ValueChangeEvent<AggregationProcessorDefinitionDTO> event) {
-                notifyStatisticListeners();
+                notifyAggregatorDefinitionListeners();
             }
         });
         return aggregatorListBox;
@@ -170,22 +172,26 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
                     settingsMap.clear();
                     awaitingRetrieverChainStatistics = dataRetrieverChainDefinitions.size();
                     availableExtractionFunctions.clear();
-                    for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
-                        if (retrieverChain.hasSettings()) {
-                            settingsMap.put(retrieverChain, retrieverChain.getDefaultSettings());
+                    if (awaitingRetrieverChainStatistics == 0) {
+                        updateListBox(extractionFunctionListBox, availableExtractionFunctions);
+                    } else {
+                        for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
+                            if (retrieverChain.hasSettings()) {
+                                settingsMap.put(retrieverChain, retrieverChain.getDefaultSettings());
+                            }
+                            dataMiningService.getStatisticsFor(retrieverChain, localeName, new AsyncCallback<HashSet<FunctionDTO>>() {
+                                @Override
+                                public void onSuccess(HashSet<FunctionDTO> statistics) {
+                                    collectStatistics(retrieverChain, statistics);
+                                }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error fetching the statistics for the retriever chain '" +
+                                                              retrieverChain + "': " + caught.getMessage());
+                                    collectStatistics(retrieverChain, Collections.emptySet());
+                                }
+                            });
                         }
-                        dataMiningService.getStatisticsFor(retrieverChain, localeName, new AsyncCallback<HashSet<FunctionDTO>>() {
-                            @Override
-                            public void onSuccess(HashSet<FunctionDTO> statistics) {
-                                collectStatistics(retrieverChain, statistics);
-                            }
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error fetching the statistics for the retriever chain '" +
-                                                          retrieverChain + "': " + caught.getMessage());
-                                collectStatistics(retrieverChain, Collections.emptySet());
-                            }
-                        });
                     }
                 }
                 @Override
@@ -212,22 +218,26 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
     }
     
     private void updateAggregators() {
-        FunctionDTO extractionFunction = getStatisticToCalculate();
-        dataMiningService.getAggregatorDefinitionsFor(extractionFunction, LocaleInfo.getCurrentLocale().getLocaleName(),
-            new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
-                @Override
-                public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> aggregators) {
-                    List<AggregationProcessorDefinitionDTO> aggregatorsList = new ArrayList<>(aggregators);
-                    Collections.sort(aggregatorsList);
-                    updateListBox(aggregatorListBox, aggregatorsList);
+        FunctionDTO extractionFunction = getExtractionFunction();
+        if (extractionFunction == null) {
+            updateListBox(aggregatorListBox, Collections.emptyList());
+        } else {
+            dataMiningService.getAggregatorDefinitionsFor(extractionFunction, LocaleInfo.getCurrentLocale().getLocaleName(),
+                new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
+                    @Override
+                    public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> aggregators) {
+                        List<AggregationProcessorDefinitionDTO> aggregatorsList = new ArrayList<>(aggregators);
+                        Collections.sort(aggregatorsList);
+                        updateListBox(aggregatorListBox, aggregatorsList);
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error fetching the aggregators for the extraction function'" +
+                                                  extractionFunction + "': " + caught.getMessage());
+                    }
                 }
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error fetching the aggregators for the extraction function'" +
-                                              extractionFunction + "': " + caught.getMessage());
-                }
-            }
-        );
+            );
+        }
     }
     
     private <T> void updateListBox(ValueListBox<T> listBox, Collection<T> acceptableValues) {
@@ -327,11 +337,6 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
     }
     
     @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO) {
-        // TODO Delete after this has been established as the default statistic provider
-    }
-    
-    @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         FunctionDTO extractionFunction = queryDefinition.getStatisticToCalculate();
@@ -341,15 +346,9 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
     
     @Override
     public void addStatisticChangedListener(StatisticChangedListener listener) {
-        statisticListeners.add(listener);
-    }
-
-    private void notifyStatisticListeners() {
-        FunctionDTO statistic = getStatisticToCalculate();
-        AggregationProcessorDefinitionDTO aggregator = getAggregatorDefinition();
-        for (StatisticChangedListener listener : statisticListeners) {
-            listener.statisticChanged(statistic, aggregator);
-        }
+        retrieverChainListeners.add(listener);
+        extractionFunctionListeners.add(listener);
+        aggregatorDefinitionListeners.add(listener);
     }
     
     @Override
@@ -365,13 +364,37 @@ public class GlobalStatisticProvider extends AbstractComponent<CompositeSettings
     }
     
     @Override
+    public void addExtractionFunctionChangedListener(ExtractionFunctionChangedListener listener) {
+        extractionFunctionListeners.add(listener);
+    }
+
+    private void notifyExtractionFunctionListeners() {
+        FunctionDTO extractionFunction = getExtractionFunction();
+        for (ExtractionFunctionChangedListener listener : extractionFunctionListeners) {
+            listener.extractionFunctionChanged(extractionFunction);
+        }
+    }
+    
+    @Override
+    public void addAggregatorDefinitionChangedListener(AggregatorDefinitionChangedListener listener) {
+        aggregatorDefinitionListeners.add(listener);
+    }
+
+    private void notifyAggregatorDefinitionListeners() {
+        AggregationProcessorDefinitionDTO aggregatorDefinition = getAggregatorDefinition();
+        for (AggregatorDefinitionChangedListener listener : aggregatorDefinitionListeners) {
+            listener.aggregatorDefinitionChanged(aggregatorDefinition);
+        }
+    }
+
+    @Override
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition() {
         Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> selection = extractionFunctionListBox.getValue();
         return selection == null ? null : selection.getA();
     }
     
     @Override
-    public FunctionDTO getStatisticToCalculate() {
+    public FunctionDTO getExtractionFunction() {
         Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> selection = extractionFunctionListBox.getValue();
         return selection == null ? null : selection.getB();
     }
