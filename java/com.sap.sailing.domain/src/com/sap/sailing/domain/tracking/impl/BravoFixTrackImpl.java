@@ -64,7 +64,6 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      * the object after de-serialization, so the cache invalidation listener can be re-established.
      */
     private transient GPSFixTrack<ItemType, GPSFixMoving> gpsTrack;
-
     
     private class CacheInvalidationGpsTrackListener implements GPSTrackListener<ItemType, GPSFixMoving> {
         private static final long serialVersionUID = 6395529765232404414L;
@@ -105,23 +104,27 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     public BravoFixTrackImpl(ItemType trackedItem, String trackName, boolean hasExtendedFixes, GPSFixTrack<ItemType, GPSFixMoving> gpsTrack) {
         super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
         this.hasExtendedFixes = hasExtendedFixes;
-        this.foilingTimeCache = createFoilingTimeCache(trackedItem);
-        this.foilingDistanceCache = createFoilingDistanceCache(trackedItem);
-        this.averageRideHeightCache = createAverageRideHeightCache(trackedItem);
-        this.expeditionAWACache = createExpeditionAWACache(trackedItem);
-        this.expeditionAWSCache= createExpeditionAWSCache(trackedItem);
-        this.expeditionTWACache= createExpeditionTWACache(trackedItem);
-        this.expeditionTWSCache= createExpeditionTWSCache(trackedItem);
-        this.expeditionTWDCache= createExpeditionTWDCache(trackedItem);
-        this.expeditionBoatSpeedCache= createExpeditionBoatSpeedCache(trackedItem);
-        this.expeditionTargBoatSpeedCache= createExpeditionTargBoatSpeedCache(trackedItem);
-        this.expeditionSOGCache= createExpeditionSOGCache(trackedItem);
-        this.expeditionCOGCache= createExpeditionCOGCache(trackedItem);
-        this.expeditionForestayLoadCache= createExpeditionForestayLoadCache(trackedItem);
-        this.expeditionRakeCache= createExpeditionRakeCache(trackedItem);
-        this.expeditionCourseDetailCache= createExpeditionCourseDetailCache(trackedItem);
+        initCaches(trackedItem);
         
         setGpsTrack(gpsTrack);
+    }
+
+    private void initCaches(ItemType trackedItem) {
+        this.foilingTimeCache = createTimeRangeCache(trackedItem, "foilingTimeCache");
+        this.foilingDistanceCache = createTimeRangeCache(trackedItem, "foilingDistanceCache");
+        this.averageRideHeightCache = createTimeRangeCache(trackedItem, "averageRideHeightCache");
+        this.expeditionAWACache = createTimeRangeCache(trackedItem, "expeditionAWACache");
+        this.expeditionAWSCache= createTimeRangeCache(trackedItem, "expeditionAWSCache");
+        this.expeditionTWACache= createTimeRangeCache(trackedItem, "expeditionTWACache");
+        this.expeditionTWSCache= createTimeRangeCache(trackedItem, "expeditionTWSCache");
+        this.expeditionTWDCache= createTimeRangeCache(trackedItem, "expeditionTWDCache");
+        this.expeditionBoatSpeedCache= createTimeRangeCache(trackedItem, "expeditionBoatSpeedCache");
+        this.expeditionTargBoatSpeedCache= createTimeRangeCache(trackedItem, "expeditionTargBoatSpeedCache");
+        this.expeditionSOGCache= createTimeRangeCache(trackedItem, "expeditionSOGCache");
+        this.expeditionCOGCache= createTimeRangeCache(trackedItem, "expeditionCOGCache");
+        this.expeditionForestayLoadCache= createTimeRangeCache(trackedItem, "expeditionForestayLoadCache");
+        this.expeditionRakeCache= createTimeRangeCache(trackedItem, "expeditionRakeCache");
+        this.expeditionCourseDetailCache= createTimeRangeCache(trackedItem, "expeditionCourseDetailCache");
     }
 
     public GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
@@ -144,78 +147,16 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
     }
 
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionAWACache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionAWACache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionAWSCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionAWSCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionTWACache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionTWACache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionTWSCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionTWSCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionTWDCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionTWDCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionBoatSpeedCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionBoatSpeedCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionTargBoatSpeedCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionTargBoatSpeedCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionSOGCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionSOGCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionCOGCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionCOGCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionForestayLoadCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionForestayLoadCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionRakeCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionRakeCache");
-    }
-    private TimeRangeCache<Pair<Double, Long>> createExpeditionCourseDetailCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "expeditionCourseDetailCache");
-    }
-    private TimeRangeCache<Pair<Distance, Long>> createAverageRideHeightCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "averageRideHeightCache");
-    }
-
     private <T> TimeRangeCache<T> createTimeRangeCache(ItemType trackedItem, final String cacheName) {
         return new TimeRangeCache<>(cacheName+" for "+trackedItem);
     }
 
-    private TimeRangeCache<Distance> createFoilingDistanceCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "foilingDistanceCache");
-    }
-
-    private TimeRangeCache<Duration> createFoilingTimeCache(ItemType trackedItem) {
-        return createTimeRangeCache(trackedItem, "foilingTimeCache");
-    }
-    
     /**
      * After reading this object from an {@link ObjectInputStream}, initialize the caches properly.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        this.foilingTimeCache = createFoilingTimeCache(getTrackedItem());
-        this.foilingDistanceCache = createFoilingDistanceCache(getTrackedItem());
-        this.averageRideHeightCache = createAverageRideHeightCache(getTrackedItem());
-        this.expeditionAWACache = createExpeditionAWACache(getTrackedItem());
-        this.expeditionAWSCache= createExpeditionAWSCache(getTrackedItem());
-        this.expeditionTWACache= createExpeditionTWACache(getTrackedItem());
-        this.expeditionTWSCache= createExpeditionTWSCache(getTrackedItem());
-        this.expeditionTWDCache= createExpeditionTWDCache(getTrackedItem());
-        this.expeditionBoatSpeedCache= createExpeditionBoatSpeedCache(getTrackedItem());
-        this.expeditionTargBoatSpeedCache= createExpeditionTargBoatSpeedCache(getTrackedItem());
-        this.expeditionSOGCache= createExpeditionSOGCache(getTrackedItem());
-        this.expeditionCOGCache= createExpeditionCOGCache(getTrackedItem());
-        this.expeditionForestayLoadCache= createExpeditionForestayLoadCache(getTrackedItem());
-        this.expeditionRakeCache= createExpeditionRakeCache(getTrackedItem());
-        this.expeditionCourseDetailCache= createExpeditionCourseDetailCache(getTrackedItem());
+        initCaches(getTrackedItem());
     }
 
     @Override
@@ -248,28 +189,19 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         final boolean added = super.add(fix, replace);
         if (added) {
             final TimePoint fixTimePoint = fix.getTimePoint();
-            averageRideHeightCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            foilingDistanceCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            foilingTimeCache.invalidateAllAtOrLaterThan(fixTimePoint);
             
-            this.expeditionAWACache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionAWSCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTWACache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTWSCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTWDCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionBoatSpeedCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTargBoatSpeedCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionSOGCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionCOGCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionForestayLoadCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionRakeCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionCourseDetailCache.invalidateAllAtOrLaterThan(fixTimePoint);
+            invalidateAllAtOrLaterThanForCaches(fixTimePoint, averageRideHeightCache, foilingDistanceCache,
+                    foilingTimeCache, expeditionAWACache, expeditionAWSCache, expeditionTWACache, expeditionTWSCache,
+                    expeditionTWDCache, expeditionBoatSpeedCache, expeditionTargBoatSpeedCache, expeditionSOGCache,
+                    expeditionCOGCache, expeditionForestayLoadCache, expeditionRakeCache, expeditionCourseDetailCache);
         }
         return added;
     }
-
-    interface ValueProvider{
-        Double getValue(BravoExtendedFix fix);
+    
+    private void invalidateAllAtOrLaterThanForCaches(TimePoint fixTimePoint, TimeRangeCache<?>... caches) {
+        for (TimeRangeCache<?> timeRangeCache : caches) {
+            timeRangeCache.invalidateAllAtOrLaterThan(fixTimePoint);
+        }
     }
     
     @Override
@@ -691,7 +623,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
     
     private Double getAverageOfBravoExtenededFixValueWithCachingForDouble(TimePoint from, TimePoint to,
-            ValueProvider valueProvider, TimeRangeCache<Pair<Double, Long>> rangeCache) {
+            Function<BravoExtendedFix, Double> valueProvider, TimeRangeCache<Pair<Double, Long>> rangeCache) {
         final Pair<Double, Long> nullElement = new Pair<>(0.0, 0l);
         Pair<Double, Long> cacheValue = getValueSum(from, to, nullElement,
                 (a, b) -> new Pair<>(a.getA() + b.getA(), a.getB() + b.getB()), rangeCache,
@@ -702,7 +634,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                         long count = 0;
                         for (final BravoFix fix : getFixes(from, true, to, true)) {
                             if (fix instanceof BravoExtendedFix) {
-                                final Double value = valueProvider.getValue((BravoExtendedFix) fix);
+                                final Double value = valueProvider.apply((BravoExtendedFix) fix);
                                 if (value != null) {
                                     sumValue = sumValue + value;
                                     count++;

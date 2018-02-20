@@ -74,8 +74,6 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                             mainPanel.add(new ScrollPanel(authorizedContentDecorator));
                         }
                     });
-                    
-                    
                 } else {
                     RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                 }

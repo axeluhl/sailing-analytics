@@ -236,7 +236,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     
     protected Collection<DetailType> availableDetailTypes;
 
-
     private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
     /**
