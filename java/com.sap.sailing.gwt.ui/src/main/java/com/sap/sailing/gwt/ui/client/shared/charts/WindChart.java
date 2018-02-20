@@ -33,7 +33,6 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
@@ -300,11 +299,9 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     wasInResult = true;
                     series.select(true); // ensures that the checkbox will be ticked
                     series.setVisible(true, true);
-                    GWT.log("Showing " + series.getName());
                 } else {
                     series.select(false);
                     series.setVisible(false, true);
-                    GWT.log("Hiding " + series.getName());
                 }
             } else {
                 if (visibleSeries.contains(series)) {

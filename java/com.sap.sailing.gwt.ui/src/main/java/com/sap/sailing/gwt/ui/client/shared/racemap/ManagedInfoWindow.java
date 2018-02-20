@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.overlays.InfoWindow;
@@ -14,7 +13,7 @@ public class ManagedInfoWindow {
     private final InfoWindow infoWindow = InfoWindow.newInstance(infoWindowOptions);
     private final MapWidget map;
 
-    private final FooBarBlubbKeineAhnung container = new FooBarBlubbKeineAhnung();
+    private final InfoWindowContent container = new InfoWindowContent();
 
     private boolean shown = false;
 
@@ -43,7 +42,7 @@ public class ManagedInfoWindow {
         }
     }
 
-    private class FooBarBlubbKeineAhnung extends SimplePanel {
+    private class InfoWindowContent extends SimplePanel {
 
         private boolean attached = false;
 
@@ -51,7 +50,6 @@ public class ManagedInfoWindow {
             if (!attached) {
                 this.attached = true;
                 onAttach();
-                GWT.log("++++++++++++ Attaching info window ++++++++++++");
             }
         }
 
@@ -59,7 +57,6 @@ public class ManagedInfoWindow {
             if (attached) {
                 this.attached = false;
                 onDetach();
-                GWT.log("------------ Detaching info window ------------");
             }
         }
     }
