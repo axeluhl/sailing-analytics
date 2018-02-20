@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -105,6 +106,16 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
             jsonColumnNames.add(raceColumn.getName());
         }
+    }
+
+    protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard) {
+        jsonCompetitor.put("name", competitor.getName());
+        final String displayName = leaderboard.getDisplayName(competitor);
+        jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
+        jsonCompetitor.put("id", competitor.getIdAsString());
+        jsonCompetitor.put("sailID", competitor.getSailID());
+        jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
+        jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
     }
 
     private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,

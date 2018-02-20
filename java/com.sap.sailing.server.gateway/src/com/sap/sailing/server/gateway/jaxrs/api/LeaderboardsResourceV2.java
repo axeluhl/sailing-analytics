@@ -154,13 +154,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             }
             JSONObject jsonCompetitor = new JSONObject();
-            jsonCompetitor.put("name", competitor.getName());
-            final String displayName = leaderboardDTO.getDisplayName(competitor);
-            jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
-            jsonCompetitor.put("id", competitor.getIdAsString());
-            jsonCompetitor.put("sailID", competitor.getSailID());
-            jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
-            jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
+            writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
 
             jsonCompetitor.put("rank", competitorCounter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
