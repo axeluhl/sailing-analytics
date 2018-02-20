@@ -5,11 +5,11 @@
 	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
-	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+	<title>SAP Sailing Analytics Webservices API Version 2.0</title>
 </head>
 <body>
-<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/leaderboards/{name}</h2>
+<h1>SAP Sailing Analytics Webservices API Version 2.0</h1>
+<h2>URL: /api/v2/leaderboards/{name}</h2>
 
 <b>Description:</b>
 <p>The service gets the details of a leaderboard</p>
@@ -31,6 +31,21 @@
 		<td>Optional parameters:</td>
 		<td>resultState [Live = Default, Final] </td>
 	</tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>columnNames [Default = all columns]</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>raceDetails [Default = RACE_GAP_TO_LEADER_IN_SECONDS, RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, CURRENT_LEG]</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <div>time (ISO format, such as 2014-02-14T10:12:03Z)</div>
+            <div>timeasmillis</div>
+        </td>
+    </tr>
 	<tr>
 		<td>&nbsp;</td>
 		<td>maxCompetitorsCount [1000 = Default]</td>
@@ -41,7 +56,7 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboards/505 Worlds 2013">http://www.sapsailing.com/sailingserver/api/v1/leaderboards/505 Worlds 2013</a></td>
+		<td><a href="http://www.sapsailing.com/sailingserver/api/v2/leaderboards/505 Worlds 2013">http://www.sapsailing.com/sailingserver/api/v2/leaderboards/505 Worlds 2013</a></td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
