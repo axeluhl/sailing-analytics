@@ -599,7 +599,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getExpeditionDistanceTocommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }

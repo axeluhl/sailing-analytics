@@ -994,7 +994,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Double getExpeditionDistanceToCommitteeBoat(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistanceTocommitteeBoatIfAvailable);
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistanceToCommitteeBoatIfAvailable);
     }
 
     @Override
