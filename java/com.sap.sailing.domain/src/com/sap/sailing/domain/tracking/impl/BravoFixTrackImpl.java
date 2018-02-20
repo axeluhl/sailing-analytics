@@ -622,6 +622,204 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         return null;
     }
     
+    public Double getExpeditionValueForDouble(TimePoint timePoint, final Function<BravoExtendedFix, Double> getter){
+        if (hasExtendedFixes) {
+            return this.<Double, Double, BravoExtendedFix>getValueFromExtendedFixSkippingNullValues(timePoint, getter, ScalableDouble::new);
+        }
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionAWAIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionAWA);
+    }
+    
+    @Override
+    public Double getExpeditionAWSIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionAWS);
+    }
+    
+    @Override
+    public Double getExpeditionTWAIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWA);
+    }
+    
+    @Override
+    public Double getExpeditionTWSIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWS);
+    }
+    
+    @Override
+    public Double getExpeditionTWDIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWD);
+    }
+    
+    @Override
+    public Double getExpeditionTargTWAIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWA);
+    }
+    
+    @Override
+    public Double getExpeditionBoatSpeedIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBSP);
+    }
+    
+    @Override
+    public Double getExpeditionTargBoatSpeedIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBSP_TR);
+    }
+    
+    @Override
+    public Double getExpeditionSOGIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionSOG);
+    }
+    
+    @Override
+    public Double getExpeditionCOGIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionCOG);
+    }
+    
+    @Override
+    public Double getExpeditionForestayLoadIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionForestayLoad);
+    }
+    
+    @Override
+    public Double getExpeditionRakeIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionRake);
+    }
+    
+    @Override
+    public Double getExpeditionCourseDetailIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionCourse);
+    }
+    
+    @Override
+    public Double getExpeditionHeadingIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionVMGIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionVMGTargVMGDeltaIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionRateOfTurnIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionRudderAngleIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionHeelIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionTargetHeelIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionTimeToPortLaylineIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionTimeToStbLaylineIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionDistToPortLaylineIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionDistToStbLaylineIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Duration getExpeditionTimeToGUNIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionTimeToCommitteeBoatIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionTimeToPinIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Duration getExpeditionTimeToBurnToLineIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionTimeToBurnToPinIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionDistanceToPinDetailIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionDistanceBelowLineIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Double getExpeditionLineSquareForWindIfAvailable(TimePoint at){
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     private Double getAverageOfBravoExtenededFixValueWithCachingForDouble(TimePoint from, TimePoint to,
             Function<BravoExtendedFix, Double> valueProvider, TimeRangeCache<Pair<Double, Long>> rangeCache) {
         final Pair<Double, Long> nullElement = new Pair<>(0.0, 0l);
