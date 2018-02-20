@@ -189,24 +189,19 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         final boolean added = super.add(fix, replace);
         if (added) {
             final TimePoint fixTimePoint = fix.getTimePoint();
-            averageRideHeightCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            foilingDistanceCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            foilingTimeCache.invalidateAllAtOrLaterThan(fixTimePoint);
             
-            this.expeditionAWACache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionAWSCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTWACache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTWSCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTWDCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionBoatSpeedCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionTargBoatSpeedCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionSOGCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionCOGCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionForestayLoadCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionRakeCache.invalidateAllAtOrLaterThan(fixTimePoint);
-            this.expeditionCourseDetailCache.invalidateAllAtOrLaterThan(fixTimePoint);
+            invalidateAllAtOrLaterThanForCaches(fixTimePoint, averageRideHeightCache, foilingDistanceCache,
+                    foilingTimeCache, expeditionAWACache, expeditionAWSCache, expeditionTWACache, expeditionTWSCache,
+                    expeditionTWDCache, expeditionBoatSpeedCache, expeditionTargBoatSpeedCache, expeditionSOGCache,
+                    expeditionCOGCache, expeditionForestayLoadCache, expeditionRakeCache, expeditionCourseDetailCache);
         }
         return added;
+    }
+    
+    private void invalidateAllAtOrLaterThanForCaches(TimePoint fixTimePoint, TimeRangeCache<?>... caches) {
+        for (TimeRangeCache<?> timeRangeCache : caches) {
+            timeRangeCache.invalidateAllAtOrLaterThan(fixTimePoint);
+        }
     }
 
     interface ValueProvider{
