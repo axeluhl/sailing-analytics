@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -687,75 +688,27 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     @Override
     public Bearing getHeel(TimePoint at) {
-        final Bearing result;
-        if (hasStartedLeg(at)) {
-            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-            result = track == null ? null : track.getHeel(timePoint);
-        } else {
-            result = null;
-        }
-        return result;
+        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getHeel);
     }
 
     @Override
     public Bearing getPitch(TimePoint at) {
-        final Bearing result;
-        if (hasStartedLeg(at)) {
-            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-            result = track == null ? null : track.getPitch(timePoint);
-        } else {
-            result = null;
-        }
-        return result;
+        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getPitch);
     }
 
     @Override
     public Distance getRideHeight(TimePoint at) {
-        final Distance result;
-        if (hasStartedLeg(at)) {
-            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-            result = track == null ? null : track.getRideHeight(timePoint);
-        } else {
-            result = null;
-        }
-        return result;
+        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getRideHeight);
     }
     
     @Override
     public Distance getDistanceFoiled(TimePoint at) {
-        final Distance result;
-        if (hasStartedLeg(at)) {
-            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-            result = track == null ? null
-                    : track.getDistanceSpentFoiling(getMarkPassingForLegStart().getTimePoint(),
-                            timePoint);
-        } else {
-            result = null;
-        }
-        return result;
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getDistanceSpentFoiling);
     }
 
     @Override
     public Duration getDurationFoiled(TimePoint at) {
-        final Duration result;
-        if (hasStartedLeg(at)) {
-            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-            result = track == null ? null
-                    : track.getTimeSpentFoiling(getMarkPassingForLegStart().getTimePoint(), timePoint);
-        } else {
-            result = null;
-        }
-        return result;
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getTimeSpentFoiling);
     }
 
     @Override
@@ -844,182 +797,194 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Double getExpeditionAWA(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionAWAIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionAWAIfAvailable);
     }
 
     @Override
     public Double getExpeditionAWS(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionAWSIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionAWSIfAvailable);
     }
 
     @Override
     public Double getExpeditionTWA(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTWAIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTWAIfAvailable);
     }
 
     @Override
     public Double getExpeditionTWS(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTWSIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTWSIfAvailable);
     }
 
     @Override
     public Double getExpeditionTWD(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTWDIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTWDIfAvailable);
     }
 
     @Override
     public Double getExpeditionTargTWA(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTargTWAIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTargTWAIfAvailable);
     }
 
     @Override
     public Double getExpeditionBoatSpeed(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionBoatSpeedIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionBoatSpeedIfAvailable);
     }
 
     @Override
     public Double getExpeditionTargBoatSpeed(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTargBoatSpeedIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTargBoatSpeedIfAvailable);
     }
 
     @Override
     public Double getExpeditionSOG(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionSOGIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionSOGIfAvailable);
     }
 
     @Override
     public Double getExpeditionCOG(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionCOGIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionCOGIfAvailable);
     }
 
     @Override
     public Double getExpeditionForestayLoad(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionForestayLoadIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionForestayLoadIfAvailable);
     }
 
     @Override
     public Double getExpeditionRake(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionRakeIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionRakeIfAvailable);
     }
 
     @Override
     public Double getExpeditionCourseDetail(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionCourseDetailIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionCourseDetailIfAvailable);
     }
 
     @Override
     public Double getExpeditionHeading(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionHeadingIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionHeadingIfAvailable);
     }
 
     @Override
     public Double getExpeditionVMG(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionVMGIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionVMGIfAvailable);
     }
 
     @Override
     public Double getExpeditionVMGTargVMGDelta(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionVMGTargVMGDeltaIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionVMGTargVMGDeltaIfAvailable);
     }
 
     @Override
     public Double getExpeditionRateOfTurn(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionRateOfTurnIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionRateOfTurnIfAvailable);
     }
 
     @Override
     public Double getExpeditionRudderAngle(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionRudderAngleIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionRudderAngleIfAvailable);
     }
 
     @Override
     public Double getExpeditionHeel(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionHeelIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionHeelIfAvailable);
     }
 
     @Override
     public Double getExpeditionTargetHeel(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTargetHeelIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTargetHeelIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToPortLayline(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToPortLaylineIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToPortLaylineIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToStbLayline(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToStbLaylineIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToStbLaylineIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistToPortLayline(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistToPortLaylineIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionDistToPortLaylineIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistToStbLayline(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistToStbLaylineIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionDistToStbLaylineIfAvailable);
     }
 
     @Override
     public Duration getExpeditionTimeToGUN(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToGUNIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToGUNIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToCommitteeBoat(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToCommitteeBoatIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToCommitteeBoatIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToPin(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToPinIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToPinIfAvailable);
     }
 
     @Override
     public Duration getExpeditionTimeToBurnToLine(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToBurnToCommitteeBoat(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToBurnToCommitteeBoatIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToBurnToCommitteeBoatIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToBurnToPin(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToBurnToPinIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToBurnToPinIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistanceToCommitteeBoat(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistanceToCommitteeBoatIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionDistanceToCommitteeBoatIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistanceToPinDetail(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getDistanceToPinDetailIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getDistanceToPinDetailIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistanceBelowLine(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getDistanceBelowLineIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getDistanceBelowLineIfAvailable);
     }
 
     @Override
     public Double getExpeditionLineSquareForWindDirection(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getLineSquareForWindIfAvailable);
+        return getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getLineSquareForWindIfAvailable);
     }
     
-    private <R> R getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(TimePoint at, BravoTrackValueExtractor<R> valueExtractor) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
+    private <R> R getExpeditionValueFromBravoFixTrackIfLegIsStarted(TimePoint at, BiFunction<BravoFixTrack<Competitor>, TimePoint, R> valueExtractor) {
+        final R result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : valueExtractor.apply(track, timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    private <R> R getExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(TimePoint at, BravoTrackValueExtractor<R> valueExtractor) {
+        if (hasStartedLeg(at)) {
             BravoFixTrack<Competitor> track = getTrackedRace()
                     .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
             if (track != null) {
                 TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return valueExtractor.getValue(track, legStart.getTimePoint(), endTimePoint);
+                return valueExtractor.getValue(track, getMarkPassingForLegStart().getTimePoint(), endTimePoint);
             }
         }
         return null;
