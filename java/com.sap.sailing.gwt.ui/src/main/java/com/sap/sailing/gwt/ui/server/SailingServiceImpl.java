@@ -6992,17 +6992,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
         final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
+        final boolean result;
         if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
                 || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
-            return false;
+            result = false;
+        } else {
+            final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRace);
+            result = (raceColumnAndFleetOfRaceToSlice != null); // is the TrackedRace associated to the given RegattaLeaderboard?
         }
-        
-        final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRace);
-        if (raceColumnAndFleetOfRaceToSlice == null) {
-            // the TrackedRace is not associated to the given RegattaLeaderboard
-            return false;
-        }
-        return true;
+        return result;
     }
     
     private boolean isSmartphoneTrackingEnabled(DynamicTrackedRace trackedRace) {
