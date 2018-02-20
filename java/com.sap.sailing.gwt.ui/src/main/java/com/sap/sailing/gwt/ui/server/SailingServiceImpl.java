@@ -7251,9 +7251,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     && event.getNextStatus().getOrderNumber() <= RaceLogRaceStatus.RUNNING.getOrderNumber())
                                     || (hasFinishingTime && event.getNextStatus() == RaceLogRaceStatus.FINISHING)
                                     || (hasFinishedTime && event.getNextStatus() == RaceLogRaceStatus.FINISHED)) {
-                                new RaceLogRaceStatusEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                raceLog.add(new RaceLogRaceStatusEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
                                         event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
-                                        event.getNextStatus());
+                                        event.getNextStatus()));
                             }
                         }
                     }
