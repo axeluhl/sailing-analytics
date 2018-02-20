@@ -92,7 +92,7 @@ public class OfflineDataManager extends DataManager {
 
         SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, /* isFleetsCanRunInParallel */ true, null);
         SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, /* isFleetsCanRunInParallel */ true, null);
-        RaceGroup raceGroup = new RaceGroupImpl("ESS", /* displayName */ null, new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
+        RaceGroup raceGroup = new RaceGroupImpl("ESS", /* displayName */ null, new BoatClassImpl("X40", false), false, null, Arrays.asList(qualifying,
                         medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
