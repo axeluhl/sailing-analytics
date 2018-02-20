@@ -202,12 +202,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             });
         }
         mEntryCount = ViewHelper.get(layout, R.id.competitor_entry_count);
-        mAdapter = new PenaltyAdapter(getActivity(), this);
-        RecyclerView recyclerView = ViewHelper.get(layout, R.id.competitor_list);
-        if (recyclerView != null) {
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            recyclerView.setAdapter(mAdapter);
-        }
         return layout;
     }
 
@@ -227,6 +221,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        mAdapter = new PenaltyAdapter(getActivity(), this, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
+        RecyclerView recyclerView = ViewHelper.get(getView(), R.id.competitor_list);
+        if (recyclerView != null) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            recyclerView.setAdapter(mAdapter);
+        }
 
         if (mPenaltyDropDown != null) {
             int selection = mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name());
@@ -436,7 +437,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 mCompetitorResults.add(pos, new CompetitorResultEditableImpl(result));
             }
         }
-        mAdapter.setCompetitor(mCompetitorResults);
+        mAdapter.setCompetitor(mCompetitorResults, data);
         setPublishButton();
     }
 
@@ -456,7 +457,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
         mCompetitorResults.clear();
         mCompetitorResults.addAll(sortedList);
-        mAdapter.setCompetitor(mCompetitorResults);
+        mAdapter.setCompetitor(mCompetitorResults, null);
     }
 
     @Override
