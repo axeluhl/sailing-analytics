@@ -21,8 +21,8 @@ public class SliceRacePreperationDTO implements IsSerializable {
         Util.addAll(alreadyUsedNames, this.alreadyUsedNames);
     }
     
-    protected SliceRacePreperationDTO() {
-    }
+    @Deprecated
+    SliceRacePreperationDTO() {}
 
     public String getProposedRaceName() {
         return proposedRaceName;
