@@ -170,12 +170,15 @@ public class RaceBoardPanel
      * @param isScreenLargeEnoughToOfferChartSupport
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
-     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
+     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint}
+     *            class.
      * @param showChartMarkEditMediaButtonsAndVideo
-     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark 
-     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
-     *            aligns its right border with that of the chart. Otherwise those components will be hidden.
-     * @param availableDetailTypes 
+     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark
+     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that aligns
+     *            its right border with that of the chart. Otherwise those components will be hidden.
+     * @param availableDetailTypes
+     *            A list of all Detailtypes, that will be offered in the Settingsdialog. Can be used to hide settings no
+     *            data exists for, eg Bravo, Expdition ect.
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,

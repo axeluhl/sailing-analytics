@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -18,6 +20,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -28,6 +31,8 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class LeaderboardEditPage extends AbstractSailingEntryPoint {
+    private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
@@ -44,8 +49,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO Auto-generated method stub
-                            
+                            logger.log(Level.SEVERE, "Could not load detailtypes", caught);
                         }
 
                         @Override

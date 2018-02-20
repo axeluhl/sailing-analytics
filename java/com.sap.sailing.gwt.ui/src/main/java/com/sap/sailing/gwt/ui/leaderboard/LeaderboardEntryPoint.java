@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
@@ -42,6 +44,8 @@ import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
 
+    private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
+    
     private StringMessages stringmessages = StringMessages.INSTANCE;
     private String leaderboardName;
     private String leaderboardGroupName;
@@ -124,8 +128,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-
+                logger.log(Level.SEVERE, "Could not load detailtypes", caught);
             }
 
             @Override

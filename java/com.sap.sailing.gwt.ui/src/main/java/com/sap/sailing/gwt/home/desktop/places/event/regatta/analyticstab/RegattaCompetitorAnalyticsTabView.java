@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -38,7 +40,8 @@ import com.sap.sse.common.Util;
  * Created by pgtaboada on 25.11.14.
  */
 public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaTabView<RegattaCompetitorAnalyticsPlace> {
-
+    private static final Logger logger = Logger.getLogger(RegattaCompetitorAnalyticsTabView.class.getName());
+    
     interface MyBinder extends UiBinder<HTMLPanel, RegattaCompetitorAnalyticsTabView> {
     }
 
@@ -115,8 +118,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
                 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO Auto-generated method stub
-                    
+                    logger.log(Level.SEVERE, "Could not load detailtypes", caught);
                 }
             });
         }

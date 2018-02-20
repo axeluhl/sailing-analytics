@@ -632,7 +632,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         entryDTO.pitch = fix.getPitch();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                   logger.log(Level.WARNING, "There was an error determining expedition or extended data", e);
                 }
                 
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
