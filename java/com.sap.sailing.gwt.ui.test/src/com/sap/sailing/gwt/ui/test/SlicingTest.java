@@ -100,20 +100,15 @@ public class SlicingTest {
         final List<Pair<String, Integer>> columnNames = new ArrayList<>();
         columnNames.add(new Pair<>(columnNameOriginalRace, 0));
         sailingService.addRaceColumnsToSeries(regatta.getRegattaIdentifier(), seriesName, columnNames);
-        
         sailingService.createRegattaLeaderboard(regatta.getRegattaIdentifier(), regattaName, new int[0]);
-        
         final List<CompetitorDTO> competitors = sailingService.addCompetitors(Arrays.asList(competitor), null);
         final CompetitorDTO competitorDTO = competitors.iterator().next();
         sailingService.setCompetitorRegistrationsInRegattaLog(regattaName, new HashSet<>(competitors));
-        
         DeviceIdentifierDTO deviceId = new DeviceIdentifierDTO("FILE", UUID.randomUUID().toString());
         final DeviceMappingDTO deviceMapping = new DeviceMappingDTO(deviceId, startOriginalRace.asDate(), endOriginalRace.asDate(), competitorDTO, null);
         sailingService.addDeviceMappingToRegattaLog(regattaName, deviceMapping);
-        
         final List<Triple<String, String, String>> leaderboardRaceColumnFleetNames = new ArrayList<>();
         leaderboardRaceColumnFleetNames.add(new Triple<>(regattaName, columnNameOriginalRace, fleetName));
-        
         RaceLogSetTrackingTimesDTO raceLogSetTrackingTimes = new RaceLogSetTrackingTimesDTO();
         raceLogSetTrackingTimes.leaderboardName = regattaName;
         raceLogSetTrackingTimes.authorName = "Test";
@@ -122,24 +117,18 @@ public class SlicingTest {
         raceLogSetTrackingTimes.newStartOfTracking = new TimePointSpecificationFoundInLogImpl(startOriginalRace);
         raceLogSetTrackingTimes.newEndOfTracking = new TimePointSpecificationFoundInLogImpl(endOriginalRace);
         sailingService.setTrackingTimes(raceLogSetTrackingTimes);
-        
         sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames , true, false);
         // TODO add wind fixes
         
-        StrippedLeaderboardDTO leaderboard = sailingService.getLeaderboard(regattaName);
+        final StrippedLeaderboardDTO leaderboard = sailingService.getLeaderboard(regattaName);
         final RaceColumnDTO columnOfOriginalRace = leaderboard.getRaceList().iterator().next();
         final RaceDTO originalRace = columnOfOriginalRace.getRace(columnOfOriginalRace.getFleets().iterator().next());
         final RegattaAndRaceIdentifier raceIdentifierOfOriginalRace = originalRace.getRaceIdentifier();
-        
         final RegattaAndRaceIdentifier sliceRaceIdentifier = sailingService.sliceRace(raceIdentifierOfOriginalRace, columnNameSlicedRace, startSlicedRace, endSlicedRace);
-        
-        
-        leaderboard = sailingService.getLeaderboard(regattaName);
-        final RaceColumnDTO columnOfSlicedRace = leaderboard.getRaceColumnByName(columnNameSlicedRace);
+        final StrippedLeaderboardDTO leaderboard2 = sailingService.getLeaderboard(regattaName);
+        final RaceColumnDTO columnOfSlicedRace = leaderboard2.getRaceColumnByName(columnNameSlicedRace);
         final RaceDTO slicedRace = columnOfSlicedRace.getRace(columnOfOriginalRace.getFleets().iterator().next());
-        
         Assert.assertEquals(slicedRace.getRaceIdentifier(), sliceRaceIdentifier);
-        
         final TrackedRaceDTO trackedRace = slicedRace.trackedRace;
         Assert.assertEquals(startSlicedRace.asDate(), trackedRace.startOfTracking);
         Assert.assertEquals(endSlicedRace.asDate(), trackedRace.endOfTracking);
