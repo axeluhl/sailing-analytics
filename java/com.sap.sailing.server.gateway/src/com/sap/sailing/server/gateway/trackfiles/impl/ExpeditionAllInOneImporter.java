@@ -147,7 +147,7 @@ public class ExpeditionAllInOneImporter {
         final String seriesName = Series.DEFAULT_NAME;
 
         // TODO wild guess...
-        final ScoringSchemeType scoringSchemeType = ScoringSchemeType.HIGH_POINT;
+        final ScoringSchemeType scoringSchemeType = ScoringSchemeType.LOW_POINT;
         final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         final int[] discardThresholds = new int[0];
 
