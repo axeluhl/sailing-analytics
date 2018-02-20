@@ -710,5 +710,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
     
+    /**
+     * Returns a list of DetailTypes that should be shown. Based on the type of the tracking, not all DetailTypes make
+     * sense. E.g. Bravo and Expedition values are only available for very few leaderboards. To prevent confusion of
+     * users, definitly non existant values will be hidden in the settings and the leaderboardtables.
+     */
     Collection<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName);
 }
