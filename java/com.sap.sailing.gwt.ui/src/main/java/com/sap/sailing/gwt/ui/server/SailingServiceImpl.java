@@ -7019,7 +7019,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         String prefix = null;
         int currentCount = 0;
-        final Pattern pattern = Pattern.compile("^([a-zA-Z]+)([0-9]+)$");
+        final Pattern pattern = Pattern.compile("^([a-zA-Z_ -]+)([0-9]+)$");
         final HashSet<String> alreadyUsedRaceNames = new HashSet<>();
         for (RaceColumn column : regattaLeaderboard.getRaceColumns()) {
             alreadyUsedRaceNames.add(column.getName());
