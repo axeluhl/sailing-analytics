@@ -130,7 +130,7 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Double getAverageExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionTimeToBurnToPinIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint);
-    Double getAverageDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint);
-    Double getAverageDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint);
-    Double getAverageLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint);
 }

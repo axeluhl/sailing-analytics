@@ -605,19 +605,19 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getAverageDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getAverageDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getAverageLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
