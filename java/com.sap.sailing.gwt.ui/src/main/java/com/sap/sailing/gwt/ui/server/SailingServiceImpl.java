@@ -6977,6 +6977,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 allowed.addAll(DetailType.getLegExpeditionDetailColumnTypes());
             }
         }
+        allowed.removeAll(DetailType.getDisabledDetailColumTypes());
         return allowed;
     }
 }
