@@ -844,477 +844,188 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Double getExpeditionAWA(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionAWAIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionAWAIfAvailable);
     }
 
     @Override
     public Double getExpeditionAWS(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionAWSIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionAWSIfAvailable);
     }
 
     @Override
     public Double getExpeditionTWA(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTWAIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTWAIfAvailable);
     }
 
     @Override
     public Double getExpeditionTWS(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTWSIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTWSIfAvailable);
     }
 
     @Override
     public Double getExpeditionTWD(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTWDIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTWDIfAvailable);
     }
 
     @Override
     public Double getExpeditionTargTWA(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTargTWAIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTargTWAIfAvailable);
     }
 
     @Override
     public Double getExpeditionBoatSpeed(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionBoatSpeedIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionBoatSpeedIfAvailable);
     }
 
     @Override
     public Double getExpeditionTargBoatSpeed(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTargBoatSpeedIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTargBoatSpeedIfAvailable);
     }
 
     @Override
     public Double getExpeditionSOG(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionSOGIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionSOGIfAvailable);
     }
 
     @Override
     public Double getExpeditionCOG(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionCOGIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionCOGIfAvailable);
     }
 
     @Override
     public Double getExpeditionForestayLoad(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionForestayLoadIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionForestayLoadIfAvailable);
     }
 
     @Override
     public Double getExpeditionRake(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionRakeIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionRakeIfAvailable);
     }
 
     @Override
     public Double getExpeditionCourseDetail(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionCourseDetailIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionCourseDetailIfAvailable);
     }
 
     @Override
     public Double getExpeditionHeading(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionHeadingIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionHeadingIfAvailable);
     }
 
     @Override
     public Double getExpeditionVMG(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionVMGIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionVMGIfAvailable);
     }
 
     @Override
     public Double getExpeditionVMGTargVMGDelta(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionVMGTargVMGDeltaIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionVMGTargVMGDeltaIfAvailable);
     }
 
     @Override
     public Double getExpeditionRateOfTurn(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionRateOfTurnIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionRateOfTurnIfAvailable);
     }
 
     @Override
     public Double getExpeditionRudderAngle(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionRudderAngleIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionRudderAngleIfAvailable);
     }
 
     @Override
     public Double getExpeditionHeel(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionHeelIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionHeelIfAvailable);
     }
 
     @Override
     public Double getExpeditionTargetHeel(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTargetHeelIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTargetHeelIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToPortLayline(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToPortLaylineIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToPortLaylineIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToStbLayline(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToStbLaylineIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToStbLaylineIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistToPortLayline(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionDistToPortLaylineIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistToPortLaylineIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistToStbLayline(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionDistToStbLaylineIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistToStbLaylineIfAvailable);
     }
 
     @Override
     public Duration getExpeditionTimeToGUN(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToGUNIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToGUNIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToCommitteeBoat(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToCommitteeBoatIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToCommitteeBoatIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToPin(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToPinIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToPinIfAvailable);
     }
 
     @Override
     public Duration getExpeditionTimeToBurnToLine(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToBurnToLineIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToBurnToCommitteeBoat(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToBurnToCommitteeBoatIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToBurnToCommitteeBoatIfAvailable);
     }
 
     @Override
     public Double getExpeditionTimeToBurnToPin(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionTimeToBurnToPinIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionTimeToBurnToPinIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistanceToCommitteeBoat(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getExpeditionDistanceTocommitteeBoatIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getExpeditionDistanceTocommitteeBoatIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistanceToPinDetail(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getDistanceToPinDetailIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getDistanceToPinDetailIfAvailable);
     }
 
     @Override
     public Double getExpeditionDistanceBelowLine(TimePoint at) {
-        MarkPassing legStart = getMarkPassingForLegStart();
-        if (legStart != null) {
-            BravoFixTrack<Competitor> track = getTrackedRace()
-                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (track != null) {
-                TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getDistanceBelowLineIfAvailable(legStart.getTimePoint(), endTimePoint);
-            }
-        }
-        return null;
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getDistanceBelowLineIfAvailable);
     }
 
     @Override
     public Double getExpeditionLineSquareForWindDirection(TimePoint at) {
+        return getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(at, BravoFixTrack::getLineSquareForWindIfAvailable);
+    }
+    
+    private <R> R getExpeditionValueFromBravoFixTrackIfMarkPassingIsAvailable(TimePoint at, BravoTrackValueExtractor<R> valueExtractor) {
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart != null) {
             BravoFixTrack<Competitor> track = getTrackedRace()
                     .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
             if (track != null) {
                 TimePoint endTimePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-                return track.getLineSquareForWindIfAvailable(legStart.getTimePoint(), endTimePoint);
+                return valueExtractor.getValue(track, legStart.getTimePoint(), endTimePoint);
             }
         }
         return null;
+    }
+    
+    private interface BravoTrackValueExtractor<R> {
+        R getValue(BravoFixTrack<Competitor> track, TimePoint from, TimePoint to);
     }
 }
