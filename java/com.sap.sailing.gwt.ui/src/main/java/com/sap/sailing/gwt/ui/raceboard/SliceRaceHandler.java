@@ -69,6 +69,9 @@ public class SliceRaceHandler {
     
     private boolean canSlice = false;
 
+    /**
+     * Registers this handler as a zoom event handler on the {@code competitorRaceChart}.
+     */
     public SliceRaceHandler(SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, String leaderboardName, UUID eventId) {
@@ -79,9 +82,7 @@ public class SliceRaceHandler {
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardName = leaderboardName;
         this.eventId = eventId;
-        
         styles.ensureInjected();
-        
         sliceButtonUi = new Button();
         sliceButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
         sliceButtonUi.setTitle(StringMessages.INSTANCE.sliceRace());
@@ -93,7 +94,6 @@ public class SliceRaceHandler {
             updateVisibility();
         });
         sliceButtonUi.addClickHandler((e) -> doSlice());
-        
         sailingService.canSliceRace(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
@@ -107,7 +107,6 @@ public class SliceRaceHandler {
                 updateVisibility();
             }
         });
-        
         final UserStatusEventHandler userStatusEventHandler = (user, preAuthenticated) -> {
             updateVisibility();
         };

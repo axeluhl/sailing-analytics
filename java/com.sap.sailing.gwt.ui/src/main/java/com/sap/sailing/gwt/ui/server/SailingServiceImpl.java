@@ -7004,19 +7004,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private boolean isSmartphoneTrackingEnabled(DynamicTrackedRace trackedRace) {
+        boolean result = false;
         for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
             if (raceLogTrackingState.isTracking()) {
-                return true;
+                result = true;
+                break;
             }
         }
-        return false;
+        return result;
     }
     
     @Override
     public SliceRacePreperationDTO prepareForSlicingOfRace(final RegattaAndRaceIdentifier raceIdentifier) {
         final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
-        
         String prefix = null;
         int currentCount = 0;
         final Pattern pattern = Pattern.compile("^([a-zA-Z_ -]+)([0-9]+)$");
@@ -7029,7 +7030,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 currentCount = Integer.parseInt(matcher.group(2));
             }
         }
-        
         if (prefix == null) {
             prefix = "R";
         }
@@ -7057,28 +7057,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 || (endOfTrackingOfRaceToSlice != null && endOfTrackingOfRaceToSlice.before(sliceTo))) {
             throw new RuntimeException("The TimeRange to slice is not part of the race");
         }
-        
         final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) getService().getLeaderboardByName(raceIdentifier.getRegattaName());
-        
         final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRaceToSlice);
         // RaceColumns in a RegattaLeaderboard are always RaceColumnInSeries instances
         final RaceColumnInSeries raceColumnOfRaceToSlice = (RaceColumnInSeries) raceColumnAndFleetOfRaceToSlice.getA();
         final Fleet fleet = raceColumnAndFleetOfRaceToSlice.getB();
         final Series series = raceColumnOfRaceToSlice.getSeries();
         final RaceLog raceLogOfRaceToSlice = raceColumnOfRaceToSlice.getRaceLog(fleet);
-        
         getService().apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
         final RaceColumn raceColumn = regattaLeaderboard.getRaceColumnByName(newRaceColumnName);
-        
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        
         final AbstractLogEventAuthor author = getService().getServerAuthor();
-        
         final TimePoint startOfTracking = sliceFrom;
         final TimePoint endOfTracking = sliceTo;
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
-        
         final TimeRange timeRange = new TimeRangeImpl(sliceFrom, sliceTo);
         final StartTimeFinderResult startTimeFinderResult = new StartTimeFinder(getService(), raceLogOfRaceToSlice).analyze();
         final TimePoint startTime = startTimeFinderResult.getStartTime();
@@ -7268,25 +7261,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             });
         }
-        
         windFixEvents.getFilteredEvents()
                 .forEach(event -> raceLog.add(new RaceLogWindFixEventImpl(event.getCreatedAt(),
                         event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
                         event.getWindFix(), event.isMagnetic())));
-        
         final TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
         // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
         // that's why we can't just call adapter.denoteRaceForRaceLogTracking
         final TimePoint denotationTimePoint = startTrackingTimePoint.minus(1);
         raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint,
                 author, raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
-        
         raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
-            
         try {
             getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
-            
             DynamicTrackedRace trackedRace = null;
             for (int i = 0; i < 100 ; i++) {
                 trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
@@ -7296,20 +7284,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     Thread.sleep(100);
                 }
             }
-            
             if (trackedRace == null) {
                 throw new IllegalStateException("Could not obtain sliced race after 10s");
             }
-            
-            for (WindSource windSourceToCopy : trackedRaceToSlice.getWindSources(WindSourceType.EXPEDITION)) {
-                final WindTrack windTrackToCopyFrom = trackedRaceToSlice.getOrCreateWindTrack(windSourceToCopy);
-                windTrackToCopyFrom.lockForRead();
-                try {
-                    for (Wind windToCopy : windTrackToCopyFrom.getFixes(startOfTracking, true, endOfTracking, true)) {
-                        trackedRace.recordWind(windToCopy, windSourceToCopy);
+            for (WindSource windSourceToCopy : trackedRaceToSlice.getWindSources()) {
+                if (windSourceToCopy.canBeStored()) {
+                    final WindTrack windTrackToCopyFrom = trackedRaceToSlice.getOrCreateWindTrack(windSourceToCopy);
+                    windTrackToCopyFrom.lockForRead();
+                    try {
+                        for (Wind windToCopy : windTrackToCopyFrom.getFixes(startOfTracking, true, endOfTracking, true)) {
+                            trackedRace.recordWind(windToCopy, windSourceToCopy);
+                        }
+                    } finally {
+                        windTrackToCopyFrom.unlockAfterRead();
                     }
-                } finally {
-                    windTrackToCopyFrom.unlockAfterRead();
                 }
             }
             return trackedRace.getRaceIdentifier();
