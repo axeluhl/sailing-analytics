@@ -7096,170 +7096,175 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
         final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
                 timeRange);
-        for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
-            raceLogEvent.accept(new BaseRaceLogEventVisitor() {
-                @Override
-                public void visit(RaceLogDependentStartTimeEvent event) {
-                    if (dependentStartTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogDependentStartTimeEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), event.getDependentOnRaceIdentifier(),
-                                event.getStartTimeDifference(), event.getNextStatus()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogStartTimeEvent event) {
-                    if (!dependentStartTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                                event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getStartTime(),
-                                event.getNextStatus()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogRegisterCompetitorEvent event) {
-                    raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getCreatedAt(),
-                            event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                            raceLog.getCurrentPassId(), event.getCompetitor()));
-                }
-
-                @Override
-                public void visit(RaceLogWindFixEvent event) {
-                    windFixEvents.addEvent(event);
-                }
-                
-                @Override
-                public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
-                    raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(event.getCreatedAt(), event.getAuthor(),
-                            event.getLogicalTimePoint(), UUID.randomUUID(), raceLog.getCurrentPassId()));
-                }
-                
-                @Override
-                public void visit(RaceLogCourseDesignChangedEvent event) {
-                    raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
-                            event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                            raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
-                }
-                
-                @Override
-                public void visit(RaceLogFlagEvent event) {
-                    if (hasStartTime && isLatestPass(event) && !event.getLogicalTimePoint().after(sliceTo)) {
-                        raceLog.add(new RaceLogFlagEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                                event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getUpperFlag(),
-                                event.getLowerFlag(), event.isDisplayed()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogCourseAreaChangedEvent event) {
-                    raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                            event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getCourseAreaId()));
-                }
-                
-                @Override
-                public void visit(RaceLogStartProcedureChangedEvent event) {
-                    if (hasStartTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogStartProcedureChangedEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), event.getStartProcedureType()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogFinishPositioningConfirmedEvent event) {
-                    if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogFinishPositioningListChangedEvent event) {
-                    if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogFinishPositioningListChangedEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogFixedMarkPassingEvent event) {
-                    if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getTimePointOfFixedPassing())) {
-                        raceLog.add(new RaceLogFixedMarkPassingEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                event.getInvolvedBoats(), raceLog.getCurrentPassId(),
-                                event.getTimePointOfFixedPassing(), event.getZeroBasedIndexOfPassedWaypoint()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogSuppressedMarkPassingsEvent event) {
-                    if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getLogicalTimePoint())) {
-                        raceLog.add(new RaceLogSuppressedMarkPassingsEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                event.getInvolvedBoats(), raceLog.getCurrentPassId(),
-                                event.getZeroBasedIndexOfFirstSuppressedWaypoint()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogProtestStartTimeEvent event) {
-                    if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogProtestStartTimeEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), event.getProtestTime()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogAdditionalScoringInformationEvent event) {
-                    if (hasFinishedTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogAdditionalScoringInformationEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), event.getType()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogPathfinderEvent event) {
-                    if (hasStartTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogPathfinderEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                                event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
-                                event.getPathfinderId()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogGateLineOpeningTimeEvent event) {
-                    if (hasStartTime && isLatestPass(event)) {
-                        raceLog.add(new RaceLogGateLineOpeningTimeEventImpl(event.getCreatedAt(),
-                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), event.getGateLineOpeningTimes().getGateLaunchStopTime(),
-                                event.getGateLineOpeningTimes().getGolfDownTime()));
-                    }
-                }
-                
-                @Override
-                public void visit(RaceLogRaceStatusEvent event) {
-                    if (isLatestPass(event) && !(event instanceof RaceLogDependentStartTimeEvent)
-                            && !(event instanceof RaceLogStartTimeEvent)) {
-                        if ((hasStartTime
-                                && event.getNextStatus().getOrderNumber() <= RaceLogRaceStatus.RUNNING.getOrderNumber())
-                                || (hasFinishingTime && event.getNextStatus() == RaceLogRaceStatus.FINISHING)
-                                || (hasFinishedTime && event.getNextStatus() == RaceLogRaceStatus.FINISHED)) {
-                            new RaceLogRaceStatusEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
-                                    event.getNextStatus());
+        raceLogOfRaceToSlice.lockForRead();
+        try {
+            for (RaceLogEvent raceLogEvent : raceLogOfRaceToSlice.getUnrevokedEvents()) {
+                raceLogEvent.accept(new BaseRaceLogEventVisitor() {
+                    @Override
+                    public void visit(RaceLogDependentStartTimeEvent event) {
+                        if (dependentStartTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogDependentStartTimeEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    raceLog.getCurrentPassId(), event.getDependentOnRaceIdentifier(),
+                                    event.getStartTimeDifference(), event.getNextStatus()));
                         }
                     }
-                }
-                
-                private boolean isLatestPass(RaceLogEvent event) {
-                    return event.getPassId() == raceLogOfRaceToSlice.getCurrentPassId();
-                }
-            });
+                    
+                    @Override
+                    public void visit(RaceLogStartTimeEvent event) {
+                        if (!dependentStartTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getStartTime(),
+                                    event.getNextStatus()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogRegisterCompetitorEvent event) {
+                        raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getCompetitor()));
+                    }
+    
+                    @Override
+                    public void visit(RaceLogWindFixEvent event) {
+                        windFixEvents.addEvent(event);
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
+                        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(event.getCreatedAt(), event.getAuthor(),
+                                event.getLogicalTimePoint(), UUID.randomUUID(), raceLog.getCurrentPassId()));
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogCourseDesignChangedEvent event) {
+                        raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogFlagEvent event) {
+                        if (hasStartTime && isLatestPass(event) && !event.getLogicalTimePoint().after(sliceTo)) {
+                            raceLog.add(new RaceLogFlagEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getUpperFlag(),
+                                    event.getLowerFlag(), event.isDisplayed()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogCourseAreaChangedEvent event) {
+                        raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getCourseAreaId()));
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogStartProcedureChangedEvent event) {
+                        if (hasStartTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogStartProcedureChangedEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    raceLog.getCurrentPassId(), event.getStartProcedureType()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+                        if (hasFinishedTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogFinishPositioningListChangedEvent event) {
+                        if (hasFinishedTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogFinishPositioningListChangedEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogFixedMarkPassingEvent event) {
+                        if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getTimePointOfFixedPassing())) {
+                            raceLog.add(new RaceLogFixedMarkPassingEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    event.getInvolvedBoats(), raceLog.getCurrentPassId(),
+                                    event.getTimePointOfFixedPassing(), event.getZeroBasedIndexOfPassedWaypoint()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogSuppressedMarkPassingsEvent event) {
+                        if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getLogicalTimePoint())) {
+                            raceLog.add(new RaceLogSuppressedMarkPassingsEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    event.getInvolvedBoats(), raceLog.getCurrentPassId(),
+                                    event.getZeroBasedIndexOfFirstSuppressedWaypoint()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogProtestStartTimeEvent event) {
+                        if (hasFinishedTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogProtestStartTimeEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    raceLog.getCurrentPassId(), event.getProtestTime()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogAdditionalScoringInformationEvent event) {
+                        if (hasFinishedTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogAdditionalScoringInformationEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    raceLog.getCurrentPassId(), event.getType()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogPathfinderEvent event) {
+                        if (hasStartTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogPathfinderEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
+                                    event.getPathfinderId()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogGateLineOpeningTimeEvent event) {
+                        if (hasStartTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogGateLineOpeningTimeEventImpl(event.getCreatedAt(),
+                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                    raceLog.getCurrentPassId(), event.getGateLineOpeningTimes().getGateLaunchStopTime(),
+                                    event.getGateLineOpeningTimes().getGolfDownTime()));
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogRaceStatusEvent event) {
+                        if (isLatestPass(event) && !(event instanceof RaceLogDependentStartTimeEvent)
+                                && !(event instanceof RaceLogStartTimeEvent)) {
+                            if ((hasStartTime
+                                    && event.getNextStatus().getOrderNumber() <= RaceLogRaceStatus.RUNNING.getOrderNumber())
+                                    || (hasFinishingTime && event.getNextStatus() == RaceLogRaceStatus.FINISHING)
+                                    || (hasFinishedTime && event.getNextStatus() == RaceLogRaceStatus.FINISHED)) {
+                                new RaceLogRaceStatusEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
+                                        event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
+                                        event.getNextStatus());
+                            }
+                        }
+                    }
+                    
+                    private boolean isLatestPass(RaceLogEvent event) {
+                        return event.getPassId() == raceLogOfRaceToSlice.getCurrentPassId();
+                    }
+                });
+            }
+        } finally {
+            raceLogOfRaceToSlice.unlockAfterRead();
         }
         windFixEvents.getFilteredEvents()
                 .forEach(event -> raceLog.add(new RaceLogWindFixEventImpl(event.getCreatedAt(),
