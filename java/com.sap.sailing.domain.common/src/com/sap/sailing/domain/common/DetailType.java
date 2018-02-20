@@ -310,7 +310,7 @@ public enum DetailType implements Serializable {
         allowed.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         return allowed;
     }
-    
+
     public static List<DetailType> getLegBravoDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
         allowed.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
@@ -318,7 +318,6 @@ public enum DetailType implements Serializable {
         allowed.add(DetailType.BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS);
         return allowed;
     }
-    
 
     public static List<DetailType> getAllRaceDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
@@ -387,13 +386,14 @@ public enum DetailType implements Serializable {
                 DetailType.LEG_CORRECTED_TIME_TRAVELED, DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, DetailType.LEG_RANK_GAIN });
     }
-    
+
     public static List<DetailType> getRaceStartAnalysisColumnTypes() {
         return Arrays.asList(new DetailType[] { DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
                 DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, DetailType.DISTANCE_TO_START_AT_RACE_START,
                 DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                 DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, DetailType.START_TACK });
+                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
+                DetailType.START_TACK });
     }
 
     public static List<DetailType> getLegExpeditionDetailColumnTypes() {
@@ -410,7 +410,7 @@ public enum DetailType implements Serializable {
                 EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT, EXPEDITION_LEG_DISTANCE_TO_PIN,
                 EXPEDITION_LEG_DISTANCE_BELOW_LINE, EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION });
     }
-    
+
     /**
      * Not yet implemented types can be added here, they will be hidden from any user under all circumstances
      */
@@ -428,9 +428,9 @@ public enum DetailType implements Serializable {
                 EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, EXPEDITION_RACE_TIME_TO_PIN,
                 EXPEDITION_RACE_TIME_TO_BURN_TO_LINE, EXPEDITION_RACE_TIME_TO_BURN_TO_PIN,
                 EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, EXPEDITION_RACE_DISTANCE_TO_PIN,
-                EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION });
+                EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, EXPEDITION_LEG_DISTANCE_BELOW_LINE,
+                EXPEDITION_RACE_DISTANCE_BELOW_LINE, EXPEDITION_RACE_TIME_TO_GUN, EXPEDITION_LEG_TIME_TO_GUN });
     }
-    
 
     public static List<DetailType> getAllLegDetailColumnTypes() {
         ArrayList<DetailType> all = new ArrayList<>();
