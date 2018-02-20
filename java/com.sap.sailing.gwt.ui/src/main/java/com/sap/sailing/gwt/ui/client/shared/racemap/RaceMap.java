@@ -417,6 +417,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean orientationChangeInProgress;
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
+    private final NumberFormat numberFormatNoDecimal = NumberFormat.getFormat("0");
     
     /**
      * The competitor for which the advantage line is currently showing. Should this competitor's quick rank change, or
@@ -1651,10 +1652,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Position startLineRightPosition = numberOfStartWaypointMarks < 2 ? null : courseDTO.getStartMarkPositions().get(1);
             if (courseDTO.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind != null) {
                 startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
-                        NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
-                        NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
+                        numberFormatOneDecimal.format(courseDTO.startLineLengthInMeters),
+                        numberFormatOneDecimal.format(Math.abs(courseDTO.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
                         courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
-                        NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters)));
+                        numberFormatOneDecimal.format(courseDTO.startLineAdvantageInMeters)));
             } else {
                 startLineAdvantageText.delete(0, startLineAdvantageText.length());
             }
@@ -1684,10 +1685,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Position finishLineRightPosition = numberOfFinishWaypointMarks < 2 ? null : courseDTO.getFinishMarkPositions().get(1);
             if (courseDTO.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind != null) {
                 finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
-                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
-                        NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
+                        numberFormatOneDecimal.format(courseDTO.finishLineLengthInMeters),
+                        numberFormatOneDecimal.format(Math.abs(courseDTO.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
                         courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
-                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters)));
+                        numberFormatOneDecimal.format(courseDTO.finishLineAdvantageInMeters)));
             } else {
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
@@ -1760,14 +1761,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 final StringBuilder sb = new StringBuilder();
                 sb.append(stringMessages.courseMiddleLine());
                 sb.append('\n');
-                sb.append(NumberFormat.getFormat("0").format(
+                sb.append(numberFormatNoDecimal.format(
                         Math.abs(position1DTO.getDistance(position2DTO).getMeters()))+stringMessages.metersUnit());
                 if (lastCombinedWindTrackInfoDTO != null) {
                     final WindTrackInfoDTO windTrackAtLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(zeroBasedIndexOfStartWaypoint);
                     if (windTrackAtLegMiddle != null && windTrackAtLegMiddle.windFixes != null && !windTrackAtLegMiddle.windFixes.isEmpty()) {
                         WindDTO windAtLegMiddle = windTrackAtLegMiddle.windFixes.get(0);
                         final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
-                        final String diff = NumberFormat.getFormat("0.0").format(
+                        final String diff = numberFormatOneDecimal.format(
                                 Math.min(Math.abs(windAtLegMiddle.dampenedTrueWindBearingDeg-legBearingDeg),
                                                      Math.abs(windAtLegMiddle.dampenedTrueWindFromDeg-legBearingDeg)));
                         sb.append(", ");
@@ -2183,19 +2184,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
                         + stringMessages.knotsUnit() + ")"));
         if (maneuver.maneuverLossInMeters != null) {
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), NumberFormat.getFormat("0.0").format(maneuver.maneuverLossInMeters)+"m"));
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), numberFormatOneDecimal.format(maneuver.maneuverLossInMeters)+"m"));
         }
         return vPanel;
     }
 
     private Widget getInfoWindowContent(final WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
         final VerticalPanel vPanel = new VerticalPanel();
         final Anchor windSourceNameAnchor = new Anchor(WindSourceTypeFormatter.format(windSource, stringMessages));
         vPanel.add(createInfoWindowLabelWithWidget(stringMessages.windSource(), windSourceNameAnchor));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.wind(), Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormatOneDecimal.format(windDTO.dampenedTrueWindSpeedInKnots)));
         final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(windDTO.measureTimepoint);
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(), timePoint.asDate().toString()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
