@@ -20,13 +20,15 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
 
     private static final String TAG = CompetitorAndBoatAdapter.class.getName();
 
-    private Context mContext;
-    private List<Map.Entry<Competitor, Boat>> mData;
+    private final Context mContext;
+    private final List<Map.Entry<Competitor, Boat>> mData;
+    private boolean mCanBoatsOfCompetitorsChangePerRace;
     private CompetitorClick mListener;
 
-    public CompetitorAndBoatAdapter(Context context, List<Map.Entry<Competitor, Boat>> data) {
+    public CompetitorAndBoatAdapter(Context context, List<Map.Entry<Competitor, Boat>> data, boolean canBoatsOfCompetitorsChangePerRace) {
         mContext = context;
         mData = data;
+        mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 
     @Override
@@ -40,15 +42,15 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
         Competitor competitor = mData.get(position).getKey();
         Boat boat = mData.get(position).getValue();
         if (competitor != null) {
+            if (mCanBoatsOfCompetitorsChangePerRace && boat != null) {
+                holder.vesselId.setText(boat.getSailID());
+                float color = (1 - boat.getColor().getAsHSV().getC()) * 255f;
+                holder.vesselId.setTextColor(Color.argb(255, (int) color, (int) color, (int) color));
+                holder.vesselId.setBackgroundColor(Color.parseColor(boat.getColor().getAsHtml()));
+            }
             String name = "";
             if (competitor.getShortInfo() != null) {
                 name += competitor.getShortInfo() + " - ";
-                if (boat != null) {
-                    holder.vesselId.setText(boat.getSailID());
-                    float color = (1 - boat.getColor().getAsHSV().getC()) * 255f;
-                    holder.vesselId.setTextColor(Color.argb(255, (int) color, (int) color, (int) color));
-                    holder.vesselId.setBackgroundColor(Color.parseColor(boat.getColor().getAsHtml()));
-                }
             }
             name += competitor.getName();
             if (holder.competitor != null) {

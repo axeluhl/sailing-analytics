@@ -25,14 +25,16 @@ import android.widget.TextView;
 
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
-    private Context mContext;
-    private CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
+    private final Context mContext;
+    private final CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
+    private final boolean mCanBoatsOfCompetitorsChangePerRace;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor, boolean canBoatsOfCompetitorsChangePerRace) {
         setHasStableIds(true);
         mContext = context;
         mCompetitor = competitor;
+        mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 
     public void setListener(FinishEvents listener) {
@@ -53,7 +55,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         } else {
             holder.position.setText(null);
         }
-        if (item.getBoat() != null) {
+        if (mCanBoatsOfCompetitorsChangePerRace && item.getBoat() != null) {
             holder.vesselId.setText(item.getBoat().getSailID());
             float color = (1 - item.getBoat().getColor().getAsHSV().getC()) * 255f;
             holder.vesselId.setTextColor(Color.argb(255, (int) color, (int) color, (int) color));

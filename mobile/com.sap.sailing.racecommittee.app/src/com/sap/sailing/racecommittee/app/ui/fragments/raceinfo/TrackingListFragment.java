@@ -133,7 +133,7 @@ public class TrackingListFragment extends BaseFragment
         return fragment;
     }
 
-    @TargetApi(19)
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_tracking_list, container, false);
@@ -237,7 +237,7 @@ public class TrackingListFragment extends BaseFragment
             RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
             if (competitorView != null) {
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mCompetitorAdapter = new CompetitorAndBoatAdapter(getActivity(), mFilteredCompetitorData);
+                mCompetitorAdapter = new CompetitorAndBoatAdapter(getActivity(), mFilteredCompetitorData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
                 mCompetitorAdapter.setListener(this);
                 competitorView.setLayoutManager(layoutManager);
                 competitorView.setAdapter(mCompetitorAdapter);
@@ -253,7 +253,7 @@ public class TrackingListFragment extends BaseFragment
                 mDragDropManager.setDraggingItemShadowDrawable(drawable);
                 mSwipeManager = new RecyclerViewSwipeManager();
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mAdapter = new FinishListAdapter(getActivity(), mFinishedData);
+                mAdapter = new FinishListAdapter(getActivity(), mFinishedData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
                 mAdapter.setListener(this);
                 @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> dragManager = mDragDropManager
                     .createWrappedAdapter(mAdapter);
