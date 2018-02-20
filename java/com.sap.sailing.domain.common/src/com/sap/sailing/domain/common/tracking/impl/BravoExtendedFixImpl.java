@@ -213,6 +213,11 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
 
     @Override
     public Double getExpeditionCourse() {
-        return getExpeditionHDG() + getLeeway().getDegrees();
+        final Double expeditionHDG = getExpeditionHDG();
+        final Bearing leeway = getLeeway();
+        if (expeditionHDG != null && leeway != null) {
+            return expeditionHDG + leeway.getDegrees();
+        }
+        return null;
     }
 }
