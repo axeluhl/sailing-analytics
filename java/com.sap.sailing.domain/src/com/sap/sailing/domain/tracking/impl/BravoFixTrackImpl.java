@@ -203,10 +203,6 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
             timeRangeCache.invalidateAllAtOrLaterThan(fixTimePoint);
         }
     }
-
-    interface ValueProvider{
-        Double getValue(BravoExtendedFix fix);
-    }
     
     @Override
     public Distance getAverageRideHeight(TimePoint from, TimePoint to) {
@@ -627,7 +623,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
     
     private Double getAverageOfBravoExtenededFixValueWithCachingForDouble(TimePoint from, TimePoint to,
-            ValueProvider valueProvider, TimeRangeCache<Pair<Double, Long>> rangeCache) {
+            Function<BravoExtendedFix, Double> valueProvider, TimeRangeCache<Pair<Double, Long>> rangeCache) {
         final Pair<Double, Long> nullElement = new Pair<>(0.0, 0l);
         Pair<Double, Long> cacheValue = getValueSum(from, to, nullElement,
                 (a, b) -> new Pair<>(a.getA() + b.getA(), a.getB() + b.getB()), rangeCache,
@@ -638,7 +634,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                         long count = 0;
                         for (final BravoFix fix : getFixes(from, true, to, true)) {
                             if (fix instanceof BravoExtendedFix) {
-                                final Double value = valueProvider.getValue((BravoExtendedFix) fix);
+                                final Double value = valueProvider.apply((BravoExtendedFix) fix);
                                 if (value != null) {
                                     sumValue = sumValue + value;
                                     count++;
