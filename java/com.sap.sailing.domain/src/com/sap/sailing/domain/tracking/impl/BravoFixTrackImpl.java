@@ -432,192 +432,192 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
     
     @Override
-    public Double getExpeditionAWAIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionAWAIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionAWA, expeditionAWACache);
     }
 
     @Override
-    public Double getExpeditionAWSIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionAWSIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionAWS, expeditionAWSCache);
     }
 
     @Override
-    public Double getExpeditionTWAIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTWAIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionTWA, expeditionTWACache);
     }
 
     @Override
-    public Double getExpeditionTWSIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTWSIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionTWS, expeditionTWSCache);
     }
 
     @Override
-    public Double getExpeditionTWDIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTWDIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionTWD, expeditionTWDCache);
     }
 
     @Override
-    public Double getExpeditionTargTWAIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTargTWAIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionTWA, expeditionTWACache);
     }
 
     @Override
-    public Double getExpeditionBoatSpeedIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionBoatSpeedIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionBSP, expeditionBoatSpeedCache);
     }
 
     @Override
-    public Double getExpeditionTargBoatSpeedIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTargBoatSpeedIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionBSP_TR, expeditionTargBoatSpeedCache);
     }
 
     @Override
-    public Double getExpeditionSOGIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionSOGIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionSOG, expeditionSOGCache);
     }
 
     @Override
-    public Double getExpeditionCOGIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionCOGIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionCOG, expeditionCOGCache);
     }
 
     @Override
-    public Double getExpeditionForestayLoadIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionForestayLoadIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionForestayLoad, expeditionForestayLoadCache);
     }
 
     @Override
-    public Double getExpeditionRakeIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionRakeIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionRake, expeditionRakeCache);
     }
 
     @Override
-    public Double getExpeditionCourseDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionCourseDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionCourse, expeditionCourseDetailCache);
     }
 
     @Override
-    public Double getExpeditionHeadingIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionHeadingIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionVMGIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionVMGIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionVMGTargVMGDeltaIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionVMGTargVMGDeltaIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionRateOfTurnIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionRateOfTurnIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionRudderAngleIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionRudderAngleIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionTargetHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTargetHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionTimeToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTimeToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionTimeToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTimeToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionDistToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionDistToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionDistToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionDistToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Duration getExpeditionTimeToGUNIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Duration getAverageExpeditionTimeToGUNIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionTimeToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTimeToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionTimeToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTimeToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Duration getExpeditionTimeToBurnToLineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Duration getAverageExpeditionTimeToBurnToLineIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionTimeToBurnToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTimeToBurnToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint){
         // TODO Auto-generated method stub
         return null;
     }
