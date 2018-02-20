@@ -230,13 +230,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         Set<Series> visibleSeries = new HashSet<Series>(currentSeries);
 
         if (preselectFilter != null) {
-            boolean wasFound = forceSeriesSelection(visibleSeries, windSourceDirectionSeries);
-            if(forceSeriesSelection(visibleSeries, windSourceSpeedSeries)){
-                wasFound = true;
-            }
-            if(wasFound){
-                preselectFilter = null;
-            }
+            forceSeriesSelection(visibleSeries, windSourceDirectionSeries);
+            forceSeriesSelection(visibleSeries, windSourceSpeedSeries);
         } else {
             if (settings.isShowWindDirectionsSeries()) {
                 for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
