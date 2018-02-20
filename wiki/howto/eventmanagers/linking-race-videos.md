@@ -1,7 +1,6 @@
-# Link tracked races with their YouTube Live-Streams
 This articel provides a short guidance of how to synchronize races with their YouTube Videos.
 
-## 1. Open the video on YouTube
+# 1. Open the video on YouTube
   1. Check first race covered by the video.
   2. Seek to race start. Ideally, the video shows a start countdown for this race (see figure 1).
   3. Note the video time for the start
@@ -11,14 +10,14 @@ This articel provides a short guidance of how to synchronize races with their Yo
 ![Figure 1: Most races provide a race start indicator](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/linking%20race%20videos/start_race_indicator.png)
 **Figure 1: Most races provide a countdown which indicates when the race is going to start**
 
-## 2. Open Admin Console
+# 2. Open Admin Console
   1. This step is necessary to elevate you as admin user
   2. Open sapsailing.com
   3. Go to event home page
   4. In the URL, replace "http://`server name>`/gwt/Home.html/...." by "http://`server name`/gwt/AdminConsole.html". _Remember to access the -master url!_
   5. Enter login credentials
 
-## 3. In a new bowser tab
+# 3. In a new bowser tab
   1. Open the first race covered by the video. It is located under the _races_ tab and will redirect you to the raceboard.
   2. Click "Manage Media" (see figure 2, only visible when logged into Admin Console before)
   3. Click Add
@@ -33,7 +32,7 @@ This articel provides a short guidance of how to synchronize races with their Yo
 ![Figure 2: Manage media button is only visible when logged in as admin](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/linking%20race%20videos/manage-media-btn.png)
 **Figure 2: Manage media button is only visible when logged in as admin**
 
-## 4. In the video window
+# 4. In the video window
   1. Click “Edit” (--> decouples video from race)
   2. Seek video to start of first race (see figure 3, if available, a count down overlay on the video is very helpful)
   3. Click “Preview”
@@ -49,7 +48,7 @@ This articel provides a short guidance of how to synchronize races with their Yo
 
 **Figure 3: Synchronize the tracked race with the Live-Stream**
 
-## 5. Go to Admin Console
+# 5. Go to Admin Console
   1. Open tab “Races/Manage Media” (see figure 4)
   2. Search the recently added video ( use search box)
   3. For this video, click column “Linked Race” (showing first race only)
