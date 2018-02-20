@@ -196,14 +196,14 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
 
     @Override
     public Duration getExpeditionTmToGun() {
-        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex()); 
-        return duration==null?null:new MillisecondsDurationImpl(Math.round(duration*1000));
+        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex());
+        return duration == null ? null : new MillisecondsDurationImpl(Math.round(duration * 1000));
     }
 
     @Override
     public Duration getExpeditionTmToBurn() {
-        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex()); 
-        return duration==null?null:new MillisecondsDurationImpl(Math.round(duration*1000));
+        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex());
+        return duration == null ? null : new MillisecondsDurationImpl(Math.round(duration * 1000));
     }
     
     @Override
@@ -213,6 +213,6 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
 
     @Override
     public Double getExpeditionCourse() {
-        return getExpeditionHDG()+getLeeway().getDegrees();
+        return getExpeditionHDG() + getLeeway().getDegrees();
     }
 }
