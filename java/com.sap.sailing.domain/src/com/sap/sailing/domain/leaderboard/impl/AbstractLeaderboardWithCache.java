@@ -890,7 +890,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
             result.averageSignedCrossTrackErrorInMeters = averageSignedCrossTrackError == null ? null : averageSignedCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
-            if (trackedLeg.hasFinishedLeg(timePoint))  {
+            final boolean hasFinishedLeg = trackedLeg.hasFinishedLeg(timePoint);
+            if (hasFinishedLeg) {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
                 final Distance averageRideHeight = trackedLeg.getAverageRideHeight(timePoint);
                 result.currentRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
@@ -918,14 +919,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final Duration estimatedTimeToNextMarkInSeconds = trackedLeg.getEstimatedTimeToNextMark(timePoint, WindPositionMode.EXACT, cache);
             result.estimatedTimeToNextWaypointInSeconds = estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds.asSeconds();
             result.timeInMilliseconds = time.asMillis();
-            result.finished = trackedLeg.hasFinishedLeg(timePoint);
+            result.finished = hasFinishedLeg;
             final TimePoint legFinishTime = trackedLeg.getFinishTime();
             // See bug 3829: there is an unlikely possibility that legFinishTime is null and the call to hasFinishedLeg below
             // says that the leg has already finished. This can happen if the corresponding mark passing arrives between the two
             // calls. To avoid having to use expensive locking, we'll just double-check here if legFinishTime is null and
             // treat this as if trackedLeg.hasFinishedLeg(timePoint) had returned false.
             result.correctedTotalTime = trackedLeg.hasStartedLeg(timePoint) ? trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getCorrectedTime(trackedLeg.getCompetitor(),
-                    trackedLeg.hasFinishedLeg(timePoint) && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
+                    hasFinishedLeg && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
             // fetch the leg gap in own corrected time from the ranking metric
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, rankingInfo, cache);
@@ -1012,41 +1013,47 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                     }
                 }
             }
+            BiFunction<BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, Double> extractDoubleValue = (
+                    currentValueExtractor, averageValueExtractor) -> (hasFinishedLeg
+                            ? averageValueExtractor.apply(trackedLeg, timePoint) : currentValueExtractor.apply(trackedLeg, timePoint));
+            BiFunction<BiFunction<TrackedLegOfCompetitor, TimePoint, Duration>, BiFunction<TrackedLegOfCompetitor, TimePoint, Duration>, Duration> extractDurationValue = (
+                    currentValueExtractor, averageValueExtractor) -> (hasFinishedLeg
+                            ? averageValueExtractor.apply(trackedLeg, timePoint) : currentValueExtractor.apply(trackedLeg, timePoint));
+            result.expeditionAWA = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWA, TrackedLegOfCompetitor::getAverageExpeditionAWA);
+            result.expeditionAWS = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWS, TrackedLegOfCompetitor::getAverageExpeditionAWS);
+            result.expeditionTWA = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWA, TrackedLegOfCompetitor::getAverageExpeditionTWA);
+            result.expeditionTWS = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWS, TrackedLegOfCompetitor::getAverageExpeditionTWS);
+            result.expeditionTWD = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWD, TrackedLegOfCompetitor::getAverageExpeditionTWD);
+            result.expeditionTargTWA = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargTWA, TrackedLegOfCompetitor::getAverageExpeditionTargTWA);
+            result.expeditionBoatSpeed = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionBoatSpeed, TrackedLegOfCompetitor::getAverageExpeditionBoatSpeed);
+            result.expeditionTargBoatSpeed = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargBoatSpeed, TrackedLegOfCompetitor::getAverageExpeditionTargBoatSpeed);
+            result.expeditionSOG = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionSOG, TrackedLegOfCompetitor::getAverageExpeditionSOG);
+            result.expeditionCOG = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionCOG, TrackedLegOfCompetitor::getAverageExpeditionCOG);
+            result.expeditionForestayLoad = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionForestayLoad, TrackedLegOfCompetitor::getAverageExpeditionForestayLoad);
+            result.expeditionRake = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRake, TrackedLegOfCompetitor::getAverageExpeditionRake);
+            result.expeditionCourseDetail = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionCourseDetail, TrackedLegOfCompetitor::getAverageExpeditionCourseDetail);
+            result.expeditionHeading = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeading, TrackedLegOfCompetitor::getAverageExpeditionHeading);
+            result.expeditionVMG = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMG, TrackedLegOfCompetitor::getAverageExpeditionVMG);
+            result.expeditionVMGTargVMGDelta = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMGTargVMGDelta, TrackedLegOfCompetitor::getAverageExpeditionVMGTargVMGDelta);
+            result.expeditionRateOfTurn = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRateOfTurn, TrackedLegOfCompetitor::getAverageExpeditionRateOfTurn);
+            result.expeditionRudderAngle = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRudderAngle, TrackedLegOfCompetitor::getAverageExpeditionRudderAngle);
+            result.expeditionHeel = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeel, TrackedLegOfCompetitor::getAverageExpeditionHeel);
+            result.expeditionTargetHeel = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargetHeel, TrackedLegOfCompetitor::getAverageExpeditionTargetHeel);
+            result.expeditionTimeToPortLayline = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToPortLayline);
+            result.expeditionTimeToStbLayline = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToStbLayline);
+            result.expeditionDistToPortLayline = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToPortLayline);
+            result.expeditionDistToStbLayline = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToStbLayline);
+            result.expeditionTimeToGUN = extractDurationValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToGUN, TrackedLegOfCompetitor::getAverageExpeditionTimeToGUN);
+            result.expeditionTimeToCommitteeBoat = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToCommitteeBoat);
+            result.expeditionTimeToPin = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToPin);
+            result.expeditionTimeToBurnToLine = extractDurationValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToLine, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToLine);
+            result.expeditionTimeToBurnToCommitteeBoat = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToCommitteeBoat);
+            result.expeditionTimeToBurnToPin = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToPin);
+            result.expeditionDistanceToCommitteeBoat = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionDistanceToCommitteeBoat);
+            result.expeditionDistanceToPinDetail = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToPinDetail, TrackedLegOfCompetitor::getAverageExpeditionDistanceToPinDetail);
+            result.expeditionDistanceBelowLine = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceBelowLine, TrackedLegOfCompetitor::getAverageExpeditionDistanceBelowLine);
+            result.expeditionLineSquareForWindDirection = extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLineSquareForWindDirection, TrackedLegOfCompetitor::getAverageExpeditionLineSquareForWindDirection);
         }
-        result.expeditionAWA = trackedLeg.getExpeditionAWA(timePoint);
-        result.expeditionAWS = trackedLeg.getExpeditionAWS(timePoint);
-        result.expeditionTWA = trackedLeg.getExpeditionTWA(timePoint);
-        result.expeditionTWS = trackedLeg.getExpeditionTWS(timePoint);
-        result.expeditionTWD = trackedLeg.getExpeditionTWD(timePoint);
-        result.expeditionTargTWA = trackedLeg.getExpeditionTargTWA(timePoint);
-        result.expeditionBoatSpeed = trackedLeg.getExpeditionBoatSpeed(timePoint);
-        result.expeditionTargBoatSpeed = trackedLeg.getExpeditionTargBoatSpeed(timePoint);
-        result.expeditionSOG = trackedLeg.getExpeditionSOG(timePoint);
-        result.expeditionCOG = trackedLeg.getExpeditionCOG(timePoint);
-        result.expeditionForestayLoad = trackedLeg.getExpeditionForestayLoad(timePoint);
-        result.expeditionRake = trackedLeg.getExpeditionRake(timePoint);
-        result.expeditionCourseDetail = trackedLeg.getExpeditionCourseDetail(timePoint);
-        result.expeditionHeading = trackedLeg.getExpeditionHeading(timePoint);
-        result.expeditionVMG = trackedLeg.getExpeditionVMG(timePoint);
-        result.expeditionVMGTargVMGDelta = trackedLeg.getExpeditionVMGTargVMGDelta(timePoint);
-        result.expeditionRateOfTurn = trackedLeg.getExpeditionRateOfTurn(timePoint);
-        result.expeditionRudderAngle = trackedLeg.getExpeditionRudderAngle(timePoint);
-        result.expeditionHeel = trackedLeg.getExpeditionHeel(timePoint);
-        result.expeditionTargetHeel = trackedLeg.getExpeditionTargetHeel(timePoint);
-        result.expeditionTimeToPortLayline = trackedLeg.getExpeditionTimeToPortLayline(timePoint);
-        result.expeditionTimeToStbLayline = trackedLeg.getExpeditionTimeToStbLayline(timePoint);
-        result.expeditionDistToPortLayline = trackedLeg.getExpeditionDistToPortLayline(timePoint);
-        result.expeditionDistToStbLayline = trackedLeg.getExpeditionDistToStbLayline(timePoint);
-        result.expeditionTimeToGUN = trackedLeg.getExpeditionTimeToGUN(timePoint);
-        result.expeditionTimeToCommitteeBoat = trackedLeg.getExpeditionTimeToCommitteeBoat(timePoint);
-        result.expeditionTimeToPin = trackedLeg.getExpeditionTimeToPin(timePoint);
-        result.expeditionTimeToBurnToLine = trackedLeg.getExpeditionTimeToBurnToLine(timePoint);
-        result.expeditionTimeToBurnToCommitteeBoat = trackedLeg.getExpeditionTimeToBurnToCommitteeBoat(timePoint);
-        result.expeditionTimeToBurnToPin = trackedLeg.getExpeditionTimeToBurnToPin(timePoint);
-        result.expeditionDistanceToCommitteeBoat = trackedLeg.getExpeditionDistanceToCommitteeBoat(timePoint);
-        result.expeditionDistanceToPinDetail = trackedLeg.getExpeditionDistanceToPinDetail(timePoint);
-        result.expeditionDistanceBelowLine = trackedLeg.getExpeditionDistanceBelowLine(timePoint);
-        result.expeditionLineSquareForWindDirection = trackedLeg.getExpeditionLineSquareForWindDirection(timePoint);
         return result;
     }
 
