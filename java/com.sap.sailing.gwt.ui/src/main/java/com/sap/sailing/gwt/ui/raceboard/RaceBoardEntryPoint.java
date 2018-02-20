@@ -129,7 +129,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
 
                                             @Override
                                             public void onSuccess(Collection<DetailType> availableDetailTypes) {
-                                                // TODO Auto-generated method stub
                                                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
                                                         StringMessages.INSTANCE, result, getUserService(), availableDetailTypes);
                                                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(
@@ -155,8 +154,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                         });
                             }
                         });
-
-                
             }
             
             @Override

@@ -40,7 +40,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        caught.printStackTrace();                        
+                        caught.printStackTrace();
                     }
 
                     @Override
@@ -53,7 +53,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
                                 AutoPlayClassicConfiguration.this, context));
                         // start sixty inch slide loop nodes...
                         RootNodeClassic root = new RootNodeClassic(cf);
-                        root.start(cf.getEventBus());                        
+                        root.start(cf.getEventBus());
                     }
                 });
             }

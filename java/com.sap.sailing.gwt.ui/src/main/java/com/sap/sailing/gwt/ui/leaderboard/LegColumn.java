@@ -141,10 +141,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             }
             return result;
         }
-        
-
     }
-        
     
     private class DurationAsSecondsDetailTypeExtractor extends DoubleDetailTypeExtractor {
         public DurationAsSecondsDetailTypeExtractor(Function<LegEntryDTO, Duration> valueExtractor) {

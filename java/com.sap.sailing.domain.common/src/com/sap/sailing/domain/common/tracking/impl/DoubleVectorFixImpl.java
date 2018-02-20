@@ -28,12 +28,12 @@ public class DoubleVectorFixImpl implements DoubleVectorFix {
     private final BitSet validComponents;
 
     public DoubleVectorFixImpl(TimePoint timePoint, Double[] fixData) {
-        // We determine the last valid component, and omit everything after so safe space
+        // We determine the last valid component, and omit everything after to safe space
         int usedSize = getLastUsedDouble(fixData);
         this.timePoint = timePoint;
         this.fixData = new double[usedSize];
         this.validComponents = new BitSet(usedSize);
-        for (int i=0; i<usedSize; i++) {
+        for (int i = 0; i < usedSize; i++) {
             if (fixData[i] != null) {
                 this.validComponents.set(i);
                 this.fixData[i] = fixData[i];
@@ -42,9 +42,9 @@ public class DoubleVectorFixImpl implements DoubleVectorFix {
     }
 
     private int getLastUsedDouble(Double[] fixData) {
-        for (int i = fixData.length-1; i >= 0; i--) {
+        for (int i = fixData.length - 1; i >= 0; i--) {
             if (fixData[i] != null) {
-                return i+1;
+                return i + 1;
             }
         }
         return 0;

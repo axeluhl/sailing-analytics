@@ -27,7 +27,7 @@ public class LeaderboardPanelMock extends MultiRaceLeaderboardPanel {
                 new CompetitorSelectionModel(
                         /* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
-                FlagImageResolverImpl.get(),Arrays.asList(DetailType.values()));
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
     }
 
     @Override
