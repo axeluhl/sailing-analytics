@@ -60,5 +60,10 @@ public class WaitForTrackedRaceUtil {
         @Override
         public void defaultAction() {
         }
+        
+        @Override
+        public boolean isTransient() {
+            return true;
+        }
     }
 }
