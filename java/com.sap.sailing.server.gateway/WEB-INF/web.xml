@@ -215,16 +215,6 @@
 	</servlet-mapping>
 	
     <servlet>
-        <servlet-name>websockettest</servlet-name>
-        <servlet-class>com.sap.sailing.server.gateway.impl.WebSocketTestServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>websockettest</servlet-name>
-        <url-pattern>/websockettest</url-pattern>
-    </servlet-mapping>
-	
-    <servlet>
     	<servlet-name>Jersey REST API</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>

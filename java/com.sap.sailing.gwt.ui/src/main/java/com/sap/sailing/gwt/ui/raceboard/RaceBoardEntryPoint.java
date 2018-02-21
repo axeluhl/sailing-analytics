@@ -117,7 +117,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                             @Override
                             public void onSuccess(List<DetailType> result) {
                                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
-                                        StringMessages.INSTANCE, result);
+                                        StringMessages.INSTANCE, result, getUserService());
                                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle,
                                         getUserService(), storageDefinition);
 

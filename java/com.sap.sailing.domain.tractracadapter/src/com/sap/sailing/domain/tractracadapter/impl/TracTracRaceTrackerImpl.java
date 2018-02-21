@@ -317,21 +317,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         }
         // check if there is a directory configured where stored data files can be cached
         // only cache files for races in REPLAY state
-        final URI effectifeStoredURI; // may be altered by legacy caching mechanism; won't affect this tracker's ID
+        final URI effectiveStoredURI; // may be altered by legacy caching mechanism; won't affect this tracker's ID
         if ( (raceStatus != null && raceStatus.equals(TracTracConnectionConstants.REPLAY_STATUS)) || 
                 (raceVisibility != null && raceVisibility.equals(TracTracConnectionConstants.REPLAY_VISIBILITY)) ) {
-            effectifeStoredURI = checkForCachedStoredData(storedURI);
+            effectiveStoredURI = checkForCachedStoredData(storedURI);
         } else {
-            effectifeStoredURI = storedURI;
+            effectiveStoredURI = storedURI;
         }
         logger.info("Starting race tracker: " + tractracRace.getName() + " " + paramURL + " " + liveURI + " "
-                + effectifeStoredURI + " startOfTracking:"
+                + effectiveStoredURI + " startOfTracking:"
                 + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:"
                 + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
 
         // Initialize data controller using live and stored data sources
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
-        eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectifeStoredURI);
+        eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectiveStoredURI);
         competitorsListener = new ICompetitorsListener() {
             @Override
             public void updateCompetitor(ICompetitor competitor) {
@@ -372,7 +372,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         eventSubscriber.subscribeRaces(racesListener);
         // Start live and stored data streams
         final Regatta effectiveRegatta;
-        raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, effectifeStoredURI);
+        raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, effectiveStoredURI);
         raceSubscriber.subscribeConnectionStatus(this);
         // Try to find a pre-associated event based on the Race ID
         if (regatta == null) {
