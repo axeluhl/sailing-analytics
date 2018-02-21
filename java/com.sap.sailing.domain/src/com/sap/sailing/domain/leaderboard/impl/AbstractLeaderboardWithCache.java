@@ -608,7 +608,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 try {
                     BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
                             BravoFixTrack.TRACK_NAME);
-                    if (sensorTrack.hasExtendedFixes()) {
+                    if (sensorTrack != null && sensorTrack.hasExtendedFixes()) {
                         BravoExtendedFix fix = (BravoExtendedFix) sensorTrack.getFirstFixAtOrAfter(timePoint);
                         entryDTO.expeditionAWA = fix.getExpeditionAWA();
                         entryDTO.expeditionAWS = fix.getExpeditionAWS();
