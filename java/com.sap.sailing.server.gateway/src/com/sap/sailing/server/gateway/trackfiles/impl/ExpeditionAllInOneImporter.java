@@ -49,6 +49,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
@@ -60,6 +61,7 @@ import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
+import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
@@ -249,23 +251,17 @@ public class ExpeditionAllInOneImporter {
             
             raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
             
-            adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
+            final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
                     /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
             
-            DynamicTrackedRace trackedRace = null;
-            for (int i = 0; i < 100 ; i++) {
-                trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
-                if (trackedRace != null) {
-                    break;
-                } else {
-                    Thread.sleep(100);
-                }
+            // wait for the RaceDefinition to be created
+            raceHandle.getRace();
+            
+            final DynamicTrackedRace trackedRace = WaitForTrackedRaceUtil.waitForTrackedRace(raceColumn, fleet, 10);
+            if (trackedRace == null) {
+                throw new IllegalStateException("Could not obtain imported race");
             }
             
-            if (trackedRace == null) {
-                throw new IllegalStateException("Could not obtain imported race after 10s");
-            }
-
             final WindImportResult windImportResult = new AbstractWindImporter.WindImportResult();
             final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION,
                     windSourceId);

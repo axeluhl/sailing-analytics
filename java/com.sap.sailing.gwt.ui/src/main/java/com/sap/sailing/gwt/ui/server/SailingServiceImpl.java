@@ -335,6 +335,7 @@ import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -495,6 +496,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationResults;
@@ -7278,19 +7280,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 author, raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
         raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
         try {
-            getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
+            final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
-            DynamicTrackedRace trackedRace = null;
-            for (int i = 0; i < 100 ; i++) {
-                trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
-                if (trackedRace != null) {
-                    break;
-                } else {
-                    Thread.sleep(100);
-                }
-            }
+            
+            // wait for the RaceDefinition to be created
+            raceHandle.getRace();
+
+            final DynamicTrackedRace trackedRace = WaitForTrackedRaceUtil.waitForTrackedRace(raceColumn, fleet, 10);
             if (trackedRace == null) {
-                throw new IllegalStateException("Could not obtain sliced race after 10s");
+                throw new IllegalStateException("Could not obtain sliced race");
             }
             for (WindSource windSourceToCopy : trackedRaceToSlice.getWindSources()) {
                 if (windSourceToCopy.canBeStored()) {
