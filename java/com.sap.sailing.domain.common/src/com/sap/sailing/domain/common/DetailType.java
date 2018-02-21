@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.core.shared.GWT;
+
 /**
  * Identifies details that can be requested from the racing service. Optionally, the details can specify a precision as
  * the number of decimal digits in which they are usually provided and should be formatted. Additionally a default
@@ -439,5 +441,26 @@ public enum DetailType implements Serializable {
         all.addAll(getLegExtendedBravoDetailTypes());
         all.addAll(getLegExpeditionDetailColumnTypes());
         return all;
+    }
+    
+    public static DetailType valueOfString(String value) {
+        // fastpath for directly mappable values
+        try {
+            return DetailType.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            // fallback for renamed legacy settings
+            GWT.debugger();
+            for (DetailType t : values()) {
+                if (t.oldNames != null) {
+                    for (String oldname : t.oldNames) {
+                        if (oldname.equals(value)) {
+                            return t;
+                        }
+                    }
+
+                }
+            }
+        }
+        throw new IllegalArgumentException("Could not restore " + value + " to an DetailType enum");
     }
 }
