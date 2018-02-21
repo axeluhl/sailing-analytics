@@ -16,7 +16,6 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -98,7 +97,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public SafeHtml getValue(CompetitorDTO competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                ImageResourceRenderer renderer = new ImageResourceRenderer();
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
                 final String flagImageURL = competitor.getFlagImageURL();
                 if (flagImageURL != null && !flagImageURL.isEmpty()) {
@@ -112,7 +110,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                     }
                     if (flagImageResource != null) {
-                        sb.append(renderer.render(flagImageResource));
+                        sb.appendHtmlConstant("<img src=\"" + flagImageResource.getSafeUri().asString() + "\" width=\"18px\" height=\"12px\"/>");
                         sb.appendHtmlConstant("&nbsp;");
                     }
                 }
