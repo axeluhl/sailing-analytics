@@ -441,6 +441,9 @@ public enum DetailType implements Serializable {
         return all;
     }
     
+    /**
+     * This method allows, to also restore legacy names of older settings, that do not match the renamed detailtypes anymore. 
+     */
     public static DetailType valueOfString(String value) {
         // fastpath for directly mappable values
         try {
