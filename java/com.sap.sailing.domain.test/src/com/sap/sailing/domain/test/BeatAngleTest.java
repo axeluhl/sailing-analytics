@@ -62,8 +62,8 @@ public class BeatAngleTest {
                 new WindImpl(new DegreePosition(0, 0), MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
                         windToBearing)));
         when(trackedLegOfCompetitor.getSpeedOverGround((TimePoint) anyObject())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
-        when(trackedLegOfCompetitor.getBeatAngle((TimePoint) anyObject())).thenCallRealMethod();
-        when(trackedLegOfCompetitor.getBeatAngle((TimePoint) anyObject(), (WindLegTypeAndLegBearingCache) anyObject())).thenCallRealMethod();
+        when(trackedRace.determineBeatAngleForChart(competitor, (TimePoint) anyObject())).thenCallRealMethod();
+        when(trackedRace.getBeatAngleFor(competitor, (TimePoint) anyObject(), (WindLegTypeAndLegBearingCache) anyObject())).thenCallRealMethod();
     }
 
     @Test
@@ -72,7 +72,7 @@ public class BeatAngleTest {
         final Bearing boatToBearing = new DegreeBearingImpl(348);
         final Bearing legBearing = new DegreeBearingImpl(303);
         setUp(windToBearing, boatToBearing, legBearing, LegType.UPWIND);
-        assertEquals(-45., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(-45., trackedRace.determineBeatAngleForChart(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class BeatAngleTest {
         final Bearing boatToBearing = new DegreeBearingImpl(258);
         final Bearing legBearing = new DegreeBearingImpl(303);
         setUp(windToBearing, boatToBearing, legBearing, LegType.UPWIND);
-        assertEquals(45., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(45., trackedRace.determineBeatAngleForChart(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class BeatAngleTest {
         final Bearing boatToBearing = new DegreeBearingImpl(120);
         final Bearing legBearing = new DegreeBearingImpl(123);
         setUp(windToBearing, boatToBearing, legBearing, LegType.DOWNWIND);
-        assertEquals(-177., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(-177., trackedRace.determineBeatAngleForChart(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class BeatAngleTest {
         final Bearing boatToBearing = new DegreeBearingImpl(126);
         final Bearing legBearing = new DegreeBearingImpl(123);
         setUp(windToBearing, boatToBearing, legBearing, LegType.DOWNWIND);
-        assertEquals(177., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(177., trackedRace.determineBeatAngleForChart(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class BeatAngleTest {
         final Bearing boatToBearing = new DegreeBearingImpl(33);
         final Bearing legBearing = new DegreeBearingImpl(33);
         setUp(windToBearing, boatToBearing, legBearing, LegType.REACHING);
-        assertEquals(-90., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(-90., trackedRace.determineBeatAngleForChart(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
@@ -117,6 +117,6 @@ public class BeatAngleTest {
         final Bearing boatToBearing = new DegreeBearingImpl(33);
         final Bearing legBearing = new DegreeBearingImpl(33);
         setUp(windToBearing, boatToBearing, legBearing, LegType.REACHING);
-        assertEquals(90., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(90., trackedRace.determineBeatAngleForChart(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 }

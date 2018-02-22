@@ -57,6 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -2970,10 +2971,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case BEAT_ANGLE:
-                if (trackedLeg != null) {
-                    Bearing beatAngle = trackedLeg.getBeatAngle(timePoint, cache);
-                    result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
-                }
+                Bearing beatAngle = trackedRace.getBeatAngleFor(competitor, timePoint, cache);
+                result = beatAngle == null? null:beatAngle.getDegrees();
                 break;
             case CURRENT_HEEL_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getHeel, trackedRace, competitor, timePoint);
