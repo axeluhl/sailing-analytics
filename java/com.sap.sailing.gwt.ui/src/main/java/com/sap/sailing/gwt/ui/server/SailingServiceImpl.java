@@ -318,6 +318,7 @@ import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
+import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -3925,26 +3926,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         eventDTO.setWindFinderReviewedSpotsCollection(event.getWindFinderReviewedSpotsCollectionIds());
         final WindFinderTrackerFactory windFinderTrackerFactory = windFinderTrackerFactoryServiceTracker.getService();
-        final List<SpotDTO> windFinderSpots = new ArrayList<>();
         if (windFinderTrackerFactory != null) {
-            for (final String spotsCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
-                try {
-                    for (final Spot spot : windFinderTrackerFactory.getReviewedSpotsCollectionById(spotsCollectionId, /* lookupInCache */ true).
-                            getSpots(/* cached */ false)) {
-                        windFinderSpots.add(new SpotDTO(spot));
-                    }
-                } catch (IOException | org.json.simple.parser.ParseException | InterruptedException | ExecutionException e) {
-                    logger.warning("Unable to determine WindFinder spots for reviewed spot collection with ID "+spotsCollectionId);
-                }
-            }
-            for (final String spotIdFromTrackedRace : event.getAllFinderSpotIdsUsedByTrackedRacesInEvent()) {
-                try {
-                    windFinderSpots.add(new SpotDTO(windFinderTrackerFactory.getSpotById(spotIdFromTrackedRace, /* cached */ false)));
-                } catch (IOException | org.json.simple.parser.ParseException | InterruptedException | ExecutionException e) {
-                    logger.warning("Unable to determine WindFinder spot with ID "+spotIdFromTrackedRace);
-                }
-            }
-            eventDTO.setAllWindFinderSpotsUsedByEvent(windFinderSpots);
+            eventDTO.setAllWindFinderSpotsUsedByEvent(new EventWindFinderUtil().getWindFinderSpotsToConsider(event,
+                    windFinderTrackerFactory, /* useCachedSpotsForTrackedRaces */ false));
         }
         return eventDTO;
     }

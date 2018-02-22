@@ -135,7 +135,7 @@ public class EventDTO extends EventBaseDTO {
         return result;
     }
     
-    public void setAllWindFinderSpotsUsedByEvent(List<SpotDTO> windFinderSpots) {
+    public void setAllWindFinderSpotsUsedByEvent(Iterable<SpotDTO> windFinderSpots) {
         this.allWindFinderSpotIdsUsedByEvent = new ArrayList<>();
         if (windFinderSpots != null) {
             Util.addAll(windFinderSpots, this.allWindFinderSpotIdsUsedByEvent);
