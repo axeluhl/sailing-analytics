@@ -34,9 +34,17 @@ public class WindFinderReportParser {
      * @param position The position of the station from which messages are to be parsed
      */
     Wind parse(Position position, JSONObject jsonOfSingleMeasurement) throws NumberFormatException, ParseException {
-        return new WindImpl(position, new MillisecondsTimePoint(dateFormat.parse(jsonOfSingleMeasurement.get("dtl").toString())),
+        final Wind result;
+        if (jsonOfSingleMeasurement.get("dtl") != null &&
+            jsonOfSingleMeasurement.get("ws") != null &&
+            jsonOfSingleMeasurement.get("wd") != null) {
+            result = new WindImpl(position, new MillisecondsTimePoint(dateFormat.parse(jsonOfSingleMeasurement.get("dtl").toString())),
                 new KnotSpeedWithBearingImpl(Double.parseDouble(jsonOfSingleMeasurement.get("ws").toString()),
                         new DegreeBearingImpl(Double.parseDouble(jsonOfSingleMeasurement.get("wd").toString())).reverse()));
+        } else {
+            result = null;
+        }
+        return result;
     }
     
     /**
@@ -45,7 +53,10 @@ public class WindFinderReportParser {
     Iterable<Wind> parse(Position position, JSONArray jsonOfSeveralMeasurements) throws NumberFormatException, ParseException {
         final List<Wind> result = new ArrayList<>();
         for (final Object jsonOfSingleMeasurement : jsonOfSeveralMeasurements) {
-            result.add(parse(position, (JSONObject) jsonOfSingleMeasurement));
+            final Wind wind = parse(position, (JSONObject) jsonOfSingleMeasurement);
+            if (wind != null) {
+                result.add(wind);
+            }
         }
         return result;
     }

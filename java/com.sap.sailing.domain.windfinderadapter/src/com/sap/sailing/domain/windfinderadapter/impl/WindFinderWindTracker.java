@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +51,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
 
     private final ScheduledFuture<?> poller;
     
-    private TimePoint timePointOfLastMeasurement;
+    private WeakHashMap<Spot, TimePoint> timePointOfLastMeasurement;
     
     /**
      * The set of all {@link ReviewedSpotsCollection}s delivered by the {@link #factory} when this tracker
@@ -63,6 +64,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
         this.trackedRace = trackedRace;
         this.factory = factory;
         this.allSpotCollections = factory.getReviewedSpotsCollections(/* cached */ false); // obtain fresh copy of all spots, updating cache
+        this.timePointOfLastMeasurement = new WeakHashMap<>();
         this.poller = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this,
                 /* initialDelay */ 0, /* period */ POLL_EVERY.asMillis(), TimeUnit.MILLISECONDS);
     }
@@ -75,7 +77,7 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
         try {
             final Iterable<Spot> usefulSpots = getUsefulSpots();
             for (final Spot usefulSpot : usefulSpots) {
-                final Iterable<Wind> windFixes = usefulSpot.getAllMeasurementsAfter(timePointOfLastMeasurement);
+                final Iterable<Wind> windFixes = usefulSpot.getAllMeasurementsAfter(timePointOfLastMeasurement.get(usefulSpot));
                 if (!Util.isEmpty(windFixes)) {
                     final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.WINDFINDER, usefulSpot.getId());
                     final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
@@ -84,8 +86,8 @@ public class WindFinderWindTracker implements WindTracker, Runnable {
                         if (existingFix == null || !existingFix.getTimePoint().equals(wind.getTimePoint())) {
                             // avoid duplicates by adding the same fix again 
                             trackedRace.recordWind(wind, windSource);
-                            if (timePointOfLastMeasurement == null || wind.getTimePoint().after(timePointOfLastMeasurement)) {
-                                timePointOfLastMeasurement = wind.getTimePoint();
+                            if (!timePointOfLastMeasurement.containsKey(usefulSpot) || wind.getTimePoint().after(timePointOfLastMeasurement.get(usefulSpot))) {
+                                timePointOfLastMeasurement.put(usefulSpot, wind.getTimePoint());
                             }
                         }
                     }
