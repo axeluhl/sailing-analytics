@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
@@ -23,6 +24,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderControl;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -38,10 +40,12 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         @UiField(provided = true) EventHeader eventHeaderUi;
         @UiField Quickfinder quickFinderUi;
         @UiField SimpleInfoBlock simpleInfoUi;
-        @UiField SimplePanel viewContentUi;
+        @UiField(provided = true) WindfinderControl windfinderUi;
+        @UiField SimplePanel viewContentUi;;
         
         private AbstractEventViewLayout(EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
             this.eventHeaderUi = new EventHeader(event, regattaName, logoNavigation);
+            this.windfinderUi = new WindfinderControl(SpotDTO::getCurrentlyMostAppropriateUrl);
         }
     }
 
@@ -125,6 +129,11 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         layout.simpleInfoUi.setAction(buttonLabel, url);
     }
     
+    @Override
+    public void setWindfinderNavigations(Iterable<SpotDTO> spotData) {
+        layout.windfinderUi.setSpotData(spotData);
+    }
+
     @Override
     public void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation) {
         layout.simpleInfoUi.setAction(buttonLabel, placeNavigation);

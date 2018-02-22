@@ -22,6 +22,23 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
     
+                    <h2 class="articleSubheadline">February 2018</h2>
+                    <ul class="bulletList">
+                        <li>There is an integration with WindFinder (<a href="https://www.windfinder.com">https://www.windfinder.com</a>) now.
+                            In the Event edit dialog there is a new tab "WindFinder" where so-called "spot collection ID" can be entered.
+                            Such spot collection IDs are negotiated and manually selected by the WindFinder team upon request. Talk to
+                            the SAP Sailing Analytics team or to WindFinder directly to obtain one for your area.<p>
+                            When such spot collections are provided for an event, a "Weather Data" button will appear on the event
+                            landing page. Races whose tracking is started with wind tracking included will obtain wind information
+                            from the wind finder spots of the spot collections configured. When the wind arrows for those readings
+                            appear on the map, the bubble displayed when clicking them also contains a link to the respective
+                            WindFinder web page.<p>
+                            The links to the WindFinder page are sensitive to the event time. If it's a few days before the event,
+                            a forecast link will be used. During the event the actual report page is shown. Outside of these dates
+                            a general weather statistics page is shown for the venue. 
+                        </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">January 2018</h2>
                     <ul class="bulletList">
                         <li>The auto detection for the media add dialog was improved. It will now attempt to only load the parts of a video, that are required to parse the tags. Additionally if the server cannot reach a video, the client (browser) will make an attempt to load the video. This allows to analyze locally hosted videos without the need to upload them.</li>
@@ -35,16 +52,17 @@
                             A new race column is created in the same series the current race is associated to.
                             A new tracked race is then associated to the new column for the fleet of the current race.
                             This new race is being filled with the data from the current race for the selected time range.
-                            After the slicing process is finished, a dialog will open providing a link to the RaceBoard for the newly added race.
+                            After the slicing process is finished, a dialog will open providing a link to the RaceBoard for the newly added race.</li>
                     </ul>
-                    
+    
                     <h2 class="articleSubheadline">December 2017</h2>
                     <ul class="bulletList">
                         <li>In the raceboard it is now possible to upload 360&deg; videos in addition to the already supported video types. 
                         360&deg; Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
                         The dialog will try an auto-detection for the mimetype upon entering the link.
-                        Additionally, for mp4  videos it is now possible to use the start time, written in the file, as an start time preset for the mediatrack, simplifying the video linking.</li>
-                        <li> In Home it is now also possible to use 360&deg; videos, for example as an highlight video</li>
+                        Additionally, for mp4 videos it is now possible to use the start time, written in the file, as
+                        a start time preset for the mediatrack, simplifying the video linking.</li>
+                        <li>In Home it is now also possible to use 360&deg; videos, for example as a highlight video</li>
                         <li>Various Fix importers can now properly report errors and other states</li>
                         <li>Pairing list generation is now supported. Add competitors to a regatta, then use the new
                             action icons in the Leaderboards/Leaderboards panel in the administration console to generate
