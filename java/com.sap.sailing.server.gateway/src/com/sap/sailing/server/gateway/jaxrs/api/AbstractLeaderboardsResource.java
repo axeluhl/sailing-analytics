@@ -30,28 +30,26 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
 
     public enum ResultStates {
         Live, Final
-    };
+    }
 
     protected boolean isValidLeaderboard(Leaderboard leaderboard) {
+        final boolean result;
         if (leaderboard == null) {
             logger.warning("Could not find a leaderboard with the given name");
-            return false;
-        }
-
-        if (!(leaderboard instanceof HasRegattaLike)) {
+            result = false;
+        } else if (!(leaderboard instanceof HasRegattaLike)) {
             logger.warning("Specified Leaderboard does not have a RegattaLike child (is not a RegattaLeaderboard/FlexibleLeaderboard)");
-            return false;
+            result = false;
+        } else {
+            result = true;
         }
-
-        return true;
+        return result;
     }
 
     protected JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard, ResultStates resultState,
             TimePoint requestTimePoint, Integer maxCompetitorsCount) throws NoWindException {
         JSONObject jsonLeaderboard = new JSONObject();
-
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null, maxCompetitorsCount);
-
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         for (Competitor competitor : leaderboard.getCompetitors()) {
@@ -65,7 +63,6 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
             jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym() : null);
             jsonCompetitor.put("countryCode", nationality != null ? (nationality.getCountryCode() != null ? nationality
                     .getCountryCode().getTwoLetterISOCode() : null) : null);
-
             jsonCompetitor.put("rank", 0);
             jsonCompetitor.put("carriedPoints", null);
             jsonCompetitor.put("netPoints", null);
@@ -100,7 +97,6 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("scoringComment", leaderboard.getComment());
         Date lastUpdateTimepoint = leaderboard.getTimePointOfLastCorrectionsValidity();
         jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.getTime() : null);
-
         JSONArray jsonColumnNames = new JSONArray();
         jsonLeaderboard.put("columnNames", jsonColumnNames);
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
@@ -126,18 +122,15 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
-
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         if (scoreCorrection != null) {
             jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
             TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
-            jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asMillis()
-                    : null);
+            jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asMillis() : null);
         } else {
             jsonLeaderboard.put("scoringComment", null);
             jsonLeaderboard.put("lastScoringUpdate", null);
         }
-
         JSONArray jsonColumnNames = new JSONArray();
         jsonLeaderboard.put("columnNames", jsonColumnNames);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
