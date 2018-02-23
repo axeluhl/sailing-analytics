@@ -7342,6 +7342,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }
             }
+            
+            final Iterable<MediaTrack> mediaTracksForOriginalRace = getService().getMediaTracksForRace(raceIdentifier);
+            for (MediaTrack mediaTrack : mediaTracksForOriginalRace) {
+                if (mediaTrack.overlapsWith(sliceFrom, sliceTo)) {
+                    final Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<>(mediaTrack.assignedRaces);
+                    assignedRaces.add(trackedRace.getRaceIdentifier());
+                    // we can't just use the original instance and add the Race due to the fact that this leads to
+                    // assignedRaces being empty afterwards.
+                    final MediaTrack mediaTrackToSave = new MediaTrack(mediaTrack.dbId, mediaTrack.title,
+                            mediaTrack.url, mediaTrack.startTime, mediaTrack.duration, mediaTrack.mimeType,
+                            assignedRaces);
+                    getService().mediaTrackAssignedRacesChanged(mediaTrackToSave);
+                }
+            }
             return trackedRace.getRaceIdentifier();
         } catch (Exception e) {
             throw new RuntimeException("Error while slicing race", e);
