@@ -81,6 +81,7 @@ import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
@@ -929,6 +930,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
     
     void getRaceDisplayNamesFromLeaderboard(final String leaderboardName, List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+
+    void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
+
+    void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
+            AsyncCallback<RegattaAndRaceIdentifier> callback);
+
+    void prepareForSlicingOfRace(RegattaAndRaceIdentifier raceIdentifier,
+            AsyncCallback<SliceRacePreperationDTO> callback);
     
     /**
      * For a given WindFinder spot ID provides a {@link URL} that a web UI can use to link
