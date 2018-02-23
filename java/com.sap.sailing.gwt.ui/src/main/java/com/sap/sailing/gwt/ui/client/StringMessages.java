@@ -2058,6 +2058,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String enterIdOfWindfinderReviewedSpotCollection();
     String enterTagsForTheImage();
     String unableToResolveWindFinderSpotId(String id, String message);
-
     String windFinderWeatherData();
 }
