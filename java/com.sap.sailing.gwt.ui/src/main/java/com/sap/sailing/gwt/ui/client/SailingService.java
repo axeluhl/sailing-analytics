@@ -11,6 +11,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -48,6 +49,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
@@ -89,6 +91,7 @@ import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
@@ -713,4 +716,21 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
 
     SpotDTO getWindFinderSpot(String spotId) throws Exception;
+    
+    /**
+     * Returns {@code true} if the given race can be sliced. Only Smarthphone tracked races can be sliced.
+     * In addition the race must be part of a {@link RegattaLeaderboard}.
+     */
+    boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier);
+    
+    /**
+     * Slices a new race from the race specified by the given {@link RegattaAndRaceIdentifier} using the given time range.
+     * A new {@link RaceColumn} with the given name is added to the {@link RegattaLeaderboard}.
+     */
+    RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo);
+
+    /**
+     * Returns specific data needed for the slicing UI.
+     */
+    SliceRacePreperationDTO prepareForSlicingOfRace(RegattaAndRaceIdentifier raceIdentifier);
 }
