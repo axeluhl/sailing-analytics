@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.common.client;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -23,7 +23,7 @@ public class EventWindFinderUtil {
      *            whether or not to use the cached set of wind finder spots for tracked races
      */
     public Iterable<SpotDTO> getWindFinderSpotsToConsider(Event event, WindFinderTrackerFactory windFinderTrackerFactory, boolean useCachedSpotsForTrackedRaces) {
-        final List<SpotDTO> windFinderSpots = new ArrayList<>();
+        final Set<SpotDTO> windFinderSpots = new LinkedHashSet<>();
         for (final String spotsCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
             try {
                 for (final Spot spot : windFinderTrackerFactory.getReviewedSpotsCollectionById(spotsCollectionId, /* lookupInCache */ true).
