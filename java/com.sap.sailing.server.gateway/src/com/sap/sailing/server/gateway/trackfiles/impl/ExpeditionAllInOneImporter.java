@@ -147,7 +147,7 @@ public class ExpeditionAllInOneImporter {
         final String seriesName = Series.DEFAULT_NAME;
 
         // TODO wild guess...
-        final ScoringSchemeType scoringSchemeType = ScoringSchemeType.HIGH_POINT;
+        final ScoringSchemeType scoringSchemeType = ScoringSchemeType.LOW_POINT;
         final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         final int[] discardThresholds = new int[0];
 
@@ -231,7 +231,7 @@ public class ExpeditionAllInOneImporter {
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
                 Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
-                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos()));
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
 
         final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
         final Fleet fleet = raceColumn.getFleets().iterator().next();

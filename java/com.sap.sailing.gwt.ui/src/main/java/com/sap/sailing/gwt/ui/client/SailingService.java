@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -317,8 +318,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws Exception;
     
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, String baseURLAsString,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
+            Iterable<VideoDTO> videos, Iterable<String> windFinderReviewedSpotCollectionIds) throws Exception;
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL,
@@ -709,4 +711,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;
     
     List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
+
+    SpotDTO getWindFinderSpot(String spotId) throws Exception;
 }

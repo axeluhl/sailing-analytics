@@ -9,6 +9,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -62,7 +63,10 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
         URL sailorsInfoWebsiteURL = event.getSailorsInfoWebsiteURLOrFallback(context.getClientLocale());
         dto.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL == null ? null : sailorsInfoWebsiteURL.toString());
-
+        if (context.getWindFinderTrackerFactory() != null) {
+            dto.setAllWindFinderSpotsUsedByEvent(new EventWindFinderUtil().getWindFinderSpotsToConsider(event,
+                    context.getWindFinderTrackerFactory(), /* useCachedSpotsForTrackedRaces */ true));
+        }
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));
         // bug2982: always show leaderboard and competitor analytics 

@@ -57,6 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -241,6 +242,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -311,9 +313,12 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.windfinder.Spot;
+import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
+import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -536,6 +541,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
     private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
+    
+    private final ServiceTracker<WindFinderTrackerFactory, WindFinderTrackerFactory> windFinderTrackerFactoryServiceTracker;
 
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -596,6 +603,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
         swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
@@ -3645,7 +3653,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString, String baseURLAsString,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
+            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos,
+            Iterable<String> windFinderReviewedSpotCollectionIds) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
@@ -3655,7 +3664,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
-                        isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos));
+                        isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages,
+                        eventVideos, windFinderReviewedSpotCollectionIds));
         return getEventById(eventId, false);
     }
 
@@ -3912,7 +3922,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventDTO.venue.getCourseAreas().add(courseAreaDTO);
         }
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, withStatisticalData));
+            eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */ false, withStatisticalData));
+        }
+        eventDTO.setWindFinderReviewedSpotsCollection(event.getWindFinderReviewedSpotsCollectionIds());
+        final WindFinderTrackerFactory windFinderTrackerFactory = windFinderTrackerFactoryServiceTracker.getService();
+        if (windFinderTrackerFactory != null) {
+            eventDTO.setAllWindFinderSpotsUsedByEvent(new EventWindFinderUtil().getWindFinderSpotsToConsider(event,
+                    windFinderTrackerFactory, /* useCachedSpotsForTrackedRaces */ false));
         }
         return eventDTO;
     }
@@ -4513,7 +4529,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
                 newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(),
-                newEvent.getBaseURL(), newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos());
+                newEvent.getBaseURL(), newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos(),
+                newEvent.getWindFinderReviewedSpotsCollectionIds());
     }
     
     @Override
@@ -6905,44 +6922,61 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    public List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName,List<String> raceColumnNames) throws NotFoundException{
-        Leaderboard leaderboard=this.getLeaderboardByName(leaderboardName);
-        List<String> result=new ArrayList<>();
+    public List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName,List<String> raceColumnNames) throws NotFoundException {
+        Leaderboard leaderboard = this.getLeaderboardByName(leaderboardName);
+        List<String> result = new ArrayList<>();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if(raceColumn.hasTrackedRaces()){
+            if (raceColumn.hasTrackedRaces()) {
                 if (raceColumnNames.contains(raceColumn.getName())) {
                     for (Fleet fleet : raceColumn.getFleets()) {
-                        if(raceColumn.getTrackedRace(fleet) != null && raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null){
+                        if(raceColumn.getTrackedRace(fleet) != null && raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null) {
                             result.add(raceColumn.getTrackedRace(fleet).getRaceIdentifier().getRaceName());
                         }
                     }
                 }
-            }else{
+            } else {
                 break;
             }
         }
-        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
+        if (result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())) {
             return result;
         }
         result.clear();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
-                for(Fleet fleet: raceColumn.getFleets()){
-                    NavigableSet<RaceLogEvent> set=raceColumn.getRaceLog(fleet).getUnrevokedEvents();
-                    for (RaceLogEvent raceLogEvent : set) {
-                        if(raceLogEvent instanceof RaceLogDenoteForTrackingEvent){
-                            RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
-                            result.add(denoteEvent.getRaceName());
-                            break;
-                        }
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (Fleet fleet: raceColumn.getFleets()) {
+                NavigableSet<RaceLogEvent> set=raceColumn.getRaceLog(fleet).getUnrevokedEvents();
+                for (RaceLogEvent raceLogEvent : set) {
+                    if (raceLogEvent instanceof RaceLogDenoteForTrackingEvent) {
+                        RaceLogDenoteForTrackingEvent denoteEvent = (RaceLogDenoteForTrackingEvent) raceLogEvent;
+                        result.add(denoteEvent.getRaceName());
+                        break;
                     }
                 }
+            }
         }
-        if(result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())){
+        if (result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())) {
             return result;
         }
         result.clear();
-        for(int count=1;count<=raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets());count++){
+        for (int count=1;count<=raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets());count++) {
             result.add("Race "+count);
+        }
+        return result;
+    }
+
+    @Override
+    public SpotDTO getWindFinderSpot(String spotId) throws MalformedURLException, IOException, org.json.simple.parser.ParseException, InterruptedException, ExecutionException {
+        final SpotDTO result;
+        final WindFinderTrackerFactory windFinderTrackerFactory = windFinderTrackerFactoryServiceTracker.getService();
+        if (windFinderTrackerFactory != null) {
+            final Spot spot = windFinderTrackerFactory.getSpotById(spotId, /* cached */ false);
+            if (spot != null) {
+                result = new SpotDTO(spot);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
         }
         return result;
     }
