@@ -594,6 +594,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
         storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
+        BasicDBList windFinderSpotCollectionIds = new BasicDBList();
+        for (final String windFinderSpotCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
+            windFinderSpotCollectionIds.add(windFinderSpotCollectionId);
+        }
+        eventDBObject.put(FieldNames.EVENT_WINDFINDER_SPOT_COLLECTION_IDS.name(), windFinderSpotCollectionIds);
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
         BasicDBList images = new BasicDBList();

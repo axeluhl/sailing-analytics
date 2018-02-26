@@ -236,7 +236,7 @@ public class EventsResource extends AbstractSailingServerResource {
             baseURL = baseURLParam != null ? new URL(baseURLParam) : event.getBaseURL();
             getService().updateEvent(id, eventName, eventDescription, startDate, endDate, venueName, isPublic,
                     leaderboardGroupIds, officialWebsiteURL, baseURL, event.getSailorsInfoWebsiteURLs(),
-                    event.getImages(), event.getVideos());
+                    event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
             response = Response.ok().build();
         }
         return response;
@@ -524,7 +524,7 @@ public class EventsResource extends AbstractSailingServerResource {
         getService().updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(), newLeaderboardGroupIds,
                 event.getOfficialWebsiteURL(), event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(),
-                event.getVideos());
+                event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
     }
 
     private CourseArea addCourseArea(UUID eventId, String courseAreaName) {
