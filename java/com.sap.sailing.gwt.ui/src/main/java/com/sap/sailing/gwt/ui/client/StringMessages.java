@@ -110,6 +110,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventName();
     String event();
     String startTime();
+    String endTime();
     String startOfTracking();
     String endOfTracking();
     String regatta();
@@ -2050,4 +2051,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chooseAName();
     String unexpectedErrorDuringFileImport();
     String couldNotDownload(String url);
+    String sliceRace();
+    String slicingARaceWasSuccessful();
+    String enterNameForSlicedRace();
+    String raceNameIsRequired();
+    String raceNameIsAlreadyUsed();
+    String errorWhilePreparingToSliceARace();
+    String errorWhileSlicingARace();
+    String windFinderWindSourceTypeName();
+    String windFinderWindSourceTypeTooltip();
+    String windFinder();
+    String enterTagsForTheVideo();
+    String enterIdOfWindfinderReviewedSpotCollection();
+    String enterTagsForTheImage();
+    String unableToResolveWindFinderSpotId(String id, String message);
+    String windFinderWeatherData();
 }

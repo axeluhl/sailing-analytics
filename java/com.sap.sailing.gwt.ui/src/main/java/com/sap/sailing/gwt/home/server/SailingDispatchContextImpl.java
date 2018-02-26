@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.news.EventNewsService;
@@ -31,12 +32,15 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     private final SecurityService securityService;
     private final UserStore userStore;
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
+    private final WindFinderTrackerFactory windFinderTrackerFactory;
 
     public SailingDispatchContextImpl(Date currentClientTime, RacingEventService racingEventService,
-            EventNewsService eventNewsService, SecurityService securityService, UserStore userStore,
-            TrackedRaceStatisticsCache trackedRaceStatisticsCache, String clientLocaleName, HttpServletRequest request) {
+            WindFinderTrackerFactory windFinderTrackerFactory, EventNewsService eventNewsService,
+            SecurityService securityService, UserStore userStore, TrackedRaceStatisticsCache trackedRaceStatisticsCache,
+            String clientLocaleName, HttpServletRequest request) {
         this.currentClientTime = currentClientTime;
         this.racingEventService = racingEventService;
+        this.windFinderTrackerFactory = windFinderTrackerFactory;
         this.eventNewsService = eventNewsService;
         this.securityService = securityService;
         this.userStore = userStore;
@@ -50,6 +54,11 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
         return racingEventService;
     }
     
+    @Override
+    public WindFinderTrackerFactory getWindFinderTrackerFactory() {
+        return windFinderTrackerFactory;
+    }
+
     public EventNewsService getEventNewsService() {
         return eventNewsService;
     }
