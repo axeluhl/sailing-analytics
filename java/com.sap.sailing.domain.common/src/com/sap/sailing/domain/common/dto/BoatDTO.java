@@ -28,12 +28,6 @@ public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice 
         this.color = color;
     }
 
-    @Override
-    public String getIdAsString() {
-        // FIXME Bug 2822 -> proper implementation
-        return null;
-    }
-
     public Color getColor() {
         return color;
     }
@@ -42,6 +36,7 @@ public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice 
         return sailId;
     }
     
+    @Override
     public String getIdAsString() {
         return idAsString;
     }
