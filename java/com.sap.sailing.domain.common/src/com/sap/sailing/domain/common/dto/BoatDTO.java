@@ -2,9 +2,10 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
 
-public class BoatDTO extends NamedDTO implements Serializable {
+public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice {
     private static final long serialVersionUID = -4076992788294272162L;
 
     private String idAsString;
@@ -25,6 +26,12 @@ public class BoatDTO extends NamedDTO implements Serializable {
         this.boatClass = boatClass;
         this.sailId = sailId;
         this.color = color;
+    }
+
+    @Override
+    public String getIdAsString() {
+        // FIXME Bug 2822 -> proper implementation
+        return null;
     }
 
     public Color getColor() {

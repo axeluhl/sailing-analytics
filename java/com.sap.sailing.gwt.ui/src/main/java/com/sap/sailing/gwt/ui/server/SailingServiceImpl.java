@@ -97,6 +97,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEnde
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
@@ -5989,8 +5990,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                         competitor, mapping.getDevice(), from, to);
             }
+        } else if (dto.mappedTo instanceof BoatDTO) {
+            final Boat boat = getService().getCompetitorStore().getExistingBoatById(((BoatDTO) dto.mappedTo).getIdAsString());
+            event = new RegattaLogDeviceBoatMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
+                    boat, mapping.getDevice(), from, to);
         } else {
-            throw new RuntimeException("Can only map devices to competitors or marks");
+            throw new RuntimeException("Can only map devices to competitors, marks or boats");
         }
         regattaLog.add(event);
     }
