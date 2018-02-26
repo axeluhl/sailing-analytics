@@ -1101,7 +1101,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     default Bearing getTWA(Competitor competitor, TimePoint at){
         return getTWA(competitor, at, new LeaderboardDTOCalculationReuseCache(at));
-    };
+    }
+    
     /**
      * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
      * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
