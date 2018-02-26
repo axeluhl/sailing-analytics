@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -184,6 +185,12 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                             if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
                                 mapper.addFix(track, (DoubleVectorFix) fix);
                             }
+                        }
+                        
+                        @Override
+                        public void visit(RegattaLogDeviceBoatMappingEvent event) {
+                            // TODO Auto-generated method stub
+                            
                         }
                         
                         @Override
@@ -415,6 +422,12 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 }
                 
                 @Override
+                public void visit(RegattaLogDeviceBoatMappingEvent event) {
+                    // TODO Auto-generated method stub
+                    
+                }
+                
+                @Override
                 public void visit(RegattaLogDeviceMarkMappingEvent event) {
                     DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
                     try {
@@ -443,6 +456,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 
                 @Override
                 public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+                    throw new UnsupportedOperationException();
+                }
+                
+                @Override
+                public void visit(RegattaLogDeviceBoatMappingEvent event) {
                     throw new UnsupportedOperationException();
                 }
                 

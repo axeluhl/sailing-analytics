@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
@@ -41,6 +42,11 @@ public class MongoRegattaLogStoreVisitor implements RegattaLogEventVisitor {
 
     @Override
     public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+        mongoObjectFactory.storeRegattaLogEvent(regattaLikeIdentifier, event);
+    }
+
+    @Override
+    public void visit(RegattaLogDeviceBoatMappingEvent event) {
         mongoObjectFactory.storeRegattaLogEvent(regattaLikeIdentifier, event);
     }
 

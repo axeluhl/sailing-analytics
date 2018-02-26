@@ -13,6 +13,12 @@ public abstract class RegattaLogDeviceMappingEventImpl<ItemType extends WithID> 
 RegattaLogDeviceMappingEvent<ItemType> {
     private static final long serialVersionUID = -8439653251231710356L;
 
+    public interface Factory<ItemType extends WithID, T extends RegattaLogDeviceMappingEvent<ItemType>> {
+        T create(TimePoint createdAt, TimePoint logicalTimePoint,
+                AbstractLogEventAuthor author, Serializable pId, ItemType mappedTo, DeviceIdentifier device,
+                TimePoint from, TimePoint to);
+    }
+
     private final ItemType mappedTo;
     private final DeviceIdentifier device;
     
