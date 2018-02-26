@@ -21,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
@@ -188,17 +189,27 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         }
                         
                         @Override
-                        public void visit(RegattaLogDeviceBoatMappingEvent event) {
-                            // TODO Auto-generated method stub
-                            
+                        public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+                            recordForCompetitor(event.getMappedTo());
                         }
                         
                         @Override
-                        public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+                        public void visit(RegattaLogDeviceBoatMappingEvent event) {
+                            final Boat boat = event.getMappedTo();
+                            final Competitor comp = getCompetitorForBoat(boat);
+                            if (comp != null) {
+                                recordForCompetitor(comp);
+                            } else {
+                                logger.log(Level.WARNING,
+                                        "Could not record fix for boat because no competitor could be determined. Boat: "
+                                                + boat);
+                            }
+                        }
+                        
+                        public void recordForCompetitor(Competitor comp) {
                             if (preemptiveStopRequested.get()) {
                                 return;
                             }
-                            Competitor comp = event.getMappedTo();
                             if (fix instanceof GPSFixMoving) {
                                 trackedRace.recordFix(comp, (GPSFixMoving) fix);
                             } else {
@@ -284,6 +295,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.trackedRace = trackedRace;
         startTracking();
+    }
+    
+    private Competitor getCompetitorForBoat(Boat boat) {
+        // FIXME Bug 2822 -> proper implementation
+        return null;
     }
 
     /**
@@ -405,7 +421,24 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 
                 @Override
                 public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
-                    DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(event.getMappedTo());
+                    loadForCompetitor(event.getMappedTo(), event);
+                }
+                
+                @Override
+                public void visit(RegattaLogDeviceBoatMappingEvent event) {
+                    final Boat boat = event.getMappedTo();
+                    final Competitor comp = getCompetitorForBoat(boat);
+                    if (comp != null) {
+                        loadForCompetitor(comp, event);
+                    } else {
+                        logger.log(Level.WARNING,
+                                "Could not load fixes for boat because no competitor could be determined. Boat: "
+                                        + boat);
+                    }
+                }
+                
+                private void loadForCompetitor(Competitor competitor, RegattaLogDeviceMappingEvent<?> event) {
+                    DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     if (track != null) {
                         // for split-fleet racing, device mappings coming from the regatta log may not be relevant
                         // for the trackedRace because the competitors may not compete in it; in this case, the
@@ -415,16 +448,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                     timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
                                     stopCallback, progressConsumer);
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load competitor track " + event.getMappedTo() + "; device "
+                            logger.log(Level.WARNING, "Could not load competitor track " + competitor + "; device "
                                     + event.getDevice());
                         }
                     }
-                }
-                
-                @Override
-                public void visit(RegattaLogDeviceBoatMappingEvent event) {
-                    // TODO Auto-generated method stub
-                    
                 }
                 
                 @Override
