@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad;
 
+import java.util.function.BiFunction;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -12,7 +14,7 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
-public abstract class RaceviewerLaunchPad extends Composite {
+class RaceviewerLaunchPad extends Composite {
 
     private static RaceviewerLaunchPadUiBinder uiBinder = GWT.create(RaceviewerLaunchPadUiBinder.class);
 
@@ -21,9 +23,12 @@ public abstract class RaceviewerLaunchPad extends Composite {
 
     @UiField RaceviewerLaunchPadResources local_res;
     @UiField DivElement itemContainerUi;
+    private final BiFunction<SimpleRaceMetadataDTO, String, String> raceboardUrlFactory;
     private final PopupPanel parent;
 
-    public RaceviewerLaunchPad(SimpleRaceMetadataDTO data, final PopupPanel parent) {
+    RaceviewerLaunchPad(SimpleRaceMetadataDTO data,
+            BiFunction<SimpleRaceMetadataDTO, String, String> raceboardUrlFactory, PopupPanel parent) {
+        this.raceboardUrlFactory = raceboardUrlFactory;
         this.parent = parent;
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
@@ -50,7 +55,7 @@ public abstract class RaceviewerLaunchPad extends Composite {
     }
     
     private void addItem(SimpleRaceMetadataDTO data, RaceviewerLaunchPadMenuItem item) {
-        String raceViewerUrl = getRaceViewerURL(data, item.raceBoardMode);
+        String raceViewerUrl = raceboardUrlFactory.apply(data, item.raceBoardMode);
         itemContainerUi.appendChild(new RaceviewerLaunchPadItem(item.label, item.icon, raceViewerUrl).getElement());
     }
     
@@ -70,6 +75,4 @@ public abstract class RaceviewerLaunchPad extends Composite {
         }
     }
     
-    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO data, String raceBoardMode);
-
 }

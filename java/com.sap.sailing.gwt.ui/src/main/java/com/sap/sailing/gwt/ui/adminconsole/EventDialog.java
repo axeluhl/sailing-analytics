@@ -34,6 +34,7 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -49,6 +50,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected TextBox baseURLEntryField;
     protected CourseAreaListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
+    protected StringListInlineEditorComposite windFinderSpotCollectionIdsComposite;
     protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
@@ -160,6 +162,9 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
         videosListComposite = new VideosListComposite(stringMessages);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
+        windFinderSpotCollectionIdsComposite = new StringListInlineEditorComposite(Collections.<String> emptyList(),
+                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        Collections.emptyList(), stringMessages.enterIdOfWindfinderReviewedSpotCollection(), 80));
     }
 
     @Override
@@ -189,6 +194,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             result.addVideo(video);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
+        result.setWindFinderReviewedSpotsCollection(windFinderSpotCollectionIdsComposite.getValue());
         return result;
     }
 
@@ -240,6 +246,9 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         final ScrollPanel videosTab = new ScrollPanel(videosListComposite);
         videosTab.ensureDebugId("VideosTab");
         tabPanel.add(videosTab, stringMessages.videos());
+        final ScrollPanel windFinderTab = new ScrollPanel(windFinderSpotCollectionIdsComposite);
+        windFinderTab.ensureDebugId("WindFinderTab");
+        tabPanel.add(windFinderTab, stringMessages.windFinder());
         return panel;
     }
 

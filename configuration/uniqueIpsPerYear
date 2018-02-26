@@ -1,0 +1,10 @@
+#!/bin/sh
+year=$1
+read -s -p "Password for user awstats on awstats.sapsailing.com: " passwd
+if [ "$year" = "" ]; then
+  year=`date +%Y`
+fi
+for i in Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec; do
+  echo -n "$i: "
+  wget -O - "http://awstats:$passwd@awstats.sapsailing.com/unique-visitors/unique-ips-days-useragents-per-event-$i-$year" 2>/dev/null | awk '{ sum=sum+$2; } END { print sum; }'
+done | awk '{ print $0; total=total+$2; } END { print "Total: " total; }'
