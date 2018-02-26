@@ -1088,9 +1088,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
             SpeedWithBearing speedOverGround = sogTrack.getEstimatedSpeed(timePoint);
             Wind wind = cache.getWind(this, competitor, timePoint);
             if (wind != null && speedOverGround != null) {
-                if (speedOverGround != null) {
-                    beatAngle = speedOverGround.getBearing().getDifferenceTo(wind.getFrom());
-                }
+                final Bearing projectToDirection = wind.getFrom();
+                beatAngle = speedOverGround.getBearing().getDifferenceTo(projectToDirection);
             }
         }
         return beatAngle;
