@@ -5919,6 +5919,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
         } else if (mappedTo instanceof Mark) {
             item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
+        } else if (mappedTo instanceof Boat) {
+            item = baseDomainFactory.convertToBoatDTO((Boat) mappedTo);
         } else {
             throw new RuntimeException("Can only handle Competitor or Mark as mapped item type, but not "+mappedTo.getClass().getName());
         }
