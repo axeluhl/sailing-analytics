@@ -1081,26 +1081,26 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
      * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
      */
-    default Bearing getBeatAngleFor(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        Bearing beatAngle = null;
+    default Bearing getTWA(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        Bearing twa = null;
         final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = this.getTrack(competitor);
         if (sogTrack != null) {
             SpeedWithBearing speedOverGround = sogTrack.getEstimatedSpeed(timePoint);
             Wind wind = cache.getWind(this, competitor, timePoint);
             if (wind != null && speedOverGround != null) {
                 final Bearing projectToDirection = wind.getFrom();
-                beatAngle = speedOverGround.getBearing().getDifferenceTo(projectToDirection);
+                twa = speedOverGround.getBearing().getDifferenceTo(projectToDirection);
             }
         }
-        return beatAngle;
+        return twa;
     }
     
     /**
-     * Same as {@link #getBeatAngle}, only that additionally a cache is provided that can allow the method to use
+     * Same as {@link #getTWA}, only that additionally a cache is provided that can allow the method to use
      * cached wind and leg type values.
      */
-    default Bearing determineBeatAngleForChart(Competitor competitor, TimePoint at){
-        return getBeatAngleFor(competitor, at, new LeaderboardDTOCalculationReuseCache(at));
+    default Bearing getTWA(Competitor competitor, TimePoint at){
+        return getTWA(competitor, at, new LeaderboardDTOCalculationReuseCache(at));
     };
     /**
      * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can

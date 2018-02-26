@@ -26,7 +26,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * This container has two regressions. One for boatSpeed over windSpeed and one for beatAngle over windSpeed
+ * This container has two regressions. One for boatSpeed over windSpeed and one for twa over windSpeed
  * estimations.<p>
  * 
  * It can return speed and angle for a given windSpeed and should only be used for restricted sets of input data. There

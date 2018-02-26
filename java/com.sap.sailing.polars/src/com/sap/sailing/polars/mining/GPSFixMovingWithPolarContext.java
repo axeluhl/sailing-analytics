@@ -79,7 +79,7 @@ public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, Ang
         Bearing bearing = null;
         TrackedLegOfCompetitor currentLeg = race.getCurrentLeg(competitor, fix.getTimePoint());
         if (currentLeg != null) {
-            Bearing realBearing = race.determineBeatAngleForChart(competitor, fix.getTimePoint());
+            Bearing realBearing = race.getTWA(competitor, fix.getTimePoint());
             bearing = realBearing == null ? null : new DegreeBearingImpl(Math.abs(realBearing.getDegrees()));
         }
         WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(),
