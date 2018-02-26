@@ -196,7 +196,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         @Override
                         public void visit(RegattaLogDeviceBoatMappingEvent event) {
                             final Boat boat = event.getMappedTo();
-                            final Competitor comp = getCompetitorForBoat(boat);
+                            final Competitor comp = trackedRace.getCompetitorOfBoat(boat);
                             if (comp != null) {
                                 recordForCompetitor(comp);
                             } else {
@@ -295,11 +295,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.trackedRace = trackedRace;
         startTracking();
-    }
-    
-    private Competitor getCompetitorForBoat(Boat boat) {
-        // FIXME Bug 2822 -> proper implementation
-        return null;
     }
 
     /**
@@ -427,7 +422,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 @Override
                 public void visit(RegattaLogDeviceBoatMappingEvent event) {
                     final Boat boat = event.getMappedTo();
-                    final Competitor comp = getCompetitorForBoat(boat);
+                    final Competitor comp = trackedRace.getCompetitorOfBoat(boat);
                     if (comp != null) {
                         loadForCompetitor(comp, event);
                     } else {

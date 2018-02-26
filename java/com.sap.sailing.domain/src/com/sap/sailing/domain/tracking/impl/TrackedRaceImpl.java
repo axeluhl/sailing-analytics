@@ -1465,6 +1465,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return getRace().getBoatOfCompetitor(competitor);
     }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        if (boat == null) {
+            return null;
+        }
+        for (Map.Entry<Competitor, Boat> competitorWithBoat : getRace().getCompetitorsAndTheirBoats().entrySet()) {
+            if (boat.equals(competitorWithBoat.getValue())) {
+                return competitorWithBoat.getKey();
+            }
+        }
+        return null;
+    }
 
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
