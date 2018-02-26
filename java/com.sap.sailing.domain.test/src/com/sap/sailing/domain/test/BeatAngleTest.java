@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -61,9 +62,10 @@ public class BeatAngleTest {
         when(trackedRace.getWind((Position) anyObject(), (TimePoint) anyObject())).thenReturn(
                 new WindImpl(new DegreePosition(0, 0), MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
                         windToBearing)));
-        when(trackedLegOfCompetitor.getSpeedOverGround((TimePoint) anyObject())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
-        when(trackedRace.determineBeatAngleForChart(competitor, (TimePoint) anyObject())).thenCallRealMethod();
-        when(trackedRace.getBeatAngleFor(competitor, (TimePoint) anyObject(), (WindLegTypeAndLegBearingCache) anyObject())).thenCallRealMethod();
+        
+        when(competitorTrack.getEstimatedSpeed((TimePoint) anyObject())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
+        when(trackedRace.determineBeatAngleForChart(Matchers.eq(competitor), (TimePoint) anyObject())).thenCallRealMethod();
+        when(trackedRace.getBeatAngleFor(Matchers.eq(competitor), (TimePoint) anyObject(), (WindLegTypeAndLegBearingCache) anyObject())).thenCallRealMethod();
     }
 
     @Test

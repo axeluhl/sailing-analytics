@@ -1086,12 +1086,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = this.getTrack(competitor);
         if (sogTrack != null) {
             SpeedWithBearing speedOverGround = sogTrack.getEstimatedSpeed(timePoint);
-            Bearing projectToBearing;
             Wind wind = cache.getWind(this, competitor, timePoint);
-            if (wind != null) {
-                projectToBearing = wind.getFrom();
+            if (wind != null && speedOverGround != null) {
                 if (speedOverGround != null) {
-                    beatAngle = speedOverGround.getBearing().getDifferenceTo(projectToBearing);
+                    beatAngle = speedOverGround.getBearing().getDifferenceTo(wind.getFrom());
                 }
             }
         }
