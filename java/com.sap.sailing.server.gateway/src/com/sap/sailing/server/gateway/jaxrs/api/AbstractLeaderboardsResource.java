@@ -23,7 +23,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractLeaderboardsResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardsResource.class.getName());
@@ -142,10 +141,8 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         TimePoint result = null;
         switch (resultState) {
         case Live:
-            result = leaderboard.getTimePointOfLatestModification();
-            if (result == null) {
-                result = MillisecondsTimePoint.now();
-            }
+            // the timepoint to be used for a live leaderboard is 'null' 
+            result = null;
             break;
         case Final:
             if (leaderboard.getScoreCorrection() != null

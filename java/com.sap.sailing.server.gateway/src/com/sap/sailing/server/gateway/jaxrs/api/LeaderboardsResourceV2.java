@@ -92,20 +92,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return response;
     }
 
-    @Override
-    protected TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {
-        TimePoint result = null;
-        switch (resultState) {
-            case Live:
-                result = null;
-                break;
-            case Final:
-                result = super.calculateTimePointForResultState(leaderboard, resultState);
-                break;
-        }   
-        return result;
-    }     
-
     private JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
             List<String> raceColumnNames, List<String> raceDetailNames)
