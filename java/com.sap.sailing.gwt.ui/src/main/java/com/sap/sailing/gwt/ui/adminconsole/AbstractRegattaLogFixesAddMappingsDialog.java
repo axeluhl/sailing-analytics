@@ -207,7 +207,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         VerticalPanel leftPanel = new VerticalPanel();
         VerticalPanel tablesPanel = new VerticalPanel();
         CaptionPanel marksPanel = new CaptionPanel(stringMessages.mark());
-        CaptionPanel boatsPanel = new CaptionPanel(stringMessages.boats());
+        CaptionPanel boatsPanel = new CaptionPanel(stringMessages.boat());
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitor());
 
         leftPanel.add(importWidgetHolder);
