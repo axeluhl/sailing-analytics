@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -54,7 +53,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogFlagEventSerializer(competitorSerializer), 
                 new RaceLogStartTimeEventSerializer(competitorSerializer), 
                 new RaceLogRaceStatusEventSerializer(competitorSerializer),
-                new RaceLogCourseAreaChangedEventSerializer(competitorSerializer),
                 new RaceLogPassChangeEventSerializer(competitorSerializer),
                 new RaceLogCourseDesignChangedEventSerializer(competitorSerializer,
                         new CourseBaseJsonSerializer(
@@ -87,7 +85,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> flagEventSerializer;
     private final JsonSerializer<RaceLogEvent> startTimeSerializer;
     private final JsonSerializer<RaceLogEvent> raceStatusSerializer;
-    private final JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> passChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
@@ -116,7 +113,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> flagEventSerializer,
             JsonSerializer<RaceLogEvent> startTimeSerializer,
             JsonSerializer<RaceLogEvent> raceStatusSerializer,
-            JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer,
             JsonSerializer<RaceLogEvent> passChangedEventSerializer,
             JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer, 
             JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer,
@@ -140,7 +136,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
-        this.courseAreaChangedEventSerializer = courseAreaChangedEventSerializer;
         this.passChangedEventSerializer = passChangedEventSerializer;
         this.courseDesignChangedEventSerializer = courseDesignChangedEventSerializer;
         this.finishPositioningListChangedEventSerializer = finishPositioningListChangedEventSerializer;
@@ -199,11 +194,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     @Override
     public void visit(RaceLogStartTimeEvent event) {
         chosenSerializer = startTimeSerializer;
-    }
-
-    @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
-        chosenSerializer = courseAreaChangedEventSerializer;
     }
 
     @Override
