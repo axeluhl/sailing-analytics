@@ -25,21 +25,25 @@ public class SimpleInfoBlock extends Composite {
 
     public SimpleInfoBlock() {
         initWidget(uiBinder.createAndBindUi(this));
+        getElement().getStyle().setDisplay(Display.NONE);
     }
 
     public void setDescription(SafeHtml description) {
         descriptionUi.getStyle().setDisplay(Display.BLOCK);
+        getElement().getStyle().clearDisplay();
         descriptionUi.setInnerSafeHtml(description);
     }
 
     public void setAction(String label, String url) {
         actionUi.getStyle().setDisplay(Display.BLOCK);
+        getElement().getStyle().clearDisplay();
         actionUi.setInnerText(label);
         actionUi.setHref(UriUtils.fromString(url));
     }
     
     public void setAction(String label, PlaceNavigation<?> placeNavigation) {
         actionUi.getStyle().setDisplay(Display.BLOCK);
+        getElement().getStyle().clearDisplay();
         actionUi.setInnerText(label);
         placeNavigation.configureAnchorElement(actionUi);
     }

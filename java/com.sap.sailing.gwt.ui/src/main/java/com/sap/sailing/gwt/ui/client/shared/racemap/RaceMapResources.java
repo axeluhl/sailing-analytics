@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.TextResource;
 
 public interface RaceMapResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/cameraBoat.png")
@@ -27,6 +28,9 @@ public interface RaceMapResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/maneuver_green.png")
     ImageResource maneuverMarkerGreen();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/windfinder-logo.svg")
+    TextResource getWindFinderLogo();
 
     @Source("RaceMap.css")
     RaceMapStyle raceMapStyle();

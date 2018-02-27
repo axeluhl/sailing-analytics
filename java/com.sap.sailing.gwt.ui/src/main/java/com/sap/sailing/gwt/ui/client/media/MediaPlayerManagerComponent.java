@@ -61,7 +61,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
-        T createVideoContainer(VideoSynchPlayer videoPlayer, boolean showSynchControls, MediaServiceAsync mediaService,
+        T createVideoContainer(VideoSynchPlayer videoPlayer, UserService userService, MediaServiceAsync mediaService,
                 ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener);
     }
     
@@ -365,7 +365,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     new VideoContainerFactory<VideoDockedContainer>() {
                         @Override
                         public VideoDockedContainer createVideoContainer(VideoSynchPlayer videoPlayer,
-                                boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+                                UserService userService, MediaServiceAsync mediaService, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             VideoDockedContainer videoDockedContainer = new VideoDockedContainer(rootPanel,
                                     videoPlayer, playerCloseListener, popoutListener);
@@ -441,10 +441,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     new VideoContainerFactory<VideoFloatingContainer>() {
                         @Override
                         public VideoFloatingContainer createVideoContainer(VideoSynchPlayer videoPlayer,
-                                boolean showSynchControls, MediaServiceAsync mediaService, ErrorReporter errorReporter,
+                                UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer, popupPositionProvider,
-                                    showSynchControls, mediaService, errorReporter, playerCloseListener, popoutListener);
+                                    userservice, mediaService, errorReporter, playerCloseListener, popoutListener);
                             return videoFloatingContainer;
                         }
                     });
@@ -489,16 +489,12 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             }
         };
         final VideoSynchPlayer videoPlayer;
-        final UserDTO currentUser = userService.getCurrentUser();
-        boolean showSynchControls = currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
-                        SailingPermissionsForRoleProvider.INSTANCE);
         if (videoTrack.isYoutube()) {
-            videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
+            videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), raceTimer);
         } else {
             videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer);
         }
-        return videoContainerFactory.createVideoContainer(videoPlayer, showSynchControls, getMediaService(), errorReporter,
+        return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaService(), errorReporter,
                 playerCloseListener, popoutListener);
     }
 
@@ -522,6 +518,15 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         Date startOfRace = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).startOfRace;
         if (startOfRace != null) {
             return new MillisecondsTimePoint(startOfRace);
+        } else {
+            return null;
+        }
+    }
+    
+    private TimePoint getTrackingStartTime() {
+        Date startOfTracking = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).startOfTracking;
+        if (startOfTracking != null) {
+            return new MillisecondsTimePoint(startOfTracking);
         } else {
             return null;
         }
@@ -606,8 +611,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void addMediaTrack() {
-        TimePoint raceStartTime = getRaceStartTime();
-        TimePoint defaultStartTime = raceStartTime;
+        TimePoint defaultStartTime = getRaceStartTime();
+        if (defaultStartTime == null) {
+            defaultStartTime = getTrackingStartTime();
+        }
         NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
                 MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
                 new DialogCallback<MediaTrack>() {
