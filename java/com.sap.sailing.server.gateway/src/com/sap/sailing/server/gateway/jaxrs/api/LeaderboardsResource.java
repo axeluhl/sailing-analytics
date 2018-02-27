@@ -542,11 +542,12 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         logger.fine("JSON requestObject is: " + requestObject.toString());
         Long toMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_TO_MILLIS);
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        String boatId = (String) requestObject.get(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         TimePoint closingTimePointInclusive = new MillisecondsTimePoint(toMillis);
         if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null ||
-                (competitorId == null && markId == null)) {
+                (competitorId == null && boatId == null && markId == null)) {
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
@@ -558,6 +559,14 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
                 return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+        } else if (boatId != null) {
+            final Boat mappedToBoat = getService().getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            mappedTo = mappedToBoat;
+            if (mappedToBoat == null) {
+                logger.warning("No boat found for id " + boatId);
+                return Response.status(Status.BAD_REQUEST).entity("No boat found for id " + boatId)
                         .type(MediaType.TEXT_PLAIN).build();
             }
         } else {
@@ -572,18 +581,24 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             }
             
         }
+        final String mappedToTypeString;
+        if (competitorId != null) {
+            mappedToTypeString = "competitor";
+        } else {
+            mappedToTypeString = (markId != null) ? "mark" : "boat";
+        }
         OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
         if (deviceMappingEventId == null) {
-            logger.warning("No corresponding open "+((markId!=null)?"mark":"competitor")+" to device mapping has been found");
+            logger.warning("No corresponding open " + mappedToTypeString + " to device mapping has been found");
             return Response.status(Status.BAD_REQUEST)
-                    .entity("No corresponding open "+((markId!=null)?"mark":"competitor")+" to device mapping has been found")
+                    .entity("No corresponding open " + mappedToTypeString + " to device mapping has been found")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
                 author, deviceMappingEventId, closingTimePointInclusive);
         isRegattaLike.getRegattaLog().add(event);
-        logger.fine("Successfully checked out "+((markId!=null)?"mark ":"competitor ") + mappedTo.getName());
+        logger.fine("Successfully checked out " + mappedToTypeString + mappedTo.getName());
         return Response.status(Status.OK).build();
     }
 
