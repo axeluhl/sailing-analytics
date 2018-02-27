@@ -116,7 +116,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         toolbar.addStyleName(chartsCss.toolbar());
         add(toolbar);
         settingsButton = createSettingsButton();
-        settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
+        settingsButton.setStyleName(chartsCss.settingsButtonBackgroundImage());
         addToolbarButton(settingsButton);
         initWidget(rootPanel);
         getElement().getStyle().setMarginRight(12, Unit.PX);
