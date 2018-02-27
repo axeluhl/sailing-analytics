@@ -55,7 +55,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
         return settingsButton;
     }
-
+    
     @Override
     public MultiCompetitorRaceChartSettings getSettings() {
         return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
@@ -114,5 +114,4 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     public String getId() {
         return lifecycle.getComponentId();
     }
-
 }

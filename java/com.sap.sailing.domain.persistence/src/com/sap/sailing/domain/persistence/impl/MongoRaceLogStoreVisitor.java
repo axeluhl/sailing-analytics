@@ -3,7 +3,6 @@ package com.sap.sailing.domain.persistence.impl;
 import java.util.logging.Logger;
 
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -66,12 +65,6 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogStartTimeEvent event) {
         DBObject startTimeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(startTimeEventTrackEntry);
-    }
-
-    @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
-        DBObject courseAreaChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        mongoObjectFactory.storeRaceLogEventEvent(courseAreaChangedEventTrackEntry);
     }
 
     @Override

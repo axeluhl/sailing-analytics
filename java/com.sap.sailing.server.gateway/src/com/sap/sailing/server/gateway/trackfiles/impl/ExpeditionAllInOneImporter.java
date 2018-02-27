@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 import org.apache.commons.fileupload.FileItem;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
@@ -61,6 +61,7 @@ import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
+import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
@@ -151,11 +152,6 @@ public class ExpeditionAllInOneImporter {
         final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         final int[] discardThresholds = new int[0];
 
-        // TODO These are the defaults also used by the UI
-        final String raceLogEventAuthorName = "Shore";
-        final int raceLogEventPriority = 4;
-        final boolean correctWindDirectionByMagneticDeclination = true;
-
         final ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
         final List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filenameWithSuffix, fileItem));
         try {
@@ -233,13 +229,13 @@ public class ExpeditionAllInOneImporter {
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
                 Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
-                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos()));
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
 
         final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
         final Fleet fleet = raceColumn.getFleets().iterator().next();
 
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        final LogEventAuthorImpl author = new LogEventAuthorImpl(raceLogEventAuthorName, raceLogEventPriority);
+        final AbstractLogEventAuthor author = service.getServerAuthor();
 
         final TimePoint startOfTracking = firstFixAt;
         final TimePoint endOfTracking = lastFixAt;
@@ -257,14 +253,17 @@ public class ExpeditionAllInOneImporter {
             
             raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
             
-            final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet, true,
-                    correctWindDirectionByMagneticDeclination);
-
-            // TODO do we need to wait or is the TrackedRace guaranteed to be reachable after calling startTracking?
+            final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
+                    /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
+            
+            // wait for the RaceDefinition to be created
             raceHandle.getRace();
-
-            final DynamicTrackedRace trackedRace = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
-
+            
+            final DynamicTrackedRace trackedRace = WaitForTrackedRaceUtil.waitForTrackedRace(raceColumn, fleet, 10);
+            if (trackedRace == null) {
+                throw new IllegalStateException("Could not obtain imported race");
+            }
+            
             final WindImportResult windImportResult = new AbstractWindImporter.WindImportResult();
             final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION,
                     windSourceId);

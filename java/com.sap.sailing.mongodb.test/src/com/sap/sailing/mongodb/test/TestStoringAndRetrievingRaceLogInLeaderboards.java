@@ -24,7 +24,6 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -42,7 +41,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
@@ -424,27 +422,6 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             final CompetitorResults expectedCompetiorResults = event.getPositionedCompetitorsIDsNamesMaxPointsReasons();
             final CompetitorResults loadedCompetitorResults = loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons();
             assertCompetitorResultsEqual(expectedCompetiorResults, loadedCompetitorResults);
-            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
-        } finally {
-            loadedRaceLog.unlockAfterRead();
-        }
-    }
-
-    @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseAreaChangeEvent() {
-        final UUID uuid = UUID.randomUUID();
-        RaceLogCourseAreaChangedEvent event = new RaceLogCourseAreaChangeEventImpl(now, author, 0, uuid);
-        addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
-        RaceLog loadedRaceLog = retrieveRaceLog();
-        loadedRaceLog.lockForRead();
-        try {
-            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
-            RaceLogCourseAreaChangedEvent courseAreaEvent = (RaceLogCourseAreaChangedEvent) loadedEvent;
-            assertEquals(event.getCreatedAt(), courseAreaEvent.getCreatedAt());
-            assertEquals(event.getLogicalTimePoint(), courseAreaEvent.getLogicalTimePoint());
-            assertEquals(event.getPassId(), courseAreaEvent.getPassId());
-            assertEquals(event.getId(), courseAreaEvent.getId());
-            assertEquals(event.getCourseAreaId(), courseAreaEvent.getCourseAreaId());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();
