@@ -569,7 +569,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         entryDTO.netPoints = entry.getNetPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
-        entryDTO.trackedRank = entry.getTrackedRank();
         final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace == null ? null : trackedRace.getTrack(competitor);
         if (trackedRace != null) {
             Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
