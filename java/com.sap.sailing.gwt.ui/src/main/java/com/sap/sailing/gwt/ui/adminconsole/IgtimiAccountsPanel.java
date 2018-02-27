@@ -182,7 +182,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                     frame.setPixelSize(520, 770);
                     final CaptionImpl caption = new CaptionImpl();
                     caption.setText(stringMessages.addIgtimiUser());
-                    final DialogBox dialogBox = new DialogBox(/* autoHide */ true, /* modal */ true);
+                    final DialogBox dialogBox = new DialogBox(/* autoHide */ false, /* modal */ true);
                     Button closeButton = new Button(stringMessages.close());
                     closeButton.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
