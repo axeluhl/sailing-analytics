@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.suggestion.AbstractListSuggestOracle;
+import com.sap.sailing.gwt.home.shared.partials.filter.AbstractListSuggestBoxFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.AggregatorDefinitionChangedListener;
@@ -31,6 +34,8 @@ import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.filter.AbstractKeywordFilter;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -74,8 +79,10 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
     
     private final FlowPanel mainPanel;
     private final List<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> availableExtractionFunctions;
-    private final ValueListBox<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> extractionFunctionListBox;
+    private final ExtractionFunctionTextBoxFilter extractionFunctionTextBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
+    
+    private Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> selectedExtractionFunction;
 
     public ListBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
             StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
@@ -101,34 +108,25 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
         mainPanel.add(label);
         
         availableExtractionFunctions = new ArrayList<>();
-        extractionFunctionListBox = createExtractionFunctionListBox();
-        extractionFunctionListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
-        mainPanel.add(extractionFunctionListBox);
+        extractionFunctionTextBox = new ExtractionFunctionTextBoxFilter() {
+            @Override
+            protected void onSuggestionSelected(Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> selectedItem) {
+                selectedExtractionFunction = selectedItem;
+                notifyRetrieverChainListeners();
+                notifyExtractionFunctionListeners();
+                updateAggregators();
+            }
+        };
+        extractionFunctionTextBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
+        // TODO SuggestBox styling: Width, request length, enable scrolling
+        extractionFunctionTextBox.setWidth("60%");
+        mainPanel.add(extractionFunctionTextBox);
         
         aggregatorListBox = createAggregatorListBox();
         aggregatorListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(aggregatorListBox);
         
         updateContent();
-    }
-    
-    private ValueListBox<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> createExtractionFunctionListBox() {
-        ValueListBox<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> extractionFunctionListBox =
-            new ValueListBox<>(new AbstractObjectRenderer<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>>() {
-                @Override
-                protected String convertObjectToString(Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> nonNullObject) {
-                    return nonNullObject.getB().getDisplayName();
-                }
-            });
-        extractionFunctionListBox.addValueChangeHandler(new ValueChangeHandler<Pair<DataRetrieverChainDefinitionDTO,FunctionDTO>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> event) {
-                notifyRetrieverChainListeners();
-                notifyExtractionFunctionListeners();
-                updateAggregators();
-            }
-        });
-        return extractionFunctionListBox;
     }
 
     private ValueListBox<AggregationProcessorDefinitionDTO> createAggregatorListBox() {
@@ -173,7 +171,7 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
                     awaitingRetrieverChainStatistics = dataRetrieverChainDefinitions.size();
                     availableExtractionFunctions.clear();
                     if (awaitingRetrieverChainStatistics == 0) {
-                        updateListBox(extractionFunctionListBox, availableExtractionFunctions);
+                        extractionFunctionTextBox.setSelectableValues(Collections.emptyList());
                     } else {
                         for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
                             if (retrieverChain.hasSettings()) {
@@ -213,7 +211,7 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
                 int retrieverChainComparison = p1.getA().compareTo(p2.getA());
                 return retrieverChainComparison != 0 ? retrieverChainComparison : p1.getB().compareTo(p2.getB());
             });
-            updateListBox(extractionFunctionListBox, availableExtractionFunctions);
+            extractionFunctionTextBox.setSelectableValues(availableExtractionFunctions);
         }
     }
     
@@ -338,10 +336,11 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
     
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
-        FunctionDTO extractionFunction = queryDefinition.getStatisticToCalculate();
-        extractionFunctionListBox.setValue(new Pair<>(retrieverChain, extractionFunction));
-        aggregatorListBox.setValue(queryDefinition.getAggregatorDefinition());
+        // TODO How to set the value/text of an AbstractListSuggestBoxFilter
+//        DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
+//        FunctionDTO extractionFunction = queryDefinition.getStatisticToCalculate();
+//        extractionFunctionListBox.setValue(new Pair<>(retrieverChain, extractionFunction));
+//        aggregatorListBox.setValue(queryDefinition.getAggregatorDefinition());
     }
     
     @Override
@@ -389,14 +388,12 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
 
     @Override
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition() {
-        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> selection = extractionFunctionListBox.getValue();
-        return selection == null ? null : selection.getA();
+        return selectedExtractionFunction == null ? null : selectedExtractionFunction.getA();
     }
     
     @Override
     public FunctionDTO getExtractionFunction() {
-        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> selection = extractionFunctionListBox.getValue();
-        return selection == null ? null : selection.getB();
+        return selectedExtractionFunction == null ? null : selectedExtractionFunction.getB();
     }
     
     @Override
@@ -432,6 +429,51 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
     @Override
     public String getId() {
         return "GlobalStatisticProvider";
+    }
+    
+    // TODO AbstractListSuggestBoxFilter is located in home.shared.* It's a bit hacky to get that into the Data Mining module
+    private static abstract class ExtractionFunctionTextBoxFilter extends
+            AbstractListSuggestBoxFilter<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>, Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> {
+        
+        private final ExtractionFunctionFilter filter = new ExtractionFunctionFilter();
+        
+        public ExtractionFunctionTextBoxFilter() {
+            super(new AbstractListSuggestOracle<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>>() {
+
+                @Override
+                protected Iterable<String> getMatchingStrings(
+                        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> value) {
+                    return Collections.singleton(value.getB().getDisplayName());
+                }
+
+                @Override
+                protected String createSuggestionKeyString(Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> value) {
+                    return value.getB().getDisplayName();
+                }
+
+                @Override
+                protected String createSuggestionAdditionalDisplayString(
+                        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> value) {
+                    return null;
+                }
+            }, "Placeholder"); // TODO Use real placeholder text
+        }
+
+        @Override
+        protected Filter<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> getFilter(String searchValue) {
+            filter.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchValue));
+            return filter;
+        }
+        
+        private class ExtractionFunctionFilter extends AbstractKeywordFilter<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> {
+
+            @Override
+            public Iterable<String> getStrings(Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> extractionFunction) {
+                return Arrays.asList(extractionFunction.getB().getDisplayName().split("\\s"));
+            }
+            
+        }
+        
     }
 
 }
