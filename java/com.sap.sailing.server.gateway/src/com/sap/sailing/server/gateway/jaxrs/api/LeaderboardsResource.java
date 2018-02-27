@@ -51,6 +51,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.OpenEndedDeviceMappingFinder;
@@ -426,6 +427,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         final TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        String boatId = (String) requestObject.get(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
@@ -434,7 +436,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         // String deviceType = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_TYPE);
         // String pushDeviceId = (String) requestObject.get(DeviceMappingConstants.JSON_PUSH_DEVICE_ID);
 
-        if ((competitorId == null && markId == null) || deviceUuid == null || fromMillis == null) {
+        if ((competitorId == null && boatId == null && markId == null) || deviceUuid == null || fromMillis == null) {
             // || deviceType == null
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
@@ -461,6 +463,24 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
             event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToCompetitor, device,
+                    from, /* to */ null);
+        } else if (boatId != null) {
+            // map to a boat
+            final Boat mappedToBoat = domainFactory.getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            mappedTo = mappedToBoat;
+            if (mappedToBoat == null) {
+                logger.warning("No boat found for id " + boatId);
+                return Response.status(Status.BAD_REQUEST).entity("No boat found for id " + StringEscapeUtils.escapeHtml(boatId))
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            Iterable<Boat> registered = hasRegattaLike.getAllBoats();
+            if (!Util.contains(registered, mappedToBoat)) {
+                logger.warning("Boat found but not registered for leaderboard " + leaderboardName);
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("Boat found but not registered for leaderboard " + StringEscapeUtils.escapeHtml(leaderboardName))
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            event = new RegattaLogDeviceBoatMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToBoat, device,
                     from, /* to */ null);
         } else {
             // map to a mark
