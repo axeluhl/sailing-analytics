@@ -3017,10 +3017,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case BEAT_ANGLE:
-                if (trackedLeg != null) {
-                    Bearing beatAngle = trackedLeg.getBeatAngle(timePoint, cache);
-                    result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
-                }
+                Bearing twa = trackedRace.getTWA(competitor, timePoint, cache);
+                result = twa == null? null:twa.getDegrees();
                 break;
             case CURRENT_HEEL_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getHeel, trackedRace, competitor, timePoint);
