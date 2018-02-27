@@ -22,7 +22,8 @@ import com.sap.sse.gwt.client.StringMessages;
 
 /**
  * A list editor that renders values of type {@code ValueType} as {@link String}s and lets the user edit them
- * as strings. For this to work, implementing subclasses need to specify the 
+ * as strings. For this to work, implementing subclasses need to specify how strings are parsed to objects
+ * of type {@code ValueType} and vice versa.
  * 
  * @author Lukas Niemeier
  * @author Axel Uhl (d043530)
@@ -93,6 +94,10 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
         }
         
+        /**
+         * @param suggestValues must not be null but may be empty
+         * @param placeholderTextForAddTextbox may be null
+         */
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues, String placeholderTextForAddTextbox) {
             super(stringMessages, removeImage, /*canRemoveItems*/true);
             this.placeholderTextForAddTextbox = placeholderTextForAddTextbox;

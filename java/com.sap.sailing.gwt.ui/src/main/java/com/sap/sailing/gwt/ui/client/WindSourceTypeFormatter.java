@@ -20,6 +20,8 @@ public class WindSourceTypeFormatter {
             return stringMessages.webWindSourceTypeName();
         case RACECOMMITTEE:
             return stringMessages.raceCommitteeWindSourceTypeName();
+        case WINDFINDER:
+            return stringMessages.windFinderWindSourceTypeName();
         }
         return null;
     }
@@ -40,6 +42,8 @@ public class WindSourceTypeFormatter {
             return stringMessages.webWindSourceTypeTooltip();
         case RACECOMMITTEE:
             return stringMessages.raceCommitteeWindSourceTypeTooltip();
+        case WINDFINDER:
+            return stringMessages.windFinderWindSourceTypeTooltip();
         }
         return null;
     }
