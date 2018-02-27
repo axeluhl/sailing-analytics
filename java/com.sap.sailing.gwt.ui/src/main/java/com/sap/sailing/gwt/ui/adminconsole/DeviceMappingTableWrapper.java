@@ -6,7 +6,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.MappableToDeviceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -28,8 +28,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
         TextColumn<DeviceMappingDTO> itemTypeCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
-                if (mapping.mappedTo instanceof CompetitorDTO) return stringMessages.competitor();
-                else return stringMessages.mark();
+                return MappableToDeviceTypeFormatter.format(mapping.mappedTo, stringMessages);
             }
         };
         itemTypeCol.setSortable(true);
