@@ -6017,8 +6017,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
             event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
                     getCompetitor((CompetitorDTO) dto.mappedTo), mapping.getDevice(), from, to);
+        } else if (dto.mappedTo instanceof BoatDTO) {
+            DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
+            event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
+                    getBoat((BoatDTO) dto.mappedTo), mapping.getDevice(), from, to);
         } else {
-            throw new RuntimeException("Can only map devices to competitors");
+            throw new RuntimeException("Can only map devices to a competitor or boat");
         }
         regattaLog.add(event);
     }
