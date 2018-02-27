@@ -5922,7 +5922,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else if (mappedTo instanceof Boat) {
             item = baseDomainFactory.convertToBoatDTO((Boat) mappedTo);
         } else {
-            throw new RuntimeException("Can only handle Competitor or Mark as mapped item type, but not "+mappedTo.getClass().getName());
+            throw new RuntimeException("Can only handle Competitor, Boat or Mark as mapped item type, but not "
+                    + mappedTo.getClass().getName());
         }
         //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
         //has a large performance implact for GWT.
@@ -5993,11 +5994,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         competitor, mapping.getDevice(), from, to);
             }
         } else if (dto.mappedTo instanceof BoatDTO) {
-            final Boat boat = getService().getCompetitorStore().getExistingBoatById(((BoatDTO) dto.mappedTo).getIdAsString());
+            final Boat boat = getService().getCompetitorStore()
+                    .getExistingBoatByIdAsString(((BoatDTO) dto.mappedTo).getIdAsString());
             event = new RegattaLogDeviceBoatMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     boat, mapping.getDevice(), from, to);
         } else {
-            throw new RuntimeException("Can only map devices to competitors, marks or boats");
+            throw new RuntimeException("Can only map devices to competitors, boats or marks");
         }
         regattaLog.add(event);
     }
@@ -6031,7 +6033,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
     
-    DeviceMapping<?> convertToDeviceMapping(DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException {
+    private DeviceMapping<?> convertToDeviceMapping(DeviceMappingDTO dto)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
         DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceIdentifier.deviceType, dto.deviceIdentifier.deviceId);
         TimePoint from = dto.from == null ? null : new MillisecondsTimePoint(dto.from);
         TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
@@ -6044,8 +6047,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
             return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceCompetitorMappingEventImpl.class);
+        } else if (dto.mappedTo instanceof BoatDTO) {
+            final Boat boat = getService().getCompetitorStore()
+                    .getExistingBoatByIdAsString(dto.mappedTo.getIdAsString());
+            return new DeviceMappingImpl<WithID>(boat, device, timeRange, dto.originalRaceLogEventIds,
+                    RegattaLogDeviceBoatMappingEventImpl.class);
         } else {
-            throw new RuntimeException("Can only map devices to competitors or marks");
+            throw new RuntimeException("Can only map devices to competitors, boats or marks");
         }
     }
 
