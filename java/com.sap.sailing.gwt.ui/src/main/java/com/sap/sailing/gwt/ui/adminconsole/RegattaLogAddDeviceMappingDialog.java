@@ -144,7 +144,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
         qrWidget = setupQRCodeWidget();
         qrWidget.generateQRCode();
         this.leaderboardName = leaderboardName;
-        loadCompetitorsAndMarks();
+        loadCompetitorsBoatsAndMarks();
         events = new GenericListBox<EventDTO>(new ValueBuilder<EventDTO>() {
             @Override
             public String getValue(EventDTO item) {
@@ -225,7 +225,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
         return new DeviceMappingDTO(deviceIdentifier, from.getValue(), to.getValue(), selectedItem, null);
     }
 
-    private void loadCompetitorsAndMarks() {
+    private void loadCompetitorsBoatsAndMarks() {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
         sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetBoatsCallback());
         sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());

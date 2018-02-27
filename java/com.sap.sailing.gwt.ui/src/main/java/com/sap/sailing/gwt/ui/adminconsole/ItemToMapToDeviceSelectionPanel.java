@@ -89,8 +89,8 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         competitorsPanel.setContentWidget(competitorTable.asWidget());
         boatsPanel.setContentWidget(boatTable.asWidget());
         mainPanel.add(marksPanel);
-        mainPanel.add(competitorsPanel);
         mainPanel.add(boatsPanel);
+        mainPanel.add(competitorsPanel);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
             
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load competitors: " + caught.getMessage());
+                errorReporter.reportError("Could not load boats: " + caught.getMessage());
             }
         };
     }
