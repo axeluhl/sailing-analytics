@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
@@ -126,6 +127,14 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                                 competitor.getIdAsString());
                         validateAndUpdate();
                     }
+                    
+                    @Override
+                    public void onSelectionChange(BoatDTO boat) {
+                        selectedItem = boat;
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_BOAT_ID_AS_STRING,
+                                boat.getIdAsString());
+                        validateAndUpdate();
+                    }
                 }, mapping != null ? mapping.mappedTo : null);
         if (mapping != null) {
             deviceId.setValue(mapping.deviceIdentifier.deviceId);
@@ -218,6 +227,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
 
     private void loadCompetitorsAndMarks() {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
+        sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetBoatsCallback());
         sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());
     }
 }
