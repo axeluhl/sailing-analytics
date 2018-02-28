@@ -115,7 +115,7 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
                 updateAggregators();
             }
         };
-        extractionFunctionSuggestBox.getValueBox().addClickHandler(e -> {
+        extractionFunctionSuggestBox.getValueBox().addFocusHandler(e -> {
             extractionFunctionSuggestBox.getValueBox().selectAll();
             extractionFunctionSuggestBox.showSuggestionList();
         });
