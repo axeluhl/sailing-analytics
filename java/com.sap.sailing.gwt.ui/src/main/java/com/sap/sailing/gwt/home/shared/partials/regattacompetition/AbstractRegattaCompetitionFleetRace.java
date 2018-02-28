@@ -51,7 +51,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
             return;
         }
         
-        launchPadController.showRaceviewerLaunchPad(race, this.getElement());
+        launchPadController.showLaunchPad(race, this.getElement());
     }
     
     private void setupRaceState(SimpleRaceMetadataDTO race) {

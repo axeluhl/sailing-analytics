@@ -47,6 +47,7 @@
       <plugin id="com.sap.sailing.domain.swisstimingreplayadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.tractracadapter" autoStart="false" startLevel="4" />
       <plugin id="com.sap.sailing.domain.tractracadapter.persistence" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.windfinderadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.ess40.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.expeditionconnector.persistence" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.freg.resultimport" autoStart="true" startLevel="3" />

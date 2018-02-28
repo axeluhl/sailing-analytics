@@ -111,6 +111,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             String leaderboardGroupName, String leaderboardName) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
+        
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -130,7 +131,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             timeChanged(timer.getTime(), null);
         }
     }
-
+    
     /**
      * Creates a new chart.
      * Attention: We can't reuse the old chart when the detail changes because HighChart does not support the inverting of the Y-Axis  
@@ -838,4 +839,5 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         private Long timeOfLatestRequestInMillis;
     }
 
+    
 }

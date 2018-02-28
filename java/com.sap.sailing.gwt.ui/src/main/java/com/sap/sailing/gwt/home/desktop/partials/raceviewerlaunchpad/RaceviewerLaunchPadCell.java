@@ -55,7 +55,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         if (!launchPadController.renderAsDirectLink(data)) {
             if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())
                     && parent.getFirstChildElement().isOrHasChild(Element.as(event.getEventTarget()))) {
-                launchPadController.showRaceviewerLaunchPad(data, parent);
+                launchPadController.showLaunchPad(data, parent);
             }
             return;
         }

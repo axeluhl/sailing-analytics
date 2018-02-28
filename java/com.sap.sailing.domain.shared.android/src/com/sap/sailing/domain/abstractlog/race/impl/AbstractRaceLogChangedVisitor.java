@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -43,10 +42,6 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     }
 
     public void visit(RaceLogStartTimeEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-
-    public void visit(RaceLogCourseAreaChangedEvent event) {
         notifyListenerAboutEventAdded(event);
     }
 

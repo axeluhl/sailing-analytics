@@ -37,6 +37,7 @@ public class EventEditDialog extends EventDialog {
         leaderboardGroupList.setValue(leaderboardGroupNames);
         imagesListComposite.fillImages(event.getImages());
         videosListComposite.fillVideos(event.getVideos());
+        windFinderSpotCollectionIdsComposite.setValue(event.getWindFinderReviewedSpotsCollectionIds());
         externalLinksComposite.fillExternalLinks(event);
     }
 }

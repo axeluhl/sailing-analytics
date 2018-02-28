@@ -3202,7 +3202,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL,
-            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos,
+            Iterable<String> windFinderReviewedSpotCollectionIds) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -3229,6 +3230,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         event.setSailorsInfoWebsiteURLs(sailorsInfoWebsiteURLs);
         event.setImages(images);
         event.setVideos(videos);
+        event.setWindFinderReviewedSpotsCollection(windFinderReviewedSpotCollectionIds);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
         // to keep changes minimial
         mongoObjectFactory.storeEvent(event);
@@ -4272,4 +4274,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return pairingList;
     }
 
+    @Override
+    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
+        final Set<String> result = new HashSet<>();
+        for (final Event event : getAllEvents()) {
+            Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
+        }
+        return result;
+    }
 }

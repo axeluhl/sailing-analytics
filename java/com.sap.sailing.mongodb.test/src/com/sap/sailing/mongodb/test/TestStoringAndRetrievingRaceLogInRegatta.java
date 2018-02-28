@@ -17,7 +17,6 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -33,7 +32,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
@@ -297,29 +295,6 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
         
         MongoObjectFactoryImpl factoryImpl = (MongoObjectFactoryImpl) mongoObjectFactory;
         factoryImpl.getRaceLogCollection().insert(raceLogResult);
-    }
-    
-    @Test
-    public void testStoreAndRetrieveRegattaWithRaceLogCourseAreaChangeEvent() {
-        final UUID uuid = UUID.randomUUID();
-        RaceLogCourseAreaChangedEvent event = new RaceLogCourseAreaChangeEventImpl(now, author, 0, uuid);
-
-        addAndStoreRaceLogEvent(regatta, raceColumnName, event);
-
-        RaceLog loadedRaceLog = retrieveRaceLog();
-
-        loadedRaceLog.lockForRead();
-        try {
-            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
-            RaceLogCourseAreaChangedEvent courseAreaEvent = (RaceLogCourseAreaChangedEvent) loadedEvent;
-            assertEquals(event.getLogicalTimePoint(), courseAreaEvent.getLogicalTimePoint());
-            assertEquals(event.getPassId(), courseAreaEvent.getPassId());
-            assertEquals(event.getId(), courseAreaEvent.getId());
-            assertEquals(event.getCourseAreaId(), courseAreaEvent.getCourseAreaId());
-            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
-        } finally {
-            loadedRaceLog.unlockAfterRead();
-        }
     }
 
     @Test

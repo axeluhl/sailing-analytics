@@ -51,7 +51,14 @@ public enum WindSourceType {
      * Like {@link #COMBINED}, only that when combined with an ID into a {@link WindSourceWithAdditionalID} then the
      * position for the wind is taken to be the middle of the tracked leg whose number is identified by the ID.
      */
-    LEG_MIDDLE(/* can be stored */ false, /* base confidence */ 0.9, /* useSpeed */ true);
+    LEG_MIDDLE(/* can be stored */ false, /* base confidence */ 0.9, /* useSpeed */ true),
+    
+    /**
+     * A wind measurement spot as provided by https://www.windfinder.com; when used with a
+     * {@link WindSourceWithAdditionalID}, the {@link WindSourceWithAdditionalID#getId() ID} is
+     * the WindFinder's "Spot ID" such as "10044N" for Kiel Lighthouse.
+     */
+    WINDFINDER(/* can be stored */ true, /* base confidence */ 0.3, /* useSpeed */ true);
     
     private final boolean canBeStored;
     

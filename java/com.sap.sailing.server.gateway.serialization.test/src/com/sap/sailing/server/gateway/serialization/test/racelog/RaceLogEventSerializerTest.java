@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
@@ -50,7 +49,6 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> flagEventSerializer;
     private JsonSerializer<RaceLogEvent> startTimeSerializer;
     private JsonSerializer<RaceLogEvent> raceStatusSerializer;
-    private JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> passChangedSerializer;
     private JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
@@ -80,7 +78,6 @@ public class RaceLogEventSerializerTest {
         flagEventSerializer = mock(JsonSerializer.class);
         startTimeSerializer = mock(JsonSerializer.class);
         raceStatusSerializer = mock(JsonSerializer.class);
-        courseAreaChangedEventSerializer = mock(JsonSerializer.class);
         passChangedSerializer = mock(JsonSerializer.class);
         courseDesignChangedEventSerializer = mock(JsonSerializer.class);
         finishPositioningListChangedEventSerializer = mock(JsonSerializer.class);
@@ -103,7 +100,7 @@ public class RaceLogEventSerializerTest {
         endOfTrackingEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
-                courseAreaChangedEventSerializer, passChangedSerializer, courseDesignChangedEventSerializer,
+                passChangedSerializer, courseDesignChangedEventSerializer,
                 finishPositioningListChangedEventSerializer, finishPositioningConfirmedEventSerializer,
                 pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
@@ -137,14 +134,6 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = new RaceLogRaceStatusEventImpl(null, author, 0, RaceLogRaceStatus.SCHEDULED);
         serializer.serialize(event);
         verify(raceStatusSerializer).serialize(event);
-    }
-
-    @Test
-    public void testChoosesCourseAreaChangedSerializer() {
-        // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogCourseAreaChangeEventImpl(null, author, 0, null);
-        serializer.serialize(event);
-        verify(courseAreaChangedEventSerializer).serialize(event);
     }
 
     @Test
