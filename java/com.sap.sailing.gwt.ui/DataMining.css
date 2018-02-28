@@ -242,3 +242,8 @@ input.magnifier {
 	background-color: white;
 	padding: 5px;
 }
+
+.statisticSuggestBoxPopup .suggestPopupContent {
+	max-height: 700px;
+	overflow-y: scroll;
+}

@@ -34,7 +34,6 @@
 	<source path="datamining" />
 	<source path="polarmining" />
 	
-    <inherits name='com.sap.sailing.gwt.home.HomeShared'/>
     <inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
