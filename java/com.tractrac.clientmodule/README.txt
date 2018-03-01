@@ -17,6 +17,20 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.9.0 ****************
+********************************************
+This is a final version. It changes the implementation of the ISensorData interface, breaking the
+backward compatibility:
+
+Release date: 01/03/2018
+Build number: 8fdd19ee81b3ccbfc2694963e8e398346eebde7a
+
+ 1) Features
+
+ - Updating the interface ISensorData (Requested by Axel Uhl and Jakob Odum, 22/11/2017)
+ - Support for https downloading MTBs (Requested by Axel Uhl, 07/01/2018)
+
+********************************************
 ************* TracAPI 3.8.0 ****************
 ********************************************
 This is a final version. It change the signature of a method, breaking the
