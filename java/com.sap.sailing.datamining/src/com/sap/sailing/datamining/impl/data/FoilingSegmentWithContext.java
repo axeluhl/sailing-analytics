@@ -107,7 +107,8 @@ public class FoilingSegmentWithContext implements HasFoilingSegmentContext {
     }
 
     private Bearing getAbsoluteTrueWindAngle(final TimePoint timePoint) throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), timePoint).getBeatAngle(timePoint).abs();
+        Bearing twa = getTrackedRace().getTWA(getCompetitor(), timePoint);
+        return twa == null ? null:twa.abs();
     }
 
     @Override

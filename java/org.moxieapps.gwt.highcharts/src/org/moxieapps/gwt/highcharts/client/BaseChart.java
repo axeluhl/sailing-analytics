@@ -3046,4 +3046,17 @@ public abstract class BaseChart<T> extends Widget {
         if (chart) chart.showResetZoom();
     }-*/;
 
+
+    /**
+     * Patch, to provide highcharts functionality in Java API. 
+     */
+    public native void hideResetZoom() /*-{
+        var chart = this.@org.moxieapps.gwt.highcharts.client.BaseChart::chart;
+        if (chart) {
+            if (chart.resetZoomButton) {
+                chart.zoomOut();
+            }
+        }
+    }-*/;
+    
 }
