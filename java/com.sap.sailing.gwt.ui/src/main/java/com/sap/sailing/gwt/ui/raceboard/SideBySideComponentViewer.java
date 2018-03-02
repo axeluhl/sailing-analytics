@@ -78,7 +78,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private TouchSplitLayoutPanel splitLayoutPanel;
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
-    private ManeuverTablePanel maneuverTablePanel;
 
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
@@ -93,7 +92,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
-        this.maneuverTablePanel = maneuverTablePanel;
         markPositionPanel.setComponentViewer(this);
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {

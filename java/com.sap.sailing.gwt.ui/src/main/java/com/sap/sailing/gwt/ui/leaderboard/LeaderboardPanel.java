@@ -97,7 +97,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -185,7 +185,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    interface LeaderBoardStyle {
+    public interface LeaderBoardStyle {
         void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb);
 
         void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorDTO competitor);
@@ -1174,23 +1174,23 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED,
                             new RaceDistanceTraveledInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
                             new RaceDistanceTraveledIncludingGateStartInMeters(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceAverageSpeedInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                             new RaceGapToLeaderInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceCurrentSpeedOverGroundInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
@@ -1198,7 +1198,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             new RaceCurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
                             new RaceDistanceFoiledInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS,
@@ -1206,44 +1206,44 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             new RaceDurationFoiledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
                             new RaceDistanceToCompetitorFarthestAheadInMeters(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                             new RaceAverageAbsoluteCrossTrackErrorInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                             new RaceAverageSignedCrossTrackErrorInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
-                    new FormattedDoubleDetailTypeColumn(
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(
                             DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
                             new DistanceToStartFiveSecondsBeforeStartInMeters(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
                             new SpeedFiveSecondsBeforeStartInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.DISTANCE_TO_START_AT_RACE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_START_AT_RACE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.DISTANCE_TO_START_AT_RACE_START,
                             new DistanceToStartAtRaceStartInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
                             new TimeBetweenRaceStartAndCompetitorStartInSeconds(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                             new SpeedOverGroundAtRaceStartInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                             new SpeedOverGroundWhenPassingStartInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(
                             DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
                             new DistanceToStarboardSideOfStartLineInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
@@ -1253,17 +1253,17 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringMessages,
                             LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.CURRENT_LEG, new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG,
+            result.put(DetailType.CURRENT_LEG, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.CURRENT_LEG,
                     new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_TIME_TRAVELED,
                     new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
             result.put(DetailType.RACE_CALCULATED_TIME_TRAVELED,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,
                             new RaceCalculatedTimeTraveledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
-                    new FormattedDoubleDetailTypeColumn(
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(
                             DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                             new RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
@@ -1324,7 +1324,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          *
          */
         private class RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval
-                implements LegDetailField<Double> {
+                implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1343,7 +1343,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
+        private class RaceAverageSpeedInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 final Distance distanceTraveledInMeters = row.getDistanceTraveled(getRaceColumnName());
@@ -1364,7 +1364,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceAverageAbsoluteCrossTrackErrorInMeters implements LegDetailField<Double> {
+        private class RaceAverageAbsoluteCrossTrackErrorInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1382,7 +1382,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceAverageSignedCrossTrackErrorInMeters implements LegDetailField<Double> {
+        private class RaceAverageSignedCrossTrackErrorInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1399,7 +1399,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class DistanceToStartAtRaceStartInMeters implements LegDetailField<Double> {
+        private class DistanceToStartAtRaceStartInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1417,7 +1417,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class TimeBetweenRaceStartAndCompetitorStartInSeconds implements LegDetailField<Double> {
+        private class TimeBetweenRaceStartAndCompetitorStartInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1434,7 +1434,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class SpeedOverGroundAtRaceStartInKnots implements LegDetailField<Double> {
+        private class SpeedOverGroundAtRaceStartInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1449,7 +1449,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         /**
          * Fetches the competitor's distance to the start mark five seconds before the race started
          */
-        private class DistanceToStartFiveSecondsBeforeStartInMeters implements LegDetailField<Double> {
+        private class DistanceToStartFiveSecondsBeforeStartInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1464,7 +1464,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         /**
          * Fetches the competitor's speed over ground five seconds before the race started
          */
-        private class SpeedFiveSecondsBeforeStartInKnots implements LegDetailField<Double> {
+        private class SpeedFiveSecondsBeforeStartInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1481,7 +1481,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class SpeedOverGroundWhenPassingStartInKnots implements LegDetailField<Double> {
+        private class SpeedOverGroundWhenPassingStartInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1499,7 +1499,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class DistanceToStarboardSideOfStartLineInMeters implements LegDetailField<Double> {
+        private class DistanceToStarboardSideOfStartLineInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1516,7 +1516,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class TackWhenStarting implements LegDetailField<Tack> {
+        private class TackWhenStarting implements DataExtractor<Tack, LeaderboardRowDTO> {
             @Override
             public Tack get(LeaderboardRowDTO row) {
                 Tack result = null;
@@ -1533,7 +1533,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
+        private class RaceDistanceTraveledInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Distance distanceForRaceColumn = row.getDistanceTraveled(getRaceColumnName());
@@ -1546,7 +1546,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDistanceFoiledInMeters implements LegDetailField<Double> {
+        private class RaceDistanceFoiledInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Distance distanceForRaceColumn = row.getDistanceFoiled(getRaceColumnName());
@@ -1559,7 +1559,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDurationFoiledInSeconds implements LegDetailField<Double> {
+        private class RaceDurationFoiledInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Duration durationForRaceColumn = row.getDurationFoiled(getRaceColumnName());
@@ -1567,7 +1567,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class RaceCalculatedTimeTraveledInSeconds implements LegDetailField<Double> {
+        private class RaceCalculatedTimeTraveledInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1580,7 +1580,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds
-                implements LegDetailField<Double> {
+                implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1601,7 +1601,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDistanceTraveledIncludingGateStartInMeters implements LegDetailField<Double> {
+        private class RaceDistanceTraveledIncludingGateStartInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1622,7 +1622,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class CurrentLeg implements LegDetailField<Double> {
+        private class CurrentLeg implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1640,7 +1640,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceGapToLeaderInSeconds implements LegDetailField<Double> {
+        private class RaceGapToLeaderInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1659,7 +1659,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDistanceToCompetitorFarthestAheadInMeters implements LegDetailField<Double> {
+        private class RaceDistanceToCompetitorFarthestAheadInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1671,7 +1671,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> implements LegDetailField<T> {
+        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> implements DataExtractor<T, LeaderboardRowDTO> {
             @Override
             public final T get(LeaderboardRowDTO row) {
                 T result = null;
@@ -1938,8 +1938,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     }
 
-    private class StartingTackColumn extends DetailTypeColumn<Tack, String> {
-        public StartingTackColumn(LegDetailField<Tack> field, String headerStyle, String columnStyle) {
+    private class StartingTackColumn extends DetailTypeColumn<Tack, String, LeaderboardRowDTO> {
+        public StartingTackColumn(DataExtractor<Tack, LeaderboardRowDTO> field, String headerStyle,
+                String columnStyle) {
             super(DetailType.START_TACK, field, new TextCell(), headerStyle, columnStyle, LeaderboardPanel.this);
         }
 
@@ -2000,42 +2001,42 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    private static class TotalDistanceTraveledInMetersField implements LegDetailField<Double> {
+    private static class TotalDistanceTraveledInMetersField implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.totalDistanceTraveledInMeters;
         }
     }
 
-    private static class TotalDistanceFoiledInMetersField implements LegDetailField<Double> {
+    private static class TotalDistanceFoiledInMetersField implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.totalDistanceFoiledInMeters;
         }
     }
 
-    private static class TotalDurationFoiledInSecondsField implements LegDetailField<Double> {
+    private static class TotalDurationFoiledInSecondsField implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.totalDurationFoiledInSeconds;
         }
     }
 
-    private static class TimeOnTimeFactorColumn implements LegDetailField<Double> {
+    private static class TimeOnTimeFactorColumn implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.competitor.getTimeOnTimeFactor();
         }
     }
-    
-    private static class TotalScoredRacesCountField implements LegDetailField<Integer> {
+
+    private static class TotalScoredRacesCountField implements DataExtractor<Integer, LeaderboardRowDTO> {
         @Override
         public Integer get(LeaderboardRowDTO row) {
             return row.totalScoredRaces;
         }
     }
 
-    private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements LegDetailField<Double> {
+    private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements DataExtractor<Double,LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null
@@ -2043,7 +2044,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    private static class TotalAverageSpeedOverGroundField implements LegDetailField<Double> {
+    private static class TotalAverageSpeedOverGroundField implements DataExtractor<Double,LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             final Double result;
@@ -2061,10 +2062,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
         result.put(DetailType.TOTAL_DISTANCE_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_TRAVELED,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TOTAL_DISTANCE_TRAVELED,
                         new TotalDistanceTraveledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
                         new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
                 new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
@@ -2073,12 +2074,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 new TotalTimeColumn(DetailType.TOTAL_DURATION_FOILED_IN_SECONDS,
                         new TotalDurationFoiledInSecondsField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TOTAL_DISTANCE_FOILED_IN_METERS,
                         new TotalDistanceFoiledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TIME_ON_TIME_FACTOR, new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
+        result.put(DetailType.TIME_ON_TIME_FACTOR, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
                 new TimeOnTimeFactorColumn(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
-                new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                         new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE,
                         RACE_COLUMN_STYLE, this));
         result.put(DetailType.TOTAL_SCORED_RACE_COUNT, new IntegerDetailTypeColumn(DetailType.TOTAL_SCORED_RACE_COUNT,

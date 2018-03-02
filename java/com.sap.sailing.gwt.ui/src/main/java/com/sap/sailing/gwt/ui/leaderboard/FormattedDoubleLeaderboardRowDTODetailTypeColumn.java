@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Collection;
+
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -9,37 +11,39 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 
-public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, String> implements HasStringAndDoubleValue {
+public class FormattedDoubleLeaderboardRowDTODetailTypeColumn extends DetailTypeColumn<Double, String, LeaderboardRowDTO>
+        implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     private final NumberFormat formatter;
-    private final MinMaxRenderer minMaxRenderer;
+    private final MinMaxRenderer<LeaderboardRowDTO> minMaxRenderer;
     
     /**
      * Creates a new column for the given {@link DetailType}. Have a look at
      * {@link DetailTypeFormatter#getUnit(DetailType)}, to see if the given type is supported.
      * @param displayedLeaderboardRowsProvider TODO
      */
-    public FormattedDoubleDetailTypeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle,
+    public FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType detailType, DataExtractor<Double,LeaderboardRowDTO> field, String headerStyle,
             String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(detailType, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
         formatter = createNumberFormatter(detailType);
         this.minMaxRenderer = createMinMaxRenderer();
     }
     
-    protected MinMaxRenderer createMinMaxRenderer() {
-        return new MinMaxRenderer(this, getComparator());
+    protected MinMaxRenderer<LeaderboardRowDTO> createMinMaxRenderer() {
+        return new MinMaxRenderer<LeaderboardRowDTO>(this, getComparator());
     }
 
     private NumberFormat createNumberFormatter(DetailType detailType) {
         return NumberFormatterFactory.getDecimalFormat(detailType.getPrecision());
     }
     
-    protected MinMaxRenderer getMinMaxRenderer() {
+    protected MinMaxRenderer<LeaderboardRowDTO> getMinMaxRenderer() {
         return minMaxRenderer;
     }
 
     @Override
     public void updateMinMax() {
-        getMinMaxRenderer().updateMinMax(getDisplayedLeaderboardRowsProvider());
+        Collection<LeaderboardRowDTO> data = getDisplayedLeaderboardRowsProvider().getRowsToDisplay().values();
+        getMinMaxRenderer().updateMinMax(data);
     }
 
     protected NumberFormat getFormatter() {

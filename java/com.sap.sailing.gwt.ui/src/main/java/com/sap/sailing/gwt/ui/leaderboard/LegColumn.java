@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
-import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 
 /**
  * Displays competitor's rank in leg and makes the column sortable by rank. The leg is
@@ -32,7 +32,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private final String headerStyle;
     private final String columnStyle;
     
-    private abstract class AbstractLegDetailField<T extends Comparable<?>> implements LegDetailField<T> {
+    private abstract class AbstractLegDetailField<T extends Comparable<?>> implements DataExtractor<T, LeaderboardRowDTO> {
         public T get(LeaderboardRowDTO row) {
             LegEntryDTO entry = getLegEntry(row);
             if (entry == null) {
@@ -178,7 +178,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
-    private class RankGain implements LegDetailField<Integer> {
+    private class RankGain implements DataExtractor<Integer, LeaderboardRowDTO> {
         @Override
         public Integer get(LeaderboardRowDTO row) {
             LegEntryDTO legEntry = getLegEntry(row);
@@ -192,7 +192,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
-    private class ManeuverCountLegDetailsColumn extends FormattedDoubleDetailTypeColumn {
+    private class ManeuverCountLegDetailsColumn extends FormattedDoubleLeaderboardRowDTODetailTypeColumn {
         public ManeuverCountLegDetailsColumn(String headerStyle, String columnStyle) {
             super(DetailType.NUMBER_OF_MANEUVERS, null, headerStyle, columnStyle, getLeaderboardPanel());
         }
@@ -299,13 +299,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
         result.put(DetailType.DISTANCE_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TRAVELED, new DistanceTraveledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.DISTANCE_TRAVELED, new DistanceTraveledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START,
-                new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START, new DistanceTraveledIncludingGateStartInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START, new DistanceTraveledIncludingGateStartInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new AverageSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new AverageSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
 
         result.put(DetailType.CURRENT_HEEL_IN_DEGREES, new HeelColumn(DetailType.CURRENT_HEEL_IN_DEGREES,
                 new CurrentHeelInDegrees(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
@@ -314,34 +314,34 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS, new RideHeightColumn(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
                 new CurrentRideHeightInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS, new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS,
+        result.put(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.CURRENT_DISTANCE_FOILED_IN_METERS,
                 new CurrentDistanceFoiledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CURRENT_DURATION_FOILED_IN_SECONDS, new TotalTimeColumn(DetailType.CURRENT_DURATION_FOILED_IN_SECONDS,
                 new CurrentDurationFoiled(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
-                new FormattedDoubleDetailTypeColumn(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, new EstimatedTimeToNextWaypointInSeconds(),
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, new EstimatedTimeToNextWaypointInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.GAP_TO_LEADER_IN_SECONDS,
-                new FormattedDoubleDetailTypeColumn(DetailType.GAP_TO_LEADER_IN_SECONDS, new GapToLeaderInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.GAP_TO_LEADER_IN_SECONDS, new GapToLeaderInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS,
-                new FormattedDoubleDetailTypeColumn(DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS, new GapChangeSinceLegStartInSeconds(),
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS, new GapChangeSinceLegStartInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED,
                 new SideToWhichMarkAtLegStartWasRoundedColumn(stringMessages.sideToWhichMarkAtLegStartWasRounded(),
                         new SideToWhichMarkAtLegStartWasRounded(), detailHeaderStyle, detailColumnStyle, stringMessages, leaderboardPanel));
         result.put(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
-                new FormattedDoubleDetailTypeColumn(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, new VelocityMadeGoodInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, new VelocityMadeGoodInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new WindwardDistanceToGoInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new WindwardDistanceToGoInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.TIME_TRAVELED, new TotalTimeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CORRECTED_TIME_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.CORRECTED_TIME_TRAVELED, new CorrectedTimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.CORRECTED_TIME_TRAVELED, new CorrectedTimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new AverageAbsoluteCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new AverageAbsoluteCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, 
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new AverageSignedCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new AverageSignedCrossTrackErrorInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         return result;
     }
 

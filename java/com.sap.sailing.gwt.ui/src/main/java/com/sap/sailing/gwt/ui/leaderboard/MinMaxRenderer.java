@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Collection;
 import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
@@ -20,7 +21,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
  * @author Fabian Schwarz-Fritz
  * 
  */
-public class MinMaxRenderer {
+public class MinMaxRenderer<T> {
     
 
     
@@ -28,8 +29,8 @@ public class MinMaxRenderer {
     protected static final String BACKGROUND_BAR_STYLE_OK = "minMaxBackgroundBar";
     protected static final String BACKGROUND_BAR_STYLE_GOOD = "minMaxBackgroundBarGood";
 
-    private final HasStringAndDoubleValue valueProvider;
-    private final Comparator<LeaderboardRowDTO> comparator;
+    private final HasStringAndDoubleValue<T> valueProvider;
+    private final Comparator<T> comparator;
     private Double minimumValue;
     private Double maximumValue;
 
@@ -102,7 +103,7 @@ public class MinMaxRenderer {
      * @param comparator
      *            The comparator to update the minimum and maximum values.
      */
-    public MinMaxRenderer(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDTO> comparator) {
+    public MinMaxRenderer(HasStringAndDoubleValue<T> valueProvider, Comparator<T> comparator) {
         this.valueProvider = valueProvider;
         this.comparator = comparator;
     }
@@ -113,12 +114,12 @@ public class MinMaxRenderer {
      * @param title
      *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
      */
-    public final void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
+    public final void render(Context context, T row, String title, SafeHtmlBuilder sb) {
         String stringValue = valueProvider.getStringValueToRender(row);
         this.render(row, stringValue == null ? "" : stringValue, title == null ? "" : title, sb);
     }
     
-    protected void render(LeaderboardRowDTO row, String nullSafeValue, String nullSafeTitle, SafeHtmlBuilder sb) {
+    protected void render(T row, String nullSafeValue, String nullSafeTitle, SafeHtmlBuilder sb) {
         sb.append(TEMPLATES.render(nullSafeValue, BACKGROUND_BAR_STYLE_OK, nullSafeTitle, getPercentage(row)));
     }
     
@@ -129,7 +130,7 @@ public class MinMaxRenderer {
      * @param row
      *            The row to get the percentage for.
      */
-    protected int getPercentage(LeaderboardRowDTO row) {
+    protected int getPercentage(T row) {
         int percentage = 0;
         Double value = valueProvider.getDoubleValue(row);
         if (value != null) {
@@ -158,10 +159,10 @@ public class MinMaxRenderer {
      * @param displayedLeaderboardRowsProvider
      *            The values of {@link LeaderboardRowDTO}s to determine the minimum and maximum values for.
      */
-    public void updateMinMax(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-        LeaderboardRowDTO minimumRow = null;
-        LeaderboardRowDTO maximumRow = null;
-        for (LeaderboardRowDTO row : displayedLeaderboardRowsProvider.getRowsToDisplay().values()) {
+    public void updateMinMax(Collection<T> displayedLeaderboardRowsProvider) {
+        T minimumRow = null;
+        T maximumRow = null;
+        for (T row : displayedLeaderboardRowsProvider) {
             if (valueProvider.getDoubleValue(row) != null
                     && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;
@@ -179,7 +180,7 @@ public class MinMaxRenderer {
         }
     }
 
-    protected HasStringAndDoubleValue getValueProvider() {
+    protected HasStringAndDoubleValue<T> getValueProvider() {
         return valueProvider;
     }
 
