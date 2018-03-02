@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/main/java/com/sap/sailing/gwt/home/desktop/places/whatsnew/resources/SailingAnalyticsNotes.html=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/home/mobile/partials/sectionHeader/SectionHeaderContent.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/regattaoverview/client/RegattaRaceStatesComponent.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/server/HomeServiceUtil.java=utf-8
