@@ -155,12 +155,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             try {
-                TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
+                TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                 JSONObject jsonLeaderboard;
-                if (resultTimePoint != null) {
-                    Util.Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new Util.Triple<>(
-                            resultTimePoint, resultState, maxCompetitorsCount);
-                    jsonLeaderboard = getLeaderboardJson(leaderboard, resultStateAndTimePoint);
+                if (timePoint != null || resultState == ResultStates.Live) {
+                    jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount);
                 } else {
                     jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
                             maxCompetitorsCount);
@@ -181,19 +179,16 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     }
 
     private JSONObject getLeaderboardJson(Leaderboard leaderboard,
-            Util.Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount)
+            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount)
             throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
-                timePointAndResultStateAndMaxCompetitorsCount.getA(), Collections.<String> emptyList(), /* addOverallDetails */
+                resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
 
-        TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
-        ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
-        Integer maxCompetitorsCount = timePointAndResultStateAndMaxCompetitorsCount.getC();
         JSONObject jsonLeaderboard = new JSONObject();
 
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, resultTimePoint, maxCompetitorsCount);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
 
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);

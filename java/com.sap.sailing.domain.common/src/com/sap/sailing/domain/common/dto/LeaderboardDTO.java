@@ -42,6 +42,9 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     private Map<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName;
 
+    /** timpoint of the leaderboard */
+    private Date timePoint;
+
     private Date timePointOfLastCorrectionsValidity;
 
     private String comment;
@@ -63,9 +66,10 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
      * from it by the {@link #clone()} operation.
      */
-    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
+    public LeaderboardDTO(Date timepoint, Date timePointOfLastCorrectionsValidity, String comment, ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
         initCollections();
         id = uuidGenerator.generateRandomUUID();
+        this.timePoint = timepoint;
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.scoringScheme = scoringScheme;
         this.comment = comment;
@@ -155,6 +159,13 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      */
     public Date getTimePointOfLastCorrectionsValidity() {
         return timePointOfLastCorrectionsValidity;
+    }
+
+    /**
+     * Returns the timepoint for which the leaderboard has been created.
+     */
+    public Date getTimePoint() {
+        return timePoint;
     }
 
     @Override

@@ -85,11 +85,11 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
     }
     
     protected void writeCommonLeaderboardData(JSONObject jsonLeaderboard, LeaderboardDTO leaderboard,
-            ResultStates resultState, TimePoint resultTimePoint, Integer maxCompetitorsCount) {
+            ResultStates resultState, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.name);
         final String displayName = leaderboard.getDisplayName();
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.name : displayName);
-        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
+        jsonLeaderboard.put("resultTimepoint", leaderboard.getTimePoint() != null ? leaderboard.getTimePoint().getTime() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         jsonLeaderboard.put("higherScoreIsBetter", leaderboard.isHigherScoreBetter());

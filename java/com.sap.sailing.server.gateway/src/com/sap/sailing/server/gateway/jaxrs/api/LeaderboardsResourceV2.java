@@ -63,16 +63,16 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             try {
-                TimePoint resultTimePoint;
+                TimePoint timePoint;
                 try {
-                    resultTimePoint = parseTimePoint(time, timeasmillis, calculateTimePointForResultState(leaderboard, resultState));
+                    timePoint = parseTimePoint(time, timeasmillis, calculateTimePointForResultState(leaderboard, resultState));
                 } catch (InvalidDateException e1) {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the time.")
                             .type(MediaType.TEXT_PLAIN).build();
                 }
                 JSONObject jsonLeaderboard;
-                if (resultTimePoint != null || resultState == ResultStates.Live) {
-                    jsonLeaderboard = getLeaderboardJson(leaderboard, resultTimePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
+                if (timePoint != null || resultState == ResultStates.Live) {
+                    jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
                 } else {
                     jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
                             maxCompetitorsCount);
@@ -107,7 +107,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         
         JSONObject jsonLeaderboard = new JSONObject();
               
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, resultTimePoint, maxCompetitorsCount);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
 
         Map<String, Map<String, Map<CompetitorDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
         for (String raceColumnName : raceColumnsToShow) {
