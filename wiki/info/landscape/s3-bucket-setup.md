@@ -4,7 +4,32 @@ When you want to equip a server with a File Storage for easy upload of media con
 
 ## Creating a New User
 
-In the AWS console, go to IAM, Users, and add a new user. Ideally, call the user like you will call the bucket, for easy identification and mapping. Tick the "Programmatic access" checkbox but not the "AWS Management Console access" box. No permissions need to be assigned to the user here.
+In the AWS console, go to IAM, Users, and add a new user. Ideally, call the user like you will call the bucket, for easy identification and mapping. Tick the "Programmatic access" checkbox but not the "AWS Management Console access" box. Give the user a permission document as follows, replacing ``<TheNameOfTheBucket>`` by the bucket name you will choose below:
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:AbortMultipartUpload",
+                "s3:Get*",
+                "s3:List*",
+                "s3:Put*"
+            ],
+            "Resource": "arn:aws:s3:::<TheNameOfTheBucket>/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
 
 Record the access ID and key displayed. You will need to enter them in the SAP Sailing Analytics Admin Console Advanced/File Storage tab.
 
