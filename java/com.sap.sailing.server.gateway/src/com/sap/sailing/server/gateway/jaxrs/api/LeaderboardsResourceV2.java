@@ -202,14 +202,14 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         List<DetailType> result = new ArrayList<>();
         if (raceDetailTypesNames.size() == 0) {
             result = Arrays.asList(getDefaultRaceDetailColumnTypes());
-        }if (raceDetailTypesNames.size() == 1 && raceDetailTypesNames.get(0).equals("ALL")) {
+        } else if (raceDetailTypesNames.size() == 1 && raceDetailTypesNames.get(0).equals("ALL")) {
             result = Arrays.asList(getAvailableRaceDetailColumnTypes());
         } else {
             Map<String, DetailType> typeMap = new HashMap<>();
-            for (DetailType detailType: getAvailableRaceDetailColumnTypes()) {
+            for (DetailType detailType : getAvailableRaceDetailColumnTypes()) {
                 typeMap.put(detailType.name(), detailType);
             }
-            for (String raceDetailTypeName: raceDetailTypesNames) {
+            for (String raceDetailTypeName : raceDetailTypesNames) {
                 if (typeMap.containsKey(raceDetailTypeName)) {
                     result.add(typeMap.get(raceDetailTypeName));
                 }

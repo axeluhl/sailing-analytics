@@ -42,7 +42,10 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     private Map<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName;
 
-    /** timpoint of the leaderboard */
+    /**
+     * The validity time point for which this leaderboard DTO was requested (not to be confused with
+     * the time <em>when</em> the request was made).
+     */
     private Date timePoint;
 
     private Date timePointOfLastCorrectionsValidity;
@@ -162,7 +165,8 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     }
 
     /**
-     * Returns the timepoint for which the leaderboard has been created.
+     * @return the validity time point for which this leaderboard DTO was requested (not to be confused with the time
+     *         <em>when</em> the request was made).
      */
     public Date getTimePoint() {
         return timePoint;
