@@ -105,7 +105,11 @@ public class SensorDataReceiver extends AbstractReceiverWithQueue<IRaceCompetito
                             trackedRace.getOrCreateSensorTrack(competitor, BravoFixTrack.TRACK_NAME,
                                     () -> new CompetitorBravoFixTrackImpl(competitor, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ false,
                                             trackedRace.getTrack(competitor)));
-                    bravoFixTrack.add(fix);
+                    if (getSimulator() != null) {
+                        getSimulator().scheduleCompetitorSensorData(bravoFixTrack, fix);
+                    } else {
+                        bravoFixTrack.add(fix);
+                    }
                 }
             }
         } else {
