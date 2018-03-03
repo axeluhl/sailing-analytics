@@ -4,7 +4,7 @@ When you want to equip a server with a File Storage for easy upload of media con
 
 ## Creating a New User
 
-In the AWS console, go to IAM, Users, and add a new user. Ideally, call the user like you will call the bucket, for easy identification and mapping. Tick the "Programmatic access" checkbox but not the "AWS Management Console access" box. Give the user a permission document as follows, replacing ``<TheNameOfTheBucket>`` by the bucket name you will choose below:
+In the AWS console, go to IAM, Users, and add a new user. Ideally, call the user like you will call the bucket, for easy identification and mapping. Tick the "Programmatic access" checkbox but not the "AWS Management Console access" box. Give the user a permission document using the "Add inline policy" link and choosing the JSON tab, as follows, replacing ``<TheNameOfTheBucket>`` by the bucket name you will choose below:
 
 ```
 {
