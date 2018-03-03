@@ -96,19 +96,14 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
             List<String> raceColumnNames, List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
-
         List<String> raceColumnsToShow = calculateRaceColumnsToShow(raceColumnNames, leaderboard.getRaceColumns());
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
-
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, raceColumnsToShow, /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
-        
         JSONObject jsonLeaderboard = new JSONObject();
-              
         writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
-
         Map<String, Map<String, Map<CompetitorDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
         for (String raceColumnName : raceColumnsToShow) {
             List<CompetitorDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
@@ -128,36 +123,30 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             }
             competitorRanksPerRaceColumnsAndFleets.put(raceColumnName, competitorsOrderedByFleets);
         }
-            
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int competitorCounter = 1;
         // Remark: leaderboardDTO.competitors are ordered by total rank
         for (CompetitorDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
-
             if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {
                 break;
             }
             JSONObject jsonCompetitor = new JSONObject();
             writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
-
             jsonCompetitor.put("rank", competitorCounter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
             jsonCompetitor.put("overallRank", leaderboardDTO.getTotalRank(competitor));
             jsonCompetitorEntries.add(jsonCompetitor);
-
             JSONObject jsonRaceColumns = new JSONObject();
             jsonCompetitor.put("columns", jsonRaceColumns);
             for (String raceColumnName : raceColumnsToShow) {
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumnName, jsonEntry);
                 LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
-                
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
-                
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
                 jsonEntry.put("uncorrectedTotalPoints", leaderboardEntry.totalPoints);
                 jsonEntry.put("netPoints", leaderboardEntry.netPoints);
@@ -165,7 +154,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
                 jsonEntry.put("isDiscarded", leaderboardEntry.discarded);
                 jsonEntry.put("isCorrected", leaderboardEntry.hasScoreCorrection());
-
                 // if we have no fleet information there is no way to know in which fleet the competitor was racing
                 Integer rank = null;
                 if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
@@ -178,17 +166,14 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     }
                 }
                 jsonEntry.put("rank", rank);
-
                 LegEntryDTO detailsOfLastAvailableLeg =  getDetailsOfLastAvailableLeg(leaderboardEntry);
                 jsonEntry.put("trackedRank", detailsOfLastAvailableLeg != null ? detailsOfLastAvailableLeg.rank : null);
-
                 boolean finished = false;
                 LegEntryDTO detailsOfLastCourseLeg = getDetailsOfLastCourseLeg(leaderboardEntry);
                 if (detailsOfLastCourseLeg != null) {
                     finished = detailsOfLastCourseLeg.finished;
                 }
                 jsonEntry.put("finished", finished);
-                
                 if (!raceDetailsToShow.isEmpty() && leaderboardEntry.race != null) {
                     LegEntryDTO currentLegEntry = null;
                     int currentLegNumber = leaderboardEntry.getOneBasedCurrentLegNumber();
@@ -198,10 +183,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                             jsonEntry.put("trackedRank", currentLegEntry.rank);
                         }
                     }
-                    
                     JSONObject jsonRaceDetails = new JSONObject();
                     jsonEntry.put("data", jsonRaceDetails);
-                    for (DetailType type: raceDetailsToShow) {
+                    for (DetailType type : raceDetailsToShow) {
                         Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardEntry, currentLegEntry);
                         if (valueForRaceDetailType != null && valueForRaceDetailType.getA() != null && valueForRaceDetailType.getB() != null) {
                             jsonRaceDetails.put(valueForRaceDetailType.getA(),  valueForRaceDetailType.getB());
