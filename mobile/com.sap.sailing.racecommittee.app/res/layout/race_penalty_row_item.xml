@@ -25,6 +25,14 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp">
 
+            <ImageView
+                android:id="@+id/item_merge_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingRight="6dp"
+                tools:src="@drawable/ic_warning_red" />
+
             <TextView
                 android:id="@+id/item_penalty"
                 android:layout_width="wrap_content"
@@ -42,6 +50,7 @@
                 android:id="@+id/item_edit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:src="?attr/create" />
         </LinearLayout>
 
@@ -54,6 +63,8 @@
             android:layout_marginLeft="24dp"
             android:layout_toLeftOf="@id/item_right"
             android:layout_toRightOf="@id/item_check"
+            android:ellipsize="end"
+            android:maxLines="3"
             tools:text="ABD 1234 - Angel Dunn" />
     </RelativeLayout>
 

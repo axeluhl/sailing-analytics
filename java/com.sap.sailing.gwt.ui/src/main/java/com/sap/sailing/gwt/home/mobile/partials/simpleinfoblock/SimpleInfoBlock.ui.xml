@@ -1,27 +1,25 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="res"
-		type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:style>
-		.description {
-			display: none;
-			font-size: .866666666666667em;
-    			margin-bottom: .769230769230769em;
-		}
-		.action {
-			display: none;
-			border-radius: .384615384615385em;
-			width: 100%;
-		    text-align: center;
-		}
-		.holder {
-			box-sizing: border-box;
-			padding: 0px 10px 0px 10px;
-		}
-	</ui:style>
-	<g:HTMLPanel styleName="{style.holder}">
-		<div ui:field="descriptionUi" class="{style.description}"></div>
-		<a ui:field="actionUi" class="{res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} {style.action} "></a>
-	</g:HTMLPanel>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .description {
+            display: none;
+            font-size: .866666666666667em;
+            margin-bottom: .384615384615385em;
+        }
+        .action {
+            display: none;
+            border-radius: .384615384615385em;
+            width: 100%;
+            text-align: center;
+        }
+        .holder {
+            box-sizing: border-box;
+            padding: 0px 10px 10px;
+        }
+    </ui:style>
+    <g:HTMLPanel styleName="{style.holder}">
+        <div ui:field="descriptionUi" class="{style.description}"></div>
+        <a ui:field="actionUi" class="{res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} {style.action} "></a>
+    </g:HTMLPanel>
 </ui:UiBinder> 

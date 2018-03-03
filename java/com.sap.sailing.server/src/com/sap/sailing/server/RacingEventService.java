@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -132,7 +133,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
         LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
         ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver,
-        SensorFixStoreSupplier {
+        SensorFixStoreSupplier, WindFinderReviewedSpotsCollectionIdProvider {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -373,6 +374,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
      * the names in <code>regattaNames</code> and updates it in the database.
+     * 
      * @param eventName
      *            The name of the event to update
      * @param startDate
@@ -383,11 +385,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
+     * @param windFinderReviewedSpotCollectionIds
+     *            IDs of WindFinder spot collections, reviewed by www.windfinder.com, to use by the WindFinder wind
+     *            tracker and to expose on the event's UI
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL, 
-            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos,
+            Iterable<String> windFinderReviewedSpotCollectionIds);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},

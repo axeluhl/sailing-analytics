@@ -200,6 +200,8 @@ To reach your multi instance via "ssv.sapsailing.com", perform the following ste
    
    Notice the overwritten health check port that is now pointing directly to the instance with its `SERVER_PORT` 8888.
 
+BE CAREFUL please use for a live-server and live-master-server the traffic port for Health Checks.
+
 2. Add the "SL Multi-Instance Sailing Server" instance to the target group.
 
   <img src="/wiki/images/amazon/TargetGroup_3.png"/>

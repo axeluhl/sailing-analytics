@@ -14,6 +14,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.EventType;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -91,6 +92,13 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
     }
     
+    protected final void initWindfinderNavigations(EventViewBase view) {
+        final Iterable<SpotDTO> spots = eventDTO.getAllWindFinderSpotIdsUsedByEvent();
+        if (spots != null && !Util.isEmpty(spots)) {
+            view.setWindfinderNavigations(spots);
+        }
+    }
+
     protected final void initQuickfinder(EventViewBase view, boolean showQuickfinder) {
         EventViewDTO event = eventDTO;
         if(showQuickfinder && event.getType() == EventType.MULTI_REGATTA) {
