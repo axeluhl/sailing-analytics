@@ -177,20 +177,27 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
             @Override
             public void onSuccess(String result) {
-                final Button addIgtimiUserButton = new Button(stringMessages.addIgtimiUser()+" (OAuth)");
-                addIgtimiUserButton.addClickHandler(clickEvent->{
+                final Button addIgtimiUserButton = new Button(stringMessages.addIgtimiUser() + " (OAuth)");
+                addIgtimiUserButton.addClickHandler(clickEvent -> {
                     Frame frame = new Frame(UriUtils.fromString(result).asString());
-                    frame.addLoadHandler(loadEvent->refresh(sailingService, errorReporter, stringMessages));
-                    frame.setPixelSize(520, 770); 
+                    frame.addLoadHandler(loadEvent -> refresh(sailingService, errorReporter, stringMessages));
+                    frame.setPixelSize(520, 770);
                     final CaptionImpl caption = new CaptionImpl();
                     caption.setText(stringMessages.addIgtimiUser());
-                    final DialogBox dialogBox = new DialogBox(/* autoHide */ true, /* modal */ true);
+                    final DialogBox dialogBox = new DialogBox(/* autoHide */ false, /* modal */ true);
+                    Button closeButton = new Button(stringMessages.close());
+                    closeButton.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            dialogBox.hide();
+                        }
+                    });
                     dialogBox.setText(stringMessages.addIgtimiUser());
                     dialogBox.setGlassEnabled(true);
                     final VerticalPanel panel = new VerticalPanel();
                     dialogBox.setWidget(panel);
                     panel.add(frame);
-                    dialogBox.addCloseHandler(event->{
+                    panel.add(closeButton);
+                    dialogBox.addCloseHandler(event -> {
                         refresh(sailingService, errorReporter, stringMessages);
                     });
                     dialogBox.center();

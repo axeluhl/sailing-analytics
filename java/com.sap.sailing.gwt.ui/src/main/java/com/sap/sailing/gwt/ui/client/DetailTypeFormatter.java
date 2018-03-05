@@ -197,7 +197,7 @@ public class DetailTypeFormatter {
         case DISTANCE_TO_START_LINE:
             return stringMessages.distanceToLine();
         case BEAT_ANGLE:
-            return stringMessages.beatAngle();
+            return stringMessages.TWA();
         case COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegrees();
         case TOTAL_SCORED_RACE_COUNT:
@@ -535,7 +535,7 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.raceTimeUpwindTooltip();
         case BEAT_ANGLE:
-            return stringMessages.beatAngleTooltip();
+            return stringMessages.TWATooltip();
         case DISTANCE_TO_START_LINE:
             return "";
         case COURSE_OVER_GROUND_TRUE_DEGREES:

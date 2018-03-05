@@ -8,4 +8,9 @@ CACHE=$VARLOGOLD/cache/unique-ips-per-referrer
 
 JAR_FILE=$VARLOGOLD/com.sap.sse.jar
 
-$JAVA_HOME/bin/java -jar $JAR_FILE $CACHE $*
+$JAVA_HOME/bin/java -Xmx8G -jar $JAR_FILE $CACHE $*
+
+# Do the sorting of all .unique files now:
+for i in `find $CACHE -name '*.unique'`; do
+  cat $i | awk '{ print $2 " " $1; }' | sort -rn >${i}.sorted
+done

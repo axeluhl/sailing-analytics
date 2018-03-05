@@ -20,14 +20,12 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
@@ -118,20 +116,6 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         assertEquals(upperFlag, actualEvent.getUpperFlag());
         assertEquals(lowerFlag, actualEvent.getLowerFlag());
         assertEquals(isDisplayed, actualEvent.isDisplayed());
-    }
-
-    @Test
-    public void testStoreAndLoadCourseAreaChangedEvent() {
-        Serializable courseAreaId = UUID.randomUUID();
-
-        RaceLogCourseAreaChangedEvent expectedEvent = new RaceLogCourseAreaChangeEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, expectedPassId, courseAreaId);
-
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogCourseAreaChangedEvent actualEvent = loadEvent(dbObject);
-
-        assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(courseAreaId, actualEvent.getCourseAreaId());
     }
 
     @Test

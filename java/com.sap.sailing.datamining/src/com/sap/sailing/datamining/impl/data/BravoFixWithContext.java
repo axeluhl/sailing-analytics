@@ -4,7 +4,6 @@ import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -64,8 +63,8 @@ public class BravoFixWithContext implements HasBravoFixContext {
     }
 
     @Override
-    public Bearing getAbsoluteTrueWindAngle() throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), getTimePoint()).getBeatAngle(getTimePoint()).abs();
+    public Bearing getAbsoluteTrueWindAngle() {
+        return getTrackedRace().getTWA(getCompetitor(), getTimePoint()).abs();
     }
 
     private Competitor getCompetitor() {

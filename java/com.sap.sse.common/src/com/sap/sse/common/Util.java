@@ -789,4 +789,41 @@ public class Util {
         }
         return toStringOrNull.toString();
     }
+    
+    /**
+     * Pads a numerical value with '0' characters up to a number of digits left and right of the decimal point. If the
+     * number of digits right of the decimal point is zero, no decimal point will be rendered in the result. The sum of
+     * digits requested must be greater than zero. Digits will appear left of the decimal point if required to represent
+     * the integer part of the {@code value}'s magnitude.
+     * 
+     * @param digitsLeftOfDecimal
+     *            a non-negative number; if zero,
+     * @param digitsRightOfDecimal
+     *            a non-negative number; if zero, no decimal point will appear at all
+     * @param round
+     *            whether or not the value shall be rounded to the number of decimals requested. If {@code false}, the
+     *            value will be displayed in a truncated form
+     */
+    public static String padPositiveValue(double value, int digitsLeftOfDecimal, int digitsRightOfDecimal, boolean round) {
+        assert value >= 0;
+        assert digitsLeftOfDecimal >= 0;
+        assert digitsRightOfDecimal >= 0;
+        final StringBuilder sb = new StringBuilder();
+        final double scalePow = Math.pow(10.0, digitsRightOfDecimal);
+        final double scaledValue = round?Math.round(value * scalePow):(value*scalePow);
+        double remainder = scaledValue;
+        if (digitsLeftOfDecimal==0 && scaledValue>=scalePow) {
+            sb.append(Math.round(remainder/scalePow));
+            remainder = remainder%scalePow;
+        }
+        for (int i=digitsLeftOfDecimal+digitsRightOfDecimal; i>0; i--) {
+            if (i==digitsRightOfDecimal) {
+                sb.append('.');
+            }
+            final double pow = Math.pow(10.0, i-1);
+            sb.append((int) (remainder/pow));
+            remainder = remainder % pow;
+        }
+        return sb.toString();
+    }
 }
