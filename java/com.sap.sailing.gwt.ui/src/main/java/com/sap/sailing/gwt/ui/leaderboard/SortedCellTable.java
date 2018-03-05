@@ -168,6 +168,13 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
         }
     }
 
+    /**
+     * Allows simpler inserting of a SortableColumn 
+     */
+    public void insertColumn(int beforeIndex, SortableColumn<T, ?> column) {
+        insertColumn(beforeIndex, column, column.getHeader(), column.getComparator(), column.isDefaultSortAscending());
+    }
+    
     public void insertColumn(int beforeIndex, Column<T, ?> column, Header<?> header, InvertibleComparator<T> comparator, boolean ascendingSorting) {
         insertColumn(beforeIndex, column, header);
         column.setSortable(comparator != null);

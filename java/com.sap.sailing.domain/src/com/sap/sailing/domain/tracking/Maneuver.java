@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -134,5 +135,7 @@ public interface Maneuver extends GPSFix {
      */
     @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
     double getDirectionChangeInDegrees();
+
+    Duration getDuration();
 
 }

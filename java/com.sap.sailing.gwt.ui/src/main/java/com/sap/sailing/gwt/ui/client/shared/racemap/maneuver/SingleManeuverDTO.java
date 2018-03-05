@@ -17,11 +17,11 @@ public class SingleManeuverDTO {
     public final SpeedWithBearingDTO speedOut;
     public final SpeedWithBearingDTO minSpeed;
     public final double turnRate;
-    public final double loss;
+    public final Double loss;
     public final Bearing direction;
 
     public SingleManeuverDTO(CompetitorDTO competitor, Date time, ManeuverType maneuverType, Duration duration,
-            SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedWithBearingDTO minSpeed, double turnRate, double loss, Bearing direction) {
+            SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedWithBearingDTO minSpeed, double turnRate, Double loss, Bearing direction) {
         super();
         this.competitor = competitor;
         this.time = time;

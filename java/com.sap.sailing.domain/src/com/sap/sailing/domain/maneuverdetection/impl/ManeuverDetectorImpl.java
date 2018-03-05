@@ -436,7 +436,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     maneuverLoss, markPassingTimePoint, maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
                     maneuverDetails.extractEnteringAndExistingDetailsOnly(),
                     maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), waypointPassed,
-                    sideToWhichWaypointWasPassed));
+                    sideToWhichWaypointWasPassed, maneuverMainCurveDetails.getDuration()));
         } else {
             markPassingTimePoint = null;
         }
@@ -512,7 +512,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         tackAfterManeuver, penaltyPosition, maneuverLoss, refinedPenaltyDetails.getTimePoint(),
                         refinedPenaltyMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
                         refinedPenaltyDetails.extractEnteringAndExistingDetailsOnly(),
-                        refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
+                        refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), refinedPenaltyMainCurveDetails.getDuration());
                 maneuvers.add(maneuver);
                 // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes
                 // remain
@@ -533,7 +533,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                             maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
                             maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
                             maneuverDetails.extractEnteringAndExistingDetailsOnly(),
-                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
+                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), maneuverMainCurveDetails.getDuration());
                 } else if (wind != null) {
                     // heading up or bearing away
                     Bearing windBearing = wind.getBearing();
@@ -549,7 +549,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                             maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
                             maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
                             maneuverDetails.extractEnteringAndExistingDetailsOnly(),
-                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
+                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), maneuverMainCurveDetails.getDuration());
                 } else {
                     // no wind information; marking as UNKNOWN
                     maneuverType = ManeuverType.UNKNOWN;
@@ -561,7 +561,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                             maneuverLoss, maneuverDetails.getTimePoint(),
                             maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
                             maneuverDetails.extractEnteringAndExistingDetailsOnly(),
-                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond());
+                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), maneuverMainCurveDetails.getDuration());
                 }
                 maneuvers.add(maneuver);
             }
