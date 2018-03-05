@@ -15,6 +15,7 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
 public class SortedCellTable<T> extends BaseCelltable<T> {
@@ -145,6 +146,13 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
     }
 
     /**
+     * Easy helper to correctly add sortableColumns without that much parameters
+     */
+    public void addColumn(SortableColumn<T, ?> column) {
+        addColumn(column, column.getHeader(), column.getComparator(), column.isDefaultSortAscending());
+    }
+    
+    /**
      * Adds a column to the table and sets its sortable state
      * 
      * @param column
@@ -230,7 +238,15 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
             currentlySortedColumn = initialSortColumn;
         }
     }
-
+    
+    @Override
+    /**
+     * DO NOT USE! use setList instead, as else the content will not be sorted correctly!
+     */
+    public void setRowData(int start, List<? extends T> values) {
+        super.setRowData(start, values);
+    }
+    
     public ListDataProvider<T> getDataProvider() {
         return dataProvider;
     }
