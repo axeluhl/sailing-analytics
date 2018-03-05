@@ -23,7 +23,6 @@ import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeseriali
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogAdditionalScoringInformationSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAreaChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDenoteForTrackingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDependentStartTimeEventSerializer;
@@ -65,7 +64,6 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogStartTimeEventDeserializer(competitorDeserializer), 
                 new RaceLogDependentStartTimeEventDeserializer(competitorDeserializer),
                 new RaceLogRaceStatusEventDeserializer(competitorDeserializer),
-                new RaceLogCourseAreaChangedEventDeserializer(competitorDeserializer),
                 new RaceLogCourseDesignChangedEventDeserializer(competitorDeserializer,
                         new CourseBaseDeserializer(
                                 new WaypointDeserializer(
@@ -97,7 +95,6 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> startTimeEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> dependentStartTimeEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer;
-    protected final JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> finishPositioningListChangedEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer;
@@ -122,7 +119,6 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
             JsonDeserializer<RaceLogEvent> dependentStartTimeEventDeserializer,
             JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer,
-            JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer,
             JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer,
             JsonDeserializer<RaceLogEvent> finishPositioningListChangedEventDeserializer,
             JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer,
@@ -146,7 +142,6 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
         this.raceStatusEventDeserializer = raceStatusEventDeserializer;
-        this.courseAreaChangedEventDeserializer = courseAreaChangedEventDeserializer;
         this.courseDesignChangedEventDeserializer = courseDesignChangedEventDeserializer;
         this.finishPositioningListChangedEventDeserializer = finishPositioningListChangedEventDeserializer;
         this.finishPositioningConfirmedEventDeserializer = finishPositioningConfirmedEventDeserializer;
@@ -181,8 +176,6 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return raceStatusEventDeserializer;
         } else if (type.equals(RaceLogPassChangeEventSerializer.VALUE_CLASS)) {
             return passChangeEventDeserializer;
-        } else if (type.equals(RaceLogCourseAreaChangedEventSerializer.VALUE_CLASS)) {
-            return courseAreaChangedEventDeserializer;
         } else if (type.equals(RaceLogCourseDesignChangedEventSerializer.VALUE_CLASS)) {
             return courseDesignChangedEventDeserializer;
         } else if (type.equals(RaceLogFinishPositioningListChangedEventSerializer.VALUE_CLASS)) {

@@ -28,7 +28,6 @@ import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -57,6 +56,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -602,6 +602,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
         storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
+        BasicDBList windFinderSpotCollectionIds = new BasicDBList();
+        for (final String windFinderSpotCollectionId : event.getWindFinderReviewedSpotsCollectionIds()) {
+            windFinderSpotCollectionIds.add(windFinderSpotCollectionId);
+        }
+        eventDBObject.put(FieldNames.EVENT_WINDFINDER_SPOT_COLLECTION_IDS.name(), windFinderSpotCollectionIds);
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
         BasicDBList images = new BasicDBList();
@@ -850,13 +855,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
-        BasicDBObject result = new BasicDBObject();
-        storeRaceLogIdentifier(raceLogIdentifier, result);       
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCourseAreaChangedEvent(courseAreaChangedEvent));
-        return result;
-    }
-    
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogCourseDesignChangedEvent courseDesignChangedEvent) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);       
@@ -1182,14 +1180,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(raceStatusEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRaceStatusEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), raceStatusEvent.getNextStatus().name());
-        return result;
-    }
-
-    private DBObject storeRaceLogCourseAreaChangedEvent(RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
-        DBObject result = new BasicDBObject();
-        storeRaceLogEventProperties(courseAreaChangedEvent, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseAreaChangedEvent.class.getSimpleName());
-        result.put(FieldNames.COURSE_AREA_ID.name(), courseAreaChangedEvent.getCourseAreaId());
         return result;
     }
 
@@ -1583,6 +1573,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), event.getClass().getSimpleName());
         storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+    
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId,
+            RegattaLogDeviceBoatSensorDataMappingEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), event.getClass().getSimpleName());
+        storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
+        result.put(FieldNames.RACE_LOG_BOAT_ID.name(), event.getMappedTo().getId());
         storeRegattaLogEvent(regattaLikeId, result);
     }
 

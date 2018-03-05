@@ -92,7 +92,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.videoTagSuggestions, "Enter tags for the video", 50));
+                        MediaConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
     }
 
     @Override

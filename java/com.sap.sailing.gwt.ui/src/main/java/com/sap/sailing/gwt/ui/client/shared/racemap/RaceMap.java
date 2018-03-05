@@ -11,7 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -51,8 +53,6 @@ import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
 import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.mvc.MVCArray;
-import com.google.gwt.maps.client.overlays.InfoWindow;
-import com.google.gwt.maps.client.overlays.InfoWindowOptions;
 import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
 import com.google.gwt.maps.client.overlays.Polygon;
@@ -63,8 +63,10 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -86,6 +88,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
@@ -137,6 +140,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -326,8 +330,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    private InfoWindow lastInfoWindow = null;
-    
     /**
      * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
      * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
@@ -417,6 +419,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean orientationChangeInProgress;
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
+    private final NumberFormat numberFormatNoDecimal = NumberFormat.getFormat("0");
     
     /**
      * The competitor for which the advantage line is currently showing. Should this competitor's quick rank change, or
@@ -427,6 +430,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     protected Label estimatedDurationOverlay;
     private RaceMapStyle raceMapStyle;
     private final boolean showHeaderPanel;
+    
+    /** Callback to set the visibility of the wind chart. */
+    private final Consumer<WindSource> showWindChartForProvider;
+    private ManagedInfoWindow managedInfoWindow;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -445,6 +452,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
+        this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
+                timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
+                showHeaderPanel, quickRanksDTOProvider, visible -> {});
+    }
+    
+    public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
+            RaceMapSettings raceMapSettings,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider) {
         super(parent, context);
         this.showHeaderPanel = showHeaderPanel;
         this.quickRanksDTOProvider = quickRanksDTOProvider;
@@ -456,6 +474,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.errorReporter = errorReporter;
         this.timer = timer;
         this.isSimulationEnabled = true;
+        this.showWindChartForProvider = showWindChartForProvider;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -699,6 +718,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               RaceMap.this.redraw();
               trueNorthIndicatorPanel.redraw();
               showAdditionalControls(map);
+              RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
           }
         };
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
@@ -861,6 +881,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
+                    windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
                             /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
@@ -880,7 +901,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
                                         case EXPEDITION:
-                                            // we filter out measured wind sources with vary low confidence
+                                        case WINDFINDER:
+                                            // we filter out measured wind sources with very low confidence
                                             if (windTrackInfoDTO.minWindConfidence > 0.0001) {
                                                 windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
@@ -1633,10 +1655,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Position startLineRightPosition = numberOfStartWaypointMarks < 2 ? null : courseDTO.getStartMarkPositions().get(1);
             if (courseDTO.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind != null) {
                 startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
-                        NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
-                        NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
+                        numberFormatOneDecimal.format(courseDTO.startLineLengthInMeters),
+                        numberFormatOneDecimal.format(Math.abs(courseDTO.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
                         courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
-                        NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters)));
+                        numberFormatOneDecimal.format(courseDTO.startLineAdvantageInMeters)));
             } else {
                 startLineAdvantageText.delete(0, startLineAdvantageText.length());
             }
@@ -1666,10 +1688,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Position finishLineRightPosition = numberOfFinishWaypointMarks < 2 ? null : courseDTO.getFinishMarkPositions().get(1);
             if (courseDTO.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind != null) {
                 finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
-                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
-                        NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
+                        numberFormatOneDecimal.format(courseDTO.finishLineLengthInMeters),
+                        numberFormatOneDecimal.format(Math.abs(courseDTO.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
                         courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
-                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters)));
+                        numberFormatOneDecimal.format(courseDTO.finishLineAdvantageInMeters)));
             } else {
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
@@ -1742,14 +1764,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 final StringBuilder sb = new StringBuilder();
                 sb.append(stringMessages.courseMiddleLine());
                 sb.append('\n');
-                sb.append(NumberFormat.getFormat("0").format(
+                sb.append(numberFormatNoDecimal.format(
                         Math.abs(position1DTO.getDistance(position2DTO).getMeters()))+stringMessages.metersUnit());
                 if (lastCombinedWindTrackInfoDTO != null) {
                     final WindTrackInfoDTO windTrackAtLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(zeroBasedIndexOfStartWaypoint);
                     if (windTrackAtLegMiddle != null && windTrackAtLegMiddle.windFixes != null && !windTrackAtLegMiddle.windFixes.isEmpty()) {
                         WindDTO windAtLegMiddle = windTrackAtLegMiddle.windFixes.get(0);
                         final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
-                        final String diff = NumberFormat.getFormat("0.0").format(
+                        final String diff = numberFormatOneDecimal.format(
                                 Math.min(Math.abs(windAtLegMiddle.dampenedTrueWindBearingDeg-legBearingDeg),
                                                      Math.abs(windAtLegMiddle.dampenedTrueWindFromDeg-legBearingDeg)));
                         sb.append(", ");
@@ -2063,21 +2085,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final BoatDTO boatOfCompetitor = competitorSelection.getBoat(competitorDTO);
         final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, boatOfCompetitor, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
         boatCanvas.setDisplayMode(displayMode);
-        boatCanvas.addClickHandler(new ClickMapHandler() {
-            @Override
-            public void onEvent(ClickMapEvent event) {
-                if (lastInfoWindow != null) {
-                    lastInfoWindow.close();
-                }
-                GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
-                LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
-                InfoWindowOptions options = InfoWindowOptions.newInstance();
-                InfoWindow infoWindow = InfoWindow.newInstance(options);
-                infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
-                infoWindow.setPosition(where);
-                lastInfoWindow = infoWindow;
-                infoWindow.open(map);
-            }
+        boatCanvas.addClickHandler(event -> {
+            GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
+            Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
+            LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
+            managedInfoWindow.openAtPosition(content, where);
         });
 
         boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
@@ -2109,81 +2121,55 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void showMarkInfoWindow(MarkDTO markDTO, LatLng position) {
-        if(lastInfoWindow != null) {
-            lastInfoWindow.close();
-        }
-        InfoWindowOptions options = InfoWindowOptions.newInstance();
-        InfoWindow infoWindow = InfoWindow.newInstance(options);
-        infoWindow.setContent(getInfoWindowContent(markDTO));
-        infoWindow.setPosition(position);
-        lastInfoWindow = infoWindow;
-        infoWindow.open(map);
+        managedInfoWindow.openAtPosition(getInfoWindowContent(markDTO), position);
     }
 
     private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
-        if(lastInfoWindow != null) {
-            lastInfoWindow.close();
-        }
-        GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime()); 
-        // TODO find close fix where the mouse was; see BUG 470
-        InfoWindowOptions options = InfoWindowOptions.newInstance();
-        InfoWindow infoWindow = InfoWindow.newInstance(options);
-        infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
-        infoWindow.setPosition(where);
-        lastInfoWindow = infoWindow;
-        infoWindow.open(map);
+        final GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
+        final Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
+        managedInfoWindow.openAtPosition(content, where);
     }
 
-    private String formatPosition(double lat, double lng) {
-        NumberFormat numberFormat = NumberFormat.getFormat("0.00000");
-        String result = numberFormat.format(lat) + " lat, " + numberFormat.format(lng) + " lng";
-        return result;
-    }
-    
     private void showWindSensorInfoWindow(final WindSensorOverlay windSensorOverlay) {
         WindSource windSource = windSensorOverlay.getWindSource();
         WindTrackInfoDTO windTrackInfoDTO = windSensorOverlay.getWindTrackInfoDTO();
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-        if(windDTO != null && windDTO.position != null) {
-            if(lastInfoWindow != null) {
-                lastInfoWindow.close();
-            }
-            LatLng where = coordinateSystem.toLatLng(windDTO.position);
-            InfoWindowOptions options = InfoWindowOptions.newInstance();
-            InfoWindow infoWindow = InfoWindow.newInstance(options);
-            infoWindow.setContent(getInfoWindowContent(windSource, windTrackInfoDTO));
-            infoWindow.setPosition(where);
-            lastInfoWindow = infoWindow;
-            infoWindow.open(map);
+        if (windDTO != null && windDTO.position != null) {
+            final LatLng where = coordinateSystem.toLatLng(windDTO.position);
+            final Widget content = getInfoWindowContent(windSource, windTrackInfoDTO);
+            managedInfoWindow.openAtPosition(content, where);
         }
     }
 
     private Widget createInfoWindowLabelAndValue(String labelName, String value) {
+        Label valueLabel = new Label(value);
+        valueLabel.setWordWrap(false);
+        return createInfoWindowLabelWithWidget(labelName, valueLabel);
+    }
+
+    public Widget createInfoWindowLabelWithWidget(String labelName, Widget value) {
         FlowPanel flowPanel = new FlowPanel();
         Label label = new Label(labelName + ":");
         label.setWordWrap(false);
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
         label.getElement().getStyle().setPadding(3, Style.Unit.PX);
         label.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
+        value.getElement().getStyle().setFloat(Style.Float.LEFT);
+        value.getElement().getStyle().setPadding(3, Style.Unit.PX);
         flowPanel.add(label);
-
-        Label valueLabel = new Label(value);
-        valueLabel.setWordWrap(false);
-        valueLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        valueLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        flowPanel.add(valueLabel);
-
+        flowPanel.add(value);
         return flowPanel;
     }
     
     private Widget getInfoWindowContent(MarkDTO markDTO) {
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.getName()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.getLatDeg(), markDTO.position.getLngDeg())));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), markDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), markDTO.position.getAsSignedDecimalDegrees()));
         return vPanel;
     }
 
-    public Widget getInfoWindowContent(ManeuverDTO maneuver) {
+    private Widget getInfoWindowContent(ManeuverDTO maneuver) {
         SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
         SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
         VerticalPanel vPanel = new VerticalPanel();
@@ -2202,19 +2188,54 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
                         + stringMessages.knotsUnit() + ")"));
         if (maneuver.maneuverLossInMeters != null) {
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), NumberFormat.getFormat("0.0").format(maneuver.maneuverLossInMeters)+"m"));
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), numberFormatOneDecimal.format(maneuver.maneuverLossInMeters)+"m"));
         }
         return vPanel;
     }
 
-    private Widget getInfoWindowContent(WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
+    private Widget getInfoWindowContent(final WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        VerticalPanel vPanel = new VerticalPanel();
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSource(), WindSourceTypeFormatter.format(windSource, stringMessages)));
+        final VerticalPanel vPanel = new VerticalPanel();
+        final Anchor windSourceNameAnchor = new Anchor(WindSourceTypeFormatter.format(windSource, stringMessages));
+        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.windSource(), windSourceNameAnchor));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.wind(), Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(windDTO.position.getLatDeg(), windDTO.position.getLngDeg())));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormatOneDecimal.format(windDTO.dampenedTrueWindSpeedInKnots)));
+        final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(windDTO.measureTimepoint);
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(), timePoint.asDate().toString()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), windDTO.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
+        final Label positionInDecimalDegreesLabel = new Label(windDTO.position.getAsSignedDecimalDegrees());
+        positionInDecimalDegreesLabel.setWordWrap(false);
+        positionInDecimalDegreesLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        positionInDecimalDegreesLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        positionInDecimalDegreesLabel.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
+        positionInDecimalDegreesLabel.getElement().getStyle().setFontSize(0.7, Unit.EM);
+        vPanel.add(positionInDecimalDegreesLabel);
+        if (windSource.getType() == WindSourceType.WINDFINDER) {
+            final HorizontalPanel container = new HorizontalPanel();
+            container.setSpacing(1);
+            final WindfinderIcon windfinderIcon = new WindfinderIcon(raceMapImageManager, stringMessages);
+            container.add(windfinderIcon);
+            container.add(vPanel);
+            sailingService.getWindFinderSpot(windSource.getId().toString(), new AsyncCallback<SpotDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(stringMessages.unableToResolveWindFinderSpotId(
+                            windSource.getId().toString(), caught.getMessage()), /* silentMode */ true);
+                }
+
+                @Override
+                public void onSuccess(SpotDTO result) {
+                    final String url = result.getCurrentlyMostAppropriateUrl(timePoint);
+                    windSourceNameAnchor.setTarget("_blank");
+                    windSourceNameAnchor.setText(result.getName());
+                    windSourceNameAnchor.setHref(url);
+                    windfinderIcon.setHref(url);
+                }
+            });
+            return container;
+        } else {
+            windSourceNameAnchor.addClickHandler(event -> showWindChartForProvider.accept(windSource));
+        }
         return vPanel;
     }
 
@@ -2374,18 +2395,22 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
-                        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
+        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
         Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
                 .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
-                        MarkerOptions options = MarkerOptions.newInstance();
-                        options.setIcon(maneuverMarker.getIcon_MarkerImage());
-                        Marker marker = Marker.newInstance(options);
-                        marker.setPosition(latLng);
+        MarkerOptions options = MarkerOptions.newInstance();
+        options.setIcon(maneuverMarker.getIcon_MarkerImage());
+        Marker marker = Marker.newInstance(options);
+        marker.setPosition(latLng);
         marker.setTitle(ManeuverTypeFormatter.format(maneuver.type, stringMessages));
-        marker.addClickHandler(new ManeuverMarkerClickedListener(this, maneuver));
-                        maneuverMarkers.add(marker);
-                        marker.setMap(map);
-                    }
+        marker.addClickHandler(event -> {
+            LatLng where = getCoordinateSystem().toLatLng(maneuver.position);
+            Widget content = getInfoWindowContent(maneuver);
+            managedInfoWindow.openAtPosition(content, where);
+        });
+        maneuverMarkers.add(marker);
+        marker.setMap(map);
+    }
 
     /**
      * @param date
@@ -2743,12 +2768,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             Collection<WindSensorOverlay> marksToZoom = forMap.windSensorOverlays.values();
             if (marksToZoom != null) {
                 for (WindSensorOverlay windSensorOverlay : marksToZoom) {
-                    if (BoundsUtil.getAsPosition(windSensorOverlay.getLatLngPosition()) != null) {
-                        LatLngBounds bounds = BoundsUtil.getAsBounds(windSensorOverlay.getLatLngPosition());
+                    final LatLng latLngPosition = windSensorOverlay.getLatLngPosition();
+                    if (Objects.nonNull(latLngPosition) && BoundsUtil.getAsPosition(latLngPosition) != null) {
+                        LatLngBounds bounds = BoundsUtil.getAsBounds(latLngPosition);
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds = newBounds.extend(windSensorOverlay.getLatLngPosition());
+                            newBounds = newBounds.extend(latLngPosition);
                         }
                     }
                 }
@@ -3011,14 +3037,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
     
-    void setLastInfoWindow(InfoWindow infoWindow) {
-        lastInfoWindow = infoWindow;
-    }
-
-    InfoWindow getLastInfoWindow() {
-        return lastInfoWindow;
-    }
-
     public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
         raceCompetitorSet.addCompetitorsForRaceDefinedListener(listener);
     }

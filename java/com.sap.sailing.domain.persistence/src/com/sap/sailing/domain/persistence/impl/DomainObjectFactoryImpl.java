@@ -43,7 +43,6 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -66,7 +65,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
@@ -103,6 +101,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -115,6 +114,9 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitor
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatBravoExtendedMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatBravoMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
@@ -1131,6 +1133,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
         Event result = new EventImpl(name, startDate, endDate, venue, isPublic, id);
         result.setDescription(description);
+        @SuppressWarnings("unchecked")
+        final List<String> windFinderReviewedSpotCollectionIds = (List<String>) eventDBObject.get(FieldNames.EVENT_WINDFINDER_SPOT_COLLECTION_IDS.name());
+        if (windFinderReviewedSpotCollectionIds != null) {
+            result.setWindFinderReviewedSpotsCollection(windFinderReviewedSpotCollectionIds);
+        }
         String officialWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name());
         if (officialWebSiteURLAsString != null) {
             try {
@@ -1515,9 +1522,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogFlagEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogPassChangeEvent.class.getSimpleName())) {
             return loadRaceLogPassChangeEvent(createdAt, author, logicalTimePoint, id, passId, competitors);
-        } else if (eventClass.equals(RaceLogCourseAreaChangedEvent.class.getSimpleName())) {
-            return loadRaceLogCourseAreaChangedEvent(createdAt, author, logicalTimePoint, id, passId, competitors,
-                    dbObject);
         } else if (eventClass.equals(RaceLogCourseDesignChangedEvent.class.getSimpleName())) {
             return loadRaceLogCourseDesignChangedEvent(createdAt, author, logicalTimePoint, id, passId, competitors,
                     dbObject);
@@ -1737,16 +1741,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 courseDesignerMode);
     }
 
-    private RaceLogCourseAreaChangedEvent loadRaceLogCourseAreaChangedEvent(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
-            List<Competitor> competitors, DBObject dbObject) {
-        Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
-        return new RaceLogCourseAreaChangeEventImpl(createdAt, logicalTimePoint, author, id, passId, courseAreaId);
-    }
-
-    private RaceLogEvent loadRaceLogFixedMarkPassingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
-            DBObject dbObject) {
+    private RaceLogEvent loadRaceLogFixedMarkPassingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         TimePoint ofFixedPassing = loadTimePoint(dbObject, FieldNames.TIMEPOINT_OF_FIXED_MARKPASSING);
         Integer zeroBasedIndexOfWaypoint = (Integer) dbObject.get(FieldNames.INDEX_OF_PASSED_WAYPOINT.name());
         return new RaceLogFixedMarkPassingEventImpl(createdAt, logicalTimePoint, author, id, competitors, passId,
@@ -1934,6 +1930,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl.class.getSimpleName())) {
             return loadRegattaLogDeviceCompetitorExpeditionExtendedMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                    regattaLogIdentifier, o);
+        } else if (eventClass.equals(RegattaLogDeviceBoatBravoMappingEventImpl.class.getSimpleName())) {
+            return loadRegattaLogDeviceBoatBravoMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                    regattaLogIdentifier, o);
+        } else if (eventClass.equals(RegattaLogDeviceBoatBravoExtendedMappingEventImpl.class.getSimpleName())) {
+            return loadRegattaLogDeviceBoatBravoExtendedMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                    regattaLogIdentifier, o);
+        } else if (eventClass.equals(RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl.class.getSimpleName())) {
+            return loadRegattaLogDeviceBoatExpeditionExtendedMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
                     regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogDeviceMarkMappingEvent.class.getSimpleName())) {
             return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
@@ -2145,6 +2150,39 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         .getExistingCompetitorById((Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name())),
                 factory, result -> new MongoObjectFactoryImpl(database, serviceFinderFactory)
                         .storeRegattaLogEvent(regattaLogIdentifier, result));
+    }
+    
+    private RegattaLogDeviceBoatBravoMappingEventImpl loadRegattaLogDeviceBoatBravoMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        return loadRegattaLogDeviceBoatSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                regattaLogIdentifier, outerDBObject, RegattaLogDeviceBoatBravoMappingEventImpl::new);
+    }
+    
+    private RegattaLogDeviceBoatBravoExtendedMappingEventImpl loadRegattaLogDeviceBoatBravoExtendedMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        return loadRegattaLogDeviceBoatSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                regattaLogIdentifier, outerDBObject, RegattaLogDeviceBoatBravoExtendedMappingEventImpl::new);
+    }
+    
+    private RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl loadRegattaLogDeviceBoatExpeditionExtendedMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        return loadRegattaLogDeviceBoatSensorDataMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                regattaLogIdentifier, outerDBObject, RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl::new);
+    }
+    
+    private <MappingT extends RegattaLogDeviceBoatSensorDataMappingEvent> MappingT loadRegattaLogDeviceBoatSensorDataMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject,
+            RegattaLogDeviceMappingEventImpl.Factory<Boat, MappingT> factory) {
+        return this.<Boat, MappingT>loadRegattaLogDeviceMappingEvent(createdAt, author, logicalTimePoint, id,
+                dbObject, regattaLogIdentifier, outerDBObject,
+                () -> baseDomainFactory
+                .getExistingBoatById((Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name())),
+                factory, result -> new MongoObjectFactoryImpl(database, serviceFinderFactory)
+                .storeRegattaLogEvent(regattaLogIdentifier, result));
     }
     
     private <ItemType extends WithID, MappingT extends RegattaLogDeviceMappingEvent<ItemType>> MappingT loadRegattaLogDeviceMappingEvent(

@@ -13,7 +13,6 @@ import com.sap.sse.common.TimePoint;
 public class RegattaLogDeviceCompetitorBravoMappingEventImpl extends AbstractRegattaLogDeviceCompetitorSensorDataMappingEventImpl {
     private static final long serialVersionUID = -1494030544804758753L;
 
-
     public RegattaLogDeviceCompetitorBravoMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
