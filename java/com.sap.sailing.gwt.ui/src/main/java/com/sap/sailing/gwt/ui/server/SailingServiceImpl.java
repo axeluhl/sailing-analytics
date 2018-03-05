@@ -3866,14 +3866,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
         eventDTO.setBaseURL(event.getBaseURL() != null ? event.getBaseURL().toString() : null);
-        for(Map.Entry<Locale, URL> sailorsInfoWebsiteEntry : event.getSailorsInfoWebsiteURLs().entrySet()) {
+        for (Map.Entry<Locale, URL> sailorsInfoWebsiteEntry : event.getSailorsInfoWebsiteURLs().entrySet()) {
             eventDTO.setSailorsInfoWebsiteURL(sailorsInfoWebsiteEntry.getKey() == null ? null : sailorsInfoWebsiteEntry
                     .getKey().toLanguageTag(), sailorsInfoWebsiteEntry.getValue().toExternalForm());
         }
-        for(ImageDescriptor image: event.getImages()) {
+        for (ImageDescriptor image : event.getImages()) {
             eventDTO.addImage(convertToImageDTO(image));
         }
-        for(VideoDescriptor video: event.getVideos()) {
+        for (VideoDescriptor video : event.getVideos()) {
             eventDTO.addVideo(convertToVideoDTO(video));
         }
     }
