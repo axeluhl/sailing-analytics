@@ -78,6 +78,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private Date fromTime;
     private Date newTime;
     private SortableColumn<SingleManeuverDTO, String> turnRateColumn;
+    private SortableColumn<SingleManeuverDTO, String> competitorColumn;
 
     public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
@@ -106,7 +107,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
 
-        SortableColumn<SingleManeuverDTO, String> competitorColumn = createCompetitorColumn();
+        competitorColumn = createCompetitorColumn();
         maneuverCellTable.addColumn(competitorColumn);
 
         SortableColumn<SingleManeuverDTO, String> maneuvertypeColumn = createManeuverTypeColumn();
@@ -353,7 +354,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("i18n duration");
+                return new TextHeader(stringMessages.durationPlain());
             }
 
             @Override
@@ -428,7 +429,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("i18n Competitor");
+                return new TextHeader(stringMessages.competitor());
             }
 
             @Override
@@ -436,6 +437,14 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return object.competitor.getName();
             }
         };
+    }
+    
+    private void showCompetitorColumn(boolean b) {
+        if(b){
+            maneuverCellTable.insertColumn(0, competitorColumn);
+        }else{
+            maneuverCellTable.removeColumn(competitorColumn);
+        }
     }
 
     /**
@@ -527,6 +536,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         if (visible && Util.size(competitorSelectionModel.getSelectedCompetitors()) > 0) {
             selectCompetitorLabel.setText("");
             maneuverCellTable.setVisible(true);
+            showCompetitorColumn(Util.size(competitorSelectionModel.getSelectedCompetitors()) != 1);
             rerender();
         } else {
             selectCompetitorLabel.setText(stringMessages.selectCompetitor());
