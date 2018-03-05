@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
@@ -126,8 +126,8 @@ public class SliceRaceHandler {
     private boolean allowsEditing() {
         final UserDTO currentUser = userService.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_TRACKED_RACES.getStringPermission(),
-                        SailingPermissionsForRoleProvider.INSTANCE);
+                && currentUser.hasPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, selectedRaceIdentifier.getRegattaName()))
+                && currentUser.hasPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
     }
 
     private void doSlice() {
