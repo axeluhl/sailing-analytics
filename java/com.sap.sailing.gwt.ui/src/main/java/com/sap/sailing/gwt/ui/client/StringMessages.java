@@ -1100,8 +1100,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String timeToStart(String timeToStart);
     String timeSinceStart(String timeSince);
     String distanceToLine();
-    String beatAngleTooltip();
-    String beatAngle();
+    String TWATooltip();
+    String TWA();
     String showBoatClassChartsLabel();
     String showDiagram();
     String runAutomaticallyTooltip();

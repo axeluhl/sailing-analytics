@@ -513,6 +513,11 @@ public class SensorFixStoreAndLoadTest {
             return fix.get(TEST_COLUMN_INDEX);
         }
 
+        @Override
+        public Double[] get() {
+            return Arrays.copyOf(fix.get(), fix.get().length);
+        }
+
     }
     
     public class TestFixTrackImpl<ItemType extends WithID & Serializable> extends SensorFixTrackImpl<ItemType, TestFixImpl> {

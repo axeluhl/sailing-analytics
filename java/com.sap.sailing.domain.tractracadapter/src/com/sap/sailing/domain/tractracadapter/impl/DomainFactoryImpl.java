@@ -493,7 +493,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new RaceStartedAndFinishedReceiver(
                         trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
                 break;
-            }
+            case SENSORDATA:
+                result.add(new SensorDataReceiver(
+                        trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
+                break;
+            }                
         }
         return result;
     }
@@ -509,7 +513,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, courseDesignUpdateURI,
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
                 useInternalMarkPassingAlgorithm, timeoutInMilliseconds, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS,
+                ReceiverType.SENSORDATA);
     }
     
     @Override

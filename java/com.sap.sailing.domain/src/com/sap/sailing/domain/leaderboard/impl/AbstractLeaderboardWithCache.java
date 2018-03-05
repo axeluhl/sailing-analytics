@@ -353,7 +353,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
-        final LeaderboardDTO result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
+        final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
