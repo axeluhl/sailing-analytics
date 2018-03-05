@@ -5,8 +5,10 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.DefaultValue;
@@ -358,17 +360,22 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return totalNumberOfManeuvers;
     }
 
+    /**
+     * If {@code raceColumnNames} is empty or {@code null}, return the names of all {@link raceColumnsOfLeaderboard}; otherwise
+     * return those race column names from {@code raceColumnsOfLeaderboard} that are also in {@code raceColumnNames}.
+     */
     private List<String> calculateRaceColumnsToShow(List<String> raceColumnNames, Iterable<RaceColumn> raceColumnsOfLeaderboard) {
-        // Calculates the race columns to retrieve data for
-        List<String> allRaceColumns = new ArrayList<>();
-        for (RaceColumn raceColumn : raceColumnsOfLeaderboard) {
-            allRaceColumns.add(raceColumn.getName());
-        }        
-        List<String> raceColumnsToShow = new ArrayList<>(allRaceColumns);
-        if (!raceColumnNames.isEmpty()) {
-            allRaceColumns.removeAll(raceColumnNames);
-            raceColumnsToShow.removeAll(allRaceColumns);
+        final Set<String> raceColumnNamesAsSet = new HashSet<>();
+        if (raceColumnNames != null) {
+            raceColumnNamesAsSet.addAll(raceColumnNames);
         }
+        // Calculates the race columns to retrieve data for
+        final List<String> raceColumnsToShow = new ArrayList<>();
+        for (final RaceColumn raceColumn : raceColumnsOfLeaderboard) {
+            if (raceColumnNamesAsSet.isEmpty() || raceColumnNamesAsSet.contains(raceColumn.getName())) {
+                raceColumnsToShow.add(raceColumn.getName());
+            }
+        }        
         return raceColumnsToShow;
     }
 
