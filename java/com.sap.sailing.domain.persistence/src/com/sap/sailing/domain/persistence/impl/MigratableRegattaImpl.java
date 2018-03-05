@@ -41,7 +41,7 @@ public class MigratableRegattaImpl extends RegattaImpl implements MigratableRega
         // It should not be possible to call this after races have been already added to this regatta.
         assert !canBoatsOfCompetitorsChangePerRace() && Util.size(getAllRaces()) == 0;
         super.setCanBoatsOfCompetitorsChangePerRace(true);
-        logger.log(Level.INFO, "Bug2822 DB-Migration: Store migrated regatta with having now canBoatsOfCompetitorsChangePerRace=true.");
+        logger.log(Level.INFO, "Bug2822 DB-Migration: Store migrated regatta '" + getName() + "' having now canBoatsOfCompetitorsChangePerRace=true.");
         mongoObjectFactory.storeRegatta(this);
     }
 }
