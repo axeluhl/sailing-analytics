@@ -1,0 +1,45 @@
+.maneuverPanel {
+    margin-top: 1em;
+}
+.contentContainer {
+    padding: 0 2em 0 .5em;
+    display: inline-block;
+    width: 100%;
+}
+
+.maneuverTable {
+	width: 100%;
+}
+
+.importantMessage {
+    background-image: resourceUrl('importantMessage');
+    background-position: left center;
+    background-repeat: no-repeat;
+    padding-left: 4em;
+    margin: auto;
+    width: 15em;
+    font-weight: 600;
+    font-size: 20px;
+    color: #7c7c7c;
+    line-height: 1.2em;
+    min-height: 3em;
+}
+
+.settingsButton {
+    background-image: resourceUrl('settingsButton');
+    width: 2em;
+    height: 2em;
+    background-color: transparent;
+    background-size: contain;
+    border: none;
+    position: fixed;
+    right: 1em;
+}
+
+.settingsButton:focus {
+    outline: 0;
+}
+
+.settingsButton:hover {
+    border: 1px solid #ececec;
+}

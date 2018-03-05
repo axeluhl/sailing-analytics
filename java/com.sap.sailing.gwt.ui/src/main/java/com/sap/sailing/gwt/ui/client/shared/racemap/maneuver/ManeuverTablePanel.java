@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat;
@@ -18,10 +19,10 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DurationFormatter;
@@ -60,17 +61,20 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTableSettings>
         implements CompetitorSelectionChangeListener, TimeListener {
+
+    private final ManeuverTablePanelResources resources = GWT.create(ManeuverTablePanelResources.class);
+
     private final SailingServiceAsync sailingService;
-    private RegattaAndRaceIdentifier raceIdentifier;
+    private final RegattaAndRaceIdentifier raceIdentifier;
     private final StringMessages stringMessages;
     private final CompetitorSelectionProvider competitorSelectionModel;
 
     private final NumberFormat towDigitAccuracy = NumberFormatterFactory.getDecimalFormat(2);
+    private final DateTimeFormat dateformat = DateTimeFormat.getFormat("HH:mm:ss");
     
-    private Label selectCompetitorLabel = new Label();
-    private ManeuverTableSettings settings;
-    private SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
-    protected DateTimeFormat dateformat = DateTimeFormat.getFormat("HH:mm:ss");
+    private final SimplePanel contentPanel = new SimplePanel();
+    private final Label selectCompetitorLabel;
+    private final SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
     private Timer timer;
     private TimeRangeWithZoomModel timeRangeWithZoomProvider;
     private Long timeOfEarliestRequestInMillis;
@@ -79,6 +83,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private Date fromTime;
     private Date newTime;
     private SortableColumn<SingleManeuverDTO, String> turnRateColumn;
+    private ManeuverTableSettings settings;
 
     public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
@@ -86,6 +91,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             final ErrorReporter errorReporter, final Timer timer, ManeuverTableSettings initialSettings,
             TimeRangeWithZoomModel timeRangeWithZoomProvider, LeaderBoardStyle style) {
         super(parent, context);
+        this.resources.css().ensureInjected();
         this.settings = initialSettings;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -96,16 +102,19 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
 
-        AbsolutePanel rootPanel = new AbsolutePanel();
-        HorizontalPanel tableAndButtons = new HorizontalPanel();
-        rootPanel.add(tableAndButtons, 0, 0);
-        tableAndButtons.setSpacing(3);
-        VerticalPanel buttonPanel = new VerticalPanel();
-        buttonPanel.setSpacing(3);
-        tableAndButtons.add(buttonPanel);
-        buttonPanel.add(selectCompetitorLabel);
+        final FlowPanel rootPanel = new FlowPanel();
+        rootPanel.addStyleName(resources.css().maneuverPanel());
+        this.contentPanel.addStyleName(resources.css().contentContainer());
+        rootPanel.add(contentPanel);
+        final Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
+        settingsButton.setStyleName(resources.css().settingsButton());
+        rootPanel.add(settingsButton);
+
+        this.selectCompetitorLabel = new Label(stringMessages.selectCompetitor());
+        this.selectCompetitorLabel.addStyleName(resources.css().importantMessage());
 
         maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
+        maneuverCellTable.addStyleName(resources.css().maneuverTable());
 
         SortableColumn<SingleManeuverDTO, String> competitorColumn = createCompetitorColumn();
         maneuverCellTable.addColumn(competitorColumn);
@@ -137,9 +146,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         SortableColumn<SingleManeuverDTO, String> directionColumn = createDirectionColumn();
         maneuverCellTable.addColumn(directionColumn);
 
-        maneuverCellTable.setVisible(false);
-        tableAndButtons.add(maneuverCellTable);
-        tableAndButtons.add(SettingsDialog.createSettingsButton(this, stringMessages));
+        // maneuverCellTable.setVisible(false);
         rootPanel.getElement().getStyle().setOverflow(Overflow.AUTO);
         initWidget(rootPanel);
         setVisible(false);
@@ -516,13 +523,11 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     private void processCompetitorSelectionChange(boolean visible) {
-        if (visible && Util.size(competitorSelectionModel.getSelectedCompetitors()) > 0) {
-            selectCompetitorLabel.setText("");
-            maneuverCellTable.setVisible(true);
-            rerender();
+        if (visible && !Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
+            this.contentPanel.setWidget(maneuverCellTable);
+            this.rerender();
         } else {
-            selectCompetitorLabel.setText(stringMessages.selectCompetitor());
-            maneuverCellTable.setVisible(false);
+            this.contentPanel.setWidget(selectCompetitorLabel);
         }
     }
 
