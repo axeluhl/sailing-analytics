@@ -2,7 +2,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -10,7 +12,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -23,11 +26,19 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends DataEntryDialog<Collection<TypedDeviceMappingDTO>> {
+
     private final String leaderboardName;
     private final SimplePanel importWidgetHolder;
     protected final TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
-    protected final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
+    private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final StringMessages stringMessages;
+    private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
+
+    private TrackFileImportDeviceIdentifierDTO deviceToSelect;
+    private CompetitorDTO compToSelect;
+    private BoatDTO boatToSelect;
+    private boolean inInstableTransitionState = false;
 
     public AbstractRegattaLogSensorDataAddMappingsDialog(SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
@@ -45,31 +56,44 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         deviceIdTable.removeTrackNameColumn();
 
         importWidgetHolder = new SimplePanel();
-        deviceIdTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                CompetitorDTO mappedComp = deviceIdTable.getMappedCompetitorForCurrentSelection();
-                if (mappedComp != null) {
-                    competitorTable.getSelectionModel().setSelected(mappedComp, true);
-                }
-            }
-        });
+        deviceIdTable.getSelectionModel().addSelectionChangeHandler(
+                event -> deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject()));
+
+        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingService, stringMessages,
+                errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, /* show only competitors with boat */ false);
-        competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                deviceIdTable.didSelectCompetitorForMapping(competitorTable.getSelectionModel().getSelectedObject());
-                validateAndUpdate();
-            }
+
+        boatTable.getSelectionModel().addSelectionChangeHandler(event -> {
+            this.mappedToSelectionChanged(boatTable.getSelectionModel().getSelectedObject());
+            validateAndUpdate();
+        });
+        competitorTable.getSelectionModel().addSelectionChangeHandler(event -> {
+            // deviceIdTable.didSelectCompetitorForMapping(competitorTable.getSelectionModel().getSelectedObject());
+            this.mappedToSelectionChanged(competitorTable.getSelectionModel().getSelectedObject());
+            validateAndUpdate();
         });
 
         this.leaderboardName = leaderboardName;
-
+        getBoatRegistrations(sailingService, errorReporter);
         getCompetitorRegistrations(sailingService, errorReporter);
     }
 
-    void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
+    private void getBoatRegistrations(final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
+        sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, new AsyncCallback<Collection<BoatDTO>>() {
+            @Override
+            public void onSuccess(Collection<BoatDTO> result) {
+                boatTable.filterBoats(result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not load boats: " + caught.getMessage());
+            }
+        });
+    }
+
+    private void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
                 new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
@@ -90,11 +114,14 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         VerticalPanel leftPanel = new VerticalPanel();
         VerticalPanel tablesPanel = new VerticalPanel();
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitor());
+        CaptionPanel boatsPanel = new CaptionPanel(stringMessages.boat());
         leftPanel.add(importWidgetHolder);
         leftPanel.add(deviceIdTable);
         panel.add(leftPanel);
         panel.add(tablesPanel);
+        tablesPanel.add(boatsPanel);
         tablesPanel.add(competitorsPanel);
+        boatsPanel.setContentWidget(boatTable.asWidget());
         competitorsPanel.setContentWidget(competitorTable.asWidget());
         return panel;
     }
@@ -115,5 +142,70 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
 
     protected void setImportWidget(Widget importWidget) {
         importWidgetHolder.setWidget(importWidget);
+    }
+
+    // TODO Refactor!
+
+    private static <T> void selectOrClear(SingleSelectionModel<T> selectionModel, T object) {
+        if (object == null) {
+            selectionModel.clear();
+        } else {
+            selectionModel.setSelected(object, true);
+        }
+    }
+
+    /**
+     * Avoid programmatic deselections that re-trigger the selection listeners and lead to a loop.
+     */
+    private void select() {
+        if (inInstableTransitionState) {
+            if (deviceIdTable.getSelectionModel().getSelectedObject() == deviceToSelect
+                    && competitorTable.getSelectionModel().getSelectedObject() == compToSelect
+                    && boatTable.getSelectionModel().getSelectedObject() == boatToSelect) {
+                inInstableTransitionState = false;
+            }
+        } else {
+            inInstableTransitionState = true;
+            selectOrClear(deviceIdTable.getSelectionModel(), deviceToSelect);
+            selectOrClear(competitorTable.getSelectionModel(), compToSelect);
+            selectOrClear(boatTable.getSelectionModel(), boatToSelect);
+        }
+    }
+
+    private void mappedToSelectionChanged(MappableToDevice mappedTo) {
+        if (!inInstableTransitionState) {
+            TrackFileImportDeviceIdentifierDTO device = deviceIdTable.getSelectionModel().getSelectedObject();
+            if (device != null) {
+                mappings.put(device, mappedTo);
+            }
+
+            if (mappedTo instanceof CompetitorDTO) {
+                compToSelect = (CompetitorDTO) mappedTo;
+                boatToSelect = null;
+            } else if (mappedTo instanceof BoatDTO) {
+                compToSelect = null;
+                boatToSelect = (BoatDTO) mappedTo;
+            }
+        }
+        select();
+        validateAndUpdate();
+    }
+
+    private void deviceSelectionChanged(TrackFileImportDeviceIdentifierDTO deviceId) {
+        if (!inInstableTransitionState) {
+            deviceToSelect = deviceId;
+            compToSelect = null;
+            boatToSelect = null;
+
+            if (deviceId != null) {
+                MappableToDevice mappedTo = mappings.get(deviceId);
+                if (mappedTo instanceof CompetitorDTO) {
+                    compToSelect = (CompetitorDTO) mappedTo;
+                } else if (mappedTo instanceof BoatDTO) {
+                    boatToSelect = (BoatDTO) mappedTo;
+                }
+            }
+        }
+        select();
     }
 }
