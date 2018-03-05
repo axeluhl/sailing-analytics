@@ -44,7 +44,6 @@ import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -185,6 +184,15 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                     @Override
                     public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
+                        if(o1.loss == null && o2.loss == null){
+                            return 0;
+                        }
+                        if(o1.loss != null && o2.loss == null){
+                            return 1;
+                        }
+                        if(o1.loss == null && o2.loss != null){
+                            return -1;
+                        }
                         return Double.compare(o1.loss, o2.loss);
                     }
                 };
@@ -192,12 +200,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("i18n loss");
+                return new TextHeader(stringMessages.maneuverLoss());
             }
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return String.valueOf(object.loss);
+                return object.loss == null ? "" : towDigitAccuracy.format(object.loss) + stringMessages.meters();
             }
         };
     }
@@ -350,7 +358,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return duration.format(object.duration);
+                return duration.format(object.duration) + " " + stringMessages.secondsUnit();
             }
         };
     }
@@ -456,8 +464,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 for (ManeuverDTO maneuver : res.getValue()) {
                     if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                         data.add(new SingleManeuverDTO(res.getKey(), maneuver.timepoint, maneuver.type,
-                                Duration.NULL, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
-                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees, 123,
+                                maneuver.duration, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
+                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees, maneuver.maneuverLossInMeters,
                                 Bearing.NORTH));
                     }
                 }

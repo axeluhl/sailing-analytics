@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Duration;
 
 public class MarkpassingManeuverDTO extends ManeuverDTO {
     public NauticalSide side;
@@ -15,9 +16,9 @@ public class MarkpassingManeuverDTO extends ManeuverDTO {
 
     public MarkpassingManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timepoint,
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
-            double directionChangeInDegrees, Double maneuverLossInMeters, NauticalSide side) {
+            double directionChangeInDegrees, Double maneuverLossInMeters, NauticalSide side, Duration duration) {
         super(type, newTack, position, timepoint, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
-                maneuverLossInMeters);
+                maneuverLossInMeters, duration);
         this.side = side;
     }
 

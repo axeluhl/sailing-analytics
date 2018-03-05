@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -24,11 +25,12 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final double maxAngularVelocityInDegreesPerSecond;
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
+    private Duration duration;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond) {
+            double maxAngularVelocityInDegreesPerSecond, Duration duration) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -37,6 +39,12 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         this.mainCurveBoundaries = mainCurveBoundaries;
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
+        this.duration = duration;
+    }
+    
+    @Override
+    public Duration getDuration() {
+        return duration;
     }
 
     @Override

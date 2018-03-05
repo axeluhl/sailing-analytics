@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Duration;
 
 public class ManeuverDTO implements IsSerializable {
     public ManeuverType type;
@@ -28,10 +29,12 @@ public class ManeuverDTO implements IsSerializable {
     
     public Double maneuverLossInMeters;
 
+    public Duration duration;
+
     public ManeuverDTO() {}
     
     public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timepoint, SpeedWithBearingDTO speedWithBearingBefore,
-            SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees, Double maneuverLossInMeters) {
+            SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees, Double maneuverLossInMeters, Duration duration) {
         super();
         this.type = type;
         this.newTack = newTack;
@@ -41,6 +44,7 @@ public class ManeuverDTO implements IsSerializable {
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
         this.maneuverLossInMeters = maneuverLossInMeters;
+        this.duration = duration;
     }
 
     public String toString(StringMessages stringMessages) {
