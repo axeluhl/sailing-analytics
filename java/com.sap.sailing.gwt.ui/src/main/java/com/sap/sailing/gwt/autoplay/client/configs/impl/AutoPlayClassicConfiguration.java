@@ -37,7 +37,6 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             @Override
             public void onSuccess(final EventDTO event) {
                 cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<Collection<DetailType>>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         caught.printStackTrace();
