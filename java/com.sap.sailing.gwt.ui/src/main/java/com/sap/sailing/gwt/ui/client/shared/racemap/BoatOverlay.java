@@ -113,7 +113,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (speedWithBearing == null) {
                 speedWithBearing = new SpeedWithBearingDTO(0, 0);
             }
-            updateBoatDrawingAngle(coordinateSystem.mapDegreeBearing(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
+            updateBoatDrawingAngle(coordinateSystem.mapDegreeBearing(speedWithBearing.getDegrees() - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
             setCanvasRotation(boatDrawingAngle);
         }
     }
